@@ -153,7 +153,7 @@ struct GameBoardView: View {
     }
 
     func rollDice() {
-        let result = gameState.rollDice(sides: 6, count: 1)
+        _ = gameState.rollDice(sides: 6, count: 1)
         showingDiceRoll = true
     }
 }
