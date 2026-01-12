@@ -76,6 +76,7 @@ struct CardView: View {
                     Text(card.description)
                         .font(.caption)
                         .foregroundColor(.primary)
+                        .fixedSize(horizontal: false, vertical: true)
 
                     // Abilities
                     ForEach(card.abilities) { ability in
@@ -87,6 +88,7 @@ struct CardView: View {
                             Text(ability.description)
                                 .font(.caption2)
                                 .foregroundColor(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
                         .padding(.top, 4)
                     }
@@ -120,7 +122,7 @@ struct CardView: View {
             }
             .padding(8)
         }
-        .frame(width: 200, height: 320)
+        .frame(height: 320)
         .background(Color(UIColor.systemBackground))
         .cornerRadius(12)
         .shadow(color: isSelected ? .blue.opacity(0.5) : .black.opacity(0.2), radius: isSelected ? 8 : 4)

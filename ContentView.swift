@@ -19,106 +19,126 @@ struct ContentView: View {
     }
 
     var characterSelectionView: some View {
-        VStack(spacing: 20) {
-            HStack {
-                Spacer()
-                Button(action: { showingRules = true }) {
-                    Label(L10n.rulesButton.localized, systemImage: "book.fill")
-                        .font(.headline)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                        .background(Color.blue.opacity(0.2))
-                        .foregroundColor(.blue)
-                        .cornerRadius(8)
-                }
-                .padding(.trailing)
-            }
-
-            Text(L10n.gameTitle.localized)
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .padding(.top, -10)
-
-            Text(L10n.characterSelectTitle.localized)
-                .font(.title2)
-                .foregroundColor(.secondary)
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 20) {
-                    ForEach(Array(characters.enumerated()), id: \.element.id) { index, character in
-                        CardView(
-                            card: character,
-                            isSelected: selectedCharacterIndex == index,
-                            onTap: {
-                                selectedCharacterIndex = index
-                            }
-                        )
-                    }
-                }
-                .padding(.horizontal)
-            }
-            .frame(height: 350)
-
-            // Character stats
-            if selectedCharacterIndex < characters.count {
-                let character = characters[selectedCharacterIndex]
-                VStack(alignment: .leading, spacing: 12) {
-                    Text(L10n.characterStats.localized)
-                        .font(.headline)
-
-                    Text(character.description)
-                        .font(.body)
-                        .foregroundColor(.secondary)
-
-                    HStack(spacing: 20) {
-                        if let health = character.health {
-                            StatDisplay(icon: "heart.fill", label: L10n.statHealth.localized, value: health, color: .red)
-                        }
-                        if let power = character.power {
-                            StatDisplay(icon: "sword.fill", label: L10n.statPower.localized, value: power, color: .orange)
-                        }
-                        if let defense = character.defense {
-                            StatDisplay(icon: "shield.fill", label: L10n.statDefense.localized, value: defense, color: .blue)
-                        }
-                    }
-
-                    if !character.abilities.isEmpty {
-                        Text(L10n.characterAbilities.localized)
+        GeometryReader { geometry in
+            VStack(spacing: 0) {
+                // Fixed header with rules button
+                HStack {
+                    Spacer()
+                    Button(action: { showingRules = true }) {
+                        Label(L10n.rulesButton.localized, systemImage: "book.fill")
                             .font(.headline)
-                            .padding(.top, 8)
-
-                        ForEach(character.abilities) { ability in
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(ability.name)
-                                    .font(.subheadline)
-                                    .fontWeight(.bold)
-                                Text(ability.description)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                            .padding(.vertical, 4)
-                        }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(Color.blue.opacity(0.2))
+                            .foregroundColor(.blue)
+                            .cornerRadius(8)
                     }
                 }
                 .padding()
-                .background(Color(UIColor.secondarySystemBackground))
-                .cornerRadius(12)
-                .padding(.horizontal)
-            }
+                .background(Color(UIColor.systemBackground))
 
-            Spacer()
+                // Scrollable content
+                ScrollView {
+                    VStack(spacing: 16) {
+                        Text(L10n.gameTitle.localized)
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .padding(.top, 8)
 
-            Button(action: startGame) {
-                Text(L10n.buttonStartAdventure.localized)
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
-                    .cornerRadius(12)
+                        Text(L10n.characterSelectTitle.localized)
+                            .font(.title2)
+                            .foregroundColor(.secondary)
+
+                        // Character cards scroll
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 20) {
+                                ForEach(Array(characters.enumerated()), id: \.element.id) { index, character in
+                                    CardView(
+                                        card: character,
+                                        isSelected: selectedCharacterIndex == index,
+                                        onTap: {
+                                            selectedCharacterIndex = index
+                                        }
+                                    )
+                                    .frame(width: min(geometry.size.width * 0.7, 280))
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+                        .frame(height: min(geometry.size.height * 0.35, 320))
+
+                        // Character stats
+                        if selectedCharacterIndex < characters.count {
+                            let character = characters[selectedCharacterIndex]
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text(L10n.characterStats.localized)
+                                    .font(.headline)
+
+                                Text(character.description)
+                                    .font(.body)
+                                    .foregroundColor(.secondary)
+                                    .fixedSize(horizontal: false, vertical: true)
+
+                                HStack(spacing: 20) {
+                                    if let health = character.health {
+                                        StatDisplay(icon: "heart.fill", label: L10n.statHealth.localized, value: health, color: .red)
+                                    }
+                                    if let power = character.power {
+                                        StatDisplay(icon: "sword.fill", label: L10n.statPower.localized, value: power, color: .orange)
+                                    }
+                                    if let defense = character.defense {
+                                        StatDisplay(icon: "shield.fill", label: L10n.statDefense.localized, value: defense, color: .blue)
+                                    }
+                                }
+
+                                if !character.abilities.isEmpty {
+                                    Text(L10n.characterAbilities.localized)
+                                        .font(.headline)
+                                        .padding(.top, 8)
+
+                                    ForEach(character.abilities) { ability in
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(ability.name)
+                                                .font(.subheadline)
+                                                .fontWeight(.bold)
+                                            Text(ability.description)
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                                .fixedSize(horizontal: false, vertical: true)
+                                        }
+                                        .padding(.vertical, 4)
+                                    }
+                                }
+                            }
+                            .padding()
+                            .background(Color(UIColor.secondarySystemBackground))
+                            .cornerRadius(12)
+                            .padding(.horizontal)
+                        }
+
+                        // Extra space for button
+                        Color.clear.frame(height: 80)
+                    }
+                }
+
+                // Fixed button at bottom
+                VStack {
+                    Divider()
+                    Button(action: startGame) {
+                        Text(L10n.buttonStartAdventure.localized)
+                            .font(.title3)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue)
+                            .cornerRadius(12)
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 8)
+                }
+                .background(Color(UIColor.systemBackground))
             }
-            .padding()
         }
         .navigationBarHidden(true)
         .sheet(isPresented: $showingRules) {
