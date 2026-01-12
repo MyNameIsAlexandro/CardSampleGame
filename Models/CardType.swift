@@ -11,6 +11,12 @@ enum CardType: String, Codable {
     case monster
     case location
     case scenario
+
+    // Twilight Marches specific card types
+    case curse      // Проклятия - negative effects
+    case spirit     // Духи - summonable allies/enemies
+    case artifact   // Артефакты - powerful ancient items
+    case ritual     // Ритуалы - special spells requiring preparation
 }
 
 enum CardRarity: String, Codable {
@@ -30,4 +36,38 @@ enum DamageType: String, Codable {
     case mental
     case poison
     case arcane
+}
+
+// Twilight Marches: Balance system (Light/Dark)
+enum CardBalance: String, Codable {
+    case light      // Cards from Prav, protective/healing
+    case neutral    // Balanced cards
+    case dark       // Cards from Nav, aggressive/cursing
+}
+
+// Twilight Marches: Three Realms system
+enum Realm: String, Codable {
+    case yav        // Явь - World of the Living (reality, settlements, heroes)
+    case nav        // Навь - World of the Dead (spirits, undead, curses)
+    case prav       // Правь - World of the Gods (higher powers, blessings, ancient magic)
+}
+
+// Twilight Marches: Curse system
+enum CurseType: String, Codable {
+    case blindness      // Слепота - reduce accuracy/vision
+    case muteness       // Немота - can't cast spells
+    case weakness       // Слабость - reduce power
+    case forgetfulness  // Забвение - discard cards
+    case sickness       // Болезнь - lose health over time
+    case madness        // Безумие - random effects
+    case transformation // Превращение - change form
+}
+
+// Expansion tracking
+enum ExpansionSet: String, Codable {
+    case baseSet        // Базовый набор
+    case borderlands    // Порубежье (first expansion)
+    case deepForest     // Дремучий Лес
+    case ancientRuins   // Древние Руины
+    case frozenNorth    // Замерзший Север
 }

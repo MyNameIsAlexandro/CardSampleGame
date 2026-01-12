@@ -1,5 +1,20 @@
 import Foundation
 
+// Twilight Marches: Active curse tracking
+struct ActiveCurse: Identifiable, Codable {
+    let id: UUID
+    let type: CurseType
+    var duration: Int  // turns remaining
+    let sourceCard: String?  // name of card that applied curse
+
+    init(id: UUID = UUID(), type: CurseType, duration: Int, sourceCard: String? = nil) {
+        self.id = id
+        self.type = type
+        self.duration = duration
+        self.sourceCard = sourceCard
+    }
+}
+
 class Player: ObservableObject, Identifiable {
     let id: UUID
     @Published var name: String
@@ -21,6 +36,14 @@ class Player: ObservableObject, Identifiable {
     // Hand size management
     let maxHandSize: Int
 
+    // Twilight Marches mechanics
+    @Published var faith: Int  // Вера - resource for powerful abilities
+    @Published var maxFaith: Int
+    @Published var balance: Int  // -10 (dark) to +10 (light), 0 is neutral
+    @Published var activeCurses: [ActiveCurse]
+    @Published var currentRealm: Realm
+    @Published var spirits: [Card]  // Summoned spirits
+
     init(
         id: UUID = UUID(),
         name: String,
@@ -32,7 +55,11 @@ class Player: ObservableObject, Identifiable {
         constitution: Int = 0,
         intelligence: Int = 0,
         wisdom: Int = 0,
-        charisma: Int = 0
+        charisma: Int = 0,
+        faith: Int = 3,
+        maxFaith: Int = 10,
+        balance: Int = 0,
+        currentRealm: Realm = .yav
     ) {
         self.id = id
         self.name = name
@@ -49,6 +76,12 @@ class Player: ObservableObject, Identifiable {
         self.intelligence = intelligence
         self.wisdom = wisdom
         self.charisma = charisma
+        self.faith = faith
+        self.maxFaith = maxFaith
+        self.balance = balance
+        self.activeCurses = []
+        self.currentRealm = currentRealm
+        self.spirits = []
     }
 
     func drawCard() {
@@ -85,5 +118,83 @@ class Player: ObservableObject, Identifiable {
 
     func heal(_ amount: Int) {
         health = min(maxHealth, health + amount)
+    }
+
+    // Twilight Marches methods
+    func gainFaith(_ amount: Int) {
+        faith = min(maxFaith, faith + amount)
+    }
+
+    func spendFaith(_ amount: Int) -> Bool {
+        guard faith >= amount else { return false }
+        faith -= amount
+        return true
+    }
+
+    func shiftBalance(towards: CardBalance, amount: Int) {
+        switch towards {
+        case .light:
+            balance = min(10, balance + amount)
+        case .dark:
+            balance = max(-10, balance - amount)
+        case .neutral:
+            if balance > 0 {
+                balance = max(0, balance - amount)
+            } else {
+                balance = min(0, balance + amount)
+            }
+        }
+    }
+
+    func applyCurse(type: CurseType, duration: Int, sourceCard: String? = nil) {
+        let curse = ActiveCurse(type: type, duration: duration, sourceCard: sourceCard)
+        activeCurses.append(curse)
+    }
+
+    func removeCurse(type: CurseType? = nil) {
+        if let specificType = type {
+            activeCurses.removeAll { $0.type == specificType }
+        } else {
+            // Remove first curse if no type specified
+            if !activeCurses.isEmpty {
+                activeCurses.removeFirst()
+            }
+        }
+    }
+
+    func hasCurse(_ type: CurseType) -> Bool {
+        return activeCurses.contains { $0.type == type }
+    }
+
+    func tickCurses() {
+        // Reduce duration of all curses and remove expired ones
+        for i in (0..<activeCurses.count).reversed() {
+            activeCurses[i].duration -= 1
+            if activeCurses[i].duration <= 0 {
+                activeCurses.remove(at: i)
+            }
+        }
+    }
+
+    func summonSpirit(_ spirit: Card) {
+        spirits.append(spirit)
+    }
+
+    func dismissSpirit(_ spirit: Card) {
+        spirits.removeAll { $0.id == spirit.id }
+    }
+
+    func travelToRealm(_ realm: Realm) {
+        currentRealm = realm
+    }
+
+    var balanceState: CardBalance {
+        if balance >= 3 {
+            return .light
+        } else if balance <= -3 {
+            return .dark
+        } else {
+            return .neutral
+        }
     }
 }
