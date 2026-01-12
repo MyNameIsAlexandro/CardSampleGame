@@ -6,7 +6,8 @@ struct ContentView: View {
     @State private var selectedCharacterIndex = 0
     @StateObject private var gameState = GameState(players: [])
 
-    let characters = SampleCards.createCharacterDeck()
+    // Using Twilight Marches characters
+    let characters = TwilightMarchesCards.createGuardians()
 
     var body: some View {
         NavigationView {
@@ -26,9 +27,14 @@ struct ContentView: View {
                     VStack(spacing: 20) {
                         // Header with rules button
                         HStack {
-                            Text(L10n.gameTitle.localized)
-                                .font(.largeTitle)
-                                .fontWeight(.bold)
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(L10n.tmGameTitle.localized)
+                                    .font(.largeTitle)
+                                    .fontWeight(.bold)
+                                Text(L10n.tmGameSubtitle.localized)
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
                             Spacer()
                             Button(action: { showingRules = true }) {
                                 Label(L10n.rulesButton.localized, systemImage: "book.fill")
@@ -172,13 +178,13 @@ struct ContentView: View {
             charisma: 0
         )
 
-        // Build player's deck
-        player.deck = SampleCards.createFullDeck()
+        // Build player's deck with Twilight Marches cards
+        player.deck = TwilightMarchesCards.createFullDeck()
         player.shuffleDeck()
 
-        // Initialize game state
+        // Initialize game state with Twilight Marches encounters
         gameState.players = [player]
-        gameState.encounterDeck = SampleCards.createEncounterDeck()
+        gameState.encounterDeck = TwilightMarchesCards.createEncounterDeck()
         gameState.encounterDeck.shuffle()
 
         gameState.startGame()

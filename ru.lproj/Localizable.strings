@@ -232,3 +232,171 @@
 "trait.skeleton" = "Скелет";
 "trait.dragon" = "Дракон";
 "trait.ancient" = "Древний";
+
+// MARK: - Сумрачные Пределы (Twilight Marches)
+
+// Название игры
+"tm.game.title" = "Сумрачные Пределы";
+"tm.game.subtitle" = "Темные Славянские Легенды";
+
+// Миры
+"tm.realm.yav" = "Явь - Мир Живых";
+"tm.realm.nav" = "Навь - Мир Мертвых";
+"tm.realm.prav" = "Правь - Мир Богов";
+
+// Баланс
+"tm.balance.light" = "Свет";
+"tm.balance.neutral" = "Нейтральный";
+"tm.balance.dark" = "Тьма";
+
+// Ресурсы
+"tm.resource.faith" = "Вера";
+"tm.resource.balance" = "Баланс";
+
+// Персонажи
+"tm.char.veleslava.name" = "Велеслава";
+"tm.char.veleslava.desc" = "Ведунья пограничья, хранительница древних искусств исцеления и защитница от проклятий.";
+"tm.char.ratibor.name" = "Ратибор";
+"tm.char.ratibor.desc" = "Изгнанный воевода, ищущий искупления, мастер меча и командования.";
+"tm.char.miroslav.name" = "Мирослав";
+"tm.char.miroslav.desc" = "Волхв-отступник, заключивший темный договор, владеющий запретными силами Нави.";
+"tm.char.zabava.name" = "Забава";
+"tm.char.zabava.desc" = "Хитрая охотница на нечисть, выслеживающая духов и чудовищ по сумрачным землям.";
+
+// Способности персонажей
+"tm.ability.herb.wisdom" = "Травяная Мудрость";
+"tm.ability.herb.wisdom.desc" = "Исцелить 3 здоровья древним травничеством";
+"tm.ability.curse.breaker" = "Снятие Проклятий";
+"tm.ability.curse.breaker.desc" = "Снять одно проклятие с себя или союзника";
+"tm.ability.battle.fury" = "Боевая Ярость";
+"tm.ability.battle.fury.desc" = "Добавить 3 кубика к следующей боевой проверке";
+"tm.ability.commanders.will" = "Воля Командира";
+"tm.ability.commanders.will.desc" = "Получить 2 Веры от вашего лидерства";
+"tm.ability.dark.pact" = "Темный Договор";
+"tm.ability.dark.pact.desc" = "Призвать духа из Нави (Сила 5)";
+"tm.ability.soul.drain" = "Вытягивание Души";
+"tm.ability.soul.drain.desc" = "Пожертвовать 2 здоровья, чтобы взять 3 карты";
+"tm.ability.silver.arrow" = "Серебряная Стрела";
+"tm.ability.silver.arrow.desc" = "Нанести 5 урона любому существу";
+"tm.ability.track.prey" = "Выследить Добычу";
+"tm.ability.track.prey.desc" = "Взять 2 карты, следуя по следу";
+
+// Враги
+"tm.enemy.navii.name" = "Навий";
+"tm.enemy.navii.desc" = "Неупокоенный дух мертвого, блуждающий между мирами.";
+"tm.enemy.upyr.name" = "Упырь";
+"tm.enemy.upyr.desc" = "Древний вампир, высасывающий жизненную силу из живых.";
+"tm.enemy.leshiy.name" = "Леший";
+"tm.enemy.leshiy.desc" = "Искаженный дух леса, сбивающий путников с дороги.";
+"tm.enemy.rusalka.name" = "Русалка";
+"tm.enemy.rusalka.desc" = "Дух утопленной девы, поющая смертельные песни при лунном свете.";
+"tm.enemy.zmey.name" = "Змей Горыныч";
+"tm.enemy.zmey.desc" = "Легендарный трехглавый дракон, древний ужас небес.";
+
+// Способности врагов
+"tm.ability.soul.touch" = "Касание Души";
+"tm.ability.soul.touch.desc" = "Наложить проклятие Слабости на 2 хода";
+"tm.ability.blood.drain" = "Вытягивание Крови";
+"tm.ability.blood.drain.desc" = "Нанести 4 ментального урона";
+"tm.ability.life.steal" = "Кража Жизни";
+"tm.ability.life.steal.desc" = "Исцелить 2 здоровья вытянутой жизнью";
+"tm.ability.forest.maze" = "Лесной Лабиринт";
+"tm.ability.forest.maze.desc" = "Наложить проклятие Забвения на 3 хода";
+"tm.ability.natures.wrath" = "Гнев Природы";
+"tm.ability.natures.wrath.desc" = "Нанести 3 физического урона";
+"tm.ability.drowning.song" = "Песня Утопленницы";
+"tm.ability.drowning.song.desc" = "Наложить проклятие Безумия на 2 хода";
+"tm.ability.water.grasp" = "Водная Хватка";
+"tm.ability.water.grasp.desc" = "Нанести 3 урона холодом";
+"tm.ability.three.breaths" = "Три Дыхания";
+"tm.ability.three.breaths.desc" = "Нанести 10 урона огнем тремя драконьими головами";
+"tm.ability.ancient.curse" = "Древнее Проклятие";
+"tm.ability.ancient.curse.desc" = "Наложить проклятие Болезни на 5 ходов";
+
+// Духи
+"tm.spirit.domovoy.name" = "Домовой";
+"tm.spirit.domovoy.desc" = "Домашний дух, хранитель очага и дома.";
+"tm.spirit.bereginya.name" = "Берегиня";
+"tm.spirit.bereginya.desc" = "Защитный дух, оберегающий от тьмы.";
+
+// Способности духов
+"tm.ability.home.guard" = "Домашняя Стража";
+"tm.ability.home.guard.desc" = "Добавить 1 кубик к проверкам защиты";
+"tm.ability.protective.aura" = "Защитная Аура";
+"tm.ability.protective.aura.desc" = "Снять одно проклятие";
+"tm.ability.blessing.shield" = "Благословенный Щит";
+"tm.ability.blessing.shield.desc" = "Сдвинуть баланс на 2 пункта к Свету";
+
+// Проклятия
+"tm.curse.black.mark.name" = "Черная Метка";
+"tm.curse.black.mark.desc" = "Темная печать из Нави, вытягивающая вашу силу.";
+"tm.curse.madness.name" = "Безумие";
+"tm.curse.madness.desc" = "Реальность искажается и извивается перед вашими глазами.";
+
+// Типы проклятий
+"tm.curse.type.blindness" = "Слепота";
+"tm.curse.type.muteness" = "Немота";
+"tm.curse.type.weakness" = "Слабость";
+"tm.curse.type.forgetfulness" = "Забвение";
+"tm.curse.type.sickness" = "Болезнь";
+"tm.curse.type.madness" = "Безумие";
+"tm.curse.type.transformation" = "Превращение";
+
+// Способности проклятий
+"tm.ability.mark.of.nav" = "Метка Нави";
+"tm.ability.mark.of.nav.desc" = "Наложить Слабость на 3 хода";
+"tm.ability.lose.sanity" = "Потеря Рассудка";
+"tm.ability.lose.sanity.desc" = "Наложить Безумие на 4 хода";
+
+// Артефакты
+"tm.artifact.kalinov.sword.name" = "Калинов Меч";
+"tm.artifact.kalinov.sword.desc" = "Легендарный клинок, выкованный в мире богов, погибель тьмы.";
+"tm.artifact.alatyr.stone.name" = "Алатырь-Камень";
+"tm.artifact.alatyr.stone.desc" = "Священный камень в центре всех миров, якорь реальности.";
+
+// Способности артефактов
+"tm.ability.cleaving.strike" = "Рассекающий Удар";
+"tm.ability.cleaving.strike.desc" = "Нанести 8 урона легендарным клинком";
+"tm.ability.banish.darkness" = "Изгнание Тьмы";
+"tm.ability.banish.darkness.desc" = "Сдвинуть баланс на 3 пункта к Свету";
+"tm.ability.realm.anchor" = "Якорь Миров";
+"tm.ability.realm.anchor.desc" = "Вернуться в Явь из любого мира";
+"tm.ability.restore.balance" = "Восстановить Баланс";
+"tm.ability.restore.balance.desc" = "Сдвинуть баланс на 5 пунктов к Нейтральному";
+
+// Характеристики
+"tm.trait.healer" = "Целитель";
+"tm.trait.vedunya" = "Ведунья";
+"tm.trait.warrior" = "Воин";
+"tm.trait.voevoda" = "Воевода";
+"tm.trait.sorcerer" = "Колдун";
+"tm.trait.volkhv" = "Волхв";
+"tm.trait.hunter" = "Охотник";
+"tm.trait.ranger" = "Следопыт";
+"tm.trait.spirit" = "Дух";
+"tm.trait.guardian" = "Хранитель";
+"tm.trait.bereginya" = "Берегиня";
+"tm.trait.curse" = "Проклятие";
+"tm.trait.mental" = "Ментальный";
+"tm.trait.artifact" = "Артефакт";
+"tm.trait.weapon" = "Оружие";
+"tm.trait.legendary" = "Легендарный";
+"tm.trait.sacred" = "Священный";
+"tm.trait.light" = "Свет";
+"tm.trait.dark" = "Тьма";
+"tm.trait.neutral" = "Нейтральный";
+"tm.trait.nav" = "Навь";
+"tm.trait.yav" = "Явь";
+"tm.trait.prav" = "Правь";
+"tm.trait.upyr" = "Упырь";
+"tm.trait.leshiy" = "Леший";
+"tm.trait.rusalka" = "Русалка";
+"tm.trait.zmey" = "Змей";
+"tm.trait.nature" = "Природа";
+"tm.trait.water" = "Вода";
+
+// Типы карт
+"tm.card.type.curse" = "Проклятие";
+"tm.card.type.spirit" = "Дух";
+"tm.card.type.artifact" = "Артефакт";
+"tm.card.type.ritual" = "Ритуал";

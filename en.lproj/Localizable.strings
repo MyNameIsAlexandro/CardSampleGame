@@ -232,3 +232,171 @@
 "trait.skeleton" = "Skeleton";
 "trait.dragon" = "Dragon";
 "trait.ancient" = "Ancient";
+
+// MARK: - Twilight Marches (Сумрачные Пределы)
+
+// Game Title
+"tm.game.title" = "Twilight Marches";
+"tm.game.subtitle" = "Dark Slavic Legends";
+
+// Realms
+"tm.realm.yav" = "Yav - World of the Living";
+"tm.realm.nav" = "Nav - World of the Dead";
+"tm.realm.prav" = "Prav - World of the Gods";
+
+// Balance
+"tm.balance.light" = "Light";
+"tm.balance.neutral" = "Neutral";
+"tm.balance.dark" = "Dark";
+
+// Resources
+"tm.resource.faith" = "Faith";
+"tm.resource.balance" = "Balance";
+
+// Characters
+"tm.char.veleslava.name" = "Veleslava";
+"tm.char.veleslava.desc" = "A wise woman of the borderlands, keeper of ancient healing arts and protector against curses.";
+"tm.char.ratibor.name" = "Ratibor";
+"tm.char.ratibor.desc" = "An exiled warlord seeking redemption, master of blade and command.";
+"tm.char.miroslav.name" = "Miroslav";
+"tm.char.miroslav.desc" = "An apostate sorcerer who made a dark pact, wielding forbidden powers from Nav.";
+"tm.char.zabava.name" = "Zabava";
+"tm.char.zabava.desc" = "A cunning hunter of the unclean, tracking spirits and monsters across the twilight lands.";
+
+// Character Abilities
+"tm.ability.herb.wisdom" = "Herb Wisdom";
+"tm.ability.herb.wisdom.desc" = "Heal 3 health using ancient herbal lore";
+"tm.ability.curse.breaker" = "Curse Breaker";
+"tm.ability.curse.breaker.desc" = "Remove one curse from yourself or ally";
+"tm.ability.battle.fury" = "Battle Fury";
+"tm.ability.battle.fury.desc" = "Add 3 dice to your next combat check";
+"tm.ability.commanders.will" = "Commander's Will";
+"tm.ability.commanders.will.desc" = "Gain 2 Faith from your leadership";
+"tm.ability.dark.pact" = "Dark Pact";
+"tm.ability.dark.pact.desc" = "Summon a spirit from Nav (Power 5)";
+"tm.ability.soul.drain" = "Soul Drain";
+"tm.ability.soul.drain.desc" = "Sacrifice 2 health to draw 3 cards";
+"tm.ability.silver.arrow" = "Silver Arrow";
+"tm.ability.silver.arrow.desc" = "Deal 5 damage to any creature";
+"tm.ability.track.prey" = "Track Prey";
+"tm.ability.track.prey.desc" = "Draw 2 cards by following the trail";
+
+// Enemies
+"tm.enemy.navii.name" = "Navii";
+"tm.enemy.navii.desc" = "A restless spirit of the dead, wandering between worlds.";
+"tm.enemy.upyr.name" = "Upyr";
+"tm.enemy.upyr.desc" = "An ancient vampire, draining life force from the living.";
+"tm.enemy.leshiy.name" = "Leshiy";
+"tm.enemy.leshiy.desc" = "A corrupted forest spirit, leading travelers astray.";
+"tm.enemy.rusalka.name" = "Rusalka";
+"tm.enemy.rusalka.desc" = "A drowned maiden's spirit, singing deadly songs by moonlit waters.";
+"tm.enemy.zmey.name" = "Zmey Gorynych";
+"tm.enemy.zmey.desc" = "The legendary three-headed dragon, ancient terror of the skies.";
+
+// Enemy Abilities
+"tm.ability.soul.touch" = "Soul Touch";
+"tm.ability.soul.touch.desc" = "Apply Weakness curse for 2 turns";
+"tm.ability.blood.drain" = "Blood Drain";
+"tm.ability.blood.drain.desc" = "Deal 4 mental damage";
+"tm.ability.life.steal" = "Life Steal";
+"tm.ability.life.steal.desc" = "Heal 2 health from drained life";
+"tm.ability.forest.maze" = "Forest Maze";
+"tm.ability.forest.maze.desc" = "Apply Forgetfulness curse for 3 turns";
+"tm.ability.natures.wrath" = "Nature's Wrath";
+"tm.ability.natures.wrath.desc" = "Deal 3 physical damage";
+"tm.ability.drowning.song" = "Drowning Song";
+"tm.ability.drowning.song.desc" = "Apply Madness curse for 2 turns";
+"tm.ability.water.grasp" = "Water Grasp";
+"tm.ability.water.grasp.desc" = "Deal 3 cold damage";
+"tm.ability.three.breaths" = "Three Breaths";
+"tm.ability.three.breaths.desc" = "Deal 10 fire damage with three dragon heads";
+"tm.ability.ancient.curse" = "Ancient Curse";
+"tm.ability.ancient.curse.desc" = "Apply Sickness curse for 5 turns";
+
+// Spirits
+"tm.spirit.domovoy.name" = "Domovoy";
+"tm.spirit.domovoy.desc" = "A house spirit, guardian of hearth and home.";
+"tm.spirit.bereginya.name" = "Bereginya";
+"tm.spirit.bereginya.desc" = "A protective spirit, shielding from darkness.";
+
+// Spirit Abilities
+"tm.ability.home.guard" = "Home Guard";
+"tm.ability.home.guard.desc" = "Add 1 die to defense checks";
+"tm.ability.protective.aura" = "Protective Aura";
+"tm.ability.protective.aura.desc" = "Remove one curse";
+"tm.ability.blessing.shield" = "Blessing Shield";
+"tm.ability.blessing.shield.desc" = "Shift balance 2 points toward Light";
+
+// Curses
+"tm.curse.black.mark.name" = "Black Mark";
+"tm.curse.black.mark.desc" = "A dark sigil from Nav, sapping your strength.";
+"tm.curse.madness.name" = "Madness";
+"tm.curse.madness.desc" = "Reality warps and twists before your eyes.";
+
+// Curse Types
+"tm.curse.type.blindness" = "Blindness";
+"tm.curse.type.muteness" = "Muteness";
+"tm.curse.type.weakness" = "Weakness";
+"tm.curse.type.forgetfulness" = "Forgetfulness";
+"tm.curse.type.sickness" = "Sickness";
+"tm.curse.type.madness" = "Madness";
+"tm.curse.type.transformation" = "Transformation";
+
+// Curse Abilities
+"tm.ability.mark.of.nav" = "Mark of Nav";
+"tm.ability.mark.of.nav.desc" = "Apply Weakness for 3 turns";
+"tm.ability.lose.sanity" = "Lose Sanity";
+"tm.ability.lose.sanity.desc" = "Apply Madness for 4 turns";
+
+// Artifacts
+"tm.artifact.kalinov.sword.name" = "Kalinov Sword";
+"tm.artifact.kalinov.sword.desc" = "A legendary blade forged in the realm of gods, bane of darkness.";
+"tm.artifact.alatyr.stone.name" = "Alatyr Stone";
+"tm.artifact.alatyr.stone.desc" = "The sacred stone at the center of all worlds, anchor of reality.";
+
+// Artifact Abilities
+"tm.ability.cleaving.strike" = "Cleaving Strike";
+"tm.ability.cleaving.strike.desc" = "Deal 8 damage with legendary blade";
+"tm.ability.banish.darkness" = "Banish Darkness";
+"tm.ability.banish.darkness.desc" = "Shift balance 3 points toward Light";
+"tm.ability.realm.anchor" = "Realm Anchor";
+"tm.ability.realm.anchor.desc" = "Return to Yav from any realm";
+"tm.ability.restore.balance" = "Restore Balance";
+"tm.ability.restore.balance.desc" = "Shift balance 5 points toward Neutral";
+
+// Traits
+"tm.trait.healer" = "Healer";
+"tm.trait.vedunya" = "Vedunya";
+"tm.trait.warrior" = "Warrior";
+"tm.trait.voevoda" = "Voevoda";
+"tm.trait.sorcerer" = "Sorcerer";
+"tm.trait.volkhv" = "Volkhv";
+"tm.trait.hunter" = "Hunter";
+"tm.trait.ranger" = "Ranger";
+"tm.trait.spirit" = "Spirit";
+"tm.trait.guardian" = "Guardian";
+"tm.trait.bereginya" = "Bereginya";
+"tm.trait.curse" = "Curse";
+"tm.trait.mental" = "Mental";
+"tm.trait.artifact" = "Artifact";
+"tm.trait.weapon" = "Weapon";
+"tm.trait.legendary" = "Legendary";
+"tm.trait.sacred" = "Sacred";
+"tm.trait.light" = "Light";
+"tm.trait.dark" = "Dark";
+"tm.trait.neutral" = "Neutral";
+"tm.trait.nav" = "Nav";
+"tm.trait.yav" = "Yav";
+"tm.trait.prav" = "Prav";
+"tm.trait.upyr" = "Upyr";
+"tm.trait.leshiy" = "Leshiy";
+"tm.trait.rusalka" = "Rusalka";
+"tm.trait.zmey" = "Zmey";
+"tm.trait.nature" = "Nature";
+"tm.trait.water" = "Water";
+
+// Card Types
+"tm.card.type.curse" = "Curse";
+"tm.card.type.spirit" = "Spirit";
+"tm.card.type.artifact" = "Artifact";
+"tm.card.type.ritual" = "Ritual";

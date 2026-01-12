@@ -122,4 +122,37 @@ enum L10n {
 
     static let rulesTipsTitle = "rules.tips.title"
     static let rulesTipsContent = "rules.tips.content"
+
+    // MARK: - Twilight Marches
+    static let tmGameTitle = "tm.game.title"
+    static let tmGameSubtitle = "tm.game.subtitle"
+
+    // Realms
+    static let tmRealmYav = "tm.realm.yav"
+    static let tmRealmNav = "tm.realm.nav"
+    static let tmRealmPrav = "tm.realm.prav"
+
+    // Balance
+    static let tmBalanceLight = "tm.balance.light"
+    static let tmBalanceNeutral = "tm.balance.neutral"
+    static let tmBalanceDark = "tm.balance.dark"
+
+    // Resources
+    static let tmResourceFaith = "tm.resource.faith"
+    static let tmResourceBalance = "tm.resource.balance"
+
+    // Card Types
+    static let tmCardTypeCurse = "tm.card.type.curse"
+    static let tmCardTypeSpirit = "tm.card.type.spirit"
+    static let tmCardTypeArtifact = "tm.card.type.artifact"
+    static let tmCardTypeRitual = "tm.card.type.ritual"
+
+    // Curse Types
+    static let tmCurseBlindness = "tm.curse.type.blindness"
+    static let tmCurseMuteness = "tm.curse.type.muteness"
+    static let tmCurseWeakness = "tm.curse.type.weakness"
+    static let tmCurseForgetfulness = "tm.curse.type.forgetfulness"
+    static let tmCurseSickness = "tm.curse.type.sickness"
+    static let tmCurseMadness = "tm.curse.type.madness"
+    static let tmCurseTransformation = "tm.curse.type.transformation"
 }

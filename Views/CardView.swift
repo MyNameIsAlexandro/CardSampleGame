@@ -151,6 +151,10 @@ struct CardView: View {
         case .monster: return L10n.cardTypeMonster.localized
         case .location: return L10n.cardTypeLocation.localized
         case .scenario: return card.type.rawValue.capitalized
+        case .curse: return L10n.tmCardTypeCurse.localized
+        case .spirit: return L10n.tmCardTypeSpirit.localized
+        case .artifact: return L10n.tmCardTypeArtifact.localized
+        case .ritual: return L10n.tmCardTypeRitual.localized
         }
     }
 
@@ -176,6 +180,10 @@ struct CardView: View {
         case .monster: return Color.red.opacity(0.8)
         case .location: return Color.teal
         case .scenario: return Color.indigo
+        case .curse: return Color.black
+        case .spirit: return Color.cyan
+        case .artifact: return Color.orange
+        case .ritual: return Color.indigo
         }
     }
 
@@ -195,6 +203,10 @@ struct CardView: View {
         case .monster: return "flame.fill"
         case .location: return "mappin.and.ellipse"
         case .scenario: return "book.fill"
+        case .curse: return "cloud.bolt.fill"
+        case .spirit: return "cloud.moon.fill"
+        case .artifact: return "crown.fill"
+        case .ritual: return "book.closed.fill"
         }
     }
 
@@ -331,6 +343,10 @@ struct CompactCardView: View {
         case .monster: return Color.red.opacity(0.8)
         case .location: return Color.teal
         case .scenario: return Color.indigo
+        case .curse: return Color.black
+        case .spirit: return Color.cyan
+        case .artifact: return Color.orange
+        case .ritual: return Color.indigo
         }
     }
 
@@ -346,6 +362,10 @@ struct CompactCardView: View {
         case .monster: return "flame.fill"
         case .location: return "mappin.and.ellipse"
         case .scenario: return "book.fill"
+        case .curse: return "cloud.bolt.fill"
+        case .spirit: return "cloud.moon.fill"
+        case .artifact: return "crown.fill"
+        case .ritual: return "book.closed.fill"
         }
     }
 
@@ -361,6 +381,10 @@ struct CompactCardView: View {
         case .monster: return L10n.cardTypeMonster.localized
         case .location: return L10n.cardTypeLocation.localized
         case .scenario: return card.type.rawValue.capitalized
+        case .curse: return L10n.tmCardTypeCurse.localized
+        case .spirit: return L10n.tmCardTypeSpirit.localized
+        case .artifact: return L10n.tmCardTypeArtifact.localized
+        case .ritual: return L10n.tmCardTypeRitual.localized
         }
     }
 
