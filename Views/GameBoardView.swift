@@ -5,149 +5,284 @@ struct GameBoardView: View {
     @State private var selectedCard: Card?
     @State private var showingDiceRoll = false
     @State private var showingRules = false
+    @State private var showingPauseMenu = false
+    @Environment(\.dismiss) var dismiss
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Game status bar
-            HStack {
-                Text(L10n.turnLabel.localized(with: gameState.turnNumber))
-                    .font(.headline)
+        GeometryReader { geometry in
+            ZStack {
+                // Main game view
+                VStack(spacing: 0) {
+                    // Top bar
+                    topBar
+                        .frame(height: 70)
+                        .background(Color(UIColor.systemBackground))
+                        .shadow(radius: 2)
 
-                Button(action: { showingRules = true }) {
-                    Image(systemName: "book.fill")
-                        .foregroundColor(.blue)
-                }
-                .padding(.leading, 8)
+                    // Main game area (scrollable)
+                    ScrollView {
+                        VStack(spacing: 16) {
+                            // Current encounter or exploration
+                            encounterArea
+                                .padding(.horizontal)
 
-                Spacer()
+                            // Deck info
+                            deckInfoView
+                                .padding(.horizontal)
 
-                Text(phaseText)
-                    .font(.subheadline)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(phaseColor)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-
-                Spacer()
-
-                Button(action: {
-                    gameState.nextPhase()
-                }) {
-                    Text(L10n.buttonNextPhase.localized)
-                        .font(.headline)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                        .background(Color.green)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                }
-            }
-            .padding()
-            .background(Color(UIColor.systemBackground))
-            .shadow(radius: 2)
-
-            // Main game area
-            ScrollView {
-                VStack(spacing: 20) {
-                    // Active encounter
-                    if let encounter = gameState.activeEncounter {
-                        VStack {
-                            Text(L10n.encounterActive.localized)
-                                .font(.title2)
-                                .fontWeight(.bold)
-
-                            CardView(card: encounter)
-                                .padding()
-
-                            HStack(spacing: 16) {
-                                Button(action: {
-                                    rollDice()
-                                }) {
-                                    Label(L10n.buttonRollDice.localized, systemImage: "dice.fill")
-                                        .padding()
-                                        .background(Color.orange)
-                                        .foregroundColor(.white)
-                                        .cornerRadius(8)
-                                }
-
-                                if let roll = gameState.diceRoll {
-                                    Text(L10n.diceResult.localized(with: roll))
-                                        .font(.title2)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(.orange)
-                                }
-                            }
+                            // Space for hand
+                            Color.clear.frame(height: 180)
                         }
-                        .padding()
-                        .background(Color(UIColor.secondarySystemBackground))
-                        .cornerRadius(12)
-                    } else if gameState.currentPhase == .exploration {
-                        Button(action: {
-                            gameState.drawEncounter()
-                        }) {
-                            VStack {
-                                Image(systemName: "questionmark.circle.fill")
-                                    .font(.system(size: 60))
-                                Text(L10n.buttonExplore.localized)
-                                    .font(.title2)
-                            }
-                            .frame(width: 200, height: 200)
-                            .background(Color.blue.opacity(0.2))
-                            .cornerRadius(12)
-                        }
+                        .padding(.vertical)
                     }
 
-                    // Encounter deck info
-                    HStack(spacing: 20) {
-                        DeckPileView(
-                            title: L10n.deckEncounters.localized,
-                            count: gameState.encounterDeck.count,
-                            color: .red
-                        )
+                    Divider()
 
-                        DeckPileView(
-                            title: L10n.deckLocations.localized,
-                            count: gameState.locationDeck.count,
-                            color: .teal
-                        )
-                    }
+                    // Fixed player hand at bottom
+                    PlayerHandView(
+                        player: gameState.currentPlayer,
+                        selectedCard: $selectedCard,
+                        onCardPlay: playCard
+                    )
+                    .frame(height: min(geometry.size.height * 0.25, 180))
+                    .background(Color(UIColor.secondarySystemBackground))
                 }
-                .padding()
-            }
 
-            Divider()
-
-            // Current player's hand
-            PlayerHandView(
-                player: gameState.currentPlayer,
-                selectedCard: $selectedCard,
-                onCardPlay: { card in
-                    gameState.currentPlayer.playCard(card)
+                // Pause menu overlay
+                if showingPauseMenu {
+                    pauseMenuOverlay
                 }
-            )
-            .frame(maxHeight: 450)
-        }
-        .alert(L10n.diceRollTitle.localized, isPresented: $showingDiceRoll) {
-            Button(L10n.buttonOk.localized, role: .cancel) { }
-        } message: {
-            if let roll = gameState.diceRoll {
-                Text(L10n.diceRollMessage.localized(with: roll))
             }
         }
+        .navigationBarHidden(true)
         .sheet(isPresented: $showingRules) {
             RulesView()
         }
+        .alert("Dice Roll", isPresented: $showingDiceRoll) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            if let roll = gameState.diceRoll {
+                Text("You rolled: \(roll)")
+            }
+        }
     }
+
+    // MARK: - Top Bar
+
+    var topBar: some View {
+        HStack(spacing: 12) {
+            // Pause/Menu button
+            Button(action: { showingPauseMenu = true }) {
+                Image(systemName: "line.3.horizontal")
+                    .font(.title3)
+                    .foregroundColor(.blue)
+                    .padding(8)
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Turn \(gameState.turnNumber)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Text(phaseText)
+                    .font(.caption)
+                    .fontWeight(.bold)
+                    .foregroundColor(phaseColor)
+            }
+
+            Spacer()
+
+            // Player resources
+            HStack(spacing: 8) {
+                // Health
+                resourceBadge(icon: "heart.fill", value: "\(gameState.currentPlayer.health)", color: .red)
+
+                // Faith
+                resourceBadge(icon: "sparkles", value: "\(gameState.currentPlayer.faith)", color: .yellow)
+
+                // Balance
+                resourceBadge(icon: balanceIcon, value: "\(gameState.currentPlayer.balance)", color: balanceColor)
+            }
+
+            // Next phase button
+            Button(action: {
+                gameState.nextPhase()
+            }) {
+                Image(systemName: "arrow.right.circle.fill")
+                    .font(.title2)
+                    .foregroundColor(.green)
+            }
+            .padding(4)
+        }
+        .padding(.horizontal)
+    }
+
+    func resourceBadge(icon: String, value: String, color: Color) -> some View {
+        HStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.caption)
+                .foregroundColor(color)
+            Text(value)
+                .font(.caption2)
+                .fontWeight(.bold)
+        }
+        .padding(.horizontal, 6)
+        .padding(.vertical, 4)
+        .background(Color(UIColor.tertiarySystemBackground))
+        .cornerRadius(6)
+    }
+
+    // MARK: - Encounter Area
+
+    var encounterArea: some View {
+        Group {
+            if let encounter = gameState.activeEncounter {
+                VStack(spacing: 12) {
+                    Text("Active Encounter")
+                        .font(.headline)
+                        .foregroundColor(.red)
+
+                    CardView(card: encounter)
+                        .frame(width: 180, height: 280)
+
+                    HStack(spacing: 16) {
+                        Button(action: rollDice) {
+                            Label("Roll", systemImage: "dice.fill")
+                                .font(.caption)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(Color.orange)
+                                .foregroundColor(.white)
+                                .cornerRadius(8)
+                        }
+
+                        if let roll = gameState.diceRoll {
+                            Text("Result: \(roll)")
+                                .font(.subheadline)
+                                .fontWeight(.bold)
+                                .foregroundColor(.orange)
+                        }
+                    }
+                }
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.red.opacity(0.1))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.red, lineWidth: 2)
+                        )
+                )
+            } else if gameState.currentPhase == .exploration {
+                Button(action: {
+                    gameState.drawEncounter()
+                }) {
+                    VStack(spacing: 12) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 40))
+                        Text("Explore")
+                            .font(.title3)
+                            .fontWeight(.bold)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 120)
+                    .background(Color.blue.opacity(0.2))
+                    .cornerRadius(12)
+                }
+            }
+        }
+    }
+
+    // MARK: - Deck Info
+
+    var deckInfoView: some View {
+        HStack(spacing: 12) {
+            DeckPileView(
+                title: "Encounters",
+                count: gameState.encounterDeck.count,
+                color: .red
+            )
+
+            DeckPileView(
+                title: "Your Deck",
+                count: gameState.currentPlayer.deck.count,
+                color: .blue
+            )
+
+            DeckPileView(
+                title: "Discard",
+                count: gameState.currentPlayer.discard.count,
+                color: .gray
+            )
+        }
+    }
+
+    // MARK: - Pause Menu
+
+    var pauseMenuOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.5)
+                .ignoresSafeArea()
+                .onTapGesture {
+                    showingPauseMenu = false
+                }
+
+            VStack(spacing: 16) {
+                Text("Game Menu")
+                    .font(.title2)
+                    .fontWeight(.bold)
+
+                Button(action: {
+                    showingPauseMenu = false
+                }) {
+                    Label("Resume", systemImage: "play.fill")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.green)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+
+                Button(action: {
+                    showingRules = true
+                    showingPauseMenu = false
+                }) {
+                    Label("Rules", systemImage: "book.fill")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+
+                Button(action: {
+                    dismiss()
+                }) {
+                    Label("Exit", systemImage: "house.fill")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.red)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+            }
+            .padding(30)
+            .background(Color(UIColor.systemBackground))
+            .cornerRadius(16)
+            .shadow(radius: 20)
+            .padding(40)
+        }
+    }
+
+    // MARK: - Helper Properties
 
     var phaseText: String {
         switch gameState.currentPhase {
-        case .setup: return L10n.phaseSetup.localized
-        case .exploration: return L10n.phaseExploration.localized
-        case .encounter: return L10n.phaseEncounter.localized
-        case .combat: return L10n.phaseCombat.localized
-        case .endTurn: return L10n.phaseEndTurn.localized
-        case .gameOver: return L10n.phaseGameOver.localized
+        case .setup: return "Setup"
+        case .exploration: return "Explore"
+        case .encounter: return "Encounter"
+        case .combat: return "Combat"
+        case .endTurn: return "End Turn"
+        case .gameOver: return "Game Over"
         }
     }
 
@@ -162,11 +297,84 @@ struct GameBoardView: View {
         }
     }
 
+    var balanceIcon: String {
+        let balance = gameState.currentPlayer.balance
+        if balance >= 3 {
+            return "sun.max.fill"
+        } else if balance <= -3 {
+            return "moon.fill"
+        } else {
+            return "circle.lefthalf.filled"
+        }
+    }
+
+    var balanceColor: Color {
+        let balance = gameState.currentPlayer.balance
+        if balance >= 3 {
+            return .yellow
+        } else if balance <= -3 {
+            return .purple
+        } else {
+            return .gray
+        }
+    }
+
+    // MARK: - Helper Functions
+
     func rollDice() {
         _ = gameState.rollDice(sides: 6, count: 1)
         showingDiceRoll = true
     }
+
+    func playCard(_ card: Card) {
+        // Check if player has enough faith
+        guard let cost = card.cost else {
+            gameState.currentPlayer.playCard(card)
+            applyCardEffects(card)
+            return
+        }
+
+        if gameState.currentPlayer.spendFaith(cost) {
+            gameState.currentPlayer.playCard(card)
+            applyCardEffects(card)
+        }
+    }
+
+    func applyCardEffects(_ card: Card) {
+        for ability in card.abilities {
+            switch ability.effect {
+            case .heal(let amount):
+                gameState.currentPlayer.heal(amount)
+
+            case .damage(let amount, _):
+                if var encounter = gameState.activeEncounter, let health = encounter.health {
+                    encounter.health = max(0, health - amount)
+                    gameState.activeEncounter = encounter
+                    if encounter.health == 0 {
+                        gameState.activeEncounter = nil
+                    }
+                }
+
+            case .drawCards(let count):
+                gameState.currentPlayer.drawCards(count: count)
+
+            case .gainFaith(let amount):
+                gameState.currentPlayer.gainFaith(amount)
+
+            case .removeCurse(let type):
+                gameState.currentPlayer.removeCurse(type: type)
+
+            case .shiftBalance(let towards, let amount):
+                gameState.currentPlayer.shiftBalance(towards: towards, amount: amount)
+
+            default:
+                break
+            }
+        }
+    }
 }
+
+// MARK: - Deck Pile View
 
 struct DeckPileView: View {
     let title: String
@@ -174,22 +382,25 @@ struct DeckPileView: View {
     let color: Color
 
     var body: some View {
-        VStack {
+        VStack(spacing: 6) {
             ZStack {
                 ForEach(0..<min(count, 3), id: \.self) { index in
-                    RoundedRectangle(cornerRadius: 8)
+                    RoundedRectangle(cornerRadius: 4)
                         .fill(color.opacity(0.7))
-                        .frame(width: 80, height: 120)
+                        .frame(width: 50, height: 70)
                         .offset(x: CGFloat(index) * 2, y: CGFloat(index) * -2)
                 }
             }
+            .frame(width: 60, height: 80)
 
             Text(title)
-                .font(.caption)
+                .font(.caption2)
                 .fontWeight(.bold)
-            Text(L10n.deckCards.localized(with: count))
+                .multilineTextAlignment(.center)
+            Text("\(count)")
                 .font(.caption2)
                 .foregroundColor(.secondary)
         }
+        .frame(maxWidth: .infinity)
     }
 }
