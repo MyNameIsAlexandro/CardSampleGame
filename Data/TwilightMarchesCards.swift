@@ -112,9 +112,9 @@ struct TwilightMarchesCards {
                     )
                 ],
                 traits: ["tm.trait.hunter".localized, "tm.trait.ranger".localized, "tm.trait.neutral".localized],
+                range: 3,
                 balance: .neutral,
                 realm: .yav,
-                range: 3,
                 expansionSet: "baseSet"
             )
         ]
