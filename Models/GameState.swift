@@ -19,9 +19,20 @@ class GameState: ObservableObject {
     @Published var activeEncounter: Card?
     @Published var turnNumber: Int = 0
     @Published var diceRoll: Int?
+    @Published var encountersDefeated: Int = 0
+    @Published var isVictory: Bool = false
+    @Published var isDefeat: Bool = false
 
     var currentPlayer: Player {
         players[currentPlayerIndex]
+    }
+
+    // Win condition: defeat 10 encounters
+    var victoryThreshold: Int { 10 }
+
+    // Game is over if victory or defeat
+    var isGameOver: Bool {
+        isVictory || isDefeat
     }
 
     init(players: [Player]) {
@@ -65,14 +76,45 @@ class GameState: ObservableObject {
             turnNumber += 1
         }
 
-        currentPhase = .exploration
-        activeEncounter = nil
+        // Tick curses at end of turn
+        currentPlayer.tickCurses()
 
-        // Draw cards to hand size
-        let player = currentPlayer
-        let cardsToDraw = player.maxHandSize - player.hand.count
-        if cardsToDraw > 0 {
-            player.drawCards(count: cardsToDraw)
+        // Check defeat condition
+        checkDefeat()
+
+        if !isGameOver {
+            currentPhase = .exploration
+            activeEncounter = nil
+
+            // Draw cards to hand size
+            let player = currentPlayer
+            let cardsToDraw = player.maxHandSize - player.hand.count
+            if cardsToDraw > 0 {
+                player.drawCards(count: cardsToDraw)
+            }
+
+            // Regenerate faith
+            currentPlayer.gainFaith(1)
+        }
+    }
+
+    func defeatEncounter() {
+        encountersDefeated += 1
+        activeEncounter = nil
+        currentPhase = .exploration
+
+        // Check victory condition
+        if encountersDefeated >= victoryThreshold {
+            isVictory = true
+            currentPhase = .gameOver
+        }
+    }
+
+    func checkDefeat() {
+        // Player loses if health reaches 0
+        if currentPlayer.health <= 0 {
+            isDefeat = true
+            currentPhase = .gameOver
         }
     }
 

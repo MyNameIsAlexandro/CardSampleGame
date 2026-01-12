@@ -52,6 +52,34 @@ struct GameBoardView: View {
                 if showingPauseMenu {
                     pauseMenuOverlay
                 }
+
+                // Victory screen
+                if gameState.isVictory {
+                    Color.black.opacity(0.3)
+                        .ignoresSafeArea()
+                    VictoryView(
+                        encountersDefeated: gameState.encountersDefeated,
+                        turnsTaken: gameState.turnNumber,
+                        onDismiss: {
+                            dismiss()
+                        }
+                    )
+                    .padding(20)
+                }
+
+                // Defeat screen
+                if gameState.isDefeat {
+                    Color.black.opacity(0.3)
+                        .ignoresSafeArea()
+                    DefeatView(
+                        encountersDefeated: gameState.encountersDefeated,
+                        turnsTaken: gameState.turnNumber,
+                        onDismiss: {
+                            dismiss()
+                        }
+                    )
+                    .padding(20)
+                }
             }
         }
         .navigationBarHidden(true)
@@ -351,7 +379,8 @@ struct GameBoardView: View {
                     encounter.health = max(0, health - amount)
                     gameState.activeEncounter = encounter
                     if encounter.health == 0 {
-                        gameState.activeEncounter = nil
+                        // Encounter defeated!
+                        gameState.defeatEncounter()
                     }
                 }
 
@@ -370,6 +399,111 @@ struct GameBoardView: View {
             default:
                 break
             }
+        }
+    }
+}
+
+// MARK: - Victory/Defeat Screens
+
+struct VictoryView: View {
+    let encountersDefeated: Int
+    let turnsTaken: Int
+    let onDismiss: () -> Void
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "crown.fill")
+                .font(.system(size: 80))
+                .foregroundColor(.yellow)
+
+            Text("Victory!")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+
+            Text("You have defended the realm!")
+                .font(.title3)
+                .foregroundColor(.secondary)
+
+            VStack(spacing: 12) {
+                StatRow(label: "Encounters Defeated", value: "\(encountersDefeated)")
+                StatRow(label: "Turns Taken", value: "\(turnsTaken)")
+            }
+            .padding()
+            .background(Color(UIColor.secondarySystemBackground))
+            .cornerRadius(12)
+
+            Button(action: onDismiss) {
+                Text("Return to Main Menu")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .cornerRadius(12)
+            }
+        }
+        .padding(40)
+        .background(Color(UIColor.systemBackground))
+        .cornerRadius(20)
+        .shadow(radius: 20)
+    }
+}
+
+struct DefeatView: View {
+    let encountersDefeated: Int
+    let turnsTaken: Int
+    let onDismiss: () -> Void
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "xmark.circle.fill")
+                .font(.system(size: 80))
+                .foregroundColor(.red)
+
+            Text("Defeat")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+
+            Text("The darkness has won...")
+                .font(.title3)
+                .foregroundColor(.secondary)
+
+            VStack(spacing: 12) {
+                StatRow(label: "Encounters Defeated", value: "\(encountersDefeated)")
+                StatRow(label: "Turns Survived", value: "\(turnsTaken)")
+            }
+            .padding()
+            .background(Color(UIColor.secondarySystemBackground))
+            .cornerRadius(12)
+
+            Button(action: onDismiss) {
+                Text("Return to Main Menu")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .cornerRadius(12)
+            }
+        }
+        .padding(40)
+        .background(Color(UIColor.systemBackground))
+        .cornerRadius(20)
+        .shadow(radius: 20)
+    }
+}
+
+struct StatRow: View {
+    let label: String
+    let value: String
+
+    var body: some View {
+        HStack {
+            Text(label)
+                .foregroundColor(.secondary)
+            Spacer()
+            Text(value)
+                .fontWeight(.bold)
         }
     }
 }
