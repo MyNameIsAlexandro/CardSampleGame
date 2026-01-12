@@ -20,6 +20,7 @@
 		AA0000410000000000000001 /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000420000000000000001 /* Localization.swift */; };
 		AA0000430000000000000001 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = AA0000450000000000000001 /* Localizable.strings */; };
 		AA0000480000000000000001 /* RulesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000490000000000000001 /* RulesView.swift */; };
+		AA0000500000000000000001 /* TwilightMarchesCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000510000000000000001 /* TwilightMarchesCards.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,6 +41,7 @@
 		AA0000440000000000000001 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		AA0000460000000000000001 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
 		AA0000490000000000000001 /* RulesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RulesView.swift; sourceTree = "<group>"; };
+		AA0000510000000000000001 /* TwilightMarchesCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwilightMarchesCards.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -111,6 +113,7 @@
 			isa = PBXGroup;
 			children = (
 				AA0000200000000000000001 /* SampleCards.swift */,
+				AA0000510000000000000001 /* TwilightMarchesCards.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -215,6 +218,7 @@
 				AA0000150000000000000001 /* PlayerHandView.swift in Sources */,
 				AA0000170000000000000001 /* GameBoardView.swift in Sources */,
 				AA0000190000000000000001 /* SampleCards.swift in Sources */,
+				AA0000500000000000000001 /* TwilightMarchesCards.swift in Sources */,
 				AA0000410000000000000001 /* Localization.swift in Sources */,
 				AA0000480000000000000001 /* RulesView.swift in Sources */,
 			);
