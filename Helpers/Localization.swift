@@ -94,4 +94,32 @@ enum L10n {
     static let actionPlay = "action.play"
     static let actionDiscard = "action.discard"
     static let actionExamine = "action.examine"
+
+    // Rules
+    static let rulesTitle = "rules.title"
+    static let rulesButton = "rules.button"
+
+    // Rules Sections
+    static let rulesObjectiveTitle = "rules.objective.title"
+    static let rulesObjectiveContent = "rules.objective.content"
+
+    static let rulesPhasesTitle = "rules.phases.title"
+    static let rulesPhasesContent = "rules.phases.content"
+
+    static let rulesPhaseExploration = "rules.phase.exploration"
+    static let rulesPhaseEncounter = "rules.phase.encounter"
+    static let rulesPhaseCombat = "rules.phase.combat"
+    static let rulesPhaseEndTurn = "rules.phase.endturn"
+
+    static let rulesCardsTitle = "rules.cards.title"
+    static let rulesCardsContent = "rules.cards.content"
+
+    static let rulesDiceTitle = "rules.dice.title"
+    static let rulesDiceContent = "rules.dice.content"
+
+    static let rulesVictoryTitle = "rules.victory.title"
+    static let rulesVictoryContent = "rules.victory.content"
+
+    static let rulesTipsTitle = "rules.tips.title"
+    static let rulesTipsContent = "rules.tips.content"
 }

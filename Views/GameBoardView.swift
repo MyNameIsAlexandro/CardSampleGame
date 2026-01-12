@@ -4,6 +4,7 @@ struct GameBoardView: View {
     @StateObject var gameState: GameState
     @State private var selectedCard: Card?
     @State private var showingDiceRoll = false
+    @State private var showingRules = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -11,6 +12,12 @@ struct GameBoardView: View {
             HStack {
                 Text(L10n.turnLabel.localized(with: gameState.turnNumber))
                     .font(.headline)
+
+                Button(action: { showingRules = true }) {
+                    Image(systemName: "book.fill")
+                        .foregroundColor(.blue)
+                }
+                .padding(.leading, 8)
 
                 Spacer()
 
@@ -127,6 +134,9 @@ struct GameBoardView: View {
             if let roll = gameState.diceRoll {
                 Text(L10n.diceRollMessage.localized(with: roll))
             }
+        }
+        .sheet(isPresented: $showingRules) {
+            RulesView()
         }
     }
 

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var showingGame = false
+    @State private var showingRules = false
     @State private var selectedCharacterIndex = 0
     @StateObject private var gameState = GameState(players: [])
 
@@ -19,10 +20,24 @@ struct ContentView: View {
 
     var characterSelectionView: some View {
         VStack(spacing: 20) {
+            HStack {
+                Spacer()
+                Button(action: { showingRules = true }) {
+                    Label(L10n.rulesButton.localized, systemImage: "book.fill")
+                        .font(.headline)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(Color.blue.opacity(0.2))
+                        .foregroundColor(.blue)
+                        .cornerRadius(8)
+                }
+                .padding(.trailing)
+            }
+
             Text(L10n.gameTitle.localized)
                 .font(.largeTitle)
                 .fontWeight(.bold)
-                .padding()
+                .padding(.top, -10)
 
             Text(L10n.characterSelectTitle.localized)
                 .font(.title2)
@@ -106,6 +121,9 @@ struct ContentView: View {
             .padding()
         }
         .navigationBarHidden(true)
+        .sheet(isPresented: $showingRules) {
+            RulesView()
+        }
     }
 
     func startGame() {

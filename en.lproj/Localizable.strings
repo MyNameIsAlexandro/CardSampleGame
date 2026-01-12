@@ -84,3 +84,31 @@
 "action.play" = "Play";
 "action.discard" = "Discard";
 "action.examine" = "Examine";
+
+// MARK: - Rules
+"rules.title" = "How to Play";
+"rules.button" = "Rules";
+
+// Rules Sections
+"rules.objective.title" = "Game Objective";
+"rules.objective.content" = "Embark on an epic adventure! Choose your hero, explore dangerous locations, defeat monsters, and collect powerful cards to become the ultimate adventurer.";
+
+"rules.phases.title" = "Turn Phases";
+"rules.phases.content" = "Each turn consists of several phases. Complete all phases to finish your turn:";
+
+"rules.phase.exploration" = "Draw an encounter card and face a new challenge.";
+"rules.phase.encounter" = "Use cards from your hand to overcome the encounter.";
+"rules.phase.combat" = "Roll dice and use abilities to defeat monsters.";
+"rules.phase.endturn" = "Discard played cards and draw back up to your hand size.";
+
+"rules.cards.title" = "Card Types";
+"rules.cards.content" = "Weapons boost your attack, Spells provide magical effects, Armor protects you from damage, Items give special abilities, and Blessings grant temporary bonuses. Build your deck wisely!";
+
+"rules.dice.title" = "Dice Rolls";
+"rules.dice.content" = "When facing challenges, roll the dice! Add bonuses from your cards and abilities. Roll higher than the difficulty to succeed.";
+
+"rules.victory.title" = "Victory";
+"rules.victory.content" = "Defeat all encounters, survive dangerous situations, and manage your health carefully. When your health reaches zero, the game ends!";
+
+"rules.tips.title" = "Strategic Tips";
+"rules.tips.content" = "• Save powerful cards for difficult encounters\n• Balance your deck with different card types\n• Use blessings at the right moment\n• Manage your hand size carefully\n• Remember: some cards can be played together for combo effects!";
