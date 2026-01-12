@@ -19,12 +19,12 @@ struct ContentView: View {
 
     var characterSelectionView: some View {
         VStack(spacing: 20) {
-            Text("Card Adventure Game")
+            Text(L10n.gameTitle.localized)
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .padding()
 
-            Text("Select Your Character")
+            Text(L10n.characterSelectTitle.localized)
                 .font(.title2)
                 .foregroundColor(.secondary)
 
@@ -48,7 +48,7 @@ struct ContentView: View {
             if selectedCharacterIndex < characters.count {
                 let character = characters[selectedCharacterIndex]
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Character Stats")
+                    Text(L10n.characterStats.localized)
                         .font(.headline)
 
                     Text(character.description)
@@ -57,18 +57,18 @@ struct ContentView: View {
 
                     HStack(spacing: 20) {
                         if let health = character.health {
-                            StatDisplay(icon: "heart.fill", label: "Health", value: health, color: .red)
+                            StatDisplay(icon: "heart.fill", label: L10n.statHealth.localized, value: health, color: .red)
                         }
                         if let power = character.power {
-                            StatDisplay(icon: "sword.fill", label: "Power", value: power, color: .orange)
+                            StatDisplay(icon: "sword.fill", label: L10n.statPower.localized, value: power, color: .orange)
                         }
                         if let defense = character.defense {
-                            StatDisplay(icon: "shield.fill", label: "Defense", value: defense, color: .blue)
+                            StatDisplay(icon: "shield.fill", label: L10n.statDefense.localized, value: defense, color: .blue)
                         }
                     }
 
                     if !character.abilities.isEmpty {
-                        Text("Abilities")
+                        Text(L10n.characterAbilities.localized)
                             .font(.headline)
                             .padding(.top, 8)
 
@@ -94,7 +94,7 @@ struct ContentView: View {
             Spacer()
 
             Button(action: startGame) {
-                Text("Start Adventure")
+                Text(L10n.buttonStartAdventure.localized)
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(.white)

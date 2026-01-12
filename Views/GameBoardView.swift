@@ -9,7 +9,7 @@ struct GameBoardView: View {
         VStack(spacing: 0) {
             // Game status bar
             HStack {
-                Text("Turn \(gameState.turnNumber)")
+                Text(L10n.turnLabel.localized(with: gameState.turnNumber))
                     .font(.headline)
 
                 Spacer()
@@ -27,7 +27,7 @@ struct GameBoardView: View {
                 Button(action: {
                     gameState.nextPhase()
                 }) {
-                    Text("Next Phase")
+                    Text(L10n.buttonNextPhase.localized)
                         .font(.headline)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
@@ -46,7 +46,7 @@ struct GameBoardView: View {
                     // Active encounter
                     if let encounter = gameState.activeEncounter {
                         VStack {
-                            Text("Active Encounter")
+                            Text(L10n.encounterActive.localized)
                                 .font(.title2)
                                 .fontWeight(.bold)
 
@@ -57,7 +57,7 @@ struct GameBoardView: View {
                                 Button(action: {
                                     rollDice()
                                 }) {
-                                    Label("Roll Dice", systemImage: "dice.fill")
+                                    Label(L10n.buttonRollDice.localized, systemImage: "dice.fill")
                                         .padding()
                                         .background(Color.orange)
                                         .foregroundColor(.white)
@@ -65,7 +65,7 @@ struct GameBoardView: View {
                                 }
 
                                 if let roll = gameState.diceRoll {
-                                    Text("Result: \(roll)")
+                                    Text(L10n.diceResult.localized(with: roll))
                                         .font(.title2)
                                         .fontWeight(.bold)
                                         .foregroundColor(.orange)
@@ -82,7 +82,7 @@ struct GameBoardView: View {
                             VStack {
                                 Image(systemName: "questionmark.circle.fill")
                                     .font(.system(size: 60))
-                                Text("Explore")
+                                Text(L10n.buttonExplore.localized)
                                     .font(.title2)
                             }
                             .frame(width: 200, height: 200)
@@ -94,13 +94,13 @@ struct GameBoardView: View {
                     // Encounter deck info
                     HStack(spacing: 20) {
                         DeckPileView(
-                            title: "Encounters",
+                            title: L10n.deckEncounters.localized,
                             count: gameState.encounterDeck.count,
                             color: .red
                         )
 
                         DeckPileView(
-                            title: "Locations",
+                            title: L10n.deckLocations.localized,
                             count: gameState.locationDeck.count,
                             color: .teal
                         )
@@ -121,23 +121,23 @@ struct GameBoardView: View {
             )
             .frame(maxHeight: 450)
         }
-        .alert("Dice Roll", isPresented: $showingDiceRoll) {
-            Button("OK", role: .cancel) { }
+        .alert(L10n.diceRollTitle.localized, isPresented: $showingDiceRoll) {
+            Button(L10n.buttonOk.localized, role: .cancel) { }
         } message: {
             if let roll = gameState.diceRoll {
-                Text("You rolled: \(roll)")
+                Text(L10n.diceRollMessage.localized(with: roll))
             }
         }
     }
 
     var phaseText: String {
         switch gameState.currentPhase {
-        case .setup: return "Setup"
-        case .exploration: return "Exploration"
-        case .encounter: return "Encounter"
-        case .combat: return "Combat"
-        case .endTurn: return "End Turn"
-        case .gameOver: return "Game Over"
+        case .setup: return L10n.phaseSetup.localized
+        case .exploration: return L10n.phaseExploration.localized
+        case .encounter: return L10n.phaseEncounter.localized
+        case .combat: return L10n.phaseCombat.localized
+        case .endTurn: return L10n.phaseEndTurn.localized
+        case .gameOver: return L10n.phaseGameOver.localized
         }
     }
 
@@ -177,7 +177,7 @@ struct DeckPileView: View {
             Text(title)
                 .font(.caption)
                 .fontWeight(.bold)
-            Text("\(count) cards")
+            Text(L10n.deckCards.localized(with: count))
                 .font(.caption2)
                 .foregroundColor(.secondary)
         }

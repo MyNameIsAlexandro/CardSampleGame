@@ -1,0 +1,86 @@
+/*
+  Localizable.strings
+  CardSampleGame - English
+*/
+
+// MARK: - Main Screen
+"game.title" = "Card Adventure Game";
+"character.select.title" = "Select Your Character";
+"character.stats" = "Character Stats";
+"character.abilities" = "Abilities";
+"button.start.adventure" = "Start Adventure";
+
+// MARK: - Game Board
+"turn.label" = "Turn %d";
+"button.next.phase" = "Next Phase";
+"button.explore" = "Explore";
+"button.roll.dice" = "Roll Dice";
+"dice.result" = "Result: %d";
+"dice.roll.title" = "Dice Roll";
+"dice.roll.message" = "You rolled: %d";
+"button.ok" = "OK";
+
+// MARK: - Game Phases
+"phase.setup" = "Setup";
+"phase.exploration" = "Exploration";
+"phase.encounter" = "Encounter";
+"phase.combat" = "Combat";
+"phase.end.turn" = "End Turn";
+"phase.game.over" = "Game Over";
+
+// MARK: - Encounter
+"encounter.active" = "Active Encounter";
+
+// MARK: - Deck
+"deck.encounters" = "Encounters";
+"deck.locations" = "Locations";
+"deck.cards" = "%d cards";
+
+// MARK: - Player Hand
+"player.hand.title" = "Your Hand";
+"player.discard.pile" = "Discard: %d";
+"player.deck.remaining" = "Deck: %d";
+
+// MARK: - Card Types
+"card.type.character" = "Character";
+"card.type.weapon" = "Weapon";
+"card.type.spell" = "Spell";
+"card.type.armor" = "Armor";
+"card.type.item" = "Item";
+"card.type.blessing" = "Blessing";
+"card.type.monster" = "Monster";
+"card.type.location" = "Location";
+"card.type.ally" = "Ally";
+
+// MARK: - Stats
+"stat.health" = "Health";
+"stat.power" = "Power";
+"stat.defense" = "Defense";
+"stat.strength" = "Strength";
+"stat.dexterity" = "Dexterity";
+"stat.constitution" = "Constitution";
+"stat.intelligence" = "Intelligence";
+"stat.wisdom" = "Wisdom";
+"stat.charisma" = "Charisma";
+
+// MARK: - Rarity
+"rarity.common" = "Common";
+"rarity.uncommon" = "Uncommon";
+"rarity.rare" = "Rare";
+"rarity.epic" = "Epic";
+"rarity.legendary" = "Legendary";
+
+// MARK: - Damage Types
+"damage.physical" = "Physical";
+"damage.fire" = "Fire";
+"damage.cold" = "Cold";
+"damage.lightning" = "Lightning";
+"damage.poison" = "Poison";
+"damage.acid" = "Acid";
+"damage.holy" = "Holy";
+"damage.shadow" = "Shadow";
+
+// MARK: - Actions
+"action.play" = "Play";
+"action.discard" = "Discard";
+"action.examine" = "Examine";

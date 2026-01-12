@@ -1,0 +1,86 @@
+/*
+  Localizable.strings
+  CardSampleGame - Russian
+*/
+
+// MARK: - Main Screen
+"game.title" = "Карточное Приключение";
+"character.select.title" = "Выберите персонажа";
+"character.stats" = "Характеристики персонажа";
+"character.abilities" = "Способности";
+"button.start.adventure" = "Начать приключение";
+
+// MARK: - Game Board
+"turn.label" = "Ход %d";
+"button.next.phase" = "Следующая фаза";
+"button.explore" = "Исследовать";
+"button.roll.dice" = "Бросить кубик";
+"dice.result" = "Результат: %d";
+"dice.roll.title" = "Бросок кубика";
+"dice.roll.message" = "Вы выбросили: %d";
+"button.ok" = "ОК";
+
+// MARK: - Game Phases
+"phase.setup" = "Подготовка";
+"phase.exploration" = "Исследование";
+"phase.encounter" = "Столкновение";
+"phase.combat" = "Бой";
+"phase.end.turn" = "Конец хода";
+"phase.game.over" = "Игра окончена";
+
+// MARK: - Encounter
+"encounter.active" = "Активное столкновение";
+
+// MARK: - Deck
+"deck.encounters" = "Столкновения";
+"deck.locations" = "Локации";
+"deck.cards" = "Карт: %d";
+
+// MARK: - Player Hand
+"player.hand.title" = "Ваша рука";
+"player.discard.pile" = "Сброс: %d";
+"player.deck.remaining" = "Колода: %d";
+
+// MARK: - Card Types
+"card.type.character" = "Персонаж";
+"card.type.weapon" = "Оружие";
+"card.type.spell" = "Заклинание";
+"card.type.armor" = "Броня";
+"card.type.item" = "Предмет";
+"card.type.blessing" = "Благословение";
+"card.type.monster" = "Монстр";
+"card.type.location" = "Локация";
+"card.type.ally" = "Союзник";
+
+// MARK: - Stats
+"stat.health" = "Здоровье";
+"stat.power" = "Сила";
+"stat.defense" = "Защита";
+"stat.strength" = "Сила";
+"stat.dexterity" = "Ловкость";
+"stat.constitution" = "Телосложение";
+"stat.intelligence" = "Интеллект";
+"stat.wisdom" = "Мудрость";
+"stat.charisma" = "Харизма";
+
+// MARK: - Rarity
+"rarity.common" = "Обычная";
+"rarity.uncommon" = "Необычная";
+"rarity.rare" = "Редкая";
+"rarity.epic" = "Эпическая";
+"rarity.legendary" = "Легендарная";
+
+// MARK: - Damage Types
+"damage.physical" = "Физический";
+"damage.fire" = "Огонь";
+"damage.cold" = "Холод";
+"damage.lightning" = "Молния";
+"damage.poison" = "Яд";
+"damage.acid" = "Кислота";
+"damage.holy" = "Святой";
+"damage.shadow" = "Тень";
+
+// MARK: - Actions
+"action.play" = "Сыграть";
+"action.discard" = "Сбросить";
+"action.examine" = "Осмотреть";

@@ -17,6 +17,8 @@
 		AA0000150000000000000001 /* PlayerHandView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000160000000000000001 /* PlayerHandView.swift */; };
 		AA0000170000000000000001 /* GameBoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000180000000000000001 /* GameBoardView.swift */; };
 		AA0000190000000000000001 /* SampleCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000200000000000000001 /* SampleCards.swift */; };
+		AA0000410000000000000001 /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000420000000000000001 /* Localization.swift */; };
+		AA0000430000000000000001 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = AA0000450000000000000001 /* Localizable.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,6 +35,9 @@
 		AA0000200000000000000001 /* SampleCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleCards.swift; sourceTree = "<group>"; };
 		AA0000220000000000000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA0000400000000000000001 /* CardSampleGame.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CardSampleGame.entitlements; sourceTree = "<group>"; };
+		AA0000420000000000000001 /* Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Localization.swift; sourceTree = "<group>"; };
+		AA0000440000000000000001 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		AA0000460000000000000001 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,6 +69,8 @@
 				AA0000270000000000000001 /* Models */,
 				AA0000280000000000000001 /* Views */,
 				AA0000290000000000000001 /* Data */,
+				AA0000470000000000000001 /* Helpers */,
+				AA0000450000000000000001 /* Localizable.strings */,
 			);
 			path = ".";
 			sourceTree = "<group>";
@@ -105,7 +112,27 @@
 			path = Data;
 			sourceTree = "<group>";
 		};
+		AA0000470000000000000001 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				AA0000420000000000000001 /* Localization.swift */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
+
+/* Begin PBXVariantGroup section */
+		AA0000450000000000000001 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				AA0000440000000000000001 /* en */,
+				AA0000460000000000000001 /* ru */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin PBXNativeTarget section */
 		AA0000300000000000000001 /* CardSampleGame */ = {
@@ -147,6 +174,7 @@
 			knownRegions = (
 				en,
 				Base,
+				ru,
 			);
 			mainGroup = AA0000240000000000000001;
 			productRefGroup = AA0000260000000000000001 /* Products */;
@@ -163,6 +191,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA0000430000000000000001 /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -183,6 +212,7 @@
 				AA0000150000000000000001 /* PlayerHandView.swift in Sources */,
 				AA0000170000000000000001 /* GameBoardView.swift in Sources */,
 				AA0000190000000000000001 /* SampleCards.swift in Sources */,
+				AA0000410000000000000001 /* Localization.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

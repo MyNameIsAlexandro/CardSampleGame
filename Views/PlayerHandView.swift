@@ -25,19 +25,11 @@ struct PlayerHandView: View {
 
                 // Deck info
                 VStack(alignment: .trailing, spacing: 4) {
-                    HStack {
-                        Text("Deck:")
-                        Text("\(player.deck.count)")
-                            .fontWeight(.bold)
-                    }
-                    .font(.caption)
+                    Text(L10n.playerDeckRemaining.localized(with: player.deck.count))
+                        .font(.caption)
 
-                    HStack {
-                        Text("Discard:")
-                        Text("\(player.discard.count)")
-                            .fontWeight(.bold)
-                    }
-                    .font(.caption)
+                    Text(L10n.playerDiscardPile.localized(with: player.discard.count))
+                        .font(.caption)
                 }
             }
             .padding()
