@@ -25,7 +25,7 @@ struct CardView: View {
                     }
                 }
 
-                Text(card.type.rawValue.capitalized)
+                Text(localizedCardType)
                     .font(.caption)
                     .foregroundColor(.white.opacity(0.8))
             }
@@ -116,7 +116,7 @@ struct CardView: View {
                 Circle()
                     .fill(rarityColor)
                     .frame(width: 8, height: 8)
-                Text(card.rarity.rawValue.capitalized)
+                Text(localizedRarity)
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
@@ -137,6 +137,31 @@ struct CardView: View {
 
     var hasStats: Bool {
         card.power != nil || card.defense != nil || card.health != nil
+    }
+
+    var localizedCardType: String {
+        switch card.type {
+        case .character: return L10n.cardTypeCharacter.localized
+        case .weapon: return L10n.cardTypeWeapon.localized
+        case .spell: return L10n.cardTypeSpell.localized
+        case .armor: return L10n.cardTypeArmor.localized
+        case .item: return L10n.cardTypeItem.localized
+        case .ally: return L10n.cardTypeAlly.localized
+        case .blessing: return L10n.cardTypeBlessing.localized
+        case .monster: return L10n.cardTypeMonster.localized
+        case .location: return L10n.cardTypeLocation.localized
+        case .scenario: return card.type.rawValue.capitalized
+        }
+    }
+
+    var localizedRarity: String {
+        switch card.rarity {
+        case .common: return L10n.rarityCommon.localized
+        case .uncommon: return L10n.rarityUncommon.localized
+        case .rare: return L10n.rarityRare.localized
+        case .epic: return L10n.rarityEpic.localized
+        case .legendary: return L10n.rarityLegendary.localized
+        }
     }
 
     var headerColor: Color {

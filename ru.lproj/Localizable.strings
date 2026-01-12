@@ -112,3 +112,123 @@
 
 "rules.tips.title" = "Стратегические советы";
 "rules.tips.content" = "• Берегите мощные карты для сложных столкновений\n• Балансируйте колоду разными типами карт\n• Используйте благословения в правильный момент\n• Следите за размером руки\n• Помните: некоторые карты можно играть вместе для комбо-эффектов!";
+
+// MARK: - Card Names
+// Characters
+"card.valeros.name" = "Валерос";
+"card.valeros.desc" = "Отважный воин из городской стражи, мастер меча и щита.";
+"card.seoni.name" = "Сеони";
+"card.seoni.desc" = "Могущественная волшебница, управляющая тайной энергией.";
+"card.kyra.name" = "Кайра";
+"card.kyra.desc" = "Преданная жрица, исцеляющая союзников и карающая зло.";
+
+// Character Abilities
+"ability.weapon.master" = "Мастер Оружия";
+"ability.weapon.master.desc" = "Добавьте 2 кубика при использовании оружия";
+"ability.arcane.blast" = "Магический Взрыв";
+"ability.arcane.blast.desc" = "Нанесите 3 урона огнём любому врагу";
+"ability.spell.focus" = "Концентрация Заклинаний";
+"ability.spell.focus.desc" = "Возьмите 1 дополнительную карту при сотворении заклинаний";
+"ability.divine.healing" = "Божественное Исцеление";
+"ability.divine.healing.desc" = "Излечите 4 урона себе или союзнику";
+"ability.channel.energy" = "Направление Энергии";
+"ability.channel.energy.desc" = "Излечите 2 урона всем союзникам";
+
+// Weapons
+"card.longsword.name" = "Длинный Меч";
+"card.longsword.desc" = "Хорошо сбалансированный клинок, смертельный в умелых руках.";
+"card.longbow.name" = "Длинный Лук";
+"card.longbow.desc" = "Поражайте врагов издалека с точностью.";
+"card.staff.power.name" = "Посох Силы";
+"card.staff.power.desc" = "Магический посох, направляющий мистическую энергию.";
+
+// Weapon Abilities
+"ability.power.strike" = "Мощный Удар";
+"ability.power.strike.desc" = "Нанесите +3 урона";
+"ability.precise.shot" = "Точный Выстрел";
+"ability.precise.shot.desc" = "Игнорируйте броню";
+"ability.arcane.surge" = "Магический Всплеск";
+"ability.arcane.surge.desc" = "Добавьте силу заклинаний к атаке";
+
+// Spells
+"card.fireball.name" = "Огненный Шар";
+"card.fireball.desc" = "Швырните шар пламени во врагов.";
+"card.lightning.bolt.name" = "Молния";
+"card.lightning.bolt.desc" = "Призовите удар молнии.";
+"card.healing.touch.name" = "Исцеляющее Прикосновение";
+"card.healing.touch.desc" = "Восстановите здоровье божественной магией.";
+
+// Spell Abilities
+"ability.burn" = "Поджог";
+"ability.burn.desc" = "Нанесите 4 урона огнём";
+"ability.chain.lightning" = "Цепная Молния";
+"ability.chain.lightning.desc" = "Нанесите 3 урона молнией 2 врагам";
+"ability.restore" = "Восстановление";
+"ability.restore.desc" = "Излечите 5 урона";
+
+// Armor
+"card.leather.armor.name" = "Кожаная Броня";
+"card.leather.armor.desc" = "Легкая защита, не мешающая движению.";
+"card.plate.armor.name" = "Латная Броня";
+"card.plate.armor.desc" = "Тяжелая броня, обеспечивающая отличную защиту.";
+
+// Items
+"card.healing.potion.name" = "Зелье Лечения";
+"card.healing.potion.desc" = "Флакон магической жидкости, восстанавливающей жизнь.";
+"card.magic.ring.name" = "Магическое Кольцо";
+"card.magic.ring.desc" = "Кольцо с защитными чарами.";
+
+// Item Abilities
+"ability.quick.heal" = "Быстрое Лечение";
+"ability.quick.heal.desc" = "Мгновенно излечите 3 урона";
+"ability.shield" = "Щит";
+"ability.shield.desc" = "Добавьте +2 к защите до конца хода";
+
+// Blessings
+"card.blessing.luck.name" = "Благословение Удачи";
+"card.blessing.luck.desc" = "Фортуна улыбается вам.";
+"card.blessing.gods.name" = "Благословение Богов";
+"card.blessing.gods.desc" = "Божественная милость дарует вам силу.";
+
+// Blessing Abilities
+"ability.lucky" = "Удача";
+"ability.lucky.desc" = "Перебросьте любую неудавшуюся проверку";
+"ability.divine.favor" = "Божественная Милость";
+"ability.divine.favor.desc" = "Добавьте 3 к любой проверке";
+
+// Monsters
+"card.goblin.raider.name" = "Гоблин-Налётчик";
+"card.goblin.raider.desc" = "Маленькое, но злобное существо с грубым оружием.";
+"card.orc.warrior.name" = "Орк-Воин";
+"card.orc.warrior.desc" = "Грубый боец с огромной силой.";
+"card.skeleton.warrior.name" = "Скелет-Воин";
+"card.skeleton.warrior.desc" = "Нежить-солдат с древним оружием.";
+"card.ancient.dragon.name" = "Древний Дракон";
+"card.ancient.dragon.desc" = "Массивный змей с чешуёй как железо и огненным дыханием.";
+
+// Traits
+"trait.human" = "Человек";
+"trait.warrior" = "Воин";
+"trait.fighter" = "Боец";
+"trait.sorcerer" = "Волшебник";
+"trait.magic" = "Магия";
+"trait.cleric" = "Жрец";
+"trait.divine" = "Божественный";
+"trait.melee" = "Ближний Бой";
+"trait.ranged" = "Дальний Бой";
+"trait.arcane" = "Тайный";
+"trait.fire" = "Огонь";
+"trait.lightning" = "Молния";
+"trait.healing" = "Лечение";
+"trait.light" = "Легкий";
+"trait.heavy" = "Тяжелый";
+"trait.potion" = "Зелье";
+"trait.magical" = "Магический";
+"trait.blessing" = "Благословение";
+"trait.goblin" = "Гоблин";
+"trait.evil" = "Зло";
+"trait.orc" = "Орк";
+"trait.undead" = "Нежить";
+"trait.skeleton" = "Скелет";
+"trait.dragon" = "Дракон";
+"trait.ancient" = "Древний";

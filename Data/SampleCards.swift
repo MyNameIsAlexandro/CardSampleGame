@@ -4,60 +4,60 @@ struct SampleCards {
     static func createCharacterDeck() -> [Card] {
         return [
             Card(
-                name: "Valeros",
+                name: "card.valeros.name".localized,
                 type: .character,
                 rarity: .rare,
-                description: "A brave fighter from the city guard, skilled with sword and shield.",
+                description: "card.valeros.desc".localized,
                 power: 8,
                 defense: 6,
                 health: 12,
                 abilities: [
                     CardAbility(
-                        name: "Weapon Master",
-                        description: "Add 2 dice when using weapons",
+                        name: "ability.weapon.master".localized,
+                        description: "ability.weapon.master.desc".localized,
                         effect: .addDice(count: 2)
                     )
                 ],
-                traits: ["Human", "Warrior", "Fighter"]
+                traits: ["trait.human".localized, "trait.warrior".localized, "trait.fighter".localized]
             ),
             Card(
-                name: "Seoni",
+                name: "card.seoni.name".localized,
                 type: .character,
                 rarity: .rare,
-                description: "A powerful sorceress who channels arcane energies.",
+                description: "card.seoni.desc".localized,
                 power: 4,
                 defense: 3,
                 health: 8,
                 abilities: [
                     CardAbility(
-                        name: "Arcane Blast",
-                        description: "Deal 3 fire damage to any enemy",
+                        name: "ability.arcane.blast".localized,
+                        description: "ability.arcane.blast.desc".localized,
                         effect: .damage(amount: 3, type: .fire)
                     ),
                     CardAbility(
-                        name: "Spell Focus",
-                        description: "Draw 1 extra card when casting spells",
+                        name: "ability.spell.focus".localized,
+                        description: "ability.spell.focus.desc".localized,
                         effect: .drawCards(count: 1)
                     )
                 ],
-                traits: ["Human", "Sorcerer", "Magic"]
+                traits: ["trait.human".localized, "trait.sorcerer".localized, "trait.magic".localized]
             ),
             Card(
-                name: "Kyra",
+                name: "card.kyra.name".localized,
                 type: .character,
                 rarity: .rare,
-                description: "A devoted cleric who heals allies and smites evil.",
+                description: "card.kyra.desc".localized,
                 power: 5,
                 defense: 5,
                 health: 10,
                 abilities: [
                     CardAbility(
-                        name: "Divine Healing",
-                        description: "Heal yourself or an ally for 4 health",
+                        name: "ability.divine.healing".localized,
+                        description: "ability.divine.healing.desc".localized,
                         effect: .heal(amount: 4)
                     )
                 ],
-                traits: ["Human", "Cleric", "Divine"]
+                traits: ["trait.human".localized, "trait.cleric".localized, "trait.divine".localized]
             )
         ]
     }
@@ -65,42 +65,54 @@ struct SampleCards {
     static func createWeapons() -> [Card] {
         return [
             Card(
-                name: "Longsword",
+                name: "card.longsword.name".localized,
                 type: .weapon,
                 rarity: .common,
-                description: "A well-balanced blade, deadly in skilled hands.",
+                description: "card.longsword.desc".localized,
                 power: 4,
                 cost: 2,
-                abilities: [],
-                traits: ["Melee", "Slashing"],
+                abilities: [
+                    CardAbility(
+                        name: "ability.power.strike".localized,
+                        description: "ability.power.strike.desc".localized,
+                        effect: .damage(amount: 3, type: .physical)
+                    )
+                ],
+                traits: ["trait.melee".localized],
                 damageType: .physical
             ),
             Card(
-                name: "Flaming Sword",
+                name: "card.staff.power.name".localized,
                 type: .weapon,
                 rarity: .rare,
-                description: "A magical blade wreathed in flames.",
+                description: "card.staff.power.desc".localized,
                 power: 6,
                 cost: 4,
                 abilities: [
                     CardAbility(
-                        name: "Burning Strike",
-                        description: "Deal 2 additional fire damage",
-                        effect: .damage(amount: 2, type: .fire)
+                        name: "ability.arcane.surge".localized,
+                        description: "ability.arcane.surge.desc".localized,
+                        effect: .damage(amount: 2, type: .arcane)
                     )
                 ],
-                traits: ["Melee", "Magical", "Fire"],
-                damageType: .fire
+                traits: ["trait.melee".localized, "trait.magical".localized, "trait.arcane".localized],
+                damageType: .arcane
             ),
             Card(
-                name: "Longbow",
+                name: "card.longbow.name".localized,
                 type: .weapon,
                 rarity: .uncommon,
-                description: "Strike your enemies from afar.",
+                description: "card.longbow.desc".localized,
                 power: 5,
                 cost: 3,
-                abilities: [],
-                traits: ["Ranged", "Piercing"],
+                abilities: [
+                    CardAbility(
+                        name: "ability.precise.shot".localized,
+                        description: "ability.precise.shot.desc".localized,
+                        effect: .custom("Ignore armor")
+                    )
+                ],
+                traits: ["trait.ranged".localized],
                 damageType: .physical,
                 range: 3
             )
@@ -110,53 +122,53 @@ struct SampleCards {
     static func createSpells() -> [Card] {
         return [
             Card(
-                name: "Fireball",
+                name: "card.fireball.name".localized,
                 type: .spell,
                 rarity: .uncommon,
-                description: "Hurl a ball of flame at your enemies.",
+                description: "card.fireball.desc".localized,
                 power: 7,
                 cost: 3,
                 abilities: [
                     CardAbility(
-                        name: "Explosive",
-                        description: "Deal damage to multiple enemies",
-                        effect: .damage(amount: 7, type: .fire)
+                        name: "ability.burn".localized,
+                        description: "ability.burn.desc".localized,
+                        effect: .damage(amount: 4, type: .fire)
                     )
                 ],
-                traits: ["Fire", "Evocation"],
+                traits: ["trait.fire".localized, "trait.arcane".localized],
                 damageType: .fire
             ),
             Card(
-                name: "Lightning Bolt",
+                name: "card.lightning.bolt.name".localized,
                 type: .spell,
                 rarity: .uncommon,
-                description: "Call down a bolt of electricity.",
+                description: "card.lightning.bolt.desc".localized,
                 power: 6,
                 cost: 2,
                 abilities: [
                     CardAbility(
-                        name: "Chain Lightning",
-                        description: "Can hit multiple targets",
-                        effect: .damage(amount: 6, type: .electricity)
+                        name: "ability.chain.lightning".localized,
+                        description: "ability.chain.lightning.desc".localized,
+                        effect: .damage(amount: 3, type: .electricity)
                     )
                 ],
-                traits: ["Electricity", "Evocation"],
+                traits: ["trait.lightning".localized, "trait.arcane".localized],
                 damageType: .electricity
             ),
             Card(
-                name: "Cure",
+                name: "card.healing.touch.name".localized,
                 type: .spell,
                 rarity: .common,
-                description: "Heal wounds with divine magic.",
+                description: "card.healing.touch.desc".localized,
                 cost: 1,
                 abilities: [
                     CardAbility(
-                        name: "Healing Touch",
-                        description: "Restore 5 health",
+                        name: "ability.restore".localized,
+                        description: "ability.restore.desc".localized,
                         effect: .heal(amount: 5)
                     )
                 ],
-                traits: ["Divine", "Healing"]
+                traits: ["trait.divine".localized, "trait.healing".localized]
             )
         ]
     }
@@ -164,66 +176,49 @@ struct SampleCards {
     static func createMonsters() -> [Card] {
         return [
             Card(
-                name: "Goblin Raider",
+                name: "card.goblin.raider.name".localized,
                 type: .monster,
                 rarity: .common,
-                description: "A sneaky goblin armed with crude weapons.",
+                description: "card.goblin.raider.desc".localized,
                 power: 3,
                 defense: 2,
                 health: 4,
                 abilities: [],
-                traits: ["Goblin", "Humanoid"]
+                traits: ["trait.goblin".localized, "trait.evil".localized]
             ),
             Card(
-                name: "Orc Berserker",
+                name: "card.orc.warrior.name".localized,
                 type: .monster,
                 rarity: .uncommon,
-                description: "A brutal orc warrior consumed by battle rage.",
+                description: "card.orc.warrior.desc".localized,
                 power: 6,
                 defense: 4,
                 health: 8,
-                abilities: [
-                    CardAbility(
-                        name: "Rage",
-                        description: "Gains +2 power when damaged",
-                        effect: .addDice(count: 2)
-                    )
-                ],
-                traits: ["Orc", "Humanoid"]
+                abilities: [],
+                traits: ["trait.orc".localized, "trait.evil".localized]
             ),
             Card(
-                name: "Ancient Dragon",
+                name: "card.ancient.dragon.name".localized,
                 type: .monster,
                 rarity: .legendary,
-                description: "A massive wyrm of terrible power.",
+                description: "card.ancient.dragon.desc".localized,
                 power: 12,
                 defense: 10,
                 health: 20,
-                abilities: [
-                    CardAbility(
-                        name: "Dragon Breath",
-                        description: "Deal 8 fire damage to all players",
-                        effect: .damage(amount: 8, type: .fire)
-                    ),
-                    CardAbility(
-                        name: "Armored Scales",
-                        description: "Reduce all damage by 3",
-                        effect: .custom("Damage reduction 3")
-                    )
-                ],
-                traits: ["Dragon", "Fire"],
+                abilities: [],
+                traits: ["trait.dragon".localized, "trait.ancient".localized, "trait.fire".localized],
                 damageType: .fire
             ),
             Card(
-                name: "Skeleton Warrior",
+                name: "card.skeleton.warrior.name".localized,
                 type: .monster,
                 rarity: .common,
-                description: "An undead soldier wielding ancient weapons.",
+                description: "card.skeleton.warrior.desc".localized,
                 power: 4,
                 defense: 3,
                 health: 5,
                 abilities: [],
-                traits: ["Undead", "Skeleton"]
+                traits: ["trait.undead".localized, "trait.skeleton".localized]
             )
         ]
     }
@@ -231,35 +226,35 @@ struct SampleCards {
     static func createItems() -> [Card] {
         return [
             Card(
-                name: "Healing Potion",
+                name: "card.healing.potion.name".localized,
                 type: .item,
                 rarity: .common,
-                description: "A vial of magical healing liquid.",
+                description: "card.healing.potion.desc".localized,
                 cost: 1,
                 abilities: [
                     CardAbility(
-                        name: "Drink",
-                        description: "Restore 3 health",
+                        name: "ability.quick.heal".localized,
+                        description: "ability.quick.heal.desc".localized,
                         effect: .heal(amount: 3)
                     )
                 ],
-                traits: ["Potion", "Consumable"]
+                traits: ["trait.potion".localized]
             ),
             Card(
-                name: "Magic Ring",
+                name: "card.magic.ring.name".localized,
                 type: .item,
                 rarity: .rare,
-                description: "A ring imbued with protective enchantments.",
+                description: "card.magic.ring.desc".localized,
                 defense: 2,
                 cost: 3,
                 abilities: [
                     CardAbility(
-                        name: "Shield",
-                        description: "Add 1 die to all defense checks",
+                        name: "ability.shield".localized,
+                        description: "ability.shield.desc".localized,
                         effect: .addDice(count: 1)
                     )
                 ],
-                traits: ["Ring", "Magical"]
+                traits: ["trait.magical".localized]
             )
         ]
     }
@@ -267,24 +262,24 @@ struct SampleCards {
     static func createArmor() -> [Card] {
         return [
             Card(
-                name: "Leather Armor",
+                name: "card.leather.armor.name".localized,
                 type: .armor,
                 rarity: .common,
-                description: "Light armor that doesn't restrict movement.",
+                description: "card.leather.armor.desc".localized,
                 defense: 3,
                 cost: 2,
                 abilities: [],
-                traits: ["Light Armor"]
+                traits: ["trait.light".localized]
             ),
             Card(
-                name: "Plate Mail",
+                name: "card.plate.armor.name".localized,
                 type: .armor,
                 rarity: .uncommon,
-                description: "Heavy armor providing excellent protection.",
+                description: "card.plate.armor.desc".localized,
                 defense: 6,
                 cost: 4,
                 abilities: [],
-                traits: ["Heavy Armor"]
+                traits: ["trait.heavy".localized]
             )
         ]
     }
@@ -292,34 +287,34 @@ struct SampleCards {
     static func createBlessings() -> [Card] {
         return [
             Card(
-                name: "Blessing of the Gods",
+                name: "card.blessing.gods.name".localized,
                 type: .blessing,
                 rarity: .uncommon,
-                description: "Divine favor aids your actions.",
+                description: "card.blessing.gods.desc".localized,
                 cost: 0,
                 abilities: [
                     CardAbility(
-                        name: "Divine Aid",
-                        description: "Reroll any check",
+                        name: "ability.divine.favor".localized,
+                        description: "ability.divine.favor.desc".localized,
                         effect: .reroll
                     )
                 ],
-                traits: ["Divine", "Blessing"]
+                traits: ["trait.divine".localized, "trait.blessing".localized]
             ),
             Card(
-                name: "Lucky Charm",
+                name: "card.blessing.luck.name".localized,
                 type: .blessing,
                 rarity: .common,
-                description: "Luck smiles upon you.",
+                description: "card.blessing.luck.desc".localized,
                 cost: 0,
                 abilities: [
                     CardAbility(
-                        name: "Fortune",
-                        description: "Add 2 dice to any check",
+                        name: "ability.lucky".localized,
+                        description: "ability.lucky.desc".localized,
                         effect: .addDice(count: 2)
                     )
                 ],
-                traits: ["Luck", "Blessing"]
+                traits: ["trait.blessing".localized]
             )
         ]
     }

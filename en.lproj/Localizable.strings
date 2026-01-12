@@ -112,3 +112,123 @@
 
 "rules.tips.title" = "Strategic Tips";
 "rules.tips.content" = "• Save powerful cards for difficult encounters\n• Balance your deck with different card types\n• Use blessings at the right moment\n• Manage your hand size carefully\n• Remember: some cards can be played together for combo effects!";
+
+// MARK: - Card Names
+// Characters
+"card.valeros.name" = "Valeros";
+"card.valeros.desc" = "A brave fighter from the city guard, skilled with sword and shield.";
+"card.seoni.name" = "Seoni";
+"card.seoni.desc" = "A powerful sorceress who channels arcane energies.";
+"card.kyra.name" = "Kyra";
+"card.kyra.desc" = "A devoted cleric who heals allies and smites evil.";
+
+// Character Abilities
+"ability.weapon.master" = "Weapon Master";
+"ability.weapon.master.desc" = "Add 2 dice when using weapons";
+"ability.arcane.blast" = "Arcane Blast";
+"ability.arcane.blast.desc" = "Deal 3 fire damage to any enemy";
+"ability.spell.focus" = "Spell Focus";
+"ability.spell.focus.desc" = "Draw 1 extra card when casting spells";
+"ability.divine.healing" = "Divine Healing";
+"ability.divine.healing.desc" = "Heal 4 damage to yourself or an ally";
+"ability.channel.energy" = "Channel Energy";
+"ability.channel.energy.desc" = "Heal 2 damage to all allies";
+
+// Weapons
+"card.longsword.name" = "Longsword";
+"card.longsword.desc" = "A well-balanced blade, deadly in skilled hands.";
+"card.longbow.name" = "Longbow";
+"card.longbow.desc" = "Strike enemies from afar with precision.";
+"card.staff.power.name" = "Staff of Power";
+"card.staff.power.desc" = "A magical staff that channels mystical energies.";
+
+// Weapon Abilities
+"ability.power.strike" = "Power Strike";
+"ability.power.strike.desc" = "Deal +3 damage";
+"ability.precise.shot" = "Precise Shot";
+"ability.precise.shot.desc" = "Ignore armor";
+"ability.arcane.surge" = "Arcane Surge";
+"ability.arcane.surge.desc" = "Add spell power to attack";
+
+// Spells
+"card.fireball.name" = "Fireball";
+"card.fireball.desc" = "Hurl a ball of flame at your enemies.";
+"card.lightning.bolt.name" = "Lightning Bolt";
+"card.lightning.bolt.desc" = "Call down a bolt of electricity.";
+"card.healing.touch.name" = "Healing Touch";
+"card.healing.touch.desc" = "Restore health with divine magic.";
+
+// Spell Abilities
+"ability.burn" = "Burn";
+"ability.burn.desc" = "Deal 4 fire damage";
+"ability.chain.lightning" = "Chain Lightning";
+"ability.chain.lightning.desc" = "Deal 3 lightning damage to 2 enemies";
+"ability.restore" = "Restore";
+"ability.restore.desc" = "Heal 5 damage";
+
+// Armor
+"card.leather.armor.name" = "Leather Armor";
+"card.leather.armor.desc" = "Light protection that doesn't hinder movement.";
+"card.plate.armor.name" = "Plate Armor";
+"card.plate.armor.desc" = "Heavy armor that provides excellent protection.";
+
+// Items
+"card.healing.potion.name" = "Healing Potion";
+"card.healing.potion.desc" = "A vial of magical liquid that restores vitality.";
+"card.magic.ring.name" = "Magic Ring";
+"card.magic.ring.desc" = "A ring imbued with protective enchantments.";
+
+// Item Abilities
+"ability.quick.heal" = "Quick Heal";
+"ability.quick.heal.desc" = "Heal 3 damage instantly";
+"ability.shield" = "Shield";
+"ability.shield.desc" = "Add +2 defense until end of turn";
+
+// Blessings
+"card.blessing.luck.name" = "Blessing of Luck";
+"card.blessing.luck.desc" = "Fortune smiles upon you.";
+"card.blessing.gods.name" = "Blessing of the Gods";
+"card.blessing.gods.desc" = "Divine favor grants you strength.";
+
+// Blessing Abilities
+"ability.lucky" = "Lucky";
+"ability.lucky.desc" = "Reroll any failed check";
+"ability.divine.favor" = "Divine Favor";
+"ability.divine.favor.desc" = "Add 3 to any check";
+
+// Monsters
+"card.goblin.raider.name" = "Goblin Raider";
+"card.goblin.raider.desc" = "A small but vicious creature armed with crude weapons.";
+"card.orc.warrior.name" = "Orc Warrior";
+"card.orc.warrior.desc" = "A brutish fighter with immense strength.";
+"card.skeleton.warrior.name" = "Skeleton Warrior";
+"card.skeleton.warrior.desc" = "An undead soldier wielding ancient weapons.";
+"card.ancient.dragon.name" = "Ancient Dragon";
+"card.ancient.dragon.desc" = "A massive wyrm with scales like iron and breath of flame.";
+
+// Traits
+"trait.human" = "Human";
+"trait.warrior" = "Warrior";
+"trait.fighter" = "Fighter";
+"trait.sorcerer" = "Sorcerer";
+"trait.magic" = "Magic";
+"trait.cleric" = "Cleric";
+"trait.divine" = "Divine";
+"trait.melee" = "Melee";
+"trait.ranged" = "Ranged";
+"trait.arcane" = "Arcane";
+"trait.fire" = "Fire";
+"trait.lightning" = "Lightning";
+"trait.healing" = "Healing";
+"trait.light" = "Light";
+"trait.heavy" = "Heavy";
+"trait.potion" = "Potion";
+"trait.magical" = "Magical";
+"trait.blessing" = "Blessing";
+"trait.goblin" = "Goblin";
+"trait.evil" = "Evil";
+"trait.orc" = "Orc";
+"trait.undead" = "Undead";
+"trait.skeleton" = "Skeleton";
+"trait.dragon" = "Dragon";
+"trait.ancient" = "Ancient";
