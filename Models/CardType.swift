@@ -29,4 +29,5 @@ enum DamageType: String, Codable {
     case acid
     case mental
     case poison
+    case arcane
 }
