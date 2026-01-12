@@ -225,3 +225,152 @@ struct StatBadge: View {
         .foregroundColor(color)
     }
 }
+
+// Compact card view for character selection
+struct CompactCardView: View {
+    let card: Card
+    var isSelected: Bool = false
+    var onTap: (() -> Void)?
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Card header
+            Text(card.name)
+                .font(.title3)
+                .fontWeight(.bold)
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(headerColor)
+
+            // Card image area
+            ZStack {
+                Rectangle()
+                    .fill(
+                        LinearGradient(
+                            gradient: Gradient(colors: [headerColor.opacity(0.3), headerColor.opacity(0.6)]),
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+
+                Image(systemName: cardIcon)
+                    .font(.system(size: 70))
+                    .foregroundColor(.white.opacity(0.9))
+            }
+            .frame(height: 140)
+
+            // Stats
+            VStack(spacing: 12) {
+                Text(localizedCardType)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                HStack(spacing: 16) {
+                    if let health = card.health {
+                        VStack(spacing: 2) {
+                            Image(systemName: "heart.fill")
+                                .foregroundColor(.red)
+                            Text("\(health)")
+                                .font(.headline)
+                                .fontWeight(.bold)
+                        }
+                    }
+                    if let power = card.power {
+                        VStack(spacing: 2) {
+                            Image(systemName: "sword.fill")
+                                .foregroundColor(.orange)
+                            Text("\(power)")
+                                .font(.headline)
+                                .fontWeight(.bold)
+                        }
+                    }
+                    if let defense = card.defense {
+                        VStack(spacing: 2) {
+                            Image(systemName: "shield.fill")
+                                .foregroundColor(.blue)
+                            Text("\(defense)")
+                                .font(.headline)
+                                .fontWeight(.bold)
+                        }
+                    }
+                }
+
+                Circle()
+                    .fill(rarityColor)
+                    .frame(width: 6, height: 6)
+            }
+            .padding(.vertical, 12)
+            .frame(maxWidth: .infinity)
+            .background(Color(UIColor.secondarySystemBackground))
+        }
+        .frame(height: 280)
+        .background(Color(UIColor.systemBackground))
+        .cornerRadius(16)
+        .shadow(color: isSelected ? headerColor.opacity(0.5) : .black.opacity(0.2), radius: isSelected ? 10 : 5)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(isSelected ? headerColor : Color.clear, lineWidth: 3)
+        )
+        .scaleEffect(isSelected ? 1.05 : 1.0)
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
+        .onTapGesture {
+            onTap?()
+        }
+    }
+
+    var headerColor: Color {
+        switch card.type {
+        case .character: return Color.purple
+        case .weapon: return Color.red
+        case .spell: return Color.blue
+        case .armor: return Color.gray
+        case .item: return Color.brown
+        case .ally: return Color.green
+        case .blessing: return Color.yellow
+        case .monster: return Color.red.opacity(0.8)
+        case .location: return Color.teal
+        case .scenario: return Color.indigo
+        }
+    }
+
+    var cardIcon: String {
+        switch card.type {
+        case .character: return "person.fill"
+        case .weapon: return "sword.fill"
+        case .spell: return "sparkles"
+        case .armor: return "shield.fill"
+        case .item: return "bag.fill"
+        case .ally: return "person.2.fill"
+        case .blessing: return "star.fill"
+        case .monster: return "flame.fill"
+        case .location: return "mappin.and.ellipse"
+        case .scenario: return "book.fill"
+        }
+    }
+
+    var localizedCardType: String {
+        switch card.type {
+        case .character: return L10n.cardTypeCharacter.localized
+        case .weapon: return L10n.cardTypeWeapon.localized
+        case .spell: return L10n.cardTypeSpell.localized
+        case .armor: return L10n.cardTypeArmor.localized
+        case .item: return L10n.cardTypeItem.localized
+        case .ally: return L10n.cardTypeAlly.localized
+        case .blessing: return L10n.cardTypeBlessing.localized
+        case .monster: return L10n.cardTypeMonster.localized
+        case .location: return L10n.cardTypeLocation.localized
+        case .scenario: return card.type.rawValue.capitalized
+        }
+    }
+
+    var rarityColor: Color {
+        switch card.rarity {
+        case .common: return .gray
+        case .uncommon: return .green
+        case .rare: return .blue
+        case .epic: return .purple
+        case .legendary: return .orange
+        }
+    }
+}

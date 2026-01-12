@@ -20,30 +20,28 @@ struct ContentView: View {
 
     var characterSelectionView: some View {
         GeometryReader { geometry in
-            VStack(spacing: 0) {
-                // Fixed header with rules button
-                HStack {
-                    Spacer()
-                    Button(action: { showingRules = true }) {
-                        Label(L10n.rulesButton.localized, systemImage: "book.fill")
-                            .font(.headline)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(Color.blue.opacity(0.2))
-                            .foregroundColor(.blue)
-                            .cornerRadius(8)
-                    }
-                }
-                .padding()
-                .background(Color(UIColor.systemBackground))
-
+            ZStack(alignment: .bottom) {
                 // Scrollable content
                 ScrollView {
-                    VStack(spacing: 16) {
-                        Text(L10n.gameTitle.localized)
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                            .padding(.top, 8)
+                    VStack(spacing: 20) {
+                        // Header with rules button
+                        HStack {
+                            Text(L10n.gameTitle.localized)
+                                .font(.largeTitle)
+                                .fontWeight(.bold)
+                            Spacer()
+                            Button(action: { showingRules = true }) {
+                                Label(L10n.rulesButton.localized, systemImage: "book.fill")
+                                    .font(.headline)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 8)
+                                    .background(Color.blue.opacity(0.2))
+                                    .foregroundColor(.blue)
+                                    .cornerRadius(8)
+                            }
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, 8)
 
                         Text(L10n.characterSelectTitle.localized)
                             .font(.title2)
@@ -53,24 +51,24 @@ struct ContentView: View {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 20) {
                                 ForEach(Array(characters.enumerated()), id: \.element.id) { index, character in
-                                    CardView(
+                                    CompactCardView(
                                         card: character,
                                         isSelected: selectedCharacterIndex == index,
                                         onTap: {
                                             selectedCharacterIndex = index
                                         }
                                     )
-                                    .frame(width: min(geometry.size.width * 0.7, 280))
+                                    .frame(width: min(geometry.size.width * 0.65, 240))
                                 }
                             }
                             .padding(.horizontal)
                         }
-                        .frame(height: min(geometry.size.height * 0.35, 320))
+                        .frame(height: 280)
 
                         // Character stats
                         if selectedCharacterIndex < characters.count {
                             let character = characters[selectedCharacterIndex]
-                            VStack(alignment: .leading, spacing: 12) {
+                            VStack(alignment: .leading, spacing: 16) {
                                 Text(L10n.characterStats.localized)
                                     .font(.headline)
 
@@ -79,7 +77,7 @@ struct ContentView: View {
                                     .foregroundColor(.secondary)
                                     .fixedSize(horizontal: false, vertical: true)
 
-                                HStack(spacing: 20) {
+                                HStack(spacing: 24) {
                                     if let health = character.health {
                                         StatDisplay(icon: "heart.fill", label: L10n.statHealth.localized, value: health, color: .red)
                                     }
@@ -92,15 +90,16 @@ struct ContentView: View {
                                 }
 
                                 if !character.abilities.isEmpty {
+                                    Divider()
                                     Text(L10n.characterAbilities.localized)
                                         .font(.headline)
-                                        .padding(.top, 8)
 
                                     ForEach(character.abilities) { ability in
                                         VStack(alignment: .leading, spacing: 4) {
                                             Text(ability.name)
                                                 .font(.subheadline)
                                                 .fontWeight(.bold)
+                                                .foregroundColor(.orange)
                                             Text(ability.description)
                                                 .font(.caption)
                                                 .foregroundColor(.secondary)
@@ -117,13 +116,23 @@ struct ContentView: View {
                         }
 
                         // Extra space for button
-                        Color.clear.frame(height: 80)
+                        Color.clear.frame(height: 90)
                     }
+                    .padding(.bottom, 20)
                 }
 
-                // Fixed button at bottom
-                VStack {
-                    Divider()
+                // Fixed button at bottom with shadow
+                VStack(spacing: 0) {
+                    Rectangle()
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [Color.clear, Color(UIColor.systemBackground)]),
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        .frame(height: 30)
+
                     Button(action: startGame) {
                         Text(L10n.buttonStartAdventure.localized)
                             .font(.title3)
@@ -135,9 +144,9 @@ struct ContentView: View {
                             .cornerRadius(12)
                     }
                     .padding(.horizontal)
-                    .padding(.bottom, 8)
+                    .padding(.bottom, 12)
+                    .background(Color(UIColor.systemBackground))
                 }
-                .background(Color(UIColor.systemBackground))
             }
         }
         .navigationBarHidden(true)
