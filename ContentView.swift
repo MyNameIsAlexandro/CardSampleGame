@@ -85,12 +85,13 @@ struct ContentView: View {
                                             selectedCharacterIndex = index
                                         }
                                     )
-                                    .frame(width: min(geometry.size.width * 0.65, 240))
+                                    .frame(width: min(geometry.size.width * 0.65, 240), height: 280)
                                 }
                             }
                             .padding(.horizontal)
+                            .padding(.vertical, 8)
                         }
-                        .frame(height: 280)
+                        .frame(height: 300)
 
                         // Character stats
                         if selectedCharacterIndex < characters.count {

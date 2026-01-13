@@ -410,13 +410,14 @@ struct HandCardView: View {
         VStack(spacing: 0) {
             // Card name
             Text(card.name)
-                .font(.caption)
+                .font(.system(size: 10))
                 .fontWeight(.bold)
                 .foregroundColor(.white)
                 .lineLimit(1)
+                .minimumScaleFactor(0.7)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 4)
-                .padding(.horizontal, 4)
+                .padding(.vertical, 3)
+                .padding(.horizontal, 2)
                 .background(headerColor)
 
             // Card icon
@@ -431,28 +432,49 @@ struct HandCardView: View {
                     )
 
                 Image(systemName: cardIcon)
-                    .font(.system(size: 24))
+                    .font(.system(size: 32))
                     .foregroundColor(.white.opacity(0.9))
             }
-            .frame(height: 50)
+            .frame(height: 55)
 
-            // Stats row
-            HStack(spacing: 4) {
+            // Stats in vertical column
+            VStack(spacing: 2) {
                 if let cost = card.cost {
-                    StatBadge(icon: "star.fill", value: cost, color: .yellow)
+                    HStack(spacing: 2) {
+                        Image(systemName: "star.fill")
+                            .font(.system(size: 8))
+                            .foregroundColor(.yellow)
+                        Text("\(cost)")
+                            .font(.system(size: 9))
+                            .fontWeight(.bold)
+                    }
                 }
                 if let power = card.power {
-                    StatBadge(icon: "sword.fill", value: power, color: .red)
+                    HStack(spacing: 2) {
+                        Image(systemName: "sword.fill")
+                            .font(.system(size: 8))
+                            .foregroundColor(.red)
+                        Text("\(power)")
+                            .font(.system(size: 9))
+                            .fontWeight(.bold)
+                    }
                 }
                 if let defense = card.defense {
-                    StatBadge(icon: "shield.fill", value: defense, color: .blue)
+                    HStack(spacing: 2) {
+                        Image(systemName: "shield.fill")
+                            .font(.system(size: 8))
+                            .foregroundColor(.blue)
+                        Text("\(defense)")
+                            .font(.system(size: 9))
+                            .fontWeight(.bold)
+                    }
                 }
             }
-            .padding(.vertical, 4)
+            .padding(.vertical, 3)
             .frame(maxWidth: .infinity)
             .background(Color(UIColor.secondarySystemBackground))
         }
-        .frame(width: 80, height: 90)
+        .frame(width: 70, height: 100)
         .background(Color(UIColor.systemBackground))
         .cornerRadius(8)
         .shadow(color: isSelected ? headerColor.opacity(0.6) : .black.opacity(0.2), radius: isSelected ? 6 : 3)

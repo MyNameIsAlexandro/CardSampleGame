@@ -10,6 +10,8 @@ struct GameBoardView: View {
     @State private var showingRules = false
     @State private var showingPauseMenu = false
     @State private var showingSaveConfirmation = false
+    @State private var showingEnemyAttack = false
+    @State private var enemyDamage: Int = 0
     @StateObject private var saveManager = SaveManager.shared
 
     struct CombatResult {
@@ -56,7 +58,7 @@ struct GameBoardView: View {
                         selectedCard: $selectedCard,
                         onCardPlay: playCard
                     )
-                    .frame(height: 110)
+                    .frame(height: 120)
                     .background(Color(UIColor.secondarySystemBackground))
                 }
 
@@ -104,8 +106,13 @@ struct GameBoardView: View {
         .onChange(of: gameState.currentPhase) { newPhase in
             if newPhase == .enemyTurn {
                 // Enemy attacks during their phase
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                    gameState.enemyPhaseAction()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    if let encounter = gameState.activeEncounter {
+                        let damage = encounter.power ?? 3
+                        enemyDamage = damage
+                        gameState.enemyPhaseAction()
+                        showingEnemyAttack = true
+                    }
                 }
             }
         }
@@ -129,6 +136,11 @@ struct GameBoardView: View {
             Button(L10n.buttonOk.localized, role: .cancel) { }
         } message: {
             Text(L10n.uiProgressSaved.localized)
+        }
+        .alert("Атака врага!", isPresented: $showingEnemyAttack) {
+            Button(L10n.buttonOk.localized, role: .cancel) { }
+        } message: {
+            Text("Враг атакует вас и наносит \(enemyDamage) урона!\nВаше здоровье: \(gameState.currentPlayer.health)")
         }
     }
 
@@ -157,18 +169,40 @@ struct GameBoardView: View {
             Spacer()
 
             // Player resources
-            HStack(spacing: 6) {
-                // Actions
-                resourceBadge(icon: "bolt.fill", value: "\(gameState.actionsRemaining)", color: .orange, label: "")
-
-                // Health
-                resourceBadge(icon: "heart.fill", value: "\(gameState.currentPlayer.health)", color: .red, label: "")
-
-                // Faith
-                resourceBadge(icon: "sparkles", value: "\(gameState.currentPlayer.faith)", color: .yellow, label: "")
-
-                // Balance
-                resourceBadge(icon: balanceIcon, value: "\(gameState.currentPlayer.balance)", color: balanceColor, label: "")
+            VStack(alignment: .trailing, spacing: 2) {
+                HStack(spacing: 4) {
+                    Image(systemName: "bolt.fill")
+                        .font(.system(size: 10))
+                        .foregroundColor(.orange)
+                    Text("\(gameState.actionsRemaining)")
+                        .font(.system(size: 11))
+                        .fontWeight(.bold)
+                    Text("Дейст")
+                        .font(.system(size: 9))
+                        .foregroundColor(.secondary)
+                }
+                HStack(spacing: 4) {
+                    Image(systemName: "heart.fill")
+                        .font(.system(size: 10))
+                        .foregroundColor(.red)
+                    Text("\(gameState.currentPlayer.health)")
+                        .font(.system(size: 11))
+                        .fontWeight(.bold)
+                    Text("Здор")
+                        .font(.system(size: 9))
+                        .foregroundColor(.secondary)
+                }
+                HStack(spacing: 4) {
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 10))
+                        .foregroundColor(.yellow)
+                    Text("\(gameState.currentPlayer.faith)")
+                        .font(.system(size: 11))
+                        .fontWeight(.bold)
+                    Text("Вера")
+                        .font(.system(size: 9))
+                        .foregroundColor(.secondary)
+                }
             }
 
             // Next phase button
