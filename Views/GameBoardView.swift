@@ -29,7 +29,7 @@ struct GameBoardView: View {
                 VStack(spacing: 0) {
                     // Top bar
                     topBar
-                        .frame(height: 70)
+                        .frame(height: 95)
                         .background(Color(UIColor.systemBackground))
                         .shadow(radius: 2)
 
@@ -151,71 +151,78 @@ struct GameBoardView: View {
     // MARK: - Top Bar
 
     var topBar: some View {
-        HStack(spacing: 12) {
-            // Pause/Menu button
-            Button(action: { showingPauseMenu = true }) {
-                Image(systemName: "line.3.horizontal")
-                    .font(.title3)
-                    .foregroundColor(.blue)
-                    .padding(8)
-            }
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(L10n.turnLabel.localized(with: gameState.turnNumber))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                Text(phaseText)
-                    .font(.caption)
-                    .fontWeight(.bold)
-                    .foregroundColor(phaseColor)
-            }
-
-            Spacer()
-
-            // Player resources - compact with icons only
-            HStack(spacing: 8) {
-                // Actions
-                HStack(spacing: 2) {
-                    Image(systemName: "bolt.fill")
-                        .font(.system(size: 12))
-                        .foregroundColor(.orange)
-                    Text("\(gameState.actionsRemaining)")
-                        .font(.system(size: 13))
-                        .fontWeight(.bold)
+        VStack(spacing: 4) {
+            HStack(spacing: 12) {
+                // Pause/Menu button
+                Button(action: { showingPauseMenu = true }) {
+                    Image(systemName: "line.3.horizontal")
+                        .font(.title3)
+                        .foregroundColor(.blue)
+                        .padding(8)
                 }
 
-                // Health
-                HStack(spacing: 2) {
-                    Image(systemName: "heart.fill")
-                        .font(.system(size: 12))
-                        .foregroundColor(.red)
-                    Text("\(gameState.currentPlayer.health)")
-                        .font(.system(size: 13))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(L10n.turnLabel.localized(with: gameState.turnNumber))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text(phaseText)
+                        .font(.caption)
                         .fontWeight(.bold)
+                        .foregroundColor(phaseColor)
                 }
 
-                // Faith
-                HStack(spacing: 2) {
-                    Image(systemName: "sparkles")
-                        .font(.system(size: 12))
-                        .foregroundColor(.yellow)
-                    Text("\(gameState.currentPlayer.faith)")
-                        .font(.system(size: 13))
-                        .fontWeight(.bold)
-                }
-            }
+                Spacer()
 
-            // Next phase button
-            Button(action: {
-                gameState.nextPhase()
-            }) {
-                Image(systemName: "arrow.right.circle.fill")
-                    .font(.title2)
-                    .foregroundColor(.green)
+                // Player resources - compact with icons only
+                HStack(spacing: 8) {
+                    // Actions
+                    HStack(spacing: 2) {
+                        Image(systemName: "bolt.fill")
+                            .font(.system(size: 12))
+                            .foregroundColor(.orange)
+                        Text("\(gameState.actionsRemaining)")
+                            .font(.system(size: 13))
+                            .fontWeight(.bold)
+                    }
+
+                    // Health
+                    HStack(spacing: 2) {
+                        Image(systemName: "heart.fill")
+                            .font(.system(size: 12))
+                            .foregroundColor(.red)
+                        Text("\(gameState.currentPlayer.health)")
+                            .font(.system(size: 13))
+                            .fontWeight(.bold)
+                    }
+
+                    // Faith
+                    HStack(spacing: 2) {
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 12))
+                            .foregroundColor(.yellow)
+                        Text("\(gameState.currentPlayer.faith)")
+                            .font(.system(size: 13))
+                            .fontWeight(.bold)
+                    }
+                }
+
+                // Next phase button
+                Button(action: {
+                    gameState.nextPhase()
+                }) {
+                    Image(systemName: "arrow.right.circle.fill")
+                        .font(.title2)
+                        .foregroundColor(.green)
+                }
+                .padding(4)
             }
-            .padding(4)
+            .padding(.horizontal)
+
+            // Phase progress bar
+            PhaseProgressBar(currentPhase: gameState.currentPhase)
+                .padding(.horizontal, 12)
+                .padding(.bottom, 4)
         }
-        .padding(.horizontal)
     }
 
     func resourceBadge(icon: String, value: String, color: Color, label: String) -> some View {
@@ -901,5 +908,75 @@ struct MarketCardView: View {
         case .epic: return .purple
         case .legendary: return .orange
         }
+    }
+}
+
+// MARK: - Phase Progress Bar
+
+struct PhaseProgressBar: View {
+    let currentPhase: GamePhase
+
+    let phases: [(phase: GamePhase, name: String, color: Color)] = [
+        (.exploration, "Исследование", .blue),
+        (.encounter, "Встреча", .orange),
+        (.playerTurn, "Ход игрока", .green),
+        (.enemyTurn, "Ход врага", .red),
+        (.endTurn, "Конец хода", .purple)
+    ]
+
+    var body: some View {
+        VStack(spacing: 4) {
+            // Progress bar
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    // Background
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(height: 4)
+                        .cornerRadius(2)
+
+                    // Progress indicator
+                    Rectangle()
+                        .fill(currentPhaseColor)
+                        .frame(width: progressWidth(totalWidth: geometry.size.width), height: 4)
+                        .cornerRadius(2)
+                }
+            }
+            .frame(height: 4)
+
+            // Phase indicators
+            HStack(spacing: 0) {
+                ForEach(Array(phases.enumerated()), id: \.offset) { index, phaseInfo in
+                    VStack(spacing: 2) {
+                        Circle()
+                            .fill(phaseInfo.phase == currentPhase ? phaseInfo.color : Color.gray.opacity(0.3))
+                            .frame(width: 8, height: 8)
+                            .overlay(
+                                Circle()
+                                    .stroke(phaseInfo.color, lineWidth: phaseInfo.phase == currentPhase ? 2 : 0)
+                            )
+
+                        Text(phaseInfo.name)
+                            .font(.system(size: 8))
+                            .foregroundColor(phaseInfo.phase == currentPhase ? phaseInfo.color : .secondary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.5)
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+            }
+        }
+    }
+
+    var currentPhaseColor: Color {
+        phases.first(where: { $0.phase == currentPhase })?.color ?? .gray
+    }
+
+    func progressWidth(totalWidth: CGFloat) -> CGFloat {
+        guard let currentIndex = phases.firstIndex(where: { $0.phase == currentPhase }) else {
+            return 0
+        }
+        let progress = CGFloat(currentIndex + 1) / CGFloat(phases.count)
+        return totalWidth * progress
     }
 }
