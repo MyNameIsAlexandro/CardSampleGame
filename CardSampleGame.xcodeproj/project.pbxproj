@@ -22,6 +22,7 @@
 		AA0000480000000000000001 /* RulesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000490000000000000001 /* RulesView.swift */; };
 		AA0000500000000000000001 /* TwilightMarchesCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000510000000000000001 /* TwilightMarchesCards.swift */; };
 		AA0000520000000000000001 /* GameSave.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000530000000000000001 /* GameSave.swift */; };
+		AA0000540000000000000001 /* StatisticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000550000000000000001 /* StatisticsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +45,7 @@
 		AA0000490000000000000001 /* RulesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RulesView.swift; sourceTree = "<group>"; };
 		AA0000510000000000000001 /* TwilightMarchesCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwilightMarchesCards.swift; sourceTree = "<group>"; };
 		AA0000530000000000000001 /* GameSave.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameSave.swift; sourceTree = "<group>"; };
+		AA0000550000000000000001 /* StatisticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -108,6 +110,7 @@
 				AA0000160000000000000001 /* PlayerHandView.swift */,
 				AA0000180000000000000001 /* GameBoardView.swift */,
 				AA0000490000000000000001 /* RulesView.swift */,
+				AA0000550000000000000001 /* StatisticsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -225,6 +228,7 @@
 				AA0000410000000000000001 /* Localization.swift in Sources */,
 				AA0000480000000000000001 /* RulesView.swift in Sources */,
 				AA0000520000000000000001 /* GameSave.swift in Sources */,
+				AA0000540000000000000001 /* StatisticsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

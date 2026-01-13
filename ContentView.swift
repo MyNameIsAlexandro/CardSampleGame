@@ -4,6 +4,7 @@ struct ContentView: View {
     @State private var showingGame = false
     @State private var showingRules = false
     @State private var showingSaveSlots = false
+    @State private var showingStatistics = false
     @State private var selectedCharacterIndex = 0
     @State private var selectedSaveSlot: Int?
     @StateObject private var gameState = GameState(players: [])
@@ -30,7 +31,7 @@ struct ContentView: View {
                 // Scrollable content
                 ScrollView {
                     VStack(spacing: 20) {
-                        // Header with rules button
+                        // Header with rules and statistics buttons
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(L10n.tmGameTitle.localized)
@@ -41,6 +42,14 @@ struct ContentView: View {
                                     .foregroundColor(.secondary)
                             }
                             Spacer()
+                            Button(action: { showingStatistics = true }) {
+                                Image(systemName: "chart.bar.fill")
+                                    .font(.title3)
+                                    .padding(8)
+                                    .background(Color.orange.opacity(0.2))
+                                    .foregroundColor(.orange)
+                                    .cornerRadius(8)
+                            }
                             Button(action: { showingRules = true }) {
                                 Label(L10n.rulesButton.localized, systemImage: "book.fill")
                                     .font(.headline)
@@ -163,6 +172,9 @@ struct ContentView: View {
         .navigationBarHidden(true)
         .sheet(isPresented: $showingRules) {
             RulesView()
+        }
+        .sheet(isPresented: $showingStatistics) {
+            StatisticsView()
         }
     }
 
