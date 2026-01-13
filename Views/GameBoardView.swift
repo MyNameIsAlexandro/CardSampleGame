@@ -89,17 +89,17 @@ struct GameBoardView: View {
         .sheet(isPresented: $showingRules) {
             RulesView()
         }
-        .alert("Dice Roll", isPresented: $showingDiceRoll) {
-            Button("OK", role: .cancel) { }
+        .alert(L10n.diceRollTitle.localized, isPresented: $showingDiceRoll) {
+            Button(L10n.buttonOk.localized, role: .cancel) { }
         } message: {
             if let roll = gameState.diceRoll {
-                Text("You rolled: \(roll)")
+                Text(L10n.diceRollMessage.localized(with: roll))
             }
         }
-        .alert("Игра сохранена", isPresented: $showingSaveConfirmation) {
-            Button("OK", role: .cancel) { }
+        .alert(L10n.uiGameSaved.localized, isPresented: $showingSaveConfirmation) {
+            Button(L10n.buttonOk.localized, role: .cancel) { }
         } message: {
-            Text("Ваш прогресс успешно сохранён.")
+            Text(L10n.uiProgressSaved.localized)
         }
     }
 
@@ -116,7 +116,7 @@ struct GameBoardView: View {
             }
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("Turn \(gameState.turnNumber)")
+                Text(L10n.turnLabel.localized(with: gameState.turnNumber))
                     .font(.caption)
                     .foregroundColor(.secondary)
                 Text(phaseText)
@@ -173,7 +173,7 @@ struct GameBoardView: View {
         Group {
             if let encounter = gameState.activeEncounter {
                 VStack(spacing: 12) {
-                    Text("Active Encounter")
+                    Text(L10n.uiActiveEncounter.localized)
                         .font(.headline)
                         .foregroundColor(.red)
 
@@ -182,7 +182,7 @@ struct GameBoardView: View {
 
                     HStack(spacing: 16) {
                         Button(action: rollDice) {
-                            Label("Roll", systemImage: "dice.fill")
+                            Label(L10n.uiRoll.localized, systemImage: "dice.fill")
                                 .font(.caption)
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 6)
@@ -192,7 +192,7 @@ struct GameBoardView: View {
                         }
 
                         if let roll = gameState.diceRoll {
-                            Text("Result: \(roll)")
+                            Text(L10n.uiResult.localized(with: roll))
                                 .font(.subheadline)
                                 .fontWeight(.bold)
                                 .foregroundColor(.orange)
@@ -215,7 +215,7 @@ struct GameBoardView: View {
                     VStack(spacing: 12) {
                         Image(systemName: "magnifyingglass")
                             .font(.system(size: 40))
-                        Text("Explore")
+                        Text(L10n.uiExplore.localized)
                             .font(.title3)
                             .fontWeight(.bold)
                     }
@@ -233,19 +233,19 @@ struct GameBoardView: View {
     var deckInfoView: some View {
         HStack(spacing: 12) {
             DeckPileView(
-                title: "Encounters",
+                title: L10n.uiEncounters.localized,
                 count: gameState.encounterDeck.count,
                 color: .red
             )
 
             DeckPileView(
-                title: "Your Deck",
+                title: L10n.uiYourDeck.localized,
                 count: gameState.currentPlayer.deck.count,
                 color: .blue
             )
 
             DeckPileView(
-                title: "Discard",
+                title: L10n.uiDiscard.localized,
                 count: gameState.currentPlayer.discard.count,
                 color: .gray
             )
@@ -263,14 +263,14 @@ struct GameBoardView: View {
                 }
 
             VStack(spacing: 16) {
-                Text("Game Menu")
+                Text(L10n.uiPauseMenu.localized)
                     .font(.title2)
                     .fontWeight(.bold)
 
                 Button(action: {
                     showingPauseMenu = false
                 }) {
-                    Label("Resume", systemImage: "play.fill")
+                    Label(L10n.uiResume.localized, systemImage: "play.fill")
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color.green)
@@ -282,7 +282,7 @@ struct GameBoardView: View {
                     showingRules = true
                     showingPauseMenu = false
                 }) {
-                    Label("Rules", systemImage: "book.fill")
+                    Label(L10n.uiRules.localized, systemImage: "book.fill")
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color.blue)
@@ -296,7 +296,7 @@ struct GameBoardView: View {
                         showingSaveConfirmation = true
                         showingPauseMenu = false
                     }) {
-                        Label("Сохранить игру", systemImage: "tray.and.arrow.down.fill")
+                        Label(L10n.uiSaveGame.localized, systemImage: "tray.and.arrow.down.fill")
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(Color.orange)
@@ -308,7 +308,7 @@ struct GameBoardView: View {
                 Button(action: {
                     dismiss()
                 }) {
-                    Label("Exit", systemImage: "house.fill")
+                    Label(L10n.uiExit.localized, systemImage: "house.fill")
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color.red)
@@ -328,12 +328,12 @@ struct GameBoardView: View {
 
     var phaseText: String {
         switch gameState.currentPhase {
-        case .setup: return "Setup"
-        case .exploration: return "Explore"
-        case .encounter: return "Encounter"
-        case .combat: return "Combat"
-        case .endTurn: return "End Turn"
-        case .gameOver: return "Game Over"
+        case .setup: return L10n.phaseSetup.localized
+        case .exploration: return L10n.phaseExploration.localized
+        case .encounter: return L10n.phaseEncounter.localized
+        case .combat: return L10n.phaseCombat.localized
+        case .endTurn: return L10n.phaseEndTurn.localized
+        case .gameOver: return L10n.phaseGameOver.localized
         }
     }
 
@@ -439,24 +439,25 @@ struct VictoryView: View {
                 .font(.system(size: 80))
                 .foregroundColor(.yellow)
 
-            Text("Victory!")
+            Text(L10n.uiVictoryTitle.localized)
                 .font(.largeTitle)
                 .fontWeight(.bold)
 
-            Text("You have defended the realm!")
+            Text("Вы защитили земли от тьмы!")
                 .font(.title3)
                 .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
 
             VStack(spacing: 12) {
-                StatRow(label: "Encounters Defeated", value: "\(encountersDefeated)")
-                StatRow(label: "Turns Taken", value: "\(turnsTaken)")
+                StatRow(label: "Побеждено столкновений", value: "\(encountersDefeated)")
+                StatRow(label: "Ходов сделано", value: "\(turnsTaken)")
             }
             .padding()
             .background(Color(UIColor.secondarySystemBackground))
             .cornerRadius(12)
 
             Button(action: onDismiss) {
-                Text("Return to Main Menu")
+                Text(L10n.uiReturnMenu.localized)
                     .font(.headline)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
@@ -483,24 +484,25 @@ struct DefeatView: View {
                 .font(.system(size: 80))
                 .foregroundColor(.red)
 
-            Text("Defeat")
+            Text(L10n.uiDefeatTitle.localized)
                 .font(.largeTitle)
                 .fontWeight(.bold)
 
-            Text("The darkness has won...")
+            Text("Тьма одержала победу...")
                 .font(.title3)
                 .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
 
             VStack(spacing: 12) {
-                StatRow(label: "Encounters Defeated", value: "\(encountersDefeated)")
-                StatRow(label: "Turns Survived", value: "\(turnsTaken)")
+                StatRow(label: "Побеждено столкновений", value: "\(encountersDefeated)")
+                StatRow(label: "Ходов выжито", value: "\(turnsTaken)")
             }
             .padding()
             .background(Color(UIColor.secondarySystemBackground))
             .cornerRadius(12)
 
             Button(action: onDismiss) {
-                Text("Return to Main Menu")
+                Text(L10n.uiReturnMenu.localized)
                     .font(.headline)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)

@@ -155,4 +155,37 @@ enum L10n {
     static let tmCurseSickness = "tm.curse.type.sickness"
     static let tmCurseMadness = "tm.curse.type.madness"
     static let tmCurseTransformation = "tm.curse.type.transformation"
+
+    // UI Elements
+    static let uiMenuButton = "ui.menu.button"
+    static let uiPauseMenu = "ui.pause.menu"
+    static let uiResume = "ui.resume"
+    static let uiSaveGame = "ui.save.game"
+    static let uiRules = "ui.rules"
+    static let uiExit = "ui.exit"
+    static let uiRoll = "ui.roll"
+    static let uiResult = "ui.result"
+    static let uiEncounters = "ui.encounters"
+    static let uiYourDeck = "ui.your.deck"
+    static let uiDiscard = "ui.discard"
+    static let uiActiveEncounter = "ui.active.encounter"
+    static let uiExplore = "ui.explore"
+    static let uiDeckInfo = "ui.deck.info"
+    static let uiHandTitle = "ui.hand.title"
+    static let uiGameSaved = "ui.game.saved"
+    static let uiProgressSaved = "ui.progress.saved"
+
+    // Victory/Defeat
+    static let uiVictoryTitle = "ui.victory.title"
+    static let uiDefeatTitle = "ui.defeat.title"
+    static let uiEncountersDefeated = "ui.encounters.defeated"
+    static let uiTurnsTaken = "ui.turns.taken"
+    static let uiTurnsSurvived = "ui.turns.survived"
+    static let uiReturnMenu = "ui.return.menu"
+
+    // Tooltips
+    static let tooltipHealth = "tooltip.health"
+    static let tooltipFaith = "tooltip.faith"
+    static let tooltipBalance = "tooltip.balance"
+    static let tooltipNextPhase = "tooltip.next.phase"
 }

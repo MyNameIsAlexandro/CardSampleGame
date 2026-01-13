@@ -400,3 +400,36 @@
 "tm.card.type.spirit" = "Дух";
 "tm.card.type.artifact" = "Артефакт";
 "tm.card.type.ritual" = "Ритуал";
+
+// Интерфейс игры
+"ui.menu.button" = "Меню";
+"ui.pause.menu" = "Игровое Меню";
+"ui.resume" = "Продолжить";
+"ui.save.game" = "Сохранить игру";
+"ui.rules" = "Правила";
+"ui.exit" = "Выход";
+"ui.roll" = "Бросить";
+"ui.result" = "Результат: %d";
+"ui.encounters" = "Столкновения";
+"ui.your.deck" = "Ваша Колода";
+"ui.discard" = "Сброс";
+"ui.active.encounter" = "Активное столкновение";
+"ui.explore" = "Исследовать";
+"ui.deck.info" = "Информация о колоде";
+"ui.hand.title" = "Ваши карты";
+"ui.game.saved" = "Игра сохранена";
+"ui.progress.saved" = "Ваш прогресс успешно сохранён.";
+
+// Победа/Поражение
+"ui.victory.title" = "Победа!";
+"ui.defeat.title" = "Поражение";
+"ui.encounters.defeated" = "Побеждено столкновений: %d";
+"ui.turns.taken" = "Ходов сделано: %d";
+"ui.turns.survived" = "Ходов выжито: %d";
+"ui.return.menu" = "Вернуться в Меню";
+
+// Подсказки для иконок
+"tooltip.health" = "Здоровье";
+"tooltip.faith" = "Вера - ресурс для игры карт";
+"tooltip.balance" = "Баланс между Светом и Тьмой";
+"tooltip.next.phase" = "Следующая фаза хода";
