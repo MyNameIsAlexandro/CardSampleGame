@@ -35,14 +35,19 @@ struct RulesView: View {
                             color: .orange
                         )
                         PhaseCard(
-                            phase: L10n.phaseCombat.localized,
-                            description: L10n.rulesPhaseCombat.localized,
+                            phase: L10n.phasePlayerTurn.localized,
+                            description: L10n.rulesPhasePlayerTurn.localized,
+                            color: .green
+                        )
+                        PhaseCard(
+                            phase: L10n.phaseEnemyTurn.localized,
+                            description: L10n.rulesPhaseEnemyTurn.localized,
                             color: .red
                         )
                         PhaseCard(
                             phase: L10n.phaseEndTurn.localized,
                             description: L10n.rulesPhaseEndTurn.localized,
-                            color: .green
+                            color: .purple
                         )
                     }
                     .padding(.leading, 8)
@@ -61,6 +66,14 @@ struct RulesView: View {
                         color: .pink,
                         title: L10n.rulesResourcesTitle.localized,
                         content: L10n.rulesResourcesContent.localized
+                    )
+
+                    // Actions
+                    RuleSection(
+                        icon: "bolt.fill",
+                        color: .orange,
+                        title: L10n.rulesActionsTitle.localized,
+                        content: L10n.rulesActionsContent.localized
                     )
 
                     // Dice Rolls

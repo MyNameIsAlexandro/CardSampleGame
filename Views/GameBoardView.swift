@@ -464,6 +464,12 @@ struct GameBoardView: View {
     }
 
     func playCard(_ card: Card) {
+        // Check if player has actions remaining
+        guard gameState.useAction() else {
+            // TODO: Show alert that no actions left
+            return
+        }
+
         // Check if player has enough faith
         guard let cost = card.cost else {
             gameState.currentPlayer.playCard(card)
@@ -474,6 +480,9 @@ struct GameBoardView: View {
         if gameState.currentPlayer.spendFaith(cost) {
             gameState.currentPlayer.playCard(card)
             applyCardEffects(card)
+        } else {
+            // Refund action if couldn't spend faith
+            gameState.actionsRemaining += 1
         }
     }
 

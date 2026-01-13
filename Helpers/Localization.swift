@@ -109,7 +109,8 @@ enum L10n {
 
     static let rulesPhaseExploration = "rules.phase.exploration"
     static let rulesPhaseEncounter = "rules.phase.encounter"
-    static let rulesPhaseCombat = "rules.phase.combat"
+    static let rulesPhasePlayerTurn = "rules.phase.player.turn"
+    static let rulesPhaseEnemyTurn = "rules.phase.enemy.turn"
     static let rulesPhaseEndTurn = "rules.phase.endturn"
 
     static let rulesCardsTitle = "rules.cards.title"
@@ -117,6 +118,9 @@ enum L10n {
 
     static let rulesResourcesTitle = "rules.resources.title"
     static let rulesResourcesContent = "rules.resources.content"
+
+    static let rulesActionsTitle = "rules.actions.title"
+    static let rulesActionsContent = "rules.actions.content"
 
     static let rulesDiceTitle = "rules.dice.title"
     static let rulesDiceContent = "rules.dice.content"
