@@ -438,6 +438,10 @@ struct TwilightMarchesCards {
         // Add artifacts (rare)
         deck.append(contentsOf: createArtifacts())
 
+        // Add starting curses (like weaknesses in Arkham Horror)
+        let curses = createCurses()
+        deck.append(curses[0])  // Add one curse to start with
+
         return deck
     }
 
