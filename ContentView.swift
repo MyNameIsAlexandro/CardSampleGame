@@ -40,13 +40,16 @@ struct ContentView: View {
                     VStack(spacing: 20) {
                         // Header with rules and statistics buttons
                         HStack {
-                            VStack(alignment: .leading, spacing: 4) {
+                            VStack(alignment: .leading, spacing: 2) {
                                 Text(L10n.tmGameTitle.localized)
-                                    .font(.largeTitle)
+                                    .font(.title)
                                     .fontWeight(.bold)
+                                    .minimumScaleFactor(0.7)
+                                    .lineLimit(1)
                                 Text(L10n.tmGameSubtitle.localized)
-                                    .font(.subheadline)
+                                    .font(.caption)
                                     .foregroundColor(.secondary)
+                                    .lineLimit(1)
                             }
                             Spacer()
                             Button(action: { showingStatistics = true }) {
@@ -89,9 +92,9 @@ struct ContentView: View {
                                 }
                             }
                             .padding(.horizontal)
-                            .padding(.vertical, 8)
+                            .padding(.vertical, 12)
                         }
-                        .frame(height: 300)
+                        .frame(height: 320)
 
                         // Character stats
                         if selectedCharacterIndex < characters.count {

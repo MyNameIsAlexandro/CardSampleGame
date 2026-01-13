@@ -274,37 +274,49 @@ struct CompactCardView: View {
             .frame(height: 140)
 
             // Stats
-            VStack(spacing: 12) {
+            VStack(spacing: 8) {
                 Text(localizedCardType)
                     .font(.caption)
                     .foregroundColor(.secondary)
 
-                HStack(spacing: 16) {
+                HStack(spacing: 20) {
                     if let health = card.health {
-                        VStack(spacing: 2) {
+                        VStack(spacing: 4) {
                             Image(systemName: "heart.fill")
+                                .font(.title3)
                                 .foregroundColor(.red)
                             Text("\(health)")
                                 .font(.headline)
                                 .fontWeight(.bold)
+                            Text("❤️")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
                         }
                     }
                     if let power = card.power {
-                        VStack(spacing: 2) {
+                        VStack(spacing: 4) {
                             Image(systemName: "sword.fill")
+                                .font(.title3)
                                 .foregroundColor(.orange)
                             Text("\(power)")
                                 .font(.headline)
                                 .fontWeight(.bold)
+                            Text("⚔️")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
                         }
                     }
                     if let defense = card.defense {
-                        VStack(spacing: 2) {
+                        VStack(spacing: 4) {
                             Image(systemName: "shield.fill")
+                                .font(.title3)
                                 .foregroundColor(.blue)
                             Text("\(defense)")
                                 .font(.headline)
                                 .fontWeight(.bold)
+                            Text("🛡️")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
                         }
                     }
                 }
@@ -313,7 +325,7 @@ struct CompactCardView: View {
                     .fill(rarityColor)
                     .frame(width: 6, height: 6)
             }
-            .padding(.vertical, 12)
+            .padding(.vertical, 10)
             .frame(maxWidth: .infinity)
             .background(Color(UIColor.secondarySystemBackground))
         }
