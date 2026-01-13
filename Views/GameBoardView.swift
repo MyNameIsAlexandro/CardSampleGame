@@ -5,11 +5,20 @@ struct GameBoardView: View {
     var saveSlot: Int?
     @State private var selectedCard: Card?
     @State private var showingDiceRoll = false
+    @State private var combatResult: CombatResult?
     @State private var showingRules = false
     @State private var showingPauseMenu = false
     @State private var showingSaveConfirmation = false
     @StateObject private var saveManager = SaveManager.shared
     @Environment(\.dismiss) var dismiss
+
+    struct CombatResult {
+        let diceRoll: Int
+        let total: Int
+        let defense: Int
+        let success: Bool
+        let damage: Int
+    }
 
     var body: some View {
         GeometryReader { geometry in
@@ -89,11 +98,17 @@ struct GameBoardView: View {
         .sheet(isPresented: $showingRules) {
             RulesView()
         }
-        .alert(L10n.diceRollTitle.localized, isPresented: $showingDiceRoll) {
-            Button(L10n.buttonOk.localized, role: .cancel) { }
+        .alert(combatResult?.success == true ? "Успех!" : "Провал", isPresented: $showingDiceRoll) {
+            Button(L10n.buttonOk.localized, role: .cancel) {
+                combatResult = nil
+            }
         } message: {
-            if let roll = gameState.diceRoll {
-                Text(L10n.diceRollMessage.localized(with: roll))
+            if let result = combatResult {
+                if result.success {
+                    Text("Бросок: \(result.diceRoll) + Сила: \(result.total - result.diceRoll) = \(result.total)\nЗащита врага: \(result.defense)\nУрон: \(result.damage)")
+                } else {
+                    Text("Бросок: \(result.diceRoll) + Сила: \(result.total - result.diceRoll) = \(result.total)\nЗащита врага: \(result.defense)\nВраг атакует вас!")
+                }
             }
         }
         .alert(L10n.uiGameSaved.localized, isPresented: $showingSaveConfirmation) {
@@ -373,7 +388,51 @@ struct GameBoardView: View {
     // MARK: - Helper Functions
 
     func rollDice() {
-        _ = gameState.rollDice(sides: 6, count: 1)
+        guard let encounter = gameState.activeEncounter else { return }
+
+        // Roll dice
+        let diceResult = gameState.rollDice(sides: 6, count: 1)
+
+        // Calculate total (dice + player power)
+        let playerPower = gameState.currentPlayer.strength
+        let total = diceResult + playerPower
+
+        // Get encounter defense (or use default 10 if not specified)
+        let encounterDefense = encounter.defense ?? 10
+
+        // Combat resolution
+        let success = total >= encounterDefense
+        var damageDealt = 0
+
+        if success {
+            // Success! Deal damage to encounter
+            damageDealt = max(1, total - encounterDefense + 3) // Base 3 damage + excess
+            if var updatedEncounter = gameState.activeEncounter {
+                let currentHealth = updatedEncounter.health ?? 10
+                updatedEncounter.health = max(0, currentHealth - damageDealt)
+                gameState.activeEncounter = updatedEncounter
+
+                // Check if encounter defeated
+                if updatedEncounter.health == 0 {
+                    gameState.defeatEncounter()
+                }
+            }
+        } else {
+            // Failure! Encounter attacks player
+            let encounterPower = encounter.power ?? 3
+            gameState.currentPlayer.health = max(0, gameState.currentPlayer.health - encounterPower)
+            gameState.checkDefeat()
+        }
+
+        // Store combat result for display
+        combatResult = CombatResult(
+            diceRoll: diceResult,
+            total: total,
+            defense: encounterDefense,
+            success: success,
+            damage: damageDealt
+        )
+
         showingDiceRoll = true
     }
 
