@@ -22,9 +22,13 @@ class GameState: ObservableObject {
     @Published var encountersDefeated: Int = 0
     @Published var isVictory: Bool = false
     @Published var isDefeat: Bool = false
+    @Published var actionsRemaining: Int = 3
 
     // Auto-save callback
     var onAutoSave: (() -> Void)?
+
+    // Actions per turn
+    var actionsPerTurn: Int { 3 }
 
     var currentPlayer: Player {
         players[currentPlayerIndex]
@@ -92,6 +96,7 @@ class GameState: ObservableObject {
         if !isGameOver {
             currentPhase = .exploration
             activeEncounter = nil
+            actionsRemaining = actionsPerTurn
 
             // Draw cards to hand size
             let player = currentPlayer
@@ -143,5 +148,11 @@ class GameState: ObservableObject {
         guard !encounterDeck.isEmpty else { return }
         activeEncounter = encounterDeck.removeFirst()
         currentPhase = .encounter
+    }
+
+    func useAction() -> Bool {
+        guard actionsRemaining > 0 else { return false }
+        actionsRemaining -= 1
+        return true
     }
 }

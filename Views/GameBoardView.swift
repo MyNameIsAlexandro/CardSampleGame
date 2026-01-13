@@ -149,15 +149,18 @@ struct GameBoardView: View {
             Spacer()
 
             // Player resources
-            HStack(spacing: 8) {
+            HStack(spacing: 6) {
+                // Actions
+                resourceBadge(icon: "bolt.fill", value: "\(gameState.actionsRemaining)", color: .orange, label: "")
+
                 // Health
-                resourceBadge(icon: "heart.fill", value: "\(gameState.currentPlayer.health)", color: .red, label: L10n.statHealth.localized)
+                resourceBadge(icon: "heart.fill", value: "\(gameState.currentPlayer.health)", color: .red, label: "")
 
                 // Faith
-                resourceBadge(icon: "sparkles", value: "\(gameState.currentPlayer.faith)", color: .yellow, label: L10n.tmResourceFaith.localized)
+                resourceBadge(icon: "sparkles", value: "\(gameState.currentPlayer.faith)", color: .yellow, label: "")
 
                 // Balance
-                resourceBadge(icon: balanceIcon, value: "\(gameState.currentPlayer.balance)", color: balanceColor, label: L10n.tmResourceBalance.localized)
+                resourceBadge(icon: balanceIcon, value: "\(gameState.currentPlayer.balance)", color: balanceColor, label: "")
             }
 
             // Next phase button
@@ -181,9 +184,11 @@ struct GameBoardView: View {
             Text(value)
                 .font(.caption2)
                 .fontWeight(.bold)
-            Text(label)
-                .font(.caption2)
-                .foregroundColor(.secondary)
+            if !label.isEmpty {
+                Text(label)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
         }
         .padding(.horizontal, 6)
         .padding(.vertical, 4)
@@ -399,6 +404,12 @@ struct GameBoardView: View {
 
     func rollDice() {
         guard let encounter = gameState.activeEncounter else { return }
+
+        // Check if player has actions remaining
+        guard gameState.useAction() else {
+            // Show alert that no actions left
+            return
+        }
 
         // Roll dice
         let diceResult = gameState.rollDice(sides: 6, count: 1)
