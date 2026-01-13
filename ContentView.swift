@@ -244,7 +244,7 @@ struct ContentView: View {
             name: selectedCharacter.name,
             health: selectedCharacter.health ?? 10,
             maxHealth: selectedCharacter.health ?? 10,
-            maxHandSize: 7,
+            maxHandSize: 5,  // Changed from 7 to 5 for deck-building mechanics
             strength: selectedCharacter.power ?? 0,
             dexterity: 0,
             constitution: 0,
@@ -253,14 +253,15 @@ struct ContentView: View {
             charisma: 0
         )
 
-        // Build player's deck with Twilight Marches cards
-        player.deck = TwilightMarchesCards.createFullDeck()
+        // Build player's starting deck (10 unique cards per hero)
+        player.deck = TwilightMarchesCards.createStartingDeck(for: selectedCharacter.name)
         player.shuffleDeck()
 
-        // Initialize game state with Twilight Marches encounters
+        // Initialize game state with Twilight Marches encounters and market
         gameState.players = [player]
         gameState.encounterDeck = TwilightMarchesCards.createEncounterDeck()
         gameState.encounterDeck.shuffle()
+        gameState.marketCards = TwilightMarchesCards.createMarketCards()
 
         gameState.startGame()
 
@@ -285,7 +286,7 @@ struct ContentView: View {
             name: saveData.characterName,
             health: saveData.health,
             maxHealth: saveData.maxHealth,
-            maxHandSize: 7,
+            maxHandSize: 5,  // Changed from 7 to 5 for deck-building mechanics
             strength: 0,
             dexterity: 0,
             constitution: 0,
@@ -298,14 +299,15 @@ struct ContentView: View {
         player.faith = saveData.faith
         player.balance = saveData.balance
 
-        // Build player's deck
-        player.deck = TwilightMarchesCards.createFullDeck()
+        // Build player's starting deck (10 unique cards per hero)
+        player.deck = TwilightMarchesCards.createStartingDeck(for: saveData.characterName)
         player.shuffleDeck()
 
-        // Initialize game state
+        // Initialize game state with market
         gameState.players = [player]
         gameState.encounterDeck = TwilightMarchesCards.createEncounterDeck()
         gameState.encounterDeck.shuffle()
+        gameState.marketCards = TwilightMarchesCards.createMarketCards()
         gameState.turnNumber = saveData.turnNumber
         gameState.encountersDefeated = saveData.encountersDefeated
 

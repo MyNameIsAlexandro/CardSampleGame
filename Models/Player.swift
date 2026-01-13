@@ -85,6 +85,11 @@ class Player: ObservableObject, Identifiable {
     }
 
     func drawCard() {
+        // Auto-reshuffle discard when deck is empty
+        if deck.isEmpty && !discard.isEmpty {
+            reshuffleDiscard()
+        }
+
         guard !deck.isEmpty else { return }
         let card = deck.removeFirst()
         hand.append(card)

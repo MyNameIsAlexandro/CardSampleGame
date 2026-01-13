@@ -25,6 +25,9 @@ class GameState: ObservableObject {
     @Published var isDefeat: Bool = false
     @Published var actionsRemaining: Int = 3
 
+    // Marketplace for deck-building
+    @Published var marketCards: [Card] = []
+
     // Auto-save callback
     var onAutoSave: (() -> Void)?
 
@@ -64,6 +67,26 @@ class GameState: ObservableObject {
         }
     }
 
+    // Purchase card from market
+    func purchaseCard(_ card: Card) -> Bool {
+        guard let cardCost = card.cost else { return false }
+
+        // Check if player has enough faith
+        if currentPlayer.spendFaith(cardCost) {
+            // Remove card from market
+            if let index = marketCards.firstIndex(where: { $0.id == card.id }) {
+                marketCards.remove(at: index)
+            }
+
+            // Add card to player's discard pile (standard deck-building mechanic)
+            currentPlayer.discard.append(card)
+
+            return true
+        }
+
+        return false
+    }
+
     func nextPhase() {
         switch currentPhase {
         case .setup:
@@ -101,12 +124,14 @@ class GameState: ObservableObject {
             activeEncounter = nil
             actionsRemaining = actionsPerTurn
 
-            // Draw cards to hand size
+            // NEW: Discard all cards and draw 5 new ones (deck-building mechanic)
             let player = currentPlayer
-            let cardsToDraw = player.maxHandSize - player.hand.count
-            if cardsToDraw > 0 {
-                player.drawCards(count: cardsToDraw)
-            }
+            // Discard all cards in hand
+            player.discard.append(contentsOf: player.hand)
+            player.hand.removeAll()
+
+            // Draw 5 new cards
+            player.drawCards(count: 5)
 
             // Regenerate faith
             currentPlayer.gainFaith(1)

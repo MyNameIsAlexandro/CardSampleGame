@@ -17,6 +17,12 @@ enum CardType: String, Codable {
     case spirit     // Духи - summonable allies/enemies
     case artifact   // Артефакты - powerful ancient items
     case ritual     // Ритуалы - special spells requiring preparation
+
+    // Deck-building game card types
+    case resource   // Ресурсы - used to purchase cards from market
+    case attack     // Атака - deal damage to enemies
+    case defense    // Защита - block damage or protect
+    case special    // Особые - unique effects and abilities
 }
 
 enum CardRarity: String, Codable {

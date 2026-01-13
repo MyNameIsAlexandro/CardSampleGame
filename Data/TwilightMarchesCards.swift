@@ -427,6 +427,222 @@ struct TwilightMarchesCards {
 
     // MARK: - Deck Creation
 
+    // MARK: - Starting Decks (10 cards each, unique per hero)
+
+    static func createStartingDeck(for characterName: String) -> [Card] {
+        // Determine which character and return their starting deck
+        if characterName.contains("Велеслава") || characterName.contains("Veleslava") {
+            return createVeleslavaStartingDeck()
+        } else if characterName.contains("Ратибор") || characterName.contains("Ratibor") {
+            return createRatiborStartingDeck()
+        } else if characterName.contains("Мирослав") || characterName.contains("Miroslav") {
+            return createMiroslavStartingDeck()
+        } else if characterName.contains("Забава") || characterName.contains("Zabava") {
+            return createZabavaStartingDeck()
+        } else {
+            // Default starting deck
+            return createGenericStartingDeck()
+        }
+    }
+
+    // Велеслава - Healer/Light focused deck
+    static func createVeleslavaStartingDeck() -> [Card] {
+        return [
+            // 5x Resource cards (common)
+            Card(name: "Травяной Сбор", type: .resource, rarity: .common,
+                 description: "Собранные целебные травы. Дают 1 веру.",
+                 cost: 0, abilities: [], balance: .light, realm: .yav),
+            Card(name: "Травяной Сбор", type: .resource, rarity: .common,
+                 description: "Собранные целебные травы. Дают 1 веру.",
+                 cost: 0, abilities: [], balance: .light, realm: .yav),
+            Card(name: "Травяной Сбор", type: .resource, rarity: .common,
+                 description: "Собранные целебные травы. Дают 1 веру.",
+                 cost: 0, abilities: [], balance: .light, realm: .yav),
+            Card(name: "Травяной Сбор", type: .resource, rarity: .common,
+                 description: "Собранные целебные травы. Дают 1 веру.",
+                 cost: 0, abilities: [], balance: .light, realm: .yav),
+            Card(name: "Травяной Сбор", type: .resource, rarity: .common,
+                 description: "Собранные целебные травы. Дают 1 веру.",
+                 cost: 0, abilities: [], balance: .light, realm: .yav),
+
+            // 2x Attack cards (weak)
+            Card(name: "Защитный Посох", type: .attack, rarity: .common,
+                 description: "Простой посох. Наносит 2 урона.",
+                 power: 2, cost: 0, abilities: [], balance: .light, realm: .yav),
+            Card(name: "Защитный Посох", type: .attack, rarity: .common,
+                 description: "Простой посох. Наносит 2 урона.",
+                 power: 2, cost: 0, abilities: [], balance: .light, realm: .yav),
+
+            // 2x Defense cards
+            Card(name: "Светлый Оберег", type: .defense, rarity: .common,
+                 description: "Простой защитный оберег. Блокирует 1 урона.",
+                 defense: 1, cost: 0, abilities: [], balance: .light, realm: .yav),
+            Card(name: "Светлый Оберег", type: .defense, rarity: .common,
+                 description: "Простой защитный оберег. Блокирует 1 урона.",
+                 defense: 1, cost: 0, abilities: [], balance: .light, realm: .yav),
+
+            // 1x Special card (unique to character)
+            Card(name: "Исцеляющее Касание", type: .special, rarity: .uncommon,
+                 description: "Ведунья лечит раны прикосновением. Восстанавливает 3 здоровья.",
+                 cost: 0, abilities: [
+                     CardAbility(name: "Исцеление", description: "Восстанавливает 3 здоровья.", effect: .heal(amount: 3))
+                 ], balance: .light, realm: .yav)
+        ]
+    }
+
+    // Ратибор - Warrior/Neutral focused deck
+    static func createRatiborStartingDeck() -> [Card] {
+        return [
+            // 5x Resource cards (common)
+            Card(name: "Военная Добыча", type: .resource, rarity: .common,
+                 description: "Трофеи с поля боя. Дают 1 веру.",
+                 cost: 0, abilities: [], balance: .neutral, realm: .yav),
+            Card(name: "Военная Добыча", type: .resource, rarity: .common,
+                 description: "Трофеи с поля боя. Дают 1 веру.",
+                 cost: 0, abilities: [], balance: .neutral, realm: .yav),
+            Card(name: "Военная Добыча", type: .resource, rarity: .common,
+                 description: "Трофеи с поля боя. Дают 1 веру.",
+                 cost: 0, abilities: [], balance: .neutral, realm: .yav),
+            Card(name: "Военная Добыча", type: .resource, rarity: .common,
+                 description: "Трофеи с поля боя. Дают 1 веру.",
+                 cost: 0, abilities: [], balance: .neutral, realm: .yav),
+            Card(name: "Военная Добыча", type: .resource, rarity: .common,
+                 description: "Трофеи с поля боя. Дают 1 веру.",
+                 cost: 0, abilities: [], balance: .neutral, realm: .yav),
+
+            // 3x Attack cards (stronger than healer)
+            Card(name: "Удар Мечом", type: .attack, rarity: .common,
+                 description: "Удар воеводы. Наносит 3 урона.",
+                 power: 3, cost: 0, abilities: [], balance: .neutral, realm: .yav),
+            Card(name: "Удар Мечом", type: .attack, rarity: .common,
+                 description: "Удар воеводы. Наносит 3 урона.",
+                 power: 3, cost: 0, abilities: [], balance: .neutral, realm: .yav),
+            Card(name: "Удар Мечом", type: .attack, rarity: .common,
+                 description: "Удар воеводы. Наносит 3 урона.",
+                 power: 3, cost: 0, abilities: [], balance: .neutral, realm: .yav),
+
+            // 1x Defense card
+            Card(name: "Боевая Стойка", type: .defense, rarity: .common,
+                 description: "Защитная стойка воина. Блокирует 2 урона.",
+                 defense: 2, cost: 0, abilities: [], balance: .neutral, realm: .yav),
+
+            // 1x Special card
+            Card(name: "Боевой Клич", type: .special, rarity: .uncommon,
+                 description: "Воевода вдохновляет себя. Получает +2 к атаке до конца хода.",
+                 cost: 0, abilities: [
+                     CardAbility(name: "Вдохновение", description: "+2 к атаке до конца хода.", effect: .addDice(count: 2))
+                 ], balance: .neutral, realm: .yav)
+        ]
+    }
+
+    // Мирослав - Sorcerer/Dark focused deck
+    static func createMiroslavStartingDeck() -> [Card] {
+        return [
+            // 5x Resource cards (common)
+            Card(name: "Темная Энергия", type: .resource, rarity: .common,
+                 description: "Энергия из Нави. Дает 1 веру.",
+                 cost: 0, abilities: [], balance: .dark, realm: .nav),
+            Card(name: "Темная Энергия", type: .resource, rarity: .common,
+                 description: "Энергия из Нави. Дает 1 веру.",
+                 cost: 0, abilities: [], balance: .dark, realm: .nav),
+            Card(name: "Темная Энергия", type: .resource, rarity: .common,
+                 description: "Энергия из Нави. Дает 1 веру.",
+                 cost: 0, abilities: [], balance: .dark, realm: .nav),
+            Card(name: "Темная Энергия", type: .resource, rarity: .common,
+                 description: "Энергия из Нави. Дает 1 веру.",
+                 cost: 0, abilities: [], balance: .dark, realm: .nav),
+            Card(name: "Темная Энергия", type: .resource, rarity: .common,
+                 description: "Энергия из Нави. Дает 1 веру.",
+                 cost: 0, abilities: [], balance: .dark, realm: .nav),
+
+            // 2x Attack cards (magical damage)
+            Card(name: "Темный Снаряд", type: .attack, rarity: .common,
+                 description: "Магический снаряд тьмы. Наносит 3 урона.",
+                 power: 3, cost: 0, abilities: [], damageType: .arcane, balance: .dark, realm: .nav),
+            Card(name: "Темный Снаряд", type: .attack, rarity: .common,
+                 description: "Магический снаряд тьмы. Наносит 3 урона.",
+                 power: 3, cost: 0, abilities: [], damageType: .arcane, balance: .dark, realm: .nav),
+
+            // 1x Defense card (weak)
+            Card(name: "Теневой Покров", type: .defense, rarity: .common,
+                 description: "Защита тенями. Блокирует 1 урона.",
+                 defense: 1, cost: 0, abilities: [], balance: .dark, realm: .nav),
+
+            // 1x Special card
+            Card(name: "Жертвоприношение", type: .special, rarity: .uncommon,
+                 description: "Волхв жертвует здоровьем ради силы. Теряет 2 здоровья, получает 2 веры.",
+                 cost: 0, abilities: [
+                     CardAbility(name: "Жертва", description: "Теряет 2 здоровья, получает 2 веры.", effect: .sacrifice(cost: 2, benefit: "Gain 2 faith"))
+                 ], balance: .dark, realm: .nav),
+
+            // 1x Curse card (starting weakness)
+            Card(name: "Темное Проклятие", type: .curse, rarity: .common,
+                 description: "Проклятие тьмы. Нужно 1 веру чтобы сбросить.",
+                 cost: 1, abilities: [], curseType: .weakness, balance: .dark, realm: .nav)
+        ]
+    }
+
+    // Забава - Hunter focused deck
+    static func createZabavaStartingDeck() -> [Card] {
+        return [
+            // 5x Resource cards (common)
+            Card(name: "Охотничьи Припасы", type: .resource, rarity: .common,
+                 description: "Запасы охотника. Дают 1 веру.",
+                 cost: 0, abilities: [], balance: .neutral, realm: .yav),
+            Card(name: "Охотничьи Припасы", type: .resource, rarity: .common,
+                 description: "Запасы охотника. Дают 1 веру.",
+                 cost: 0, abilities: [], balance: .neutral, realm: .yav),
+            Card(name: "Охотничьи Припасы", type: .resource, rarity: .common,
+                 description: "Запасы охотника. Дают 1 веру.",
+                 cost: 0, abilities: [], balance: .neutral, realm: .yav),
+            Card(name: "Охотничьи Припасы", type: .resource, rarity: .common,
+                 description: "Запасы охотника. Дают 1 веру.",
+                 cost: 0, abilities: [], balance: .neutral, realm: .yav),
+            Card(name: "Охотничьи Припасы", type: .resource, rarity: .common,
+                 description: "Запасы охотника. Дают 1 веру.",
+                 cost: 0, abilities: [], balance: .neutral, realm: .yav),
+
+            // 3x Attack cards (ranged)
+            Card(name: "Выстрел из Лука", type: .attack, rarity: .common,
+                 description: "Точный выстрел. Наносит 2 урона.",
+                 power: 2, cost: 0, abilities: [], range: 3, balance: .neutral, realm: .yav),
+            Card(name: "Выстрел из Лука", type: .attack, rarity: .common,
+                 description: "Точный выстрел. Наносит 2 урона.",
+                 power: 2, cost: 0, abilities: [], range: 3, balance: .neutral, realm: .yav),
+            Card(name: "Выстрел из Лука", type: .attack, rarity: .common,
+                 description: "Точный выстрел. Наносит 2 урона.",
+                 power: 2, cost: 0, abilities: [], range: 3, balance: .neutral, realm: .yav),
+
+            // 1x Defense card
+            Card(name: "Уклонение", type: .defense, rarity: .common,
+                 description: "Охотник уклоняется от удара. Блокирует 1 урона.",
+                 defense: 1, cost: 0, abilities: [], balance: .neutral, realm: .yav),
+
+            // 1x Special card
+            Card(name: "Меткий Выстрел", type: .special, rarity: .uncommon,
+                 description: "Охотник целится точнее. Следующая атака наносит +3 урона.",
+                 cost: 0, abilities: [
+                     CardAbility(name: "Точность", description: "+3 к урону для следующей атаки.", effect: .damage(amount: 3, type: .physical))
+                 ], balance: .neutral, realm: .yav)
+        ]
+    }
+
+    // Generic starting deck for unknown characters
+    static func createGenericStartingDeck() -> [Card] {
+        return [
+            Card(name: "Ресурс", type: .resource, rarity: .common, description: "Базовый ресурс. Дает 1 веру.", cost: 0, abilities: []),
+            Card(name: "Ресурс", type: .resource, rarity: .common, description: "Базовый ресурс. Дает 1 веру.", cost: 0, abilities: []),
+            Card(name: "Ресурс", type: .resource, rarity: .common, description: "Базовый ресурс. Дает 1 веру.", cost: 0, abilities: []),
+            Card(name: "Ресурс", type: .resource, rarity: .common, description: "Базовый ресурс. Дает 1 веру.", cost: 0, abilities: []),
+            Card(name: "Ресурс", type: .resource, rarity: .common, description: "Базовый ресурс. Дает 1 веру.", cost: 0, abilities: []),
+            Card(name: "Атака", type: .attack, rarity: .common, description: "Базовая атака. Наносит 2 урона.", power: 2, cost: 0, abilities: []),
+            Card(name: "Атака", type: .attack, rarity: .common, description: "Базовая атака. Наносит 2 урона.", power: 2, cost: 0, abilities: []),
+            Card(name: "Защита", type: .defense, rarity: .common, description: "Базовая защита. Блокирует 1 урона.", defense: 1, cost: 0, abilities: []),
+            Card(name: "Защита", type: .defense, rarity: .common, description: "Базовая защита. Блокирует 1 урона.", defense: 1, cost: 0, abilities: []),
+            Card(name: "Особое", type: .special, rarity: .common, description: "Базовая особая карта.", cost: 0, abilities: [])
+        ]
+    }
+
     static func createFullDeck() -> [Card] {
         var deck: [Card] = []
 
@@ -458,5 +674,88 @@ struct TwilightMarchesCards {
         deck.append(contentsOf: curses)  // More curses
 
         return deck
+    }
+
+    // MARK: - Market Cards (for purchase during game)
+
+    static func createMarketCards() -> [Card] {
+        return [
+            // Common Resource cards (cost 2 faith, give 2 faith when played)
+            Card(name: "Молитва", type: .resource, rarity: .common,
+                 description: "Молитва богам. Дает 2 веры.",
+                 cost: 2, abilities: [], balance: .light, realm: .prav),
+            Card(name: "Молитва", type: .resource, rarity: .common,
+                 description: "Молитва богам. Дает 2 веры.",
+                 cost: 2, abilities: [], balance: .light, realm: .prav),
+
+            // Uncommon Resource cards (cost 4, give 3 faith)
+            Card(name: "Древний Ритуал", type: .resource, rarity: .uncommon,
+                 description: "Древний ритуал призыва силы. Дает 3 веры.",
+                 cost: 4, abilities: [], balance: .neutral, realm: .prav),
+
+            // Common Attack cards (cost 3, deal 4 damage)
+            Card(name: "Меч Света", type: .attack, rarity: .common,
+                 description: "Светлый меч. Наносит 4 урона.",
+                 power: 4, cost: 3, abilities: [], balance: .light, realm: .yav),
+            Card(name: "Меч Света", type: .attack, rarity: .common,
+                 description: "Светлый меч. Наносит 4 урона.",
+                 power: 4, cost: 3, abilities: [], balance: .light, realm: .yav),
+
+            // Uncommon Attack cards (cost 5, deal 6 damage)
+            Card(name: "Огненный Шар", type: .attack, rarity: .uncommon,
+                 description: "Мощный огненный шар. Наносит 6 урона.",
+                 power: 6, cost: 5, abilities: [], damageType: .fire, balance: .neutral, realm: .yav),
+
+            // Rare Attack cards (cost 7, deal 8 damage + effect)
+            Card(name: "Божественный Удар", type: .attack, rarity: .rare,
+                 description: "Удар божественной силы. Наносит 8 урона и восстанавливает 2 здоровья.",
+                 power: 8, cost: 7, abilities: [
+                     CardAbility(name: "Исцеление", description: "Восстанавливает 2 здоровья.", effect: .heal(amount: 2))
+                 ], balance: .light, realm: .prav),
+
+            // Common Defense cards (cost 2, block 3 damage)
+            Card(name: "Щит Веры", type: .defense, rarity: .common,
+                 description: "Защитный щит. Блокирует 3 урона.",
+                 defense: 3, cost: 2, abilities: [], balance: .light, realm: .yav),
+            Card(name: "Щит Веры", type: .defense, rarity: .common,
+                 description: "Защитный щит. Блокирует 3 урона.",
+                 defense: 3, cost: 2, abilities: [], balance: .light, realm: .yav),
+
+            // Uncommon Defense cards (cost 4, block 5 damage)
+            Card(name: "Каменная Кожа", type: .defense, rarity: .uncommon,
+                 description: "Магическая защита. Блокирует 5 урона.",
+                 defense: 5, cost: 4, abilities: [], balance: .neutral, realm: .yav),
+
+            // Common Special cards (cost 3, draw 2 cards)
+            Card(name: "Прозрение", type: .special, rarity: .common,
+                 description: "Видение будущего. Берете 2 карты.",
+                 cost: 3, abilities: [
+                     CardAbility(name: "Карты", description: "Берете 2 карты.", effect: .drawCards(count: 2))
+                 ], balance: .light, realm: .prav),
+
+            // Uncommon Special cards (cost 5, heal 5 health)
+            Card(name: "Великое Исцеление", type: .special, rarity: .uncommon,
+                 description: "Мощное целебное заклинание. Восстанавливает 5 здоровья.",
+                 cost: 5, abilities: [
+                     CardAbility(name: "Исцеление", description: "Восстанавливает 5 здоровья.", effect: .heal(amount: 5))
+                 ], balance: .light, realm: .prav),
+
+            // Rare Special cards (cost 6, powerful effects)
+            Card(name: "Перерождение", type: .special, rarity: .rare,
+                 description: "Древнее заклинание перерождения. Восстанавливает 7 здоровья и дает 2 веры.",
+                 cost: 6, abilities: [
+                     CardAbility(name: "Перерождение", description: "Восстанавливает 7 здоровья.", effect: .heal(amount: 7)),
+                     CardAbility(name: "Сила", description: "Дает 2 веры.", effect: .gainFaith(amount: 2))
+                 ], balance: .light, realm: .prav),
+
+            // Legendary cards (cost 10, extremely powerful)
+            Card(name: "Дар Богов", type: .special, rarity: .legendary,
+                 description: "Величайший дар от богов. Берете 3 карты, восстанавливаете 5 здоровья, получаете 3 веры.",
+                 cost: 10, abilities: [
+                     CardAbility(name: "Дар", description: "Берете 3 карты.", effect: .drawCards(count: 3)),
+                     CardAbility(name: "Исцеление", description: "Восстанавливаете 5 здоровья.", effect: .heal(amount: 5)),
+                     CardAbility(name: "Сила", description: "Получаете 3 веры.", effect: .gainFaith(amount: 3))
+                 ], balance: .light, realm: .prav)
+        ]
     }
 }

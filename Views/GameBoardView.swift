@@ -40,6 +40,10 @@ struct GameBoardView: View {
                             encounterArea
                                 .padding(.horizontal)
 
+                            // Market section
+                            marketView
+                                .padding(.horizontal)
+
                             // Deck info
                             deckInfoView
                                 .padding(.horizontal)
@@ -293,6 +297,58 @@ struct GameBoardView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Market View
+
+    var marketView: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: "cart.fill")
+                    .font(.title3)
+                    .foregroundColor(.orange)
+                Text("Рынок")
+                    .font(.title3)
+                    .fontWeight(.bold)
+                Spacer()
+                HStack(spacing: 4) {
+                    Image(systemName: "sparkles")
+                        .font(.caption)
+                        .foregroundColor(.yellow)
+                    Text("\(gameState.currentPlayer.faith)")
+                        .font(.subheadline)
+                        .fontWeight(.bold)
+                }
+            }
+
+            if gameState.marketCards.isEmpty {
+                Text("Нет карт для покупки")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(gameState.marketCards) { card in
+                            MarketCardView(
+                                card: card,
+                                canAfford: gameState.currentPlayer.faith >= (card.cost ?? 0),
+                                onPurchase: {
+                                    if gameState.purchaseCard(card) {
+                                        // Card purchased successfully
+                                    }
+                                }
+                            )
+                        }
+                    }
+                    .padding(.vertical, 8)
+                }
+            }
+        }
+        .padding()
+        .background(Color(UIColor.secondarySystemBackground))
+        .cornerRadius(12)
     }
 
     // MARK: - Deck Info
@@ -703,5 +759,147 @@ struct DeckPileView: View {
                 .foregroundColor(.secondary)
         }
         .frame(maxWidth: .infinity)
+    }
+}
+
+// MARK: - Market Card View
+
+struct MarketCardView: View {
+    let card: Card
+    let canAfford: Bool
+    let onPurchase: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // Rarity badge
+            HStack {
+                rarityBadge
+                Spacer()
+                // Cost badge
+                HStack(spacing: 2) {
+                    Image(systemName: "sparkles")
+                        .font(.caption2)
+                    Text("\(card.cost ?? 0)")
+                        .font(.caption)
+                        .fontWeight(.bold)
+                }
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(canAfford ? Color.yellow.opacity(0.3) : Color.gray.opacity(0.3))
+                .foregroundColor(canAfford ? .yellow : .gray)
+                .cornerRadius(8)
+            }
+
+            // Card name
+            Text(card.name)
+                .font(.subheadline)
+                .fontWeight(.bold)
+                .lineLimit(2)
+                .minimumScaleFactor(0.8)
+                .frame(height: 32, alignment: .top)
+
+            // Card type
+            Text(cardTypeText)
+                .font(.caption2)
+                .foregroundColor(.secondary)
+
+            // Card stats
+            HStack(spacing: 8) {
+                if let power = card.power {
+                    HStack(spacing: 2) {
+                        Image(systemName: "bolt.fill")
+                            .font(.caption2)
+                            .foregroundColor(.orange)
+                        Text("\(power)")
+                            .font(.caption)
+                    }
+                }
+                if let defense = card.defense {
+                    HStack(spacing: 2) {
+                        Image(systemName: "shield.fill")
+                            .font(.caption2)
+                            .foregroundColor(.blue)
+                        Text("\(defense)")
+                            .font(.caption)
+                    }
+                }
+            }
+
+            Spacer()
+
+            // Purchase button
+            Button(action: onPurchase) {
+                Text("Купить")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 6)
+                    .background(canAfford ? Color.green : Color.gray)
+                    .cornerRadius(6)
+            }
+            .disabled(!canAfford)
+        }
+        .padding(8)
+        .frame(width: 120, height: 180)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(rarityBackgroundColor)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(rarityBorderColor, lineWidth: 2)
+                )
+        )
+    }
+
+    var cardTypeText: String {
+        switch card.type {
+        case .resource: return "Ресурс"
+        case .attack: return "Атака"
+        case .defense: return "Защита"
+        case .special: return "Особая"
+        default: return card.type.rawValue
+        }
+    }
+
+    var rarityBadge: some View {
+        Text(rarityText)
+            .font(.system(size: 8))
+            .fontWeight(.bold)
+            .foregroundColor(.white)
+            .padding(.horizontal, 4)
+            .padding(.vertical, 2)
+            .background(rarityBorderColor)
+            .cornerRadius(4)
+    }
+
+    var rarityText: String {
+        switch card.rarity {
+        case .common: return "Обычная"
+        case .uncommon: return "Необычная"
+        case .rare: return "Редкая"
+        case .epic: return "Эпическая"
+        case .legendary: return "Легендарная"
+        }
+    }
+
+    var rarityBackgroundColor: Color {
+        switch card.rarity {
+        case .common: return Color(UIColor.tertiarySystemBackground)
+        case .uncommon: return Color.green.opacity(0.1)
+        case .rare: return Color.blue.opacity(0.1)
+        case .epic: return Color.purple.opacity(0.1)
+        case .legendary: return Color.orange.opacity(0.1)
+        }
+    }
+
+    var rarityBorderColor: Color {
+        switch card.rarity {
+        case .common: return .gray
+        case .uncommon: return .green
+        case .rare: return .blue
+        case .epic: return .purple
+        case .legendary: return .orange
+        }
     }
 }
