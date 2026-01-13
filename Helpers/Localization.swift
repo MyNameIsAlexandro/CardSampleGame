@@ -114,6 +114,9 @@ enum L10n {
     static let rulesCardsTitle = "rules.cards.title"
     static let rulesCardsContent = "rules.cards.content"
 
+    static let rulesResourcesTitle = "rules.resources.title"
+    static let rulesResourcesContent = "rules.resources.content"
+
     static let rulesDiceTitle = "rules.dice.title"
     static let rulesDiceContent = "rules.dice.content"
 

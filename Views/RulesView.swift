@@ -55,6 +55,14 @@ struct RulesView: View {
                         content: L10n.rulesCardsContent.localized
                     )
 
+                    // Resources
+                    RuleSection(
+                        icon: "star.fill",
+                        color: .pink,
+                        title: L10n.rulesResourcesTitle.localized,
+                        content: L10n.rulesResourcesContent.localized
+                    )
+
                     // Dice Rolls
                     RuleSection(
                         icon: "dice.fill",

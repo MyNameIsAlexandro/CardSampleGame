@@ -151,13 +151,13 @@ struct GameBoardView: View {
             // Player resources
             HStack(spacing: 8) {
                 // Health
-                resourceBadge(icon: "heart.fill", value: "\(gameState.currentPlayer.health)", color: .red)
+                resourceBadge(icon: "heart.fill", value: "\(gameState.currentPlayer.health)", color: .red, label: L10n.statHealth.localized)
 
                 // Faith
-                resourceBadge(icon: "sparkles", value: "\(gameState.currentPlayer.faith)", color: .yellow)
+                resourceBadge(icon: "sparkles", value: "\(gameState.currentPlayer.faith)", color: .yellow, label: L10n.tmResourceFaith.localized)
 
                 // Balance
-                resourceBadge(icon: balanceIcon, value: "\(gameState.currentPlayer.balance)", color: balanceColor)
+                resourceBadge(icon: balanceIcon, value: "\(gameState.currentPlayer.balance)", color: balanceColor, label: L10n.tmResourceBalance.localized)
             }
 
             // Next phase button
@@ -173,7 +173,7 @@ struct GameBoardView: View {
         .padding(.horizontal)
     }
 
-    func resourceBadge(icon: String, value: String, color: Color) -> some View {
+    func resourceBadge(icon: String, value: String, color: Color, label: String) -> some View {
         HStack(spacing: 4) {
             Image(systemName: icon)
                 .font(.caption)
@@ -181,6 +181,9 @@ struct GameBoardView: View {
             Text(value)
                 .font(.caption2)
                 .fontWeight(.bold)
+            Text(label)
+                .font(.caption2)
+                .foregroundColor(.secondary)
         }
         .padding(.horizontal, 6)
         .padding(.vertical, 4)
