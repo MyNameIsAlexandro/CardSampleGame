@@ -101,6 +101,14 @@ struct GameBoardView: View {
         .onDisappear {
             autoSaveOnExit()
         }
+        .onChange(of: gameState.currentPhase) { newPhase in
+            if newPhase == .enemyTurn {
+                // Enemy attacks during their phase
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    gameState.enemyPhaseAction()
+                }
+            }
+        }
         .sheet(isPresented: $showingRules) {
             RulesView()
         }
@@ -361,7 +369,8 @@ struct GameBoardView: View {
         case .setup: return L10n.phaseSetup.localized
         case .exploration: return L10n.phaseExploration.localized
         case .encounter: return L10n.phaseEncounter.localized
-        case .combat: return L10n.phaseCombat.localized
+        case .playerTurn: return L10n.phasePlayerTurn.localized
+        case .enemyTurn: return L10n.phaseEnemyTurn.localized
         case .endTurn: return L10n.phaseEndTurn.localized
         case .gameOver: return L10n.phaseGameOver.localized
         }
@@ -372,8 +381,9 @@ struct GameBoardView: View {
         case .setup: return .gray
         case .exploration: return .blue
         case .encounter: return .orange
-        case .combat: return .red
-        case .endTurn: return .green
+        case .playerTurn: return .green
+        case .enemyTurn: return .red
+        case .endTurn: return .purple
         case .gameOver: return .black
         }
     }
@@ -438,12 +448,8 @@ struct GameBoardView: View {
                     gameState.defeatEncounter()
                 }
             }
-        } else {
-            // Failure! Encounter attacks player
-            let encounterPower = encounter.power ?? 3
-            gameState.currentPlayer.health = max(0, gameState.currentPlayer.health - encounterPower)
-            gameState.checkDefeat()
         }
+        // Enemy attacks during enemy phase, not immediately after player attack
 
         // Store combat result for display
         combatResult = CombatResult(

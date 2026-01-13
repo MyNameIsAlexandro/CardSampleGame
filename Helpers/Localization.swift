@@ -34,7 +34,8 @@ enum L10n {
     static let phaseSetup = "phase.setup"
     static let phaseExploration = "phase.exploration"
     static let phaseEncounter = "phase.encounter"
-    static let phaseCombat = "phase.combat"
+    static let phasePlayerTurn = "phase.player.turn"
+    static let phaseEnemyTurn = "phase.enemy.turn"
     static let phaseEndTurn = "phase.end.turn"
     static let phaseGameOver = "phase.game.over"
 

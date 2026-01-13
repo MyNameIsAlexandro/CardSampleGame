@@ -24,7 +24,8 @@
 "phase.setup" = "Подготовка";
 "phase.exploration" = "Исследование";
 "phase.encounter" = "Столкновение";
-"phase.combat" = "Бой";
+"phase.player.turn" = "Ход игрока";
+"phase.enemy.turn" = "Ход врага";
 "phase.end.turn" = "Конец хода";
 "phase.game.over" = "Игра окончена";
 

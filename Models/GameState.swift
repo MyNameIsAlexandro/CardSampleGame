@@ -5,7 +5,8 @@ enum GamePhase {
     case setup
     case exploration
     case encounter
-    case combat
+    case playerTurn
+    case enemyTurn
     case endTurn
     case gameOver
 }
@@ -70,8 +71,10 @@ class GameState: ObservableObject {
         case .exploration:
             currentPhase = .encounter
         case .encounter:
-            currentPhase = .combat
-        case .combat:
+            currentPhase = .playerTurn
+        case .playerTurn:
+            currentPhase = .enemyTurn
+        case .enemyTurn:
             currentPhase = .endTurn
         case .endTurn:
             endTurn()
@@ -154,5 +157,14 @@ class GameState: ObservableObject {
         guard actionsRemaining > 0 else { return false }
         actionsRemaining -= 1
         return true
+    }
+
+    func enemyPhaseAction() {
+        // Enemy attacks during their phase
+        guard let encounter = activeEncounter else { return }
+
+        let encounterPower = encounter.power ?? 3
+        currentPlayer.health = max(0, currentPlayer.health - encounterPower)
+        checkDefeat()
     }
 }
