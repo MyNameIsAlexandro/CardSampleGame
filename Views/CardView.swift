@@ -97,7 +97,7 @@ struct CardView: View {
                     if !card.traits.isEmpty {
                         HStack {
                             ForEach(card.traits, id: \.self) { trait in
-                                Text(trait)
+                                Text(trait.localized)
                                     .font(.caption2)
                                     .padding(.horizontal, 6)
                                     .padding(.vertical, 2)

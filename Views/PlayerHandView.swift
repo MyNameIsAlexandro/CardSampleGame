@@ -38,14 +38,14 @@ struct PlayerHandView: View {
 
             // Hand of cards
             if player.hand.isEmpty {
-                Text("No cards in hand")
+                Text("Нет карт в руке")
                     .foregroundColor(.secondary)
                     .padding()
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 16) {
+                    HStack(spacing: 12) {
                         ForEach(player.hand) { card in
-                            CardView(
+                            CompactCardView(
                                 card: card,
                                 isSelected: selectedCard?.id == card.id,
                                 onTap: {
@@ -56,9 +56,11 @@ struct PlayerHandView: View {
                                     }
                                 }
                             )
+                            .frame(width: 140, height: 160)
                         }
                     }
                     .padding(.horizontal)
+                    .padding(.vertical, 4)
                 }
             }
 
@@ -69,7 +71,7 @@ struct PlayerHandView: View {
                         onCardPlay?(selected)
                         selectedCard = nil
                     }) {
-                        Label("Play Card", systemImage: "play.fill")
+                        Label(L10n.actionPlay.localized, systemImage: "play.fill")
                             .padding()
                             .frame(maxWidth: .infinity)
                             .background(Color.blue)
@@ -80,7 +82,7 @@ struct PlayerHandView: View {
                     Button(action: {
                         selectedCard = nil
                     }) {
-                        Label("Cancel", systemImage: "xmark")
+                        Label("Отмена", systemImage: "xmark")
                             .padding()
                             .background(Color.gray)
                             .foregroundColor(.white)
