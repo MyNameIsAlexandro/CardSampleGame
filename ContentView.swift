@@ -3,18 +3,23 @@ import SwiftUI
 struct ContentView: View {
     @State private var showingGame = false
     @State private var showingRules = false
+    @State private var showingSaveSlots = false
     @State private var selectedCharacterIndex = 0
+    @State private var selectedSaveSlot: Int?
     @StateObject private var gameState = GameState(players: [])
+    @StateObject private var saveManager = SaveManager.shared
 
     // Using Twilight Marches characters
     let characters = TwilightMarchesCards.createGuardians()
 
     var body: some View {
         NavigationView {
-            if !showingGame {
-                characterSelectionView
+            if showingGame {
+                GameBoardView(gameState: gameState, saveSlot: selectedSaveSlot)
+            } else if showingSaveSlots {
+                saveSlotSelectionView
             } else {
-                GameBoardView(gameState: gameState)
+                characterSelectionView
             }
         }
     }
@@ -139,7 +144,7 @@ struct ContentView: View {
                         )
                         .frame(height: 30)
 
-                    Button(action: startGame) {
+                    Button(action: { showingSaveSlots = true }) {
                         Text(L10n.buttonStartAdventure.localized)
                             .font(.title3)
                             .fontWeight(.bold)
@@ -161,7 +166,53 @@ struct ContentView: View {
         }
     }
 
-    func startGame() {
+    var saveSlotSelectionView: some View {
+        VStack(spacing: 20) {
+            // Header
+            HStack {
+                Button(action: { showingSaveSlots = false }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "chevron.left")
+                        Text("Назад")
+                    }
+                    .foregroundColor(.blue)
+                }
+                Spacer()
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text("Выбор слота")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                    if selectedCharacterIndex < characters.count {
+                        Text(characters[selectedCharacterIndex].name)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+            .padding()
+
+            // Save slots
+            ScrollView {
+                VStack(spacing: 16) {
+                    ForEach(1...3, id: \.self) { slotNumber in
+                        SaveSlotCard(
+                            slotNumber: slotNumber,
+                            saveData: saveManager.loadGame(from: slotNumber),
+                            onNewGame: { startGame(in: slotNumber) },
+                            onLoadGame: { loadGame(from: slotNumber) },
+                            onDelete: {
+                                saveManager.deleteSave(from: slotNumber)
+                            }
+                        )
+                    }
+                }
+                .padding()
+            }
+        }
+        .navigationBarHidden(true)
+    }
+
+    func startGame(in slot: Int) {
         let selectedCharacter = characters[selectedCharacterIndex]
 
         // Create player with selected character
@@ -188,7 +239,57 @@ struct ContentView: View {
         gameState.encounterDeck.shuffle()
 
         gameState.startGame()
+
+        // Save to selected slot
+        selectedSaveSlot = slot
+        saveManager.saveGame(to: slot, gameState: gameState)
+
         showingGame = true
+        showingSaveSlots = false
+    }
+
+    func loadGame(from slot: Int) {
+        guard let saveData = saveManager.loadGame(from: slot) else { return }
+
+        // Find the character
+        if let characterIndex = characters.firstIndex(where: { $0.name == saveData.characterName }) {
+            selectedCharacterIndex = characterIndex
+        }
+
+        // Create player from save data
+        let player = Player(
+            name: saveData.characterName,
+            health: saveData.health,
+            maxHealth: saveData.maxHealth,
+            maxHandSize: 7,
+            strength: 0,
+            dexterity: 0,
+            constitution: 0,
+            intelligence: 0,
+            wisdom: 0,
+            charisma: 0
+        )
+
+        // Set player resources
+        player.faith = saveData.faith
+        player.balance = saveData.balance
+
+        // Build player's deck
+        player.deck = TwilightMarchesCards.createFullDeck()
+        player.shuffleDeck()
+
+        // Initialize game state
+        gameState.players = [player]
+        gameState.encounterDeck = TwilightMarchesCards.createEncounterDeck()
+        gameState.encounterDeck.shuffle()
+        gameState.turnNumber = saveData.turnNumber
+        gameState.encountersDefeated = saveData.encountersDefeated
+
+        gameState.startGame()
+
+        selectedSaveSlot = slot
+        showingGame = true
+        showingSaveSlots = false
     }
 }
 
@@ -209,6 +310,133 @@ struct StatDisplay: View {
             Text(label)
                 .font(.caption)
                 .foregroundColor(.secondary)
+        }
+    }
+}
+
+struct SaveSlotCard: View {
+    let slotNumber: Int
+    let saveData: GameSave?
+    let onNewGame: () -> Void
+    let onLoadGame: () -> Void
+    let onDelete: () -> Void
+
+    @State private var showingDeleteAlert = false
+    @State private var showingOverwriteAlert = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Слот \(slotNumber)")
+                    .font(.headline)
+                Spacer()
+                if saveData != nil {
+                    Button(action: { showingDeleteAlert = true }) {
+                        Image(systemName: "trash")
+                            .foregroundColor(.red)
+                    }
+                }
+            }
+
+            if let save = saveData {
+                // Existing save
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(save.characterName)
+                        .font(.title3)
+                        .fontWeight(.bold)
+
+                    HStack(spacing: 16) {
+                        Label("\(save.health)/\(save.maxHealth)", systemImage: "heart.fill")
+                            .foregroundColor(.red)
+                        Label("\(save.faith)", systemImage: "sparkles")
+                            .foregroundColor(.yellow)
+                        Label("\(save.balance)", systemImage: "scale.3d")
+                            .foregroundColor(.purple)
+                    }
+                    .font(.subheadline)
+
+                    HStack {
+                        Text("Ход: \(save.turnNumber)")
+                        Text("•")
+                        Text("Побед: \(save.encountersDefeated)")
+                    }
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                    Text(save.formattedDate)
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+
+                    Divider()
+
+                    HStack(spacing: 12) {
+                        Button(action: onLoadGame) {
+                            Text("Загрузить")
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 10)
+                                .background(Color.blue)
+                                .cornerRadius(8)
+                        }
+
+                        Button(action: { showingOverwriteAlert = true }) {
+                            Text("Новая игра")
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.blue)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 10)
+                                .background(Color.blue.opacity(0.1))
+                                .cornerRadius(8)
+                        }
+                    }
+                }
+            } else {
+                // Empty slot
+                VStack(spacing: 12) {
+                    Image(systemName: "square.dashed")
+                        .font(.largeTitle)
+                        .foregroundColor(.secondary)
+
+                    Text("Пустой слот")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+
+                    Button(action: onNewGame) {
+                        Text("Начать новую игру")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(Color.green)
+                            .cornerRadius(8)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 20)
+            }
+        }
+        .padding()
+        .background(Color(UIColor.secondarySystemBackground))
+        .cornerRadius(12)
+        .alert("Удалить сохранение?", isPresented: $showingDeleteAlert) {
+            Button("Отмена", role: .cancel) { }
+            Button("Удалить", role: .destructive) {
+                onDelete()
+            }
+        } message: {
+            Text("Это действие нельзя отменить.")
+        }
+        .alert("Перезаписать сохранение?", isPresented: $showingOverwriteAlert) {
+            Button("Отмена", role: .cancel) { }
+            Button("Перезаписать", role: .destructive) {
+                onNewGame()
+            }
+        } message: {
+            Text("Текущее сохранение будет потеряно.")
         }
     }
 }

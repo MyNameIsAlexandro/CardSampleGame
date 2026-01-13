@@ -2,10 +2,13 @@ import SwiftUI
 
 struct GameBoardView: View {
     @StateObject var gameState: GameState
+    var saveSlot: Int?
     @State private var selectedCard: Card?
     @State private var showingDiceRoll = false
     @State private var showingRules = false
     @State private var showingPauseMenu = false
+    @State private var showingSaveConfirmation = false
+    @StateObject private var saveManager = SaveManager.shared
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
@@ -92,6 +95,11 @@ struct GameBoardView: View {
             if let roll = gameState.diceRoll {
                 Text("You rolled: \(roll)")
             }
+        }
+        .alert("Игра сохранена", isPresented: $showingSaveConfirmation) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Ваш прогресс успешно сохранён.")
         }
     }
 
@@ -280,6 +288,21 @@ struct GameBoardView: View {
                         .background(Color.blue)
                         .foregroundColor(.white)
                         .cornerRadius(10)
+                }
+
+                if let slot = saveSlot {
+                    Button(action: {
+                        saveManager.saveGame(to: slot, gameState: gameState)
+                        showingSaveConfirmation = true
+                        showingPauseMenu = false
+                    }) {
+                        Label("Сохранить игру", systemImage: "tray.and.arrow.down.fill")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.orange)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
                 }
 
                 Button(action: {
