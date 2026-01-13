@@ -239,6 +239,7 @@ struct StatBadge: View {
 }
 
 // Compact card view for character selection
+// Compact card view for character selection
 struct CompactCardView: View {
     let card: Card
     var isSelected: Bool = false
@@ -395,6 +396,112 @@ struct CompactCardView: View {
         case .rare: return .blue
         case .epic: return .purple
         case .legendary: return .orange
+        }
+    }
+}
+
+// Very compact card view for player hand
+struct HandCardView: View {
+    let card: Card
+    var isSelected: Bool = false
+    var onTap: (() -> Void)?
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Card name
+            Text(card.name)
+                .font(.caption)
+                .fontWeight(.bold)
+                .foregroundColor(.white)
+                .lineLimit(1)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 4)
+                .padding(.horizontal, 4)
+                .background(headerColor)
+
+            // Card icon
+            ZStack {
+                Rectangle()
+                    .fill(
+                        LinearGradient(
+                            gradient: Gradient(colors: [headerColor.opacity(0.3), headerColor.opacity(0.6)]),
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+
+                Image(systemName: cardIcon)
+                    .font(.system(size: 24))
+                    .foregroundColor(.white.opacity(0.9))
+            }
+            .frame(height: 50)
+
+            // Stats row
+            HStack(spacing: 4) {
+                if let cost = card.cost {
+                    StatBadge(icon: "star.fill", value: cost, color: .yellow)
+                }
+                if let power = card.power {
+                    StatBadge(icon: "sword.fill", value: power, color: .red)
+                }
+                if let defense = card.defense {
+                    StatBadge(icon: "shield.fill", value: defense, color: .blue)
+                }
+            }
+            .padding(.vertical, 4)
+            .frame(maxWidth: .infinity)
+            .background(Color(UIColor.secondarySystemBackground))
+        }
+        .frame(width: 80, height: 90)
+        .background(Color(UIColor.systemBackground))
+        .cornerRadius(8)
+        .shadow(color: isSelected ? headerColor.opacity(0.6) : .black.opacity(0.2), radius: isSelected ? 6 : 3)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(isSelected ? headerColor : Color.clear, lineWidth: 2)
+        )
+        .scaleEffect(isSelected ? 1.1 : 1.0)
+        .animation(.spring(response: 0.2, dampingFraction: 0.7), value: isSelected)
+        .onTapGesture {
+            onTap?()
+        }
+    }
+
+    var headerColor: Color {
+        switch card.type {
+        case .character: return Color.purple
+        case .weapon: return Color.red
+        case .spell: return Color.blue
+        case .armor: return Color.gray
+        case .item: return Color.brown
+        case .ally: return Color.green
+        case .blessing: return Color.yellow
+        case .monster: return Color.red.opacity(0.8)
+        case .location: return Color.teal
+        case .scenario: return Color.indigo
+        case .curse: return Color.black
+        case .spirit: return Color.cyan
+        case .artifact: return Color.orange
+        case .ritual: return Color.indigo
+        }
+    }
+
+    var cardIcon: String {
+        switch card.type {
+        case .character: return "person.fill"
+        case .weapon: return "sword.fill"
+        case .spell: return "sparkles"
+        case .armor: return "shield.fill"
+        case .item: return "bag.fill"
+        case .ally: return "person.2.fill"
+        case .blessing: return "star.fill"
+        case .monster: return "flame.fill"
+        case .location: return "mappin.and.ellipse"
+        case .scenario: return "book.fill"
+        case .curse: return "cloud.bolt.fill"
+        case .spirit: return "cloud.moon.fill"
+        case .artifact: return "crown.fill"
+        case .ritual: return "book.closed.fill"
         }
     }
 }

@@ -47,6 +47,10 @@ class GameState: ObservableObject {
     func startGame() {
         currentPhase = .exploration
         turnNumber = 1
+        isVictory = false
+        isDefeat = false
+        encountersDefeated = 0
+        activeEncounter = nil
 
         // Deal initial hands
         for player in players {

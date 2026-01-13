@@ -6,90 +6,64 @@ struct PlayerHandView: View {
     var onCardPlay: ((Card) -> Void)?
 
     var body: some View {
-        VStack(spacing: 12) {
-            // Player info
-            HStack {
-                VStack(alignment: .leading) {
-                    Text(player.name)
-                        .font(.title2)
-                        .fontWeight(.bold)
-                    HStack {
-                        Image(systemName: "heart.fill")
-                            .foregroundColor(.red)
-                        Text("\(player.health) / \(player.maxHealth)")
-                            .font(.headline)
-                    }
-                }
+        VStack(spacing: 4) {
+            // Compact deck info
+            HStack(spacing: 16) {
+                Text(player.name)
+                    .font(.caption)
+                    .fontWeight(.bold)
 
                 Spacer()
 
-                // Deck info
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text(L10n.playerDeckRemaining.localized(with: player.deck.count))
-                        .font(.caption)
-
-                    Text(L10n.playerDiscardPile.localized(with: player.discard.count))
-                        .font(.caption)
+                // Deck count
+                HStack(spacing: 4) {
+                    Image(systemName: "rectangle.stack.fill")
+                        .font(.caption2)
+                    Text("\(player.deck.count)")
+                        .font(.caption2)
                 }
+                .foregroundColor(.blue)
+
+                // Discard count
+                HStack(spacing: 4) {
+                    Image(systemName: "trash.fill")
+                        .font(.caption2)
+                    Text("\(player.discard.count)")
+                        .font(.caption2)
+                }
+                .foregroundColor(.gray)
             }
-            .padding()
+            .padding(.horizontal, 12)
+            .padding(.vertical, 4)
             .background(Color(UIColor.secondarySystemBackground))
-            .cornerRadius(8)
 
             // Hand of cards
             if player.hand.isEmpty {
                 Text("Нет карт в руке")
+                    .font(.caption)
                     .foregroundColor(.secondary)
                     .padding()
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
+                    HStack(spacing: 8) {
                         ForEach(player.hand) { card in
-                            CompactCardView(
+                            HandCardView(
                                 card: card,
                                 isSelected: selectedCard?.id == card.id,
                                 onTap: {
                                     if selectedCard?.id == card.id {
+                                        onCardPlay?(card)
                                         selectedCard = nil
                                     } else {
                                         selectedCard = card
                                     }
                                 }
                             )
-                            .frame(width: 140, height: 160)
                         }
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 8)
                     .padding(.vertical, 4)
                 }
-            }
-
-            // Action buttons
-            if let selected = selectedCard {
-                HStack(spacing: 16) {
-                    Button(action: {
-                        onCardPlay?(selected)
-                        selectedCard = nil
-                    }) {
-                        Label(L10n.actionPlay.localized, systemImage: "play.fill")
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(8)
-                    }
-
-                    Button(action: {
-                        selectedCard = nil
-                    }) {
-                        Label("Отмена", systemImage: "xmark")
-                            .padding()
-                            .background(Color.gray)
-                            .foregroundColor(.white)
-                            .cornerRadius(8)
-                    }
-                }
-                .padding(.horizontal)
             }
         }
     }

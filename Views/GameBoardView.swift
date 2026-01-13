@@ -43,7 +43,7 @@ struct GameBoardView: View {
                                 .padding(.horizontal)
 
                             // Space for hand
-                            Color.clear.frame(height: 180)
+                            Color.clear.frame(height: 120)
                         }
                         .padding(.vertical)
                     }
@@ -56,7 +56,7 @@ struct GameBoardView: View {
                         selectedCard: $selectedCard,
                         onCardPlay: playCard
                     )
-                    .frame(height: min(geometry.size.height * 0.25, 180))
+                    .frame(height: 110)
                     .background(Color(UIColor.secondarySystemBackground))
                 }
 
