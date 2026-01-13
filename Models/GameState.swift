@@ -23,6 +23,9 @@ class GameState: ObservableObject {
     @Published var isVictory: Bool = false
     @Published var isDefeat: Bool = false
 
+    // Auto-save callback
+    var onAutoSave: (() -> Void)?
+
     var currentPlayer: Player {
         players[currentPlayerIndex]
     }
@@ -96,6 +99,9 @@ class GameState: ObservableObject {
             // Regenerate faith
             currentPlayer.gainFaith(1)
         }
+
+        // Auto-save after turn ends
+        onAutoSave?()
     }
 
     func defeatEncounter() {
@@ -108,6 +114,9 @@ class GameState: ObservableObject {
             isVictory = true
             currentPhase = .gameOver
         }
+
+        // Auto-save after defeating encounter
+        onAutoSave?()
     }
 
     func checkDefeat() {

@@ -95,6 +95,12 @@ struct GameBoardView: View {
             }
         }
         .navigationBarHidden(true)
+        .onAppear {
+            setupAutoSave()
+        }
+        .onDisappear {
+            autoSaveOnExit()
+        }
         .sheet(isPresented: $showingRules) {
             RulesView()
         }
@@ -483,6 +489,23 @@ struct GameBoardView: View {
                 break
             }
         }
+    }
+
+    // MARK: - Auto-Save Functions
+
+    func setupAutoSave() {
+        guard let slot = saveSlot else { return }
+
+        gameState.onAutoSave = { [weak saveManager, weak gameState] in
+            guard let saveManager = saveManager,
+                  let gameState = gameState else { return }
+            saveManager.saveGame(to: slot, gameState: gameState)
+        }
+    }
+
+    func autoSaveOnExit() {
+        guard let slot = saveSlot else { return }
+        saveManager.saveGame(to: slot, gameState: gameState)
     }
 }
 
