@@ -39,19 +39,21 @@ struct ContentView: View {
                 ScrollView {
                     VStack(spacing: 20) {
                         // Header with rules and statistics buttons
-                        HStack {
+                        HStack(spacing: 8) {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(L10n.tmGameTitle.localized)
-                                    .font(.title)
+                                    .font(.title2)
                                     .fontWeight(.bold)
-                                    .minimumScaleFactor(0.7)
-                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.6)
+                                    .lineLimit(2)
                                 Text(L10n.tmGameSubtitle.localized)
-                                    .font(.caption)
+                                    .font(.caption2)
                                     .foregroundColor(.secondary)
                                     .lineLimit(1)
+                                    .minimumScaleFactor(0.8)
                             }
-                            Spacer()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
                             Button(action: { showingStatistics = true }) {
                                 Image(systemName: "chart.bar.fill")
                                     .font(.title3)
@@ -61,10 +63,9 @@ struct ContentView: View {
                                     .cornerRadius(8)
                             }
                             Button(action: { showingRules = true }) {
-                                Label(L10n.rulesButton.localized, systemImage: "book.fill")
-                                    .font(.headline)
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 8)
+                                Image(systemName: "book.fill")
+                                    .font(.title3)
+                                    .padding(8)
                                     .background(Color.blue.opacity(0.2))
                                     .foregroundColor(.blue)
                                     .cornerRadius(8)

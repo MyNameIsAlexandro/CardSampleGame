@@ -281,41 +281,41 @@ struct CompactCardView: View {
 
                 HStack(spacing: 20) {
                     if let health = card.health {
-                        VStack(spacing: 4) {
+                        VStack(spacing: 2) {
                             Image(systemName: "heart.fill")
                                 .font(.title3)
                                 .foregroundColor(.red)
                             Text("\(health)")
                                 .font(.headline)
                                 .fontWeight(.bold)
-                            Text("❤️")
-                                .font(.caption2)
+                            Text("Здоровье")
+                                .font(.system(size: 9))
                                 .foregroundColor(.secondary)
                         }
                     }
                     if let power = card.power {
-                        VStack(spacing: 4) {
+                        VStack(spacing: 2) {
                             Image(systemName: "sword.fill")
                                 .font(.title3)
                                 .foregroundColor(.orange)
                             Text("\(power)")
                                 .font(.headline)
                                 .fontWeight(.bold)
-                            Text("⚔️")
-                                .font(.caption2)
+                            Text("Сила")
+                                .font(.system(size: 9))
                                 .foregroundColor(.secondary)
                         }
                     }
                     if let defense = card.defense {
-                        VStack(spacing: 4) {
+                        VStack(spacing: 2) {
                             Image(systemName: "shield.fill")
                                 .font(.title3)
                                 .foregroundColor(.blue)
                             Text("\(defense)")
                                 .font(.headline)
                                 .fontWeight(.bold)
-                            Text("🛡️")
-                                .font(.caption2)
+                            Text("Защита")
+                                .font(.system(size: 9))
                                 .foregroundColor(.secondary)
                         }
                     }
