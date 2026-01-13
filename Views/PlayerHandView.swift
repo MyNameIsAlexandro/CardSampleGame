@@ -7,6 +7,35 @@ struct PlayerHandView: View {
 
     var body: some View {
         VStack(spacing: 4) {
+            // Play card button (shown when card is selected)
+            if let selected = selectedCard {
+                HStack(spacing: 12) {
+                    Button(action: {
+                        onCardPlay?(selected)
+                        selectedCard = nil
+                    }) {
+                        Label("Сыграть карту", systemImage: "play.fill")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .background(Color.green)
+                            .cornerRadius(8)
+                    }
+
+                    Button(action: {
+                        selectedCard = nil
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(.gray)
+                    }
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 4)
+                .background(Color(UIColor.tertiarySystemBackground))
+            }
+
             // Compact deck info
             HStack(spacing: 16) {
                 Text(player.name)
@@ -52,7 +81,6 @@ struct PlayerHandView: View {
                                 isSelected: selectedCard?.id == card.id,
                                 onTap: {
                                     if selectedCard?.id == card.id {
-                                        onCardPlay?(card)
                                         selectedCard = nil
                                     } else {
                                         selectedCard = card

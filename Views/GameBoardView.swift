@@ -168,40 +168,36 @@ struct GameBoardView: View {
 
             Spacer()
 
-            // Player resources
-            VStack(alignment: .trailing, spacing: 2) {
-                HStack(spacing: 4) {
+            // Player resources - compact with icons only
+            HStack(spacing: 8) {
+                // Actions
+                HStack(spacing: 2) {
                     Image(systemName: "bolt.fill")
-                        .font(.system(size: 10))
+                        .font(.system(size: 12))
                         .foregroundColor(.orange)
                     Text("\(gameState.actionsRemaining)")
-                        .font(.system(size: 11))
+                        .font(.system(size: 13))
                         .fontWeight(.bold)
-                    Text("Дейст")
-                        .font(.system(size: 9))
-                        .foregroundColor(.secondary)
                 }
-                HStack(spacing: 4) {
+
+                // Health
+                HStack(spacing: 2) {
                     Image(systemName: "heart.fill")
-                        .font(.system(size: 10))
+                        .font(.system(size: 12))
                         .foregroundColor(.red)
                     Text("\(gameState.currentPlayer.health)")
-                        .font(.system(size: 11))
+                        .font(.system(size: 13))
                         .fontWeight(.bold)
-                    Text("Здор")
-                        .font(.system(size: 9))
-                        .foregroundColor(.secondary)
                 }
-                HStack(spacing: 4) {
+
+                // Faith
+                HStack(spacing: 2) {
                     Image(systemName: "sparkles")
-                        .font(.system(size: 10))
+                        .font(.system(size: 12))
                         .foregroundColor(.yellow)
                     Text("\(gameState.currentPlayer.faith)")
-                        .font(.system(size: 11))
+                        .font(.system(size: 13))
                         .fontWeight(.bold)
-                    Text("Вера")
-                        .font(.system(size: 9))
-                        .foregroundColor(.secondary)
                 }
             }
 

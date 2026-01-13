@@ -486,7 +486,7 @@ struct HandCardView: View {
             .frame(maxWidth: .infinity)
             .background(Color(UIColor.secondarySystemBackground))
         }
-        .frame(width: 70, height: 100)
+        .frame(width: 85, height: 115)
         .background(Color(UIColor.systemBackground))
         .cornerRadius(8)
         .shadow(color: isSelected ? headerColor.opacity(0.6) : .black.opacity(0.2), radius: isSelected ? 6 : 3)
