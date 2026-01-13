@@ -16,7 +16,14 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             if showingGame {
-                GameBoardView(gameState: gameState, saveSlot: selectedSaveSlot)
+                GameBoardView(
+                    gameState: gameState,
+                    saveSlot: selectedSaveSlot,
+                    onExit: {
+                        showingGame = false
+                        showingSaveSlots = false
+                    }
+                )
             } else if showingSaveSlots {
                 saveSlotSelectionView
             } else {

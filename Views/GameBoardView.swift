@@ -3,6 +3,7 @@ import SwiftUI
 struct GameBoardView: View {
     @StateObject var gameState: GameState
     var saveSlot: Int?
+    var onExit: (() -> Void)?
     @State private var selectedCard: Card?
     @State private var showingDiceRoll = false
     @State private var combatResult: CombatResult?
@@ -10,7 +11,6 @@ struct GameBoardView: View {
     @State private var showingPauseMenu = false
     @State private var showingSaveConfirmation = false
     @StateObject private var saveManager = SaveManager.shared
-    @Environment(\.dismiss) var dismiss
 
     struct CombatResult {
         let diceRoll: Int
@@ -73,7 +73,7 @@ struct GameBoardView: View {
                         encountersDefeated: gameState.encountersDefeated,
                         turnsTaken: gameState.turnNumber,
                         onDismiss: {
-                            dismiss()
+                            onExit?()
                         }
                     )
                     .padding(20)
@@ -87,7 +87,7 @@ struct GameBoardView: View {
                         encountersDefeated: gameState.encountersDefeated,
                         turnsTaken: gameState.turnNumber,
                         onDismiss: {
-                            dismiss()
+                            onExit?()
                         }
                     )
                     .padding(20)
@@ -321,7 +321,8 @@ struct GameBoardView: View {
                 }
 
                 Button(action: {
-                    dismiss()
+                    showingPauseMenu = false
+                    onExit?()
                 }) {
                     Label(L10n.uiExit.localized, systemImage: "house.fill")
                         .frame(maxWidth: .infinity)
