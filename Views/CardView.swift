@@ -155,6 +155,10 @@ struct CardView: View {
         case .spirit: return L10n.tmCardTypeSpirit.localized
         case .artifact: return L10n.tmCardTypeArtifact.localized
         case .ritual: return L10n.tmCardTypeRitual.localized
+        case .resource: return "Ресурс"
+        case .attack: return "Атака"
+        case .defense: return "Защита"
+        case .special: return "Особая"
         }
     }
 
@@ -184,6 +188,10 @@ struct CardView: View {
         case .spirit: return Color.cyan
         case .artifact: return Color.orange
         case .ritual: return Color.indigo
+        case .resource: return Color.green
+        case .attack: return Color.red
+        case .defense: return Color.blue
+        case .special: return Color.purple
         }
     }
 
@@ -207,6 +215,10 @@ struct CardView: View {
         case .spirit: return "cloud.moon.fill"
         case .artifact: return "crown.fill"
         case .ritual: return "book.closed.fill"
+        case .resource: return "leaf.fill"
+        case .attack: return "bolt.fill"
+        case .defense: return "shield.fill"
+        case .special: return "star.circle.fill"
         }
     }
 
@@ -360,6 +372,10 @@ struct CompactCardView: View {
         case .spirit: return Color.cyan
         case .artifact: return Color.orange
         case .ritual: return Color.indigo
+        case .resource: return Color.green
+        case .attack: return Color.red
+        case .defense: return Color.blue
+        case .special: return Color.purple
         }
     }
 
@@ -379,6 +395,10 @@ struct CompactCardView: View {
         case .spirit: return "cloud.moon.fill"
         case .artifact: return "crown.fill"
         case .ritual: return "book.closed.fill"
+        case .resource: return "leaf.fill"
+        case .attack: return "bolt.fill"
+        case .defense: return "shield.fill"
+        case .special: return "star.circle.fill"
         }
     }
 
@@ -398,6 +418,10 @@ struct CompactCardView: View {
         case .spirit: return L10n.tmCardTypeSpirit.localized
         case .artifact: return L10n.tmCardTypeArtifact.localized
         case .ritual: return L10n.tmCardTypeRitual.localized
+        case .resource: return "Ресурс"
+        case .attack: return "Атака"
+        case .defense: return "Защита"
+        case .special: return "Особая"
         }
     }
 
@@ -517,6 +541,10 @@ struct HandCardView: View {
         case .spirit: return Color.cyan
         case .artifact: return Color.orange
         case .ritual: return Color.indigo
+        case .resource: return Color.green
+        case .attack: return Color.red
+        case .defense: return Color.blue
+        case .special: return Color.purple
         }
     }
 
@@ -536,6 +564,10 @@ struct HandCardView: View {
         case .spirit: return "cloud.moon.fill"
         case .artifact: return "crown.fill"
         case .ritual: return "book.closed.fill"
+        case .resource: return "leaf.fill"
+        case .attack: return "bolt.fill"
+        case .defense: return "shield.fill"
+        case .special: return "star.circle.fill"
         }
     }
 }
