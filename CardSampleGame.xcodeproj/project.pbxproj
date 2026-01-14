@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		01D384D3F190A3976183B126 /* EventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43D4E3FBE4DC34B63B61E061 /* EventView.swift */; };
+		A4E4965164ED9C6373D15D1C /* ExplorationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BE0C9930A837029C5CD71A5 /* ExplorationModels.swift */; };
+		A56525B2E101A593EF7BE61A /* WorldState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2263FEB0CBAF703EC97141A7 /* WorldState.swift */; };
 		AA0000010000000000000001 /* CardGameApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000000000001 /* CardGameApp.swift */; };
 		AA0000030000000000000001 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000040000000000000001 /* ContentView.swift */; };
 		AA0000050000000000000001 /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000060000000000000001 /* Card.swift */; };
@@ -26,7 +29,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		AA0000210000000000000001 /* CardSampleGame.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CardSampleGame.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0BE0C9930A837029C5CD71A5 /* ExplorationModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExplorationModels.swift; path = Models/ExplorationModels.swift; sourceTree = "<group>"; };
+		2263FEB0CBAF703EC97141A7 /* WorldState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WorldState.swift; path = Models/WorldState.swift; sourceTree = "<group>"; };
+		43D4E3FBE4DC34B63B61E061 /* EventView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EventView.swift; path = Views/EventView.swift; sourceTree = "<group>"; };
 		AA0000020000000000000001 /* CardGameApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardGameApp.swift; sourceTree = "<group>"; };
 		AA0000040000000000000001 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		AA0000060000000000000001 /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
@@ -37,6 +42,7 @@
 		AA0000160000000000000001 /* PlayerHandView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerHandView.swift; sourceTree = "<group>"; };
 		AA0000180000000000000001 /* GameBoardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameBoardView.swift; sourceTree = "<group>"; };
 		AA0000200000000000000001 /* SampleCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleCards.swift; sourceTree = "<group>"; };
+		AA0000210000000000000001 /* CardSampleGame.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CardSampleGame.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0000400000000000000001 /* CardSampleGame.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CardSampleGame.entitlements; sourceTree = "<group>"; };
 		AA0000420000000000000001 /* Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Localization.swift; sourceTree = "<group>"; };
 		AA0000440000000000000001 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -58,15 +64,25 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		400571CAB07A5DD68E7B0107 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				0BE0C9930A837029C5CD71A5 /* ExplorationModels.swift */,
+				2263FEB0CBAF703EC97141A7 /* WorldState.swift */,
+			);
+			name = Models;
+			sourceTree = "<group>";
+		};
 		AA0000240000000000000001 = {
 			isa = PBXGroup;
 			children = (
-				AA0000250000000000000001 /* CardSampleGame */,
+				AA0000250000000000000001 /* . */,
 				AA0000260000000000000001 /* Products */,
+				E65102638302D3C4A04B78CD /* CardSampleGame */,
 			);
 			sourceTree = "<group>";
 		};
-		AA0000250000000000000001 /* CardSampleGame */ = {
+		AA0000250000000000000001 /* . */ = {
 			isa = PBXGroup;
 			children = (
 				AA0000400000000000000001 /* CardSampleGame.entitlements */,
@@ -78,7 +94,7 @@
 				AA0000470000000000000001 /* Helpers */,
 				AA0000450000000000000001 /* Localizable.strings */,
 			);
-			path = ".";
+			path = .;
 			sourceTree = "<group>";
 		};
 		AA0000260000000000000001 /* Products */ = {
@@ -130,19 +146,24 @@
 			path = Helpers;
 			sourceTree = "<group>";
 		};
-/* End PBXGroup section */
-
-/* Begin PBXVariantGroup section */
-		AA0000450000000000000001 /* Localizable.strings */ = {
-			isa = PBXVariantGroup;
+		D0A7147A6DE85C304CAD50D7 /* Views */ = {
+			isa = PBXGroup;
 			children = (
-				AA0000440000000000000001 /* en */,
-				AA0000460000000000000001 /* ru */,
+				43D4E3FBE4DC34B63B61E061 /* EventView.swift */,
 			);
-			name = Localizable.strings;
+			name = Views;
 			sourceTree = "<group>";
 		};
-/* End PBXVariantGroup section */
+		E65102638302D3C4A04B78CD /* CardSampleGame */ = {
+			isa = PBXGroup;
+			children = (
+				400571CAB07A5DD68E7B0107 /* Models */,
+				D0A7147A6DE85C304CAD50D7 /* Views */,
+			);
+			name = CardSampleGame;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
 		AA0000300000000000000001 /* CardSampleGame */ = {
@@ -227,10 +248,25 @@
 				AA0000480000000000000001 /* RulesView.swift in Sources */,
 				AA0000520000000000000001 /* GameSave.swift in Sources */,
 				AA0000540000000000000001 /* StatisticsView.swift in Sources */,
+				A4E4965164ED9C6373D15D1C /* ExplorationModels.swift in Sources */,
+				A56525B2E101A593EF7BE61A /* WorldState.swift in Sources */,
+				01D384D3F190A3976183B126 /* EventView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		AA0000450000000000000001 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				AA0000440000000000000001 /* en */,
+				AA0000460000000000000001 /* ru */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		AA0000360000000000000001 /* Debug */ = {
