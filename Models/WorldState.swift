@@ -386,8 +386,207 @@ class WorldState: ObservableObject {
     }
 
     private func createInitialEvents() -> [GameEvent] {
-        // TODO: Создать начальные события
-        // Пока возвращаем пустой массив, создадим события в следующем шаге
-        return []
+        var events: [GameEvent] = []
+
+        // 1. COMBAT EVENT: Встреча с лешим (Forest guardian)
+        let leshyEvent = GameEvent(
+            eventType: .combat,
+            title: "Встреча с Лешим",
+            description: "Из чащи появляется древний страж леса. Его глаза горят зеленым огнем, а ветви скрипят угрожающе. Леший преграждает путь.",
+            regionTypes: [.forest, .swamp],
+            regionStates: [.borderland, .breach],
+            choices: [
+                EventChoice(
+                    text: "Вступить в бой с духом леса",
+                    requirements: EventRequirements(minimumHealth: 3),
+                    consequences: EventConsequences(
+                        healthChange: -2,
+                        faithChange: 1,
+                        message: "Вы сразились с лешим и отстояли свой путь, но бой был тяжелым."
+                    )
+                ),
+                EventChoice(
+                    text: "Попытаться задобрить дарами (стоит 5 ✨)",
+                    requirements: EventRequirements(minimumFaith: 5),
+                    consequences: EventConsequences(
+                        faithChange: -5,
+                        balanceChange: 5,
+                        tensionChange: -5,
+                        message: "Леший принял дары и пропустил вас. Лес стал спокойнее."
+                    )
+                ),
+                EventChoice(
+                    text: "Отступить и обойти стороной",
+                    consequences: EventConsequences(
+                        reputationChange: -5,
+                        message: "Вы отступили, избежав конфликта, но потеряли уважение местных духов."
+                    )
+                )
+            ],
+            oneTime: false
+        )
+        events.append(leshyEvent)
+
+        // 2. RITUAL/CHOICE EVENT: Древний ритуал
+        let ritualEvent = GameEvent(
+            eventType: .ritual,
+            title: "Древний Ритуал",
+            description: "Вы находите место силы - старинное капище с угасающим пламенем. Вы чувствуете, что можете либо возродить святилище Света, либо осквернить его силой Тьмы для получения власти.",
+            regionTypes: [.forest, .sacred, .mountain],
+            regionStates: [.stable, .borderland],
+            choices: [
+                EventChoice(
+                    text: "Возродить святилище Света (10 ✨)",
+                    requirements: EventRequirements(minimumFaith: 10, requiredBalance: .light),
+                    consequences: EventConsequences(
+                        faithChange: -10,
+                        balanceChange: 15,
+                        tensionChange: -10,
+                        anchorIntegrityChange: 20,
+                        message: "Святилище возрождено! Свет Яви становится сильнее в этом регионе."
+                    )
+                ),
+                EventChoice(
+                    text: "Осквернить ритуал для получения силы",
+                    requirements: EventRequirements(requiredBalance: .dark),
+                    consequences: EventConsequences(
+                        faithChange: 15,
+                        balanceChange: -20,
+                        tensionChange: 15,
+                        anchorIntegrityChange: -30,
+                        addCards: ["dark_power_card"],
+                        message: "Вы получили темную силу, но Навь усилилась в этом месте."
+                    )
+                ),
+                EventChoice(
+                    text: "Не вмешиваться и уйти",
+                    consequences: EventConsequences(
+                        message: "Вы оставили место силы нетронутым."
+                    )
+                )
+            ],
+            oneTime: true
+        )
+        events.append(ritualEvent)
+
+        // 3. NARRATIVE EVENT: Странник на развилке
+        let wandererEvent = GameEvent(
+            eventType: .narrative,
+            title: "Странник на Развилке",
+            description: "Старый путник сидит у костра. Он предлагает поделиться знаниями о мире в обмен на помощь.",
+            regionTypes: [.forest, .settlement, .mountain],
+            regionStates: [.stable, .borderland],
+            choices: [
+                EventChoice(
+                    text: "Выслушать рассказы странника (3 ✨)",
+                    requirements: EventRequirements(minimumFaith: 3),
+                    consequences: EventConsequences(
+                        faithChange: -3,
+                        setFlags: ["met_wanderer": true],
+                        message: "Странник рассказал вам о древних путях и тайнах мира."
+                    )
+                ),
+                EventChoice(
+                    text: "Помочь ему припасами",
+                    consequences: EventConsequences(
+                        faithChange: -2,
+                        reputationChange: 10,
+                        balanceChange: 5,
+                        message: "Странник благодарен за помощь и благословляет ваш путь."
+                    )
+                ),
+                EventChoice(
+                    text: "Пройти мимо",
+                    consequences: EventConsequences(
+                        message: "Вы продолжили свой путь."
+                    )
+                )
+            ],
+            oneTime: true
+        )
+        events.append(wandererEvent)
+
+        // 4. EXPLORATION EVENT: Заброшенный храм
+        let templeEvent = GameEvent(
+            eventType: .exploration,
+            title: "Заброшенный Храм",
+            description: "Вы находите руины древнего храма. Внутри чувствуется присутствие силы, но и опасность.",
+            regionTypes: [.settlement, .wasteland, .sacred],
+            regionStates: [.borderland, .breach],
+            choices: [
+                EventChoice(
+                    text: "Тщательно исследовать храм",
+                    requirements: EventRequirements(minimumHealth: 5),
+                    consequences: EventConsequences(
+                        faithChange: 8,
+                        healthChange: -3,
+                        addCards: ["ancient_blessing"],
+                        message: "Вы нашли древнюю реликвию, но исследование было опасным."
+                    )
+                ),
+                EventChoice(
+                    text: "Быстро осмотреть и уйти",
+                    consequences: EventConsequences(
+                        faithChange: 3,
+                        message: "Вы нашли немного ценностей и быстро покинули опасное место."
+                    )
+                ),
+                EventChoice(
+                    text: "Обойти храм стороной",
+                    consequences: EventConsequences(
+                        message: "Вы решили не рисковать."
+                    )
+                )
+            ],
+            oneTime: false
+        )
+        events.append(templeEvent)
+
+        // 5. WORLD SHIFT EVENT: Усиление Нави
+        let breachEvent = GameEvent(
+            eventType: .worldShift,
+            title: "Прорыв Нави",
+            description: "Граница между мирами истончается. Темные силы пытаются прорваться в Явь через слабый якорь.",
+            regionTypes: [.forest, .swamp, .settlement, .wasteland],
+            regionStates: [.breach],
+            choices: [
+                EventChoice(
+                    text: "Укрепить якорь своей верой (15 ✨)",
+                    requirements: EventRequirements(minimumFaith: 15),
+                    consequences: EventConsequences(
+                        faithChange: -15,
+                        balanceChange: 10,
+                        tensionChange: -20,
+                        anchorIntegrityChange: 30,
+                        message: "Вы закрыли прорыв! Регион стабилизировался."
+                    )
+                ),
+                EventChoice(
+                    text: "Отступить и предупредить других",
+                    consequences: EventConsequences(
+                        tensionChange: 10,
+                        anchorIntegrityChange: -10,
+                        reputationChange: 5,
+                        message: "Вы предупредили о прорыве, но Навь усилилась."
+                    )
+                ),
+                EventChoice(
+                    text: "Попытаться использовать силу прорыва",
+                    requirements: EventRequirements(requiredBalance: .dark),
+                    consequences: EventConsequences(
+                        faithChange: 10,
+                        healthChange: -5,
+                        balanceChange: -15,
+                        tensionChange: 5,
+                        addCurse: "breach_corruption",
+                        message: "Вы получили силу Нави, но она оставила след на вашей душе."
+                    )
+                )
+            ],
+            oneTime: false
+        )
+        events.append(breachEvent)
+
+        return events
     }
 }

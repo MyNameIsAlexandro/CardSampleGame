@@ -11,6 +11,7 @@ struct GameBoardView: View {
     @State private var showingPauseMenu = false
     @State private var showingSaveConfirmation = false
     @State private var showingEnemyAttack = false
+    @State private var showingWorldMap = false
     @State private var enemyDamage: Int = 0
     @StateObject private var saveManager = SaveManager.shared
 
@@ -122,6 +123,9 @@ struct GameBoardView: View {
         }
         .sheet(isPresented: $showingRules) {
             RulesView()
+        }
+        .sheet(isPresented: $showingWorldMap) {
+            WorldMapView(worldState: gameState.worldState, player: gameState.currentPlayer)
         }
         .alert(combatResult?.success == true ? "Успех!" : "Провал", isPresented: $showingDiceRoll) {
             Button(L10n.buttonOk.localized, role: .cancel) {
@@ -416,6 +420,18 @@ struct GameBoardView: View {
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+
+                Button(action: {
+                    showingWorldMap = true
+                    showingPauseMenu = false
+                }) {
+                    Label("Карта Мира", systemImage: "map.fill")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.cyan)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }

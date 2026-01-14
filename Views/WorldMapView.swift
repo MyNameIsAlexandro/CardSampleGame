@@ -2,6 +2,7 @@ import SwiftUI
 
 struct WorldMapView: View {
     @ObservedObject var worldState: WorldState
+    @ObservedObject var player: Player
     @State private var selectedRegion: Region?
     @State private var showingRegionDetails = false
 
@@ -36,6 +37,7 @@ struct WorldMapView: View {
                 RegionDetailView(
                     region: region,
                     worldState: worldState,
+                    player: player,
                     onDismiss: {
                         selectedRegion = nil
                         showingRegionDetails = false
@@ -254,9 +256,12 @@ struct RegionCardView: View {
 struct RegionDetailView: View {
     let region: Region
     @ObservedObject var worldState: WorldState
+    @ObservedObject var player: Player
     let onDismiss: () -> Void
     @State private var showingActionConfirmation = false
     @State private var selectedAction: RegionAction?
+    @State private var showingEvent = false
+    @State private var currentEvent: GameEvent?
 
     enum RegionAction {
         case travel
@@ -300,6 +305,23 @@ struct RegionDetailView: View {
                     Button("Закрыть") {
                         onDismiss()
                     }
+                }
+            }
+            .sheet(isPresented: $showingEvent) {
+                if let event = currentEvent {
+                    EventView(
+                        event: event,
+                        player: player,
+                        worldState: worldState,
+                        regionId: region.id,
+                        onChoiceSelected: { choice in
+                            handleEventChoice(choice)
+                        },
+                        onDismiss: {
+                            showingEvent = false
+                            currentEvent = nil
+                        }
+                    )
                 }
             }
         }
@@ -495,8 +517,7 @@ struct RegionDetailView: View {
                     color: .cyan,
                     enabled: true
                 ) {
-                    selectedAction = .explore
-                    showingActionConfirmation = true
+                    triggerExploration()
                 }
             }
         }
@@ -563,6 +584,36 @@ struct RegionDetailView: View {
         case 70...100: return .green
         case 30..<70: return .orange
         default: return .red
+        }
+    }
+
+    // MARK: - Event Handling
+
+    func triggerExploration() {
+        // Get available events for this region
+        let availableEvents = worldState.getAvailableEvents(for: region)
+
+        // Pick a random event
+        if let randomEvent = availableEvents.randomElement() {
+            currentEvent = randomEvent
+            showingEvent = true
+        } else {
+            // No events available - could show a message
+            print("No events available in this region")
+        }
+    }
+
+    func handleEventChoice(_ choice: EventChoice) {
+        // Apply consequences
+        worldState.applyConsequences(
+            choice.consequences,
+            to: player,
+            in: region.id
+        )
+
+        // Mark event as completed if it's one-time
+        if let event = currentEvent, event.oneTime {
+            worldState.markEventCompleted(event.id)
         }
     }
 }

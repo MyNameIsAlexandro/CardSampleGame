@@ -28,6 +28,9 @@ class GameState: ObservableObject {
     // Marketplace for deck-building
     @Published var marketCards: [Card] = []
 
+    // World exploration system
+    @Published var worldState: WorldState = WorldState()
+
     // Auto-save callback
     var onAutoSave: (() -> Void)?
 
