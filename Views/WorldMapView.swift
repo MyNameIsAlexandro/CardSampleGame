@@ -3,14 +3,22 @@ import SwiftUI
 struct WorldMapView: View {
     @ObservedObject var worldState: WorldState
     @ObservedObject var player: Player
+    var onExit: (() -> Void)? = nil
+
     @State private var selectedRegion: Region?
     @State private var showingRegionDetails = false
+    @State private var showingExitConfirmation = false
 
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
                 // Top bar with world info
                 worldInfoBar
+
+                Divider()
+
+                // Player info bar
+                playerInfoBar
 
                 Divider()
 
@@ -33,6 +41,20 @@ struct WorldMapView: View {
             }
             .navigationTitle("Карта Мира")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    if onExit != nil {
+                        Button(action: {
+                            showingExitConfirmation = true
+                        }) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "chevron.left")
+                                Text("Меню")
+                            }
+                        }
+                    }
+                }
+            }
             .sheet(item: $selectedRegion) { region in
                 RegionDetailView(
                     region: region,
@@ -44,6 +66,97 @@ struct WorldMapView: View {
                     }
                 )
             }
+            .alert("Выйти в меню?", isPresented: $showingExitConfirmation) {
+                Button("Отмена", role: .cancel) { }
+                Button("Выйти") {
+                    onExit?()
+                }
+            } message: {
+                Text("Прогресс будет сохранен")
+            }
+        }
+    }
+
+    // MARK: - Player Info Bar
+
+    var playerInfoBar: some View {
+        HStack(spacing: 16) {
+            // Player name
+            VStack(alignment: .leading, spacing: 2) {
+                Text(player.name)
+                    .font(.subheadline)
+                    .fontWeight(.bold)
+                Text("Странник")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer()
+
+            // Health
+            HStack(spacing: 4) {
+                Image(systemName: "heart.fill")
+                    .font(.caption)
+                    .foregroundColor(.red)
+                Text("\(player.health)/\(player.maxHealth)")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(Color.red.opacity(0.1))
+            .cornerRadius(6)
+
+            // Faith
+            HStack(spacing: 4) {
+                Image(systemName: "sparkles")
+                    .font(.caption)
+                    .foregroundColor(.yellow)
+                Text("\(player.faith)")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(Color.yellow.opacity(0.1))
+            .cornerRadius(6)
+
+            // Balance
+            HStack(spacing: 4) {
+                Image(systemName: getBalanceIcon(player.balance))
+                    .font(.caption)
+                    .foregroundColor(getPlayerBalanceColor(player.balance))
+                Text("\(abs(player.balance))")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(getPlayerBalanceColor(player.balance).opacity(0.1))
+            .cornerRadius(6)
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
+        .background(Color(UIColor.secondarySystemBackground))
+    }
+
+    func getBalanceIcon(_ balance: Int) -> String {
+        if balance >= 30 {
+            return "sun.max.fill"
+        } else if balance <= -30 {
+            return "moon.fill"
+        } else {
+            return "circle.lefthalf.filled"
+        }
+    }
+
+    func getPlayerBalanceColor(_ balance: Int) -> Color {
+        if balance >= 30 {
+            return .yellow
+        } else if balance <= -30 {
+            return .purple
+        } else {
+            return .gray
         }
     }
 

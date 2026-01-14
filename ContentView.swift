@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var showingGame = false
+    @State private var showingWorldMap = false
     @State private var showingRules = false
     @State private var showingSaveSlots = false
     @State private var showingStatistics = false
@@ -15,12 +15,16 @@ struct ContentView: View {
 
     var body: some View {
         NavigationView {
-            if showingGame {
-                GameBoardView(
-                    gameState: gameState,
-                    saveSlot: selectedSaveSlot,
+            if showingWorldMap {
+                WorldMapView(
+                    worldState: gameState.worldState,
+                    player: gameState.currentPlayer,
                     onExit: {
-                        showingGame = false
+                        // Save game before exiting
+                        if let slot = selectedSaveSlot {
+                            saveManager.saveGame(to: slot, gameState: gameState)
+                        }
+                        showingWorldMap = false
                         showingSaveSlots = false
                     }
                 )
@@ -263,13 +267,14 @@ struct ContentView: View {
         gameState.encounterDeck.shuffle()
         gameState.marketCards = TwilightMarchesCards.createMarketCards()
 
-        gameState.startGame()
+        // Don't start combat - just initialize the world
+        // Combat will be triggered by events in WorldMapView
 
         // Save to selected slot
         selectedSaveSlot = slot
         saveManager.saveGame(to: slot, gameState: gameState)
 
-        showingGame = true
+        showingWorldMap = true
         showingSaveSlots = false
     }
 
@@ -311,10 +316,11 @@ struct ContentView: View {
         gameState.turnNumber = saveData.turnNumber
         gameState.encountersDefeated = saveData.encountersDefeated
 
-        gameState.startGame()
+        // Don't start combat - just show world map
+        // Combat will be triggered by events
 
         selectedSaveSlot = slot
-        showingGame = true
+        showingWorldMap = true
         showingSaveSlots = false
     }
 }
