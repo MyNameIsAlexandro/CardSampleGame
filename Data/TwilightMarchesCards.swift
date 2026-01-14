@@ -578,7 +578,7 @@ struct TwilightMarchesCards {
             // 1x Curse card (starting weakness)
             Card(name: "Темное Проклятие", type: .curse, rarity: .common,
                  description: "Проклятие тьмы. Нужно 1 веру чтобы сбросить.",
-                 cost: 1, abilities: [], curseType: .weakness, balance: .dark, realm: .nav)
+                 cost: 1, abilities: [], balance: .dark, realm: .nav, curseType: .weakness)
         ]
     }
 
