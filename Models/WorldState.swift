@@ -400,8 +400,8 @@ class WorldState: ObservableObject {
                     text: "Вступить в бой с духом леса",
                     requirements: EventRequirements(minimumHealth: 3),
                     consequences: EventConsequences(
-                        healthChange: -2,
                         faithChange: 1,
+                        healthChange: -2,
                         message: "Вы сразились с лешим и отстояли свой путь, но бой был тяжелым."
                     )
                 ),
@@ -453,8 +453,8 @@ class WorldState: ObservableObject {
                         faithChange: 15,
                         balanceChange: -20,
                         tensionChange: 15,
-                        anchorIntegrityChange: -30,
                         addCards: ["dark_power_card"],
+                        anchorIntegrityChange: -30,
                         message: "Вы получили темную силу, но Навь усилилась в этом месте."
                     )
                 ),
@@ -490,8 +490,8 @@ class WorldState: ObservableObject {
                     text: "Помочь ему припасами",
                     consequences: EventConsequences(
                         faithChange: -2,
-                        reputationChange: 10,
                         balanceChange: 5,
+                        reputationChange: 10,
                         message: "Странник благодарен за помощь и благословляет ваш путь."
                     )
                 ),
@@ -565,8 +565,8 @@ class WorldState: ObservableObject {
                     text: "Отступить и предупредить других",
                     consequences: EventConsequences(
                         tensionChange: 10,
-                        anchorIntegrityChange: -10,
                         reputationChange: 5,
+                        anchorIntegrityChange: -10,
                         message: "Вы предупредили о прорыве, но Навь усилилась."
                     )
                 ),
