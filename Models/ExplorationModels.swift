@@ -266,8 +266,17 @@ struct EventRequirements: Codable {
             return false
         }
         if let reqBalance = requiredBalance {
-            // Проверка баланса игрока (упрощенно)
-            if player.balance != reqBalance {
+            // Проверка баланса игрока
+            let playerBalanceEnum: CardBalance
+            if player.balance >= 30 {
+                playerBalanceEnum = .light
+            } else if player.balance <= -30 {
+                playerBalanceEnum = .dark
+            } else {
+                playerBalanceEnum = .neutral
+            }
+
+            if playerBalanceEnum != reqBalance {
                 return false
             }
         }

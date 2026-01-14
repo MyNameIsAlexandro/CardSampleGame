@@ -174,14 +174,17 @@ struct EventView: View {
             }
 
             if let reqBalance = requirements.requiredBalance {
+                let playerBalanceEnum = getBalanceEnum(player.balance)
+                let meetsRequirement = playerBalanceEnum == reqBalance
+
                 HStack(spacing: 4) {
                     Image(systemName: "circle.lefthalf.filled")
                         .font(.caption2)
                     Text("Требуется путь: \(balanceText(reqBalance))")
                         .font(.caption2)
-                    Text("(ваш: \(balanceText(player.balance)))")
+                    Text("(ваш: \(balanceText(playerBalanceEnum)))")
                         .font(.caption2)
-                        .foregroundColor(player.balance == reqBalance ? .green : .red)
+                        .foregroundColor(meetsRequirement ? .green : .red)
                 }
                 .foregroundColor(.secondary)
             }
@@ -266,19 +269,30 @@ struct EventView: View {
         case .dark: return "Тьмы"
         }
     }
+
+    func getBalanceEnum(_ balanceValue: Int) -> CardBalance {
+        if balanceValue >= 30 {
+            return .light
+        } else if balanceValue <= -30 {
+            return .dark
+        } else {
+            return .neutral
+        }
+    }
 }
 
 // MARK: - Preview
 
 struct EventView_Previews: PreviewProvider {
     static var previews: some View {
-        let player = Player(hero: Hero(
+        let player = Player(
             name: "Волхв",
             health: 20,
+            maxHealth: 20,
             maxHandSize: 5,
-            specialAbility: "Мудрость",
-            startingDeck: []
-        ))
+            faith: 10,
+            balance: 0
+        )
 
         let worldState = WorldState()
 
@@ -298,7 +312,8 @@ struct EventView_Previews: PreviewProvider {
                     text: "Выбор 2",
                     requirements: EventRequirements(minimumFaith: 10),
                     consequences: EventConsequences(
-                        healthChange: -3,
+                        faithChange: -3,
+                        healthChange: -2,
                         message: "Результат выбора 2"
                     )
                 )
