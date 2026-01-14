@@ -401,12 +401,28 @@
 - ✅ Система баланса (Light/Dark/Neutral)
 - ✅ Система проклятий
 
+**Система исследования (MVP):**
+- ✅ Модели данных (Region, Anchor, Event, WorldState, Quest)
+- ✅ WorldState менеджер с глобальными параметрами
+- ✅ 3 начальных региона (Stable, Borderland, Breach)
+- ✅ Система якорей с целостностью и влиянием
+- ✅ UI карты мира с визуализацией состояний
+- ✅ UI детального просмотра региона
+- ✅ Система событий (5 типов: Combat, Ritual, Narrative, Exploration, World Shift)
+- ✅ 5 начальных событий с выборами и последствиями
+- ✅ Проверка требований для выборов
+- ✅ Применение последствий (ресурсы, репутация, якоря, флаги)
+- ✅ Интеграция с GameState и Player
+- ✅ Кнопка доступа к карте мира из игры
+
 ### 12.2 Основные файлы
 **Models:**
 - `Card.swift` - модель карты
 - `CardType.swift` - типы и редкости карт
 - `Player.swift` - модель игрока с колодой
-- `GameState.swift` - состояние игры, фазы, рынок
+- `GameState.swift` - состояние игры, фазы, рынок, WorldState
+- `ExplorationModels.swift` - Region, Anchor, Event, Quest
+- `WorldState.swift` - менеджер мира, события, регионы
 
 **Data:**
 - `TwilightMarchesCards.swift` - все карты игры
@@ -419,9 +435,11 @@
 
 **Views:**
 - `ContentView.swift` - главное меню, выбор героя
-- `GameBoardView.swift` - игровое поле, UI рынка, progress bar
+- `GameBoardView.swift` - игровое поле, UI рынка, progress bar, кнопка карты
 - `PlayerHandView.swift` - рука игрока, кнопка игры карты
 - `CardView.swift` - отображение карт
+- `WorldMapView.swift` - карта мира, карточки регионов, детали региона
+- `EventView.swift` - отображение событий с выборами
 
 **Utilities:**
 - `SaveManager.swift` - автосохранение
