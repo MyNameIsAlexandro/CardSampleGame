@@ -4,6 +4,7 @@ struct ContentView: View {
     @State private var showingWorldMap = false
     @State private var showingRules = false
     @State private var showingSaveSlots = false
+    @State private var showingLoadSlots = false  // New: for "Continue" flow
     @State private var showingStatistics = false
     @State private var selectedCharacterIndex = 0
     @State private var selectedSaveSlot: Int?
@@ -12,6 +13,11 @@ struct ContentView: View {
 
     // Using Twilight Marches characters
     let characters = TwilightMarchesCards.createGuardians()
+
+    // Check if there are any saves
+    var hasSaves: Bool {
+        !saveManager.allSaves.isEmpty
+    }
 
     var body: some View {
         NavigationView {
@@ -26,10 +32,13 @@ struct ContentView: View {
                         }
                         showingWorldMap = false
                         showingSaveSlots = false
+                        showingLoadSlots = false
                     }
                 )
             } else if showingSaveSlots {
                 saveSlotSelectionView
+            } else if showingLoadSlots {
+                loadSlotSelectionView
             } else {
                 characterSelectionView
             }
@@ -157,7 +166,7 @@ struct ContentView: View {
                     .padding(.bottom, 20)
                 }
 
-                // Fixed button at bottom with shadow
+                // Fixed buttons at bottom with shadow
                 VStack(spacing: 0) {
                     Rectangle()
                         .fill(
@@ -169,8 +178,30 @@ struct ContentView: View {
                         )
                         .frame(height: 30)
 
-                    Button(action: { showingSaveSlots = true }) {
-                        Text(L10n.buttonStartAdventure.localized)
+                    VStack(spacing: 12) {
+                        // Continue button (only if saves exist)
+                        if hasSaves {
+                            Button(action: { handleContinueGame() }) {
+                                HStack {
+                                    Image(systemName: "play.fill")
+                                    Text("Продолжить")
+                                }
+                                .font(.title3)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.green)
+                                .cornerRadius(12)
+                            }
+                        }
+
+                        // New game button
+                        Button(action: { showingSaveSlots = true }) {
+                            HStack {
+                                Image(systemName: hasSaves ? "plus.circle.fill" : "play.fill")
+                                Text(L10n.buttonStartAdventure.localized)
+                            }
                             .font(.title3)
                             .fontWeight(.bold)
                             .foregroundColor(.white)
@@ -178,6 +209,7 @@ struct ContentView: View {
                             .padding()
                             .background(Color.blue)
                             .cornerRadius(12)
+                        }
                     }
                     .padding(.horizontal)
                     .padding(.bottom, 12)
@@ -322,6 +354,56 @@ struct ContentView: View {
         selectedSaveSlot = slot
         showingWorldMap = true
         showingSaveSlots = false
+    }
+
+    // MARK: - Continue Game
+
+    func handleContinueGame() {
+        let saves = saveManager.allSaves
+
+        if saves.count == 1 {
+            // Only one save - load it directly
+            loadGame(from: saves[0].slotNumber)
+        } else {
+            // Multiple saves - show selection screen
+            showingLoadSlots = true
+        }
+    }
+
+    // MARK: - Load Slot Selection View
+
+    var loadSlotSelectionView: some View {
+        VStack(spacing: 20) {
+            // Header
+            HStack {
+                Button(action: { showingLoadSlots = false }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "chevron.left")
+                        Text("Назад")
+                    }
+                    .foregroundColor(.blue)
+                }
+                Spacer()
+                Text("Продолжить игру")
+                    .font(.title2)
+                    .fontWeight(.bold)
+            }
+            .padding()
+
+            // Load slots (only show existing saves)
+            ScrollView {
+                VStack(spacing: 16) {
+                    ForEach(saveManager.allSaves) { save in
+                        LoadSlotCard(
+                            saveData: save,
+                            onLoad: { loadGame(from: save.slotNumber) }
+                        )
+                    }
+                }
+                .padding()
+            }
+        }
+        .navigationBarHidden(true)
     }
 }
 
@@ -469,6 +551,60 @@ struct SaveSlotCard: View {
             }
         } message: {
             Text("Текущее сохранение будет потеряно.")
+        }
+    }
+}
+
+// MARK: - Load Slot Card (for Continue flow)
+
+struct LoadSlotCard: View {
+    let saveData: GameSave
+    let onLoad: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Save info
+            HStack {
+                Text("Слот \(saveData.slotNumber)")
+                    .font(.headline)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .foregroundColor(.blue)
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text(saveData.characterName)
+                    .font(.title3)
+                    .fontWeight(.bold)
+
+                HStack(spacing: 16) {
+                    Label("\(saveData.health)/\(saveData.maxHealth)", systemImage: "heart.fill")
+                        .foregroundColor(.red)
+                    Label("\(saveData.faith)", systemImage: "sparkles")
+                        .foregroundColor(.yellow)
+                    Label("\(saveData.balance)", systemImage: "scale.3d")
+                        .foregroundColor(.purple)
+                }
+                .font(.subheadline)
+
+                HStack {
+                    Text("Ход: \(saveData.turnNumber)")
+                    Text("•")
+                    Text("Побед: \(saveData.encountersDefeated)")
+                }
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+                Text(saveData.formattedDate)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding()
+        .background(Color(UIColor.secondarySystemBackground))
+        .cornerRadius(12)
+        .onTapGesture {
+            onLoad()
         }
     }
 }
