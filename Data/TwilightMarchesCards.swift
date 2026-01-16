@@ -682,8 +682,9 @@ struct TwilightMarchesCards {
     static func getCardByID(_ cardID: String) -> Card? {
         // Create a dictionary mapping card IDs to cards
         let rewardCards = createRewardCards()
+        let artifactCards = createArtifactCards()
         let marketCards = createMarketCards()
-        let allCards = rewardCards + marketCards
+        let allCards = rewardCards + artifactCards + marketCards
 
         // Map cards by their names or custom IDs
         let cardMapping: [String: Card] = [
@@ -704,8 +705,13 @@ struct TwilightMarchesCards {
             "spiritual_armor": rewardCards[13],    // Духовная Броня
             "mountain_blessing": rewardCards[14],  // Благословение Гор
             "stone_armor": rewardCards[15],        // Каменная Броня
-            "defender_blessing": rewardCards[16],  // Благословение Защитника
-            "anchor_power": rewardCards[17]        // Сила Якоря
+            "defender_blessing": rewardCards[16],  // Благословение Защитника (from reward cards)
+            "anchor_power": rewardCards[17],       // Сила Якоря (from reward cards)
+
+            // Artifact cards (legendary items from quests and boss)
+            "guardian_seal": artifactCards[0],     // Печать Защитника
+            "ancient_relic": artifactCards[1],     // Древняя Реликвия
+            "corrupted_power": artifactCards[2]    // Развращённая Сила
         ]
 
         return cardMapping[cardID]
@@ -1113,6 +1119,127 @@ struct TwilightMarchesCards {
                 ],
                 balance: .light,
                 realm: .prav
+            )
+        ]
+    }
+
+    // MARK: - Boss Cards
+
+    /// Creates the final boss for Act I: Леший-Хранитель (Leshy-Guardian)
+    /// This boss is encountered in the Чёрная Низина (Black Lowlands) as the final challenge
+    static func createLeshyGuardianBoss() -> Card {
+        return Card(
+            id: UUID(),
+            name: "Леший-Хранитель",
+            type: .monster,
+            rarity: .legendary,
+            description: "Древний страж Сумрачных Пределов. Его сила неимоверна, корни уходят глубоко в землю, а глаза горят зелёным пламенем вечности.",
+            power: 6,
+            defense: 12,
+            health: 25,
+            cost: nil,
+            abilities: [
+                CardAbility(
+                    name: "Регенерация",
+                    description: "Восстанавливает 2 здоровья в начале каждого хода.",
+                    effect: .heal(amount: 2)
+                ),
+                CardAbility(
+                    name: "Удар Корнями",
+                    description: "Наносит 8 урона и оглушает противника.",
+                    effect: .damage(amount: 8, target: .player)
+                ),
+                CardAbility(
+                    name: "Гнев Природы",
+                    description: "Призывает духов леса, наносящих 4 урона.",
+                    effect: .damage(amount: 4, target: .player)
+                )
+            ],
+            balance: .neutral,
+            realm: .nav
+        )
+    }
+
+    // MARK: - Artifact Cards
+
+    /// Creates legendary artifact cards - powerful unique items from quests
+    static func createArtifactCards() -> [Card] {
+        return [
+            // 1. Guardian Seal - main quest reward, peaceful boss resolution
+            Card(
+                id: UUID(),
+                name: "Печать Защитника",
+                type: .special,
+                rarity: .legendary,
+                description: "Древняя печать, дарованная Лешим-Хранителем. Символизует союз с силами природы.",
+                cost: 3,
+                abilities: [
+                    CardAbility(
+                        name: "Защита Якоря",
+                        description: "Восстанавливает целостность якоря на 25 пунктов.",
+                        effect: .heal(amount: 10)
+                    ),
+                    CardAbility(
+                        name: "Благословение Хранителя",
+                        description: "Снижает напряжение мира на 10 пунктов.",
+                        effect: .gainFaith(amount: 8)
+                    ),
+                    CardAbility(
+                        name: "Связь с Природой",
+                        description: "Сдвигает баланс к свету.",
+                        effect: .shiftBalance(towards: .light, amount: 10)
+                    )
+                ],
+                balance: .light,
+                realm: .prav
+            ),
+
+            // 2. Ancient Relic - powerful neutral artifact
+            Card(
+                id: UUID(),
+                name: "Древняя Реликвия",
+                type: .special,
+                rarity: .legendary,
+                description: "Таинственный артефакт из времён до разделения миров. Пульсирует неизвестной силой.",
+                cost: 4,
+                abilities: [
+                    CardAbility(
+                        name: "Власть над Реальностью",
+                        description: "Наносит 10 урона врагу или восстанавливает 10 здоровья.",
+                        effect: .damage(amount: 10, target: .activeEncounter)
+                    ),
+                    CardAbility(
+                        name: "Временной Резонанс",
+                        description: "Позволяет разыграть дополнительную карту.",
+                        effect: .gainFaith(amount: 5)
+                    )
+                ],
+                balance: .neutral,
+                realm: .prav
+            ),
+
+            // 3. Corrupted Power - dark path from boss
+            Card(
+                id: UUID(),
+                name: "Развращённая Сила",
+                type: .special,
+                rarity: .legendary,
+                description: "Частица сущности Хранителя, искажённая тёмной магией. Могущественна, но опасна.",
+                cost: 2,
+                abilities: [
+                    CardAbility(
+                        name: "Пожирание Жизни",
+                        description: "Наносит 12 урона врагу, но отнимает 3 здоровья у вас.",
+                        effect: .damage(amount: 12, target: .activeEncounter)
+                    ),
+                    CardAbility(
+                        name: "Тёмное Влияние",
+                        description: "Сильно сдвигает баланс к тьме.",
+                        effect: .shiftBalance(towards: .dark, amount: 15)
+                    )
+                ],
+                balance: .dark,
+                realm: .nav
             )
         ]
     }

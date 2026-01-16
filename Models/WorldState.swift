@@ -1033,6 +1033,54 @@ class WorldState: ObservableObject {
         )
         events.append(barrowEvent)
 
+        // 11. BOSS EVENT: Леший-Хранитель (Final Boss of Act I)
+        let leshyGuardianBoss = TwilightMarchesCards.createLeshyGuardianBoss()
+        let bossEvent = GameEvent(
+            eventType: .combat,
+            title: "Леший-Хранитель",
+            description: "Перед вами возвышается древний страж Сумрачных Пределов. Леший-Хранитель - существо невиданной силы, чьи корни уходят в самые основы мира. Зелёное пламя в его глазах горит вечностью. Это финальное испытание Акта I.",
+            regionTypes: [.swamp],
+            regionStates: [.breach],
+            choices: [
+                EventChoice(
+                    text: "Вступить в решающий бой",
+                    requirements: EventRequirements(minimumHealth: 8, minimumFaith: 10),
+                    consequences: EventConsequences(
+                        message: "Последняя битва начинается! Судьба Сумрачных Пределов решается здесь!"
+                    )
+                ),
+                EventChoice(
+                    text: "Попытаться договориться (20 ✨)",
+                    requirements: EventRequirements(minimumFaith: 20, requiredBalance: .light),
+                    consequences: EventConsequences(
+                        faithChange: -20,
+                        balanceChange: 15,
+                        tensionChange: -20,
+                        setFlags: ["leshy_guardian_peaceful": true],
+                        addCards: ["guardian_seal"],
+                        message: "Хранитель видит свет в вашей душе и соглашается помочь вам. Он вручает вам печать защитника."
+                    )
+                ),
+                EventChoice(
+                    text: "Использовать силу тьмы (15 ✨)",
+                    requirements: EventRequirements(minimumFaith: 15, requiredBalance: .dark),
+                    consequences: EventConsequences(
+                        faithChange: -15,
+                        balanceChange: -20,
+                        healthChange: -5,
+                        addCards: ["corrupted_power"],
+                        setFlags: ["leshy_guardian_corrupted": true],
+                        message: "Вы обрушиваете на хранителя силу тьмы. Он ослабевает, но часть его сущности входит в вас..."
+                    )
+                )
+            ],
+            oneTime: true,
+            questLinks: [UUID()], // Will be linked to main quest ID dynamically
+            monsterCard: leshyGuardianBoss,
+            requiredFlags: ["main_quest_started": true]
+        )
+        events.append(bossEvent)
+
         // 12. QUEST EVENT: Деревенский староста (Main Quest trigger)
         let elderEvent = GameEvent(
             eventType: .narrative,
