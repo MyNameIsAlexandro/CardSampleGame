@@ -601,6 +601,56 @@ class WorldState: ObservableObject {
         )
         events.append(breachEvent)
 
+        // 6. UNIVERSAL EVENT: Дикий зверь (works in all regions)
+        let beastMonster = Card(
+            id: UUID(),
+            name: "Дикий Зверь",
+            type: .monster,
+            rarity: .common,
+            description: "Озверевшее создание, искаженное влиянием Нави.",
+            power: 3,
+            defense: 6,
+            health: 8,
+            cost: nil,
+            abilities: [],
+            balance: .dark
+        )
+
+        let beastEvent = GameEvent(
+            eventType: .combat,
+            title: "Дикий Зверь",
+            description: "Из-за деревьев выскакивает озверевшее существо с горящими красными глазами. Оно рычит и готовится к атаке!",
+            regionTypes: [], // Empty = all region types
+            regionStates: [.stable, .borderland, .breach], // All states
+            choices: [
+                EventChoice(
+                    text: "Сразиться со зверем",
+                    requirements: EventRequirements(minimumHealth: 2),
+                    consequences: EventConsequences(
+                        message: "Вы вступаете в бой!"
+                    )
+                ),
+                EventChoice(
+                    text: "Попытаться испугать зверя (5 ✨)",
+                    requirements: EventRequirements(minimumFaith: 5),
+                    consequences: EventConsequences(
+                        faithChange: -5,
+                        message: "Вы используете силу веры, чтобы отпугнуть зверя."
+                    )
+                ),
+                EventChoice(
+                    text: "Убежать",
+                    consequences: EventConsequences(
+                        healthChange: -1,
+                        message: "Вы убегаете, но зверь успевает ранить вас."
+                    )
+                )
+            ],
+            oneTime: false,
+            monsterCard: beastMonster
+        )
+        events.append(beastEvent)
+
         return events
     }
 }

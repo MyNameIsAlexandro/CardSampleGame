@@ -375,6 +375,7 @@ struct RegionDetailView: View {
     @State private var selectedAction: RegionAction?
     @State private var showingEvent = false
     @State private var currentEvent: GameEvent?
+    @State private var showingNoEventsAlert = false
 
     enum RegionAction {
         case travel
@@ -446,6 +447,11 @@ struct RegionDetailView: View {
                 Button("Отмена", role: .cancel) { }
             } message: {
                 Text(actionConfirmationMessage)
+            }
+            .alert("Ничего не найдено", isPresented: $showingNoEventsAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("В этом регионе сейчас нет доступных событий для исследования.")
             }
         }
     }
@@ -716,13 +722,19 @@ struct RegionDetailView: View {
         // Get available events for this region
         let availableEvents = worldState.getAvailableEvents(for: region)
 
+        print("DEBUG: Region: \(region.name), Type: \(region.type), State: \(region.state)")
+        print("DEBUG: Available events count: \(availableEvents.count)")
+        for event in availableEvents {
+            print("DEBUG: - Event: \(event.title)")
+        }
+
         // Pick a random event
         if let randomEvent = availableEvents.randomElement() {
             currentEvent = randomEvent
             showingEvent = true
         } else {
-            // No events available - could show a message
-            print("No events available in this region")
+            // No events available - show alert
+            showingNoEventsAlert = true
         }
     }
 
