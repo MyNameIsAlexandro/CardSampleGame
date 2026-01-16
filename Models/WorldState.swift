@@ -699,6 +699,10 @@ class WorldState: ObservableObject, Codable {
                 EventChoice(
                     text: "Отступить и обойти стороной",
                     consequences: EventConsequences(
+                        faithChange: nil,
+                        healthChange: nil,
+                        balanceChange: nil,
+                        tensionChange: nil,
                         reputationChange: -5,
                         message: "Вы отступили, избежав конфликта, но потеряли уважение местных духов."
                     )
@@ -938,6 +942,7 @@ class WorldState: ObservableObject, Codable {
                 EventChoice(
                     text: "Убежать",
                     consequences: EventConsequences(
+                        faithChange: nil,
                         healthChange: -1,
                         message: "Вы убегаете, но зверь успевает ранить вас."
                     )
@@ -1105,6 +1110,7 @@ class WorldState: ObservableObject, Codable {
                 EventChoice(
                     text: "Просто отдохнуть в тени дуба",
                     consequences: EventConsequences(
+                        faithChange: nil,
                         healthChange: 2,
                         message: "Вы отдохнули под защитой древнего дуба."
                     )
@@ -1317,6 +1323,10 @@ class WorldState: ObservableObject, Codable {
                 EventChoice(
                     text: "Отказать и идти своим путем",
                     consequences: EventConsequences(
+                        faithChange: nil,
+                        healthChange: nil,
+                        balanceChange: nil,
+                        tensionChange: nil,
                         reputationChange: -10,
                         setFlags: ["refused_main_quest": true],
                         message: "Староста разочарован вашим отказом."
@@ -1403,8 +1413,8 @@ class WorldState: ObservableObject, Codable {
                 EventChoice(
                     text: "Отдохнуть и восстановиться",
                     consequences: EventConsequences(
-                        healthChange: 4,
                         faithChange: 2,
+                        healthChange: 4,
                         message: "Вы отдохнули у костра. Силы восстановлены."
                     )
                 ),
@@ -1421,6 +1431,7 @@ class WorldState: ObservableObject, Codable {
                 EventChoice(
                     text: "Быстро перекусить и идти дальше",
                     consequences: EventConsequences(
+                        faithChange: nil,
                         healthChange: 1,
                         message: "Вы немного отдохнули и продолжили путь."
                     )
@@ -1475,7 +1486,9 @@ class WorldState: ObservableObject, Codable {
                 EventChoice(
                     text: "Бежать от сдвига",
                     consequences: EventConsequences(
+                        faithChange: nil,
                         healthChange: -3,
+                        balanceChange: nil,
                         tensionChange: 20,
                         anchorIntegrityChange: -20,
                         message: "Вы бежите, но сдвиг усиливается. Мир становится опаснее."

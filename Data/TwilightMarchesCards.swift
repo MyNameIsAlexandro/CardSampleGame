@@ -683,7 +683,6 @@ struct TwilightMarchesCards {
         // Create a dictionary mapping card IDs to cards
         let rewardCards = createRewardCards()
         let artifactCards = createArtifactCards()
-        let marketCards = createMarketCards()
 
         // Map cards by their names or custom IDs
         let cardMapping: [String: Card] = [
