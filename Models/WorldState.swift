@@ -392,13 +392,13 @@ class WorldState: ObservableObject {
         let leshyMonster = Card(
             id: UUID(),
             name: "Леший",
-            description: "Древний страж леса, чья сила растет от гнева.",
-            type: .enemy,
+            type: .monster,
             rarity: .uncommon,
-            cost: nil,
+            description: "Древний страж леса, чья сила растет от гнева.",
             power: 4,
-            health: 12,
             defense: 8,
+            health: 12,
+            cost: nil,
             abilities: [],
             balance: .neutral
         )
