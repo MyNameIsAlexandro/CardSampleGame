@@ -39,7 +39,7 @@ class Player: ObservableObject, Identifiable {
     // Twilight Marches mechanics
     @Published var faith: Int  // Вера - resource for powerful abilities
     @Published var maxFaith: Int
-    @Published var balance: Int  // -10 (dark) to +10 (light), 0 is neutral
+    @Published var balance: Int  // 0 (dark) to 100 (light), 50 is neutral
     @Published var activeCurses: [ActiveCurse]
     @Published var currentRealm: Realm
     @Published var spirits: [Card]  // Summoned spirits
@@ -58,7 +58,7 @@ class Player: ObservableObject, Identifiable {
         charisma: Int = 0,
         faith: Int = 3,
         maxFaith: Int = 10,
-        balance: Int = 0,
+        balance: Int = 50,
         currentRealm: Realm = .yav
     ) {
         self.id = id
@@ -139,14 +139,15 @@ class Player: ObservableObject, Identifiable {
     func shiftBalance(towards: CardBalance, amount: Int) {
         switch towards {
         case .light:
-            balance = min(10, balance + amount)
+            balance = min(100, balance + amount)
         case .dark:
-            balance = max(-10, balance - amount)
+            balance = max(0, balance - amount)
         case .neutral:
-            if balance > 0 {
-                balance = max(0, balance - amount)
-            } else {
-                balance = min(0, balance + amount)
+            // Move towards 50 (neutral)
+            if balance > 50 {
+                balance = max(50, balance - amount)
+            } else if balance < 50 {
+                balance = min(50, balance + amount)
             }
         }
     }
@@ -194,12 +195,26 @@ class Player: ObservableObject, Identifiable {
     }
 
     var balanceState: CardBalance {
-        if balance >= 3 {
+        if balance >= 70 {
             return .light
-        } else if balance <= -3 {
+        } else if balance <= 30 {
             return .dark
         } else {
             return .neutral
+        }
+    }
+
+    // Описание баланса для UI
+    var balanceDescription: String {
+        switch balance {
+        case 0..<30:
+            return "Путь Тьмы"
+        case 30..<70:
+            return "Нейтральный"
+        case 70...100:
+            return "Путь Света"
+        default:
+            return "Неизвестно"
         }
     }
 }

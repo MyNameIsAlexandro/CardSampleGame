@@ -92,6 +92,31 @@ class WorldState: ObservableObject {
         if let index = regions.firstIndex(where: { $0.id == regionId }) {
             regions[index].visited = true
         }
+
+        // Проверить автоматическую деградацию мира
+        checkTimeDegradation()
+    }
+
+    // MARK: - Time-based Degradation
+
+    /// Проверка автоматической деградации мира каждые 3 дня
+    func checkTimeDegradation() {
+        guard daysPassed > 0 && daysPassed % 3 == 0 else { return }
+
+        // 1. Увеличить напряжение мира
+        increaseTension(by: 2)
+
+        // 2. С вероятностью (Tension/100) деградировать случайный регион
+        let probability = Double(worldTension) / 100.0
+        if Double.random(in: 0...1) < probability {
+            degradeRandomRegion()
+        }
+    }
+
+    /// Метод для ручного продвижения времени (для Rest, StrengthenAnchor и т.д.)
+    func advanceTime(by days: Int = 1) {
+        daysPassed += days
+        checkTimeDegradation()
     }
 
     // MARK: - Anchor Management
@@ -329,60 +354,122 @@ class WorldState: ObservableObject {
     // MARK: - Data Creation (for MVP)
 
     private func createInitialRegions() -> [Region] {
-        // Регион 1: Стабильный лес
-        let forestAnchor = Anchor(
-            name: "Священный Дуб Велеса",
-            type: .sacredTree,
+        // АКТ I - 7 регионов (2 Stable, 3 Borderland, 2 Breach)
+
+        // 1. Деревня у тракта (Stable) - стартовая точка
+        let villageAnchor = Anchor(
+            name: "Часовня Света",
+            type: .chapel,
             integrity: 85,
             influence: .light,
-            power: 7
+            power: 6
         )
-
-        let forest = Region(
-            name: "Лес Велеса",
-            type: .forest,
+        var village = Region(
+            name: "Деревня у тракта",
+            type: .settlement,
             state: .stable,
-            anchor: forestAnchor,
-            reputation: 20
+            anchor: villageAnchor,
+            reputation: 30
         )
+        village.updateStateFromAnchor()
 
-        // Регион 2: Пограничное болото
-        let swampAnchor = Anchor(
-            name: "Каменная Баба",
+        // 2. Священный Дуб (Stable) - точка силы
+        let oakAnchor = Anchor(
+            name: "Священный Дуб Велеса",
+            type: .sacredTree,
+            integrity: 90,
+            influence: .light,
+            power: 8
+        )
+        var oak = Region(
+            name: "Священный Дуб",
+            type: .sacred,
+            state: .stable,
+            anchor: oakAnchor,
+            reputation: 25
+        )
+        oak.updateStateFromAnchor()
+
+        // 3. Дремучий Лес (Borderland) - первая опасная зона
+        let forestAnchor = Anchor(
+            name: "Каменный Идол",
             type: .stoneIdol,
             integrity: 55,
             influence: .neutral,
             power: 5
         )
+        var forest = Region(
+            name: "Дремучий Лес",
+            type: .forest,
+            state: .borderland,
+            anchor: forestAnchor,
+            reputation: 0
+        )
+        forest.updateStateFromAnchor()
 
+        // 4. Болото Нави (Borderland) - зона искажения
+        let swampAnchor = Anchor(
+            name: "Осквернённый Родник",
+            type: .spring,
+            integrity: 45,
+            influence: .dark,
+            power: 4
+        )
         var swamp = Region(
-            name: "Болота Нави",
+            name: "Болото Нави",
             type: .swamp,
             state: .borderland,
             anchor: swampAnchor,
-            reputation: -10
+            reputation: -15
         )
         swamp.updateStateFromAnchor()
 
-        // Регион 3: Прорыв в деревне
-        let villageAnchor = Anchor(
-            name: "Разрушенная Часовня",
-            type: .chapel,
+        // 5. Горный Перевал (Borderland) - путь к узлу
+        let mountainAnchor = Anchor(
+            name: "Курган Предков",
+            type: .barrow,
+            integrity: 50,
+            influence: .neutral,
+            power: 5
+        )
+        var mountain = Region(
+            name: "Горный Перевал",
+            type: .mountain,
+            state: .borderland,
+            anchor: mountainAnchor,
+            reputation: 5
+        )
+        mountain.updateStateFromAnchor()
+
+        // 6. Разлом Курганов (Breach) - первый узел вторжения
+        let breachAnchor = Anchor(
+            name: "Разрушенное Капище",
+            type: .shrine,
             integrity: 15,
             influence: .dark,
             power: 3
         )
-
-        var village = Region(
-            name: "Забытая Деревня",
-            type: .settlement,
+        var breach = Region(
+            name: "Разлом Курганов",
+            type: .wasteland,
             state: .breach,
-            anchor: villageAnchor,
-            reputation: -50
+            anchor: breachAnchor,
+            reputation: -40
         )
-        village.updateStateFromAnchor()
+        breach.updateStateFromAnchor()
 
-        return [forest, swamp, village]
+        // 7. Чёрная Низина (Breach) - финал Акта I
+        // Нет якоря - полностью разрушен
+        var darkLowland = Region(
+            name: "Чёрная Низина",
+            type: .swamp,
+            state: .breach,
+            anchor: nil,
+            reputation: -60
+        )
+        darkLowland.updateStateFromAnchor()
+
+        return [village, oak, forest, swamp, mountain, breach, darkLowland]
     }
 
     private func createInitialEvents() -> [GameEvent] {

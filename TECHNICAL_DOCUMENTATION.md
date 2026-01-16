@@ -1,9 +1,10 @@
 # Техническая документация проекта
 # Twilight Marches (Сумрачные Пределы)
 
-**Версия:** 0.3.0
+**Версия:** 0.4.0
 **Последнее обновление:** 16 января 2026
 **Платформа:** iOS (SwiftUI)
+**Статус:** Core Systems + Campaign Support
 
 ---
 
@@ -708,7 +709,7 @@ case .strengthenAnchor:
 
 ## Сохранения
 
-### Что сохраняется
+### Что сохраняется (текущая версия)
 
 **Через GameSave:**
 - ✅ Имя персонажа
@@ -719,21 +720,108 @@ case .strengthenAnchor:
 - ✅ Побежденные враги
 - ✅ Дата сохранения
 
-**Что НЕ сохраняется (пересоздается):**
-- ❌ Колода игрока (воссоздается из startingDeck)
-- ❌ Состояние мира (WorldState reinit)
-- ❌ Активные квесты
-- ❌ Состояние регионов
+**Что НЕ сохраняется (пересоздается) — ПРОБЛЕМА:**
+- ❌ Колода игрока (воссоздается из startingDeck) — **КРИТИЧНО**
+- ❌ Состояние мира (WorldState reinit) — **КРИТИЧНО**
+- ❌ Активные квесты — **КРИТИЧНО**
+- ❌ Состояние регионов — **КРИТИЧНО**
+- ❌ Completed events
+- ❌ World flags
 
-### Планы на улучшение
+### Требования для кампании
 
-TODO: Расширить GameSave для сохранения:
-- Колода игрока (deck composition)
-- Состояние мира (WorldState serialization)
-- Активные квесты
-- Посещенные регионы
-- Completed events
-- World flags
+**ОБЯЗАТЕЛЬНО для кампании (из дизайн-документа):**
+
+Игра должна сохранять:
+- ✅ **Колода игрока** (deck/discard/hand/buried) — состав карт
+- ✅ **WorldState** целиком:
+  - Регионы (состояния, якоря, репутация)
+  - Квесты (активные, завершённые)
+  - Флаги мира (последствия решений)
+  - WorldTension, Light/Dark Balance
+  - daysPassed
+- ✅ **Completed events** (oneTime события не повторяются)
+- ✅ **Player state** (ресурсы, проклятия, баланс)
+
+**Без этого кампания не работает:**
+- Игрок теряет прогресс между сессиями
+- Последствия решений не сохраняются
+- Мир сбрасывается (нарушает дизайн-пиллар "мир помнит")
+
+### План обновления сохранений
+
+**Фаза 1: Расширить GameSave (КРИТИЧНО)**
+```swift
+struct GameSave: Codable {
+    // ... существующие поля ...
+    let playerDeck: [Card]           // NEW
+    let playerDiscard: [Card]        // NEW
+    let playerHand: [Card]           // NEW
+    let playerBuried: [Card]         // NEW
+    let worldStateData: WorldState   // NEW
+    let daysPassed: Int              // NEW
+}
+```
+
+**Фаза 2: WorldState Codable**
+- Сделать WorldState Codable
+- Сериализовать regions, quests, worldFlags, allEvents
+
+**Фаза 3: Тестирование**
+- Сохранение → загрузка → проверка состояния
+- Прогресс квестов сохраняется
+- Completed events не повторяются
+
+---
+
+## Система времени и деградации
+
+### Правила времени
+
+**Единица времени:** 1 день = 1 действие на карте
+
+**Что стоит время:**
+- Путешествие в соседний регион: `daysPassed += 1`
+- Путешествие в дальний регион: `daysPassed += 2`
+- Отдых в поселении: `daysPassed += 1`
+- Укрепление якоря: `daysPassed += 1`
+- Исследование события: `daysPassed += 0` (мгновенно)
+
+### Автоматическая деградация
+
+**Триггер:** Каждые 3 дня (`daysPassed % 3 == 0`)
+
+**Механизм (в WorldState):**
+```swift
+func checkTimeDegradation() {
+    guard daysPassed > 0 && daysPassed % 3 == 0 else { return }
+
+    // 1. Увеличить напряжение
+    worldTension += 2
+
+    // 2. С вероятностью (Tension/100) деградировать регион
+    let probability = Double(worldTension) / 100.0
+    if Double.random(in: 0...1) < probability {
+        degradeRandomRegion()
+    }
+}
+
+private func degradeRandomRegion() {
+    let stableRegions = regions.filter { $0.state == .stable }
+    guard let randomRegion = stableRegions.randomElement() else { return }
+
+    // Снизить целостность якоря на 20%
+    if var anchor = randomRegion.anchor {
+        anchor.integrity -= 20
+        // Обновить состояние региона на основе якоря
+        region.updateStateFromAnchor()
+    }
+}
+```
+
+**Вызов:**
+- После каждого действия (Travel, Rest, StrengthenAnchor)
+- В `WorldState.moveToRegion()` или отдельный метод `advanceTime()`
 
 ---
 
