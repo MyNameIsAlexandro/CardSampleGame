@@ -1,0 +1,822 @@
+# Техническая документация проекта
+# Twilight Marches (Сумрачные Пределы)
+
+**Версия:** 0.2.0 MVP
+**Последнее обновление:** 16 января 2026
+**Платформа:** iOS (SwiftUI)
+
+---
+
+## 📋 Содержание
+
+1. [Обзор проекта](#обзор-проекта)
+2. [Архитектура](#архитектура)
+3. [Структура проекта](#структура-проекта)
+4. [Модели данных](#модели-данных)
+5. [View компоненты](#view-компоненты)
+6. [Системы и менеджеры](#системы-и-менеджеры)
+7. [Потоки данных](#потоки-данных)
+8. [Интеграционные точки](#интеграционные-точки)
+9. [Сохранения](#сохранения)
+10. [Будущие задачи](#будущие-задачи)
+
+---
+
+## Обзор проекта
+
+**Twilight Marches** - deck-building игра с системой исследования мира, вдохновленная славянской мифологией.
+
+### Технологический стек
+
+- **Язык:** Swift 5.9+
+- **UI Framework:** SwiftUI
+- **Min iOS:** 16.0+
+- **Архитектура:** MVVM + ObservableObject
+- **Персистентность:** UserDefaults (JSON)
+- **Управление состоянием:** Combine (@Published)
+
+### Ключевые особенности
+
+- ✅ Deck-building механика (Dominion-like)
+- ✅ Система исследования мира (state-driven regions)
+- ✅ События с выборами и последствиями
+- ✅ Система балансов (Light/Dark)
+- ✅ Автосохранение
+- ✅ 3 слота сохранений
+- ✅ Русская локализация
+
+---
+
+## Архитектура
+
+### Общая архитектура
+
+```
+┌─────────────────────────────────────────────┐
+│           ContentView (Root)                │
+│  (Navigation + State Management)            │
+└──────────────┬──────────────────────────────┘
+               │
+      ┌────────┴─────────┐
+      │                  │
+      ▼                  ▼
+┌──────────────┐  ┌──────────────────┐
+│ Hero Select  │  │  WorldMapView    │
+│   Screen     │  │  (Main Game)     │
+└──────┬───────┘  └────────┬─────────┘
+       │                   │
+       ▼                   ├──► RegionDetailView
+┌──────────────┐           │      │
+│ Save Slots   │           │      └──► EventView
+│   Screen     │           │             │
+└──────────────┘           │             └──► GameBoardView (Combat)
+                           │
+                           └──► PlayerInfoBar
+                                WorldInfoBar
+```
+
+### MVVM Pattern
+
+```
+┌─────────────────┐     ┌──────────────────┐     ┌─────────────┐
+│     Models      │────▶│  ObservableObject │────▶│    Views    │
+│  (Data Layer)   │     │   (View Models)   │     │  (UI Layer) │
+└─────────────────┘     └──────────────────┘     └─────────────┘
+  • Player              • GameState                 • ContentView
+  • Card                • WorldState                • WorldMapView
+  • Region              • SaveManager               • EventView
+  • GameEvent                                       • GameBoardView
+```
+
+### Поток управления
+
+```
+User Action → View → ViewModel (@Published) → Model Update → View Update
+                ↓
+           Side Effects:
+           • Auto-save
+           • State changes
+           • Event triggers
+```
+
+---
+
+## Структура проекта
+
+### Директории
+
+```
+CardSampleGame/
+├── Models/                   # Модели данных
+│   ├── Card.swift           # Модель карты
+│   ├── CardType.swift       # Типы карт и редкость
+│   ├── Player.swift         # Модель игрока
+│   ├── GameState.swift      # Состояние игры
+│   ├── GameSave.swift       # Система сохранений
+│   ├── ExplorationModels.swift  # Регионы, события, квесты
+│   └── WorldState.swift     # Глобальное состояние мира
+│
+├── Views/                   # UI компоненты
+│   ├── GameBoardView.swift  # Боевой экран (карточная битва)
+│   ├── PlayerHandView.swift # Рука игрока
+│   ├── CardView.swift       # Отображение карт
+│   ├── WorldMapView.swift   # Карта мира (основной экран)
+│   ├── EventView.swift      # События с выборами
+│   └── RulesView.swift      # Правила игры
+│
+├── Data/                    # Игровые данные
+│   └── TwilightMarchesCards.swift  # Все карты, герои, события
+│
+├── Utilities/               # Утилиты
+│   └── Localization.swift   # Русская локализация
+│
+├── ContentView.swift        # Корневой View (меню, выбор героя)
+│
+└── Documentation/           # Документация
+    ├── GAME_DESIGN_DOCUMENT.md
+    ├── EXPLORATION_CORE_DESIGN.md
+    └── TECHNICAL_DOCUMENTATION.md (этот файл)
+```
+
+---
+
+## Модели данных
+
+### 1. Card (Карта)
+
+**Файл:** `Models/Card.swift`
+
+```swift
+struct Card: Identifiable, Codable {
+    let id: UUID
+    let name: String
+    let type: CardType          // .blessing, .creature, .curse, etc.
+    let rarity: CardRarity      // .common, .uncommon, .rare, .legendary
+    let description: String
+    let cost: Int?              // Стоимость покупки (вера)
+    let abilities: [CardAbility]
+    let balance: CardBalance    // .light, .neutral, .dark
+    let realm: Realm            // .yav, .nav, .prav
+
+    // Опционально
+    let health: Int?
+    let power: Int?
+    let defense: Int?
+    let curseType: CurseType?
+}
+```
+
+**Связи:**
+- Используется в `Player.deck`, `Player.hand`, `Player.discard`
+- Создается в `TwilightMarchesCards`
+
+---
+
+### 2. Player (Игрок)
+
+**Файл:** `Models/Player.swift`
+
+```swift
+class Player: ObservableObject {
+    @Published var name: String
+    @Published var health: Int
+    @Published var maxHealth: Int
+    @Published var hand: [Card]
+    @Published var deck: [Card]
+    @Published var discard: [Card]
+    @Published var buried: [Card]
+    @Published var faith: Int           // Ресурс для покупки карт
+    @Published var maxFaith: Int
+    @Published var balance: Int         // -100 (dark) to +100 (light)
+    @Published var activeCurses: [ActiveCurse]
+
+    func drawCards(_ count: Int)
+    func playCard(_ card: Card)
+    func discardHand()
+    func shuffleDeck()
+}
+```
+
+**Связи:**
+- Управляется `GameState.currentPlayer`
+- Используется в `WorldMapView`, `EventView`, `GameBoardView`
+
+---
+
+### 3. GameState (Состояние игры)
+
+**Файл:** `Models/GameState.swift`
+
+```swift
+class GameState: ObservableObject {
+    @Published var players: [Player]
+    @Published var currentPhase: GamePhase
+    @Published var turnNumber: Int
+    @Published var encountersDefeated: Int
+    @Published var activeEncounter: Card?
+    @Published var encounterDeck: [Card]
+    @Published var marketCards: [Card]
+    @Published var worldState: WorldState  // Система исследования
+
+    var currentPlayer: Player
+
+    func startGame()
+    func nextPhase()
+    func purchaseCard(_ card: Card)
+    func endTurn()
+}
+```
+
+**Связи:**
+- Главный ViewModel приложения
+- Содержит `WorldState` для исследования
+- Используется в `ContentView`, `GameBoardView`
+
+---
+
+### 4. WorldState (Мир исследования)
+
+**Файл:** `Models/WorldState.swift`
+
+```swift
+class WorldState: ObservableObject {
+    @Published var regions: [Region]
+    @Published var worldTension: Int        // 0-100
+    @Published var lightDarkBalance: Int    // 0-100
+    @Published var mainQuestStage: Int      // 1-5
+    @Published var activeQuests: [Quest]
+    @Published var completedQuests: [String]
+    @Published var worldFlags: [String: Bool]
+    @Published var allEvents: [GameEvent]
+    @Published var currentRegionId: UUID?
+    @Published var daysPassed: Int
+
+    func getAvailableEvents(for region: Region) -> [GameEvent]
+    func applyConsequences(_ cons: EventConsequences, to player: Player, in regionId: UUID)
+    func strengthenAnchor(in regionId: UUID, amount: Int) -> Bool
+}
+```
+
+**Связи:**
+- Вложен в `GameState.worldState`
+- Управляет регионами, событиями, квестами
+- Используется в `WorldMapView`, `EventView`
+
+---
+
+### 5. ExplorationModels
+
+**Файл:** `Models/ExplorationModels.swift`
+
+Содержит:
+- `Region` - игровой регион с состоянием
+- `Anchor` - якорь Яви (sacred object)
+- `GameEvent` - событие с выборами
+- `EventChoice` - выбор в событии
+- `EventRequirements` - требования для выбора
+- `EventConsequences` - последствия выбора
+- `Quest` - квест (главный/побочный)
+
+**Ключевые структуры:**
+
+```swift
+struct Region: Identifiable {
+    let id: UUID
+    let name: String
+    let type: RegionType  // .forest, .swamp, .mountain, etc.
+    var state: RegionState  // .stable, .borderland, .breach
+    var anchor: Anchor?
+    var availableEvents: [String]
+    var activeQuests: [String]
+    var reputation: Int
+}
+
+struct GameEvent: Identifiable {
+    let id: UUID
+    let eventType: EventType  // .combat, .ritual, .narrative, etc.
+    let title: String
+    let description: String
+    let choices: [EventChoice]
+    var oneTime: Bool
+    var completed: Bool
+}
+
+struct EventConsequences {
+    var faithChange: Int?
+    var healthChange: Int?
+    var balanceChange: Int?
+    var tensionChange: Int?
+    var reputationChange: Int?
+    var addCards: [String]?
+    var addCurse: String?
+    var anchorIntegrityChange: Int?
+    var message: String?
+}
+```
+
+---
+
+## View компоненты
+
+### Иерархия View
+
+```
+ContentView (Root)
+├── characterSelectionView
+│   ├── CompactCardView (hero cards)
+│   └── Continue / New Game buttons
+├── saveSlotSelectionView
+│   └── SaveSlotCard (x3)
+├── loadSlotSelectionView (Continue flow)
+│   └── LoadSlotCard (existing saves)
+└── WorldMapView (main game screen)
+    ├── playerInfoBar (health, faith, balance)
+    ├── worldInfoBar (tension, balance, days)
+    ├── RegionCardView (region list)
+    └── RegionDetailView (sheet)
+        ├── regionHeader
+        ├── anchorSection
+        ├── actionsSection
+        └── EventView (sheet)
+            ├── eventHeader
+            ├── choiceButton
+            └── consequencesPreview
+```
+
+---
+
+### 1. ContentView
+
+**Файл:** `ContentView.swift`
+
+**Ответственность:**
+- Навигация между экранами
+- Управление состоянием приложения
+- Выбор героя и сохранений
+- Создание/загрузка игры
+
+**Состояния:**
+```swift
+@State private var showingWorldMap: Bool
+@State private var showingSaveSlots: Bool
+@State private var showingLoadSlots: Bool
+@StateObject private var gameState: GameState
+@StateObject private var saveManager: SaveManager
+```
+
+**Функции:**
+- `startGame(in slot: Int)` - создать новую игру
+- `loadGame(from slot: Int)` - загрузить сохранение
+- `handleContinueGame()` - умная загрузка (1 слот = автозагрузка)
+
+---
+
+### 2. WorldMapView
+
+**Файл:** `Views/WorldMapView.swift`
+
+**Ответственность:**
+- Основной игровой экран
+- Отображение карты мира (список регионов)
+- Информация о игроке и мире
+- Навигация к регионам
+
+**Параметры:**
+```swift
+@ObservedObject var worldState: WorldState
+@ObservedObject var player: Player
+var onExit: (() -> Void)?
+```
+
+**Компоненты:**
+- `playerInfoBar` - статы игрока (здоровье, вера, баланс)
+- `worldInfoBar` - глобальные параметры (напряжение, баланс, дни)
+- `RegionCardView` - карточки регионов
+- `RegionDetailView` - детали региона (sheet)
+
+---
+
+### 3. RegionDetailView
+
+**Файл:** `Views/WorldMapView.swift` (вложен)
+
+**Ответственность:**
+- Детальная информация о регионе
+- Информация о якоре (anchor)
+- Доступные действия
+- Триггер событий
+
+**Действия:**
+- 🚶 Путешествовать (TODO)
+- 😴 Отдохнуть (+здоровье, +день)
+- 🛒 Торговать (рынок карт) (TODO)
+- ⚡ Укрепить якорь (-вера, +целостность)
+- 🔍 Исследовать (триггер события)
+
+---
+
+### 4. EventView
+
+**Файл:** `Views/EventView.swift`
+
+**Ответственность:**
+- Отображение события
+- Показ выборов с требованиями
+- Предпросмотр последствий
+- Применение выбранного действия
+
+**Логика:**
+- Проверка требований (`EventRequirements.canMeet()`)
+- Конвертация баланса Int → CardBalance enum
+- Отображение последствий (faith↑, health↓, etc.)
+- Вызов `worldState.applyConsequences()`
+
+---
+
+### 5. GameBoardView
+
+**Файл:** `Views/GameBoardView.swift`
+
+**Ответственность:**
+- Карточная битва (deck-building)
+- Фазы боя (draw → market → play → enemy → end)
+- Рука игрока, рынок карт
+- Бои с монстрами
+
+**Статус:** Отключен в текущем флоу (будет интегрирован с боевыми событиями)
+
+**TODO:** Открывать GameBoardView из EventView при выборе "Вступить в бой"
+
+---
+
+## Системы и менеджеры
+
+### 1. SaveManager
+
+**Файл:** `Models/GameSave.swift`
+
+**Функции:**
+```swift
+class SaveManager: ObservableObject {
+    func saveGame(to slot: Int, gameState: GameState)
+    func loadGame(from slot: Int) -> GameSave?
+    func deleteSave(from slot: Int)
+    var allSaves: [GameSave]
+}
+```
+
+**Хранение:** `UserDefaults` (JSON encoding)
+
+**Структура сохранения:**
+```swift
+struct GameSave: Codable {
+    let slotNumber: Int
+    let characterName: String
+    let turnNumber: Int
+    let health: Int
+    let maxHealth: Int
+    let faith: Int
+    let balance: Int
+    let encountersDefeated: Int
+    let timestamp: Date
+}
+```
+
+**Слоты:** 3 доступных слота (1, 2, 3)
+
+---
+
+### 2. Localization System
+
+**Файл:** `Utilities/Localization.swift`
+
+**Использование:**
+```swift
+Text(L10n.tmGameTitle.localized)
+Text(L10n.buttonStartAdventure.localized)
+```
+
+**Поддержка:** Русский язык (все тексты в игре)
+
+---
+
+### 3. Event System
+
+**Компоненты:**
+- `WorldState.allEvents` - все события игры
+- `WorldState.getAvailableEvents(for region)` - фильтрация по региону
+- `EventView` - UI для отображения
+- `applyConsequences()` - применение результатов
+
+**Типы событий:**
+1. **Combat** - боевое событие
+2. **Ritual** - моральный выбор (Light/Dark)
+3. **Narrative** - встреча с NPC
+4. **Exploration** - исследование локации
+5. **World Shift** - глобальное событие
+
+**Флоу:**
+```
+Player → Region → Explore → Random Event → Choice → Consequences → Apply
+```
+
+---
+
+## Потоки данных
+
+### 1. Создание новой игры
+
+```
+User selects hero
+    → ContentView.startGame(in slot)
+        → Create Player (from hero)
+        → Deck = TwilightMarchesCards.createStartingDeck(hero)
+        → GameState.players = [player]
+        → GameState.worldState = WorldState() (auto-init)
+        → SaveManager.saveGame()
+        → Show WorldMapView
+```
+
+### 2. Загрузка игры
+
+```
+User clicks Continue
+    → ContentView.handleContinueGame()
+        → If 1 save: loadGame() directly
+        → If multiple: show loadSlotSelectionView
+            → User selects slot
+            → loadGame(from slot)
+                → Create Player from GameSave
+                → Restore stats (health, faith, balance)
+                → GameState.worldState = WorldState() (new world)
+                → Show WorldMapView
+```
+
+### 3. Исследование региона
+
+```
+WorldMapView → User taps region
+    → RegionDetailView (sheet)
+        → User taps "Исследовать"
+            → triggerExploration()
+                → WorldState.getAvailableEvents(for region)
+                → Pick random event
+                → Show EventView (sheet)
+                    → User selects choice
+                        → handleEventChoice()
+                            → WorldState.applyConsequences()
+                                → Update player stats
+                                → Update region state
+                                → Update world tension/balance
+                            → If oneTime: mark completed
+                        → Dismiss EventView
+```
+
+### 4. Применение последствий
+
+```
+EventChoice selected
+    → EventConsequences
+        → faithChange → Player.faith += value
+        → healthChange → Player.health += value
+        → balanceChange → Player.balance += value
+        → tensionChange → WorldState.worldTension += value
+        → reputationChange → Region.reputation += value
+        → anchorIntegrityChange → Anchor.integrity += value
+        → addCards → Player.deck.append(cards)
+        → addCurse → Player.activeCurses.append(curse)
+        → setFlags → WorldState.worldFlags[key] = value
+```
+
+### 5. Автосохранение
+
+```
+WorldMapView.onExit
+    → SaveManager.saveGame(to slot, gameState)
+        → Create GameSave from current state
+        → Encode to JSON
+        → Save to UserDefaults
+```
+
+---
+
+## Интеграционные точки
+
+### 1. Боевая система ← События
+
+**TODO:** Интегрировать GameBoardView с боевыми событиями
+
+**План:**
+```swift
+// In EventView.swift
+if eventType == .combat && choice == "Вступить в бой" {
+    // Trigger combat
+    showingCombat = true
+    selectedMonster = event.monster
+}
+
+// Show GameBoardView as sheet
+.sheet(isPresented: $showingCombat) {
+    GameBoardView(
+        gameState: gameState,
+        monster: selectedMonster,
+        onVictory: { applyVictoryRewards() },
+        onDefeat: { applyDefeatPenalties() }
+    )
+}
+```
+
+---
+
+### 2. Рынок карт ← Регионы
+
+**TODO:** Добавить действие "Торговать" в RegionDetailView
+
+**План:**
+- Кнопка "Торговать" в actionsSection
+- Открывать GameBoardView (только фаза рынка)
+- Или создать отдельный MarketView
+
+---
+
+### 3. Путешествия между регионами
+
+**TODO:** Реализовать систему путешествий
+
+**План:**
+```swift
+func travelTo(regionId: UUID) {
+    // Check adjacent regions
+    // Spend time (days += 1-3)
+    // Random event chance
+    // Update currentRegionId
+    // Auto-save
+}
+```
+
+---
+
+### 4. Квесты
+
+**TODO:** Активация и отслеживание квестов
+
+**План:**
+- Квесты появляются через события
+- Отображаются в RegionDetailView.questsSection
+- Прогресс отслеживается в WorldState.activeQuests
+- Награды при завершении
+
+---
+
+## Сохранения
+
+### Что сохраняется
+
+**Через GameSave:**
+- ✅ Имя персонажа
+- ✅ Здоровье (текущее/макс)
+- ✅ Вера
+- ✅ Баланс Light/Dark
+- ✅ Номер хода
+- ✅ Побежденные враги
+- ✅ Дата сохранения
+
+**Что НЕ сохраняется (пересоздается):**
+- ❌ Колода игрока (воссоздается из startingDeck)
+- ❌ Состояние мира (WorldState reinit)
+- ❌ Активные квесты
+- ❌ Состояние регионов
+
+### Планы на улучшение
+
+TODO: Расширить GameSave для сохранения:
+- Колода игрока (deck composition)
+- Состояние мира (WorldState serialization)
+- Активные квесты
+- Посещенные регионы
+- Completed events
+- World flags
+
+---
+
+## Будущие задачи
+
+### High Priority
+
+1. **🎯 Интеграция боевой системы с событиями**
+   - Триггер GameBoardView из EventView
+   - Передача монстра в бой
+   - Обработка победы/поражения
+   - Применение наград/штрафов
+
+2. **🗺️ Система путешествий**
+   - Перемещение между регионами
+   - Затраты времени и ресурсов
+   - Случайные события в пути
+   - Визуализация доступных маршрутов
+
+3. **💾 Расширение системы сохранений**
+   - Сохранение состояния мира
+   - Сохранение колоды игрока
+   - Сохранение квестов
+   - Сохранение флагов
+
+### Medium Priority
+
+4. **🌍 Расширение карты мира**
+   - Добавить 7-10 регионов
+   - Разнообразие типов (горы, степи, города)
+   - Уникальные якоря для каждого
+
+5. **📜 Система квестов**
+   - Главный квест (5 актов)
+   - Побочные квесты (15+)
+   - Отслеживание прогресса
+   - Награды и последствия
+
+6. **✨ Больше событий**
+   - 30-50 уникальных событий
+   - События для каждого типа региона
+   - Редкие/эпические события
+   - Сюжетные события
+
+### Low Priority
+
+7. **🎨 Визуальные улучшения**
+   - Анимации переходов
+   - Визуальная карта (не список)
+   - Иконки регионов
+   - Иллюстрации событий
+
+8. **🎵 Звук и музыка**
+   - Фоновая музыка для регионов
+   - Звуковые эффекты
+   - Озвучка событий
+
+9. **📊 Статистика и достижения**
+   - Глобальная статистика игрока
+   - Достижения (achievements)
+   - Таблица лидеров (local)
+
+---
+
+## Соглашения о коде
+
+### Стиль кода
+
+- **SwiftUI views:** PascalCase (`WorldMapView`)
+- **Functions:** camelCase (`handleContinueGame`)
+- **Constants:** camelCase (`hasSaves`)
+- **@Published properties:** camelCase
+- **Enums:** PascalCase cases (`RegionState.stable`)
+
+### Комментарии
+
+```swift
+// MARK: - Section Name (для разделов)
+// TODO: Task description (для задач)
+// Однострочные комментарии для пояснений
+```
+
+### Naming Conventions
+
+- **Bool properties:** `isEnabled`, `hasSaves`, `showingMenu`
+- **Collections:** plural (`regions`, `events`, `cards`)
+- **Actions:** verb-based (`handleContinueGame`, `applyConsequences`)
+
+---
+
+## Контакты и ресурсы
+
+**Документация:**
+- [GAME_DESIGN_DOCUMENT.md](./GAME_DESIGN_DOCUMENT.md) - игровой дизайн
+- [EXPLORATION_CORE_DESIGN.md](./EXPLORATION_CORE_DESIGN.md) - система исследования
+- [TECHNICAL_DOCUMENTATION.md](./TECHNICAL_DOCUMENTATION.md) - этот файл
+
+**Git:**
+- Branch: `claude/ios-card-game-m5L5r`
+- Repository: CardSampleGame
+
+---
+
+## История изменений
+
+### v0.2.0 (16.01.2026) - Exploration Core MVP
+- ✅ Реализована система исследования мира
+- ✅ WorldMapView как основной экран игры
+- ✅ Система событий (5 типов, 5 начальных событий)
+- ✅ Регионы с якорями (3 тестовых региона)
+- ✅ Глобальные параметры (напряжение, баланс)
+- ✅ Кнопка "Продолжить" на главном экране
+
+### v0.1.0 (13.01.2026) - Deck-Building Core
+- ✅ Базовая deck-building механика
+- ✅ 4 героя со стартовыми колодами (10 карт)
+- ✅ Система рынка (15+ карт)
+- ✅ Карточные бои
+- ✅ Система сохранений (3 слота)
+- ✅ Автосохранение
+
+---
+
+**Конец документа**
