@@ -296,7 +296,7 @@ struct EventRequirements: Codable, Hashable {
 struct EventConsequences: Codable, Hashable {
     var faithChange: Int?
     var healthChange: Int?
-    var balanceChange: Int?         // Изменение Light/Dark (-100 to +100)
+    var balanceChange: Int?         // Изменение Light/Dark (дельта: +N сдвиг к Свету, -N к Тьме)
     var tensionChange: Int?
     var reputationChange: Int?
     var addCards: [String]?         // ID карт для добавления

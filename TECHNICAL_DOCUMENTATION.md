@@ -14,6 +14,17 @@
 
 **Каноническая декомпозиция дизайна:** См. [GAME_DESIGN_DOCUMENT.md](./GAME_DESIGN_DOCUMENT.md) (уровни 0-8)
 
+### Канонические шкалы (ЖЁСТКО)
+
+| Параметр | Шкала | Комментарий |
+|----------|-------|-------------|
+| **WorldTension** | 0-100 | 0=спокойствие, 100=Game Over |
+| **Light/Dark Balance** | 0-100 | 0=Тьма, 50=Нейтрально, 100=Свет |
+| **Anchor Integrity** | 0-100 | 0=разрушен, 100=полная сила |
+| **Reputation** | -100 до +100 | Отношение региона к игроку |
+
+> **ЗАПРЕЩЕНО:** Использовать отрицательные значения для Balance и Tension.
+
 ---
 
 ## 📋 Содержание
@@ -196,7 +207,7 @@ class Player: ObservableObject {
     @Published var buried: [Card]
     @Published var faith: Int           // Ресурс для покупки карт
     @Published var maxFaith: Int
-    @Published var balance: Int         // -100 (dark) to +100 (light)
+    @Published var balance: Int         // 0 (dark) to 100 (light), 50 = neutral
     @Published var activeCurses: [ActiveCurse]
 
     func drawCards(_ count: Int)
@@ -791,7 +802,7 @@ case .strengthenAnchor:
 - Путешествие в дальний регион: `daysPassed += 2`
 - Отдых в поселении: `daysPassed += 1`
 - Укрепление якоря: `daysPassed += 1`
-- Исследование события: `daysPassed += 0` (мгновенно)
+- Исследование события: `daysPassed += 1` (исключение: события с `instant: true`)
 
 ### Автоматическая деградация
 
@@ -813,15 +824,48 @@ func checkTimeDegradation() {
 }
 
 private func degradeRandomRegion() {
-    let stableRegions = regions.filter { $0.state == .stable }
-    guard let randomRegion = stableRegions.randomElement() else { return }
+    // ВАЖНО: Stable регионы НЕ деградируют напрямую!
+    // Деградируют только Borderland (вес 1) и Breach (вес 2)
+    // Это поддерживает fantasy "граница трещит"
+
+    var candidates: [(region: Region, weight: Int)] = []
+    for region in regions {
+        switch region.state {
+        case .stable:
+            continue  // Stable не деградируют напрямую
+        case .borderland:
+            candidates.append((region, 1))
+        case .breach:
+            candidates.append((region, 2))
+        }
+    }
+
+    guard !candidates.isEmpty else { return }
+
+    // Weighted random selection
+    let totalWeight = candidates.reduce(0) { $0 + $1.weight }
+    var random = Int.random(in: 1...totalWeight)
+    for (region, weight) in candidates {
+        random -= weight
+        if random <= 0 {
+            degradeRegion(region)
+            break
+        }
+    }
+}
+
+private func degradeRegion(_ region: Region) {
+    guard var anchor = region.anchor, anchor.integrity > 0 else { return }
+
+    // Проверка сопротивления якоря (шанс = integrity * 10%)
+    let resistChance = Double(anchor.integrity) / 100.0 * 0.5
+    if Double.random(in: 0...1) < resistChance {
+        return  // Якорь выдержал
+    }
 
     // Снизить целостность якоря на 20%
-    if var anchor = randomRegion.anchor {
-        anchor.integrity -= 20
-        // Обновить состояние региона на основе якоря
-        region.updateStateFromAnchor()
-    }
+    anchor.integrity -= 20
+    region.updateStateFromAnchor()
 }
 ```
 
