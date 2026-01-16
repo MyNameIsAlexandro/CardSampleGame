@@ -53,6 +53,13 @@ class WorldState: ObservableObject {
         // Создаем начальные события
         allEvents = createInitialEvents()
 
+        // Создаем начальные квесты (Act I)
+        let initialQuests = createInitialQuests()
+        // Main quest starts automatically
+        if let mainQuest = initialQuests.first(where: { $0.questType == .main }) {
+            startQuest(mainQuest)
+        }
+
         // Устанавливаем начальные параметры
         worldTension = 30
         lightDarkBalance = 50
@@ -1142,5 +1149,233 @@ class WorldState: ObservableObject {
         events.append(realmShiftEvent)
 
         return events
+    }
+
+    // MARK: - Initial Quests (Act I)
+
+    private func createInitialQuests() -> [Quest] {
+        var quests: [Quest] = []
+
+        // MAIN QUEST: Путь Защитника (5 stages)
+        let mainQuest = Quest(
+            id: UUID(),
+            title: "Путь Защитника",
+            description: "Деревня в опасности. Навь усиливается с каждым днем. Вы должны укрепить три главных якоря и защитить границу между мирами.",
+            questType: .main,
+            stage: 0,
+            objectives: [
+                QuestObjective(
+                    description: "Узнать о трех главных якорях от старосты",
+                    completed: false
+                ),
+                QuestObjective(
+                    description: "Найти Священный Дуб",
+                    completed: false
+                ),
+                QuestObjective(
+                    description: "Укрепить Дуб или найти союзника",
+                    completed: false
+                ),
+                QuestObjective(
+                    description: "Исследовать прорыв Нави в Чёрной Низине",
+                    completed: false
+                ),
+                QuestObjective(
+                    description: "Победить Лешего-Хранителя",
+                    completed: false
+                )
+            ],
+            rewards: QuestRewards(
+                faith: 20,
+                cards: ["defender_blessing", "anchor_power"],
+                artifact: "guardian_seal",
+                experience: 100
+            ),
+            completed: false
+        )
+        quests.append(mainQuest)
+
+        // SIDE QUEST 1: Потерянный ребенок
+        let lostChildQuest = Quest(
+            id: UUID(),
+            title: "Потерянный Ребенок",
+            description: "Маленький ребенок пропал в лесу три дня назад. Его родители в отчаянии. Лес становится все опаснее с каждым часом.",
+            questType: .side,
+            stage: 0,
+            objectives: [
+                QuestObjective(
+                    description: "Найти следы ребенка в лесу",
+                    completed: false
+                ),
+                QuestObjective(
+                    description: "Спасти ребенка от лесных духов",
+                    completed: false
+                ),
+                QuestObjective(
+                    description: "Вернуть ребенка в деревню",
+                    completed: false
+                )
+            ],
+            rewards: QuestRewards(
+                faith: 8,
+                cards: ["village_gratitude"],
+                experience: 30
+            ),
+            completed: false
+        )
+        quests.append(lostChildQuest)
+
+        // SIDE QUEST 2: Торговые пути
+        let tradeRoutesQuest = Quest(
+            id: UUID(),
+            title: "Безопасность Торговых Путей",
+            description: "Торговцы жалуются на участившиеся нападения на дорогах. Нужно очистить три ключевых участка пути.",
+            questType: .side,
+            stage: 0,
+            objectives: [
+                QuestObjective(
+                    description: "Очистить лесную дорогу от тварей",
+                    completed: false
+                ),
+                QuestObjective(
+                    description: "Защитить караван через горный перевал",
+                    completed: false
+                ),
+                QuestObjective(
+                    description: "Договориться с лешим о безопасном проходе",
+                    completed: false
+                )
+            ],
+            rewards: QuestRewards(
+                faith: 12,
+                cards: ["merchant_discount", "trade_blessing"],
+                experience: 40
+            ),
+            completed: false
+        )
+        quests.append(tradeRoutesQuest)
+
+        // SIDE QUEST 3: Сделка с ведьмой
+        let witchQuestLight = Quest(
+            id: UUID(),
+            title: "Тайна Болотной Ведьмы",
+            description: "Болотная ведьма знает древние секреты. Она может помочь в борьбе с Навью, но за какую цену?",
+            questType: .side,
+            stage: 0,
+            objectives: [
+                QuestObjective(
+                    description: "Найти ведьму в болоте",
+                    completed: false
+                ),
+                QuestObjective(
+                    description: "Выслушать её предложение",
+                    completed: false
+                ),
+                QuestObjective(
+                    description: "Сделать выбор: принять сделку или найти другой путь",
+                    completed: false
+                )
+            ],
+            rewards: QuestRewards(
+                faith: 10,
+                cards: ["witch_knowledge"],
+                experience: 35
+            ),
+            completed: false
+        )
+        quests.append(witchQuestLight)
+
+        // SIDE QUEST 4: Курганы предков
+        let barrowQuest = Quest(
+            id: UUID(),
+            title: "Проклятие Курганов",
+            description: "Древние курганы вскрылись, и мертвые восстали. Нужно упокоить духов предков или победить их.",
+            questType: .side,
+            stage: 0,
+            objectives: [
+                QuestObjective(
+                    description: "Исследовать Разлом Курганов",
+                    completed: false
+                ),
+                QuestObjective(
+                    description: "Найти причину пробуждения мертвых",
+                    completed: false
+                ),
+                QuestObjective(
+                    description: "Упокоить духов или победить призраков",
+                    completed: false
+                )
+            ],
+            rewards: QuestRewards(
+                faith: 15,
+                cards: ["ancestral_blessing", "warrior_spirit"],
+                artifact: "ancient_relic",
+                experience: 50
+            ),
+            completed: false
+        )
+        quests.append(barrowQuest)
+
+        // SIDE QUEST 5: Странствующий монах
+        let monkQuest = Quest(
+            id: UUID(),
+            title: "Испытание Монаха",
+            description: "Странствующий монах предлагает испытание духа. Пройдя его, вы обретете мудрость и силу.",
+            questType: .side,
+            stage: 0,
+            objectives: [
+                QuestObjective(
+                    description: "Найти монаха в священном месте",
+                    completed: false
+                ),
+                QuestObjective(
+                    description: "Пройти три испытания: тела, разума и духа",
+                    completed: false
+                ),
+                QuestObjective(
+                    description: "Доказать свою чистоту намерений",
+                    completed: false
+                )
+            ],
+            rewards: QuestRewards(
+                faith: 18,
+                cards: ["inner_peace", "spiritual_armor"],
+                experience: 45
+            ),
+            completed: false
+        )
+        quests.append(monkQuest)
+
+        // SIDE QUEST 6: Дух горного перевала
+        let mountainSpiritQuest = Quest(
+            id: UUID(),
+            title: "Благословение Гор",
+            description: "Горный дух испытывает путников. Докажите свою силу или мудрость, чтобы получить благословение перевала.",
+            questType: .side,
+            stage: 0,
+            objectives: [
+                QuestObjective(
+                    description: "Добраться до горного перевала",
+                    completed: false
+                ),
+                QuestObjective(
+                    description: "Встретить горного духа",
+                    completed: false
+                ),
+                QuestObjective(
+                    description: "Пройти испытание или принести достойный дар",
+                    completed: false
+                )
+            ],
+            rewards: QuestRewards(
+                faith: 10,
+                cards: ["mountain_blessing", "stone_armor"],
+                experience: 35
+            ),
+            completed: false
+        )
+        quests.append(mountainSpiritQuest)
+
+        return quests
     }
 }
