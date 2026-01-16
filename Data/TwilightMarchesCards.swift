@@ -676,6 +676,447 @@ struct TwilightMarchesCards {
         return deck
     }
 
+    // MARK: - Card Registry (for event rewards)
+
+    /// Returns a card by its string ID used in events and quests
+    static func getCardByID(_ cardID: String) -> Card? {
+        // Create a dictionary mapping card IDs to cards
+        let rewardCards = createRewardCards()
+        let marketCards = createMarketCards()
+        let allCards = rewardCards + marketCards
+
+        // Map cards by their names or custom IDs
+        let cardMapping: [String: Card] = [
+            // Reward cards from events
+            "dark_power_card": rewardCards[0],     // Темная Сила
+            "ancient_blessing": rewardCards[1],    // Древнее Благословение
+            "merchant_blessing": rewardCards[2],   // Благословение Торговца
+            "witch_knowledge": rewardCards[3],     // Знание Ведьмы
+            "dark_pact": rewardCards[4],           // Темный Пакт
+            "ancestral_blessing": rewardCards[5],  // Благословение Предков
+            "realm_power": rewardCards[6],         // Сила Реальности
+            "nav_essence": rewardCards[7],         // Эссенция Нави
+            "village_gratitude": rewardCards[8],   // Благодарность Деревни
+            "merchant_discount": rewardCards[9],   // Торговая Скидка
+            "trade_blessing": rewardCards[10],     // Благословение Торговли
+            "warrior_spirit": rewardCards[11],     // Дух Воина
+            "inner_peace": rewardCards[12],        // Внутренний Покой
+            "spiritual_armor": rewardCards[13],    // Духовная Броня
+            "mountain_blessing": rewardCards[14],  // Благословение Гор
+            "stone_armor": rewardCards[15],        // Каменная Броня
+            "defender_blessing": rewardCards[16],  // Благословение Защитника
+            "anchor_power": rewardCards[17]        // Сила Якоря
+        ]
+
+        return cardMapping[cardID]
+    }
+
+    // MARK: - Event and Quest Reward Cards
+
+    static func createRewardCards() -> [Card] {
+        return [
+            // 1. Dark Power Card - from desecrating shrine ritual
+            Card(
+                id: UUID(),
+                name: "Темная Сила",
+                type: .special,
+                rarity: .rare,
+                description: "Сила, полученная осквернением святилища. Мощная, но опасная.",
+                cost: 3,
+                abilities: [
+                    CardAbility(
+                        name: "Темная Мощь",
+                        description: "Наносит 6 урона и восстанавливает 2 веры.",
+                        effect: .damage(amount: 6, type: .arcane)
+                    ),
+                    CardAbility(
+                        name: "Цена Силы",
+                        description: "Сдвигает баланс к тьме.",
+                        effect: .shiftBalance(towards: .dark, amount: 5)
+                    )
+                ],
+                balance: .dark,
+                realm: .nav
+            ),
+
+            // 2. Ancient Blessing - from wanderer event
+            Card(
+                id: UUID(),
+                name: "Древнее Благословение",
+                type: .special,
+                rarity: .uncommon,
+                description: "Древняя реликвия, найденная в путешествии.",
+                cost: 4,
+                abilities: [
+                    CardAbility(
+                        name: "Дар Предков",
+                        description: "Восстанавливает 4 здоровья и даёт 2 веры.",
+                        effect: .heal(amount: 4)
+                    )
+                ],
+                balance: .light,
+                realm: .yav
+            ),
+
+            // 3. Merchant Blessing - from trader event
+            Card(
+                id: UUID(),
+                name: "Благословение Торговца",
+                type: .resource,
+                rarity: .common,
+                description: "Талисман удачи от благодарного торговца.",
+                cost: 2,
+                abilities: [
+                    CardAbility(
+                        name: "Торговая Удача",
+                        description: "Даёт 3 веры и восстанавливает 2 здоровья.",
+                        effect: .gainFaith(amount: 3)
+                    )
+                ],
+                balance: .neutral,
+                realm: .yav
+            ),
+
+            // 4. Witch Knowledge - from witch event and quest
+            Card(
+                id: UUID(),
+                name: "Знание Ведьмы",
+                type: .special,
+                rarity: .rare,
+                description: "Тайные знания болотной ведьмы. Могущественны, но опасны.",
+                cost: 4,
+                abilities: [
+                    CardAbility(
+                        name: "Темная Мудрость",
+                        description: "Берёте 3 карты.",
+                        effect: .drawCards(count: 3)
+                    ),
+                    CardAbility(
+                        name: "Цена Знания",
+                        description: "Сдвигает баланс к тьме.",
+                        effect: .shiftBalance(towards: .dark, amount: 3)
+                    )
+                ],
+                balance: .dark,
+                realm: .nav
+            ),
+
+            // 5. Dark Pact - from witch event
+            Card(
+                id: UUID(),
+                name: "Темный Пакт",
+                type: .curse,
+                rarity: .rare,
+                description: "Пакт с тёмными силами. Даёт мощь ценой души.",
+                cost: 5,
+                abilities: [
+                    CardAbility(
+                        name: "Сила Пакта",
+                        description: "Даёт 5 веры и наносит 7 урона врагу.",
+                        effect: .damage(amount: 7, type: .arcane)
+                    ),
+                    CardAbility(
+                        name: "Проклятие Пакта",
+                        description: "Накладывает слабость на 2 хода.",
+                        effect: .applyCurse(type: .weakness, duration: 2)
+                    )
+                ],
+                balance: .dark,
+                realm: .nav,
+                curseType: .weakness
+            ),
+
+            // 6. Ancestral Blessing - from multiple events/quests
+            Card(
+                id: UUID(),
+                name: "Благословение Предков",
+                type: .special,
+                rarity: .rare,
+                description: "Благословение духов предков. Защищает и направляет.",
+                cost: 4,
+                abilities: [
+                    CardAbility(
+                        name: "Защита Предков",
+                        description: "Блокирует 6 урона и снимает одно проклятие.",
+                        effect: .removeCurse(type: nil)
+                    ),
+                    CardAbility(
+                        name: "Свет Предков",
+                        description: "Сдвигает баланс к свету.",
+                        effect: .shiftBalance(towards: .light, amount: 5)
+                    )
+                ],
+                balance: .light,
+                realm: .prav
+            ),
+
+            // 7. Realm Power - from realm shift event
+            Card(
+                id: UUID(),
+                name: "Сила Реальности",
+                type: .special,
+                rarity: .epic,
+                description: "Необработанная сила границы миров. Непредсказуема и опасна.",
+                cost: 6,
+                abilities: [
+                    CardAbility(
+                        name: "Разлом Реальности",
+                        description: "Наносит 10 урона всем врагам.",
+                        effect: .damage(amount: 10, type: .arcane)
+                    ),
+                    CardAbility(
+                        name: "Искажение",
+                        description: "Случайный эффект на баланс.",
+                        effect: .shiftBalance(towards: .dark, amount: 10)
+                    )
+                ],
+                balance: .dark,
+                realm: .nav
+            ),
+
+            // 8. Nav Essence - from realm shift event
+            Card(
+                id: UUID(),
+                name: "Эссенция Нави",
+                type: .resource,
+                rarity: .rare,
+                description: "Чистая эссенция мира мёртвых. Источник тёмной силы.",
+                cost: 3,
+                abilities: [
+                    CardAbility(
+                        name: "Сила Нави",
+                        description: "Даёт 5 веры.",
+                        effect: .gainFaith(amount: 5)
+                    ),
+                    CardAbility(
+                        name: "Развращение",
+                        description: "Сдвигает баланс к тьме на 8.",
+                        effect: .shiftBalance(towards: .dark, amount: 8)
+                    )
+                ],
+                balance: .dark,
+                realm: .nav
+            ),
+
+            // 9. Village Gratitude - from lost child quest
+            Card(
+                id: UUID(),
+                name: "Благодарность Деревни",
+                type: .special,
+                rarity: .uncommon,
+                description: "Жители деревни благодарны за спасение ребёнка.",
+                cost: 2,
+                abilities: [
+                    CardAbility(
+                        name: "Дар Общины",
+                        description: "Восстанавливает 5 здоровья и даёт 3 веры.",
+                        effect: .heal(amount: 5)
+                    ),
+                    CardAbility(
+                        name: "Добрая Воля",
+                        description: "Сдвигает баланс к свету.",
+                        effect: .shiftBalance(towards: .light, amount: 3)
+                    )
+                ],
+                balance: .light,
+                realm: .yav
+            ),
+
+            // 10. Merchant Discount - from trade routes quest
+            Card(
+                id: UUID(),
+                name: "Торговая Скидка",
+                type: .resource,
+                rarity: .common,
+                description: "Особая скидка от торговцев за защиту путей.",
+                cost: 1,
+                abilities: [
+                    CardAbility(
+                        name: "Выгодная Сделка",
+                        description: "Следующая карта стоит на 2 веры меньше.",
+                        effect: .gainFaith(amount: 2)
+                    )
+                ],
+                balance: .neutral,
+                realm: .yav
+            ),
+
+            // 11. Trade Blessing - from trade routes quest
+            Card(
+                id: UUID(),
+                name: "Благословение Торговли",
+                type: .special,
+                rarity: .uncommon,
+                description: "Благословение купеческой гильдии.",
+                cost: 3,
+                abilities: [
+                    CardAbility(
+                        name: "Процветание",
+                        description: "Даёт 4 веры и берёте 2 карты.",
+                        effect: .gainFaith(amount: 4)
+                    )
+                ],
+                balance: .neutral,
+                realm: .yav
+            ),
+
+            // 12. Warrior Spirit - from barrow quest
+            Card(
+                id: UUID(),
+                name: "Дух Воина",
+                type: .spirit,
+                rarity: .rare,
+                description: "Дух древнего воина, освобождённый из кургана.",
+                power: 6,
+                defense: 4,
+                health: 8,
+                cost: 4,
+                abilities: [
+                    CardAbility(
+                        name: "Воинская Доблесть",
+                        description: "Наносит 6 урона и получает +2 к защите.",
+                        effect: .damage(amount: 6, type: .physical)
+                    )
+                ],
+                balance: .neutral,
+                realm: .yav
+            ),
+
+            // 13. Inner Peace - from monk quest
+            Card(
+                id: UUID(),
+                name: "Внутренний Покой",
+                type: .special,
+                rarity: .rare,
+                description: "Состояние духовного равновесия, дарованное монахом.",
+                cost: 3,
+                abilities: [
+                    CardAbility(
+                        name: "Просветление",
+                        description: "Восстанавливает 6 здоровья и снимает все проклятия.",
+                        effect: .heal(amount: 6)
+                    ),
+                    CardAbility(
+                        name: "Баланс Духа",
+                        description: "Восстанавливает баланс к нейтральному.",
+                        effect: .shiftBalance(towards: .neutral, amount: 10)
+                    )
+                ],
+                balance: .light,
+                realm: .prav
+            ),
+
+            // 14. Spiritual Armor - from monk quest
+            Card(
+                id: UUID(),
+                name: "Духовная Броня",
+                type: .defense,
+                rarity: .rare,
+                description: "Незримая защита духа и тела.",
+                defense: 8,
+                cost: 4,
+                abilities: [
+                    CardAbility(
+                        name: "Защита Духа",
+                        description: "Блокирует 8 урона и предотвращает проклятия.",
+                        effect: .removeCurse(type: nil)
+                    )
+                ],
+                balance: .light,
+                realm: .prav
+            ),
+
+            // 15. Mountain Blessing - from mountain spirit quest
+            Card(
+                id: UUID(),
+                name: "Благословение Гор",
+                type: .special,
+                rarity: .uncommon,
+                description: "Благословение горного духа. Даёт силу и стойкость.",
+                cost: 3,
+                abilities: [
+                    CardAbility(
+                        name: "Сила Гор",
+                        description: "Наносит 5 урона и восстанавливает 3 здоровья.",
+                        effect: .damage(amount: 5, type: .physical)
+                    )
+                ],
+                balance: .neutral,
+                realm: .yav
+            ),
+
+            // 16. Stone Armor - from mountain spirit quest
+            Card(
+                id: UUID(),
+                name: "Каменная Броня",
+                type: .defense,
+                rarity: .uncommon,
+                description: "Магическая броня из камня горного духа.",
+                defense: 6,
+                cost: 3,
+                abilities: [
+                    CardAbility(
+                        name: "Несокрушимость",
+                        description: "Блокирует 6 урона. Не может быть разрушена эффектами.",
+                        effect: .shiftBalance(towards: .neutral, amount: 0)
+                    )
+                ],
+                balance: .neutral,
+                realm: .yav
+            ),
+
+            // 17. Defender Blessing - from main quest
+            Card(
+                id: UUID(),
+                name: "Благословение Защитника",
+                type: .special,
+                rarity: .legendary,
+                description: "Величайшее благословение за защиту мира от Нави.",
+                cost: 5,
+                abilities: [
+                    CardAbility(
+                        name: "Защитник Миров",
+                        description: "Восстанавливает 10 здоровья, даёт 5 веры, берёте 2 карты.",
+                        effect: .heal(amount: 10)
+                    ),
+                    CardAbility(
+                        name: "Сила Света",
+                        description: "Сильно сдвигает баланс к свету.",
+                        effect: .shiftBalance(towards: .light, amount: 15)
+                    )
+                ],
+                balance: .light,
+                realm: .prav
+            ),
+
+            // 18. Anchor Power - from main quest
+            Card(
+                id: UUID(),
+                name: "Сила Якоря",
+                type: .artifact,
+                rarity: .legendary,
+                description: "Сила священных якорей, держащих границу миров.",
+                power: 8,
+                defense: 8,
+                cost: 6,
+                abilities: [
+                    CardAbility(
+                        name: "Якорь Реальности",
+                        description: "Наносит 12 урона существам Нави. Восстанавливает якорь региона.",
+                        effect: .damage(amount: 12, type: .holy)
+                    ),
+                    CardAbility(
+                        name: "Стабилизация",
+                        description: "Снимает все проклятия и сдвигает баланс к свету.",
+                        effect: .removeCurse(type: nil)
+                    )
+                ],
+                balance: .light,
+                realm: .prav
+            )
+        ]
+    }
+
     // MARK: - Market Cards (for purchase during game)
 
     static func createMarketCards() -> [Card] {

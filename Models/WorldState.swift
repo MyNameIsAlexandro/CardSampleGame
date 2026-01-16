@@ -355,7 +355,60 @@ class WorldState: ObservableObject {
             }
         }
 
-        // TODO: Добавление карт, проклятий, артефактов
+        // Добавление карт в колоду игрока
+        if let cardIDs = consequences.addCards {
+            for cardID in cardIDs {
+                if let card = TwilightMarchesCards.getCardByID(cardID) {
+                    // Add card to player's discard pile (standard deck-building mechanic)
+                    player.discard.append(card)
+                }
+            }
+        }
+
+        // TODO: Добавление проклятий и артефактов
+        // if let curseID = consequences.addCurse { ... }
+        // if let artifactID = consequences.giveArtifact { ... }
+    }
+
+    // MARK: - Quest Management
+
+    /// Complete a quest and give rewards to the player
+    func completeQuest(_ questId: UUID, player: Player) {
+        guard let index = activeQuests.firstIndex(where: { $0.id == questId }) else { return }
+
+        var quest = activeQuests[index]
+        quest.completed = true
+
+        // Move quest from active to completed
+        completedQuests.append(quest)
+        activeQuests.remove(at: index)
+
+        // Give rewards
+        applyQuestRewards(quest.rewards, to: player)
+    }
+
+    /// Apply quest rewards to the player
+    func applyQuestRewards(_ rewards: QuestRewards, to player: Player) {
+        // Faith reward
+        if let faith = rewards.faith {
+            player.gainFaith(faith)
+        }
+
+        // Card rewards
+        if let cardIDs = rewards.cards {
+            for cardID in cardIDs {
+                if let card = TwilightMarchesCards.getCardByID(cardID) {
+                    // Add card to player's discard pile
+                    player.discard.append(card)
+                }
+            }
+        }
+
+        // TODO: Artifact rewards
+        // if let artifactID = rewards.artifact { ... }
+
+        // TODO: Experience rewards
+        // if let experience = rewards.experience { ... }
     }
 
     // MARK: - Data Creation (for MVP)
