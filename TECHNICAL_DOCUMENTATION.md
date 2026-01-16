@@ -1,7 +1,7 @@
 # Техническая документация проекта
 # Twilight Marches (Сумрачные Пределы)
 
-**Версия:** 0.2.0 MVP
+**Версия:** 0.3.0
 **Последнее обновление:** 16 января 2026
 **Платформа:** iOS (SwiftUI)
 
@@ -602,63 +602,101 @@ WorldMapView.onExit
 
 ## Интеграционные точки
 
-### 1. Боевая система ← События
+### 1. Боевая система ← События ✅
 
-**TODO:** Интегрировать GameBoardView с боевыми событиями
+**Статус:** РЕАЛИЗОВАНО
 
-**План:**
+**Реализация:**
 ```swift
-// In EventView.swift
-if eventType == .combat && choice == "Вступить в бой" {
-    // Trigger combat
+// GameEvent.swift
+struct GameEvent {
+    let monsterCard: Card?  // Карта монстра для боевых событий
+}
+
+// EventView.swift
+func initiateCombat(choice: EventChoice) {
+    // Create GameState with monster
+    let gameState = GameState(players: [player])
+    gameState.activeEncounter = event.monsterCard
     showingCombat = true
-    selectedMonster = event.monster
 }
 
-// Show GameBoardView as sheet
-.sheet(isPresented: $showingCombat) {
-    GameBoardView(
-        gameState: gameState,
-        monster: selectedMonster,
-        onVictory: { applyVictoryRewards() },
-        onDefeat: { applyDefeatPenalties() }
-    )
+.fullScreenCover(isPresented: $showingCombat) {
+    GameBoardView(gameState: combatGameState, onExit: handleCombatEnd)
 }
 ```
 
----
+**Как работает:**
+- Боевые события содержат `monsterCard` (например, Леший)
+- При выборе боевого действия создается временный GameState
+- Открывается GameBoardView с монстром как activeEncounter
+- После победы/поражения возвращаемся к результату события
+- Применяются последствия выбора
 
-### 2. Рынок карт ← Регионы
-
-**TODO:** Добавить действие "Торговать" в RegionDetailView
-
-**План:**
-- Кнопка "Торговать" в actionsSection
-- Открывать GameBoardView (только фаза рынка)
-- Или создать отдельный MarketView
+**Файлы:** `EventView.swift:280-328`, `ExplorationModels.swift:323`, `WorldState.swift:392-442`
 
 ---
 
-### 3. Путешествия между регионами
+### 2. Действия в регионах ✅
 
-**TODO:** Реализовать систему путешествий
+**Статус:** РЕАЛИЗОВАНО
 
-**План:**
+**Реализованные действия:**
+
+**a) Путешествие (Travel):**
 ```swift
-func travelTo(regionId: UUID) {
-    // Check adjacent regions
-    // Spend time (days += 1-3)
-    // Random event chance
-    // Update currentRegionId
-    // Auto-save
-}
+case .travel:
+    worldState.moveToRegion(region.id)  // Перемещение
+    onDismiss()                         // Закрыть детали региона
 ```
+- Перемещает игрока в выбранный регион
+- Отмечает регион как посещенный
+- Увеличивает `daysPassed` на 1
+
+**b) Отдых (Rest):**
+```swift
+case .rest:
+    player.heal(5)                // Восстановить 5 HP
+    worldState.daysPassed += 1    // День проходит
+```
+- Доступно только в стабильных регионах типа `settlement` или `sacred`
+- Восстанавливает 5 здоровья
+
+**c) Укрепление якоря (Strengthen Anchor):**
+```swift
+case .strengthenAnchor:
+    if player.spendFaith(10) {
+        worldState.strengthenAnchor(in: region.id, amount: 20)
+    }
+```
+- Стоит 10 веры
+- Добавляет 20% целостности якорю
+- Может стабилизировать регион (borderland → stable)
+
+**d) Исследование (Explore):**
+- Запускает случайное событие из доступных в регионе
+- Реализовано через `triggerExploration()`
+
+**Файлы:** `WorldMapView.swift:743-798`
+
+---
+
+### 3. Рынок карт ← Регионы
+
+**Статус:** TODO (приоритет средний)
+
+**План:**
+- Кнопка "Торговать" существует но не реализована
+- Варианты:
+  - Открывать GameBoardView в режиме только рынка
+  - Создать отдельный MarketView
+  - Интегрировать с settlement regions
 
 ---
 
 ### 4. Квесты
 
-**TODO:** Активация и отслеживание квестов
+**Статус:** TODO (приоритет низкий)
 
 **План:**
 - Квесты появляются через события
@@ -801,13 +839,25 @@ TODO: Расширить GameSave для сохранения:
 
 ## История изменений
 
+### v0.3.0 (16.01.2026) - System Integration
+- ✅ Интегрирована боевая система с событиями
+  - Боевые события теперь открывают GameBoardView
+  - Добавлен монстр Леший для тестирования
+  - Victory/Defeat обрабатываются корректно
+- ✅ Реализованы действия в регионах
+  - Путешествие между регионами
+  - Отдых (восстановление здоровья)
+  - Укрепление якорей (стоит веру)
+  - Исследование (запуск событий)
+- ✅ Кнопка "Продолжить" на главном экране
+  - Умная загрузка: 1 сейв → авто, много → выбор
+
 ### v0.2.0 (16.01.2026) - Exploration Core MVP
 - ✅ Реализована система исследования мира
 - ✅ WorldMapView как основной экран игры
 - ✅ Система событий (5 типов, 5 начальных событий)
 - ✅ Регионы с якорями (3 тестовых региона)
 - ✅ Глобальные параметры (напряжение, баланс)
-- ✅ Кнопка "Продолжить" на главном экране
 
 ### v0.1.0 (13.01.2026) - Deck-Building Core
 - ✅ Базовая deck-building механика
