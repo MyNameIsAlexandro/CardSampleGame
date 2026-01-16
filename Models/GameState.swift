@@ -41,12 +41,48 @@ class GameState: ObservableObject {
         players[currentPlayerIndex]
     }
 
-    // Win condition: defeat 10 encounters
+    // DEPRECATED: Old victory condition (kept for compatibility)
+    // New victory: complete main quest (mainQuestStage == 5 && act_completed flags)
     var victoryThreshold: Int { 10 }
 
     // Game is over if victory or defeat
     var isGameOver: Bool {
         isVictory || isDefeat
+    }
+
+    // MARK: - Victory/Defeat Conditions
+
+    /// Check quest-based victory (new system)
+    func checkQuestVictory() {
+        // Victory: Main quest completed (Act 5 finished)
+        if worldState.mainQuestStage >= 5 && worldState.worldFlags["act5_completed"] == true {
+            isVictory = true
+            currentPhase = .gameOver
+        }
+    }
+
+    /// Check defeat conditions
+    func checkDefeatConditions() {
+        // Defeat 1: Player HP = 0
+        if currentPlayer.health <= 0 {
+            isDefeat = true
+            currentPhase = .gameOver
+            return
+        }
+
+        // Defeat 2: WorldTension = 100% (world fell to Nav)
+        if worldState.worldTension >= 100 {
+            isDefeat = true
+            currentPhase = .gameOver
+            return
+        }
+
+        // Defeat 3: Critical anchor destroyed (if implemented via flags)
+        if worldState.worldFlags["critical_anchor_destroyed"] == true {
+            isDefeat = true
+            currentPhase = .gameOver
+            return
+        }
     }
 
     init(players: [Player]) {
@@ -119,8 +155,9 @@ class GameState: ObservableObject {
         // Tick curses at end of turn
         currentPlayer.tickCurses()
 
-        // Check defeat condition
-        checkDefeat()
+        // Check defeat and victory conditions (new system)
+        checkDefeatConditions()
+        checkQuestVictory()
 
         if !isGameOver {
             currentPhase = .exploration
@@ -149,22 +186,24 @@ class GameState: ObservableObject {
         activeEncounter = nil
         currentPhase = .exploration
 
-        // Check victory condition
+        // DEPRECATED: Old victory condition (kept for compatibility)
+        // New system: quest-based victory via checkQuestVictory()
         if encountersDefeated >= victoryThreshold {
             isVictory = true
             currentPhase = .gameOver
         }
 
+        // Check new victory conditions
+        checkQuestVictory()
+
         // Auto-save after defeating encounter
         onAutoSave?()
     }
 
+    // DEPRECATED: Use checkDefeatConditions() instead
+    // Kept for backwards compatibility with existing code
     func checkDefeat() {
-        // Player loses if health reaches 0
-        if currentPlayer.health <= 0 {
-            isDefeat = true
-            currentPhase = .gameOver
-        }
+        checkDefeatConditions()
     }
 
     func rollDice(sides: Int = 6, count: Int = 1) -> Int {
