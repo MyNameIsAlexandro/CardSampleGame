@@ -2008,7 +2008,6 @@ class WorldState: ObservableObject, Codable {
         // Calculate anchor states summary
         let stableAnchors = regions.filter { $0.state == .stable }.count
         let breachAnchors = regions.filter { $0.state == .breach }.count
-        let totalAnchors = regions.count
 
         // Check each ending's conditions
         for ending in allEndings {
