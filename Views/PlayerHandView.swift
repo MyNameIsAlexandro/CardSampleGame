@@ -1,0 +1,98 @@
+import SwiftUI
+
+struct PlayerHandView: View {
+    @ObservedObject var player: Player
+    @Binding var selectedCard: Card?
+    var onCardPlay: ((Card) -> Void)?
+
+    var body: some View {
+        VStack(spacing: 4) {
+            // Play card button (shown when card is selected)
+            if let selected = selectedCard {
+                HStack(spacing: 12) {
+                    Button(action: {
+                        onCardPlay?(selected)
+                        selectedCard = nil
+                    }) {
+                        Label("Сыграть карту", systemImage: "play.fill")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .background(Color.green)
+                            .cornerRadius(8)
+                    }
+
+                    Button(action: {
+                        selectedCard = nil
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(.gray)
+                    }
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 4)
+                .background(Color(UIColor.tertiarySystemBackground))
+            }
+
+            // Compact deck info
+            HStack(spacing: 16) {
+                Text(player.name)
+                    .font(.caption)
+                    .fontWeight(.bold)
+
+                Spacer()
+
+                // Deck count
+                HStack(spacing: 4) {
+                    Image(systemName: "rectangle.stack.fill")
+                        .font(.caption2)
+                    Text("\(player.deck.count)")
+                        .font(.caption2)
+                }
+                .foregroundColor(.blue)
+
+                // Discard count
+                HStack(spacing: 4) {
+                    Image(systemName: "trash.fill")
+                        .font(.caption2)
+                    Text("\(player.discard.count)")
+                        .font(.caption2)
+                }
+                .foregroundColor(.gray)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 4)
+            .background(Color(UIColor.secondarySystemBackground))
+
+            // Hand of cards
+            if player.hand.isEmpty {
+                Text("Нет карт в руке")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .padding()
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(player.hand) { card in
+                            HandCardView(
+                                card: card,
+                                isSelected: selectedCard?.id == card.id,
+                                onTap: {
+                                    if selectedCard?.id == card.id {
+                                        selectedCard = nil
+                                    } else {
+                                        selectedCard = card
+                                    }
+                                }
+                            )
+                        }
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                }
+            }
+        }
+    }
+}
