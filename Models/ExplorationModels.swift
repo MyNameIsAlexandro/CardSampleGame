@@ -320,6 +320,7 @@ struct GameEvent: Identifiable, Codable {
     let questLinks: [String]            // Связь с квестами
     var oneTime: Bool                   // Происходит только один раз
     var completed: Bool                 // Уже произошло
+    let monsterCard: Card?              // Карта монстра для боевых событий
 
     init(
         id: UUID = UUID(),
@@ -331,7 +332,8 @@ struct GameEvent: Identifiable, Codable {
         choices: [EventChoice],
         questLinks: [String] = [],
         oneTime: Bool = false,
-        completed: Bool = false
+        completed: Bool = false,
+        monsterCard: Card? = nil
     ) {
         self.id = id
         self.eventType = eventType
@@ -343,6 +345,7 @@ struct GameEvent: Identifiable, Codable {
         self.questLinks = questLinks
         self.oneTime = oneTime
         self.completed = completed
+        self.monsterCard = monsterCard
     }
 
     // Проверка, может ли событие произойти в регионе

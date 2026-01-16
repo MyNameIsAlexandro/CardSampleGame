@@ -11,6 +11,9 @@ struct EventView: View {
     @State private var selectedChoice: EventChoice?
     @State private var showingResult = false
     @State private var resultMessage: String = ""
+    @State private var showingCombat = false
+    @State private var combatGameState: GameState?
+    @State private var combatVictory: Bool?
 
     var body: some View {
         NavigationView {
@@ -62,6 +65,16 @@ struct EventView: View {
             } message: {
                 Text(resultMessage)
             }
+            .fullScreenCover(isPresented: $showingCombat) {
+                if let gameState = combatGameState {
+                    GameBoardView(
+                        gameState: gameState,
+                        onExit: {
+                            handleCombatEnd()
+                        }
+                    )
+                }
+            }
         }
     }
 
@@ -109,12 +122,21 @@ struct EventView: View {
 
     func choiceButton(_ choice: EventChoice) -> some View {
         let canChoose = canMeetRequirements(choice)
+        let isCombatChoice = event.eventType == .combat &&
+                             choice.id == event.choices.first?.id &&
+                             event.monsterCard != nil
 
         return Button(action: {
             if canChoose {
                 selectedChoice = choice
-                resultMessage = choice.consequences.message ?? "Выбор сделан."
-                showingResult = true
+
+                // Check if this is a combat choice
+                if isCombatChoice {
+                    initiateCombat(choice: choice)
+                } else {
+                    resultMessage = choice.consequences.message ?? "Выбор сделан."
+                    showingResult = true
+                }
             }
         }) {
             VStack(alignment: .leading, spacing: 8) {
@@ -253,6 +275,56 @@ struct EventView: View {
                 .foregroundColor(.red)
             }
         }
+    }
+
+    // MARK: - Combat Management
+
+    func initiateCombat(choice: EventChoice) {
+        guard let monster = event.monsterCard else { return }
+
+        // Create a temporary GameState for combat
+        let gameState = GameState(players: [player])
+        gameState.worldState = worldState
+        gameState.activeEncounter = monster
+        gameState.currentPhase = .playerTurn
+        gameState.actionsRemaining = 3
+        gameState.turnNumber = 1
+
+        // Initialize player hand for combat
+        player.shuffleDeck()
+        player.drawCards(count: player.maxHandSize)
+
+        combatGameState = gameState
+        showingCombat = true
+    }
+
+    func handleCombatEnd() {
+        showingCombat = false
+
+        guard let gameState = combatGameState else { return }
+
+        // Check victory or defeat
+        if gameState.isVictory {
+            combatVictory = true
+            resultMessage = "Победа! Вы одержали верх в бою."
+        } else if gameState.isDefeat {
+            combatVictory = false
+            resultMessage = "Поражение... Вы потерпели неудачу в бою."
+        } else {
+            // Combat was exited without resolution
+            resultMessage = "Бой прерван."
+        }
+
+        // Apply non-combat consequences from the choice
+        if let choice = selectedChoice {
+            onChoiceSelected(choice)
+        }
+
+        // Clean up
+        combatGameState = nil
+
+        // Show result
+        showingResult = true
     }
 
     // MARK: - Helpers

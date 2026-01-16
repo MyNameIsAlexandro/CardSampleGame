@@ -389,6 +389,20 @@ class WorldState: ObservableObject {
         var events: [GameEvent] = []
 
         // 1. COMBAT EVENT: Встреча с лешим (Forest guardian)
+        let leshyMonster = Card(
+            id: UUID(),
+            name: "Леший",
+            description: "Древний страж леса, чья сила растет от гнева.",
+            type: .enemy,
+            rarity: .uncommon,
+            cost: nil,
+            power: 4,
+            health: 12,
+            defense: 8,
+            abilities: [],
+            balance: .neutral
+        )
+
         let leshyEvent = GameEvent(
             eventType: .combat,
             title: "Встреча с Лешим",
@@ -401,8 +415,7 @@ class WorldState: ObservableObject {
                     requirements: EventRequirements(minimumHealth: 3),
                     consequences: EventConsequences(
                         faithChange: 1,
-                        healthChange: -2,
-                        message: "Вы сразились с лешим и отстояли свой путь, но бой был тяжелым."
+                        message: "Приготовьтесь к бою!"
                     )
                 ),
                 EventChoice(
@@ -423,7 +436,8 @@ class WorldState: ObservableObject {
                     )
                 )
             ],
-            oneTime: false
+            oneTime: false,
+            monsterCard: leshyMonster
         )
         events.append(leshyEvent)
 
