@@ -23,6 +23,13 @@ struct GameBoardView: View {
         let damage: Int
     }
 
+    // Custom initializer to accept external GameState instance
+    init(gameState: GameState, saveSlot: Int? = nil, onExit: (() -> Void)? = nil) {
+        _gameState = StateObject(wrappedValue: gameState)
+        self.saveSlot = saveSlot
+        self.onExit = onExit
+    }
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
