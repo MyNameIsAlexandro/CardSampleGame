@@ -373,8 +373,7 @@ struct RegionDetailView: View {
     let onDismiss: () -> Void
     @State private var showingActionConfirmation = false
     @State private var selectedAction: RegionAction?
-    @State private var showingEvent = false
-    @State private var currentEvent: GameEvent?
+    @State private var eventToShow: GameEvent?
     @State private var showingNoEventsAlert = false
 
     enum RegionAction {
@@ -421,22 +420,19 @@ struct RegionDetailView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showingEvent) {
-                if let event = currentEvent {
-                    EventView(
-                        event: event,
-                        player: player,
-                        worldState: worldState,
-                        regionId: region.id,
-                        onChoiceSelected: { choice in
-                            handleEventChoice(choice)
-                        },
-                        onDismiss: {
-                            showingEvent = false
-                            currentEvent = nil
-                        }
-                    )
-                }
+            .sheet(item: $eventToShow) { event in
+                EventView(
+                    event: event,
+                    player: player,
+                    worldState: worldState,
+                    regionId: region.id,
+                    onChoiceSelected: { choice in
+                        handleEventChoice(choice, event: event)
+                    },
+                    onDismiss: {
+                        eventToShow = nil
+                    }
+                )
             }
             .alert(actionConfirmationTitle, isPresented: $showingActionConfirmation) {
                 Button("Подтвердить") {
@@ -730,15 +726,14 @@ struct RegionDetailView: View {
 
         // Pick a random event
         if let randomEvent = availableEvents.randomElement() {
-            currentEvent = randomEvent
-            showingEvent = true
+            eventToShow = randomEvent
         } else {
             // No events available - show alert
             showingNoEventsAlert = true
         }
     }
 
-    func handleEventChoice(_ choice: EventChoice) {
+    func handleEventChoice(_ choice: EventChoice, event: GameEvent) {
         // Apply consequences
         worldState.applyConsequences(
             choice.consequences,
@@ -747,7 +742,7 @@ struct RegionDetailView: View {
         )
 
         // Mark event as completed if it's one-time
-        if let event = currentEvent, event.oneTime {
+        if event.oneTime {
             worldState.markEventCompleted(event.id)
         }
     }

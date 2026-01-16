@@ -1,6 +1,6 @@
 import Foundation
 
-struct Card: Identifiable, Codable {
+struct Card: Identifiable, Codable, Hashable {
     let id: UUID
     let name: String
     let type: CardType
@@ -69,7 +69,7 @@ struct Card: Identifiable, Codable {
     }
 }
 
-struct CardAbility: Identifiable, Codable {
+struct CardAbility: Identifiable, Codable, Hashable {
     let id: UUID
     let name: String
     let description: String
@@ -88,7 +88,7 @@ struct CardAbility: Identifiable, Codable {
     }
 }
 
-enum AbilityEffect: Codable {
+enum AbilityEffect: Codable, Hashable {
     case damage(amount: Int, type: DamageType)
     case heal(amount: Int)
     case drawCards(count: Int)

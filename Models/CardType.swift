@@ -1,6 +1,6 @@
 import Foundation
 
-enum CardType: String, Codable {
+enum CardType: String, Codable, Hashable {
     case character
     case weapon
     case spell
@@ -25,7 +25,7 @@ enum CardType: String, Codable {
     case special    // Особые - unique effects and abilities
 }
 
-enum CardRarity: String, Codable {
+enum CardRarity: String, Codable, Hashable {
     case common
     case uncommon
     case rare
@@ -33,7 +33,7 @@ enum CardRarity: String, Codable {
     case legendary
 }
 
-enum DamageType: String, Codable {
+enum DamageType: String, Codable, Hashable {
     case physical
     case fire
     case cold
@@ -45,21 +45,21 @@ enum DamageType: String, Codable {
 }
 
 // Twilight Marches: Balance system (Light/Dark)
-enum CardBalance: String, Codable {
+enum CardBalance: String, Codable, Hashable {
     case light      // Cards from Prav, protective/healing
     case neutral    // Balanced cards
     case dark       // Cards from Nav, aggressive/cursing
 }
 
 // Twilight Marches: Three Realms system
-enum Realm: String, Codable {
+enum Realm: String, Codable, Hashable {
     case yav        // Явь - World of the Living (reality, settlements, heroes)
     case nav        // Навь - World of the Dead (spirits, undead, curses)
     case prav       // Правь - World of the Gods (higher powers, blessings, ancient magic)
 }
 
 // Twilight Marches: Curse system
-enum CurseType: String, Codable {
+enum CurseType: String, Codable, Hashable {
     case blindness      // Слепота - reduce accuracy/vision
     case muteness       // Немота - can't cast spells
     case weakness       // Слабость - reduce power

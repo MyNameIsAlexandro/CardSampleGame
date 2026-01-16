@@ -2,7 +2,7 @@ import Foundation
 
 // MARK: - Region State
 
-enum RegionState: String, Codable {
+enum RegionState: String, Codable, Hashable {
     case stable         // Стабильная Явь - безопасно
     case borderland     // Пограничье - повышенный риск
     case breach         // Прорыв Нави - опасно
@@ -26,7 +26,7 @@ enum RegionState: String, Codable {
 
 // MARK: - Region Type
 
-enum RegionType: String, Codable {
+enum RegionType: String, Codable, Hashable {
     case forest         // Лес
     case swamp          // Болото
     case mountain       // Горы
@@ -201,7 +201,7 @@ struct Region: Identifiable, Codable {
 
 // MARK: - Event Type
 
-enum EventType: String, Codable {
+enum EventType: String, Codable, Hashable {
     case combat         // Бой
     case ritual         // Ритуал/Выбор
     case narrative      // Нарративное событие
@@ -231,7 +231,7 @@ enum EventType: String, Codable {
 
 // MARK: - Event Choice
 
-struct EventChoice: Identifiable, Codable {
+struct EventChoice: Identifiable, Codable, Hashable {
     let id: String
     let text: String
     let requirements: EventRequirements?
@@ -252,7 +252,7 @@ struct EventChoice: Identifiable, Codable {
 
 // MARK: - Event Requirements
 
-struct EventRequirements: Codable {
+struct EventRequirements: Codable, Hashable {
     var minimumFaith: Int?
     var minimumHealth: Int?
     var requiredBalance: CardBalance?    // Требуется определенный баланс
@@ -293,7 +293,7 @@ struct EventRequirements: Codable {
 
 // MARK: - Event Consequences
 
-struct EventConsequences: Codable {
+struct EventConsequences: Codable, Hashable {
     var faithChange: Int?
     var healthChange: Int?
     var balanceChange: Int?         // Изменение Light/Dark (-100 to +100)
@@ -309,7 +309,7 @@ struct EventConsequences: Codable {
 
 // MARK: - Game Event
 
-struct GameEvent: Identifiable, Codable {
+struct GameEvent: Identifiable, Codable, Hashable {
     let id: UUID
     let eventType: EventType
     let title: String
