@@ -411,6 +411,127 @@ class WorldState: ObservableObject {
         // if let experience = rewards.experience { ... }
     }
 
+    // MARK: - Quest Trigger System
+
+    /// Check and update quest objectives based on world flags
+    func checkQuestObjectivesByFlags(_ player: Player) {
+        for i in 0..<activeQuests.count {
+            var quest = activeQuests[i]
+            var questUpdated = false
+
+            // Main Quest - Objective 0: Learn about anchors from elder
+            if quest.questType == .main && quest.objectives.count > 0 && !quest.objectives[0].completed {
+                if worldFlags["main_quest_started"] == true {
+                    quest.objectives[0].completed = true
+                    questUpdated = true
+                    print("Quest objective completed: \(quest.objectives[0].description)")
+                }
+            }
+
+            // Main Quest - Objective 2: Find Sacred Oak
+            if quest.questType == .main && quest.objectives.count > 2 && !quest.objectives[1].completed {
+                if worldFlags["found_sacred_oak"] == true {
+                    quest.objectives[1].completed = true
+                    questUpdated = true
+                    print("Quest objective completed: \(quest.objectives[1].description)")
+                }
+            }
+
+            // Main Quest - Objective 3: Strengthen Oak or find ally
+            if quest.questType == .main && quest.objectives.count > 3 && !quest.objectives[2].completed {
+                if worldFlags["oak_strengthened"] == true || worldFlags["found_ally"] == true {
+                    quest.objectives[2].completed = true
+                    questUpdated = true
+                    print("Quest objective completed: \(quest.objectives[2].description)")
+                }
+            }
+
+            // Main Quest - Objective 4: Explore breach in Black Lowlands
+            if quest.questType == .main && quest.objectives.count > 4 && !quest.objectives[3].completed {
+                if worldFlags["explored_black_lowlands"] == true {
+                    quest.objectives[3].completed = true
+                    questUpdated = true
+                    print("Quest objective completed: \(quest.objectives[3].description)")
+                }
+            }
+
+            // Main Quest - Objective 5: Defeat Leshy-Guardian
+            if quest.questType == .main && quest.objectives.count > 5 && !quest.objectives[4].completed {
+                if worldFlags["leshy_guardian_defeated"] == true ||
+                   worldFlags["leshy_guardian_peaceful"] == true ||
+                   worldFlags["leshy_guardian_corrupted"] == true {
+                    quest.objectives[4].completed = true
+                    questUpdated = true
+                    print("Quest objective completed: \(quest.objectives[4].description)")
+                }
+            }
+
+            // Check if all objectives are completed
+            if questUpdated {
+                let allCompleted = quest.objectives.allSatisfy { $0.completed }
+                if allCompleted {
+                    completeQuest(quest.id, player: player)
+                } else {
+                    activeQuests[i] = quest
+                }
+            }
+        }
+    }
+
+    /// Check quest objectives when visiting a region
+    func checkQuestObjectivesByRegion(regionId: UUID, player: Player) {
+        guard let region = getRegion(byId: regionId) else { return }
+
+        // Main Quest - Objective 2: Find Sacred Oak
+        if region.name == "Священный Дуб" {
+            worldFlags["found_sacred_oak"] = true
+            checkQuestObjectivesByFlags(player)
+        }
+
+        // Main Quest - Objective 4: Explore Black Lowlands
+        if region.name == "Чёрная Низина" {
+            worldFlags["explored_black_lowlands"] = true
+            checkQuestObjectivesByFlags(player)
+        }
+    }
+
+    /// Check quest objectives when an event is completed
+    func checkQuestObjectivesByEvent(eventTitle: String, choiceText: String, player: Player) {
+        // Main Quest - Objective 1: Talk to elder
+        if eventTitle == "Просьба Старосты" && choiceText.contains("Согласиться") {
+            worldFlags["main_quest_started"] = true
+            checkQuestObjectivesByFlags(player)
+        }
+
+        // Main Quest - Objective 3: Strengthen Oak
+        if eventTitle == "Мудрость Священного Дуба" && choiceText.contains("укрепить") {
+            worldFlags["oak_strengthened"] = true
+            checkQuestObjectivesByFlags(player)
+        }
+
+        // Main Quest - Objective 5: Boss defeated
+        if eventTitle == "Леший-Хранитель" {
+            if choiceText.contains("бой") {
+                // Combat will set the flag via combat victory
+                // This is handled in GameState after combat
+            } else if choiceText.contains("договориться") {
+                worldFlags["leshy_guardian_peaceful"] = true
+                checkQuestObjectivesByFlags(player)
+            } else if choiceText.contains("тьмы") {
+                worldFlags["leshy_guardian_corrupted"] = true
+                checkQuestObjectivesByFlags(player)
+            }
+        }
+    }
+
+    /// Mark boss as defeated after combat victory
+    func markBossDefeated(bossName: String, player: Player) {
+        if bossName == "Леший-Хранитель" {
+            worldFlags["leshy_guardian_defeated"] = true
+            checkQuestObjectivesByFlags(player)
+        }
+    }
+
     // MARK: - Data Creation (for MVP)
 
     private func createInitialRegions() -> [Region] {

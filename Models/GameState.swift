@@ -183,6 +183,12 @@ class GameState: ObservableObject {
 
     func defeatEncounter() {
         encountersDefeated += 1
+
+        // Check if a boss was defeated (for quest objectives)
+        if let encounter = activeEncounter {
+            worldState.markBossDefeated(bossName: encounter.name, player: currentPlayer)
+        }
+
         activeEncounter = nil
         currentPhase = .exploration
 

@@ -710,23 +710,74 @@ struct RegionDetailView: View {
 
     var questsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Активные квесты")
+            Text("Активные квесты в регионе")
                 .font(.headline)
 
             ForEach(region.activeQuests, id: \.self) { questId in
-                HStack {
-                    Image(systemName: "scroll.fill")
-                        .foregroundColor(.yellow)
-                    Text("Квест активен")
-                        .font(.subheadline)
+                if let quest = worldState.activeQuests.first(where: { $0.id.uuidString == questId }) {
+                    questView(quest)
                 }
-                .padding()
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.yellow.opacity(0.1))
-                )
             }
         }
+    }
+
+    func questView(_ quest: Quest) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // Quest title
+            HStack {
+                Image(systemName: quest.questType == .main ? "star.fill" : "scroll.fill")
+                    .foregroundColor(quest.questType == .main ? .yellow : .blue)
+                Text(quest.title)
+                    .font(.headline)
+                    .foregroundColor(.primary)
+            }
+
+            // Quest description
+            Text(quest.description)
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .lineLimit(2)
+
+            // Objectives
+            VStack(alignment: .leading, spacing: 4) {
+                ForEach(quest.objectives) { objective in
+                    HStack(spacing: 8) {
+                        Image(systemName: objective.completed ? "checkmark.circle.fill" : "circle")
+                            .foregroundColor(objective.completed ? .green : .gray)
+                            .font(.caption)
+                        Text(objective.description)
+                            .font(.caption)
+                            .foregroundColor(objective.completed ? .secondary : .primary)
+                            .strikethrough(objective.completed)
+                    }
+                }
+            }
+            .padding(.leading, 8)
+
+            // Progress indicator
+            let completedCount = quest.objectives.filter { $0.completed }.count
+            let totalCount = quest.objectives.count
+            if totalCount > 0 {
+                HStack(spacing: 4) {
+                    Text("Прогресс:")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                    Text("\(completedCount)/\(totalCount)")
+                        .font(.caption2)
+                        .fontWeight(.bold)
+                        .foregroundColor(completedCount == totalCount ? .green : .orange)
+                }
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(quest.questType == .main ? Color.yellow.opacity(0.15) : Color.blue.opacity(0.1))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(quest.questType == .main ? Color.yellow.opacity(0.5) : Color.blue.opacity(0.3), lineWidth: 1)
+        )
     }
 
     // MARK: - Helpers
@@ -776,6 +827,13 @@ struct RegionDetailView: View {
             in: region.id
         )
 
+        // Check quest objectives based on event completion
+        worldState.checkQuestObjectivesByEvent(
+            eventTitle: event.title,
+            choiceText: choice.text,
+            player: player
+        )
+
         // Mark event as completed if it's one-time
         if event.oneTime {
             worldState.markEventCompleted(event.id)
@@ -816,6 +874,10 @@ struct RegionDetailView: View {
         case .travel:
             // Move to this region
             worldState.moveToRegion(region.id)
+
+            // Check quest objectives when visiting a region
+            worldState.checkQuestObjectivesByRegion(regionId: region.id, player: player)
+
             onDismiss()
 
         case .rest:
