@@ -188,7 +188,7 @@ struct TwilightMarchesCards {
                     CardAbility(
                         name: "tm.ability.forest.maze".localized,
                         description: "tm.ability.forest.maze.desc".localized,
-                        effect: .applyCurse(type: .forgetfulness, duration: 3)
+                        effect: .applyCurse(type: .exhaustion, duration: 3)
                     ),
                     CardAbility(
                         name: "tm.ability.natures.wrath".localized,
@@ -216,7 +216,7 @@ struct TwilightMarchesCards {
                     CardAbility(
                         name: "tm.ability.drowning.song".localized,
                         description: "tm.ability.drowning.song.desc".localized,
-                        effect: .applyCurse(type: .madness, duration: 2)
+                        effect: .applyCurse(type: .fear, duration: 2)
                     ),
                     CardAbility(
                         name: "tm.ability.water.grasp".localized,
@@ -249,7 +249,7 @@ struct TwilightMarchesCards {
                     CardAbility(
                         name: "tm.ability.ancient.curse".localized,
                         description: "tm.ability.ancient.curse.desc".localized,
-                        effect: .applyCurse(type: .sickness, duration: 5)
+                        effect: .applyCurse(type: .shadowOfNav, duration: 5)
                     )
                 ],
                 traits: ["tm.trait.dragon".localized, "tm.trait.ancient".localized, "tm.trait.zmey".localized],
@@ -354,13 +354,13 @@ struct TwilightMarchesCards {
                     CardAbility(
                         name: "tm.ability.lose.sanity".localized,
                         description: "tm.ability.lose.sanity.desc".localized,
-                        effect: .applyCurse(type: .madness, duration: 4)
+                        effect: .applyCurse(type: .fear, duration: 4)
                     )
                 ],
                 traits: ["tm.trait.curse".localized, "tm.trait.mental".localized],
                 balance: .dark,
                 realm: .nav,
-                curseType: .madness,
+                curseType: .fear,
                 expansionSet: "baseSet"
             )
         ]
