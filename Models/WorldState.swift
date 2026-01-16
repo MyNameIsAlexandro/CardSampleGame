@@ -1964,6 +1964,178 @@ class WorldState: ObservableObject, Codable {
         return quests
     }
 
+    // MARK: - Narrative System (Endings & Deck Path)
+    // See EXPLORATION_CORE_DESIGN.md, sections 28-34
+
+    /// Calculate player's dominant deck path based on card balance alignment
+    func calculateDeckPath(playerDeck: [Card]) -> DeckPath {
+        guard !playerDeck.isEmpty else { return .balance }
+
+        var lightCount = 0
+        var darkCount = 0
+        var neutralCount = 0
+
+        for card in playerDeck {
+            switch card.balance {
+            case .light:
+                lightCount += 1
+            case .dark:
+                darkCount += 1
+            case .neutral:
+                neutralCount += 1
+            }
+        }
+
+        let total = playerDeck.count
+        let lightRatio = Double(lightCount) / Double(total)
+        let darkRatio = Double(darkCount) / Double(total)
+
+        // Need >50% of one type to be considered on that path
+        if lightRatio > 0.5 {
+            return .light
+        } else if darkRatio > 0.5 {
+            return .dark
+        } else {
+            return .balance
+        }
+    }
+
+    /// Determine the ending based on world state and player choices
+    /// See EXPLORATION_CORE_DESIGN.md, section 32 for ending matrix
+    func determineEnding(playerDeck: [Card], allEndings: [EndingProfile]) -> EndingProfile? {
+        let deckPath = calculateDeckPath(playerDeck: playerDeck)
+
+        // Calculate anchor states summary
+        let stableAnchors = regions.filter { $0.state == .stable }.count
+        let breachAnchors = regions.filter { $0.state == .breach }.count
+        let totalAnchors = regions.count
+
+        // Check each ending's conditions
+        for ending in allEndings {
+            let conditions = ending.conditions
+
+            // Check WorldTension range
+            if let minTension = conditions.minTension, worldTension < minTension {
+                continue
+            }
+            if let maxTension = conditions.maxTension, worldTension > maxTension {
+                continue
+            }
+
+            // Check required flags
+            if let requiredFlags = conditions.requiredFlags {
+                let hasAllFlags = requiredFlags.allSatisfy { hasFlag($0) }
+                if !hasAllFlags {
+                    continue
+                }
+            }
+
+            // Check forbidden flags
+            if let forbiddenFlags = conditions.forbiddenFlags {
+                let hasAnyForbidden = forbiddenFlags.contains { hasFlag($0) }
+                if hasAnyForbidden {
+                    continue
+                }
+            }
+
+            // Check deck path requirement
+            if let requiredPath = conditions.deckPath, deckPath != requiredPath {
+                continue
+            }
+
+            // Check anchor state requirements
+            if let minStable = conditions.minStableAnchors, stableAnchors < minStable {
+                continue
+            }
+            if let maxBreach = conditions.maxBreachAnchors, breachAnchors > maxBreach {
+                continue
+            }
+
+            // Check balance range
+            if let minBalance = conditions.minBalance, lightDarkBalance < minBalance {
+                continue
+            }
+            if let maxBalance = conditions.maxBalance, lightDarkBalance > maxBalance {
+                continue
+            }
+
+            // All conditions met - return this ending
+            return ending
+        }
+
+        // Fallback: return first ending or nil
+        return allEndings.first
+    }
+
+    /// Get summary of current state for ending evaluation
+    func getEndingStateDescription(playerDeck: [Card]) -> String {
+        let deckPath = calculateDeckPath(playerDeck: playerDeck)
+        let stableCount = regions.filter { $0.state == .stable }.count
+        let breachCount = regions.filter { $0.state == .breach }.count
+
+        return """
+        Напряжение: \(worldTension)/100
+        Баланс: \(balanceDescription) (\(lightDarkBalance))
+        Путь колоды: \(deckPath.rawValue)
+        Якоря: \(stableCount) stable, \(breachCount) breach
+        Активные флаги: \(worldFlags.filter { $0.value }.count)
+        """
+    }
+
+    /// Check if a main quest step can be unlocked
+    func canUnlockQuestStep(_ step: MainQuestStep) -> Bool {
+        let conditions = step.unlockConditions
+
+        // Check required flags
+        if let requiredFlags = conditions.requiredFlags {
+            let hasAllFlags = requiredFlags.allSatisfy { hasFlag($0) }
+            if !hasAllFlags { return false }
+        }
+
+        // Check forbidden flags
+        if let forbiddenFlags = conditions.forbiddenFlags {
+            let hasAnyForbidden = forbiddenFlags.contains { hasFlag($0) }
+            if hasAnyForbidden { return false }
+        }
+
+        // Check tension requirements
+        if let minTension = conditions.minTension, worldTension < minTension {
+            return false
+        }
+        if let maxTension = conditions.maxTension, worldTension > maxTension {
+            return false
+        }
+
+        // Check balance requirements
+        if let minBalance = conditions.minBalance, lightDarkBalance < minBalance {
+            return false
+        }
+        if let maxBalance = conditions.maxBalance, lightDarkBalance > maxBalance {
+            return false
+        }
+
+        return true
+    }
+
+    /// Check if a main quest step is completed
+    func isQuestStepCompleted(_ step: MainQuestStep) -> Bool {
+        let conditions = step.completionConditions
+
+        // Check required flags
+        if let requiredFlags = conditions.requiredFlags {
+            let hasAllFlags = requiredFlags.allSatisfy { hasFlag($0) }
+            if !hasAllFlags { return false }
+        }
+
+        // Check forbidden flags (things that must NOT have happened)
+        if let forbiddenFlags = conditions.forbiddenFlags {
+            let hasAnyForbidden = forbiddenFlags.contains { hasFlag($0) }
+            if hasAnyForbidden { return false }
+        }
+
+        return true
+    }
+
     // MARK: - Codable Implementation
 
     enum CodingKeys: String, CodingKey {

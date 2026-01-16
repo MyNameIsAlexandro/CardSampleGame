@@ -400,6 +400,9 @@ struct QuestRewards: Codable {
 
 // MARK: - Quest
 
+/// Квест в игре
+/// Для side-квестов используйте theme для определения нарративной темы
+/// См. EXPLORATION_CORE_DESIGN.md, раздел 30 (Side-квесты как "зеркала мира")
 struct Quest: Identifiable, Codable {
     let id: UUID
     let title: String
@@ -410,6 +413,10 @@ struct Quest: Identifiable, Codable {
     let rewards: QuestRewards
     var completed: Bool
 
+    // Narrative System properties (see EXPLORATION_CORE_DESIGN.md, section 30)
+    var theme: SideQuestTheme?          // Тема квеста (для side-квестов): consequence/warning/temptation
+    var mirrorFlag: String?             // Какой выбор игрока этот квест "отражает"
+
     init(
         id: UUID = UUID(),
         title: String,
@@ -418,7 +425,9 @@ struct Quest: Identifiable, Codable {
         stage: Int = 0,
         objectives: [QuestObjective],
         rewards: QuestRewards,
-        completed: Bool = false
+        completed: Bool = false,
+        theme: SideQuestTheme? = nil,
+        mirrorFlag: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -428,10 +437,175 @@ struct Quest: Identifiable, Codable {
         self.objectives = objectives
         self.rewards = rewards
         self.completed = completed
+        self.theme = theme
+        self.mirrorFlag = mirrorFlag
     }
 
     // Проверка, все ли цели выполнены
     var allObjectivesCompleted: Bool {
         return objectives.allSatisfy { $0.completed }
+    }
+
+    /// Проверяет, является ли квест "зеркалом" данного флага
+    func mirrors(flag: String) -> Bool {
+        return mirrorFlag == flag
+    }
+}
+
+// MARK: - Deck Path (for Ending calculation)
+
+/// Доминирующий путь колоды игрока
+/// См. EXPLORATION_CORE_DESIGN.md, раздел 32.5
+enum DeckPath: String, Codable {
+    case light      // Преобладают Light-карты (>60%)
+    case dark       // Преобладают Dark-карты (>60%)
+    case balance    // Нет явного преобладания
+}
+
+// MARK: - Ending Profile
+
+/// Профиль финала кампании
+/// См. EXPLORATION_CORE_DESIGN.md, раздел 32.4
+struct EndingProfile: Identifiable, Codable {
+    let id: String
+    let title: String
+    let conditions: EndingConditions
+    let summary: String
+    let epilogue: EndingEpilogue
+    let unlocksForNextRun: [String]?
+
+    init(
+        id: String,
+        title: String,
+        conditions: EndingConditions,
+        summary: String,
+        epilogue: EndingEpilogue,
+        unlocksForNextRun: [String]? = nil
+    ) {
+        self.id = id
+        self.title = title
+        self.conditions = conditions
+        self.summary = summary
+        self.epilogue = epilogue
+        self.unlocksForNextRun = unlocksForNextRun
+    }
+}
+
+/// Условия для получения финала
+struct EndingConditions: Codable {
+    let tensionRange: ClosedRange<Int>?     // Диапазон WorldTension (e.g., 0...40)
+    let requiredPath: DeckPath?             // Требуемый путь колоды
+    let requiredFlags: [String]?            // Обязательные флаги
+    let forbiddenFlags: [String]?           // Запрещённые флаги
+    let minSavedAnchors: Int?               // Минимум сохранённых якорей
+
+    init(
+        tensionRange: ClosedRange<Int>? = nil,
+        requiredPath: DeckPath? = nil,
+        requiredFlags: [String]? = nil,
+        forbiddenFlags: [String]? = nil,
+        minSavedAnchors: Int? = nil
+    ) {
+        self.tensionRange = tensionRange
+        self.requiredPath = requiredPath
+        self.requiredFlags = requiredFlags
+        self.forbiddenFlags = forbiddenFlags
+        self.minSavedAnchors = minSavedAnchors
+    }
+}
+
+/// Эпилог финала
+struct EndingEpilogue: Codable {
+    let anchors: String     // Судьба якорей
+    let hero: String        // Судьба героя
+    let world: String       // Судьба мира
+}
+
+// MARK: - Side Quest Theme
+
+/// Тема побочного квеста (влияет на тон и последствия)
+/// См. EXPLORATION_CORE_DESIGN.md, раздел 30.2
+enum SideQuestTheme: String, Codable {
+    case consequence    // Последствия — мир уже пострадал
+    case warning        // Предупреждение — можно предотвратить деградацию
+    case temptation     // Соблазн — быстрые выгоды за долгосрочный урон
+}
+
+// MARK: - Main Quest Step
+
+/// Шаг основного квеста
+/// См. EXPLORATION_CORE_DESIGN.md, раздел 29.3
+struct MainQuestStep: Identifiable, Codable {
+    let id: String
+    let title: String
+    let goal: String
+    let unlockConditions: QuestConditions
+    let completionConditions: QuestConditions
+    let effects: QuestEffects?
+
+    init(
+        id: String,
+        title: String,
+        goal: String,
+        unlockConditions: QuestConditions,
+        completionConditions: QuestConditions,
+        effects: QuestEffects? = nil
+    ) {
+        self.id = id
+        self.title = title
+        self.goal = goal
+        self.unlockConditions = unlockConditions
+        self.completionConditions = completionConditions
+        self.effects = effects
+    }
+}
+
+/// Условия для квеста (разблокировки или завершения)
+/// См. EXPLORATION_CORE_DESIGN.md, раздел 29
+struct QuestConditions: Codable {
+    var requiredFlags: [String]?    // Флаги, которые должны быть установлены
+    var forbiddenFlags: [String]?   // Флаги, которых НЕ должно быть
+    var minTension: Int?            // Минимальный WorldTension
+    var maxTension: Int?            // Максимальный WorldTension
+    var minBalance: Int?            // Минимальный lightDarkBalance
+    var maxBalance: Int?            // Максимальный lightDarkBalance
+    var visitedRegions: [String]?   // Посещённые регионы
+
+    init(
+        requiredFlags: [String]? = nil,
+        forbiddenFlags: [String]? = nil,
+        minTension: Int? = nil,
+        maxTension: Int? = nil,
+        minBalance: Int? = nil,
+        maxBalance: Int? = nil,
+        visitedRegions: [String]? = nil
+    ) {
+        self.requiredFlags = requiredFlags
+        self.forbiddenFlags = forbiddenFlags
+        self.minTension = minTension
+        self.maxTension = maxTension
+        self.minBalance = minBalance
+        self.maxBalance = maxBalance
+        self.visitedRegions = visitedRegions
+    }
+}
+
+/// Эффекты выполнения шага квеста
+struct QuestEffects: Codable {
+    var unlockRegions: [String]?    // Разблокировать регионы
+    var setFlags: [String]?         // Установить флаги
+    var tensionChange: Int?         // Изменение WorldTension
+    var addCards: [String]?         // Добавить карты
+
+    init(
+        unlockRegions: [String]? = nil,
+        setFlags: [String]? = nil,
+        tensionChange: Int? = nil,
+        addCards: [String]? = nil
+    ) {
+        self.unlockRegions = unlockRegions
+        self.setFlags = setFlags
+        self.tensionChange = tensionChange
+        self.addCards = addCards
     }
 }
