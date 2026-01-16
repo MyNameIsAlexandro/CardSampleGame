@@ -684,7 +684,6 @@ struct TwilightMarchesCards {
         let rewardCards = createRewardCards()
         let artifactCards = createArtifactCards()
         let marketCards = createMarketCards()
-        let allCards = rewardCards + artifactCards + marketCards
 
         // Map cards by their names or custom IDs
         let cardMapping: [String: Card] = [
@@ -1109,7 +1108,7 @@ struct TwilightMarchesCards {
                     CardAbility(
                         name: "Якорь Реальности",
                         description: "Наносит 12 урона существам Нави. Восстанавливает якорь региона.",
-                        effect: .damage(amount: 12, type: .holy)
+                        effect: .damage(amount: 12, type: .arcane)
                     ),
                     CardAbility(
                         name: "Стабилизация",
@@ -1147,12 +1146,12 @@ struct TwilightMarchesCards {
                 CardAbility(
                     name: "Удар Корнями",
                     description: "Наносит 8 урона и оглушает противника.",
-                    effect: .damage(amount: 8, target: .player)
+                    effect: .damage(amount: 8, type: .physical)
                 ),
                 CardAbility(
                     name: "Гнев Природы",
                     description: "Призывает духов леса, наносящих 4 урона.",
-                    effect: .damage(amount: 4, target: .player)
+                    effect: .damage(amount: 4, type: .physical)
                 )
             ],
             balance: .neutral,
@@ -1206,7 +1205,7 @@ struct TwilightMarchesCards {
                     CardAbility(
                         name: "Власть над Реальностью",
                         description: "Наносит 10 урона врагу или восстанавливает 10 здоровья.",
-                        effect: .damage(amount: 10, target: .activeEncounter)
+                        effect: .damage(amount: 10, type: .arcane)
                     ),
                     CardAbility(
                         name: "Временной Резонанс",
@@ -1230,7 +1229,7 @@ struct TwilightMarchesCards {
                     CardAbility(
                         name: "Пожирание Жизни",
                         description: "Наносит 12 урона врагу, но отнимает 3 здоровья у вас.",
-                        effect: .damage(amount: 12, target: .activeEncounter)
+                        effect: .damage(amount: 12, type: .arcane)
                     ),
                     CardAbility(
                         name: "Тёмное Влияние",

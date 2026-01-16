@@ -1242,7 +1242,7 @@ class WorldState: ObservableObject, Codable {
             choices: [
                 EventChoice(
                     text: "Вступить в решающий бой",
-                    requirements: EventRequirements(minimumHealth: 8, minimumFaith: 10),
+                    requirements: EventRequirements(minimumFaith: 10, minimumHealth: 8),
                     consequences: EventConsequences(
                         message: "Последняя битва начинается! Судьба Сумрачных Пределов решается здесь!"
                     )
