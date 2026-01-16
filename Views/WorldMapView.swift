@@ -437,6 +437,16 @@ struct RegionDetailView: View {
                     )
                 }
             }
+            .alert(actionConfirmationTitle, isPresented: $showingActionConfirmation) {
+                Button("Подтвердить") {
+                    if let action = selectedAction {
+                        performAction(action)
+                    }
+                }
+                Button("Отмена", role: .cancel) { }
+            } message: {
+                Text(actionConfirmationMessage)
+            }
         }
     }
 
@@ -727,6 +737,63 @@ struct RegionDetailView: View {
         // Mark event as completed if it's one-time
         if let event = currentEvent, event.oneTime {
             worldState.markEventCompleted(event.id)
+        }
+    }
+
+    // MARK: - Action Handling
+
+    var actionConfirmationTitle: String {
+        guard let action = selectedAction else { return "Подтверждение" }
+        switch action {
+        case .travel: return "Отправиться в регион"
+        case .rest: return "Отдохнуть"
+        case .trade: return "Торговать"
+        case .strengthenAnchor: return "Укрепить якорь"
+        case .explore: return "Исследовать"
+        }
+    }
+
+    var actionConfirmationMessage: String {
+        guard let action = selectedAction else { return "" }
+        switch action {
+        case .travel:
+            return "Отправиться в регион '\(region.name)'? Это займет день пути."
+        case .rest:
+            return "Отдохнуть в этом месте? Вы восстановите 5 здоровья."
+        case .trade:
+            return "Торговая система пока не реализована."
+        case .strengthenAnchor:
+            return "Укрепить якорь? Это стоит 10 веры и добавит 20% целостности."
+        case .explore:
+            return "Исследовать регион?"
+        }
+    }
+
+    func performAction(_ action: RegionAction) {
+        switch action {
+        case .travel:
+            // Move to this region
+            worldState.moveToRegion(region.id)
+            onDismiss()
+
+        case .rest:
+            // Rest and heal
+            player.heal(5)
+            worldState.daysPassed += 1
+
+        case .trade:
+            // TODO: Implement trade/market view
+            break
+
+        case .strengthenAnchor:
+            // Strengthen anchor if player has enough faith
+            if player.spendFaith(10) {
+                _ = worldState.strengthenAnchor(in: region.id, amount: 20)
+            }
+
+        case .explore:
+            // This is handled separately by triggerExploration()
+            break
         }
     }
 }
