@@ -341,6 +341,78 @@ class WorldState: ObservableObject, Codable {
         }
     }
 
+    // MARK: - Campaign Market System
+    // See EXPLORATION_CORE_DESIGN.md, section 24
+
+    /// Generate market cards based on current region and world state
+    /// Market is formed from 3 pools: Global, Regional, Story
+    func generateMarket(allCards: [Card], globalPoolSize: Int = 3, regionalPoolSize: Int = 2) -> [Card] {
+        var market: [Card] = []
+
+        // 1. Global pool (always available Sustain/Utility cards)
+        let globalCards = allCards.filter { card in
+            guard let role = card.role else { return false }
+            return role == .sustain || role == .utility
+        }
+        let shuffledGlobal = globalCards.shuffled()
+        market.append(contentsOf: shuffledGlobal.prefix(globalPoolSize))
+
+        // 2. Regional pool (based on current region state)
+        if let region = currentRegion {
+            let regionalCards = getRegionalCards(allCards: allCards, regionState: region.state)
+            let shuffledRegional = regionalCards.shuffled()
+            market.append(contentsOf: shuffledRegional.prefix(regionalPoolSize))
+        }
+
+        // 3. Story pool (cards unlocked by flags)
+        if let storyCard = getStoryCard(allCards: allCards) {
+            market.append(storyCard)
+        }
+
+        return market
+    }
+
+    /// Get cards appropriate for the region state
+    private func getRegionalCards(allCards: [Card], regionState: RegionState) -> [Card] {
+        switch regionState {
+        case .stable:
+            // Stable regions offer Sustain and Control cards
+            return allCards.filter { card in
+                guard let role = card.role else { return false }
+                return role == .sustain || role == .control
+            }
+
+        case .borderland:
+            // Borderland offers Utility and Power cards
+            return allCards.filter { card in
+                guard let role = card.role else { return false }
+                return role == .utility || role == .power
+            }
+
+        case .breach:
+            // Breach offers Power cards (risky but rewarding)
+            return allCards.filter { card in
+                guard let role = card.role else { return false }
+                return role == .power
+            }
+        }
+    }
+
+    /// Get a story card if player has the required flag
+    private func getStoryCard(allCards: [Card]) -> Card? {
+        // Find cards that require specific flags
+        let storyCards = allCards.filter { card in
+            guard let requirement = card.regionRequirement else { return false }
+            return hasFlag(requirement)
+        }
+        return storyCards.randomElement()
+    }
+
+    /// Calculate adjusted card cost based on Light/Dark balance
+    func adjustedCardCost(_ card: Card) -> Int {
+        return card.adjustedFaithCost(playerBalance: lightDarkBalance)
+    }
+
     // MARK: - Balance Management
 
     func shiftToLight(by amount: Int) {

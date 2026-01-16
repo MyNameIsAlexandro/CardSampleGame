@@ -27,6 +27,9 @@ struct Card: Identifiable, Codable, Hashable {
     var realm: Realm?  // Yav/Nav/Prav
     var curseType: CurseType?  // For curse cards
     var expansionSet: String?  // For DLC/expansions tracking
+    var role: CardRole?  // Functional role in campaign (Sustain/Control/Power/Utility)
+    var regionRequirement: String?  // Required region flag to purchase (for story pool)
+    var faithCost: Int  // Cost in faith to purchase from market
 
     init(
         id: UUID = UUID(),
@@ -46,7 +49,10 @@ struct Card: Identifiable, Codable, Hashable {
         balance: CardBalance? = nil,
         realm: Realm? = nil,
         curseType: CurseType? = nil,
-        expansionSet: String? = nil
+        expansionSet: String? = nil,
+        role: CardRole? = nil,
+        regionRequirement: String? = nil,
+        faithCost: Int = 3
     ) {
         self.id = id
         self.name = name
@@ -66,6 +72,30 @@ struct Card: Identifiable, Codable, Hashable {
         self.realm = realm
         self.curseType = curseType
         self.expansionSet = expansionSet
+        self.role = role
+        self.regionRequirement = regionRequirement
+        self.faithCost = faithCost
+    }
+
+    /// Calculate adjusted cost based on player's Light/Dark balance
+    /// See EXPLORATION_CORE_DESIGN.md, section 23.4
+    func adjustedFaithCost(playerBalance: Int) -> Int {
+        guard let cardBalance = balance else { return faithCost }
+
+        switch cardBalance {
+        case .light:
+            // Light cards cheaper when player is aligned to light (>50)
+            let discount = max(0, (playerBalance - 50) / 20)  // 0 to +2 discount
+            return max(1, faithCost - discount)
+
+        case .dark:
+            // Dark cards cheaper when player is aligned to dark (<50)
+            let discount = max(0, (50 - playerBalance) / 20)  // 0 to +2 discount
+            return max(1, faithCost - discount)
+
+        case .neutral:
+            return faithCost  // Neutral always base cost
+        }
     }
 }
 

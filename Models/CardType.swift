@@ -58,15 +58,71 @@ enum Realm: String, Codable, Hashable {
     case prav       // Правь - World of the Gods (higher powers, blessings, ancient magic)
 }
 
-// Twilight Marches: Curse system
+// Twilight Marches: Functional Card Roles (Campaign system)
+// See EXPLORATION_CORE_DESIGN.md, section 22
+enum CardRole: String, Codable, Hashable {
+    case sustain    // Поддержка - healing, curse removal, recovery
+    case control    // Контроль - region stabilization, anchor protection, tension reduction
+    case power      // Сила - fast progress, elite enemies, rare rewards (always with a price)
+    case utility    // Гибкость - card draw, deck manipulation, preparation
+
+    /// Default balance alignment for this role
+    var defaultBalance: CardBalance {
+        switch self {
+        case .sustain: return .light
+        case .control: return .light
+        case .power: return .dark
+        case .utility: return .neutral
+        }
+    }
+
+    /// Typical rarity for this role
+    var typicalRarity: [CardRarity] {
+        switch self {
+        case .sustain: return [.common, .uncommon]
+        case .control: return [.rare, .epic]
+        case .power: return [.uncommon, .rare]
+        case .utility: return [.common, .uncommon]
+        }
+    }
+}
+
+// Twilight Marches: Curse system (PLAYABLE curses)
+// See EXPLORATION_CORE_DESIGN.md, section 26
 enum CurseType: String, Codable, Hashable {
-    case blindness      // Слепота - reduce accuracy/vision
-    case muteness       // Немота - can't cast spells
-    case weakness       // Слабость - reduce power
-    case forgetfulness  // Забвение - discard cards
-    case sickness       // Болезнь - lose health over time
-    case madness        // Безумие - random effects
-    case transformation // Превращение - change form
+    case weakness       // Слабость: -1 к урону до конца боя (2 веры снять)
+    case fear           // Страх: -1 к защите до конца боя (2 веры)
+    case exhaustion     // Истощение: -1 действие в этом ходу (3 веры)
+    case greed          // Жадность: +2 веры, но WorldTension +1 (4 веры)
+    case shadowOfNav    // Тень Нави: +3 урона, но -2 HP (5 веры)
+    case bloodCurse     // Проклятие крови: При убийстве +2 HP, баланс к тьме (6 веры)
+    case sealOfNav      // Печать Нави: Нельзя использовать Sustain карты (8 веры)
+
+    /// Cost in faith to remove this curse
+    var removalCost: Int {
+        switch self {
+        case .weakness: return 2
+        case .fear: return 2
+        case .exhaustion: return 3
+        case .greed: return 4
+        case .shadowOfNav: return 5
+        case .bloodCurse: return 6
+        case .sealOfNav: return 8
+        }
+    }
+
+    /// Localized name
+    var displayName: String {
+        switch self {
+        case .weakness: return "Слабость"
+        case .fear: return "Страх"
+        case .exhaustion: return "Истощение"
+        case .greed: return "Жадность"
+        case .shadowOfNav: return "Тень Нави"
+        case .bloodCurse: return "Проклятие крови"
+        case .sealOfNav: return "Печать Нави"
+        }
+    }
 }
 
 // Expansion tracking
