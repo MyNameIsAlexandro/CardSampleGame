@@ -2,7 +2,7 @@ import Foundation
 import Combine
 
 /// Глобальное состояние мира для системы исследования
-class WorldState: ObservableObject {
+class WorldState: ObservableObject, Codable {
     // MARK: - Published Properties
 
     @Published var regions: [Region] = []
@@ -719,7 +719,7 @@ class WorldState: ObservableObject {
             choices: [
                 EventChoice(
                     text: "Возродить святилище Света (10 ✨)",
-                    requirements: EventRequirements(minimumFaith: 10, requiredBalance: .light),
+                    requirements: EventRequirements(minimumFaith: 10, minimumHealth: nil, requiredBalance: .light),
                     consequences: EventConsequences(
                         faithChange: -10,
                         balanceChange: 15,
@@ -764,7 +764,15 @@ class WorldState: ObservableObject {
                     requirements: EventRequirements(minimumFaith: 3),
                     consequences: EventConsequences(
                         faithChange: -3,
+                        healthChange: nil,
+                        balanceChange: nil,
+                        tensionChange: nil,
+                        reputationChange: nil,
+                        addCards: nil,
+                        addCurse: nil,
+                        giveArtifact: nil,
                         setFlags: ["met_wanderer": true],
+                        anchorIntegrityChange: nil,
                         message: "Странник рассказал вам о древних путях и тайнах мира."
                     )
                 ),
@@ -772,8 +780,15 @@ class WorldState: ObservableObject {
                     text: "Помочь ему припасами",
                     consequences: EventConsequences(
                         faithChange: -2,
+                        healthChange: nil,
                         balanceChange: 5,
+                        tensionChange: nil,
                         reputationChange: 10,
+                        addCards: nil,
+                        addCurse: nil,
+                        giveArtifact: nil,
+                        setFlags: nil,
+                        anchorIntegrityChange: nil,
                         message: "Странник благодарен за помощь и благословляет ваш путь."
                     )
                 ),
@@ -802,7 +817,14 @@ class WorldState: ObservableObject {
                     consequences: EventConsequences(
                         faithChange: 8,
                         healthChange: -3,
+                        balanceChange: nil,
+                        tensionChange: nil,
+                        reputationChange: nil,
                         addCards: ["ancient_blessing"],
+                        addCurse: nil,
+                        giveArtifact: nil,
+                        setFlags: nil,
+                        anchorIntegrityChange: nil,
                         message: "Вы нашли древнюю реликвию, но исследование было опасным."
                     )
                 ),
@@ -846,8 +868,15 @@ class WorldState: ObservableObject {
                 EventChoice(
                     text: "Отступить и предупредить других",
                     consequences: EventConsequences(
+                        faithChange: nil,
+                        healthChange: nil,
+                        balanceChange: nil,
                         tensionChange: 10,
                         reputationChange: 5,
+                        addCards: nil,
+                        addCurse: nil,
+                        giveArtifact: nil,
+                        setFlags: nil,
                         anchorIntegrityChange: -10,
                         message: "Вы предупредили о прорыве, но Навь усилилась."
                     )
@@ -934,7 +963,13 @@ class WorldState: ObservableObject {
                         faithChange: -8,
                         healthChange: 3,
                         balanceChange: 5,
+                        tensionChange: nil,
+                        reputationChange: nil,
                         addCards: ["merchant_blessing"],
+                        addCurse: nil,
+                        giveArtifact: nil,
+                        setFlags: nil,
+                        anchorIntegrityChange: nil,
                         message: "Вы приобрели благословение. Ваши силы восстановлены."
                     )
                 ),
@@ -943,8 +978,15 @@ class WorldState: ObservableObject {
                     requirements: EventRequirements(minimumFaith: 4),
                     consequences: EventConsequences(
                         faithChange: -4,
+                        healthChange: nil,
+                        balanceChange: nil,
+                        tensionChange: nil,
                         reputationChange: 5,
+                        addCards: nil,
+                        addCurse: nil,
+                        giveArtifact: nil,
                         setFlags: ["merchant_info": true],
+                        anchorIntegrityChange: nil,
                         message: "Торговец рассказал о путях и опасностях впереди."
                     )
                 ),
@@ -994,9 +1036,15 @@ class WorldState: ObservableObject {
                     requirements: EventRequirements(minimumFaith: 10),
                     consequences: EventConsequences(
                         faithChange: -10,
+                        healthChange: nil,
                         balanceChange: 8,
+                        tensionChange: nil,
                         reputationChange: 15,
+                        addCards: nil,
+                        addCurse: nil,
+                        giveArtifact: nil,
                         setFlags: ["mountain_blessing": true],
+                        anchorIntegrityChange: nil,
                         message: "Горный дух принял дар. Он благословил ваш путь через перевал."
                     )
                 ),
@@ -1027,17 +1075,28 @@ class WorldState: ObservableObject {
                         faithChange: -6,
                         healthChange: 5,
                         balanceChange: 10,
+                        tensionChange: nil,
+                        reputationChange: nil,
+                        addCards: nil,
+                        addCurse: nil,
+                        giveArtifact: nil,
                         setFlags: ["oak_wisdom": true],
+                        anchorIntegrityChange: nil,
                         message: "Дуб поделился древней мудростью. Вы чувствуете прилив сил и ясность разума."
                     )
                 ),
                 EventChoice(
                     text: "Укрепить связь дуба с землей (12 ✨)",
-                    requirements: EventRequirements(minimumFaith: 12, requiredBalance: .light),
+                    requirements: EventRequirements(minimumFaith: 12, minimumHealth: nil, requiredBalance: .light),
                     consequences: EventConsequences(
                         faithChange: -12,
+                        healthChange: nil,
                         balanceChange: 15,
                         tensionChange: -15,
+                        reputationChange: nil,
+                        addCards: nil,
+                        addCurse: nil,
+                        giveArtifact: nil,
                         setFlags: ["oak_strengthened": true],
                         anchorIntegrityChange: 25,
                         message: "Вы усилили якорь! Священный Дуб сияет обновленной силой."
@@ -1082,7 +1141,14 @@ class WorldState: ObservableObject {
                     consequences: EventConsequences(
                         faithChange: -7,
                         healthChange: 2,
+                        balanceChange: nil,
+                        tensionChange: nil,
+                        reputationChange: nil,
+                        addCards: nil,
+                        addCurse: nil,
+                        giveArtifact: nil,
                         setFlags: ["witch_refused": true],
+                        anchorIntegrityChange: nil,
                         message: "Ведьма уважает вашу стойкость и дает небольшую помощь без платы."
                     )
                 ),
@@ -1128,13 +1194,18 @@ class WorldState: ObservableObject {
                 ),
                 EventChoice(
                     text: "Провести ритуал упокоения (15 ✨)",
-                    requirements: EventRequirements(minimumFaith: 15, requiredBalance: .light),
+                    requirements: EventRequirements(minimumFaith: 15, minimumHealth: nil, requiredBalance: .light),
                     consequences: EventConsequences(
                         faithChange: -15,
+                        healthChange: nil,
                         balanceChange: 20,
                         tensionChange: -10,
+                        reputationChange: nil,
                         addCards: ["ancestral_blessing"],
+                        addCurse: nil,
+                        giveArtifact: nil,
                         setFlags: ["barrow_cleansed": true],
+                        anchorIntegrityChange: nil,
                         message: "Вы упокоили древних воинов. Они благословляют вас перед уходом."
                     )
                 ),
@@ -1144,7 +1215,13 @@ class WorldState: ObservableObject {
                         faithChange: 5,
                         healthChange: -4,
                         balanceChange: -15,
+                        tensionChange: nil,
+                        reputationChange: nil,
+                        addCards: nil,
                         addCurse: "ancestral_wrath",
+                        giveArtifact: nil,
+                        setFlags: nil,
+                        anchorIntegrityChange: nil,
                         message: "Вы захватили сокровища, но навлекли гнев предков."
                     )
                 )
@@ -1172,25 +1249,35 @@ class WorldState: ObservableObject {
                 ),
                 EventChoice(
                     text: "Попытаться договориться (20 ✨)",
-                    requirements: EventRequirements(minimumFaith: 20, requiredBalance: .light),
+                    requirements: EventRequirements(minimumFaith: 20, minimumHealth: nil, requiredBalance: .light),
                     consequences: EventConsequences(
                         faithChange: -20,
+                        healthChange: nil,
                         balanceChange: 15,
                         tensionChange: -20,
+                        reputationChange: nil,
                         addCards: ["guardian_seal"],
+                        addCurse: nil,
+                        giveArtifact: nil,
                         setFlags: ["leshy_guardian_peaceful": true],
+                        anchorIntegrityChange: nil,
                         message: "Хранитель видит свет в вашей душе и соглашается помочь вам. Он вручает вам печать защитника."
                     )
                 ),
                 EventChoice(
                     text: "Использовать силу тьмы (15 ✨)",
-                    requirements: EventRequirements(minimumFaith: 15, requiredBalance: .dark),
+                    requirements: EventRequirements(minimumFaith: 15, minimumHealth: nil, requiredBalance: .dark),
                     consequences: EventConsequences(
                         faithChange: -15,
                         healthChange: -5,
                         balanceChange: -20,
+                        tensionChange: nil,
+                        reputationChange: nil,
                         addCards: ["corrupted_power"],
+                        addCurse: nil,
+                        giveArtifact: nil,
                         setFlags: ["leshy_guardian_corrupted": true],
+                        anchorIntegrityChange: nil,
                         message: "Вы обрушиваете на хранителя силу тьмы. Он ослабевает, но часть его сущности входит в вас..."
                     )
                 )
@@ -1255,7 +1342,14 @@ class WorldState: ObservableObject {
                     consequences: EventConsequences(
                         faithChange: -5,
                         healthChange: -2,
+                        balanceChange: nil,
+                        tensionChange: nil,
+                        reputationChange: nil,
+                        addCards: nil,
+                        addCurse: nil,
+                        giveArtifact: nil,
                         setFlags: ["child_quest_started": true],
+                        anchorIntegrityChange: nil,
                         message: "Вы уходите вглубь леса на поиски пропавшего ребенка."
                     )
                 ),
@@ -1264,16 +1358,31 @@ class WorldState: ObservableObject {
                     requirements: EventRequirements(minimumFaith: 8),
                     consequences: EventConsequences(
                         faithChange: -8,
+                        healthChange: nil,
                         balanceChange: 15,
+                        tensionChange: nil,
                         reputationChange: 25,
+                        addCards: nil,
+                        addCurse: nil,
+                        giveArtifact: nil,
                         setFlags: ["child_saved": true],
+                        anchorIntegrityChange: nil,
                         message: "Ваша вера помогла найти ребенка быстро. Деревня очень благодарна!"
                     )
                 ),
                 EventChoice(
                     text: "Это слишком опасно, вернуться",
                     consequences: EventConsequences(
+                        faithChange: nil,
+                        healthChange: nil,
+                        balanceChange: nil,
+                        tensionChange: nil,
                         reputationChange: -15,
+                        addCards: nil,
+                        addCurse: nil,
+                        giveArtifact: nil,
+                        setFlags: nil,
+                        anchorIntegrityChange: nil,
                         message: "Вы решаете не рисковать. Судьба ребенка остается неизвестной."
                     )
                 )
@@ -1331,11 +1440,16 @@ class WorldState: ObservableObject {
             choices: [
                 EventChoice(
                     text: "Стабилизировать границу верой (20 ✨)",
-                    requirements: EventRequirements(minimumFaith: 20, requiredBalance: .light),
+                    requirements: EventRequirements(minimumFaith: 20, minimumHealth: nil, requiredBalance: .light),
                     consequences: EventConsequences(
                         faithChange: -20,
+                        healthChange: nil,
                         balanceChange: 25,
                         tensionChange: -25,
+                        reputationChange: nil,
+                        addCards: nil,
+                        addCurse: nil,
+                        giveArtifact: nil,
                         setFlags: ["realm_stabilized": true],
                         anchorIntegrityChange: 40,
                         message: "Вы закрыли прорыв! Граница миров укреплена вашей верой."
@@ -1343,14 +1457,18 @@ class WorldState: ObservableObject {
                 ),
                 EventChoice(
                     text: "Использовать момент для получения силы",
-                    requirements: EventRequirements(minimumFaith: 10, requiredBalance: .dark),
+                    requirements: EventRequirements(minimumFaith: 10, minimumHealth: nil, requiredBalance: .dark),
                     consequences: EventConsequences(
                         faithChange: 15,
                         healthChange: -5,
                         balanceChange: -20,
                         tensionChange: 15,
+                        reputationChange: nil,
                         addCards: ["realm_power", "nav_essence"],
                         addCurse: "realm_corruption",
+                        giveArtifact: nil,
+                        setFlags: nil,
+                        anchorIntegrityChange: nil,
                         message: "Вы вытянули силу из прорыва, но Навь пометила вас."
                     )
                 ),
@@ -1598,5 +1716,50 @@ class WorldState: ObservableObject {
         quests.append(mountainSpiritQuest)
 
         return quests
+    }
+
+    // MARK: - Codable Implementation
+
+    enum CodingKeys: String, CodingKey {
+        case regions
+        case worldTension
+        case lightDarkBalance
+        case mainQuestStage
+        case activeQuests
+        case completedQuests
+        case worldFlags
+        case allEvents
+        case currentRegionId
+        case daysPassed
+    }
+
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        regions = try container.decode([Region].self, forKey: .regions)
+        worldTension = try container.decode(Int.self, forKey: .worldTension)
+        lightDarkBalance = try container.decode(Int.self, forKey: .lightDarkBalance)
+        mainQuestStage = try container.decode(Int.self, forKey: .mainQuestStage)
+        activeQuests = try container.decode([Quest].self, forKey: .activeQuests)
+        completedQuests = try container.decode([String].self, forKey: .completedQuests)
+        worldFlags = try container.decode([String: Bool].self, forKey: .worldFlags)
+        allEvents = try container.decode([GameEvent].self, forKey: .allEvents)
+        currentRegionId = try container.decodeIfPresent(UUID.self, forKey: .currentRegionId)
+        daysPassed = try container.decode(Int.self, forKey: .daysPassed)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(regions, forKey: .regions)
+        try container.encode(worldTension, forKey: .worldTension)
+        try container.encode(lightDarkBalance, forKey: .lightDarkBalance)
+        try container.encode(mainQuestStage, forKey: .mainQuestStage)
+        try container.encode(activeQuests, forKey: .activeQuests)
+        try container.encode(completedQuests, forKey: .completedQuests)
+        try container.encode(worldFlags, forKey: .worldFlags)
+        try container.encode(allEvents, forKey: .allEvents)
+        try container.encodeIfPresent(currentRegionId, forKey: .currentRegionId)
+        try container.encode(daysPassed, forKey: .daysPassed)
     }
 }
