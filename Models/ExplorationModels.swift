@@ -379,11 +379,13 @@ struct QuestObjective: Identifiable, Codable {
     let id: UUID
     let description: String
     var completed: Bool
+    var requiredFlags: [String]?  // Флаги, необходимые для выполнения цели
 
-    init(id: UUID = UUID(), description: String, completed: Bool = false) {
+    init(id: UUID = UUID(), description: String, completed: Bool = false, requiredFlags: [String]? = nil) {
         self.id = id
         self.description = description
         self.completed = completed
+        self.requiredFlags = requiredFlags
     }
 }
 

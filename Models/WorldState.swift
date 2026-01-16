@@ -104,26 +104,136 @@ class WorldState: ObservableObject, Codable {
         checkTimeDegradation()
     }
 
-    // MARK: - Time-based Degradation
+    // MARK: - Time-based Degradation (Day Start Algorithm)
 
-    /// Проверка автоматической деградации мира каждые 3 дня
-    func checkTimeDegradation() {
+    /// Канонический алгоритм начала дня (см. EXPLORATION_CORE_DESIGN.md, раздел 18.1)
+    /// Вызывается при каждом увеличении daysPassed
+    func processDayStart() {
+        // 1. Каждые 3 дня — автоматическая деградация мира
         guard daysPassed > 0 && daysPassed % 3 == 0 else { return }
 
-        // 1. Увеличить напряжение мира
+        // 2. Увеличить напряжение мира (+2 каждые 3 дня)
         increaseTension(by: 2)
 
-        // 2. С вероятностью (Tension/100) деградировать случайный регион
+        // 3. Проверить деградацию региона с вероятностью (Tension/100)
         let probability = Double(worldTension) / 100.0
         if Double.random(in: 0...1) < probability {
-            degradeRandomRegion()
+            checkRegionDegradation()
+        }
+
+        // 4. Проверить триггеры квестов
+        checkQuestTriggers()
+
+        // 5. Проверить глобальные триггеры мира
+        checkWorldShiftTriggers()
+    }
+
+    /// Проверка автоматической деградации мира (legacy alias)
+    func checkTimeDegradation() {
+        processDayStart()
+    }
+
+    /// Проверка деградации региона по весовому алгоритму
+    /// (см. EXPLORATION_CORE_DESIGN.md, раздел 18.2)
+    private func checkRegionDegradation() {
+        // 1. Выбрать случайный регион с весами (Borderland:1, Breach:2, Stable:0)
+        guard let selectedRegion = selectRegionForDegradation() else { return }
+
+        // 2. Проверить сопротивление якоря
+        if let anchor = selectedRegion.anchor, anchor.integrity > 50 {
+            // Якорь сопротивляется — деградация не происходит
+            // Можно добавить лог или UI-уведомление
+            return
+        }
+
+        // 3. Применить деградацию
+        degradeRegion(selectedRegion.id)
+    }
+
+    /// Выбор региона для деградации с учётом весов
+    /// Веса: Stable = 0 (не деградирует), Borderland = 1, Breach = 2
+    private func selectRegionForDegradation() -> Region? {
+        // Формируем пул регионов с весами
+        var weightedPool: [(region: Region, weight: Int)] = []
+
+        for region in regions {
+            let weight: Int
+            switch region.state {
+            case .stable:
+                weight = 0  // Stable регионы не деградируют напрямую
+            case .borderland:
+                weight = 1  // Borderland имеет вес 1
+            case .breach:
+                weight = 2  // Breach имеет вес 2 (более вероятен)
+            }
+
+            if weight > 0 {
+                weightedPool.append((region, weight))
+            }
+        }
+
+        // Если нет подходящих регионов, деградируем случайный stable
+        if weightedPool.isEmpty {
+            return regions.filter { $0.state == .stable }.randomElement()
+        }
+
+        // Взвешенный случайный выбор
+        let totalWeight = weightedPool.reduce(0) { $0 + $1.weight }
+        guard totalWeight > 0 else { return nil }
+
+        var randomValue = Int.random(in: 0..<totalWeight)
+        for (region, weight) in weightedPool {
+            randomValue -= weight
+            if randomValue < 0 {
+                return region
+            }
+        }
+
+        return weightedPool.first?.region
+    }
+
+    /// Применить деградацию к конкретному региону
+    private func degradeRegion(_ regionId: UUID) {
+        guard var region = getRegion(byId: regionId) else { return }
+
+        if var anchor = region.anchor {
+            // Уменьшить integrity якоря на 20
+            anchor.integrity = max(0, anchor.integrity - 20)
+            region.anchor = anchor
+            region.updateStateFromAnchor()
+            updateRegion(region)
+        }
+    }
+
+    /// Проверка триггеров квестов (вызывается каждые 3 дня)
+    private func checkQuestTriggers() {
+        // Проверить условия продвижения для каждого активного квеста
+        for quest in activeQuests {
+            checkQuestProgress(quest)
+        }
+    }
+
+    /// Проверка глобальных триггеров мира (World Shift Events)
+    private func checkWorldShiftTriggers() {
+        // При пороговых значениях Tension могут срабатывать глобальные события
+        if worldTension >= 50 && !hasFlag("world_shift_50") {
+            setFlag("world_shift_50", value: true)
+            // Можно триггерить World Shift Event здесь
+        }
+        if worldTension >= 75 && !hasFlag("world_shift_75") {
+            setFlag("world_shift_75", value: true)
+        }
+        if worldTension >= 90 && !hasFlag("world_shift_90") {
+            setFlag("world_shift_90", value: true)
         }
     }
 
     /// Метод для ручного продвижения времени (для Rest, StrengthenAnchor и т.д.)
     func advanceTime(by days: Int = 1) {
-        daysPassed += days
-        checkTimeDegradation()
+        for _ in 0..<days {
+            daysPassed += 1
+            processDayStart()
+        }
     }
 
     // MARK: - Anchor Management
@@ -191,46 +301,43 @@ class WorldState: ObservableObject, Codable {
     }
 
     private func checkTensionEffects() {
-        // При высоком напряжении регионы деградируют
+        // При высоком напряжении (≥80) — немедленная деградация через весовой алгоритм
         if worldTension >= 80 {
-            degradeRandomRegion()
+            checkRegionDegradation()
         }
 
-        // При низком напряжении регионы улучшаются
+        // При низком напряжении (≤20) — мир начинает восстанавливаться
         if worldTension <= 20 {
             improveRandomRegion()
         }
     }
 
-    private func degradeRandomRegion() {
-        let stableRegions = regions.filter { $0.state == .stable }
-        guard let randomRegion = stableRegions.randomElement(),
-              let index = regions.firstIndex(where: { $0.id == randomRegion.id }) else {
-            return
-        }
-
-        var region = regions[index]
-        if var anchor = region.anchor {
-            anchor.integrity = max(0, anchor.integrity - 20)
-            region.anchor = anchor
-            region.updateStateFromAnchor()
-            updateRegion(region)
-        }
-    }
-
+    /// Улучшение случайного региона (при низком Tension)
     private func improveRandomRegion() {
+        // Предпочитаем улучшать Breach регионы
         let breachRegions = regions.filter { $0.state == .breach }
-        guard let randomRegion = breachRegions.randomElement(),
-              let index = regions.firstIndex(where: { $0.id == randomRegion.id }) else {
+        let borderlandRegions = regions.filter { $0.state == .borderland }
+
+        let targetRegion: Region?
+        if !breachRegions.isEmpty {
+            targetRegion = breachRegions.randomElement()
+        } else if !borderlandRegions.isEmpty {
+            targetRegion = borderlandRegions.randomElement()
+        } else {
+            targetRegion = nil
+        }
+
+        guard let region = targetRegion,
+              let index = regions.firstIndex(where: { $0.id == region.id }) else {
             return
         }
 
-        var region = regions[index]
-        if var anchor = region.anchor {
+        var updatedRegion = regions[index]
+        if var anchor = updatedRegion.anchor {
             anchor.integrity = min(100, anchor.integrity + 15)
-            region.anchor = anchor
-            region.updateStateFromAnchor()
-            updateRegion(region)
+            updatedRegion.anchor = anchor
+            updatedRegion.updateStateFromAnchor()
+            updateRegion(updatedRegion)
         }
     }
 
@@ -291,6 +398,46 @@ class WorldState: ObservableObject, Codable {
         }
     }
 
+    /// Проверка прогресса квеста по флагам (вызывается из processDayStart)
+    func checkQuestProgress(_ quest: Quest) {
+        // Проверить, выполнены ли условия для текущих целей квеста
+        for (index, objective) in quest.objectives.enumerated() {
+            if objective.completed { continue }
+
+            // Проверить флаги, связанные с целью
+            if let requiredFlags = objective.requiredFlags {
+                let allFlagsSet = requiredFlags.allSatisfy { hasFlag($0) }
+                if allFlagsSet {
+                    var updatedQuest = quest
+                    updatedQuest.objectives[index].completed = true
+                    updateQuest(updatedQuest)
+                }
+            }
+        }
+    }
+
+    // MARK: - Flag Management
+
+    /// Проверить, установлен ли флаг
+    func hasFlag(_ key: String) -> Bool {
+        return worldFlags[key] == true
+    }
+
+    /// Установить значение флага
+    func setFlag(_ key: String, value: Bool) {
+        worldFlags[key] = value
+    }
+
+    /// Получить значение флага (nil если не установлен)
+    func getFlag(_ key: String) -> Bool? {
+        return worldFlags[key]
+    }
+
+    /// Переключить флаг
+    func toggleFlag(_ key: String) {
+        worldFlags[key] = !(worldFlags[key] ?? false)
+    }
+
     // MARK: - Apply Event Consequences
 
     func applyConsequences(_ consequences: EventConsequences, to player: Player, in regionId: UUID) {
@@ -348,11 +495,19 @@ class WorldState: ObservableObject, Codable {
             }
         }
 
-        // Установка флагов
+        // Установка флагов (ключевая механика — события не меняют мир напрямую, а через флаги)
+        // См. EXPLORATION_CORE_DESIGN.md, раздел 18.7
+        var flagsChanged = false
         if let flags = consequences.setFlags {
             for (key, value) in flags {
-                worldFlags[key] = value
+                setFlag(key, value: value)
+                flagsChanged = true
             }
+        }
+
+        // Если флаги изменились — проверить прогресс квестов
+        if flagsChanged {
+            checkQuestObjectivesByFlags(player)
         }
 
         // Добавление карт в колоду игрока
@@ -363,6 +518,12 @@ class WorldState: ObservableObject, Codable {
                     player.discard.append(card)
                 }
             }
+        }
+
+        // Проверка триггеров изменения состояния региона
+        if consequences.anchorIntegrityChange != nil {
+            // Якорь изменён — это может повлиять на глобальное состояние
+            checkWorldShiftTriggers()
         }
 
         // TODO: Добавление проклятий и артефактов
