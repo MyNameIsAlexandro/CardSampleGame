@@ -380,7 +380,7 @@ class WorldState: ObservableObject {
         quest.completed = true
 
         // Move quest from active to completed
-        completedQuests.append(quest)
+        completedQuests.append(quest.id.uuidString)
         activeQuests.remove(at: index)
 
         // Give rewards
@@ -719,23 +719,34 @@ class WorldState: ObservableObject {
             choices: [
                 EventChoice(
                     text: "Возродить святилище Света (10 ✨)",
-                    requirements: EventRequirements(minimumFaith: 10, requiredBalance: .light),
+                    requirements: EventRequirements(minimumFaith: 10, minimumHealth: nil, requiredBalance: .light),
                     consequences: EventConsequences(
                         faithChange: -10,
+                        healthChange: nil,
                         balanceChange: 15,
                         tensionChange: -10,
+                        reputationChange: nil,
+                        addCards: nil,
+                        addCurse: nil,
+                        giveArtifact: nil,
+                        setFlags: nil,
                         anchorIntegrityChange: 20,
                         message: "Святилище возрождено! Свет Яви становится сильнее в этом регионе."
                     )
                 ),
                 EventChoice(
                     text: "Осквернить ритуал для получения силы",
-                    requirements: EventRequirements(requiredBalance: .dark),
+                    requirements: EventRequirements(minimumFaith: nil, minimumHealth: nil, requiredBalance: .dark),
                     consequences: EventConsequences(
                         faithChange: 15,
+                        healthChange: nil,
                         balanceChange: -20,
                         tensionChange: 15,
+                        reputationChange: nil,
                         addCards: ["dark_power_card"],
+                        addCurse: nil,
+                        giveArtifact: nil,
+                        setFlags: nil,
                         anchorIntegrityChange: -30,
                         message: "Вы получили темную силу, но Навь усилилась в этом месте."
                     )
@@ -764,7 +775,15 @@ class WorldState: ObservableObject {
                     requirements: EventRequirements(minimumFaith: 3),
                     consequences: EventConsequences(
                         faithChange: -3,
+                        healthChange: nil,
+                        balanceChange: nil,
+                        tensionChange: nil,
+                        reputationChange: nil,
+                        addCards: nil,
+                        addCurse: nil,
+                        giveArtifact: nil,
                         setFlags: ["met_wanderer": true],
+                        anchorIntegrityChange: nil,
                         message: "Странник рассказал вам о древних путях и тайнах мира."
                     )
                 ),
@@ -837,8 +856,14 @@ class WorldState: ObservableObject {
                     requirements: EventRequirements(minimumFaith: 15),
                     consequences: EventConsequences(
                         faithChange: -15,
+                        healthChange: nil,
                         balanceChange: 10,
                         tensionChange: -20,
+                        reputationChange: nil,
+                        addCards: nil,
+                        addCurse: nil,
+                        giveArtifact: nil,
+                        setFlags: nil,
                         anchorIntegrityChange: 30,
                         message: "Вы закрыли прорыв! Регион стабилизировался."
                     )
@@ -846,21 +871,33 @@ class WorldState: ObservableObject {
                 EventChoice(
                     text: "Отступить и предупредить других",
                     consequences: EventConsequences(
+                        faithChange: nil,
+                        healthChange: nil,
+                        balanceChange: nil,
                         tensionChange: 10,
                         reputationChange: 5,
+                        addCards: nil,
+                        addCurse: nil,
+                        giveArtifact: nil,
+                        setFlags: nil,
                         anchorIntegrityChange: -10,
                         message: "Вы предупредили о прорыве, но Навь усилилась."
                     )
                 ),
                 EventChoice(
                     text: "Попытаться использовать силу прорыва",
-                    requirements: EventRequirements(requiredBalance: .dark),
+                    requirements: EventRequirements(minimumFaith: nil, minimumHealth: nil, requiredBalance: .dark),
                     consequences: EventConsequences(
                         faithChange: 10,
                         healthChange: -5,
                         balanceChange: -15,
                         tensionChange: 5,
+                        reputationChange: nil,
+                        addCards: nil,
                         addCurse: "breach_corruption",
+                        giveArtifact: nil,
+                        setFlags: nil,
+                        anchorIntegrityChange: nil,
                         message: "Вы получили силу Нави, но она оставила след на вашей душе."
                     )
                 )
@@ -943,8 +980,15 @@ class WorldState: ObservableObject {
                     requirements: EventRequirements(minimumFaith: 4),
                     consequences: EventConsequences(
                         faithChange: -4,
-                        setFlags: ["merchant_info": true],
+                        healthChange: nil,
+                        balanceChange: nil,
+                        tensionChange: nil,
                         reputationChange: 5,
+                        addCards: nil,
+                        addCurse: nil,
+                        giveArtifact: nil,
+                        setFlags: ["merchant_info": true],
+                        anchorIntegrityChange: nil,
                         message: "Торговец рассказал о путях и опасностях впереди."
                     )
                 ),
@@ -1033,13 +1077,18 @@ class WorldState: ObservableObject {
                 ),
                 EventChoice(
                     text: "Укрепить связь дуба с землей (12 ✨)",
-                    requirements: EventRequirements(minimumFaith: 12, requiredBalance: .light),
+                    requirements: EventRequirements(minimumFaith: 12, minimumHealth: nil, requiredBalance: .light),
                     consequences: EventConsequences(
                         faithChange: -12,
+                        healthChange: nil,
                         balanceChange: 15,
                         tensionChange: -15,
-                        anchorIntegrityChange: 25,
+                        reputationChange: nil,
+                        addCards: nil,
+                        addCurse: nil,
+                        giveArtifact: nil,
                         setFlags: ["oak_strengthened": true],
+                        anchorIntegrityChange: 25,
                         message: "Вы усилили якорь! Священный Дуб сияет обновленной силой."
                     )
                 ),
@@ -1067,12 +1116,16 @@ class WorldState: ObservableObject {
                     text: "Принять сделку ведьмы",
                     requirements: EventRequirements(minimumHealth: 4),
                     consequences: EventConsequences(
-                        healthChange: -3,
                         faithChange: 5,
+                        healthChange: -3,
                         balanceChange: -10,
+                        tensionChange: nil,
+                        reputationChange: nil,
                         addCards: ["witch_knowledge", "dark_pact"],
                         addCurse: "witch_mark",
+                        giveArtifact: nil,
                         setFlags: ["witch_pact": true],
+                        anchorIntegrityChange: nil,
                         message: "Ведьма дала вам темные знания, но вы чувствуете проклятие на своей душе."
                     )
                 ),
@@ -1128,7 +1181,7 @@ class WorldState: ObservableObject {
                 ),
                 EventChoice(
                     text: "Провести ритуал упокоения (15 ✨)",
-                    requirements: EventRequirements(minimumFaith: 15, requiredBalance: .light),
+                    requirements: EventRequirements(minimumFaith: 15, minimumHealth: nil, requiredBalance: .light),
                     consequences: EventConsequences(
                         faithChange: -15,
                         balanceChange: 20,
@@ -1144,7 +1197,13 @@ class WorldState: ObservableObject {
                         faithChange: 5,
                         healthChange: -4,
                         balanceChange: -15,
+                        tensionChange: nil,
+                        reputationChange: nil,
+                        addCards: nil,
                         addCurse: "ancestral_wrath",
+                        giveArtifact: nil,
+                        setFlags: nil,
+                        anchorIntegrityChange: nil,
                         message: "Вы захватили сокровища, но навлекли гнев предков."
                     )
                 )
@@ -1172,33 +1231,42 @@ class WorldState: ObservableObject {
                 ),
                 EventChoice(
                     text: "Попытаться договориться (20 ✨)",
-                    requirements: EventRequirements(minimumFaith: 20, requiredBalance: .light),
+                    requirements: EventRequirements(minimumFaith: 20, minimumHealth: nil, requiredBalance: .light),
                     consequences: EventConsequences(
                         faithChange: -20,
+                        healthChange: nil,
                         balanceChange: 15,
                         tensionChange: -20,
-                        setFlags: ["leshy_guardian_peaceful": true],
+                        reputationChange: nil,
                         addCards: ["guardian_seal"],
+                        addCurse: nil,
+                        giveArtifact: nil,
+                        setFlags: ["leshy_guardian_peaceful": true],
+                        anchorIntegrityChange: nil,
                         message: "Хранитель видит свет в вашей душе и соглашается помочь вам. Он вручает вам печать защитника."
                     )
                 ),
                 EventChoice(
                     text: "Использовать силу тьмы (15 ✨)",
-                    requirements: EventRequirements(minimumFaith: 15, requiredBalance: .dark),
+                    requirements: EventRequirements(minimumFaith: 15, minimumHealth: nil, requiredBalance: .dark),
                     consequences: EventConsequences(
                         faithChange: -15,
-                        balanceChange: -20,
                         healthChange: -5,
+                        balanceChange: -20,
+                        tensionChange: nil,
+                        reputationChange: nil,
                         addCards: ["corrupted_power"],
+                        addCurse: nil,
+                        giveArtifact: nil,
                         setFlags: ["leshy_guardian_corrupted": true],
+                        anchorIntegrityChange: nil,
                         message: "Вы обрушиваете на хранителя силу тьмы. Он ослабевает, но часть его сущности входит в вас..."
                     )
                 )
             ],
             oneTime: true,
-            questLinks: [UUID()], // Will be linked to main quest ID dynamically
-            monsterCard: leshyGuardianBoss,
-            requiredFlags: ["main_quest_started": true]
+            questLinks: [], // Will be linked to main quest ID dynamically
+            monsterCard: leshyGuardianBoss
         )
         events.append(bossEvent)
 
@@ -1254,9 +1322,16 @@ class WorldState: ObservableObject {
                     text: "Отправиться на поиски ребенка",
                     requirements: EventRequirements(minimumHealth: 4),
                     consequences: EventConsequences(
-                        healthChange: -2,
                         faithChange: -5,
+                        healthChange: -2,
+                        balanceChange: nil,
+                        tensionChange: nil,
+                        reputationChange: nil,
+                        addCards: nil,
+                        addCurse: nil,
+                        giveArtifact: nil,
                         setFlags: ["child_quest_started": true],
+                        anchorIntegrityChange: nil,
                         message: "Вы уходите вглубь леса на поиски пропавшего ребенка."
                     )
                 ),
@@ -1265,9 +1340,15 @@ class WorldState: ObservableObject {
                     requirements: EventRequirements(minimumFaith: 8),
                     consequences: EventConsequences(
                         faithChange: -8,
-                        reputationChange: 25,
+                        healthChange: nil,
                         balanceChange: 15,
+                        tensionChange: nil,
+                        reputationChange: 25,
+                        addCards: nil,
+                        addCurse: nil,
+                        giveArtifact: nil,
                         setFlags: ["child_saved": true],
+                        anchorIntegrityChange: nil,
                         message: "Ваша вера помогла найти ребенка быстро. Деревня очень благодарна!"
                     )
                 ),
@@ -1332,26 +1413,35 @@ class WorldState: ObservableObject {
             choices: [
                 EventChoice(
                     text: "Стабилизировать границу верой (20 ✨)",
-                    requirements: EventRequirements(minimumFaith: 20, requiredBalance: .light),
+                    requirements: EventRequirements(minimumFaith: 20, minimumHealth: nil, requiredBalance: .light),
                     consequences: EventConsequences(
                         faithChange: -20,
+                        healthChange: nil,
                         balanceChange: 25,
                         tensionChange: -25,
-                        anchorIntegrityChange: 40,
+                        reputationChange: nil,
+                        addCards: nil,
+                        addCurse: nil,
+                        giveArtifact: nil,
                         setFlags: ["realm_stabilized": true],
+                        anchorIntegrityChange: 40,
                         message: "Вы закрыли прорыв! Граница миров укреплена вашей верой."
                     )
                 ),
                 EventChoice(
                     text: "Использовать момент для получения силы",
-                    requirements: EventRequirements(requiredBalance: .dark, minimumFaith: 10),
+                    requirements: EventRequirements(minimumFaith: 10, minimumHealth: nil, requiredBalance: .dark),
                     consequences: EventConsequences(
                         faithChange: 15,
                         healthChange: -5,
                         balanceChange: -20,
                         tensionChange: 15,
+                        reputationChange: nil,
                         addCards: ["realm_power", "nav_essence"],
                         addCurse: "realm_corruption",
+                        giveArtifact: nil,
+                        setFlags: nil,
+                        anchorIntegrityChange: nil,
                         message: "Вы вытянули силу из прорыва, но Навь пометила вас."
                     )
                 ),
