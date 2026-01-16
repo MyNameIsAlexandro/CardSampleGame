@@ -738,6 +738,409 @@ class WorldState: ObservableObject {
         )
         events.append(beastEvent)
 
+        // 7. SETTLEMENT EVENT: Торговец на тракте
+        let merchantEvent = GameEvent(
+            eventType: .narrative,
+            title: "Торговец на Тракте",
+            description: "Вы встречаете странствующего торговца. У него есть интересные товары, но цены высоки.",
+            regionTypes: [.settlement],
+            regionStates: [.stable, .borderland],
+            choices: [
+                EventChoice(
+                    text: "Купить благословение (8 ✨)",
+                    requirements: EventRequirements(minimumFaith: 8),
+                    consequences: EventConsequences(
+                        faithChange: -8,
+                        healthChange: 3,
+                        balanceChange: 5,
+                        addCards: ["merchant_blessing"],
+                        message: "Вы приобрели благословение. Ваши силы восстановлены."
+                    )
+                ),
+                EventChoice(
+                    text: "Поторговаться за информацию (4 ✨)",
+                    requirements: EventRequirements(minimumFaith: 4),
+                    consequences: EventConsequences(
+                        faithChange: -4,
+                        setFlags: ["merchant_info": true],
+                        reputationChange: 5,
+                        message: "Торговец рассказал о путях и опасностях впереди."
+                    )
+                ),
+                EventChoice(
+                    text: "Просто поговорить и идти дальше",
+                    consequences: EventConsequences(
+                        message: "Вы обменялись новостями и продолжили путь."
+                    )
+                )
+            ],
+            oneTime: false
+        )
+        events.append(merchantEvent)
+
+        // 8. MOUNTAIN EVENT: Перевал и горный дух
+        let mountainSpiritMonster = Card(
+            id: UUID(),
+            name: "Горный Дух",
+            type: .monster,
+            rarity: .uncommon,
+            description: "Древний страж горных троп, испытывающий путников.",
+            power: 5,
+            defense: 10,
+            health: 14,
+            cost: nil,
+            abilities: [],
+            balance: .neutral
+        )
+
+        let mountainEvent = GameEvent(
+            eventType: .combat,
+            title: "Испытание Перевала",
+            description: "На горном перевале появляется каменный дух. Он говорит: 'Докажи свою силу или вернись назад, смертный!'",
+            regionTypes: [.mountain],
+            regionStates: [.stable, .borderland, .breach],
+            choices: [
+                EventChoice(
+                    text: "Принять вызов духа",
+                    requirements: EventRequirements(minimumHealth: 4),
+                    consequences: EventConsequences(
+                        faithChange: 2,
+                        message: "Вы принимаете вызов горного духа!"
+                    )
+                ),
+                EventChoice(
+                    text: "Предложить дар горам (10 ✨)",
+                    requirements: EventRequirements(minimumFaith: 10),
+                    consequences: EventConsequences(
+                        faithChange: -10,
+                        balanceChange: 8,
+                        reputationChange: 15,
+                        setFlags: ["mountain_blessing": true],
+                        message: "Горный дух принял дар. Он благословил ваш путь через перевал."
+                    )
+                ),
+                EventChoice(
+                    text: "Отступить с перевала",
+                    consequences: EventConsequences(
+                        message: "Вы спускаетесь вниз, не приняв вызов."
+                    )
+                )
+            ],
+            oneTime: true,
+            monsterCard: mountainSpiritMonster
+        )
+        events.append(mountainEvent)
+
+        // 9. SACRED EVENT: Священный Дуб
+        let oakEvent = GameEvent(
+            eventType: .ritual,
+            title: "Мудрость Священного Дуба",
+            description: "Древний дуб шепчет вам на языке ветра. Вы чувствуете его древнюю силу и мудрость веков.",
+            regionTypes: [.sacred, .forest],
+            regionStates: [.stable, .borderland],
+            choices: [
+                EventChoice(
+                    text: "Медитировать под дубом (6 ✨)",
+                    requirements: EventRequirements(minimumFaith: 6),
+                    consequences: EventConsequences(
+                        faithChange: -6,
+                        healthChange: 5,
+                        balanceChange: 10,
+                        setFlags: ["oak_wisdom": true],
+                        message: "Дуб поделился древней мудростью. Вы чувствуете прилив сил и ясность разума."
+                    )
+                ),
+                EventChoice(
+                    text: "Укрепить связь дуба с землей (12 ✨)",
+                    requirements: EventRequirements(minimumFaith: 12, requiredBalance: .light),
+                    consequences: EventConsequences(
+                        faithChange: -12,
+                        balanceChange: 15,
+                        tensionChange: -15,
+                        anchorIntegrityChange: 25,
+                        setFlags: ["oak_strengthened": true],
+                        message: "Вы усилили якорь! Священный Дуб сияет обновленной силой."
+                    )
+                ),
+                EventChoice(
+                    text: "Просто отдохнуть в тени дуба",
+                    consequences: EventConsequences(
+                        healthChange: 2,
+                        message: "Вы отдохнули под защитой древнего дуба."
+                    )
+                )
+            ],
+            oneTime: false
+        )
+        events.append(oakEvent)
+
+        // 10. SWAMP EVENT: Болотная ведьма
+        let swampWitchEvent = GameEvent(
+            eventType: .narrative,
+            title: "Болотная Ведьма",
+            description: "Среди болотных туманов появляется старая ведьма. Она предлагает сделку: знания в обмен на часть вашей сущности.",
+            regionTypes: [.swamp],
+            regionStates: [.borderland, .breach],
+            choices: [
+                EventChoice(
+                    text: "Принять сделку ведьмы",
+                    requirements: EventRequirements(minimumHealth: 4),
+                    consequences: EventConsequences(
+                        healthChange: -3,
+                        faithChange: 5,
+                        balanceChange: -10,
+                        addCards: ["witch_knowledge", "dark_pact"],
+                        addCurse: "witch_mark",
+                        setFlags: ["witch_pact": true],
+                        message: "Ведьма дала вам темные знания, но вы чувствуете проклятие на своей душе."
+                    )
+                ),
+                EventChoice(
+                    text: "Отказаться и попросить о помощи (7 ✨)",
+                    requirements: EventRequirements(minimumFaith: 7),
+                    consequences: EventConsequences(
+                        faithChange: -7,
+                        healthChange: 2,
+                        setFlags: ["witch_refused": true],
+                        message: "Ведьма уважает вашу стойкость и дает небольшую помощь без платы."
+                    )
+                ),
+                EventChoice(
+                    text: "Уйти, не связываясь с ведьмой",
+                    consequences: EventConsequences(
+                        message: "Вы обходите ведьму стороной и продолжаете путь через болото."
+                    )
+                )
+            ],
+            oneTime: true
+        )
+        events.append(swampWitchEvent)
+
+        // 11. WASTELAND EVENT: Разлом Курганов
+        let barrowWraithMonster = Card(
+            id: UUID(),
+            name: "Курганный Призрак",
+            type: .monster,
+            rarity: .rare,
+            description: "Древний воин, восставший из кургана под влиянием Нави.",
+            power: 6,
+            defense: 8,
+            health: 16,
+            cost: nil,
+            abilities: [],
+            balance: .dark
+        )
+
+        let barrowEvent = GameEvent(
+            eventType: .combat,
+            title: "Стражи Курганов",
+            description: "Древние курганы вскрываются, и из них поднимаются призрачные воины. Они защищают сокровища предков.",
+            regionTypes: [.wasteland],
+            regionStates: [.breach],
+            choices: [
+                EventChoice(
+                    text: "Сразиться с призраками",
+                    requirements: EventRequirements(minimumHealth: 5),
+                    consequences: EventConsequences(
+                        message: "Вы вступаете в бой с древними стражами!"
+                    )
+                ),
+                EventChoice(
+                    text: "Провести ритуал упокоения (15 ✨)",
+                    requirements: EventRequirements(minimumFaith: 15, requiredBalance: .light),
+                    consequences: EventConsequences(
+                        faithChange: -15,
+                        balanceChange: 20,
+                        tensionChange: -10,
+                        addCards: ["ancestral_blessing"],
+                        setFlags: ["barrow_cleansed": true],
+                        message: "Вы упокоили древних воинов. Они благословляют вас перед уходом."
+                    )
+                ),
+                EventChoice(
+                    text: "Разграбить курган и бежать",
+                    consequences: EventConsequences(
+                        faithChange: 5,
+                        healthChange: -4,
+                        balanceChange: -15,
+                        addCurse: "ancestral_wrath",
+                        message: "Вы захватили сокровища, но навлекли гнев предков."
+                    )
+                )
+            ],
+            oneTime: false,
+            monsterCard: barrowWraithMonster
+        )
+        events.append(barrowEvent)
+
+        // 12. QUEST EVENT: Деревенский староста (Main Quest trigger)
+        let elderEvent = GameEvent(
+            eventType: .narrative,
+            title: "Просьба Старосты",
+            description: "Деревенский староста просит о помощи. Навь усиливается, и деревне нужен защитник, способный укрепить якоря и противостоять тьме.",
+            regionTypes: [.settlement],
+            regionStates: [.stable, .borderland],
+            choices: [
+                EventChoice(
+                    text: "Согласиться помочь деревне",
+                    consequences: EventConsequences(
+                        faithChange: 3,
+                        reputationChange: 20,
+                        setFlags: ["main_quest_started": true, "helped_village": true],
+                        message: "Староста благодарен. Он рассказывает о трех главных якорях, которые нужно укрепить."
+                    )
+                ),
+                EventChoice(
+                    text: "Попросить награду (10 ✨)",
+                    consequences: EventConsequences(
+                        faithChange: 10,
+                        reputationChange: 5,
+                        setFlags: ["main_quest_started": true, "mercenary_path": true],
+                        message: "Староста соглашается заплатить. Вы берете задание как наемник."
+                    )
+                ),
+                EventChoice(
+                    text: "Отказать и идти своим путем",
+                    consequences: EventConsequences(
+                        reputationChange: -10,
+                        setFlags: ["refused_main_quest": true],
+                        message: "Староста разочарован вашим отказом."
+                    )
+                )
+            ],
+            questLinks: ["main_quest_act1"],
+            oneTime: true
+        )
+        events.append(elderEvent)
+
+        // 13. SIDE QUEST: Потерянный ребенок
+        let lostChildEvent = GameEvent(
+            eventType: .narrative,
+            title: "Плач в Лесу",
+            description: "Вы слышите детский плач в чаще. Местные говорят, что ребенок пропал три дня назад.",
+            regionTypes: [.forest, .swamp],
+            regionStates: [.borderland, .breach],
+            choices: [
+                EventChoice(
+                    text: "Отправиться на поиски ребенка",
+                    requirements: EventRequirements(minimumHealth: 4),
+                    consequences: EventConsequences(
+                        healthChange: -2,
+                        faithChange: -5,
+                        setFlags: ["child_quest_started": true],
+                        message: "Вы уходите вглубь леса на поиски пропавшего ребенка."
+                    )
+                ),
+                EventChoice(
+                    text: "Использовать веру для поиска (8 ✨)",
+                    requirements: EventRequirements(minimumFaith: 8),
+                    consequences: EventConsequences(
+                        faithChange: -8,
+                        reputationChange: 25,
+                        balanceChange: 15,
+                        setFlags: ["child_saved": true],
+                        message: "Ваша вера помогла найти ребенка быстро. Деревня очень благодарна!"
+                    )
+                ),
+                EventChoice(
+                    text: "Это слишком опасно, вернуться",
+                    consequences: EventConsequences(
+                        reputationChange: -15,
+                        message: "Вы решаете не рисковать. Судьба ребенка остается неизвестной."
+                    )
+                )
+            ],
+            questLinks: ["side_quest_lost_child"],
+            oneTime: true
+        )
+        events.append(lostChildEvent)
+
+        // 14. REST EVENT: Привал у костра
+        let campEvent = GameEvent(
+            eventType: .narrative,
+            title: "Безопасное Место для Привала",
+            description: "Вы находите укрытое место, подходящее для отдыха. Можно развести костер и восстановить силы.",
+            regionTypes: [.forest, .mountain, .settlement],
+            regionStates: [.stable, .borderland],
+            choices: [
+                EventChoice(
+                    text: "Отдохнуть и восстановиться",
+                    consequences: EventConsequences(
+                        healthChange: 4,
+                        faithChange: 2,
+                        message: "Вы отдохнули у костра. Силы восстановлены."
+                    )
+                ),
+                EventChoice(
+                    text: "Провести ритуал очищения (5 ✨)",
+                    requirements: EventRequirements(minimumFaith: 5),
+                    consequences: EventConsequences(
+                        faithChange: -5,
+                        healthChange: 3,
+                        balanceChange: 5,
+                        message: "Ритуал очищения освежил тело и дух."
+                    )
+                ),
+                EventChoice(
+                    text: "Быстро перекусить и идти дальше",
+                    consequences: EventConsequences(
+                        healthChange: 1,
+                        message: "Вы немного отдохнули и продолжили путь."
+                    )
+                )
+            ],
+            oneTime: false
+        )
+        events.append(campEvent)
+
+        // 15. WORLD SHIFT: Сдвиг границ (Act I critical event)
+        let realmShiftEvent = GameEvent(
+            eventType: .worldShift,
+            title: "Сдвиг Границ Миров",
+            description: "Граница между Явью и Навью содрогается. Вы чувствуете, как реальность искажается вокруг вас. Это критический момент.",
+            regionTypes: [], // All regions
+            regionStates: [.breach],
+            choices: [
+                EventChoice(
+                    text: "Стабилизировать границу верой (20 ✨)",
+                    requirements: EventRequirements(minimumFaith: 20, requiredBalance: .light),
+                    consequences: EventConsequences(
+                        faithChange: -20,
+                        balanceChange: 25,
+                        tensionChange: -25,
+                        anchorIntegrityChange: 40,
+                        setFlags: ["realm_stabilized": true],
+                        message: "Вы закрыли прорыв! Граница миров укреплена вашей верой."
+                    )
+                ),
+                EventChoice(
+                    text: "Использовать момент для получения силы",
+                    requirements: EventRequirements(requiredBalance: .dark, minimumFaith: 10),
+                    consequences: EventConsequences(
+                        faithChange: 15,
+                        healthChange: -5,
+                        balanceChange: -20,
+                        tensionChange: 15,
+                        addCards: ["realm_power", "nav_essence"],
+                        addCurse: "realm_corruption",
+                        message: "Вы вытянули силу из прорыва, но Навь пометила вас."
+                    )
+                ),
+                EventChoice(
+                    text: "Бежать от сдвига",
+                    consequences: EventConsequences(
+                        healthChange: -3,
+                        tensionChange: 20,
+                        anchorIntegrityChange: -20,
+                        message: "Вы бежите, но сдвиг усиливается. Мир становится опаснее."
+                    )
+                )
+            ],
+            questLinks: ["main_quest_act1"],
+            oneTime: false
+        )
+        events.append(realmShiftEvent)
+
         return events
     }
 }
