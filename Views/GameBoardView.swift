@@ -499,22 +499,22 @@ struct GameBoardView: View {
 
     var balanceIcon: String {
         let balance = gameState.currentPlayer.balance
-        if balance >= 3 {
+        if balance >= 70 {              // Light path (70-100)
             return "sun.max.fill"
-        } else if balance <= -3 {
+        } else if balance <= 30 {       // Dark path (0-30)
             return "moon.fill"
-        } else {
+        } else {                        // Neutral (30-70)
             return "circle.lefthalf.filled"
         }
     }
 
     var balanceColor: Color {
         let balance = gameState.currentPlayer.balance
-        if balance >= 3 {
+        if balance >= 70 {              // Light path (70-100)
             return .yellow
-        } else if balance <= -3 {
+        } else if balance <= 30 {       // Dark path (0-30)
             return .purple
-        } else {
+        } else {                        // Neutral (30-70)
             return .gray
         }
     }

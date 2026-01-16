@@ -343,11 +343,11 @@ struct EventView: View {
     }
 
     func getBalanceEnum(_ balanceValue: Int) -> CardBalance {
-        if balanceValue >= 30 {
+        if balanceValue >= 70 {        // Light path (70-100)
             return .light
-        } else if balanceValue <= -30 {
+        } else if balanceValue <= 30 { // Dark path (0-30)
             return .dark
-        } else {
+        } else {                       // Neutral (30-70)
             return .neutral
         }
     }

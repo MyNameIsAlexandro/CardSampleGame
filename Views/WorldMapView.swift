@@ -121,19 +121,54 @@ struct WorldMapView: View {
             .background(Color.yellow.opacity(0.1))
             .cornerRadius(6)
 
-            // Balance
-            HStack(spacing: 4) {
-                Image(systemName: getBalanceIcon(player.balance))
-                    .font(.caption)
-                    .foregroundColor(getPlayerBalanceColor(player.balance))
-                Text("\(abs(player.balance))")
-                    .font(.caption)
-                    .fontWeight(.semibold)
+            // Balance (0-100 scale)
+            VStack(spacing: 2) {
+                HStack(spacing: 4) {
+                    Image(systemName: getBalanceIcon(player.balance))
+                        .font(.caption)
+                        .foregroundColor(getPlayerBalanceColor(player.balance))
+                    Text("\(player.balance)")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                    Text(player.balanceDescription)
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(getPlayerBalanceColor(player.balance).opacity(0.1))
+                .cornerRadius(6)
+
+                // Balance progress bar (0-100 visualization)
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        // Background with color zones
+                        HStack(spacing: 0) {
+                            Rectangle()
+                                .fill(Color.purple.opacity(0.3))  // Dark zone (0-30)
+                                .frame(width: geometry.size.width * 0.3)
+                            Rectangle()
+                                .fill(Color.gray.opacity(0.2))    // Neutral zone (30-70)
+                                .frame(width: geometry.size.width * 0.4)
+                            Rectangle()
+                                .fill(Color.yellow.opacity(0.3))  // Light zone (70-100)
+                                .frame(width: geometry.size.width * 0.3)
+                        }
+                        .frame(height: 4)
+
+                        // Current balance indicator
+                        Rectangle()
+                            .fill(getPlayerBalanceColor(player.balance))
+                            .frame(
+                                width: geometry.size.width * CGFloat(player.balance) / 100,
+                                height: 4
+                            )
+                    }
+                }
+                .frame(height: 4)
+                .padding(.horizontal, 4)
             }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(getPlayerBalanceColor(player.balance).opacity(0.1))
-            .cornerRadius(6)
+            .padding(.horizontal, 4)
         }
         .padding(.horizontal)
         .padding(.vertical, 8)
@@ -141,22 +176,22 @@ struct WorldMapView: View {
     }
 
     func getBalanceIcon(_ balance: Int) -> String {
-        if balance >= 30 {
-            return "sun.max.fill"
-        } else if balance <= -30 {
-            return "moon.fill"
+        if balance >= 70 {
+            return "sun.max.fill"      // Light path (70-100)
+        } else if balance <= 30 {
+            return "moon.fill"          // Dark path (0-30)
         } else {
-            return "circle.lefthalf.filled"
+            return "circle.lefthalf.filled"  // Neutral (30-70)
         }
     }
 
     func getPlayerBalanceColor(_ balance: Int) -> Color {
-        if balance >= 30 {
-            return .yellow
-        } else if balance <= -30 {
-            return .purple
+        if balance >= 70 {
+            return .yellow              // Light path (70-100)
+        } else if balance <= 30 {
+            return .purple              // Dark path (0-30)
         } else {
-            return .gray
+            return .gray                // Neutral (30-70)
         }
     }
 
