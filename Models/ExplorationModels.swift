@@ -492,25 +492,47 @@ struct EndingProfile: Identifiable, Codable {
 }
 
 /// Условия для получения финала
+/// См. EXPLORATION_CORE_DESIGN.md, раздел 32
 struct EndingConditions: Codable {
-    let tensionRange: ClosedRange<Int>?     // Диапазон WorldTension (e.g., 0...40)
-    let requiredPath: DeckPath?             // Требуемый путь колоды
+    // WorldTension conditions
+    let minTension: Int?                    // Минимальный WorldTension
+    let maxTension: Int?                    // Максимальный WorldTension
+
+    // Deck path condition
+    let deckPath: DeckPath?                 // Требуемый путь колоды
+
+    // Flag conditions
     let requiredFlags: [String]?            // Обязательные флаги
     let forbiddenFlags: [String]?           // Запрещённые флаги
-    let minSavedAnchors: Int?               // Минимум сохранённых якорей
+
+    // Anchor conditions
+    let minStableAnchors: Int?              // Минимум stable якорей
+    let maxBreachAnchors: Int?              // Максимум breach регионов
+
+    // Balance conditions
+    let minBalance: Int?                    // Минимальный lightDarkBalance
+    let maxBalance: Int?                    // Максимальный lightDarkBalance
 
     init(
-        tensionRange: ClosedRange<Int>? = nil,
-        requiredPath: DeckPath? = nil,
+        minTension: Int? = nil,
+        maxTension: Int? = nil,
+        deckPath: DeckPath? = nil,
         requiredFlags: [String]? = nil,
         forbiddenFlags: [String]? = nil,
-        minSavedAnchors: Int? = nil
+        minStableAnchors: Int? = nil,
+        maxBreachAnchors: Int? = nil,
+        minBalance: Int? = nil,
+        maxBalance: Int? = nil
     ) {
-        self.tensionRange = tensionRange
-        self.requiredPath = requiredPath
+        self.minTension = minTension
+        self.maxTension = maxTension
+        self.deckPath = deckPath
         self.requiredFlags = requiredFlags
         self.forbiddenFlags = forbiddenFlags
-        self.minSavedAnchors = minSavedAnchors
+        self.minStableAnchors = minStableAnchors
+        self.maxBreachAnchors = maxBreachAnchors
+        self.minBalance = minBalance
+        self.maxBalance = maxBalance
     }
 }
 

@@ -1981,7 +1981,7 @@ class WorldState: ObservableObject, Codable {
                 lightCount += 1
             case .dark:
                 darkCount += 1
-            case .neutral:
+            case .neutral, .none:
                 neutralCount += 1
             }
         }
