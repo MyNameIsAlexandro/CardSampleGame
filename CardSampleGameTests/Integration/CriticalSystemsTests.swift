@@ -99,12 +99,10 @@ final class CriticalSystemsTests: XCTestCase {
             worldState.regions[borderlandIndex].anchor = anchor
         }
 
-        let initialState = worldState.regions[borderlandIndex].state
+        _ = worldState.regions[borderlandIndex].state // Snapshot before
 
         worldState.increaseTension(by: 70)
         worldState.advanceTime(by: 6)
-
-        let finalState = worldState.regions[borderlandIndex].state
 
         // При высоком integrity регион должен сопротивляться изменению состояния
         // (может измениться, но вероятность низкая)
@@ -206,15 +204,17 @@ final class CriticalSystemsTests: XCTestCase {
         worldState.setFlag("test_flag_2", value: true)
         worldState.setFlag("boss_defeated", value: false)
 
-        // Сохраняем
-        guard let saveData = try? gameState.createSaveData() else {
-            XCTFail("Не удалось создать save data")
+        // Сохраняем через SaveManager
+        let saveManager = SaveManager()
+        saveManager.saveGame(to: 99, gameState: gameState)
+
+        // Загружаем и восстанавливаем
+        guard let save = saveManager.loadGame(from: 99) else {
+            XCTFail("Не удалось загрузить сохранение")
             return
         }
 
-        // Создаём новый GameState и загружаем
-        let newGameState = GameState(players: [Player(name: "New")])
-        newGameState.loadSaveData(saveData)
+        let newGameState = saveManager.restoreGameState(from: save)
 
         // Проверяем флаги
         XCTAssertTrue(newGameState.worldState.hasFlag("test_flag_1"))
@@ -229,19 +229,20 @@ final class CriticalSystemsTests: XCTestCase {
             if !quest.objectives.isEmpty {
                 quest.objectives[0].completed = true
             }
-            // Обновляем квест в списке
             if let index = worldState.activeQuests.firstIndex(where: { $0.id == quest.id }) {
                 worldState.activeQuests[index] = quest
             }
         }
 
-        guard let saveData = try? gameState.createSaveData() else {
-            XCTFail("Не удалось создать save data")
+        let saveManager = SaveManager()
+        saveManager.saveGame(to: 98, gameState: gameState)
+
+        guard let save = saveManager.loadGame(from: 98) else {
+            XCTFail("Не удалось загрузить сохранение")
             return
         }
 
-        let newGameState = GameState(players: [Player(name: "New")])
-        newGameState.loadSaveData(saveData)
+        let newGameState = saveManager.restoreGameState(from: save)
 
         XCTAssertEqual(newGameState.worldState.mainQuestStage, 3, "Стадия квеста сохранена")
     }
@@ -255,13 +256,15 @@ final class CriticalSystemsTests: XCTestCase {
             worldState.regions[1].state = .stable
         }
 
-        guard let saveData = try? gameState.createSaveData() else {
-            XCTFail("Не удалось создать save data")
+        let saveManager = SaveManager()
+        saveManager.saveGame(to: 97, gameState: gameState)
+
+        guard let save = saveManager.loadGame(from: 97) else {
+            XCTFail("Не удалось загрузить сохранение")
             return
         }
 
-        let newGameState = GameState(players: [Player(name: "New")])
-        newGameState.loadSaveData(saveData)
+        let newGameState = saveManager.restoreGameState(from: save)
 
         // Проверяем состояния
         if newGameState.worldState.regions.count > 0 {
@@ -275,19 +278,20 @@ final class CriticalSystemsTests: XCTestCase {
     func testSaveLoadPreservesDeckState() {
         // Настраиваем колоду
         let card1 = Card(name: "SavedCard1", type: .spell, description: "Test")
-        let card2 = Card(name: "SavedCard2", type: .action, description: "Test")
+        let card2 = Card(name: "SavedCard2", type: .item, description: "Test")
         player.deck = [card1]
         player.hand = [card2]
         player.discard = []
 
-        guard let saveData = try? gameState.createSaveData() else {
-            XCTFail("Не удалось создать save data")
+        let saveManager = SaveManager()
+        saveManager.saveGame(to: 96, gameState: gameState)
+
+        guard let save = saveManager.loadGame(from: 96) else {
+            XCTFail("Не удалось загрузить сохранение")
             return
         }
 
-        let newPlayer = Player(name: "New")
-        let newGameState = GameState(players: [newPlayer])
-        newGameState.loadSaveData(saveData)
+        let newGameState = saveManager.restoreGameState(from: save)
 
         // Проверяем колоду
         XCTAssertEqual(newGameState.players.first?.deck.count, 1, "Deck сохранена")
@@ -325,7 +329,7 @@ final class CriticalSystemsTests: XCTestCase {
 
         // Если есть босс-событие с этим флагом, оно должно стать доступным
         // Примечание: это зависит от наличия такого события в данных игры
-        let events = worldState.getAvailableEvents(for: currentRegion)
+        _ = worldState.getAvailableEvents(for: currentRegion)
 
         // Проверяем что флаг работает для фильтрации
         XCTAssertTrue(worldState.hasFlag("path_to_boss_unlocked"), "Флаг установлен")
