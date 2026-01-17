@@ -582,7 +582,7 @@ struct GameBoardView: View {
 
     func playCard(_ card: Card) {
         // Печать Нави: нельзя использовать Sustain карты
-        if card.category == .sustain && gameState.currentPlayer.hasCurse(.sealOfNav) {
+        if card.role == .sustain && gameState.currentPlayer.hasCurse(.sealOfNav) {
             // TODO: Show alert that Sustain cards are blocked by curse
             return
         }
