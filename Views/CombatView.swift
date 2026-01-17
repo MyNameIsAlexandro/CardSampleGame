@@ -1,7 +1,8 @@
 import SwiftUI
 
-/// Боевой экран - чистая реализация по документации
+/// Боевой экран - реализация по документации GAME_DESIGN_DOCUMENT.md
 /// Цикл: PlayerTurn → EnemyTurn → EndTurn (повтор до победы/поражения)
+/// Действия: 3 за ход. Играть карту = 1 действие, Атаковать = 1 действие
 struct CombatView: View {
     @ObservedObject var player: Player
     @Binding var monster: Card
@@ -23,24 +24,13 @@ struct CombatView: View {
     @State private var phase: CombatPhase = .playerTurn
     @State private var turnNumber: Int = 1
     @State private var actionsRemaining: Int = 3
-    @State private var selectedCard: Card?
     @State private var combatLog: [String] = []
-    @State private var showingAttackResult = false
-    @State private var lastAttackResult: AttackResult?
-    @State private var isAnimating = false
-
-    struct AttackResult {
-        let diceRoll: Int
-        let playerPower: Int
-        let total: Int
-        let monsterDefense: Int
-        let success: Bool
-        let damage: Int
-    }
+    @State private var lastMessage: String = ""
+    @State private var showingMessage = false
 
     var body: some View {
         VStack(spacing: 0) {
-            // Верхняя панель с информацией о ходе
+            // Верхняя панель
             combatHeader
 
             // Основная область боя
@@ -49,27 +39,21 @@ struct CombatView: View {
                     // Монстр
                     monsterCard
 
-                    // Разделитель с VS
-                    HStack {
-                        Rectangle().fill(Color.red.opacity(0.5)).frame(height: 2)
-                        Text("VS")
-                            .font(.headline)
-                            .foregroundColor(.red)
-                            .padding(.horizontal, 8)
-                        Rectangle().fill(Color.red.opacity(0.5)).frame(height: 2)
-                    }
-                    .padding(.horizontal)
+                    // VS разделитель
+                    vsIndicator
 
                     // Игрок
                     playerStats
 
-                    // Кнопки действий
+                    // Инструкции и действия
                     if phase == .playerTurn {
-                        actionButtons
+                        playerTurnControls
                     } else if phase == .enemyTurn {
                         enemyTurnView
                     } else if phase == .endTurn {
                         endTurnView
+                    } else if phase == .combatOver {
+                        combatOverView
                     }
 
                     // Лог боя
@@ -85,14 +69,10 @@ struct CombatView: View {
         }
         .background(Color(UIColor.systemBackground))
         .accessibilityIdentifier(AccessibilityIdentifiers.Combat.view)
-        .alert("Результат атаки", isPresented: $showingAttackResult) {
-            Button("OK") {
-                checkCombatEnd()
-            }
+        .alert("Бой", isPresented: $showingMessage) {
+            Button("OK") { }
         } message: {
-            if let result = lastAttackResult {
-                Text(attackResultMessage(result))
-            }
+            Text(lastMessage)
         }
         .onAppear {
             startCombat()
@@ -103,7 +83,8 @@ struct CombatView: View {
 
     var combatHeader: some View {
         HStack {
-            VStack(alignment: .leading) {
+            // Ход и фаза
+            VStack(alignment: .leading, spacing: 2) {
                 Text("Ход \(turnNumber)")
                     .font(.headline)
                 Text(phaseText)
@@ -113,24 +94,36 @@ struct CombatView: View {
 
             Spacer()
 
-            // Действия
-            HStack(spacing: 4) {
-                ForEach(0..<3, id: \.self) { i in
-                    Circle()
-                        .fill(i < actionsRemaining ? Color.orange : Color.gray.opacity(0.3))
-                        .frame(width: 12, height: 12)
+            // Действия (показываем только в ход игрока)
+            if phase == .playerTurn {
+                HStack(spacing: 6) {
+                    ForEach(0..<3, id: \.self) { i in
+                        Circle()
+                            .fill(i < actionsRemaining ? Color.orange : Color.gray.opacity(0.3))
+                            .frame(width: 16, height: 16)
+                    }
                 }
-                Text("Действия")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+
+                Text("\(actionsRemaining)/3")
+                    .font(.headline)
+                    .foregroundColor(.orange)
+                    .padding(.leading, 4)
             }
 
             Spacer()
 
             // Кнопка побега
             Button(action: flee) {
-                Image(systemName: "figure.run")
-                    .foregroundColor(.gray)
+                HStack(spacing: 4) {
+                    Image(systemName: "figure.run")
+                    Text("Бежать")
+                        .font(.caption)
+                }
+                .foregroundColor(.gray)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color.gray.opacity(0.2))
+                .cornerRadius(8)
             }
             .disabled(phase != .playerTurn)
         }
@@ -142,61 +135,50 @@ struct CombatView: View {
 
     var monsterCard: some View {
         VStack(spacing: 8) {
-            // Имя монстра
             Text(monster.name)
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(.red)
 
-            // Статы монстра
-            HStack(spacing: 24) {
-                // Здоровье
+            HStack(spacing: 32) {
+                // HP монстра
                 VStack {
                     Image(systemName: "heart.fill")
                         .font(.title)
                         .foregroundColor(.red)
                     Text("\(monster.health ?? 0)")
-                        .font(.title2)
+                        .font(.title)
                         .fontWeight(.bold)
                     Text("HP")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
 
-                // Сила атаки
+                // Атака монстра
                 VStack {
                     Image(systemName: "burst.fill")
                         .font(.title)
                         .foregroundColor(.orange)
                     Text("\(monster.power ?? 3)")
-                        .font(.title2)
+                        .font(.title)
                         .fontWeight(.bold)
                     Text("Атака")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
 
-                // Защита
+                // Защита монстра
                 VStack {
                     Image(systemName: "shield.fill")
                         .font(.title)
                         .foregroundColor(.blue)
                     Text("\(monster.defense ?? 10)")
-                        .font(.title2)
+                        .font(.title)
                         .fontWeight(.bold)
                     Text("Защита")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
-            }
-
-            // Описание
-            if !monster.description.isEmpty {
-                Text(monster.description)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
             }
         }
         .padding()
@@ -211,11 +193,20 @@ struct CombatView: View {
         )
     }
 
+    var vsIndicator: some View {
+        HStack {
+            Rectangle().fill(Color.red.opacity(0.5)).frame(height: 2)
+            Text("⚔️ VS ⚔️")
+                .font(.headline)
+                .padding(.horizontal, 8)
+            Rectangle().fill(Color.red.opacity(0.5)).frame(height: 2)
+        }
+    }
+
     // MARK: - Player Stats
 
     var playerStats: some View {
         HStack(spacing: 24) {
-            // Здоровье
             VStack {
                 Image(systemName: "heart.fill")
                     .foregroundColor(.red)
@@ -226,7 +217,6 @@ struct CombatView: View {
                     .foregroundColor(.secondary)
             }
 
-            // Сила
             VStack {
                 Image(systemName: "hand.raised.fill")
                     .foregroundColor(.orange)
@@ -237,24 +227,12 @@ struct CombatView: View {
                     .foregroundColor(.secondary)
             }
 
-            // Вера
             VStack {
                 Image(systemName: "sparkles")
                     .foregroundColor(.yellow)
                 Text("\(player.faith)")
                     .fontWeight(.bold)
                 Text("Вера")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-
-            // Выносливость (защита)
-            VStack {
-                Image(systemName: "shield.fill")
-                    .foregroundColor(.blue)
-                Text("\(player.constitution)")
-                    .fontWeight(.bold)
-                Text("Защита")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -266,57 +244,104 @@ struct CombatView: View {
         )
     }
 
-    // MARK: - Action Buttons
+    // MARK: - Player Turn Controls
 
-    var actionButtons: some View {
-        VStack(spacing: 12) {
-            // Атака
-            Button(action: performAttack) {
-                HStack {
-                    Image(systemName: "dice.fill")
-                    Text("Атаковать")
-                        .fontWeight(.semibold)
-                }
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(actionsRemaining > 0 ? Color.orange : Color.gray)
-                .foregroundColor(.white)
-                .cornerRadius(12)
-            }
-            .disabled(actionsRemaining <= 0 || isAnimating)
-            .accessibilityIdentifier(AccessibilityIdentifiers.Combat.attackButton)
+    var playerTurnControls: some View {
+        VStack(spacing: 16) {
+            // Инструкция
+            VStack(spacing: 4) {
+                Text("ВАШ ХОД")
+                    .font(.headline)
+                    .foregroundColor(.green)
 
-            // Завершить ход
-            Button(action: endPlayerTurn) {
-                HStack {
-                    Image(systemName: "arrow.right.circle.fill")
-                    Text("Завершить ход")
+                if actionsRemaining > 0 {
+                    Text("Осталось действий: \(actionsRemaining)")
+                        .font(.subheadline)
+                    Text("Нажмите на карту чтобы сыграть её, или атакуйте")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                } else {
+                    Text("Действия закончились!")
+                        .font(.subheadline)
+                        .foregroundColor(.orange)
+                    Text("Нажмите «Завершить ход»")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.purple)
-                .foregroundColor(.white)
-                .cornerRadius(12)
             }
-            .disabled(isAnimating)
-            .accessibilityIdentifier(AccessibilityIdentifiers.Combat.endTurnButton)
+            .padding()
+            .frame(maxWidth: .infinity)
+            .background(Color.green.opacity(0.1))
+            .cornerRadius(12)
+
+            // Кнопки действий
+            HStack(spacing: 12) {
+                // Базовая атака
+                Button(action: performBasicAttack) {
+                    VStack(spacing: 4) {
+                        Image(systemName: "hand.raised.fill")
+                            .font(.title2)
+                        Text("Атака")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                        Text("(-1 действие)")
+                            .font(.system(size: 9))
+                            .foregroundColor(.white.opacity(0.7))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(actionsRemaining > 0 ? Color.orange : Color.gray)
+                    .foregroundColor(.white)
+                    .cornerRadius(12)
+                }
+                .disabled(actionsRemaining <= 0)
+                .accessibilityIdentifier(AccessibilityIdentifiers.Combat.attackButton)
+
+                // Завершить ход
+                Button(action: endPlayerTurn) {
+                    VStack(spacing: 4) {
+                        Image(systemName: "arrow.right.circle.fill")
+                            .font(.title2)
+                        Text("Завершить")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                        Text("ход")
+                            .font(.system(size: 9))
+                            .foregroundColor(.white.opacity(0.7))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.purple)
+                    .foregroundColor(.white)
+                    .cornerRadius(12)
+                }
+                .accessibilityIdentifier(AccessibilityIdentifiers.Combat.endTurnButton)
+            }
+            .accessibilityIdentifier(AccessibilityIdentifiers.Combat.actionBar)
         }
-        .padding(.horizontal)
-        .accessibilityIdentifier(AccessibilityIdentifiers.Combat.actionBar)
     }
 
     // MARK: - Enemy Turn View
 
     var enemyTurnView: some View {
         VStack(spacing: 12) {
-            Text("Ход врага...")
+            Text("ХОД ВРАГА")
                 .font(.headline)
                 .foregroundColor(.red)
+
+            HStack {
+                Image(systemName: "burst.fill")
+                    .foregroundColor(.red)
+                Text("\(monster.name) атакует!")
+            }
 
             ProgressView()
                 .progressViewStyle(CircularProgressViewStyle(tint: .red))
         }
         .padding()
+        .frame(maxWidth: .infinity)
+        .background(Color.red.opacity(0.1))
+        .cornerRadius(12)
         .onAppear {
             performEnemyAttack()
         }
@@ -326,11 +351,11 @@ struct CombatView: View {
 
     var endTurnView: some View {
         VStack(spacing: 12) {
-            Text("Конец хода")
+            Text("КОНЕЦ ХОДА")
                 .font(.headline)
                 .foregroundColor(.purple)
 
-            Text("Сброс руки, взятие 5 карт, +1 вера")
+            Text("Сброс руки → Взятие 5 карт → +1 Вера")
                 .font(.caption)
                 .foregroundColor(.secondary)
 
@@ -338,22 +363,49 @@ struct CombatView: View {
                 .progressViewStyle(CircularProgressViewStyle(tint: .purple))
         }
         .padding()
+        .frame(maxWidth: .infinity)
+        .background(Color.purple.opacity(0.1))
+        .cornerRadius(12)
         .onAppear {
             performEndTurn()
         }
+    }
+
+    // MARK: - Combat Over View
+
+    var combatOverView: some View {
+        VStack(spacing: 12) {
+            if (monster.health ?? 0) <= 0 {
+                Text("🎉 ПОБЕДА!")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundColor(.green)
+                Text("\(monster.name) повержен!")
+                    .foregroundColor(.secondary)
+            } else {
+                Text("💀 ПОРАЖЕНИЕ")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundColor(.red)
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity)
+        .background(Color.gray.opacity(0.1))
+        .cornerRadius(12)
     }
 
     // MARK: - Combat Log
 
     var combatLogView: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Журнал боя")
+            Text("📜 Журнал боя")
                 .font(.caption)
                 .fontWeight(.bold)
                 .foregroundColor(.secondary)
 
             ForEach(combatLog.suffix(5), id: \.self) { entry in
-                Text(entry)
+                Text("• \(entry)")
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
@@ -368,16 +420,26 @@ struct CombatView: View {
 
     var playerHandView: some View {
         VStack(spacing: 4) {
-            Text("Рука (\(player.hand.count))")
-                .font(.caption)
-                .foregroundColor(.secondary)
+            HStack {
+                Text("🃏 Ваша рука (\(player.hand.count) карт)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Spacer()
+
+                if phase == .playerTurn && actionsRemaining > 0 {
+                    Text("Нажмите на карту = сыграть (-1 действие)")
+                        .font(.system(size: 10))
+                        .foregroundColor(.green)
+                }
+            }
+            .padding(.horizontal)
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
                     ForEach(player.hand) { card in
                         CombatCardView(
                             card: card,
-                            isSelected: selectedCard?.id == card.id,
                             canPlay: actionsRemaining > 0 && phase == .playerTurn
                         ) {
                             playCard(card)
@@ -387,7 +449,7 @@ struct CombatView: View {
                 .padding(.horizontal)
             }
         }
-        .frame(height: 140)
+        .frame(height: 150)
         .background(Color(UIColor.secondarySystemBackground))
     }
 
@@ -395,51 +457,42 @@ struct CombatView: View {
 
     func startCombat() {
         combatLog.append("Бой начался! Враг: \(monster.name)")
+        combatLog.append("У вас 3 действия за ход")
         player.shuffleDeck()
         player.drawCards(count: player.maxHandSize)
         actionsRemaining = 3
         phase = .playerTurn
     }
 
-    func performAttack() {
+    func performBasicAttack() {
         guard actionsRemaining > 0 else { return }
 
         actionsRemaining -= 1
-        isAnimating = true
 
-        // Бросок кубика
-        let diceRoll = Int.random(in: 1...6)
+        // Базовая атака: сила игрока vs защита монстра
         let playerPower = player.strength
-        let total = diceRoll + playerPower
-        let monsterDefense = monster.defense ?? 10
+        let monsterDef = monster.defense ?? 10
 
-        let success = total >= monsterDefense
-        var damage = 0
+        // Бросок кубика d6
+        let diceRoll = Int.random(in: 1...6)
+        let total = playerPower + diceRoll
 
-        if success {
-            damage = max(1, total - monsterDefense + 3)
-            // Применяем модификаторы проклятий
-            damage = player.calculateDamageDealt(damage)
+        if total >= monsterDef {
+            // Успешная атака
+            let baseDamage = max(1, total - monsterDef + 2)
+            let damage = player.calculateDamageDealt(baseDamage)
 
             let newHealth = max(0, (monster.health ?? 0) - damage)
             monster.health = newHealth
 
-            combatLog.append("Атака! Кубик: \(diceRoll) + Сила: \(playerPower) = \(total) vs \(monsterDefense). Урон: \(damage)")
+            combatLog.append("⚔️ Атака: \(playerPower) + 🎲\(diceRoll) = \(total) vs защита \(monsterDef) → Урон \(damage)!")
+
+            if newHealth <= 0 {
+                finishCombat(victory: true)
+            }
         } else {
-            combatLog.append("Атака! Кубик: \(diceRoll) + Сила: \(playerPower) = \(total) vs \(monsterDefense). Промах!")
+            combatLog.append("⚔️ Атака: \(playerPower) + 🎲\(diceRoll) = \(total) vs защита \(monsterDef) → Промах!")
         }
-
-        lastAttackResult = AttackResult(
-            diceRoll: diceRoll,
-            playerPower: playerPower,
-            total: total,
-            monsterDefense: monsterDefense,
-            success: success,
-            damage: damage
-        )
-
-        isAnimating = false
-        showingAttackResult = true
     }
 
     func playCard(_ card: Card) {
@@ -448,19 +501,24 @@ struct CombatView: View {
         // Проверяем стоимость веры
         if let cost = card.cost, cost > 0 {
             guard player.spendFaith(cost) else {
-                combatLog.append("Недостаточно веры для \(card.name)")
+                combatLog.append("❌ Недостаточно веры для \(card.name)")
                 return
             }
+            combatLog.append("💫 Потрачено \(cost) веры")
         }
 
         actionsRemaining -= 1
         player.playCard(card)
 
+        combatLog.append("🃏 Сыграна: \(card.name)")
+
         // Применяем эффекты карты
         applyCardEffects(card)
 
-        combatLog.append("Сыграна карта: \(card.name)")
-        checkCombatEnd()
+        // Проверяем победу
+        if (monster.health ?? 0) <= 0 {
+            finishCombat(victory: true)
+        }
     }
 
     func applyCardEffects(_ card: Card) {
@@ -468,25 +526,25 @@ struct CombatView: View {
             switch ability.effect {
             case .heal(let amount):
                 player.heal(amount)
-                combatLog.append("  → Исцеление: +\(amount) HP")
+                combatLog.append("   💚 Исцеление +\(amount) HP")
 
             case .damage(let amount, _):
                 let actualDamage = player.calculateDamageDealt(amount)
                 let newHealth = max(0, (monster.health ?? 0) - actualDamage)
                 monster.health = newHealth
-                combatLog.append("  → Урон: \(actualDamage)")
+                combatLog.append("   💥 Урон \(actualDamage) (HP врага: \(newHealth))")
 
             case .drawCards(let count):
                 player.drawCards(count: count)
-                combatLog.append("  → Взято карт: \(count)")
+                combatLog.append("   🃏 Взято карт: \(count)")
 
             case .gainFaith(let amount):
                 player.gainFaith(amount)
-                combatLog.append("  → Вера: +\(amount)")
+                combatLog.append("   ✨ Вера +\(amount)")
 
             case .removeCurse(let type):
                 player.removeCurse(type: type)
-                combatLog.append("  → Снято проклятие")
+                combatLog.append("   🌟 Снято проклятие")
 
             default:
                 break
@@ -499,9 +557,8 @@ struct CombatView: View {
     }
 
     func performEnemyAttack() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             guard (monster.health ?? 0) > 0 else {
-                // Монстр мёртв, пропускаем атаку
                 phase = .endTurn
                 return
             }
@@ -511,11 +568,10 @@ struct CombatView: View {
             player.takeDamageWithCurses(monsterPower)
             let damage = healthBefore - player.health
 
-            combatLog.append("Враг атакует! Урон: \(damage). Ваше HP: \(player.health)")
+            combatLog.append("👹 \(monster.name) атакует! Урон: \(damage)")
 
             if player.health <= 0 {
-                phase = .combatOver
-                onCombatEnd(.defeat)
+                finishCombat(victory: false)
             } else {
                 phase = .endTurn
             }
@@ -539,30 +595,28 @@ struct CombatView: View {
             turnNumber += 1
             actionsRemaining = 3
 
-            combatLog.append("--- Ход \(turnNumber) ---")
+            combatLog.append("━━━ Ход \(turnNumber) ━━━")
 
             phase = .playerTurn
         }
     }
 
-    func checkCombatEnd() {
-        if (monster.health ?? 0) <= 0 {
-            combatLog.append("Победа! \(monster.name) побеждён!")
-            phase = .combatOver
+    func finishCombat(victory: Bool) {
+        phase = .combatOver
 
-            // Небольшая задержка перед закрытием
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                onCombatEnd(.victory)
-            }
-        } else if player.health <= 0 {
-            combatLog.append("Поражение...")
-            phase = .combatOver
-            onCombatEnd(.defeat)
+        if victory {
+            combatLog.append("🎉 Победа! \(monster.name) повержен!")
+        } else {
+            combatLog.append("💀 Поражение...")
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            onCombatEnd(victory ? .victory : .defeat)
         }
     }
 
     func flee() {
-        combatLog.append("Вы сбежали из боя!")
+        combatLog.append("🏃 Вы сбежали из боя!")
         onCombatEnd(.fled)
     }
 
@@ -585,49 +639,25 @@ struct CombatView: View {
         case .combatOver: return .gray
         }
     }
-
-    func attackResultMessage(_ result: AttackResult) -> String {
-        if result.success {
-            return """
-            Бросок: \(result.diceRoll)
-            + Сила: \(result.playerPower)
-            = \(result.total)
-
-            Защита врага: \(result.monsterDefense)
-
-            Успех! Урон: \(result.damage)
-            Осталось HP: \(monster.health ?? 0)
-            """
-        } else {
-            return """
-            Бросок: \(result.diceRoll)
-            + Сила: \(result.playerPower)
-            = \(result.total)
-
-            Защита врага: \(result.monsterDefense)
-
-            Промах!
-            """
-        }
-    }
 }
 
 // MARK: - Combat Card View
 
 struct CombatCardView: View {
     let card: Card
-    let isSelected: Bool
     let canPlay: Bool
     let onPlay: () -> Void
 
     var body: some View {
         VStack(spacing: 4) {
+            // Название карты
             Text(card.name)
                 .font(.caption)
                 .fontWeight(.semibold)
                 .lineLimit(2)
                 .multilineTextAlignment(.center)
 
+            // Стоимость веры (если есть)
             if let cost = card.cost, cost > 0 {
                 HStack(spacing: 2) {
                     Image(systemName: "sparkles")
@@ -638,25 +668,32 @@ struct CombatCardView: View {
                 .foregroundColor(.yellow)
             }
 
-            // Показываем основной эффект
+            // Тип карты
+            Text(cardTypeText)
+                .font(.system(size: 9))
+                .foregroundColor(cardTypeColor)
+                .fontWeight(.medium)
+
+            // Основной эффект
             if let ability = card.abilities.first {
                 Text(abilityText(ability))
-                    .font(.system(size: 9))
+                    .font(.system(size: 10))
                     .foregroundColor(.secondary)
                     .lineLimit(2)
             }
         }
-        .frame(width: 80, height: 100)
-        .padding(8)
+        .frame(width: 85, height: 110)
+        .padding(6)
         .background(
             RoundedRectangle(cornerRadius: 8)
                 .fill(cardBackground)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
-                        .stroke(isSelected ? Color.blue : cardBorder, lineWidth: isSelected ? 3 : 1)
+                        .stroke(canPlay ? cardBorder : Color.gray, lineWidth: canPlay ? 2 : 1)
                 )
         )
-        .opacity(canPlay ? 1.0 : 0.6)
+        .opacity(canPlay ? 1.0 : 0.5)
+        .scaleEffect(canPlay ? 1.0 : 0.95)
         .onTapGesture {
             if canPlay {
                 onPlay()
@@ -664,13 +701,33 @@ struct CombatCardView: View {
         }
     }
 
+    var cardTypeText: String {
+        switch card.type {
+        case .attack: return "⚔️ Атака"
+        case .defense: return "🛡 Защита"
+        case .spell: return "✨ Заклинание"
+        case .resource: return "💰 Ресурс"
+        default: return "📜 Карта"
+        }
+    }
+
+    var cardTypeColor: Color {
+        switch card.type {
+        case .attack: return .red
+        case .defense: return .blue
+        case .spell: return .purple
+        case .resource: return .yellow
+        default: return .gray
+        }
+    }
+
     var cardBackground: Color {
         switch card.type {
-        case .attack: return Color.red.opacity(0.1)
-        case .defense: return Color.blue.opacity(0.1)
-        case .spell: return Color.purple.opacity(0.1)
-        case .resource: return Color.yellow.opacity(0.1)
-        default: return Color.gray.opacity(0.1)
+        case .attack: return Color.red.opacity(0.15)
+        case .defense: return Color.blue.opacity(0.15)
+        case .spell: return Color.purple.opacity(0.15)
+        case .resource: return Color.yellow.opacity(0.15)
+        default: return Color.gray.opacity(0.15)
         }
     }
 
@@ -687,7 +744,7 @@ struct CombatCardView: View {
     func abilityText(_ ability: CardAbility) -> String {
         switch ability.effect {
         case .damage(let amount, _): return "Урон: \(amount)"
-        case .heal(let amount): return "Лечение: \(amount)"
+        case .heal(let amount): return "Лечение: +\(amount)"
         case .drawCards(let count): return "Карты: +\(count)"
         case .gainFaith(let amount): return "Вера: +\(amount)"
         default: return ability.description
