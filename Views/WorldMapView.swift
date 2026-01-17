@@ -801,18 +801,19 @@ struct RegionDetailView: View {
     // MARK: - Event Handling
 
     func triggerExploration() {
-        // Get available events for this region
+        // Get available events for this region (with tension and flag filtering)
         let availableEvents = worldState.getAvailableEvents(for: region)
 
         print("DEBUG: Region: \(region.name), Type: \(region.type), State: \(region.state)")
+        print("DEBUG: World tension: \(worldState.worldTension)")
         print("DEBUG: Available events count: \(availableEvents.count)")
         for event in availableEvents {
-            print("DEBUG: - Event: \(event.title)")
+            print("DEBUG: - Event: \(event.title) (weight: \(event.weight))")
         }
 
-        // Pick a random event
-        if let randomEvent = availableEvents.randomElement() {
-            eventToShow = randomEvent
+        // Weighted random selection
+        if let selectedEvent = worldState.selectWeightedRandomEvent(from: availableEvents) {
+            eventToShow = selectedEvent
         } else {
             // No events available - show alert
             showingNoEventsAlert = true
@@ -838,6 +839,12 @@ struct RegionDetailView: View {
         if event.oneTime {
             worldState.markEventCompleted(event.id)
         }
+
+        // Исследование события тратит день (кроме instant событий)
+        if !event.instant {
+            worldState.daysPassed += 1
+            worldState.processDayStart()
+        }
     }
 
     // MARK: - Action Handling
@@ -857,7 +864,9 @@ struct RegionDetailView: View {
         guard let action = selectedAction else { return "" }
         switch action {
         case .travel:
-            return "Отправиться в регион '\(region.name)'? Это займет день пути."
+            let cost = worldState.calculateTravelCost(to: region.id)
+            let dayWord = cost == 1 ? "день" : "дня"
+            return "Отправиться в регион '\(region.name)'? Это займёт \(cost) \(dayWord) пути."
         case .rest:
             return "Отдохнуть в этом месте? Вы восстановите 5 здоровья."
         case .trade:
@@ -865,7 +874,7 @@ struct RegionDetailView: View {
         case .strengthenAnchor:
             return "Укрепить якорь? Это стоит 10 веры и добавит 20% целостности."
         case .explore:
-            return "Исследовать регион?"
+            return "Исследовать регион? Это займёт день."
         }
     }
 

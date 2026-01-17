@@ -91,9 +91,12 @@ class WorldState: ObservableObject, Codable {
             regions[index].visited = true
         }
 
+        // Рассчитать стоимость путешествия
+        let travelCost = calculateTravelCost(to: regionId)
+
         // Переместиться в новый регион
         currentRegionId = regionId
-        daysPassed += 1
+        daysPassed += travelCost
 
         // Отметить новый регион как посещенный
         if let index = regions.firstIndex(where: { $0.id == regionId }) {
@@ -102,6 +105,17 @@ class WorldState: ObservableObject, Codable {
 
         // Проверить автоматическую деградацию мира
         checkTimeDegradation()
+    }
+
+    /// Рассчитать стоимость путешествия в регион
+    /// Соседний регион: 1 день, дальний: 2 дня
+    func calculateTravelCost(to targetId: UUID) -> Int {
+        guard let currentId = currentRegionId,
+              let currentRegion = getRegion(byId: currentId) else {
+            return 1  // По умолчанию 1 день
+        }
+
+        return currentRegion.isNeighbor(targetId) ? 1 : 2
     }
 
     // MARK: - Time-based Degradation (Day Start Algorithm)
@@ -172,9 +186,10 @@ class WorldState: ObservableObject, Codable {
             }
         }
 
-        // Если нет подходящих регионов, деградируем случайный stable
+        // Если нет подходящих регионов (все Stable), деградация не происходит
+        // ВАЖНО: Stable регионы НЕ деградируют напрямую согласно документации
         if weightedPool.isEmpty {
-            return regions.filter { $0.state == .stable }.randomElement()
+            return nil
         }
 
         // Взвешенный случайный выбор
@@ -440,8 +455,29 @@ class WorldState: ObservableObject, Codable {
 
     func getAvailableEvents(for region: Region) -> [GameEvent] {
         return allEvents.filter { event in
-            event.canOccur(in: region)
+            event.canOccur(in: region, worldTension: worldTension, worldFlags: worldFlags)
         }
+    }
+
+    /// Взвешенный случайный выбор события
+    /// События с большим весом имеют пропорционально большую вероятность быть выбранными
+    func selectWeightedRandomEvent(from events: [GameEvent]) -> GameEvent? {
+        guard !events.isEmpty else { return nil }
+
+        let totalWeight = events.reduce(0) { $0 + $1.weight }
+        guard totalWeight > 0 else { return events.randomElement() }
+
+        let randomValue = Int.random(in: 1...totalWeight)
+        var cumulativeWeight = 0
+
+        for event in events {
+            cumulativeWeight += event.weight
+            if randomValue <= cumulativeWeight {
+                return event
+            }
+        }
+
+        return events.last
     }
 
     func markEventCompleted(_ eventId: UUID) {
@@ -882,6 +918,22 @@ class WorldState: ObservableObject, Codable {
             reputation: -60
         )
         darkLowland.updateStateFromAnchor()
+
+        // Настроить связи между регионами (соседи)
+        // Карта Акта I:
+        //     Oak ─── Forest ─── Mountain
+        //      │        │            │
+        //   Village ─────┼─────── Breach ─── Dark Lowland
+        //      │                    │
+        //    Swamp ─────────────────┘
+
+        village.neighborIds = [oak.id, forest.id, swamp.id]
+        oak.neighborIds = [village.id, forest.id]
+        forest.neighborIds = [village.id, oak.id, mountain.id]
+        swamp.neighborIds = [village.id, breach.id]
+        mountain.neighborIds = [forest.id, breach.id]
+        breach.neighborIds = [swamp.id, mountain.id, darkLowland.id]
+        darkLowland.neighborIds = [breach.id]
 
         return [village, oak, forest, swamp, mountain, breach, darkLowland]
     }

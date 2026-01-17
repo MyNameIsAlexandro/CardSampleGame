@@ -155,6 +155,7 @@ struct Region: Identifiable, Codable {
     var activeQuests: [String]      // ID активных квестов
     var reputation: Int             // -100 to 100
     var visited: Bool               // Был ли игрок здесь
+    var neighborIds: [UUID]         // ID соседних регионов (путешествие = 1 день)
 
     init(
         id: UUID = UUID(),
@@ -165,7 +166,8 @@ struct Region: Identifiable, Codable {
         availableEvents: [String] = [],
         activeQuests: [String] = [],
         reputation: Int = 0,
-        visited: Bool = false
+        visited: Bool = false,
+        neighborIds: [UUID] = []
     ) {
         self.id = id
         self.name = name
@@ -176,6 +178,12 @@ struct Region: Identifiable, Codable {
         self.activeQuests = activeQuests
         self.reputation = max(-100, min(100, reputation))
         self.visited = visited
+        self.neighborIds = neighborIds
+    }
+
+    /// Проверить, является ли регион соседним
+    func isNeighbor(_ regionId: UUID) -> Bool {
+        return neighborIds.contains(regionId)
     }
 
     // Обновить состояние региона на основе якоря
@@ -322,6 +330,14 @@ struct GameEvent: Identifiable, Codable, Hashable {
     var completed: Bool                 // Уже произошло
     let monsterCard: Card?              // Карта монстра для боевых событий
 
+    // Новые поля согласно документации
+    let instant: Bool                   // true = не тратит день (короткие нарративные события)
+    let weight: Int                     // Вес для взвешенного выбора (по умолчанию 1)
+    let minTension: Int?                // Минимальный уровень напряжения (0-100)
+    let maxTension: Int?                // Максимальный уровень напряжения (0-100)
+    let requiredFlags: [String]?        // Флаги, которые должны быть установлены
+    let forbiddenFlags: [String]?       // Флаги, которые НЕ должны быть установлены
+
     init(
         id: UUID = UUID(),
         eventType: EventType,
@@ -333,7 +349,13 @@ struct GameEvent: Identifiable, Codable, Hashable {
         questLinks: [String] = [],
         oneTime: Bool = false,
         completed: Bool = false,
-        monsterCard: Card? = nil
+        monsterCard: Card? = nil,
+        instant: Bool = false,
+        weight: Int = 1,
+        minTension: Int? = nil,
+        maxTension: Int? = nil,
+        requiredFlags: [String]? = nil,
+        forbiddenFlags: [String]? = nil
     ) {
         self.id = id
         self.eventType = eventType
@@ -346,6 +368,12 @@ struct GameEvent: Identifiable, Codable, Hashable {
         self.oneTime = oneTime
         self.completed = completed
         self.monsterCard = monsterCard
+        self.instant = instant
+        self.weight = max(1, weight)  // Минимум 1
+        self.minTension = minTension
+        self.maxTension = maxTension
+        self.requiredFlags = requiredFlags
+        self.forbiddenFlags = forbiddenFlags
     }
 
     // Проверка, может ли событие произойти в регионе
@@ -360,6 +388,40 @@ struct GameEvent: Identifiable, Codable, Hashable {
 
         if !regionStates.contains(region.state) {
             return false
+        }
+
+        return true
+    }
+
+    /// Проверка с учётом напряжения и флагов мира
+    func canOccur(in region: Region, worldTension: Int, worldFlags: [String: Bool]) -> Bool {
+        // Базовые проверки
+        guard canOccur(in: region) else { return false }
+
+        // Проверка напряжения
+        if let min = minTension, worldTension < min {
+            return false
+        }
+        if let max = maxTension, worldTension > max {
+            return false
+        }
+
+        // Проверка обязательных флагов
+        if let required = requiredFlags {
+            for flag in required {
+                if worldFlags[flag] != true {
+                    return false
+                }
+            }
+        }
+
+        // Проверка запрещённых флагов
+        if let forbidden = forbiddenFlags {
+            for flag in forbidden {
+                if worldFlags[flag] == true {
+                    return false
+                }
+            }
         }
 
         return true
