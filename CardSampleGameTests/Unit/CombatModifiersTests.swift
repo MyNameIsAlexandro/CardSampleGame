@@ -82,7 +82,6 @@ final class CombatModifiersTests: XCTestCase {
         let player = Player(name: "Test")
         player.applyCurse(type: .fear, duration: 3)
 
-        let baseDamage = 5
         let modifier = player.getDamageTakenModifier()
 
         XCTAssertEqual(modifier, 1, "fear: +1 получаемый урон")

@@ -149,7 +149,7 @@ final class EventSystemTests: XCTestCase {
     // MARK: - OneTime Events
 
     func testOneTimeEventNotRepeated() {
-        var oneTimeEvent = GameEvent(
+        let oneTimeEvent = GameEvent(
             eventType: .narrative,
             title: "One Time",
             description: "Test",
@@ -165,7 +165,7 @@ final class EventSystemTests: XCTestCase {
     }
 
     func testRepeatingEventCanRepeat() {
-        var repeatingEvent = GameEvent(
+        let repeatingEvent = GameEvent(
             eventType: .exploration,
             title: "Repeating",
             description: "Test",

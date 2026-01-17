@@ -190,8 +190,6 @@ final class WorldStateTests: XCTestCase {
             worldState.regions[borderlandIndex].anchor = anchor
         }
 
-        let initialIntegrity = worldState.regions[borderlandIndex].anchor?.integrity ?? 0
-
         // Высокий Tension для гарантии деградации
         worldState.worldTension = 100
         worldState.daysPassed = 3

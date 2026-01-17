@@ -303,8 +303,6 @@ final class CombatSystemTests: XCTestCase {
         gameState.defeatEncounter()
 
         // WorldState должен отметить босса как побеждённого
-        // Проверяем через флаги
-        let bossFlag = "boss_defeated_Страж Нави"
         // Реализация зависит от markBossDefeated метода
     }
 
