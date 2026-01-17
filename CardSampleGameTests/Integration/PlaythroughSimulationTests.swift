@@ -70,9 +70,23 @@ final class PlaythroughSimulationTests: XCTestCase {
         gameState.checkQuestVictory()
     }
 
-    /// Симулирует случайное действие игрока
+    /// Симулирует случайное действие игрока с учётом выживаемости
     private func simulatePlayerAction() {
-        let actions = ["explore", "rest", "travel", "combat"]
+        // Умная симуляция: приоритет лечения при низком HP
+        if player.health <= 4 {
+            // При низком HP - обязательно отдых
+            simulateRest()
+            return
+        }
+
+        // При среднем HP - избегаем боя
+        let actions: [String]
+        if player.health <= 6 {
+            actions = ["explore", "rest", "travel", "explore"]  // без combat
+        } else {
+            actions = ["explore", "rest", "travel", "combat"]
+        }
+
         let action = actions.randomElement()!
 
         switch action {
