@@ -240,7 +240,7 @@ final class PlaythroughSimulationTests: XCTestCase {
             worldState.advanceTime(by: 1)
 
             // Выбираем светлые действия через систему последствий
-            let lightConsequences = EventConsequences(balanceChange: 3, faithChange: 1)
+            let lightConsequences = EventConsequences(faithChange: 1, balanceChange: 3)
             worldState.applyConsequences(lightConsequences, to: player, in: regionId)
         }
 
@@ -505,7 +505,7 @@ final class PlaythroughSimulationTests: XCTestCase {
         switch event.eventType {
         case .combat: logType = .combat
         case .exploration: logType = .exploration
-        case .narrative, .quest: logType = .choice
+        case .narrative, .ritual, .worldShift: logType = .choice
         }
 
         worldState.logEvent(
