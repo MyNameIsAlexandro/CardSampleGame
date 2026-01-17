@@ -1,0 +1,237 @@
+import XCTest
+@testable import CardSampleGame
+
+/// Smoke-тесты для валидации канонических конфигураций игры
+/// Проверяет что стартовые значения и константы соответствуют GAME_DESIGN_DOCUMENT.md
+/// НЕ симулирует геймплей - только валидирует config
+/// Для распределений см. MetricsDistributionTests
+final class SmokeConfigTests: XCTestCase {
+
+    var worldState: WorldState!
+    var player: Player!
+    var gameState: GameState!
+
+    override func setUp() {
+        super.setUp()
+        player = Player(name: "Тест")
+        gameState = GameState(players: [player])
+        worldState = gameState.worldState
+    }
+
+    override func tearDown() {
+        worldState = nil
+        player = nil
+        gameState = nil
+        super.tearDown()
+    }
+
+    // MARK: - Каноничеcкие стартовые значения WorldState
+
+    func testInitialWorldTension() {
+        XCTAssertEqual(worldState.worldTension, 30, "Канон: стартовый Tension = 30%")
+    }
+
+    func testInitialDaysPassed() {
+        XCTAssertEqual(worldState.daysPassed, 0, "Канон: стартовый день = 0")
+    }
+
+    func testInitialLightDarkBalance() {
+        XCTAssertEqual(worldState.lightDarkBalance, 50, "Канон: мировой баланс = 50")
+    }
+
+    func testInitialMainQuestStage() {
+        XCTAssertEqual(worldState.mainQuestStage, 1, "Канон: квест начинается с этапа 1")
+    }
+
+    // MARK: - Канонические регионы (GAME_DESIGN_DOCUMENT.md)
+
+    func testRegionCount() {
+        XCTAssertEqual(worldState.regions.count, 7, "Канон: 7 регионов в Акте I")
+    }
+
+    func testInitialRegionStateDistribution() {
+        let stableCount = worldState.regions.filter { $0.state == .stable }.count
+        let borderlandCount = worldState.regions.filter { $0.state == .borderland }.count
+        let breachCount = worldState.regions.filter { $0.state == .breach }.count
+
+        XCTAssertEqual(stableCount, 2, "Канон: 2 Stable региона")
+        XCTAssertEqual(borderlandCount, 3, "Канон: 3 Borderland региона")
+        XCTAssertEqual(breachCount, 2, "Канон: 2 Breach региона")
+    }
+
+    func testStartingRegionIsVillage() {
+        guard let currentRegion = worldState.getCurrentRegion() else {
+            XCTFail("Нет текущего региона")
+            return
+        }
+
+        XCTAssertEqual(currentRegion.name, "Деревня у тракта", "Канон: старт в Деревне")
+        XCTAssertEqual(currentRegion.state, .stable, "Канон: стартовый регион = Stable")
+    }
+
+    func testAllRegionsHaveNeighbors() {
+        for region in worldState.regions {
+            XCTAssertFalse(region.neighborIds.isEmpty, "Регион \(region.name) должен иметь соседей")
+        }
+    }
+
+    // MARK: - Канонические значения Player
+
+    func testInitialPlayerHealth() {
+        XCTAssertEqual(player.health, 10, "Канон: стартовое HP = 10")
+        XCTAssertEqual(player.maxHealth, 10, "Канон: максимум HP = 10")
+    }
+
+    func testInitialPlayerFaith() {
+        XCTAssertEqual(player.faith, 3, "Канон: стартовая вера = 3")
+        XCTAssertEqual(player.maxFaith, 10, "Канон: максимум веры = 10")
+    }
+
+    func testInitialPlayerBalance() {
+        XCTAssertEqual(player.balance, 50, "Канон: стартовый баланс = 50 (нейтральный)")
+        XCTAssertEqual(player.balanceState, .neutral, "Канон: нейтральный путь")
+    }
+
+    func testInitialPlayerCurses() {
+        XCTAssertTrue(player.activeCurses.isEmpty, "Канон: нет проклятий при старте")
+    }
+
+    // MARK: - Канонические значения GameState
+
+    func testActionsPerTurn() {
+        XCTAssertEqual(gameState.actionsPerTurn, 3, "Канон: 3 действия в ход")
+    }
+
+    func testInitialPhase() {
+        XCTAssertEqual(gameState.currentPhase, .setup, "Канон: начальная фаза = setup")
+    }
+
+    func testInitialEncountersDefeated() {
+        XCTAssertEqual(gameState.encountersDefeated, 0, "Канон: 0 побед при старте")
+    }
+
+    // MARK: - Канонические квесты
+
+    func testMainQuestExists() {
+        let mainQuest = worldState.activeQuests.first { $0.questType == .main }
+        XCTAssertNotNil(mainQuest, "Канон: главный квест должен существовать")
+    }
+
+    func testMainQuestHasObjectives() {
+        guard let mainQuest = worldState.activeQuests.first(where: { $0.questType == .main }) else {
+            XCTFail("Нет главного квеста")
+            return
+        }
+
+        XCTAssertGreaterThan(mainQuest.objectives.count, 0, "Канон: квест имеет цели")
+    }
+
+    // MARK: - Канонические enum-значения CardRole
+
+    func testCardRolesExist() {
+        XCTAssertNotNil(CardRole.sustain)
+        XCTAssertNotNil(CardRole.control)
+        XCTAssertNotNil(CardRole.power)
+        XCTAssertNotNil(CardRole.utility)
+    }
+
+    func testCardRoleDefaultBalance() {
+        XCTAssertEqual(CardRole.sustain.defaultBalance, .light, "Канон: Sustain = Light")
+        XCTAssertEqual(CardRole.control.defaultBalance, .light, "Канон: Control = Light")
+        XCTAssertEqual(CardRole.power.defaultBalance, .dark, "Канон: Power = Dark")
+        XCTAssertEqual(CardRole.utility.defaultBalance, .neutral, "Канон: Utility = Neutral")
+    }
+
+    // MARK: - Канонические enum-значения DeckPath
+
+    func testDeckPathsExist() {
+        XCTAssertNotNil(DeckPath.light)
+        XCTAssertNotNil(DeckPath.dark)
+        XCTAssertNotNil(DeckPath.balance)
+    }
+
+    // MARK: - Канонические стоимости путешествий
+
+    func testTravelCostToNeighbor() {
+        guard let currentRegion = worldState.getCurrentRegion(),
+              let neighborId = currentRegion.neighborIds.first else {
+            XCTFail("Нет данных для теста")
+            return
+        }
+
+        let cost = worldState.calculateTravelCost(to: neighborId)
+        XCTAssertEqual(cost, 1, "Канон: сосед = 1 день")
+    }
+
+    func testTravelCostToDistant() {
+        guard let currentRegion = worldState.getCurrentRegion() else {
+            XCTFail("Нет текущего региона")
+            return
+        }
+
+        let distantRegion = worldState.regions.first { region in
+            region.id != currentRegion.id && !currentRegion.neighborIds.contains(region.id)
+        }
+
+        guard let distant = distantRegion else { return }
+
+        let cost = worldState.calculateTravelCost(to: distant.id)
+        XCTAssertEqual(cost, 2, "Канон: дальний = 2 дня")
+    }
+
+    // MARK: - Канонические модификаторы регионов в бою
+
+    func testStableRegionCombatModifiers() {
+        let context = CombatContext(regionState: .stable, playerCurses: [])
+        XCTAssertEqual(context.adjustedEnemyPower(5), 5, "Канон: Stable = +0 сила")
+        XCTAssertEqual(context.adjustedEnemyHealth(10), 10, "Канон: Stable = +0 HP")
+        XCTAssertEqual(context.adjustedEnemyDefense(2), 2, "Канон: Stable = +0 защита")
+    }
+
+    func testBorderlandRegionCombatModifiers() {
+        let context = CombatContext(regionState: .borderland, playerCurses: [])
+        XCTAssertEqual(context.adjustedEnemyPower(5), 6, "Канон: Borderland = +1 сила")
+        XCTAssertEqual(context.adjustedEnemyHealth(10), 12, "Канон: Borderland = +2 HP")
+        XCTAssertEqual(context.adjustedEnemyDefense(2), 3, "Канон: Borderland = +1 защита")
+    }
+
+    func testBreachRegionCombatModifiers() {
+        let context = CombatContext(regionState: .breach, playerCurses: [])
+        XCTAssertEqual(context.adjustedEnemyPower(5), 7, "Канон: Breach = +2 сила")
+        XCTAssertEqual(context.adjustedEnemyHealth(10), 15, "Канон: Breach = +5 HP")
+        XCTAssertEqual(context.adjustedEnemyDefense(2), 4, "Канон: Breach = +2 защита")
+    }
+
+    // MARK: - Канонические типы событий
+
+    func testEventTypesExist() {
+        XCTAssertNotNil(EventType.combat)
+        XCTAssertNotNil(EventType.exploration)
+        XCTAssertNotNil(EventType.narrative)
+        XCTAssertNotNil(EventType.ritual)
+        XCTAssertNotNil(EventType.worldShift)
+    }
+
+    // MARK: - Канонические типы проклятий
+
+    func testCurseTypesExist() {
+        XCTAssertNotNil(CurseType.weakness)
+        XCTAssertNotNil(CurseType.fear)
+        XCTAssertNotNil(CurseType.exhaustion)
+        XCTAssertNotNil(CurseType.shadowOfNav)
+        XCTAssertNotNil(CurseType.bloodCurse)
+        XCTAssertNotNil(CurseType.sealOfNav)
+    }
+
+    // MARK: - Проверка что события загружены
+
+    func testEventsLoaded() {
+        XCTAssertGreaterThan(worldState.allEvents.count, 0, "Канон: события должны быть загружены")
+    }
+
+    func testEventsHaveChoices() {
+        for event in worldState.allEvents {
+            XCTAssertGreaterThan(event.choices.count, 0, "Событие \(event.title) должно иметь выборы")
+        }
+    }
+}
