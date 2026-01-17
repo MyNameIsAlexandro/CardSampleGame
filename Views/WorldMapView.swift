@@ -8,6 +8,7 @@ struct WorldMapView: View {
     @State private var selectedRegion: Region?
     @State private var showingRegionDetails = false
     @State private var showingExitConfirmation = false
+    @State private var showingEventLog = false
 
     var body: some View {
         NavigationView {
@@ -54,6 +55,16 @@ struct WorldMapView: View {
                         }
                     }
                 }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        showingEventLog = true
+                    }) {
+                        Image(systemName: "book.closed")
+                    }
+                }
+            }
+            .sheet(isPresented: $showingEventLog) {
+                EventLogView(worldState: worldState)
             }
             .sheet(item: $selectedRegion) { region in
                 RegionDetailView(
@@ -896,6 +907,17 @@ struct RegionDetailView: View {
             worldState.markEventCompleted(event.id)
         }
 
+        // Записать событие в журнал
+        let logType: EventLogType = event.eventType == .combat ? .combat : .exploration
+        let outcomeMessage = choice.consequences.message ?? "Выбор сделан"
+        worldState.logEvent(
+            regionName: region.name,
+            eventTitle: event.title,
+            choiceMade: choice.text,
+            outcome: outcomeMessage,
+            type: logType
+        )
+
         // Исследование события тратит день (кроме instant событий)
         if !event.instant {
             worldState.daysPassed += 1
@@ -937,8 +959,15 @@ struct RegionDetailView: View {
     func performAction(_ action: RegionAction) {
         switch action {
         case .travel:
+            // Записать путешествие в журнал
+            let fromRegion = worldState.getCurrentRegion()?.name ?? "Неизвестно"
+            let cost = worldState.calculateTravelCost(to: region.id)
+
             // Move to this region
             worldState.moveToRegion(region.id)
+
+            // Log travel
+            worldState.logTravel(from: fromRegion, to: region.name, days: cost)
 
             // Check quest objectives when visiting a region
             worldState.checkQuestObjectivesByRegion(regionId: region.id, player: player)
@@ -963,6 +992,94 @@ struct RegionDetailView: View {
         case .explore:
             // This is handled separately by triggerExploration()
             break
+        }
+    }
+}
+
+// MARK: - Event Log View
+
+struct EventLogView: View {
+    @ObservedObject var worldState: WorldState
+    @Environment(\.dismiss) var dismiss
+
+    var body: some View {
+        NavigationView {
+            List {
+                if worldState.eventLog.isEmpty {
+                    Text("Журнал пуст. Ваши приключения ещё впереди...")
+                        .foregroundColor(.secondary)
+                        .padding()
+                } else {
+                    ForEach(worldState.eventLog.reversed()) { entry in
+                        EventLogEntryView(entry: entry)
+                    }
+                }
+            }
+            .navigationTitle("Журнал")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Закрыть") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct EventLogEntryView: View {
+    let entry: EventLogEntry
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // Header
+            HStack {
+                Image(systemName: entry.type.icon)
+                    .foregroundColor(typeColor)
+
+                Text("День \(entry.dayNumber)")
+                    .font(.caption)
+                    .fontWeight(.bold)
+
+                Spacer()
+
+                Text(entry.regionName)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            // Event title
+            Text(entry.eventTitle)
+                .font(.subheadline)
+                .fontWeight(.semibold)
+
+            // Choice made
+            HStack {
+                Image(systemName: "arrow.turn.down.right")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                Text(entry.choiceMade)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            // Outcome
+            Text(entry.outcome)
+                .font(.caption)
+                .italic()
+        }
+        .padding(.vertical, 4)
+    }
+
+    var typeColor: Color {
+        switch entry.type {
+        case .combat: return .red
+        case .exploration: return .blue
+        case .choice: return .orange
+        case .quest: return .purple
+        case .travel: return .green
+        case .worldChange: return .yellow
         }
     }
 }

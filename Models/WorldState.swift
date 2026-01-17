@@ -1,6 +1,61 @@
 import Foundation
 import Combine
 
+// MARK: - Event Log Entry
+
+/// Запись в журнале событий
+struct EventLogEntry: Identifiable, Codable {
+    let id: UUID
+    let dayNumber: Int
+    let timestamp: Date
+    let regionName: String
+    let eventTitle: String
+    let choiceMade: String
+    let outcome: String
+    let type: EventLogType
+
+    init(
+        id: UUID = UUID(),
+        dayNumber: Int,
+        timestamp: Date = Date(),
+        regionName: String,
+        eventTitle: String,
+        choiceMade: String,
+        outcome: String,
+        type: EventLogType
+    ) {
+        self.id = id
+        self.dayNumber = dayNumber
+        self.timestamp = timestamp
+        self.regionName = regionName
+        self.eventTitle = eventTitle
+        self.choiceMade = choiceMade
+        self.outcome = outcome
+        self.type = type
+    }
+}
+
+/// Тип записи в журнале
+enum EventLogType: String, Codable {
+    case exploration    // Исследование
+    case combat         // Бой
+    case choice         // Выбор
+    case quest          // Квест
+    case travel         // Путешествие
+    case worldChange    // Изменение мира
+
+    var icon: String {
+        switch self {
+        case .exploration: return "magnifyingglass"
+        case .combat: return "swords"
+        case .choice: return "questionmark.circle"
+        case .quest: return "scroll"
+        case .travel: return "figure.walk"
+        case .worldChange: return "globe"
+        }
+    }
+}
+
 /// Глобальное состояние мира для системы исследования
 class WorldState: ObservableObject, Codable {
     // MARK: - Published Properties
@@ -15,6 +70,7 @@ class WorldState: ObservableObject, Codable {
     @Published var allEvents: [GameEvent] = []
     @Published var currentRegionId: UUID?           // Текущий регион игрока
     @Published var daysPassed: Int = 0              // Дни в пути
+    @Published var eventLog: [EventLogEntry] = []   // Журнал событий
 
     // MARK: - Computed Properties
 
@@ -490,6 +546,60 @@ class WorldState: ObservableObject, Codable {
         if let index = allEvents.firstIndex(where: { $0.id == eventId }) {
             allEvents[index].completed = true
         }
+    }
+
+    // MARK: - Event Log Management
+
+    /// Добавить запись в журнал событий
+    func logEvent(
+        regionName: String,
+        eventTitle: String,
+        choiceMade: String,
+        outcome: String,
+        type: EventLogType
+    ) {
+        let entry = EventLogEntry(
+            dayNumber: daysPassed,
+            regionName: regionName,
+            eventTitle: eventTitle,
+            choiceMade: choiceMade,
+            outcome: outcome,
+            type: type
+        )
+        eventLog.append(entry)
+
+        // Ограничиваем журнал последними 100 записями
+        if eventLog.count > 100 {
+            eventLog.removeFirst(eventLog.count - 100)
+        }
+    }
+
+    /// Добавить запись о путешествии
+    func logTravel(from: String, to: String, days: Int) {
+        logEvent(
+            regionName: to,
+            eventTitle: "Путешествие",
+            choiceMade: "Отправился в \(to)",
+            outcome: "Добрался за \(days) \(days == 1 ? "день" : "дня")",
+            type: .travel
+        )
+    }
+
+    /// Добавить запись об изменении мира
+    func logWorldChange(description: String) {
+        let regionName = getCurrentRegion()?.name ?? "Мир"
+        logEvent(
+            regionName: regionName,
+            eventTitle: "Изменение мира",
+            choiceMade: "-",
+            outcome: description,
+            type: .worldChange
+        )
+    }
+
+    /// Получить последние записи журнала
+    func getRecentLogEntries(count: Int = 10) -> [EventLogEntry] {
+        return Array(eventLog.suffix(count))
     }
 
     // MARK: - Quest Management
@@ -2206,6 +2316,7 @@ class WorldState: ObservableObject, Codable {
         case allEvents
         case currentRegionId
         case daysPassed
+        case eventLog
     }
 
     required init(from decoder: Decoder) throws {
@@ -2221,6 +2332,7 @@ class WorldState: ObservableObject, Codable {
         allEvents = try container.decode([GameEvent].self, forKey: .allEvents)
         currentRegionId = try container.decodeIfPresent(UUID.self, forKey: .currentRegionId)
         daysPassed = try container.decode(Int.self, forKey: .daysPassed)
+        eventLog = try container.decodeIfPresent([EventLogEntry].self, forKey: .eventLog) ?? []
     }
 
     func encode(to encoder: Encoder) throws {
@@ -2236,5 +2348,6 @@ class WorldState: ObservableObject, Codable {
         try container.encode(allEvents, forKey: .allEvents)
         try container.encodeIfPresent(currentRegionId, forKey: .currentRegionId)
         try container.encode(daysPassed, forKey: .daysPassed)
+        try container.encode(eventLog, forKey: .eventLog)
     }
 }
