@@ -11,7 +11,6 @@ struct EventView: View {
     @State private var selectedChoice: EventChoice?
     @State private var showingResult = false
     @State private var resultMessage: String = ""
-    @State private var showingCombat = false
     @State private var combatMonster: Card?
     @State private var combatVictory: Bool?
 
@@ -65,19 +64,17 @@ struct EventView: View {
             } message: {
                 Text(resultMessage)
             }
-            .fullScreenCover(isPresented: $showingCombat) {
-                if combatMonster != nil {
-                    CombatView(
-                        player: player,
-                        monster: Binding(
-                            get: { combatMonster ?? Card(name: "Unknown", type: .monster, description: "") },
-                            set: { combatMonster = $0 }
-                        ),
-                        onCombatEnd: { outcome in
-                            handleCombatEnd(outcome: outcome)
-                        }
-                    )
-                }
+            .fullScreenCover(item: $combatMonster) { monster in
+                CombatView(
+                    player: player,
+                    monster: Binding(
+                        get: { combatMonster ?? monster },
+                        set: { combatMonster = $0 }
+                    ),
+                    onCombatEnd: { outcome in
+                        handleCombatEnd(outcome: outcome)
+                    }
+                )
             }
         }
     }
@@ -306,9 +303,8 @@ struct EventView: View {
             adjustedMonster.defense = combatContext.adjustedEnemyDefense(baseDefense)
         }
 
-        // Установить монстра и показать экран боя
+        // Установить монстра - fullScreenCover покажется автоматически
         combatMonster = adjustedMonster
-        showingCombat = true
     }
 
     func handleCombatEnd(outcome: CombatView.CombatOutcome) {
@@ -330,14 +326,10 @@ struct EventView: View {
             onChoiceSelected(choice)
         }
 
-        // Clean up
-        combatMonster = nil
-
-        // ВАЖНО: сначала закрываем fullScreenCover, затем с задержкой показываем alert
-        showingCombat = false
-
         // Задержка нужна чтобы fullScreenCover полностью закрылся перед показом alert
+        // (combatMonster = nil закроет fullScreenCover автоматически)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [self] in
+            combatMonster = nil
             showingResult = true
         }
     }
