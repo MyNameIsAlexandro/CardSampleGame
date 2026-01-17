@@ -319,9 +319,10 @@ struct EventView: View {
     }
 
     func handleCombatEnd() {
-        showingCombat = false
-
-        guard let gameState = combatGameState else { return }
+        guard let gameState = combatGameState else {
+            showingCombat = false
+            return
+        }
 
         // Определяем результат боя:
         // - Победа в бою: враг побеждён (activeEncounter == nil или health == 0)
@@ -351,8 +352,14 @@ struct EventView: View {
         // Clean up
         combatGameState = nil
 
-        // Show result
-        showingResult = true
+        // ВАЖНО: сначала закрываем fullScreenCover, затем с задержкой показываем alert
+        // Это предотвращает краш 'A view controller not containing an alert controller'
+        showingCombat = false
+
+        // Задержка нужна чтобы fullScreenCover полностью закрылся перед показом alert
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [self] in
+            showingResult = true
+        }
     }
 
     // MARK: - Helpers

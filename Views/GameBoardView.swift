@@ -13,6 +13,8 @@ struct GameBoardView: View {
     @State private var showingEnemyAttack = false
     @State private var showingWorldMap = false
     @State private var enemyDamage: Int = 0
+    @State private var showingEventCombatVictory = false  // Для победы в бою из события
+    @State private var isExitingCombat = false  // Флаг что выходим из боя
     @StateObject private var saveManager = SaveManager.shared
 
     struct CombatResult {
@@ -106,6 +108,28 @@ struct GameBoardView: View {
                     )
                     .padding(20)
                 }
+
+                // Оверлей победы в бою из события (не полная победа в игре)
+                if showingEventCombatVictory {
+                    Color.black.opacity(0.5)
+                        .ignoresSafeArea()
+                    VStack(spacing: 16) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 60))
+                            .foregroundColor(.green)
+                        Text("Враг побеждён!")
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                        Text("Возвращаемся к событию...")
+                            .font(.subheadline)
+                            .foregroundColor(.white.opacity(0.8))
+                    }
+                    .padding(40)
+                    .background(Color(UIColor.systemBackground).opacity(0.95))
+                    .cornerRadius(20)
+                    .shadow(radius: 20)
+                }
             }
         }
         .navigationBarHidden(true)
@@ -130,10 +154,21 @@ struct GameBoardView: View {
         }
         .onChange(of: gameState.activeEncounter?.id) { _ in
             // Если враг побеждён (activeEncounter стал nil) и это бой из события,
-            // автоматически закрываем экран боя и возвращаемся к EventView
-            if gameState.activeEncounter == nil && onExit != nil && !gameState.isGameOver {
-                // Небольшая задержка чтобы игрок увидел результат
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            // показываем оверлей победы и затем закрываем
+            if gameState.activeEncounter == nil && onExit != nil && !gameState.isGameOver && !isExitingCombat {
+                isExitingCombat = true
+
+                // Сначала закрываем все открытые alerts
+                showingDiceRoll = false
+                showingEnemyAttack = false
+                combatResult = nil
+
+                // Показываем оверлей победы
+                showingEventCombatVictory = true
+
+                // После небольшой задержки закрываем экран боя
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    showingEventCombatVictory = false
                     onExit?()
                 }
             }
