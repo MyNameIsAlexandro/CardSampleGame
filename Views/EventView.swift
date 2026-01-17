@@ -12,7 +12,7 @@ struct EventView: View {
     @State private var showingResult = false
     @State private var resultMessage: String = ""
     @State private var showingCombat = false
-    @State private var combatGameState: GameState?
+    @State private var combatMonster: Card?
     @State private var combatVictory: Bool?
 
     var body: some View {
@@ -66,11 +66,15 @@ struct EventView: View {
                 Text(resultMessage)
             }
             .fullScreenCover(isPresented: $showingCombat) {
-                if let gameState = combatGameState {
-                    GameBoardView(
-                        gameState: gameState,
-                        onExit: {
-                            handleCombatEnd()
+                if combatMonster != nil {
+                    CombatView(
+                        player: player,
+                        monster: Binding(
+                            get: { combatMonster ?? Card(name: "Unknown", type: .monster, description: "") },
+                            set: { combatMonster = $0 }
+                        ),
+                        onCombatEnd: { outcome in
+                            handleCombatEnd(outcome: outcome)
                         }
                     )
                 }
@@ -302,58 +306,34 @@ struct EventView: View {
             adjustedMonster.defense = combatContext.adjustedEnemyDefense(baseDefense)
         }
 
-        // Create a temporary GameState for combat
-        let gameState = GameState(players: [player])
-        gameState.worldState = worldState
-        gameState.activeEncounter = adjustedMonster
-        gameState.currentPhase = .playerTurn
-        gameState.actionsRemaining = 3
-        gameState.turnNumber = 1
-
-        // Initialize player hand for combat
-        player.shuffleDeck()
-        player.drawCards(count: player.maxHandSize)
-
-        combatGameState = gameState
+        // Установить монстра и показать экран боя
+        combatMonster = adjustedMonster
         showingCombat = true
     }
 
-    func handleCombatEnd() {
-        guard let gameState = combatGameState else {
-            showingCombat = false
-            return
-        }
-
-        // Определяем результат боя:
-        // - Победа в бою: враг побеждён (activeEncounter == nil или health == 0)
-        // - Поражение: игрок мёртв (isDefeat или health <= 0)
-        // - Прервано: ни то, ни другое
-        let monsterDefeated = gameState.activeEncounter == nil ||
-                              (gameState.activeEncounter?.health ?? 1) <= 0
-        let playerDefeated = gameState.isDefeat || player.health <= 0
-
-        if monsterDefeated && !playerDefeated {
+    func handleCombatEnd(outcome: CombatView.CombatOutcome) {
+        // Определяем результат боя
+        switch outcome {
+        case .victory:
             combatVictory = true
             resultMessage = "Победа! Вы одержали верх в бою."
-        } else if playerDefeated {
+        case .defeat:
             combatVictory = false
             resultMessage = "Поражение... Вы потерпели неудачу в бою."
-        } else {
-            // Combat was exited without resolution
+        case .fled:
             combatVictory = nil
-            resultMessage = "Бой прерван."
+            resultMessage = "Вы сбежали из боя."
         }
 
-        // Apply non-combat consequences from the choice
-        if let choice = selectedChoice {
+        // Apply non-combat consequences from the choice (if victory)
+        if outcome == .victory, let choice = selectedChoice {
             onChoiceSelected(choice)
         }
 
         // Clean up
-        combatGameState = nil
+        combatMonster = nil
 
         // ВАЖНО: сначала закрываем fullScreenCover, затем с задержкой показываем alert
-        // Это предотвращает краш 'A view controller not containing an alert controller'
         showingCombat = false
 
         // Задержка нужна чтобы fullScreenCover полностью закрылся перед показом alert
