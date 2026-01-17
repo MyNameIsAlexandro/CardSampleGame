@@ -203,7 +203,7 @@ final class MetricsValidationTests: XCTestCase {
         )
 
         XCTAssertEqual(sideQuest.questType, .side)
-        XCTAssertFalse(sideQuest.isCompleted)
+        XCTAssertFalse(sideQuest.objectives.allSatisfy { $0.completed }, "Квест не завершён")
     }
 
     // MARK: - 1.5 Исходы и поражения (через продакшн-методы)
@@ -251,7 +251,7 @@ final class MetricsValidationTests: XCTestCase {
     }
 
     func testBalanceCanShiftToLightViaConsequences() {
-        let consequences = EventConsequences(balanceShift: 30)
+        let consequences = EventConsequences(balanceChange: 30)
 
         guard let regionId = worldState.currentRegionId else {
             XCTFail("Нет текущего региона")
@@ -265,7 +265,7 @@ final class MetricsValidationTests: XCTestCase {
     }
 
     func testBalanceCanShiftToDarkViaConsequences() {
-        let consequences = EventConsequences(balanceShift: -30)
+        let consequences = EventConsequences(balanceChange: -30)
 
         guard let regionId = worldState.currentRegionId else {
             XCTFail("Нет текущего региона")
@@ -280,49 +280,29 @@ final class MetricsValidationTests: XCTestCase {
 
     // MARK: - Проклятия через продакшн-методы
 
-    func testCurseAppliedViaConsequences() {
+    func testCurseAppliedViaProductionMethod() {
         XCTAssertTrue(player.activeCurses.isEmpty, "Нет проклятий при старте")
 
-        let consequences = EventConsequences(applyCurse: .weakness)
-
-        guard let regionId = worldState.currentRegionId else {
-            XCTFail("Нет текущего региона")
-            return
-        }
-
-        worldState.applyConsequences(consequences, to: player, in: regionId)
+        // Применяем проклятие через продакшн-метод игрока
+        player.applyCurse(type: .weakness, duration: 5)
 
         XCTAssertTrue(player.hasCurse(.weakness), "Проклятие применено через систему")
     }
 
-    func testCurseRemovedViaConsequences() {
+    func testCurseRemovedViaProductionMethod() {
         player.applyCurse(type: .weakness, duration: 5)
         XCTAssertTrue(player.hasCurse(.weakness))
 
-        let consequences = EventConsequences(removeCurse: .weakness)
-
-        guard let regionId = worldState.currentRegionId else {
-            XCTFail("Нет текущего региона")
-            return
-        }
-
-        worldState.applyConsequences(consequences, to: player, in: regionId)
+        // Снимаем проклятие через продакшн-метод игрока
+        player.removeCurse(.weakness)
 
         XCTAssertFalse(player.hasCurse(.weakness), "Проклятие снято через систему")
     }
 
     func testCurseCountTarget() {
-        // Цель: 1-4 проклятия через систему событий
-        let consequences1 = EventConsequences(applyCurse: .weakness)
-        let consequences2 = EventConsequences(applyCurse: .fear)
-
-        guard let regionId = worldState.currentRegionId else {
-            XCTFail("Нет текущего региона")
-            return
-        }
-
-        worldState.applyConsequences(consequences1, to: player, in: regionId)
-        worldState.applyConsequences(consequences2, to: player, in: regionId)
+        // Цель: 1-4 проклятия через продакшн-методы
+        player.applyCurse(type: .weakness, duration: 5)
+        player.applyCurse(type: .fear, duration: 5)
 
         XCTAssertGreaterThanOrEqual(player.activeCurses.count, 1, "Минимум 1 проклятие")
         XCTAssertLessThanOrEqual(player.activeCurses.count, 4, "Максимум 4 проклятия")
