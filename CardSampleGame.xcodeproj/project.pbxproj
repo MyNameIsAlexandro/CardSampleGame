@@ -59,7 +59,7 @@
 /* Begin PBXFileReference section */
 		0BE0C9930A837029C5CD71A5 /* ExplorationModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExplorationModels.swift; path = Models/ExplorationModels.swift; sourceTree = "<group>"; };
 		CC0000010000000000000001 /* CombatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CombatView.swift; path = Views/CombatView.swift; sourceTree = "<group>"; };
-		CC0000030000000000000001 /* AccessibilityIdentifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AccessibilityIdentifiers.swift; path = Utilities/AccessibilityIdentifiers.swift; sourceTree = "<group>"; };
+		CC0000030000000000000001 /* AccessibilityIdentifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityIdentifiers.swift; sourceTree = "<group>"; };
 		2263FEB0CBAF703EC97141A7 /* WorldState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WorldState.swift; path = Models/WorldState.swift; sourceTree = "<group>"; };
 		43D4E3FBE4DC34B63B61E061 /* EventView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EventView.swift; path = Views/EventView.swift; sourceTree = "<group>"; };
 		6BEC0AA856AB6706612208E1 /* WorldMapView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WorldMapView.swift; path = Views/WorldMapView.swift; sourceTree = "<group>"; };
