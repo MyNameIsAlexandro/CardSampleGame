@@ -376,18 +376,28 @@ final class CombatSystemTests: XCTestCase {
     }
 
     func testEndTurnDiscardsHandAndDraws() {
-        let card1 = Card(name: "UniqueCard1", type: .spell, description: "")
-        let card2 = Card(name: "Card2", type: .spell, description: "")
-        player.hand = [card1]
-        player.deck = [card2]
+        // Карта которая должна уйти в сброс
+        let cardInHand = Card(name: "CardInHand", type: .spell, description: "")
+        player.hand = [cardInHand]
+
+        // 5+ карт в deck чтобы избежать reshuffleDiscard при drawCards(5)
+        var deckCards: [Card] = []
+        for i in 0..<5 {
+            deckCards.append(Card(name: "DeckCard\(i)", type: .spell, description: ""))
+        }
+        player.deck = deckCards
 
         gameState.endTurn()
 
-        // После endTurn рука сбрасывается и тянется новые карты
-        // Проверяем что карта из руки попала в сброс (по имени, т.к. id может меняться)
-        let handCardInDiscard = player.discard.contains(where: { $0.name == "UniqueCard1" })
-        let handIsEmpty = player.hand.isEmpty || player.hand.allSatisfy { $0.name != "UniqueCard1" }
-        XCTAssertTrue(handCardInDiscard || handIsEmpty, "Карта из руки должна быть сброшена или рука очищена")
+        // По документации: "Все карты из руки сбрасываются в колоду сброса"
+        // Карта из руки должна быть в discard
+        XCTAssertTrue(
+            player.discard.contains(where: { $0.name == "CardInHand" }),
+            "Карта из руки должна быть в сбросе после endTurn"
+        )
+
+        // "Берется 5 новых карт"
+        XCTAssertEqual(player.hand.count, 5, "После endTurn должно быть 5 карт в руке")
     }
 
     // MARK: - Полный бой (интеграция)
