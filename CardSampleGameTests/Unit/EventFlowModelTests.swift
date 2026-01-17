@@ -1,10 +1,10 @@
 import XCTest
 @testable import CardSampleGame
 
-/// UI тесты для потока событий
-/// Покрывает: отображение событий, выборы, последствия
+/// Модельные тесты для потока событий
+/// Покрывает: структура событий, валидация выборов, применение последствий
 /// См. QA_ACT_I_CHECKLIST.md, тесты TEST-007, TEST-008
-final class EventFlowUITests: XCTestCase {
+final class EventFlowModelTests: XCTestCase {
 
     var worldState: WorldState!
     var player: Player!

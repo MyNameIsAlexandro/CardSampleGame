@@ -1,10 +1,10 @@
 import XCTest
 @testable import CardSampleGame
 
-/// UI тесты для карты мира
-/// Покрывает: навигация, отображение регионов, риск
+/// Модельные тесты для карты мира
+/// Покрывает: состояния регионов, отображаемые данные, риск-индикаторы
 /// См. QA_ACT_I_CHECKLIST.md, тесты TEST-004, TEST-005
-final class WorldMapUITests: XCTestCase {
+final class WorldMapModelTests: XCTestCase {
 
     var worldState: WorldState!
 

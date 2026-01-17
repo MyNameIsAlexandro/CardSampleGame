@@ -84,6 +84,7 @@ struct CombatView: View {
             playerHandView
         }
         .background(Color(UIColor.systemBackground))
+        .accessibilityIdentifier(AccessibilityIdentifiers.Combat.view)
         .alert("Результат атаки", isPresented: $showingAttackResult) {
             Button("OK") {
                 checkCombatEnd()
@@ -283,6 +284,7 @@ struct CombatView: View {
                 .cornerRadius(12)
             }
             .disabled(actionsRemaining <= 0 || isAnimating)
+            .accessibilityIdentifier(AccessibilityIdentifiers.Combat.attackButton)
 
             // Завершить ход
             Button(action: endPlayerTurn) {
@@ -297,8 +299,10 @@ struct CombatView: View {
                 .cornerRadius(12)
             }
             .disabled(isAnimating)
+            .accessibilityIdentifier(AccessibilityIdentifiers.Combat.endTurnButton)
         }
         .padding(.horizontal)
+        .accessibilityIdentifier(AccessibilityIdentifiers.Combat.actionBar)
     }
 
     // MARK: - Enemy Turn View

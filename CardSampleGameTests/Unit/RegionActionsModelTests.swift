@@ -1,10 +1,10 @@
 import XCTest
 @testable import CardSampleGame
 
-/// UI тесты для действий в регионах
-/// Покрывает: доступность действий, стоимость, ограничения
+/// Модельные тесты для действий в регионах
+/// Покрывает: доступность действий (canRest/canTrade), стоимость перемещения, ограничения
 /// См. QA_ACT_I_CHECKLIST.md, тест TEST-005
-final class RegionActionsUITests: XCTestCase {
+final class RegionActionsModelTests: XCTestCase {
 
     var worldState: WorldState!
     var player: Player!
