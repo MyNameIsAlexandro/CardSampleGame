@@ -56,6 +56,42 @@ enum EventLogType: String, Codable {
     }
 }
 
+/// Событие, произошедшее в конце дня (для уведомлений)
+struct DayEvent: Identifiable {
+    let id = UUID()
+    let day: Int
+    let title: String
+    let description: String
+    let isNegative: Bool
+
+    static func tensionIncrease(day: Int, newTension: Int) -> DayEvent {
+        DayEvent(
+            day: day,
+            title: "Напряжение растёт",
+            description: "Влияние Нави усиливается. Напряжение мира: \(newTension)%",
+            isNegative: true
+        )
+    }
+
+    static func regionDegraded(day: Int, regionName: String, newState: RegionState) -> DayEvent {
+        DayEvent(
+            day: day,
+            title: "Регион деградирует",
+            description: "\(regionName) переходит в состояние: \(newState.displayName)",
+            isNegative: true
+        )
+    }
+
+    static func worldImproving(day: Int) -> DayEvent {
+        DayEvent(
+            day: day,
+            title: "Мир восстанавливается",
+            description: "Влияние Яви укрепляется, напряжение спадает",
+            isNegative: false
+        )
+    }
+}
+
 /// Глобальное состояние мира для системы исследования
 class WorldState: ObservableObject, Codable {
     // MARK: - Published Properties
@@ -71,6 +107,7 @@ class WorldState: ObservableObject, Codable {
     @Published var currentRegionId: UUID?           // Текущий регион игрока
     @Published var daysPassed: Int = 0              // Дни в пути
     @Published var eventLog: [EventLogEntry] = []   // Журнал событий
+    @Published var lastDayEvent: DayEvent?          // Последнее событие дня (для уведомлений)
 
     // MARK: - Computed Properties
 
@@ -191,16 +228,25 @@ class WorldState: ObservableObject, Codable {
         // 2. Увеличить напряжение мира (+2 каждые 3 дня)
         increaseTension(by: 2)
 
+        // Уведомить о росте напряжения
+        lastDayEvent = .tensionIncrease(day: daysPassed, newTension: worldTension)
+        logWorldChange(description: "Напряжение мира выросло до \(worldTension)%")
+
         // 3. Проверить деградацию региона с вероятностью (Tension/100)
         let probability = Double(worldTension) / 100.0
         if Double.random(in: 0...1) < probability {
             checkRegionDegradation()
         }
 
-        // 4. Проверить триггеры квестов
+        // 4. Проверить улучшение мира при низком напряжении
+        if worldTension <= 20 {
+            improveRandomRegion()
+        }
+
+        // 5. Проверить триггеры квестов
         checkQuestTriggers()
 
-        // 5. Проверить глобальные триггеры мира
+        // 6. Проверить глобальные триггеры мира
         checkWorldShiftTriggers()
     }
 
@@ -218,12 +264,19 @@ class WorldState: ObservableObject, Codable {
         // 2. Проверить сопротивление якоря
         if let anchor = selectedRegion.anchor, anchor.integrity > 50 {
             // Якорь сопротивляется — деградация не происходит
-            // Можно добавить лог или UI-уведомление
+            logWorldChange(description: "Якорь в \(selectedRegion.name) сопротивляется влиянию Нави")
             return
         }
 
-        // 3. Применить деградацию
+        // 3. Применить деградацию и уведомить
+        let oldState = selectedRegion.state
         degradeRegion(selectedRegion.id)
+
+        // Получить новое состояние после деградации
+        if let updatedRegion = getRegion(byId: selectedRegion.id), updatedRegion.state != oldState {
+            lastDayEvent = .regionDegraded(day: daysPassed, regionName: updatedRegion.name, newState: updatedRegion.state)
+            logWorldChange(description: "\(updatedRegion.name) деградировал до \(updatedRegion.state.displayName)")
+        }
     }
 
     /// Выбор региона для деградации с учётом весов

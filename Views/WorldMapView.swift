@@ -9,6 +9,8 @@ struct WorldMapView: View {
     @State private var showingRegionDetails = false
     @State private var showingExitConfirmation = false
     @State private var showingEventLog = false
+    @State private var showingDayEvent = false
+    @State private var currentDayEvent: DayEvent?
 
     var body: some View {
         NavigationView {
@@ -84,6 +86,22 @@ struct WorldMapView: View {
                 }
             } message: {
                 Text("Прогресс будет сохранен")
+            }
+            .alert(currentDayEvent?.title ?? "Событие мира", isPresented: $showingDayEvent) {
+                Button("Понятно", role: .cancel) {
+                    currentDayEvent = nil
+                }
+            } message: {
+                if let event = currentDayEvent {
+                    Text("День \(event.day)\n\n\(event.description)")
+                }
+            }
+            .onChange(of: worldState.lastDayEvent?.id) { _ in
+                if let event = worldState.lastDayEvent {
+                    currentDayEvent = event
+                    showingDayEvent = true
+                    worldState.lastDayEvent = nil
+                }
             }
         }
     }
@@ -978,6 +996,14 @@ struct RegionDetailView: View {
             // Rest and heal
             player.heal(5)
             worldState.daysPassed += 1
+            worldState.processDayStart()
+            worldState.logEvent(
+                regionName: region.name,
+                eventTitle: "Отдых",
+                choiceMade: "Решил отдохнуть",
+                outcome: "Восстановлено 5 здоровья",
+                type: .exploration
+            )
 
         case .trade:
             // TODO: Implement trade/market view
@@ -987,6 +1013,15 @@ struct RegionDetailView: View {
             // Strengthen anchor if player has enough faith
             if player.spendFaith(10) {
                 _ = worldState.strengthenAnchor(in: region.id, amount: 20)
+                worldState.daysPassed += 1
+                worldState.processDayStart()
+                worldState.logEvent(
+                    regionName: region.name,
+                    eventTitle: "Укрепление якоря",
+                    choiceMade: "Потрачено 10 веры",
+                    outcome: "Якорь укреплён на 20%",
+                    type: .worldChange
+                )
             }
 
         case .explore:
