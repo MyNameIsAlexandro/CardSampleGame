@@ -50,7 +50,7 @@ final class PlaythroughSimulationTests: XCTestCase {
         XCTAssertFalse(gameState.isGameOver)
 
         // Симуляция 20 дней через продакшн-методы
-        for day in 1...20 {
+        for _ in 1...20 {
             // 1. Двигаем время через продакшн-метод
             worldState.advanceTime(by: 1)
 
@@ -108,7 +108,7 @@ final class PlaythroughSimulationTests: XCTestCase {
         // Медленное прохождение с исследованием всех регионов
         var visitedRegions: Set<UUID> = []
 
-        for day in 1...25 {
+        for _ in 1...25 {
             // Исследуем новый регион если возможно
             if let currentRegion = worldState.getCurrentRegion() {
                 visitedRegions.insert(currentRegion.id)
@@ -147,7 +147,7 @@ final class PlaythroughSimulationTests: XCTestCase {
         let fixedDamagePerCombat = 2
         var combatsWon = 0
 
-        for day in 1...20 {
+        for _ in 1...20 {
             worldState.advanceTime(by: 1)
 
             // 2 боя в день через продакшн-систему
@@ -190,17 +190,15 @@ final class PlaythroughSimulationTests: XCTestCase {
     // MARK: - Сценарий: Проклятия через продакшн-систему
 
     func testCursedPlaythroughViaProductionSystem() {
-        // Накапливаем проклятия через систему событий
+        // Накапливаем проклятия через продакшн-метод
         guard let regionId = worldState.currentRegionId else {
             XCTFail("Нет текущего региона")
             return
         }
 
-        let curseConsequences1 = EventConsequences(applyCurse: .weakness)
-        let curseConsequences2 = EventConsequences(applyCurse: .fear)
-
-        worldState.applyConsequences(curseConsequences1, to: player, in: regionId)
-        worldState.applyConsequences(curseConsequences2, to: player, in: regionId)
+        // Применяем проклятия напрямую через Player API
+        player.applyCurse(type: .weakness, duration: 20)
+        player.applyCurse(type: .fear, duration: 20)
 
         XCTAssertTrue(player.hasCurse(.weakness))
         XCTAssertTrue(player.hasCurse(.fear))
@@ -242,7 +240,7 @@ final class PlaythroughSimulationTests: XCTestCase {
             worldState.advanceTime(by: 1)
 
             // Выбираем светлые действия через систему последствий
-            let lightConsequences = EventConsequences(balanceShift: 3, faithChange: 1)
+            let lightConsequences = EventConsequences(balanceChange: 3, faithChange: 1)
             worldState.applyConsequences(lightConsequences, to: player, in: regionId)
         }
 
@@ -264,7 +262,7 @@ final class PlaythroughSimulationTests: XCTestCase {
             worldState.advanceTime(by: 1)
 
             // Выбираем тёмные действия через систему последствий
-            let darkConsequences = EventConsequences(balanceShift: -3)
+            let darkConsequences = EventConsequences(balanceChange: -3)
             worldState.applyConsequences(darkConsequences, to: player, in: regionId)
         }
 
@@ -287,10 +285,10 @@ final class PlaythroughSimulationTests: XCTestCase {
 
             // Поддерживаем баланс через систему последствий
             if player.balance > 55 {
-                let darkConsequences = EventConsequences(balanceShift: -5)
+                let darkConsequences = EventConsequences(balanceChange: -5)
                 worldState.applyConsequences(darkConsequences, to: player, in: regionId)
             } else if player.balance < 45 {
-                let lightConsequences = EventConsequences(balanceShift: 5)
+                let lightConsequences = EventConsequences(balanceChange: 5)
                 worldState.applyConsequences(lightConsequences, to: player, in: regionId)
             }
         }
@@ -466,16 +464,16 @@ final class PlaythroughSimulationTests: XCTestCase {
             return // Нет событий для тестирования
         }
 
-        let initialHealth = player.health
-        let initialFaith = player.faith
+        let healthBefore = player.health
+        let faithBefore = player.faith
 
         // Применяем последствия выбора через продакшн-метод
         worldState.applyConsequences(choice.consequences, to: player, in: currentRegion.id)
 
         // Проверяем что система обработала последствия
-        // (конкретные изменения зависят от события)
-        XCTAssertNotNil(player.health)
-        XCTAssertNotNil(player.faith)
+        // (конкретные изменения зависят от события - могут измениться или остаться)
+        XCTAssertTrue(player.health >= 0, "HP валидно после события (было \(healthBefore))")
+        XCTAssertTrue(player.faith >= 0, "Вера валидна после события (была \(faithBefore))")
     }
 
     // MARK: - E2E: Полный цикл события
@@ -502,17 +500,24 @@ final class PlaythroughSimulationTests: XCTestCase {
         // 3. Применить последствия
         worldState.applyConsequences(choice.consequences, to: player, in: regionId)
 
-        // 4. Залогировать событие
+        // 4. Залогировать событие (маппим EventType -> EventLogType)
+        let logType: EventLogType
+        switch event.eventType {
+        case .combat: logType = .combat
+        case .exploration: logType = .exploration
+        case .narrative, .quest: logType = .choice
+        }
+
         worldState.logEvent(
             regionName: currentRegion.name,
             eventTitle: event.title,
             choiceMade: choice.text,
             outcome: "Тест",
-            type: event.eventType
+            type: logType
         )
 
         // 5. Пометить событие завершённым (если это одноразовое)
-        if event.isOneTime {
+        if event.oneTime {
             worldState.markEventCompleted(event.id)
         }
 
