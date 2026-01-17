@@ -207,26 +207,26 @@ final class PlaythroughSimulationTests: XCTestCase {
 
         var combatsWon = 0
 
+        // Детерминированный тест: фиксированный урон для стабильности
+        let fixedDamagePerCombat = 2  // средний урон
+
         for day in 1...20 {
             worldState.daysPassed = day
             worldState.processDayStart()
 
-            // Много боёв
+            // 2 боя в день
             for _ in 0..<2 {
-                // Симулируем бой
-                let enemyDamage = Int.random(in: 1...3)
-                player.takeDamageWithCurses(enemyDamage)
+                player.takeDamageWithCurses(fixedDamagePerCombat)
 
                 if player.health > 0 {
                     combatsWon += 1
-                    // Награда за бой
                     player.gainFaith(1)
                 }
             }
 
-            // Отдых
-            if player.health < 5 && player.health > 0 {
-                player.heal(3)
+            // Умный отдых: лечимся при HP < 6
+            if player.health < 6 && player.health > 0 {
+                player.heal(4)  // эффективное лечение
             }
 
             if player.health <= 0 {
@@ -235,8 +235,9 @@ final class PlaythroughSimulationTests: XCTestCase {
         }
 
         // Агрессивный стиль рискован но возможен
-        // Минимум 5 побед (тест с random уроном может давать разные результаты)
-        XCTAssertGreaterThanOrEqual(combatsWon, 5, "Должно быть несколько побед")
+        // С фиксированным уроном 2 и лечением 4: можно выжить долго
+        XCTAssertGreaterThanOrEqual(combatsWon, 10, "Агрессивный стиль должен давать много побед")
+        XCTAssertGreaterThan(player.health, 0, "Игрок должен выжить при умной игре")
     }
 
     // MARK: - Сценарий: Проклятия
