@@ -545,6 +545,21 @@ struct RegionDetailView: View {
                 }
 
                 Spacer()
+
+                // Индикатор текущей локации
+                if isPlayerHere {
+                    HStack(spacing: 4) {
+                        Image(systemName: "person.fill")
+                        Text("Вы здесь")
+                    }
+                    .font(.caption)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Color.blue)
+                    .cornerRadius(12)
+                }
             }
 
             Text(regionDescription)
@@ -701,14 +716,19 @@ struct RegionDetailView: View {
 
     // MARK: - Actions Section
 
+    /// Проверка, находится ли игрок в этом регионе
+    var isPlayerHere: Bool {
+        region.id == worldState.currentRegionId
+    }
+
     var actionsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Доступные действия")
                 .font(.headline)
 
             VStack(spacing: 8) {
-                // Travel action
-                if region.id != worldState.currentRegionId {
+                // Travel action - только если игрок НЕ здесь
+                if !isPlayerHere {
                     actionButton(
                         title: "Отправиться",
                         icon: "arrow.right.circle.fill",
@@ -718,51 +738,64 @@ struct RegionDetailView: View {
                         selectedAction = .travel
                         showingActionConfirmation = true
                     }
+
+                    // Сообщение о необходимости переместиться
+                    HStack {
+                        Image(systemName: "info.circle")
+                            .foregroundColor(.secondary)
+                        Text("Переместитесь в регион, чтобы взаимодействовать с ним")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.vertical, 8)
                 }
 
-                // Rest action
-                actionButton(
-                    title: "Отдохнуть (+5 ❤️)",
-                    icon: "bed.double.fill",
-                    color: .green,
-                    enabled: region.canRest
-                ) {
-                    selectedAction = .rest
-                    showingActionConfirmation = true
-                }
-
-                // Trade action
-                actionButton(
-                    title: "Торговать",
-                    icon: "cart.fill",
-                    color: .orange,
-                    enabled: region.canTrade
-                ) {
-                    selectedAction = .trade
-                    showingActionConfirmation = true
-                }
-
-                // Strengthen anchor
-                if region.anchor != nil {
+                // Действия доступны ТОЛЬКО если игрок находится в регионе
+                if isPlayerHere {
+                    // Rest action
                     actionButton(
-                        title: "Укрепить якорь (-10 ✨, +20%)",
-                        icon: "hammer.fill",
-                        color: .purple,
-                        enabled: true
+                        title: "Отдохнуть (+5 ❤️)",
+                        icon: "bed.double.fill",
+                        color: .green,
+                        enabled: region.canRest
                     ) {
-                        selectedAction = .strengthenAnchor
+                        selectedAction = .rest
                         showingActionConfirmation = true
                     }
-                }
 
-                // Explore
-                actionButton(
-                    title: "Исследовать",
-                    icon: "magnifyingglass",
-                    color: .cyan,
-                    enabled: true
-                ) {
-                    triggerExploration()
+                    // Trade action
+                    actionButton(
+                        title: "Торговать",
+                        icon: "cart.fill",
+                        color: .orange,
+                        enabled: region.canTrade
+                    ) {
+                        selectedAction = .trade
+                        showingActionConfirmation = true
+                    }
+
+                    // Strengthen anchor
+                    if region.anchor != nil {
+                        actionButton(
+                            title: "Укрепить якорь (-10 ✨, +20%)",
+                            icon: "hammer.fill",
+                            color: .purple,
+                            enabled: player.faith >= 10
+                        ) {
+                            selectedAction = .strengthenAnchor
+                            showingActionConfirmation = true
+                        }
+                    }
+
+                    // Explore
+                    actionButton(
+                        title: "Исследовать",
+                        icon: "magnifyingglass",
+                        color: .cyan,
+                        enabled: true
+                    ) {
+                        triggerExploration()
+                    }
                 }
             }
         }
