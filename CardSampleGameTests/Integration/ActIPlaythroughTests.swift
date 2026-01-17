@@ -300,8 +300,10 @@ final class ActIPlaythroughTests: XCTestCase {
 
     // MARK: - World State Persistence (Conceptual)
 
-    func testWorldStateCanBeCoded() {
+    @MainActor
+    func testWorldStateCanBeCoded() async {
         // Проверяем что WorldState соответствует Codable
+        // @MainActor требуется т.к. WorldState.Codable conformance изолирован на MainActor
         do {
             let encoder = JSONEncoder()
             let data = try encoder.encode(worldState)
