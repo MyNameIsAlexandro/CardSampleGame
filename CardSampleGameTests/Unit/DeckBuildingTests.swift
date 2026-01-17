@@ -305,6 +305,38 @@ final class DeckBuildingTests: XCTestCase {
         XCTAssertEqual(player.faith, 3, "+1 вера в конце хода")
     }
 
+    // MARK: - Конец хода
+
+    func testEndTurnDiscardsHandAndDraws() {
+        // Подготовка: 5 карт в руке, 5 в колоде
+        for i in 0..<5 {
+            player.hand.append(Card(name: "Hand\(i)", type: .spell, description: ""))
+        }
+        for i in 0..<5 {
+            player.deck.append(Card(name: "Deck\(i)", type: .spell, description: ""))
+        }
+
+        let handCardNames = Set(player.hand.map { $0.name })
+        XCTAssertEqual(player.hand.count, 5, "Начальная рука = 5")
+        XCTAssertEqual(player.deck.count, 5, "Начальная колода = 5")
+        XCTAssertTrue(player.discard.isEmpty, "Сброс пуст")
+
+        gameState.endTurn()
+
+        // После endTurn: старые карты в сбросе, новые 5 в руке
+        XCTAssertEqual(player.hand.count, 5, "Новая рука = 5 карт")
+        // Карты из руки должны быть в сбросе (возможно через reshuffleDiscard)
+        let totalCards = player.hand.count + player.deck.count + player.discard.count
+        XCTAssertEqual(totalCards, 10, "Все 10 карт на месте")
+
+        // Новая рука не должна содержать те же карты что были
+        // (т.к. мы взяли из колоды, а старые пошли в сброс)
+        let newHandCardNames = Set(player.hand.map { $0.name })
+        // Если колоды хватило - в руке карты из Deck*, в сбросе Hand*
+        XCTAssertFalse(newHandCardNames.intersection(handCardNames).count == 5,
+                       "Рука должна измениться после endTurn")
+    }
+
     // MARK: - Типы карт
 
     func testCardTypesExist() {
