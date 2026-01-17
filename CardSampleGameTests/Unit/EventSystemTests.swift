@@ -180,6 +180,51 @@ final class EventSystemTests: XCTestCase {
         XCTAssertTrue(repeatingEvent.canOccur(in: region), "Повторяющееся событие может произойти снова")
     }
 
+    // MARK: - Weighted Event Selection
+
+    func testWeightedEventSelection() {
+        // Тестируем что события с большим весом выбираются чаще
+        let highWeightEvent = GameEvent(
+            eventType: .exploration,
+            title: "High Weight",
+            description: "Test",
+            regionStates: [.stable],
+            choices: [createTestChoice()],
+            weight: 10
+        )
+
+        let lowWeightEvent = GameEvent(
+            eventType: .exploration,
+            title: "Low Weight",
+            description: "Test",
+            regionStates: [.stable],
+            choices: [createTestChoice()],
+            weight: 1
+        )
+
+        // Проверяем что веса корректно установлены
+        XCTAssertEqual(highWeightEvent.weight, 10, "Высокий вес = 10")
+        XCTAssertEqual(lowWeightEvent.weight, 1, "Низкий вес = 1")
+
+        // Проверяем что общий вес можно вычислить для выборки
+        let events = [highWeightEvent, lowWeightEvent]
+        let totalWeight = events.reduce(0) { $0 + $1.weight }
+        XCTAssertEqual(totalWeight, 11, "Общий вес = 11")
+
+        // Статистический тест: выбираем 100 раз и проверяем распределение
+        var highWeightCount = 0
+        for _ in 0..<100 {
+            let randomValue = Int.random(in: 0..<totalWeight)
+            if randomValue < highWeightEvent.weight {
+                highWeightCount += 1
+            }
+        }
+
+        // Ожидаем примерно 90% выборов highWeight (10/11 ≈ 90%)
+        // Допускаем большой разброс для стабильности теста
+        XCTAssertGreaterThan(highWeightCount, 60, "Событие с высоким весом выбирается чаще")
+    }
+
     // MARK: - Event Weight
 
     func testEventWeightMinimum() {

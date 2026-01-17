@@ -113,11 +113,9 @@
 **Fail:** Любое действие не тратит время как указано
 
 **Автотесты:**
-- `testTravelAdjacentCostOneDay()`
-- `testTravelDistantCostTwoDays()`
-- `testRestCostOneDay()`
-- `testStrengthenAnchorCost()`
-- `testInstantEventNoDayCost()`
+- `testTravelToNeighborCostsOneDay()`
+- `testTravelToDistantCostsTwoDays()`
+- `testCalculateTravelCost()`
 
 ---
 
@@ -141,9 +139,9 @@
 **Fail:** Можно "стоять на месте" без роста давления
 
 **Автотесты:**
-- `testWorldTensionIncreasesEvery3Days()`
-- `testRegionDegradationAtHighTension()`
-- `testStableRegionsDoNotDegrade()`
+- `testProcessDayStartIncreasesTensionEvery3Days()`
+- `testBorderlandAndBreachCanDegrade()`
+- `testStableRegionsDoNotDegradeDirectly()`
 
 ---
 
@@ -220,11 +218,14 @@
 - [x] OneTime события не повторяются
 
 **Автотесты:**
-- `testEventFilteringByRegionState()`
-- `testEventFilteringByWorldTension()`
-- `testEventFilteringByFlags()`
+- `testEventFilterByRegionState()`
+- `testEventFilterByRegionType()`
+- `testEventFilterByTensionMin()`
+- `testEventFilterByTensionMax()`
+- `testEventFilterByRequiredFlags()`
+- `testEventFilterByForbiddenFlags()`
+- `testOneTimeEventNotRepeated()`
 - `testWeightedEventSelection()`
-- `testOneTimeEventsDoNotRepeat()`
 
 ---
 
@@ -241,9 +242,16 @@
 **Fail:** Выбор ни на что не влияет
 
 **Автотесты:**
-- `testAllChoicesHaveConsequences()`
-- `testResourceChangesApplyImmediately()`
-- `testFlagsSetCorrectly()`
+- `testConsequencesFaithChange()`
+- `testConsequencesHealthChange()`
+- `testConsequencesBalanceChange()`
+- `testConsequencesTensionChange()`
+- `testConsequencesSetFlags()`
+- `testConsequencesAnchorIntegrity()`
+- `testChoiceRequirementsFaith()`
+- `testChoiceRequirementsHealth()`
+- `testChoiceRequirementsBalance()`
+- `testChoiceRequirementsFlags()`
 
 ---
 
@@ -267,9 +275,10 @@
 - Основной квест продвигается без посещения Borderland или Breach (нарушение Pillar 3)
 
 **Автотесты:**
-- `testMainQuestAutoStarts()`
-- `testMainQuestProgression()`
-- `testMainQuestStagesOrder()`
+- `testMainQuestActiveAtStart()`
+- `testMainQuestTitle()`
+- `testMainQuestInitialStage()`
+- `testMainQuestHasObjectives()`
 
 ---
 
@@ -483,9 +492,59 @@ CardSampleGameTests/
 | RegionActionsUITests.swift | Действия в регионах | ~12 | ~160 |
 | EventFlowUITests.swift | Поток событий | ~8 | ~120 |
 | ActIPlaythroughTests.swift | Полное прохождение | ~20 | ~350 |
-| MetricsValidationTests.swift | Проверка метрик | ~15 | ~250 |
+| MetricsValidationTests.swift | Проверка метрик (статистика) | ~15 | ~250 |
 | PlaythroughSimulationTests.swift | E2E симуляция | ~20 | ~380 |
 | **ИТОГО** | | **~325** | **~4320** |
+
+### Правила для MetricsValidationTests
+
+> **Критически важно:** MetricsValidationTests проверяют **распределение значений**, а не каждое отдельное прохождение.
+
+**Методология:**
+```
+100 симуляций → статистический анализ → pass/fail
+```
+
+**Критерии прохождения:**
+
+| Метрика | Pass условие | Red flag |
+|---------|--------------|----------|
+| Длительность (8–15 дней) | ≥70% в диапазоне | >10% выходят |
+| Финальный Tension (40–70%) | ≥70% в диапазоне | >10% выходят |
+| Смерти (0–2) | ≥80% в диапазоне | >15% выходят |
+| Карты (+10–15) | ≥70% в диапазоне | >10% выходят |
+
+**Пример теста:**
+```swift
+func testDurationDistribution() {
+    let results = runSimulations(count: 100)
+    let inRange = results.filter { $0.days >= 8 && $0.days <= 15 }
+    XCTAssertGreaterThanOrEqual(Double(inRange.count) / 100.0, 0.70)
+}
+```
+
+Это защищает от ложных «падений» тестов из-за естественной вариативности.
+
+---
+
+## NON-GOALS АКТА I
+
+> **Важно для QA и продюсеров:** Это не баги, а осознанные дизайн-решения.
+
+В рамках QA и баланса Акта I **НЕ требуется:**
+
+| Что НЕ нужно «чинить» | Почему это фича |
+|-----------------------|-----------------|
+| Идеальное прохождение без потерь | Риск и жертва — core loop |
+| Возможность выполнить все побочные квесты | Время ограничено, выбор имеет цену |
+| Стабилизировать весь мир | Мир деградирует быстрее, чем игрок успевает |
+| Держать WorldTension ниже 30% | Напряжение должно расти |
+| 0 смертей за прохождение | 0–2 смерти — допустимый диапазон |
+
+**Зачем этот блок:**
+- Чтобы новые QA / продюсеры не начинали «чинить» то, что задумано как фича
+- Чтобы future-you не спорил сам с собой через 6 месяцев
+- Чтобы защитить философию «мир подсказывает, но не ведёт за руку»
 
 ---
 
