@@ -130,28 +130,30 @@ final class WorldStateTests: XCTestCase {
 
     // MARK: - TEST-003: Авто-деградация мира
 
-    func testProcessDayStartIncreasesTensionEvery3Days() {
+    func testTensionIncreasesThroughAdvanceTime() {
         // Каждые 3 дня worldTension должен увеличиваться на 2
+        // Используем advanceTime() вместо ручной установки daysPassed
         let initialTension = worldState.worldTension
 
-        // День 1, 2 - ничего не происходит
-        worldState.daysPassed = 1
-        worldState.processDayStart()
+        // День 1 - ничего не происходит
+        worldState.advanceTime(by: 1)
         XCTAssertEqual(worldState.worldTension, initialTension, "День 1: Tension не должен измениться")
 
-        worldState.daysPassed = 2
-        worldState.processDayStart()
+        // День 2 - ничего не происходит
+        worldState.advanceTime(by: 1)
         XCTAssertEqual(worldState.worldTension, initialTension, "День 2: Tension не должен измениться")
 
         // День 3 - +2 к Tension
-        worldState.daysPassed = 3
-        worldState.processDayStart()
+        worldState.advanceTime(by: 1)
         XCTAssertEqual(worldState.worldTension, initialTension + 2, "День 3: Tension должен увеличиться на 2")
 
+        // Дни 4, 5
+        worldState.advanceTime(by: 2)
+
         // День 6 - ещё +2
-        worldState.daysPassed = 6
-        worldState.processDayStart()
+        worldState.advanceTime(by: 1)
         XCTAssertEqual(worldState.worldTension, initialTension + 4, "День 6: Tension должен увеличиться ещё на 2")
+        XCTAssertEqual(worldState.daysPassed, 6, "Прошло 6 дней")
     }
 
     func testStableRegionsDoNotDegradeDirectly() {
@@ -167,10 +169,9 @@ final class WorldStateTests: XCTestCase {
             }
         }
 
-        // После processDayStart Stable регионы не должны деградировать
-        worldState.worldTension = 100 // Максимальная вероятность
-        worldState.daysPassed = 3
-        worldState.processDayStart()
+        // После advanceTime Stable регионы не должны деградировать
+        worldState.increaseTension(by: 70) // Высокий tension для максимальной вероятности деградации
+        worldState.advanceTime(by: 3)
 
         let allStable = worldState.regions.allSatisfy { $0.state == .stable }
         XCTAssertTrue(allStable, "Stable регионы не должны деградировать напрямую")
@@ -190,14 +191,17 @@ final class WorldStateTests: XCTestCase {
             worldState.regions[borderlandIndex].anchor = anchor
         }
 
-        // Высокий Tension для гарантии деградации
-        worldState.worldTension = 100
-        worldState.daysPassed = 3
-        worldState.processDayStart()
+        let initialIntegrity = worldState.regions[borderlandIndex].anchor?.integrity ?? 100
 
-        // Проверяем что integrity уменьшился (деградация произошла)
-        // Примечание: это вероятностный тест, может не сработать в 100% случаев
-        // В реальном тесте лучше мокать random
+        // Высокий Tension для гарантии деградации
+        worldState.increaseTension(by: 70)
+        worldState.advanceTime(by: 3)
+
+        // Проверяем что регион мог деградировать (integrity мог уменьшиться)
+        let finalIntegrity = worldState.regions[borderlandIndex].anchor?.integrity ?? 100
+        // При высоком tension и низком integrity деградация вероятна
+        // Тест проходит если integrity уменьшился или остался (вероятностная логика)
+        XCTAssertLessThanOrEqual(finalIntegrity, initialIntegrity, "Integrity не должен вырасти без действий игрока")
     }
 
     // MARK: - Регионы

@@ -23,10 +23,20 @@ final class DeckBuildingTests: XCTestCase {
 
     // MARK: - Базовые операции с колодой
 
-    func testInitialDeckEmpty() {
-        XCTAssertTrue(player.deck.isEmpty, "Начальная колода пуста")
+    func testPlayerModelInitializesWithEmptyDeck() {
+        // Player модель инициализируется с пустой колодой
+        // Стартовая колода добавляется при старте игры через TwilightMarchesCards
+        XCTAssertTrue(player.deck.isEmpty, "Player модель начинает с пустой колодой")
         XCTAssertTrue(player.hand.isEmpty, "Начальная рука пуста")
         XCTAssertTrue(player.discard.isEmpty, "Начальный сброс пуст")
+    }
+
+    func testStartingDeckCreatedForCharacter() {
+        // Проверяем что стартовая колода создаётся для персонажа
+        let startingDeck = TwilightMarchesCards.createStartingDeck(for: "Защитник")
+
+        XCTAssertGreaterThanOrEqual(startingDeck.count, 8, "Стартовая колода минимум 8 карт")
+        XCTAssertLessThanOrEqual(startingDeck.count, 12, "Стартовая колода максимум 12 карт")
     }
 
     func testDrawCard() {
