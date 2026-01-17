@@ -27,7 +27,32 @@
 		AA0000500000000000000001 /* TwilightMarchesCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000510000000000000001 /* TwilightMarchesCards.swift */; };
 		AA0000520000000000000001 /* GameSave.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000530000000000000001 /* GameSave.swift */; };
 		AA0000540000000000000001 /* StatisticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000550000000000000001 /* StatisticsView.swift */; };
+		/* Test Files */
+		BB0001010000000000000001 /* WorldStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001020000000000000001 /* WorldStateTests.swift */; };
+		BB0001030000000000000001 /* PlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001040000000000000001 /* PlayerTests.swift */; };
+		BB0001050000000000000001 /* EventSystemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001060000000000000001 /* EventSystemTests.swift */; };
+		BB0001070000000000000001 /* QuestSystemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001080000000000000001 /* QuestSystemTests.swift */; };
+		BB0001090000000000000001 /* CombatModifiersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001100000000000000001 /* CombatModifiersTests.swift */; };
+		BB0001110000000000000001 /* CombatSystemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001120000000000000001 /* CombatSystemTests.swift */; };
+		BB0001130000000000000001 /* DeckBuildingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001140000000000000001 /* DeckBuildingTests.swift */; };
+		BB0001150000000000000001 /* SaveLoadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001160000000000000001 /* SaveLoadTests.swift */; };
+		BB0001170000000000000001 /* WorldMapUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001180000000000000001 /* WorldMapUITests.swift */; };
+		BB0001190000000000000001 /* RegionActionsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001200000000000000001 /* RegionActionsUITests.swift */; };
+		BB0001210000000000000001 /* EventFlowUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001220000000000000001 /* EventFlowUITests.swift */; };
+		BB0001230000000000000001 /* ActIPlaythroughTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001240000000000000001 /* ActIPlaythroughTests.swift */; };
+		BB0001250000000000000001 /* MetricsValidationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001260000000000000001 /* MetricsValidationTests.swift */; };
+		BB0001270000000000000001 /* PlaythroughSimulationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001280000000000000001 /* PlaythroughSimulationTests.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		BB0002010000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA0000340000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AA0000300000000000000001;
+			remoteInfo = CardSampleGame;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		0BE0C9930A837029C5CD71A5 /* ExplorationModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExplorationModels.swift; path = Models/ExplorationModels.swift; sourceTree = "<group>"; };
@@ -53,10 +78,34 @@
 		AA0000510000000000000001 /* TwilightMarchesCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwilightMarchesCards.swift; sourceTree = "<group>"; };
 		AA0000530000000000000001 /* GameSave.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameSave.swift; sourceTree = "<group>"; };
 		AA0000550000000000000001 /* StatisticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsView.swift; sourceTree = "<group>"; };
+		/* Test Target */
+		BB0000010000000000000001 /* CardSampleGameTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CardSampleGameTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		/* Test Files */
+		BB0001020000000000000001 /* WorldStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldStateTests.swift; sourceTree = "<group>"; };
+		BB0001040000000000000001 /* PlayerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerTests.swift; sourceTree = "<group>"; };
+		BB0001060000000000000001 /* EventSystemTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSystemTests.swift; sourceTree = "<group>"; };
+		BB0001080000000000000001 /* QuestSystemTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestSystemTests.swift; sourceTree = "<group>"; };
+		BB0001100000000000000001 /* CombatModifiersTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombatModifiersTests.swift; sourceTree = "<group>"; };
+		BB0001120000000000000001 /* CombatSystemTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombatSystemTests.swift; sourceTree = "<group>"; };
+		BB0001140000000000000001 /* DeckBuildingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeckBuildingTests.swift; sourceTree = "<group>"; };
+		BB0001160000000000000001 /* SaveLoadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveLoadTests.swift; sourceTree = "<group>"; };
+		BB0001180000000000000001 /* WorldMapUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldMapUITests.swift; sourceTree = "<group>"; };
+		BB0001200000000000000001 /* RegionActionsUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionActionsUITests.swift; sourceTree = "<group>"; };
+		BB0001220000000000000001 /* EventFlowUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventFlowUITests.swift; sourceTree = "<group>"; };
+		BB0001240000000000000001 /* ActIPlaythroughTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActIPlaythroughTests.swift; sourceTree = "<group>"; };
+		BB0001260000000000000001 /* MetricsValidationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricsValidationTests.swift; sourceTree = "<group>"; };
+		BB0001280000000000000001 /* PlaythroughSimulationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaythroughSimulationTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		AA0000230000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BB0000020000000000000001 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -79,6 +128,7 @@
 			isa = PBXGroup;
 			children = (
 				AA0000250000000000000001 /* . */,
+				BB0003000000000000000001 /* CardSampleGameTests */,
 				AA0000260000000000000001 /* Products */,
 				E65102638302D3C4A04B78CD /* CardSampleGame */,
 			);
@@ -103,6 +153,7 @@
 			isa = PBXGroup;
 			children = (
 				AA0000210000000000000001 /* CardSampleGame.app */,
+				BB0000010000000000000001 /* CardSampleGameTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -166,6 +217,52 @@
 			name = CardSampleGame;
 			sourceTree = "<group>";
 		};
+		/* Test Groups */
+		BB0003000000000000000001 /* CardSampleGameTests */ = {
+			isa = PBXGroup;
+			children = (
+				BB0003010000000000000001 /* Unit */,
+				BB0003020000000000000001 /* UI */,
+				BB0003030000000000000001 /* Integration */,
+			);
+			path = CardSampleGameTests;
+			sourceTree = "<group>";
+		};
+		BB0003010000000000000001 /* Unit */ = {
+			isa = PBXGroup;
+			children = (
+				BB0001020000000000000001 /* WorldStateTests.swift */,
+				BB0001040000000000000001 /* PlayerTests.swift */,
+				BB0001060000000000000001 /* EventSystemTests.swift */,
+				BB0001080000000000000001 /* QuestSystemTests.swift */,
+				BB0001100000000000000001 /* CombatModifiersTests.swift */,
+				BB0001120000000000000001 /* CombatSystemTests.swift */,
+				BB0001140000000000000001 /* DeckBuildingTests.swift */,
+				BB0001160000000000000001 /* SaveLoadTests.swift */,
+			);
+			path = Unit;
+			sourceTree = "<group>";
+		};
+		BB0003020000000000000001 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				BB0001180000000000000001 /* WorldMapUITests.swift */,
+				BB0001200000000000000001 /* RegionActionsUITests.swift */,
+				BB0001220000000000000001 /* EventFlowUITests.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		BB0003030000000000000001 /* Integration */ = {
+			isa = PBXGroup;
+			children = (
+				BB0001240000000000000001 /* ActIPlaythroughTests.swift */,
+				BB0001260000000000000001 /* MetricsValidationTests.swift */,
+				BB0001280000000000000001 /* PlaythroughSimulationTests.swift */,
+			);
+			path = Integration;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -186,6 +283,24 @@
 			productReference = AA0000210000000000000001 /* CardSampleGame.app */;
 			productType = "com.apple.product-type.application";
 		};
+		BB0000030000000000000001 /* CardSampleGameTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BB0000040000000000000001 /* Build configuration list for PBXNativeTarget "CardSampleGameTests" */;
+			buildPhases = (
+				BB0000050000000000000001 /* Sources */,
+				BB0000020000000000000001 /* Frameworks */,
+				BB0000060000000000000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BB0002020000000000000001 /* PBXTargetDependency */,
+			);
+			name = CardSampleGameTests;
+			productName = CardSampleGameTests;
+			productReference = BB0000010000000000000001 /* CardSampleGameTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -198,6 +313,10 @@
 				TargetAttributes = {
 					AA0000300000000000000001 = {
 						CreatedOnToolsVersion = 15.0;
+					};
+					BB0000030000000000000001 = {
+						CreatedOnToolsVersion = 15.0;
+						TestTargetID = AA0000300000000000000001;
 					};
 				};
 			};
@@ -216,6 +335,7 @@
 			projectRoot = "";
 			targets = (
 				AA0000300000000000000001 /* CardSampleGame */,
+				BB0000030000000000000001 /* CardSampleGameTests */,
 			);
 		};
 /* End PBXProject section */
@@ -226,6 +346,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA0000430000000000000001 /* Localizable.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BB0000060000000000000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -258,7 +385,36 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		BB0000050000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BB0001010000000000000001 /* WorldStateTests.swift in Sources */,
+				BB0001030000000000000001 /* PlayerTests.swift in Sources */,
+				BB0001050000000000000001 /* EventSystemTests.swift in Sources */,
+				BB0001070000000000000001 /* QuestSystemTests.swift in Sources */,
+				BB0001090000000000000001 /* CombatModifiersTests.swift in Sources */,
+				BB0001110000000000000001 /* CombatSystemTests.swift in Sources */,
+				BB0001130000000000000001 /* DeckBuildingTests.swift in Sources */,
+				BB0001150000000000000001 /* SaveLoadTests.swift in Sources */,
+				BB0001170000000000000001 /* WorldMapUITests.swift in Sources */,
+				BB0001190000000000000001 /* RegionActionsUITests.swift in Sources */,
+				BB0001210000000000000001 /* EventFlowUITests.swift in Sources */,
+				BB0001230000000000000001 /* ActIPlaythroughTests.swift in Sources */,
+				BB0001250000000000000001 /* MetricsValidationTests.swift in Sources */,
+				BB0001270000000000000001 /* PlaythroughSimulationTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		BB0002020000000000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AA0000300000000000000001 /* CardSampleGame */;
+			targetProxy = BB0002010000000000000001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		AA0000450000000000000001 /* Localizable.strings */ = {
@@ -452,6 +608,45 @@
 			};
 			name = Release;
 		};
+		/* Test Target Configurations */
+		BB0000070000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.cardgame.CardSampleGameTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CardSampleGame.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/CardSampleGame";
+			};
+			name = Debug;
+		};
+		BB0000080000000000000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.cardgame.CardSampleGameTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CardSampleGame.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/CardSampleGame";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -469,6 +664,15 @@
 			buildConfigurations = (
 				AA0000360000000000000001 /* Debug */,
 				AA0000370000000000000001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BB0000040000000000000001 /* Build configuration list for PBXNativeTarget "CardSampleGameTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BB0000070000000000000001 /* Debug */,
+				BB0000080000000000000001 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
