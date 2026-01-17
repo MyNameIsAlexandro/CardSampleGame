@@ -248,11 +248,11 @@ struct CombatView: View {
                     .foregroundColor(.secondary)
             }
 
-            // Защита
+            // Выносливость (защита)
             VStack {
                 Image(systemName: "shield.fill")
                     .foregroundColor(.blue)
-                Text("\(player.defense)")
+                Text("\(player.constitution)")
                     .fontWeight(.bold)
                 Text("Защита")
                     .font(.caption)
@@ -507,7 +507,9 @@ struct CombatView: View {
             }
 
             let monsterPower = monster.power ?? 3
-            let damage = player.takeDamageWithCurses(monsterPower)
+            let healthBefore = player.health
+            player.takeDamageWithCurses(monsterPower)
+            let damage = healthBefore - player.health
 
             combatLog.append("Враг атакует! Урон: \(damage). Ваше HP: \(player.health)")
 
