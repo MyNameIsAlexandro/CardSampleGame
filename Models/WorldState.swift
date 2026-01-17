@@ -84,6 +84,12 @@ class WorldState: ObservableObject, Codable {
         return regions.first { $0.id == id }
     }
 
+    /// Получить текущий регион игрока
+    func getCurrentRegion() -> Region? {
+        guard let currentId = currentRegionId else { return nil }
+        return getRegion(byId: currentId)
+    }
+
     func moveToRegion(_ regionId: UUID) {
         // Отметить текущий регион как посещенный
         if let currentId = currentRegionId,

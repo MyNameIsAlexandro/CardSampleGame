@@ -22,6 +22,70 @@ enum RegionState: String, Codable, Hashable {
         case .breach: return "🔴"
         }
     }
+
+    // MARK: - Combat Modifiers
+
+    /// Бонус к силе врага в этом регионе
+    var enemyPowerBonus: Int {
+        switch self {
+        case .stable: return 0
+        case .borderland: return 1
+        case .breach: return 2
+        }
+    }
+
+    /// Бонус к здоровью врага в этом регионе
+    var enemyHealthBonus: Int {
+        switch self {
+        case .stable: return 0
+        case .borderland: return 2
+        case .breach: return 5
+        }
+    }
+
+    /// Бонус к защите врага в этом регионе
+    var enemyDefenseBonus: Int {
+        switch self {
+        case .stable: return 0
+        case .borderland: return 1
+        case .breach: return 2
+        }
+    }
+}
+
+// MARK: - Combat Context
+
+/// Контекст боя с учётом региона и проклятий
+struct CombatContext {
+    let regionState: RegionState
+    let playerCurses: [CurseType]
+
+    /// Рассчитать эффективную силу врага
+    func adjustedEnemyPower(_ basePower: Int) -> Int {
+        return basePower + regionState.enemyPowerBonus
+    }
+
+    /// Рассчитать эффективное здоровье врага
+    func adjustedEnemyHealth(_ baseHealth: Int) -> Int {
+        return baseHealth + regionState.enemyHealthBonus
+    }
+
+    /// Рассчитать эффективную защиту врага
+    func adjustedEnemyDefense(_ baseDefense: Int) -> Int {
+        return baseDefense + regionState.enemyDefenseBonus
+    }
+
+    /// Описание модификаторов региона для UI
+    var regionModifierDescription: String? {
+        switch regionState {
+        case .stable:
+            return nil
+        case .borderland:
+            return "Пограничье: враги +1 сила, +1 защита"
+        case .breach:
+            return "Прорыв Нави: враги +2 сила, +2 защита"
+        }
+    }
 }
 
 // MARK: - Region Type

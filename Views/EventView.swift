@@ -282,10 +282,30 @@ struct EventView: View {
     func initiateCombat(choice: EventChoice) {
         guard let monster = event.monsterCard else { return }
 
+        // Получить контекст региона для модификаторов боя
+        let currentRegion = worldState.getCurrentRegion()
+        let regionState = currentRegion?.state ?? .stable
+        let combatContext = CombatContext(
+            regionState: regionState,
+            playerCurses: player.activeCurses.map { $0.type }
+        )
+
+        // Создать врага с модификаторами региона
+        var adjustedMonster = monster
+        if let baseHealth = monster.health {
+            adjustedMonster.health = combatContext.adjustedEnemyHealth(baseHealth)
+        }
+        if let basePower = monster.power {
+            adjustedMonster.power = combatContext.adjustedEnemyPower(basePower)
+        }
+        if let baseDefense = monster.defense {
+            adjustedMonster.defense = combatContext.adjustedEnemyDefense(baseDefense)
+        }
+
         // Create a temporary GameState for combat
         let gameState = GameState(players: [player])
         gameState.worldState = worldState
-        gameState.activeEncounter = monster
+        gameState.activeEncounter = adjustedMonster
         gameState.currentPhase = .playerTurn
         gameState.actionsRemaining = 3
         gameState.turnNumber = 1

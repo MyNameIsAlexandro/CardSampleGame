@@ -426,6 +426,11 @@ struct RegionDetailView: View {
                     // Region header
                     regionHeader
 
+                    // Risk display for non-stable regions
+                    if region.state != .stable {
+                        riskInfoSection
+                    }
+
                     Divider()
 
                     // Anchor section
@@ -528,6 +533,57 @@ struct RegionDetailView: View {
         case .breach:
             return "Навь активно проникает в регион. Очень опасно. Требуется восстановление якоря."
         }
+    }
+
+    // MARK: - Risk Info Section
+
+    var riskInfoSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundColor(region.state == .breach ? .red : .orange)
+                Text("Модификаторы боя")
+                    .font(.caption)
+                    .fontWeight(.bold)
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("Сила врагов:")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text("+\(region.state.enemyPowerBonus)")
+                        .font(.caption)
+                        .fontWeight(.bold)
+                        .foregroundColor(.red)
+                }
+
+                HStack {
+                    Text("Защита врагов:")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text("+\(region.state.enemyDefenseBonus)")
+                        .font(.caption)
+                        .fontWeight(.bold)
+                        .foregroundColor(.red)
+                }
+
+                HStack {
+                    Text("Здоровье врагов:")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text("+\(region.state.enemyHealthBonus)")
+                        .font(.caption)
+                        .fontWeight(.bold)
+                        .foregroundColor(.red)
+                }
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(region.state == .breach ? Color.red.opacity(0.1) : Color.orange.opacity(0.1))
+        )
     }
 
     // MARK: - Anchor Section
