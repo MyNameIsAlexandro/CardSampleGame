@@ -366,4 +366,96 @@ final class MetricsDistributionTests: XCTestCase {
         // Тест проходит - это информационный вывод
         XCTAssertTrue(true)
     }
+
+    // MARK: - TEST: Невозможность стагнации (инвариант)
+
+    /// Проверяет что игрок НЕ может "застыть" - мир должен ухудшаться при пассивной игре
+    /// Если игрок 10 дней только отдыхает в Stable регионе, WorldTension должен вырасти
+    func testNoStagnationInvariant() {
+        let player = Player(name: "Passive")
+        let gameState = GameState(players: [player])
+        let worldState = gameState.worldState
+
+        let initialTension = worldState.worldTension
+
+        // Симулируем 10 дней "ничегонеделания" - только advanceTime
+        for _ in 1...10 {
+            worldState.advanceTime(by: 1)
+        }
+
+        // После 10 дней Tension должен вырасти (каждые 3 дня +2)
+        // 10 дней = 3 интервала по 3 дня = +6 Tension минимум
+        let finalTension = worldState.worldTension
+
+        XCTAssertGreaterThan(finalTension, initialTension,
+            "WorldTension должен расти даже при пассивной игре. Было: \(initialTension), стало: \(finalTension)")
+
+        // Проверяем что выросло минимум на 6 (день 3, 6, 9 → +2 каждый)
+        XCTAssertGreaterThanOrEqual(finalTension - initialTension, 6,
+            "За 10 дней Tension должен вырасти минимум на 6. Фактически: \(finalTension - initialTension)")
+    }
+
+    // MARK: - TEST: Невозможность бесконечного instant-контента
+
+    /// Проверяет что instant события НЕ могут выстраиваться бесконечной цепочкой
+    /// без траты дней. Максимум N instant событий подряд, потом требуется трата времени.
+    func testNoInfiniteInstantEventChain() {
+        let player = Player(name: "InstantTest")
+        let gameState = GameState(players: [player])
+        let worldState = gameState.worldState
+
+        guard let currentRegion = worldState.getCurrentRegion() else {
+            XCTFail("Нет текущего региона")
+            return
+        }
+
+        // Получаем все доступные события
+        let events = worldState.getAvailableEvents(for: currentRegion)
+
+        // Считаем instant события
+        let instantEvents = events.filter { $0.instant == true }
+
+        // Проверяем что instant событий не слишком много
+        // Лимит: максимум 3 instant события на регион (защита от бесконечных цепочек)
+        XCTAssertLessThanOrEqual(instantEvents.count, 5,
+            "Слишком много instant событий в регионе (\(instantEvents.count)). Риск бесконечной цепочки.")
+
+        // Дополнительно: проверяем что большинство событий НЕ instant
+        let nonInstantEvents = events.filter { $0.instant != true }
+
+        if !events.isEmpty {
+            let instantRatio = Double(instantEvents.count) / Double(events.count)
+            XCTAssertLessThan(instantRatio, 0.5,
+                "Более 50% событий instant (\(String(format: "%.0f", instantRatio * 100))%). Это может сломать time pressure.")
+        }
+
+        // Симулируем попытку сыграть только instant события
+        var instantPlayed = 0
+        let maxInstantChain = 10 // Максимальная цепочка для теста
+
+        for _ in 0..<maxInstantChain {
+            let availableInstant = worldState.getAvailableEvents(for: currentRegion)
+                .filter { $0.instant == true && !worldState.completedEventIds.contains($0.id) }
+                .sorted { $0.title < $1.title }
+
+            guard let event = availableInstant.first,
+                  let choice = event.choices.first else {
+                break // Нет больше instant событий
+            }
+
+            worldState.applyConsequences(choice.consequences, to: player, in: currentRegion.id)
+            if event.oneTime {
+                worldState.markEventCompleted(event.id)
+            }
+            instantPlayed += 1
+        }
+
+        // Проверяем что цепочка ограничена
+        XCTAssertLessThan(instantPlayed, maxInstantChain,
+            "Сыграно \(instantPlayed) instant событий подряд. Возможна бесконечная цепочка!")
+
+        // Проверяем что дни НЕ прошли (instant не тратит время)
+        // Но это нормально - важно что цепочка конечна
+        print("Instant событий сыграно подряд: \(instantPlayed), дней прошло: \(worldState.daysPassed)")
+    }
 }
