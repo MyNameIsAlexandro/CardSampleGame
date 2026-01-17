@@ -14,6 +14,8 @@
 
 **Каноническая декомпозиция дизайна:** См. [GAME_DESIGN_DOCUMENT.md](./GAME_DESIGN_DOCUMENT.md) (уровни 0-8)
 
+**Каноническая версия Definition of Done:** См. [EXPLORATION_CORE_DESIGN.md, раздел 18.10](./EXPLORATION_CORE_DESIGN.md#1810-definition-of-done-core-loop)
+
 ### Канонические шкалы (ЖЁСТКО)
 
 | Параметр | Шкала | Комментарий |

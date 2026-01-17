@@ -2189,6 +2189,10 @@ class WorldState: ObservableObject, Codable {
     // See EXPLORATION_CORE_DESIGN.md, sections 28-34
 
     /// Calculate player's dominant deck path based on card balance alignment
+    ///
+    /// Edge case: Если в колоде нет карт со смещением (все neutral или колода пуста),
+    /// путь считается нейтральным (.balance). Это корректное поведение —
+    /// игрок, не делавший выбора между Светом и Тьмой, идёт путём Равновесия.
     func calculateDeckPath(playerDeck: [Card]) -> DeckPath {
         guard !playerDeck.isEmpty else { return .balance }
 
@@ -2212,6 +2216,7 @@ class WorldState: ObservableObject, Codable {
         let darkRatio = Double(darkCount) / Double(total)
 
         // Need >50% of one type to be considered on that path
+        // Если нет явного большинства — путь Равновесия
         if lightRatio > 0.5 {
             return .light
         } else if darkRatio > 0.5 {
