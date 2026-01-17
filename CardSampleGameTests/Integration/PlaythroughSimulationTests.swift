@@ -53,14 +53,14 @@ final class PlaythroughSimulationTests: XCTestCase {
     // MARK: - Helpers
 
     /// Выбирает событие детерминированно через seeded RNG
-    private func selectEvent(from events: [Event]) -> Event? {
+    private func selectEvent(from events: [GameEvent]) -> GameEvent? {
         guard !events.isEmpty else { return nil }
         let index = rng.randomIndex(count: events.count)
         return events[index]
     }
 
     /// Выбирает выбор детерминированно через seeded RNG
-    private func selectChoice(from event: Event) -> EventChoice? {
+    private func selectChoice(from event: GameEvent) -> EventChoice? {
         guard !event.choices.isEmpty else { return nil }
         let index = rng.randomIndex(count: event.choices.count)
         return event.choices[index]
@@ -310,7 +310,7 @@ final class PlaythroughSimulationTests: XCTestCase {
             var foundLightChoice = false
             for event in events {
                 for choice in event.choices {
-                    if choice.consequences.balanceChange > 0 {
+                    if (choice.consequences.balanceChange ?? 0) > 0 {
                         worldState.applyConsequences(choice.consequences, to: player, in: currentRegion.id)
                         if event.oneTime { worldState.markEventCompleted(event.id) }
                         foundLightChoice = true
@@ -352,7 +352,7 @@ final class PlaythroughSimulationTests: XCTestCase {
             var foundDarkChoice = false
             for event in events {
                 for choice in event.choices {
-                    if choice.consequences.balanceChange < 0 {
+                    if (choice.consequences.balanceChange ?? 0) < 0 {
                         worldState.applyConsequences(choice.consequences, to: player, in: currentRegion.id)
                         if event.oneTime { worldState.markEventCompleted(event.id) }
                         foundDarkChoice = true
@@ -393,9 +393,10 @@ final class PlaythroughSimulationTests: XCTestCase {
             var choiceMade = false
             for event in events {
                 for choice in event.choices {
-                    let willShiftRight = player.balance > 55 && choice.consequences.balanceChange < 0
-                    let willShiftLeft = player.balance < 45 && choice.consequences.balanceChange > 0
-                    let neutral = choice.consequences.balanceChange == 0
+                    let balChange = choice.consequences.balanceChange ?? 0
+                    let willShiftRight = player.balance > 55 && balChange < 0
+                    let willShiftLeft = player.balance < 45 && balChange > 0
+                    let neutral = balChange == 0
 
                     if willShiftRight || willShiftLeft || neutral {
                         worldState.applyConsequences(choice.consequences, to: player, in: currentRegion.id)
