@@ -55,7 +55,7 @@ final class QuestSystemTests: XCTestCase {
     }
 
     func testAllObjectivesCompleted() {
-        var quest = Quest(
+        let quest = Quest(
             title: "Тест",
             description: "Тестовый квест",
             questType: .side,
@@ -70,7 +70,7 @@ final class QuestSystemTests: XCTestCase {
     }
 
     func testNotAllObjectivesCompleted() {
-        var quest = Quest(
+        let quest = Quest(
             title: "Тест",
             description: "Тестовый квест",
             questType: .side,
@@ -269,7 +269,7 @@ final class QuestSystemTests: XCTestCase {
             goal: "Победить босса",
             unlockConditions: QuestConditions(requiredFlags: ["step1_complete"]),
             completionConditions: QuestConditions(requiredFlags: ["boss_defeated"]),
-            effects: QuestEffects(tensionChange: -5, setFlags: ["step2_complete"])
+            effects: QuestEffects(setFlags: ["step2_complete"], tensionChange: -5)
         )
 
         XCTAssertEqual(step.effects?.tensionChange, -5)
