@@ -164,6 +164,11 @@ class GameState: ObservableObject {
             activeEncounter = nil
             actionsRemaining = actionsPerTurn
 
+            // Проклятие истощения: -1 действие в этом ходу
+            if currentPlayer.hasCurse(.exhaustion) {
+                actionsRemaining = max(1, actionsRemaining - 1)
+            }
+
             // NEW: Discard all cards and draw 5 new ones (deck-building mechanic)
             let player = currentPlayer
             // Discard all cards in hand
@@ -187,6 +192,12 @@ class GameState: ObservableObject {
         // Check if a boss was defeated (for quest objectives)
         if let encounter = activeEncounter {
             worldState.markBossDefeated(bossName: encounter.name, player: currentPlayer)
+        }
+
+        // Проклятие крови: при убийстве +2 HP и баланс смещается к тьме
+        if currentPlayer.hasCurse(.bloodCurse) {
+            currentPlayer.heal(2)
+            currentPlayer.shiftBalance(towards: .dark, amount: 5)
         }
 
         activeEncounter = nil
@@ -237,7 +248,8 @@ class GameState: ObservableObject {
         guard let encounter = activeEncounter else { return }
 
         let encounterPower = encounter.power ?? 3
-        currentPlayer.health = max(0, currentPlayer.health - encounterPower)
+        // Применяем урон с учётом проклятий (fear увеличивает получаемый урон)
+        currentPlayer.takeDamageWithCurses(encounterPower)
         checkDefeat()
     }
 }

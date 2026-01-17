@@ -182,6 +182,44 @@ class Player: ObservableObject, Identifiable {
         }
     }
 
+    // MARK: - Curse Combat Modifiers
+
+    /// Получить модификатор наносимого урона от проклятий
+    /// weakness: -1, shadowOfNav: +3
+    func getDamageDealtModifier() -> Int {
+        var modifier = 0
+        if hasCurse(.weakness) {
+            modifier -= 1
+        }
+        if hasCurse(.shadowOfNav) {
+            modifier += 3
+        }
+        return modifier
+    }
+
+    /// Получить модификатор получаемого урона от проклятий
+    /// fear: +1 (больше урона получаем)
+    func getDamageTakenModifier() -> Int {
+        var modifier = 0
+        if hasCurse(.fear) {
+            modifier += 1
+        }
+        return modifier
+    }
+
+    /// Применить урон с учётом модификаторов проклятий
+    func takeDamageWithCurses(_ baseDamage: Int) {
+        let modifier = getDamageTakenModifier()
+        let actualDamage = max(0, baseDamage + modifier)
+        takeDamage(actualDamage)
+    }
+
+    /// Рассчитать урон с учётом модификаторов проклятий
+    func calculateDamageDealt(_ baseDamage: Int) -> Int {
+        let modifier = getDamageDealtModifier()
+        return max(0, baseDamage + modifier)
+    }
+
     func summonSpirit(_ spirit: Card) {
         spirits.append(spirit)
     }

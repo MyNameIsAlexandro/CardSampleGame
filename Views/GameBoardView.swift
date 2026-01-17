@@ -552,8 +552,9 @@ struct GameBoardView: View {
         var damageDealt = 0
 
         if success {
-            // Success! Deal damage to encounter
-            damageDealt = max(1, total - encounterDefense + 3) // Base 3 damage + excess
+            // Success! Deal damage to encounter with curse modifiers
+            let baseDamage = max(1, total - encounterDefense + 3) // Base 3 damage + excess
+            damageDealt = gameState.currentPlayer.calculateDamageDealt(baseDamage)
             if var updatedEncounter = gameState.activeEncounter {
                 let currentHealth = updatedEncounter.health ?? 10
                 updatedEncounter.health = max(0, currentHealth - damageDealt)
@@ -580,6 +581,12 @@ struct GameBoardView: View {
     }
 
     func playCard(_ card: Card) {
+        // Печать Нави: нельзя использовать Sustain карты
+        if card.category == .sustain && gameState.currentPlayer.hasCurse(.sealOfNav) {
+            // TODO: Show alert that Sustain cards are blocked by curse
+            return
+        }
+
         // Check if player has actions remaining
         guard gameState.useAction() else {
             // TODO: Show alert that no actions left
@@ -610,7 +617,9 @@ struct GameBoardView: View {
 
             case .damage(let amount, _):
                 if var encounter = gameState.activeEncounter, let health = encounter.health {
-                    encounter.health = max(0, health - amount)
+                    // Применяем модификаторы проклятий к урону
+                    let actualDamage = gameState.currentPlayer.calculateDamageDealt(amount)
+                    encounter.health = max(0, health - actualDamage)
                     gameState.activeEncounter = encounter
                     if encounter.health == 0 {
                         // Encounter defeated!
