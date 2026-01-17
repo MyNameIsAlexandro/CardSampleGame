@@ -421,8 +421,6 @@ final class MetricsDistributionTests: XCTestCase {
             "Слишком много instant событий в регионе (\(instantEvents.count)). Риск бесконечной цепочки.")
 
         // Дополнительно: проверяем что большинство событий НЕ instant
-        let nonInstantEvents = events.filter { $0.instant != true }
-
         if !events.isEmpty {
             let instantRatio = Double(instantEvents.count) / Double(events.count)
             XCTAssertLessThan(instantRatio, 0.5,
