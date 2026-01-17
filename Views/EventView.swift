@@ -323,15 +323,23 @@ struct EventView: View {
 
         guard let gameState = combatGameState else { return }
 
-        // Check victory or defeat
-        if gameState.isVictory {
+        // Определяем результат боя:
+        // - Победа в бою: враг побеждён (activeEncounter == nil или health == 0)
+        // - Поражение: игрок мёртв (isDefeat или health <= 0)
+        // - Прервано: ни то, ни другое
+        let monsterDefeated = gameState.activeEncounter == nil ||
+                              (gameState.activeEncounter?.health ?? 1) <= 0
+        let playerDefeated = gameState.isDefeat || player.health <= 0
+
+        if monsterDefeated && !playerDefeated {
             combatVictory = true
             resultMessage = "Победа! Вы одержали верх в бою."
-        } else if gameState.isDefeat {
+        } else if playerDefeated {
             combatVictory = false
             resultMessage = "Поражение... Вы потерпели неудачу в бою."
         } else {
             // Combat was exited without resolution
+            combatVictory = nil
             resultMessage = "Бой прерван."
         }
 

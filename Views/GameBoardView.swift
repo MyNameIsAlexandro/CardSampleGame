@@ -128,6 +128,16 @@ struct GameBoardView: View {
                 }
             }
         }
+        .onChange(of: gameState.activeEncounter?.id) { _ in
+            // Если враг побеждён (activeEncounter стал nil) и это бой из события,
+            // автоматически закрываем экран боя и возвращаемся к EventView
+            if gameState.activeEncounter == nil && onExit != nil && !gameState.isGameOver {
+                // Небольшая задержка чтобы игрок увидел результат
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    onExit?()
+                }
+            }
+        }
         .sheet(isPresented: $showingRules) {
             RulesView()
         }
