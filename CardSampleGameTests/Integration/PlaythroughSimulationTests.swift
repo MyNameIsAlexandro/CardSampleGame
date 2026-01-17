@@ -56,7 +56,7 @@ final class PlaythroughSimulationTests: XCTestCase {
     /// ВАЖНО: Сортируем по UUID для гарантии детерминизма
     private func selectEvent(from events: [GameEvent]) -> GameEvent? {
         guard !events.isEmpty else { return nil }
-        let sortedEvents = events.sorted { $0.id.uuidString < $1.id.uuidString }
+        let sortedEvents = events.sorted { $0.title < $1.title }
         let index = rng.randomIndex(count: sortedEvents.count)
         return sortedEvents[index]
     }
@@ -174,8 +174,12 @@ final class PlaythroughSimulationTests: XCTestCase {
                 }
             }
 
-            // Переходим к соседу которого ещё не посещали (сортируем для детерминизма)
-            let sortedNeighbors = currentRegion.neighborIds.sorted { $0.uuidString < $1.uuidString }
+            // Переходим к соседу которого ещё не посещали (сортируем по имени для детерминизма)
+            let sortedNeighbors = currentRegion.neighborIds.sorted { id1, id2 in
+                let name1 = worldState.getRegion(byId: id1)?.name ?? ""
+                let name2 = worldState.getRegion(byId: id2)?.name ?? ""
+                return name1 < name2
+            }
             if let unvisitedNeighbor = sortedNeighbors.first(where: { !visitedRegions.contains($0) }) {
                 worldState.moveToRegion(unvisitedNeighbor)
             } else {
@@ -213,7 +217,7 @@ final class PlaythroughSimulationTests: XCTestCase {
 
             // Получаем реальные события, сортируем для детерминизма
             let events = worldState.getAvailableEvents(for: currentRegion)
-                .sorted { $0.id.uuidString < $1.id.uuidString }
+                .sorted { $0.title < $1.title }
             let combatEvents = events.filter { $0.eventType == .combat }
 
             // Обрабатываем боевые события если есть (уже отсортированы)
@@ -309,7 +313,7 @@ final class PlaythroughSimulationTests: XCTestCase {
 
             // Получаем реальные события (сортируем для детерминизма)
             let events = worldState.getAvailableEvents(for: currentRegion)
-                .sorted { $0.id.uuidString < $1.id.uuidString }
+                .sorted { $0.title < $1.title }
 
             // Ищем выборы с позитивным balanceChange (светлые)
             var foundLightChoice = false
@@ -352,7 +356,7 @@ final class PlaythroughSimulationTests: XCTestCase {
 
             // Получаем реальные события (сортируем для детерминизма)
             let events = worldState.getAvailableEvents(for: currentRegion)
-                .sorted { $0.id.uuidString < $1.id.uuidString }
+                .sorted { $0.title < $1.title }
 
             // Ищем выборы с негативным balanceChange (тёмные)
             var foundDarkChoice = false
@@ -395,7 +399,7 @@ final class PlaythroughSimulationTests: XCTestCase {
 
             // Сортируем события для детерминизма
             let events = worldState.getAvailableEvents(for: currentRegion)
-                .sorted { $0.id.uuidString < $1.id.uuidString }
+                .sorted { $0.title < $1.title }
 
             // Выбираем действия, чтобы поддерживать баланс
             var choiceMade = false

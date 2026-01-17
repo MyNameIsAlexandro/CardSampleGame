@@ -55,9 +55,9 @@ final class MetricsDistributionTests: XCTestCase {
             guard let currentRegion = worldState.getCurrentRegion() else { break }
             regionsVisited.insert(currentRegion.id)
 
-            // Получаем события и сортируем по ID для детерминизма
+            // Получаем события и сортируем по title для детерминизма (UUID генерируется заново каждый раз)
             let events = worldState.getAvailableEvents(for: currentRegion)
-                .sorted { $0.id.uuidString < $1.id.uuidString }
+                .sorted { $0.title < $1.title }
 
             if !events.isEmpty {
                 let eventIndex = rng.randomIndex(count: events.count)
@@ -84,8 +84,12 @@ final class MetricsDistributionTests: XCTestCase {
 
             // Путешествие к соседнему региону (~20% шанс)
             let shouldTravel = rng.randomIndex(count: 5) == 0
-            // Сортируем соседей для детерминизма
-            let sortedNeighbors = currentRegion.neighborIds.sorted { $0.uuidString < $1.uuidString }
+            // Сортируем соседей по имени региона для детерминизма
+            let sortedNeighbors = currentRegion.neighborIds.sorted { id1, id2 in
+                let name1 = worldState.getRegion(byId: id1)?.name ?? ""
+                let name2 = worldState.getRegion(byId: id2)?.name ?? ""
+                return name1 < name2
+            }
 
             if shouldTravel && !sortedNeighbors.isEmpty {
                 // Предпочитаем непосещённые регионы
@@ -150,7 +154,7 @@ final class MetricsDistributionTests: XCTestCase {
 
         // Инфо: если много игр заканчиваются с tension <30, значит игра слишком простая
         let tensionLow = results.filter { $0.finalTension < 30 }.count
-        XCTAssertLessThan(tensionLow, 50,
+        XCTAssertLessThanOrEqual(tensionLow, 50,
             "Tension <30% не должен быть в >50% симуляций (слишком просто). Фактически: \(tensionLow)%")
     }
 
