@@ -38,9 +38,9 @@
 		BB0001110000000000000001 /* CombatSystemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001120000000000000001 /* CombatSystemTests.swift */; };
 		BB0001130000000000000001 /* DeckBuildingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001140000000000000001 /* DeckBuildingTests.swift */; };
 		BB0001150000000000000001 /* SaveLoadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001160000000000000001 /* SaveLoadTests.swift */; };
-		BB0001170000000000000001 /* WorldMapUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001180000000000000001 /* WorldMapUITests.swift */; };
-		BB0001190000000000000001 /* RegionActionsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001200000000000000001 /* RegionActionsUITests.swift */; };
-		BB0001210000000000000001 /* EventFlowUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001220000000000000001 /* EventFlowUITests.swift */; };
+		BB0001170000000000000001 /* WorldMapModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001180000000000000001 /* WorldMapModelTests.swift */; };
+		BB0001190000000000000001 /* RegionActionsModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001200000000000000001 /* RegionActionsModelTests.swift */; };
+		BB0001210000000000000001 /* EventFlowModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001220000000000000001 /* EventFlowModelTests.swift */; };
 		BB0001230000000000000001 /* ActIPlaythroughTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001240000000000000001 /* ActIPlaythroughTests.swift */; };
 		BB0001250000000000000001 /* MetricsValidationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001260000000000000001 /* MetricsValidationTests.swift */; };
 		BB0001270000000000000001 /* PlaythroughSimulationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001280000000000000001 /* PlaythroughSimulationTests.swift */; };
@@ -93,9 +93,9 @@
 		BB0001120000000000000001 /* CombatSystemTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombatSystemTests.swift; sourceTree = "<group>"; };
 		BB0001140000000000000001 /* DeckBuildingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeckBuildingTests.swift; sourceTree = "<group>"; };
 		BB0001160000000000000001 /* SaveLoadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveLoadTests.swift; sourceTree = "<group>"; };
-		BB0001180000000000000001 /* WorldMapUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldMapUITests.swift; sourceTree = "<group>"; };
-		BB0001200000000000000001 /* RegionActionsUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionActionsUITests.swift; sourceTree = "<group>"; };
-		BB0001220000000000000001 /* EventFlowUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventFlowUITests.swift; sourceTree = "<group>"; };
+		BB0001180000000000000001 /* WorldMapModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldMapModelTests.swift; sourceTree = "<group>"; };
+		BB0001200000000000000001 /* RegionActionsModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionActionsModelTests.swift; sourceTree = "<group>"; };
+		BB0001220000000000000001 /* EventFlowModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventFlowModelTests.swift; sourceTree = "<group>"; };
 		BB0001240000000000000001 /* ActIPlaythroughTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActIPlaythroughTests.swift; sourceTree = "<group>"; };
 		BB0001260000000000000001 /* MetricsValidationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricsValidationTests.swift; sourceTree = "<group>"; };
 		BB0001280000000000000001 /* PlaythroughSimulationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaythroughSimulationTests.swift; sourceTree = "<group>"; };
@@ -237,7 +237,6 @@
 			isa = PBXGroup;
 			children = (
 				BB0003010000000000000001 /* Unit */,
-				BB0003020000000000000001 /* UI */,
 				BB0003030000000000000001 /* Integration */,
 			);
 			path = CardSampleGameTests;
@@ -254,18 +253,11 @@
 				BB0001120000000000000001 /* CombatSystemTests.swift */,
 				BB0001140000000000000001 /* DeckBuildingTests.swift */,
 				BB0001160000000000000001 /* SaveLoadTests.swift */,
+				BB0001180000000000000001 /* WorldMapModelTests.swift */,
+				BB0001200000000000000001 /* RegionActionsModelTests.swift */,
+				BB0001220000000000000001 /* EventFlowModelTests.swift */,
 			);
 			path = Unit;
-			sourceTree = "<group>";
-		};
-		BB0003020000000000000001 /* UI */ = {
-			isa = PBXGroup;
-			children = (
-				BB0001180000000000000001 /* WorldMapUITests.swift */,
-				BB0001200000000000000001 /* RegionActionsUITests.swift */,
-				BB0001220000000000000001 /* EventFlowUITests.swift */,
-			);
-			path = UI;
 			sourceTree = "<group>";
 		};
 		BB0003030000000000000001 /* Integration */ = {
@@ -414,9 +406,9 @@
 				BB0001110000000000000001 /* CombatSystemTests.swift in Sources */,
 				BB0001130000000000000001 /* DeckBuildingTests.swift in Sources */,
 				BB0001150000000000000001 /* SaveLoadTests.swift in Sources */,
-				BB0001170000000000000001 /* WorldMapUITests.swift in Sources */,
-				BB0001190000000000000001 /* RegionActionsUITests.swift in Sources */,
-				BB0001210000000000000001 /* EventFlowUITests.swift in Sources */,
+				BB0001170000000000000001 /* WorldMapModelTests.swift in Sources */,
+				BB0001190000000000000001 /* RegionActionsModelTests.swift in Sources */,
+				BB0001210000000000000001 /* EventFlowModelTests.swift in Sources */,
 				BB0001230000000000000001 /* ActIPlaythroughTests.swift in Sources */,
 				BB0001250000000000000001 /* MetricsValidationTests.swift in Sources */,
 				BB0001270000000000000001 /* PlaythroughSimulationTests.swift in Sources */,
