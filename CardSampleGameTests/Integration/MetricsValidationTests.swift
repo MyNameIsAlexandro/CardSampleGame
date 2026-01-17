@@ -103,7 +103,7 @@ final class MetricsValidationTests: XCTestCase {
         // При высоком Tension регионы должны деградировать через продакшн-систему
         worldState.increaseTension(by: 50) // 80% tension
 
-        let initialBreachCount = worldState.regions.filter { $0.state == .breach }.count
+        _ = worldState.regions.filter { $0.state == .breach }.count // Snapshot before time advance
 
         // Двигаем время - система должна обрабатывать деградацию
         for _ in 1...5 {
@@ -294,7 +294,7 @@ final class MetricsValidationTests: XCTestCase {
         XCTAssertTrue(player.hasCurse(.weakness))
 
         // Снимаем проклятие через продакшн-метод игрока
-        player.removeCurse(.weakness)
+        player.removeCurse(type: .weakness)
 
         XCTAssertFalse(player.hasCurse(.weakness), "Проклятие снято через систему")
     }
