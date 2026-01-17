@@ -435,7 +435,7 @@ final class MetricsDistributionTests: XCTestCase {
 
         for _ in 0..<maxInstantChain {
             let availableInstant = worldState.getAvailableEvents(for: currentRegion)
-                .filter { $0.instant == true && !worldState.completedEventIds.contains($0.id) }
+                .filter { $0.instant == true && !$0.completed }
                 .sorted { $0.title < $1.title }
 
             guard let event = availableInstant.first,
