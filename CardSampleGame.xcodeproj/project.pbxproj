@@ -45,6 +45,7 @@
 		BB0001250000000000000001 /* MetricsValidationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001260000000000000001 /* MetricsValidationTests.swift */; };
 		BB0001270000000000000001 /* PlaythroughSimulationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001280000000000000001 /* PlaythroughSimulationTests.swift */; };
 		BB0001290000000000000001 /* CriticalSystemsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001300000000000000001 /* CriticalSystemsTests.swift */; };
+		BB0001320000000000000001 /* MetricsDistributionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001310000000000000001 /* MetricsDistributionTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -101,6 +102,7 @@
 		BB0001260000000000000001 /* MetricsValidationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricsValidationTests.swift; sourceTree = "<group>"; };
 		BB0001280000000000000001 /* PlaythroughSimulationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaythroughSimulationTests.swift; sourceTree = "<group>"; };
 		BB0001300000000000000001 /* CriticalSystemsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CriticalSystemsTests.swift; sourceTree = "<group>"; };
+		BB0001310000000000000001 /* MetricsDistributionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricsDistributionTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -267,6 +269,7 @@
 			children = (
 				BB0001240000000000000001 /* ActIPlaythroughTests.swift */,
 				BB0001300000000000000001 /* CriticalSystemsTests.swift */,
+				BB0001310000000000000001 /* MetricsDistributionTests.swift */,
 				BB0001260000000000000001 /* MetricsValidationTests.swift */,
 				BB0001280000000000000001 /* PlaythroughSimulationTests.swift */,
 			);
@@ -414,6 +417,7 @@
 				BB0001210000000000000001 /* EventFlowModelTests.swift in Sources */,
 				BB0001230000000000000001 /* ActIPlaythroughTests.swift in Sources */,
 				BB0001290000000000000001 /* CriticalSystemsTests.swift in Sources */,
+				BB0001320000000000000001 /* MetricsDistributionTests.swift in Sources */,
 				BB0001250000000000000001 /* MetricsValidationTests.swift in Sources */,
 				BB0001270000000000000001 /* PlaythroughSimulationTests.swift in Sources */,
 			);
