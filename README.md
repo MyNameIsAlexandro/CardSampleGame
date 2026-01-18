@@ -45,7 +45,7 @@ Card Adventure Game - это однопользовательская карто
 Проект использует архитектуру переиспользуемого движка:
 - **Engine/Core/** - ядро движка (TimeEngine, PressureEngine, EconomyManager)
 - **Engine/Config/** - конфигурация игры ("картридж")
-- **Engine/ENGINE_ARCHITECTURE.md** - техническая документация
+- **Docs/ENGINE_ARCHITECTURE.md** - техническая документация движка
 
 ### Models
 - \`Card\` - базовая модель карты с характеристиками и способностями

@@ -73,7 +73,7 @@
 
 ### Общая архитектура
 
-> **Каноническая архитектура движка:** См. [Engine/ENGINE_ARCHITECTURE.md](./Engine/ENGINE_ARCHITECTURE.md)
+> **Каноническая архитектура движка:** См. [ENGINE_ARCHITECTURE.md](./ENGINE_ARCHITECTURE.md)
 >
 > Проект использует архитектуру **"Processor + Cartridge"**:
 > - **Engine (Layer 1)** — переиспользуемый движок (TimeEngine, PressureEngine, EconomyManager)
@@ -136,8 +136,15 @@ User Action → View → ViewModel (@Published) → Model Update → View Update
 
 ```
 CardSampleGame/
+├── Docs/                    # Вся документация проекта
+│   ├── ENGINE_ARCHITECTURE.md      # Архитектура движка (source of truth)
+│   ├── TECHNICAL_DOCUMENTATION.md  # Техническая документация (этот файл)
+│   ├── GAME_DESIGN_DOCUMENT.md     # Игровой дизайн
+│   ├── EXPLORATION_CORE_DESIGN.md  # Система исследования
+│   ├── QA_ACT_I_CHECKLIST.md       # QA-чеклист Акта I
+│   └── CAMPAIGN_IMPLEMENTATION_REPORT.md  # Отчёт о реализации
+│
 ├── Engine/                  # Переиспользуемый игровой движок (v1.0)
-│   ├── ENGINE_ARCHITECTURE.md  # Каноническая документация
 │   ├── Core/                # Ядро движка (Layer 1)
 │   │   ├── EngineProtocols.swift   # Все контракты
 │   │   ├── TimeEngine.swift        # Управление временем
@@ -1077,8 +1084,10 @@ private func degradeRegion(_ region: Region) {
 ## Контакты и ресурсы
 
 **Документация:**
+- [ENGINE_ARCHITECTURE.md](./ENGINE_ARCHITECTURE.md) - архитектура движка (source of truth)
 - [GAME_DESIGN_DOCUMENT.md](./GAME_DESIGN_DOCUMENT.md) - игровой дизайн
 - [EXPLORATION_CORE_DESIGN.md](./EXPLORATION_CORE_DESIGN.md) - система исследования
+- [QA_ACT_I_CHECKLIST.md](./QA_ACT_I_CHECKLIST.md) - QA-чеклист Акта I
 - [TECHNICAL_DOCUMENTATION.md](./TECHNICAL_DOCUMENTATION.md) - этот файл
 
 **Git:**

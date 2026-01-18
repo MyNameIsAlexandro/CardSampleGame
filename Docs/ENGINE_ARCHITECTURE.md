@@ -678,8 +678,8 @@ Engine/
 
 ## Приложение B: Ссылки на документацию
 
-- [QA_ACT_I_CHECKLIST.md](../QA_ACT_I_CHECKLIST.md) — Тестирование Акта I
-- [EXPLORATION_CORE_DESIGN.md](../EXPLORATION_CORE_DESIGN.md) — Дизайн исследования
+- [QA_ACT_I_CHECKLIST.md](./QA_ACT_I_CHECKLIST.md) — Тестирование Акта I
+- [EXPLORATION_CORE_DESIGN.md](./EXPLORATION_CORE_DESIGN.md) — Дизайн исследования
 
 ---
 
