@@ -158,7 +158,7 @@ struct CombatCalculator {
 
         var modifiers: [CombatModifier] = []
         var damageModifiers: [CombatModifier] = []
-        var specialEffects: [CombatEffect] = []
+        let specialEffects: [CombatEffect] = []
 
         let isTargetFullHP = monsterCurrentHP == monsterMaxHP
 
