@@ -354,8 +354,9 @@ final class Phase2ContractTests: XCTestCase {
 
 // MARK: - Test Helpers
 
-/// Test content provider for validation tests
-class TestContentProvider: ContentProvider {
+/// Test content provider for Phase 2 contract validation tests
+/// Implements ContentProvider protocol for testing
+final class TestContentProvider: ContentProvider {
     private var regions: [String: RegionDefinition] = [:]
     private var anchors: [String: AnchorDefinition] = [:]
     private var events: [String: EventDefinition] = [:]
