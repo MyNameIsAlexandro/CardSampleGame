@@ -1,9 +1,9 @@
 import XCTest
 @testable import CardSampleGame
 
-/// Статистические тесты распределения метрик через 100 симуляций
-/// ВАЖНО: Каждый тест запускает 100 прохождений с разными seeds
-/// Проверяет что ≥70% результатов попадают в целевые диапазоны
+/// Статистические тесты распределения метрик через 1000 симуляций
+/// ВАЖНО: Каждый тест запускает 1000 прохождений с разными seeds
+/// Проверяет что результаты попадают в целевые диапазоны с низкой погрешностью (~1.5%)
 /// См. QA_ACT_I_CHECKLIST.md, методология статистического тестирования
 final class MetricsDistributionTests: XCTestCase {
 
@@ -136,101 +136,110 @@ final class MetricsDistributionTests: XCTestCase {
         return results
     }
 
-    // MARK: - TEST: Распределение Tension (100 симуляций)
+    // MARK: - TEST: Распределение Tension (1000 симуляций)
 
-    func testTensionDistributionOver100Simulations() {
-        let results = runSimulations(count: 100)
+    func testTensionDistributionOver1000Simulations() {
+        let results = runSimulations(count: 1000)
 
         // Базовая линия: Tension в диапазоне 30-80% (текущий баланс игры довольно жёсткий)
         let tensionInRange = results.filter { $0.finalTension >= 30 && $0.finalTension <= 80 }.count
+        let tensionInRangePercent = Double(tensionInRange) / 10.0
 
-        XCTAssertGreaterThanOrEqual(tensionInRange, 30,
-            "Tension в диапазоне 30-80% должен быть в ≥30% симуляций. Фактически: \(tensionInRange)%")
+        XCTAssertGreaterThanOrEqual(tensionInRange, 300,
+            "Tension в диапазоне 30-80% должен быть в ≥30% симуляций. Фактически: \(tensionInRangePercent)%")
 
         // Red Flag: Tension не должен достигать 100% в >50% случаев (иначе игра слишком сложная)
         let tensionMax = results.filter { $0.finalTension >= 100 }.count
-        XCTAssertLessThan(tensionMax, 50,
-            "Tension=100% не должен быть в >50% симуляций. Фактически: \(tensionMax)%")
+        let tensionMaxPercent = Double(tensionMax) / 10.0
+        XCTAssertLessThan(tensionMax, 500,
+            "Tension=100% не должен быть в >50% симуляций. Фактически: \(tensionMaxPercent)%")
 
         // Инфо: если много игр заканчиваются с tension <30, значит игра слишком простая
-        // Порог 55% учитывает статистическую погрешность для 100 симуляций (~5% variance)
         let tensionLow = results.filter { $0.finalTension < 30 }.count
-        XCTAssertLessThanOrEqual(tensionLow, 55,
-            "Tension <30% не должен быть в >55% симуляций (слишком просто). Фактически: \(tensionLow)%")
+        let tensionLowPercent = Double(tensionLow) / 10.0
+        XCTAssertLessThanOrEqual(tensionLow, 500,
+            "Tension <30% не должен быть в >50% симуляций (слишком просто). Фактически: \(tensionLowPercent)%")
     }
 
-    // MARK: - TEST: Распределение выживаемости (100 симуляций)
+    // MARK: - TEST: Распределение выживаемости (1000 симуляций)
 
-    func testSurvivalRateOver100Simulations() {
-        let results = runSimulations(count: 100)
+    func testSurvivalRateOver1000Simulations() {
+        let results = runSimulations(count: 1000)
 
         // Базовая линия: ≥40% игроков выживают 20 дней (текущий баланс жёсткий)
         let survivors = results.filter { $0.survived }.count
+        let survivorsPercent = Double(survivors) / 10.0
 
-        XCTAssertGreaterThanOrEqual(survivors, 40,
-            "Выживаемость должна быть ≥40%. Фактически: \(survivors)%")
+        XCTAssertGreaterThanOrEqual(survivors, 400,
+            "Выживаемость должна быть ≥40%. Фактически: \(survivorsPercent)%")
 
         // Red Flag: если выживаемость <20% - игра слишком сложная
-        XCTAssertGreaterThanOrEqual(survivors, 20,
-            "Выживаемость не должна быть <20% (критически сложно). Фактически: \(survivors)%")
+        XCTAssertGreaterThanOrEqual(survivors, 200,
+            "Выживаемость не должна быть <20% (критически сложно). Фактически: \(survivorsPercent)%")
     }
 
-    // MARK: - TEST: Распределение дней прохождения (100 симуляций)
+    // MARK: - TEST: Распределение дней прохождения (1000 симуляций)
 
-    func testPlaythroughDurationDistributionOver100Simulations() {
-        let results = runSimulations(count: 100, maxDays: 25)
+    func testPlaythroughDurationDistributionOver1000Simulations() {
+        let results = runSimulations(count: 1000, maxDays: 25)
 
-        // Цель: Прохождение за 15-25 дней в ≥70% случаев
+        // Цель: Прохождение за 15-25 дней в ≥60% случаев
         let daysInRange = results.filter { $0.daysPlayed >= 15 && $0.daysPlayed <= 25 }.count
+        let daysInRangePercent = Double(daysInRange) / 10.0
 
-        XCTAssertGreaterThanOrEqual(daysInRange, 60,
-            "Прохождение за 15-25 дней должно быть в ≥60% симуляций. Фактически: \(daysInRange)%")
+        XCTAssertGreaterThanOrEqual(daysInRange, 600,
+            "Прохождение за 15-25 дней должно быть в ≥60% симуляций. Фактически: \(daysInRangePercent)%")
     }
 
-    // MARK: - TEST: Распределение баланса Light/Dark (100 симуляций)
+    // MARK: - TEST: Распределение баланса Light/Dark (1000 симуляций)
 
-    func testBalanceDistributionOver100Simulations() {
-        let results = runSimulations(count: 100)
+    func testBalanceDistributionOver1000Simulations() {
+        let results = runSimulations(count: 1000)
 
         // Проверяем что баланс распределён примерно равномерно
         let lightPath = results.filter { $0.finalBalance > 70 }.count
         let darkPath = results.filter { $0.finalBalance < 30 }.count
         let neutral = results.filter { $0.finalBalance >= 30 && $0.finalBalance <= 70 }.count
 
+        let lightPercent = Double(lightPath) / 10.0
+        let darkPercent = Double(darkPath) / 10.0
+        let neutralPercent = Double(neutral) / 10.0
+
         // Нейтральный путь должен быть наиболее распространён
-        XCTAssertGreaterThanOrEqual(neutral, 30,
-            "Нейтральный баланс (30-70) должен быть в ≥30% симуляций. Фактически: \(neutral)%")
+        XCTAssertGreaterThanOrEqual(neutral, 300,
+            "Нейтральный баланс (30-70) должен быть в ≥30% симуляций. Фактически: \(neutralPercent)%")
 
         // Экстремальные пути не должны доминировать
-        XCTAssertLessThan(lightPath, 50,
-            "Путь Света (<30%) не должен быть в >50% симуляций. Фактически: \(lightPath)%")
-        XCTAssertLessThan(darkPath, 50,
-            "Путь Тьмы (>70%) не должен быть в >50% симуляций. Фактически: \(darkPath)%")
+        XCTAssertLessThan(lightPath, 500,
+            "Путь Света (<30%) не должен быть в >50% симуляций. Фактически: \(lightPercent)%")
+        XCTAssertLessThan(darkPath, 500,
+            "Путь Тьмы (>70%) не должен быть в >50% симуляций. Фактически: \(darkPercent)%")
     }
 
-    // MARK: - TEST: Распределение посещённых регионов (100 симуляций)
+    // MARK: - TEST: Распределение посещённых регионов (1000 симуляций)
 
-    func testRegionCoverageDistributionOver100Simulations() {
-        let results = runSimulations(count: 100)
+    func testRegionCoverageDistributionOver1000Simulations() {
+        let results = runSimulations(count: 1000)
 
-        // Цель: В среднем посещено ≥3 регионов
+        // Цель: В среднем посещено ≥2 регионов
         let avgRegions = Double(results.reduce(0) { $0 + $1.regionsVisited }) / Double(results.count)
 
         XCTAssertGreaterThanOrEqual(avgRegions, 2.0,
             "В среднем должно быть посещено ≥2 региона. Фактически: \(String(format: "%.1f", avgRegions))")
 
-        // Хотя бы в 50% симуляций посещено ≥3 регионов
+        // Хотя бы в 30% симуляций посещено ≥3 регионов
         let multiRegion = results.filter { $0.regionsVisited >= 3 }.count
-        XCTAssertGreaterThanOrEqual(multiRegion, 30,
-            "≥3 регионов должно быть посещено в ≥30% симуляций. Фактически: \(multiRegion)%")
+        let multiRegionPercent = Double(multiRegion) / 10.0
+        XCTAssertGreaterThanOrEqual(multiRegion, 300,
+            "≥3 регионов должно быть посещено в ≥30% симуляций. Фактически: \(multiRegionPercent)%")
     }
 
-    // MARK: - TEST: Распределение событий (100 симуляций)
+    // MARK: - TEST: Распределение событий (1000 симуляций)
 
-    func testEventDistributionOver100Simulations() {
-        let results = runSimulations(count: 100)
+    func testEventDistributionOver1000Simulations() {
+        let results = runSimulations(count: 1000)
 
-        // Цель: В среднем ≥10 событий за прохождение
+        // Цель: В среднем ≥5 событий за прохождение
         let avgEvents = Double(results.reduce(0) { $0 + $1.eventsPlayed }) / Double(results.count)
 
         XCTAssertGreaterThanOrEqual(avgEvents, 5.0,
@@ -238,31 +247,33 @@ final class MetricsDistributionTests: XCTestCase {
 
         // Не должно быть симуляций без событий
         let noEvents = results.filter { $0.eventsPlayed == 0 }.count
-        XCTAssertLessThan(noEvents, 10,
-            "Симуляций без событий должно быть <10%. Фактически: \(noEvents)%")
+        let noEventsPercent = Double(noEvents) / 10.0
+        XCTAssertLessThan(noEvents, 100,
+            "Симуляций без событий должно быть <10%. Фактически: \(noEventsPercent)%")
     }
 
-    // MARK: - TEST: Консистентность с разными базовыми seeds (100 симуляций)
+    // MARK: - TEST: Консистентность с разными базовыми seeds (1000 симуляций)
 
     func testConsistencyAcrossDifferentBaseSeeds() {
-        // Запускаем 100 симуляций с разными базовыми seeds
-        let results1 = runSimulations(count: 100, baseSeed: 10000)
-        let results2 = runSimulations(count: 100, baseSeed: 50000)
+        // Запускаем 1000 симуляций с разными базовыми seeds
+        let results1 = runSimulations(count: 1000, baseSeed: 10000)
+        let results2 = runSimulations(count: 1000, baseSeed: 50000)
 
-        // Сравниваем средние показатели - они должны быть похожи (±20%)
-        let avgTension1 = Double(results1.reduce(0) { $0 + $1.finalTension }) / 100.0
-        let avgTension2 = Double(results2.reduce(0) { $0 + $1.finalTension }) / 100.0
+        // Сравниваем средние показатели - они должны быть похожи (±15%)
+        let avgTension1 = Double(results1.reduce(0) { $0 + $1.finalTension }) / 1000.0
+        let avgTension2 = Double(results2.reduce(0) { $0 + $1.finalTension }) / 1000.0
 
         let diff = abs(avgTension1 - avgTension2)
-        XCTAssertLessThan(diff, 20.0,
-            "Разница средних Tension между сериями должна быть <20. Фактически: \(String(format: "%.1f", diff))")
+        XCTAssertLessThan(diff, 15.0,
+            "Разница средних Tension между сериями должна быть <15. Фактически: \(String(format: "%.1f", diff))")
 
         let survival1 = results1.filter { $0.survived }.count
         let survival2 = results2.filter { $0.survived }.count
         let survivalDiff = abs(survival1 - survival2)
+        let survivalDiffPercent = Double(survivalDiff) / 10.0
 
-        XCTAssertLessThan(survivalDiff, 30,
-            "Разница выживаемости между сериями должна быть <30%. Фактически: \(survivalDiff)%")
+        XCTAssertLessThan(survivalDiff, 200,
+            "Разница выживаемости между сериями должна быть <20%. Фактически: \(survivalDiffPercent)%")
     }
 
     // MARK: - TEST: Воспроизводимость результатов (детерминизм)
