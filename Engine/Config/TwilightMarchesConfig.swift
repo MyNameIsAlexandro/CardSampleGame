@@ -48,7 +48,7 @@ struct TwilightPressureRules: PressureRuleSet {
     let maxPressure: Int = 100
     let initialPressure: Int = 30
     let escalationInterval: Int = 3  // Every 3 days
-    let escalationAmount: Int = 2    // +2 tension
+    let escalationAmount: Int = 3    // +3 tension (increased for balance)
 
     /// Thresholds and their effects
     var thresholds: [Int: [WorldEffect]] {
@@ -359,8 +359,8 @@ struct TwilightTimeConfig {
     /// Days for tension increase
     static let tensionIncreaseInterval = 3
 
-    /// Tension increase amount
-    static let tensionIncreaseAmount = 2
+    /// Tension increase amount (increased from 2 to 3 for balance)
+    static let tensionIncreaseAmount = 3
 
     /// Travel costs
     static let neighborTravelCost = 1

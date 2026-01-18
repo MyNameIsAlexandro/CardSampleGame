@@ -225,8 +225,9 @@ class WorldState: ObservableObject, Codable {
         // 1. Каждые 3 дня — автоматическая деградация мира
         guard daysPassed > 0 && daysPassed % 3 == 0 else { return }
 
-        // 2. Увеличить напряжение мира (+2 каждые 3 дня)
-        increaseTension(by: 2)
+        // 2. Увеличить напряжение мира (+3 каждые 3 дня)
+        // Увеличено с +2 до +3 для баланса (см. MetricsDistributionTests)
+        increaseTension(by: 3)
 
         // Уведомить о росте напряжения
         lastDayEvent = .tensionIncrease(day: daysPassed, newTension: worldTension)

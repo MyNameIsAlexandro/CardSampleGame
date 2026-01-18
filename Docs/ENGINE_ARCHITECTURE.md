@@ -58,7 +58,7 @@
 
 | Сущность | Описание | Слой | Пример |
 |----------|----------|------|--------|
-| **Rules** | Логика изменений (формулы, инварианты, условия) | Картридж | `каждые 3 дня +2 tension` |
+| **Rules** | Логика изменений (формулы, инварианты, условия) | Картридж | `каждые 3 дня +3 tension` |
 | **Data** | Статичные определения (контент) | Картридж | `RegionDefinition`, `EventDefinition` |
 | **State** | Динамические данные (save/runtime) | Runtime | `currentHealth`, `completedQuests` |
 
@@ -455,7 +455,7 @@ Engine: perform(action)
     ├── 1. Validate: Лес — сосед? Игрок жив?
     ├── 2. Economy: Нет стоимости
     ├── 3. Time: advance(cost: 1)
-    ├── 4. WorldTick: tension +2 (если 3й день)
+    ├── 4. WorldTick: tension +3 (если 3й день)
     ├── 5. Logic: currentRegionId = "forest"
     ├── 6. Event: getAvailableEvents() -> "Волки в лесу"
     ├── 7. Challenge: resolver.resolve(wolfCombat)
