@@ -308,7 +308,8 @@ final class Phase2ContractTests: XCTestCase {
         )
 
         // When: Check with sufficient resources
-        let canMeet1 = requirements.canMeet(
+        let canMeet1 = Requirements.evaluator.canMeet(
+            requirements: requirements,
             resources: ["faith": 15],
             flags: Set(["has_blessing"]),
             balance: 25
@@ -318,7 +319,8 @@ final class Phase2ContractTests: XCTestCase {
         XCTAssertTrue(canMeet1)
 
         // When: Check with insufficient resources
-        let canMeet2 = requirements.canMeet(
+        let canMeet2 = Requirements.evaluator.canMeet(
+            requirements: requirements,
             resources: ["faith": 5], // Not enough!
             flags: Set(["has_blessing"]),
             balance: 25
