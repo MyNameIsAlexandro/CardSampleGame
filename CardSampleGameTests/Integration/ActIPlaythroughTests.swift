@@ -110,8 +110,8 @@ final class ActIPlaythroughTests: XCTestCase {
         // Используем продакшн-метод advanceTime вместо ручной установки daysPassed
         worldState.advanceTime(by: 3)
 
-        // После 3 дней Tension должен вырасти на 2
-        XCTAssertEqual(worldState.worldTension, initialTension + 2, "3 дня = +2 Tension")
+        // После 3 дней Tension должен вырасти на 3
+        XCTAssertEqual(worldState.worldTension, initialTension + 3, "3 дня = +3 Tension")
         XCTAssertEqual(worldState.daysPassed, 3, "Прошло 3 дня")
     }
 
@@ -123,8 +123,8 @@ final class ActIPlaythroughTests: XCTestCase {
             worldState.advanceTime(by: 1)
         }
 
-        // За 6 дней: +2 на день 3 и +2 на день 6 = +4
-        XCTAssertEqual(worldState.worldTension, initialTension + 4, "6 дней = +4 Tension")
+        // За 6 дней: +3 на день 3 и +3 на день 6 = +6
+        XCTAssertEqual(worldState.worldTension, initialTension + 6, "6 дней = +6 Tension")
         XCTAssertEqual(worldState.daysPassed, 6, "Прошло 6 дней")
     }
 

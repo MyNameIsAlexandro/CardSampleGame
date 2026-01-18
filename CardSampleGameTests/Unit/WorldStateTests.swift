@@ -143,16 +143,16 @@ final class WorldStateTests: XCTestCase {
         worldState.advanceTime(by: 1)
         XCTAssertEqual(worldState.worldTension, initialTension, "День 2: Tension не должен измениться")
 
-        // День 3 - +2 к Tension
+        // День 3 - +3 к Tension
         worldState.advanceTime(by: 1)
-        XCTAssertEqual(worldState.worldTension, initialTension + 2, "День 3: Tension должен увеличиться на 2")
+        XCTAssertEqual(worldState.worldTension, initialTension + 3, "День 3: Tension должен увеличиться на 3")
 
         // Дни 4, 5
         worldState.advanceTime(by: 2)
 
-        // День 6 - ещё +2
+        // День 6 - ещё +3
         worldState.advanceTime(by: 1)
-        XCTAssertEqual(worldState.worldTension, initialTension + 4, "День 6: Tension должен увеличиться ещё на 2")
+        XCTAssertEqual(worldState.worldTension, initialTension + 6, "День 6: Tension должен увеличиться ещё на 3")
         XCTAssertEqual(worldState.daysPassed, 6, "Прошло 6 дней")
     }
 
