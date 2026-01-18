@@ -467,7 +467,7 @@ CardSampleGameTests/
 ├── Integration/                        # 4 файла, ~75 тестов
 │   ├── ActIPlaythroughTests.swift      # Полное прохождение Акта I (продакшн-методы)
 │   ├── SmokeConfigTests.swift          # Валидация конфигурации (канонические значения)
-│   ├── MetricsDistributionTests.swift  # 100 симуляций, статистические проверки
+│   ├── MetricsDistributionTests.swift  # 1000 симуляций, статистические проверки
 │   └── PlaythroughSimulationTests.swift # E2E детерминированная симуляция
 └── Engine/                             # 4 файла, Engine Contract Tests
     ├── EngineContractsTests.swift      # Core engine invariants (INV-001..007)
@@ -518,7 +518,7 @@ CardSampleGameTests/
 | EventFlowModelTests.swift | Структура событий | ~8 | ~120 |
 | ActIPlaythroughTests.swift | Полное прохождение | ~35 | ~420 |
 | SmokeConfigTests.swift | Валидация конфигурации | ~8 | ~150 |
-| MetricsDistributionTests.swift | Статистика 100 симуляций | ~15 | ~460 |
+| MetricsDistributionTests.swift | Статистика 1000 симуляций | ~15 | ~480 |
 | PlaythroughSimulationTests.swift | E2E детерминированная симуляция | ~25 | ~700 |
 | **Unit/Integration ИТОГО** | | **~350** | **~5000** |
 | | | | |
@@ -532,11 +532,12 @@ CardSampleGameTests/
 
 ### Правила для MetricsDistributionTests
 
-> **Критически важно:** MetricsDistributionTests проверяют **распределение значений** через 100 симуляций.
+> **Критически важно:** MetricsDistributionTests проверяют **распределение значений** через 1000 симуляций.
+> 1000 симуляций обеспечивает статистическую погрешность ~1.5% (против ~5% при 100).
 
 **Методология:**
 ```
-100 симуляций с SeededRNG → статистический анализ → pass/fail
+1000 симуляций с SeededRNG → статистический анализ → pass/fail
 ```
 
 **Принципы детерминизма:**
