@@ -105,6 +105,7 @@
 **Приоритет:** Critical
 **Тип:** Unit
 **Файл:** `WorldStateTests.swift`
+**Engine Contract:** `EngineContractsTests.testTimeAdvancesOnlyViaTimeEngine()`
 
 **Проверить:**
 | Действие | Ожидаемая стоимость |
@@ -129,6 +130,7 @@
 **Приоритет:** Critical
 **Тип:** Unit + Integration
 **Файл:** `WorldStateTests.swift`
+**Engine Contract:** `EngineContractsTests.testWorldTickTriggeredByTimeThresholds()`
 
 **Шаги:**
 1. Провести 9 дней (любыми действиями)
@@ -214,6 +216,7 @@
 **Приоритет:** Critical
 **Тип:** Unit + UI
 **Файл:** `EventSystemTests.swift`
+**Engine Contract:** `EventModuleContractsTests.testEventSelectionDeterministicWithSeed()`
 
 **Проверить:**
 - [x] События фильтруются по regionState
@@ -239,6 +242,7 @@
 **Приоритет:** Critical
 **Тип:** Unit
 **Файл:** `EventSystemTests.swift`
+**Engine Contract:** `EventModuleContractsTests.testChoiceRequirementsGateSelection()`
 
 **Для каждого события проверить:**
 - [x] Каждый выбор меняет хотя бы один параметр
@@ -460,27 +464,38 @@ CardSampleGameTests/
 │   ├── WorldMapModelTests.swift        # Данные карты, индикаторы состояний
 │   ├── RegionActionsModelTests.swift   # Доступность действий, ограничения
 │   └── EventFlowModelTests.swift       # Структура событий, валидация
-└── Integration/                        # 4 файла, ~75 тестов
-    ├── ActIPlaythroughTests.swift      # Полное прохождение Акта I (продакшн-методы)
-    ├── SmokeConfigTests.swift          # Валидация конфигурации (канонические значения)
-    ├── MetricsDistributionTests.swift  # 100 симуляций, статистические проверки
-    └── PlaythroughSimulationTests.swift # E2E детерминированная симуляция
+├── Integration/                        # 4 файла, ~75 тестов
+│   ├── ActIPlaythroughTests.swift      # Полное прохождение Акта I (продакшн-методы)
+│   ├── SmokeConfigTests.swift          # Валидация конфигурации (канонические значения)
+│   ├── MetricsDistributionTests.swift  # 100 симуляций, статистические проверки
+│   └── PlaythroughSimulationTests.swift # E2E детерминированная симуляция
+└── Engine/                             # 4 файла, Engine Contract Tests
+    ├── EngineContractsTests.swift      # Core engine invariants (INV-001..007)
+    ├── EventModuleContractsTests.swift # Event module contracts (INV-E01..06)
+    ├── DataSeparationTests.swift       # Definition/Runtime separation (INV-D01..05)
+    └── RegressionPlaythroughTests.swift # Migration safety harness
 ```
 
 ### Покрытие по категориям
 
-| Категория | Unit | Integration | Всего тестов |
-|-----------|------|-------------|--------------|
-| Инициализация (TEST-001) | ✅ 11 | - | 11 |
-| Время/дни (TEST-002, 003) | ✅ 12 | ✅ 5 | 17 |
-| Регионы (TEST-004, 005, 006) | ✅ 22 | ✅ 6 | 28 |
-| События (TEST-007, 008) | ✅ 33 | ✅ 4 | 37 |
-| Квесты (TEST-009, 010) | ✅ 15 | ✅ 10 | 25 |
-| Бой (TEST-011, 012) | ✅ 40 | - | 40 |
-| Колода (TEST-013, 014) | ✅ 40 | ✅ 8 | 48 |
-| Сохранения (TEST-016) | ✅ 38 | - | 38 |
-| E2E симуляция (TEST-015) | - | ✅ 20 | 20 |
-| **ИТОГО** | **211** | **53** | **264** |
+| Категория | Unit | Integration | Engine | Всего |
+|-----------|------|-------------|--------|-------|
+| Инициализация (TEST-001) | ✅ 11 | - | - | 11 |
+| Время/дни (TEST-002, 003) | ✅ 12 | ✅ 5 | ✅ 3 | 20 |
+| Регионы (TEST-004, 005, 006) | ✅ 22 | ✅ 6 | - | 28 |
+| События (TEST-007, 008) | ✅ 33 | ✅ 4 | ✅ 8 | 45 |
+| Квесты (TEST-009, 010) | ✅ 15 | ✅ 10 | - | 25 |
+| Бой (TEST-011, 012) | ✅ 40 | - | - | 40 |
+| Колода (TEST-013, 014) | ✅ 40 | ✅ 8 | - | 48 |
+| Сохранения (TEST-016) | ✅ 38 | - | ✅ 4 | 42 |
+| E2E симуляция (TEST-015) | - | ✅ 20 | ✅ 3 | 23 |
+| Engine Contracts (NEW) | - | - | ✅ 18 | 18 |
+| **ИТОГО** | **211** | **53** | **36** | **300** |
+
+> **Engine Contract Tests** — новый слой тестов, проверяющий инварианты движка.
+> После миграции на Engine v1.0, тесты TEST-002/003 (время) и TEST-007/008 (события)
+> должны ссылаться на `EngineContractsTests` и `EventModuleContractsTests` как
+> канонические источники проверки контрактов.
 
 > **Примечание:** UI-тесты (XCUIApplication) пока отсутствуют. Бывшие "UI-тесты"
 > переименованы в Model-тесты и перенесены в Unit/, т.к. они тестируют модели данных,
@@ -505,7 +520,15 @@ CardSampleGameTests/
 | SmokeConfigTests.swift | Валидация конфигурации | ~8 | ~150 |
 | MetricsDistributionTests.swift | Статистика 100 симуляций | ~15 | ~460 |
 | PlaythroughSimulationTests.swift | E2E детерминированная симуляция | ~25 | ~700 |
-| **ИТОГО** | | **~350** | **~5000** |
+| **Unit/Integration ИТОГО** | | **~350** | **~5000** |
+| | | | |
+| **Engine/** (Contract Tests) | | | |
+| EngineContractsTests.swift | Core engine invariants | ~8 | ~250 |
+| EventModuleContractsTests.swift | Event module contracts | ~10 | ~350 |
+| DataSeparationTests.swift | Definition/Runtime separation | ~8 | ~280 |
+| RegressionPlaythroughTests.swift | Migration safety harness | ~10 | ~350 |
+| **Engine ИТОГО** | | **~36** | **~1230** |
+| **ВСЕГО** | | **~386** | **~6230** |
 
 ### Правила для MetricsDistributionTests
 
