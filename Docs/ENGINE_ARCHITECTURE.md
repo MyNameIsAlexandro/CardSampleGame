@@ -111,6 +111,7 @@
 | `EventEngine` | Выбор и обработка событий |
 | `QuestEngine` | Машина состояний квестов |
 | `EconomyManager` | Атомарные транзакции ресурсов |
+| `RequirementsEvaluator` | Оценка требований выборов (отделён от Definitions) |
 | `ConflictResolver` | Протокол для подключения механик |
 
 ### Layer 2: Configuration (Cartridge)
@@ -586,7 +587,7 @@ struct QuestRuntimeState: Codable {
 | 4 | Мир реагирует на бездействие | `testWorldDegrades()` |
 | 5 | Финал зависит от пути и состояния мира | `testEndingsDependOnPath()` |
 | 6 | Instant события не создают бесконечные цепочки | `testNoInfiniteInstantEventChain()` |
-| 7 | Один seed → идентичные дни/события/регионы (health/tension ±tolerance) | `testDeterministicReproducibility()` |
+| 7 | Один seed (WorldRNG) → полностью идентичные результаты | `testDeterministicReproducibility()` |
 
 ---
 
@@ -721,7 +722,7 @@ Engine/
 | Initial Pressure | 30 | `TwilightPressureRules` |
 | Max Pressure | 100 | `TwilightPressureRules` |
 | Escalation Interval | 3 дня | `TwilightPressureRules` |
-| Escalation Amount | +2 | `TwilightPressureRules` |
+| Escalation Amount | +3 | `TwilightPressureRules` |
 | Initial Health | 10 | `TwilightResource` |
 | Initial Faith | 3 | `TwilightResource` |
 | Initial Balance | 50 | `TwilightResource` |

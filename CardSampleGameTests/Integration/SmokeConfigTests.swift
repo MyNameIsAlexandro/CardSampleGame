@@ -31,6 +31,33 @@ final class SmokeConfigTests: XCTestCase {
         XCTAssertEqual(worldState.worldTension, 30, "Канон: стартовый Tension = 30%")
     }
 
+    // MARK: - Канон Pressure/Escalation (защита от изменений)
+
+    func testPressureEscalationMatchesConfig() {
+        let rules = TwilightPressureRules()
+        XCTAssertEqual(rules.escalationInterval, 3, "Канон: escalation каждые 3 дня")
+        XCTAssertEqual(rules.escalationAmount, 3, "Канон: escalation = +3 (баланс)")
+        XCTAssertEqual(rules.initialPressure, 30, "Канон: стартовое давление = 30")
+        XCTAssertEqual(rules.maxPressure, 100, "Канон: максимум давления = 100")
+    }
+
+    func testDegradationRulesMatchesConfig() {
+        let rules = TwilightDegradationRules()
+
+        // Веса выбора региона
+        XCTAssertEqual(rules.selectionWeight(for: .stable), 0, "Канон: Stable вес = 0")
+        XCTAssertEqual(rules.selectionWeight(for: .borderland), 1, "Канон: Borderland вес = 1")
+        XCTAssertEqual(rules.selectionWeight(for: .breach), 2, "Канон: Breach вес = 2")
+
+        // Вероятность сопротивления = integrity / 100
+        XCTAssertEqual(rules.resistanceProbability(anchorIntegrity: 100), 1.0, accuracy: 0.01)
+        XCTAssertEqual(rules.resistanceProbability(anchorIntegrity: 50), 0.5, accuracy: 0.01)
+        XCTAssertEqual(rules.resistanceProbability(anchorIntegrity: 0), 0.0, accuracy: 0.01)
+
+        // Урон при деградации
+        XCTAssertEqual(rules.degradationAmount, 20, "Канон: деградация = -20% integrity")
+    }
+
     func testInitialDaysPassed() {
         XCTAssertEqual(worldState.daysPassed, 0, "Канон: стартовый день = 0")
     }

@@ -234,8 +234,9 @@ class WorldState: ObservableObject, Codable {
         logWorldChange(description: "Напряжение мира выросло до \(worldTension)%")
 
         // 3. Проверить деградацию региона с вероятностью (Tension/100)
+        // Используем WorldRNG для детерминизма при тестировании
         let probability = Double(worldTension) / 100.0
-        if Double.random(in: 0...1) < probability {
+        if WorldRNG.shared.checkProbability(probability) {
             checkRegionDegradation()
         }
 
@@ -258,20 +259,27 @@ class WorldState: ObservableObject, Codable {
 
     /// Проверка деградации региона по весовому алгоритму
     /// (см. EXPLORATION_CORE_DESIGN.md, раздел 18.2)
+    /// Использует DegradationRules для определения поведения
     private func checkRegionDegradation() {
-        // 1. Выбрать случайный регион с весами (Borderland:1, Breach:2, Stable:0)
+        let rules = DegradationRules.current
+
+        // 1. Выбрать случайный регион с весами из правил
         guard let selectedRegion = selectRegionForDegradation() else { return }
 
-        // 2. Проверить сопротивление якоря
-        if let anchor = selectedRegion.anchor, anchor.integrity > 50 {
-            // Якорь сопротивляется — деградация не происходит
-            logWorldChange(description: "Якорь в \(selectedRegion.name) сопротивляется влиянию Нави")
-            return
+        // 2. Проверить сопротивление якоря (вероятностное, не пороговое)
+        // P(resist) = integrity/100: чем сильнее якорь, тем выше шанс сопротивляться
+        if let anchor = selectedRegion.anchor {
+            let resistProb = rules.resistanceProbability(anchorIntegrity: anchor.integrity)
+            if WorldRNG.shared.checkProbability(resistProb) {
+                // Якорь сопротивляется — деградация не происходит
+                logWorldChange(description: "Якорь в \(selectedRegion.name) сопротивляется влиянию Нави (\(anchor.integrity)% integrity)")
+                return
+            }
         }
 
         // 3. Применить деградацию и уведомить
         let oldState = selectedRegion.state
-        degradeRegion(selectedRegion.id)
+        degradeRegion(selectedRegion.id, amount: rules.degradationAmount)
 
         // Получить новое состояние после деградации
         if let updatedRegion = getRegion(byId: selectedRegion.id), updatedRegion.state != oldState {
@@ -280,23 +288,16 @@ class WorldState: ObservableObject, Codable {
         }
     }
 
-    /// Выбор региона для деградации с учётом весов
-    /// Веса: Stable = 0 (не деградирует), Borderland = 1, Breach = 2
+    /// Выбор региона для деградации с учётом весов из DegradationRules
+    /// Веса определяются правилами: Stable = 0, Borderland = 1, Breach = 2
     private func selectRegionForDegradation() -> Region? {
-        // Формируем пул регионов с весами
+        let rules = DegradationRules.current
+
+        // Формируем пул регионов с весами из правил
         var weightedPool: [(region: Region, weight: Int)] = []
 
         for region in regions {
-            let weight: Int
-            switch region.state {
-            case .stable:
-                weight = 0  // Stable регионы не деградируют напрямую
-            case .borderland:
-                weight = 1  // Borderland имеет вес 1
-            case .breach:
-                weight = 2  // Breach имеет вес 2 (более вероятен)
-            }
-
+            let weight = rules.selectionWeight(for: region.state)
             if weight > 0 {
                 weightedPool.append((region, weight))
             }
@@ -308,11 +309,11 @@ class WorldState: ObservableObject, Codable {
             return nil
         }
 
-        // Взвешенный случайный выбор
+        // Взвешенный случайный выбор (используем WorldRNG для детерминизма)
         let totalWeight = weightedPool.reduce(0) { $0 + $1.weight }
         guard totalWeight > 0 else { return nil }
 
-        var randomValue = Int.random(in: 0..<totalWeight)
+        var randomValue = WorldRNG.shared.nextInt(in: 0..<totalWeight)
         for (region, weight) in weightedPool {
             randomValue -= weight
             if randomValue < 0 {
@@ -324,12 +325,17 @@ class WorldState: ObservableObject, Codable {
     }
 
     /// Применить деградацию к конкретному региону
-    private func degradeRegion(_ regionId: UUID) {
+    /// - Parameters:
+    ///   - regionId: ID региона для деградации
+    ///   - amount: Урон якорю (по умолчанию из DegradationRules.current)
+    private func degradeRegion(_ regionId: UUID, amount: Int? = nil) {
         guard var region = getRegion(byId: regionId) else { return }
 
+        let degradationAmount = amount ?? DegradationRules.current.degradationAmount
+
         if var anchor = region.anchor {
-            // Уменьшить integrity якоря на 20
-            anchor.integrity = max(0, anchor.integrity - 20)
+            // Уменьшить integrity якоря на указанное значение
+            anchor.integrity = max(0, anchor.integrity - degradationAmount)
             region.anchor = anchor
             region.updateStateFromAnchor()
             updateRegion(region)
@@ -581,9 +587,14 @@ class WorldState: ObservableObject, Codable {
         guard !events.isEmpty else { return nil }
 
         let totalWeight = events.reduce(0) { $0 + $1.weight }
-        guard totalWeight > 0 else { return events.randomElement() }
+        guard totalWeight > 0 else {
+            // Используем WorldRNG для randomElement
+            let index = WorldRNG.shared.nextInt(in: 0..<events.count)
+            return events[index]
+        }
 
-        let randomValue = Int.random(in: 1...totalWeight)
+        // Используем WorldRNG для детерминизма
+        let randomValue = WorldRNG.shared.nextInt(in: 1...totalWeight)
         var cumulativeWeight = 0
 
         for event in events {

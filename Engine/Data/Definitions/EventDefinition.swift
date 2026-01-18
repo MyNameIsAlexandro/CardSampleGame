@@ -200,6 +200,9 @@ struct ChoiceRequirements: Codable, Hashable {
     }
 
     /// Check if requirements can be met with given context
+    /// - Note: Prefer using `Requirements.evaluator.canMeet(requirements:...)` instead
+    ///   for cleaner separation of data and logic (see ENGINE_ARCHITECTURE.md)
+    @available(*, deprecated, message: "Use Requirements.evaluator.canMeet() instead")
     func canMeet(resources: [String: Int], flags: Set<String>, balance: Int) -> Bool {
         // Check resources
         for (resourceId, minValue) in minResources {

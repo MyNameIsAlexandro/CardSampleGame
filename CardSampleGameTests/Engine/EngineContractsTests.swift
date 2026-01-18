@@ -225,6 +225,81 @@ final class EngineContractsTests: XCTestCase {
         XCTAssertTrue(isCompleted, "Completed event should be tracked")
         XCTAssertFalse(isNotCompleted, "Other events should not be marked")
     }
+
+    // MARK: - INV-008: WorldRNG Determinism
+
+    /// WorldRNG with same seed should produce identical sequences
+    func testWorldRNGDeterministicWithSeed() {
+        // Given: Set seed
+        WorldRNG.shared.setSeed(42)
+        let seq1 = (0..<20).map { _ in WorldRNG.shared.nextInt(in: 0..<1000) }
+
+        // When: Reset with same seed
+        WorldRNG.shared.setSeed(42)
+        let seq2 = (0..<20).map { _ in WorldRNG.shared.nextInt(in: 0..<1000) }
+
+        // Then: Sequences identical
+        XCTAssertEqual(seq1, seq2, "Same seed should produce identical sequence")
+
+        // Cleanup
+        WorldRNG.shared.resetToSystem()
+    }
+
+    // MARK: - INV-009: DegradationRules Used
+
+    /// Degradation should use DegradationRules for resistance probability
+    func testDegradationResistanceUsesRuleSet() {
+        let rules = DegradationRules.current
+
+        // Verify rules are used (not hardcoded values)
+        // Resistance probability should be integrity/100, not a threshold
+        XCTAssertEqual(rules.resistanceProbability(anchorIntegrity: 100), 1.0, accuracy: 0.001)
+        XCTAssertEqual(rules.resistanceProbability(anchorIntegrity: 75), 0.75, accuracy: 0.001)
+        XCTAssertEqual(rules.resistanceProbability(anchorIntegrity: 50), 0.5, accuracy: 0.001)
+        XCTAssertEqual(rules.resistanceProbability(anchorIntegrity: 25), 0.25, accuracy: 0.001)
+        XCTAssertEqual(rules.resistanceProbability(anchorIntegrity: 0), 0.0, accuracy: 0.001)
+
+        // Verify degradation amount matches config
+        XCTAssertEqual(rules.degradationAmount, 20, "Degradation should use configured amount")
+    }
+
+    // MARK: - INV-010: RequirementsEvaluator
+
+    /// Requirements evaluation should work through RequirementsEvaluator
+    func testRequirementsEvaluatorWorks() {
+        let requirements = ChoiceRequirements(
+            minResources: ["faith": 5],
+            requiredFlags: ["quest_started"],
+            forbiddenFlags: ["quest_failed"],
+            minBalance: nil,
+            maxBalance: nil
+        )
+
+        // Test with evaluator
+        let canMeet1 = Requirements.evaluator.canMeet(
+            requirements: requirements,
+            resources: ["faith": 10],
+            flags: ["quest_started"],
+            balance: 50
+        )
+        XCTAssertTrue(canMeet1, "Should meet requirements")
+
+        let canMeet2 = Requirements.evaluator.canMeet(
+            requirements: requirements,
+            resources: ["faith": 2],  // Not enough
+            flags: ["quest_started"],
+            balance: 50
+        )
+        XCTAssertFalse(canMeet2, "Should not meet requirements - insufficient faith")
+
+        let canMeet3 = Requirements.evaluator.canMeet(
+            requirements: requirements,
+            resources: ["faith": 10],
+            flags: ["quest_failed"],  // Forbidden flag
+            balance: 50
+        )
+        XCTAssertFalse(canMeet3, "Should not meet requirements - forbidden flag")
+    }
 }
 
 // MARK: - Test Helpers

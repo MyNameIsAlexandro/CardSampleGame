@@ -279,21 +279,39 @@ final class MetricsDistributionTests: XCTestCase {
     // MARK: - TEST: Воспроизводимость результатов (детерминизм)
 
     func testDeterministicReproducibility() {
-        // Один и тот же seed должен давать одинаковый результат для контролируемых параметров
-        // Примечание: health и tension могут отличаться из-за внутреннего рандома в WorldState
-        // (Double.random в checkRegionDegradation), который не использует наш seeded RNG
+        // Один и тот же seed должен давать полностью идентичный результат
+        // благодаря использованию WorldRNG во всех случайных операциях WorldState
+
+        // Установить seed для WorldRNG перед первой симуляцией
+        WorldRNG.shared.setSeed(12345)
         let result1 = runSimulation(seed: 12345)
+
+        // Сбросить и установить тот же seed для второй симуляции
+        WorldRNG.shared.setSeed(12345)
         let result2 = runSimulation(seed: 12345)
 
+        // Все параметры должны быть идентичны при одинаковом seed
         XCTAssertEqual(result1.daysPlayed, result2.daysPlayed, "Дни должны совпадать")
         XCTAssertEqual(result1.eventsPlayed, result2.eventsPlayed, "Количество событий должно совпадать")
         XCTAssertEqual(result1.regionsVisited, result2.regionsVisited, "Количество посещённых регионов должно совпадать")
+        XCTAssertEqual(result1.finalHealth, result2.finalHealth, "Health должен совпадать")
+        XCTAssertEqual(result1.finalTension, result2.finalTension, "Tension должен совпадать")
 
-        // Health и Tension проверяем с допуском из-за внутреннего рандома игры
-        XCTAssertEqual(result1.finalHealth, result2.finalHealth, accuracy: 3,
-            "Health должен быть близок (±3). result1=\(result1.finalHealth), result2=\(result2.finalHealth)")
-        XCTAssertEqual(result1.finalTension, result2.finalTension, accuracy: 5,
-            "Tension должен быть близок (±5). result1=\(result1.finalTension), result2=\(result2.finalTension)")
+        // Восстановить системный RNG после теста
+        WorldRNG.shared.resetToSystem()
+    }
+
+    func testWorldRNGDeterminism() {
+        // Тест детерминизма самого WorldRNG
+        WorldRNG.shared.setSeed(42)
+        let seq1 = (0..<10).map { _ in WorldRNG.shared.nextInt(in: 0..<100) }
+
+        WorldRNG.shared.setSeed(42)
+        let seq2 = (0..<10).map { _ in WorldRNG.shared.nextInt(in: 0..<100) }
+
+        XCTAssertEqual(seq1, seq2, "Одинаковый seed должен давать идентичную последовательность")
+
+        WorldRNG.shared.resetToSystem()
     }
 
     // MARK: - TEST: Статистика здоровья (100 симуляций)
@@ -401,16 +419,16 @@ final class MetricsDistributionTests: XCTestCase {
             worldState.advanceTime(by: 1)
         }
 
-        // После 10 дней Tension должен вырасти (каждые 3 дня +2)
-        // 10 дней = 3 интервала по 3 дня = +6 Tension минимум
+        // После 10 дней Tension должен вырасти (каждые 3 дня +3)
+        // 10 дней = 3 интервала по 3 дня = +9 Tension минимум
         let finalTension = worldState.worldTension
 
         XCTAssertGreaterThan(finalTension, initialTension,
             "WorldTension должен расти даже при пассивной игре. Было: \(initialTension), стало: \(finalTension)")
 
-        // Проверяем что выросло минимум на 6 (день 3, 6, 9 → +2 каждый)
-        XCTAssertGreaterThanOrEqual(finalTension - initialTension, 6,
-            "За 10 дней Tension должен вырасти минимум на 6. Фактически: \(finalTension - initialTension)")
+        // Проверяем что выросло минимум на 9 (день 3, 6, 9 → +3 каждый)
+        XCTAssertGreaterThanOrEqual(finalTension - initialTension, 9,
+            "За 10 дней Tension должен вырасти минимум на 9. Фактически: \(finalTension - initialTension)")
     }
 
     // MARK: - TEST: Невозможность бесконечного instant-контента

@@ -541,10 +541,10 @@ CardSampleGameTests/
 ```
 
 **Принципы детерминизма:**
-- Используем `SeededRNG` для воспроизводимости
+- Используем `WorldRNG` (singleton с поддержкой seed) для всех случайных операций в WorldState
 - Сортируем коллекции по `title`/`name` (НЕ по UUID, т.к. UUID генерируется заново)
-- Один seed → одинаковый результат для контролируемых параметров (дни, события, регионы)
-- **Ограничение:** health/tension могут отличаться из-за `Double.random()` в `checkRegionDegradation()`, который не использует SeededRNG
+- Один seed → **полностью идентичный результат** (дни, события, регионы, health, tension)
+- `WorldRNG.shared.setSeed(seed)` перед симуляцией обеспечивает воспроизводимость
 
 **Критерии прохождения (адаптированы под текущий баланс):**
 
@@ -559,9 +559,9 @@ CardSampleGameTests/
 
 | Тест | Что проверяет |
 |------|---------------|
-| `testNoStagnationInvariant()` | Мир ухудшается при пассивной игре (10 дней → +6 Tension) |
+| `testNoStagnationInvariant()` | Мир ухудшается при пассивной игре (10 дней → +9 Tension) |
 | `testNoInfiniteInstantEventChain()` | instant события не создают бесконечные цепочки |
-| `testDeterministicReproducibility()` | Один seed → идентичные дни/события/регионы, health/tension с tolerance ±3/±5 |
+| `testDeterministicReproducibility()` | Один seed (WorldRNG) → полностью идентичные результаты |
 
 **Пример теста:**
 ```swift

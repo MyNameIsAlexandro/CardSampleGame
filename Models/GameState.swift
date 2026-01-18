@@ -224,8 +224,9 @@ class GameState: ObservableObject {
     }
 
     func rollDice(sides: Int = 6, count: Int = 1) -> Int {
+        // Используем WorldRNG для детерминизма при тестировании
         let total = (0..<count).reduce(0) { sum, _ in
-            sum + Int.random(in: 1...sides)
+            sum + WorldRNG.shared.nextInt(in: 1...sides)
         }
         diceRoll = total
         return total
