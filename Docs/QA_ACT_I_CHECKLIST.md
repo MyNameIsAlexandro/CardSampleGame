@@ -543,7 +543,8 @@ CardSampleGameTests/
 **Принципы детерминизма:**
 - Используем `SeededRNG` для воспроизводимости
 - Сортируем коллекции по `title`/`name` (НЕ по UUID, т.к. UUID генерируется заново)
-- Один seed → всегда одинаковый результат
+- Один seed → одинаковый результат для контролируемых параметров (дни, события, регионы)
+- **Ограничение:** health/tension могут отличаться из-за `Double.random()` в `checkRegionDegradation()`, который не использует SeededRNG
 
 **Критерии прохождения (адаптированы под текущий баланс):**
 
@@ -560,7 +561,7 @@ CardSampleGameTests/
 |------|---------------|
 | `testNoStagnationInvariant()` | Мир ухудшается при пассивной игре (10 дней → +6 Tension) |
 | `testNoInfiniteInstantEventChain()` | instant события не создают бесконечные цепочки |
-| `testDeterministicReproducibility()` | Один seed даёт идентичные результаты |
+| `testDeterministicReproducibility()` | Один seed → идентичные дни/события/регионы, health/tension с tolerance ±3/±5 |
 
 **Пример теста:**
 ```swift

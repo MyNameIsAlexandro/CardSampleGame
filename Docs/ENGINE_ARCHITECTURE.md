@@ -586,7 +586,7 @@ struct QuestRuntimeState: Codable {
 | 4 | Мир реагирует на бездействие | `testWorldDegrades()` |
 | 5 | Финал зависит от пути и состояния мира | `testEndingsDependOnPath()` |
 | 6 | Instant события не создают бесконечные цепочки | `testNoInfiniteInstantEventChain()` |
-| 7 | Один seed даёт идентичные результаты | `testDeterministicReproducibility()` |
+| 7 | Один seed → идентичные дни/события/регионы (health/tension ±tolerance) | `testDeterministicReproducibility()` |
 
 ---
 
