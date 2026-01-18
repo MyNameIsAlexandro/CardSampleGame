@@ -79,6 +79,10 @@
 		BB0004050000000000000001 /* DataSeparationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0004060000000000000001 /* DataSeparationTests.swift */; };
 		BB0004070000000000000001 /* RegressionPlaythroughTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0004080000000000000001 /* RegressionPlaythroughTests.swift */; };
 		BB0004090000000000000001 /* Phase2ContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0004100000000000000001 /* Phase2ContractTests.swift */; };
+		/* New Files - WorldRNG, DegradationRules, RequirementsEvaluator */
+		FF0001010000000000000001 /* WorldRNG.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0001020000000000000001 /* WorldRNG.swift */; };
+		FF0002010000000000000001 /* DegradationRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0002020000000000000001 /* DegradationRules.swift */; };
+		FF0003010000000000000001 /* RequirementsEvaluator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0003020000000000000001 /* RequirementsEvaluator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -169,6 +173,10 @@
 		BB0004060000000000000001 /* DataSeparationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataSeparationTests.swift; sourceTree = "<group>"; };
 		BB0004080000000000000001 /* RegressionPlaythroughTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegressionPlaythroughTests.swift; sourceTree = "<group>"; };
 		BB0004100000000000000001 /* Phase2ContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Phase2ContractTests.swift; sourceTree = "<group>"; };
+		/* New Files - WorldRNG, DegradationRules, RequirementsEvaluator */
+		FF0001020000000000000001 /* WorldRNG.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldRNG.swift; sourceTree = "<group>"; };
+		FF0002020000000000000001 /* DegradationRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DegradationRules.swift; sourceTree = "<group>"; };
+		FF0003020000000000000001 /* RequirementsEvaluator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequirementsEvaluator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -298,6 +306,7 @@
 			isa = PBXGroup;
 			children = (
 				CC0000030000000000000001 /* AccessibilityIdentifiers.swift */,
+				FF0001020000000000000001 /* WorldRNG.swift */,
 			);
 			name = Utilities;
 			path = Utilities;
@@ -325,6 +334,7 @@
 				EE0001060000000000000001 /* TimeEngine.swift */,
 				EE0001080000000000000001 /* PressureEngine.swift */,
 				EE0001100000000000000001 /* EconomyManager.swift */,
+				FF0003020000000000000001 /* RequirementsEvaluator.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -333,6 +343,7 @@
 			isa = PBXGroup;
 			children = (
 				EE0002020000000000000001 /* TwilightMarchesConfig.swift */,
+				FF0002020000000000000001 /* DegradationRules.swift */,
 			);
 			path = Config;
 			sourceTree = "<group>";
@@ -570,14 +581,17 @@
 				8F035EDB750B2C0441F077B0 /* WorldMapView.swift in Sources */,
 				CC0000020000000000000001 /* CombatView.swift in Sources */,
 				CC0000040000000000000001 /* AccessibilityIdentifiers.swift in Sources */,
+				FF0001010000000000000001 /* WorldRNG.swift in Sources */,
 				/* Engine Core */
 				EE0001010000000000000001 /* EngineProtocols.swift in Sources */,
 				EE0001030000000000000001 /* GameLoop.swift in Sources */,
 				EE0001050000000000000001 /* TimeEngine.swift in Sources */,
 				EE0001070000000000000001 /* PressureEngine.swift in Sources */,
 				EE0001090000000000000001 /* EconomyManager.swift in Sources */,
+				FF0003010000000000000001 /* RequirementsEvaluator.swift in Sources */,
 				/* Engine Config */
 				EE0002010000000000000001 /* TwilightMarchesConfig.swift in Sources */,
+				FF0002010000000000000001 /* DegradationRules.swift in Sources */,
 				/* Engine Definitions */
 				EE0003010000000000000001 /* GameDefinition.swift in Sources */,
 				EE0003030000000000000001 /* RegionDefinition.swift in Sources */,
