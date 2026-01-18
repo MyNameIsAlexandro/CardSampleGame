@@ -575,9 +575,11 @@ func testSurvivalRateOver100Simulations() {
 
 ## ЧАСТЬ 4: КРИТЕРИИ ПРИЁМКИ
 
-### Definition of Done для Акта I
+### Definition of Done для Акта I — Enforced
 
-> Каноническая версия: [EXPLORATION_CORE_DESIGN.md, раздел 18.10](./EXPLORATION_CORE_DESIGN.md#1810-definition-of-done-core-loop)
+> **Это enforced DoD** — определяет *как автотесты проверяют* готовность.
+> - Философский DoD (что должно работать): [GAME_DESIGN_DOCUMENT.md, раздел 17](./GAME_DESIGN_DOCUMENT.md)
+> - Механический DoD (детальные проверки): [EXPLORATION_CORE_DESIGN.md, раздел 18.10](./EXPLORATION_CORE_DESIGN.md#1810-definition-of-done-core-loop)
 
 **Акт I считается готовым, когда:**
 

@@ -589,6 +589,13 @@ Player → Region → Explore → Random Event → Choice → Consequences → A
 
 ## Потоки данных
 
+> ⚠️ **LEGACY FLOW (pre-Engine v1.0)**
+>
+> Потоки ниже описывают текущий runtime для понимания существующего кода.
+> **НЕ использовать как референс для новой логики.**
+>
+> 👉 Канонический Game Loop: [ENGINE_ARCHITECTURE.md, раздел 4](./ENGINE_ARCHITECTURE.md)
+
 ### 1. Создание новой игры
 
 ```
@@ -613,7 +620,7 @@ User clicks Continue
             → loadGame(from slot)
                 → Create Player from GameSave
                 → Restore stats (health, faith, balance)
-                → GameState.worldState = WorldState() (new world)
+                → Restore WorldState from GameSave (full state)
                 → Show WorldMapView
 ```
 
