@@ -221,6 +221,13 @@ protocol EventSystemProtocol {
 }
 ```
 
+> **📦 Подробная архитектура Event Module:**
+> См. [EVENT_MODULE_ARCHITECTURE.md](./EVENT_MODULE_ARCHITECTURE.md)
+> - Pipeline (Selection → Resolution)
+> - Inline vs Mini-Game Events
+> - 5 типов событий (Combat, Choice, Narrative, Exploration, WorldShift)
+> - Контракт Mini-Game Module
+
 **Поток:**
 1. Input: Текущий регион, состояние мира, фильтры
 2. Process: Фильтрация по условиям → Взвешенный рандом → Выбор
