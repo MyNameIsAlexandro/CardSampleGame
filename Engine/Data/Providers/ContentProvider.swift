@@ -348,8 +348,10 @@ struct ContentValidator {
 
             // Check choice requirements
             for choice in event.choices {
-                if let range = choice.requirements?.balanceRange {
-                    if range.lowerBound < -100 || range.upperBound > 100 {
+                if let requirements = choice.requirements {
+                    let minBal = requirements.minBalance ?? -100
+                    let maxBal = requirements.maxBalance ?? 100
+                    if minBal < -100 || maxBal > 100 {
                         errors.append(ContentValidationError(
                             type: .invalidRange,
                             definitionId: event.id,
