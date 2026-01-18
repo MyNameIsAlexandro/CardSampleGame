@@ -715,41 +715,16 @@ func initiateCombat(choice: EventChoice) {
 
 **Статус:** РЕАЛИЗОВАНО
 
-**Реализованные действия:**
+> **Правила и значения:** [ENGINE_ARCHITECTURE.md, Config](./ENGINE_ARCHITECTURE.md) + [EXPLORATION_CORE_DESIGN.md](./EXPLORATION_CORE_DESIGN.md)
 
-**a) Путешествие (Travel):**
-```swift
-case .travel:
-    worldState.moveToRegion(region.id)  // Перемещение
-    onDismiss()                         // Закрыть детали региона
-```
-- Перемещает игрока в выбранный регион
-- Отмечает регион как посещенный
-- Увеличивает `daysPassed` на 1
+**Паттерн интеграции View → Model:**
 
-**b) Отдых (Rest):**
-```swift
-case .rest:
-    player.heal(5)                // Восстановить 5 HP
-    worldState.daysPassed += 1    // День проходит
-```
-- Доступно только в стабильных регионах типа `settlement` или `sacred`
-- Восстанавливает 5 здоровья
-
-**c) Укрепление якоря (Strengthen Anchor):**
-```swift
-case .strengthenAnchor:
-    if player.spendFaith(10) {
-        worldState.strengthenAnchor(in: region.id, amount: 20)
-    }
-```
-- Стоит 10 веры
-- Добавляет 20% целостности якорю
-- Может стабилизировать регион (borderland → stable)
-
-**d) Исследование (Explore):**
-- Запускает случайное событие из доступных в регионе
-- Реализовано через `triggerExploration()`
+| Действие | View | Model метод |
+|----------|------|-------------|
+| Travel | RegionDetailView | `worldState.moveToRegion()` |
+| Rest | RegionDetailView | `player.heal()` + time advance |
+| Strengthen | RegionDetailView | `worldState.strengthenAnchor()` |
+| Explore | RegionDetailView | `triggerExploration()` → EventView |
 
 **Файлы:** `WorldMapView.swift:743-798`
 
