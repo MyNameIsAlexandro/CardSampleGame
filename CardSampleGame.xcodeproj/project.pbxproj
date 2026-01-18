@@ -88,6 +88,16 @@
 		GG0002010000000000000001 /* HeroSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = GG0002020000000000000001 /* HeroSelectionView.swift */; };
 		/* Hero Class Tests */
 		HH0001010000000000000001 /* HeroClassTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = HH0001020000000000000001 /* HeroClassTests.swift */; };
+		HH0002010000000000000001 /* CardModuleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = HH0002020000000000000001 /* CardModuleTests.swift */; };
+		/* Heroes Module */
+		II0001010000000000000001 /* HeroDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = II0001020000000000000001 /* HeroDefinition.swift */; };
+		II0002010000000000000001 /* HeroAbility.swift in Sources */ = {isa = PBXBuildFile; fileRef = II0002020000000000000001 /* HeroAbility.swift */; };
+		II0003010000000000000001 /* HeroRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = II0003020000000000000001 /* HeroRegistry.swift */; };
+		/* Cards Module */
+		JJ0001010000000000000001 /* CardDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = JJ0001020000000000000001 /* CardDefinition.swift */; };
+		JJ0002010000000000000001 /* CardRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = JJ0002020000000000000001 /* CardRegistry.swift */; };
+		/* Combat Module */
+		KK0001010000000000000001 /* CombatCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = KK0001020000000000000001 /* CombatCalculator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -183,10 +193,20 @@
 		FF0002020000000000000001 /* DegradationRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DegradationRules.swift; sourceTree = "<group>"; };
 		FF0003020000000000000001 /* RequirementsEvaluator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequirementsEvaluator.swift; sourceTree = "<group>"; };
 		/* Hero System Files */
-		GG0001020000000000000001 /* HeroClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HeroClass.swift; path = Models/HeroClass.swift; sourceTree = "<group>"; };
+		GG0001020000000000000001 /* HeroClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroClass.swift; sourceTree = "<group>"; };
 		GG0002020000000000000001 /* HeroSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HeroSelectionView.swift; path = Views/HeroSelectionView.swift; sourceTree = "<group>"; };
 		/* Hero Class Tests */
 		HH0001020000000000000001 /* HeroClassTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroClassTests.swift; sourceTree = "<group>"; };
+		HH0002020000000000000001 /* CardModuleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardModuleTests.swift; sourceTree = "<group>"; };
+		/* Heroes Module Files */
+		II0001020000000000000001 /* HeroDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroDefinition.swift; sourceTree = "<group>"; };
+		II0002020000000000000001 /* HeroAbility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroAbility.swift; sourceTree = "<group>"; };
+		II0003020000000000000001 /* HeroRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroRegistry.swift; sourceTree = "<group>"; };
+		/* Cards Module Files */
+		JJ0001020000000000000001 /* CardDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardDefinition.swift; sourceTree = "<group>"; };
+		JJ0002020000000000000001 /* CardRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardRegistry.swift; sourceTree = "<group>"; };
+		/* Combat Module Files */
+		KK0001020000000000000001 /* CombatCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombatCalculator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -259,7 +279,6 @@
 				AA0000100000000000000001 /* Player.swift */,
 				AA0000120000000000000001 /* GameState.swift */,
 				AA0000530000000000000001 /* GameSave.swift */,
-				GG0001020000000000000001 /* HeroClass.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -333,7 +352,9 @@
 				EE0000030000000000000001 /* Data */,
 				EE0000040000000000000001 /* Runtime */,
 				EE0000050000000000000001 /* Migration */,
-				EE0000060000000000000001 /* Modules */,
+				II0000000000000000000001 /* Heroes */,
+				JJ0000000000000000000001 /* Cards */,
+				KK0000000000000000000001 /* Combat */,
 			);
 			path = Engine;
 			sourceTree = "<group>";
@@ -412,11 +433,35 @@
 			path = Migration;
 			sourceTree = "<group>";
 		};
-		EE0000060000000000000001 /* Modules */ = {
+		/* Heroes Module Group */
+		II0000000000000000000001 /* Heroes */ = {
 			isa = PBXGroup;
 			children = (
+				GG0001020000000000000001 /* HeroClass.swift */,
+				II0001020000000000000001 /* HeroDefinition.swift */,
+				II0002020000000000000001 /* HeroAbility.swift */,
+				II0003020000000000000001 /* HeroRegistry.swift */,
 			);
-			path = Modules;
+			path = Heroes;
+			sourceTree = "<group>";
+		};
+		/* Cards Module Group */
+		JJ0000000000000000000001 /* Cards */ = {
+			isa = PBXGroup;
+			children = (
+				JJ0001020000000000000001 /* CardDefinition.swift */,
+				JJ0002020000000000000001 /* CardRegistry.swift */,
+			);
+			path = Cards;
+			sourceTree = "<group>";
+		};
+		/* Combat Module Group */
+		KK0000000000000000000001 /* Combat */ = {
+			isa = PBXGroup;
+			children = (
+				KK0001020000000000000001 /* CombatCalculator.swift */,
+			);
+			path = Combat;
 			sourceTree = "<group>";
 		};
 		/* Test Groups */
@@ -445,6 +490,7 @@
 				BB0001200000000000000001 /* RegionActionsModelTests.swift */,
 				BB0001220000000000000001 /* EventFlowModelTests.swift */,
 				HH0001020000000000000001 /* HeroClassTests.swift */,
+				HH0002020000000000000001 /* CardModuleTests.swift */,
 			);
 			path = Unit;
 			sourceTree = "<group>";
@@ -627,6 +673,15 @@
 				EE0005090000000000000001 /* GameRuntimeState.swift in Sources */,
 				/* Engine Migration */
 				EE0006010000000000000001 /* LegacyAdapters.swift in Sources */,
+				/* Heroes Module */
+				II0001010000000000000001 /* HeroDefinition.swift in Sources */,
+				II0002010000000000000001 /* HeroAbility.swift in Sources */,
+				II0003010000000000000001 /* HeroRegistry.swift in Sources */,
+				/* Cards Module */
+				JJ0001010000000000000001 /* CardDefinition.swift in Sources */,
+				JJ0002010000000000000001 /* CardRegistry.swift in Sources */,
+				/* Combat Module */
+				KK0001010000000000000001 /* CombatCalculator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -652,6 +707,7 @@
 				BB0001250000000000000001 /* SmokeConfigTests.swift in Sources */,
 				/* Hero Class Tests */
 				HH0001010000000000000001 /* HeroClassTests.swift in Sources */,
+				HH0002010000000000000001 /* CardModuleTests.swift in Sources */,
 				/* Engine Tests */
 				BB0004010000000000000001 /* EngineContractsTests.swift in Sources */,
 				BB0004030000000000000001 /* EventModuleContractsTests.swift in Sources */,

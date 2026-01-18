@@ -34,6 +34,7 @@ struct CombatView: View {
     @State private var canReroll: Bool = false     // Возможность перебросить кубик
     @State private var summonedSpirits: [(power: Int, realm: Realm)] = []  // Призванные духи
     @State private var isFirstAttackThisCombat: Bool = true  // Для способности Следопыта
+    @State private var lastCombatResult: CombatResult? = nil  // Последний результат атаки
 
     var body: some View {
         VStack(spacing: 0) {
@@ -405,22 +406,155 @@ struct CombatView: View {
     // MARK: - Combat Log
 
     var combatLogView: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("📜 Журнал боя")
-                .font(.caption)
-                .fontWeight(.bold)
-                .foregroundColor(.secondary)
+        VStack(alignment: .leading, spacing: 8) {
+            // Детальный результат последней атаки
+            if let result = lastCombatResult {
+                combatResultDetailView(result)
+            }
 
-            ForEach(combatLog.suffix(5), id: \.self) { entry in
-                Text("• \(entry)")
-                    .font(.caption2)
+            // Журнал боя
+            VStack(alignment: .leading, spacing: 4) {
+                Text("📜 Журнал боя")
+                    .font(.caption)
+                    .fontWeight(.bold)
+                    .foregroundColor(.secondary)
+
+                ForEach(combatLog.suffix(5), id: \.self) { entry in
+                    Text("• \(entry)")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding()
+            .background(Color(UIColor.tertiarySystemBackground))
+            .cornerRadius(8)
+        }
+    }
+
+    /// Детальный вид результата атаки
+    func combatResultDetailView(_ result: CombatResult) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            // Заголовок попадание/промах
+            HStack {
+                Text(result.isHit ? "✅ ПОПАДАНИЕ!" : "❌ ПРОМАХ!")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundColor(result.isHit ? .green : .red)
+
+                Spacer()
+
+                // Общий результат
+                Text("Атака \(result.attackRoll.total) vs Защита \(result.defenseValue)")
+                    .font(.caption)
                     .foregroundColor(.secondary)
             }
+
+            Divider()
+
+            // Разбивка броска атаки
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Бросок атаки:")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+
+                HStack(spacing: 4) {
+                    Text("💪 \(result.attackRoll.baseStrength)")
+                        .font(.caption2)
+
+                    Text("+")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+
+                    // Кубики
+                    ForEach(result.attackRoll.diceRolls.indices, id: \.self) { index in
+                        diceView(result.attackRoll.diceRolls[index])
+                    }
+
+                    if result.attackRoll.bonusDamage > 0 {
+                        Text("+ \(result.attackRoll.bonusDamage)")
+                            .font(.caption2)
+                            .foregroundColor(.orange)
+                    }
+
+                    Text("= \(result.attackRoll.total)")
+                        .font(.caption)
+                        .fontWeight(.bold)
+                }
+
+                // Модификаторы атаки
+                ForEach(result.attackRoll.modifiers.indices, id: \.self) { index in
+                    let modifier = result.attackRoll.modifiers[index]
+                    Text("\(modifier.icon) \(modifier.description)")
+                        .font(.caption2)
+                        .foregroundColor(.blue)
+                }
+            }
+
+            // Расчёт урона (если попадание)
+            if result.isHit, let damage = result.damageCalculation {
+                Divider()
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Расчёт урона:")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+
+                    HStack {
+                        Text("Базовый: \(damage.base)")
+                            .font(.caption2)
+
+                        ForEach(damage.modifiers.indices, id: \.self) { index in
+                            let mod = damage.modifiers[index]
+                            Text("\(mod.value > 0 ? "+" : "")\(mod.value)")
+                                .font(.caption2)
+                                .foregroundColor(mod.value > 0 ? .green : .red)
+                        }
+
+                        Text("= \(damage.total) 💥")
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .foregroundColor(.red)
+                    }
+
+                    // Детализация модификаторов урона
+                    ForEach(damage.modifiers.indices, id: \.self) { index in
+                        let modifier = damage.modifiers[index]
+                        HStack(spacing: 4) {
+                            Text(modifier.icon)
+                            Text(modifier.description)
+                            Text("\(modifier.value > 0 ? "+" : "")\(modifier.value)")
+                                .foregroundColor(modifier.value > 0 ? .green : .red)
+                        }
+                        .font(.caption2)
+                    }
+                }
+            }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(Color(UIColor.tertiarySystemBackground))
-        .cornerRadius(8)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(result.isHit ? Color.green.opacity(0.1) : Color.red.opacity(0.1))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(result.isHit ? Color.green : Color.red, lineWidth: 1)
+                )
+        )
+    }
+
+    /// Вид кубика
+    func diceView(_ value: Int) -> some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 4)
+                .fill(Color.white)
+                .frame(width: 24, height: 24)
+                .shadow(radius: 1)
+
+            Text("\(value)")
+                .font(.caption)
+                .fontWeight(.bold)
+                .foregroundColor(value >= 5 ? .green : value <= 2 ? .red : .black)
+        }
     }
 
     // MARK: - Player Hand
@@ -476,54 +610,42 @@ struct CombatView: View {
 
         actionsRemaining -= 1
 
-        // Базовая атака: сила игрока vs защита монстра
-        let playerPower = player.strength
         let monsterDef = monster.defense ?? 10
-        let monsterMaxHP = monster.health ?? 10  // Для проверки способности Тени
-        let isTargetFullHP = (monster.health ?? 0) == monsterMaxHP
+        let monsterCurrentHP = monster.health ?? 10
+        let monsterMaxHP = monsterCurrentHP  // Начальное HP
 
-        // Бросок кубиков: базовый d6 + бонусные от карт + бонус класса (Следопыт)
-        let rangerBonus = player.getHeroClassBonusDice(isFirstAttack: isFirstAttackThisCombat)
-        let totalDice = 1 + bonusDice + rangerBonus
-        var diceRolls: [Int] = []
-        for _ in 0..<totalDice {
-            diceRolls.append(Int.random(in: 1...6))
-        }
-        let diceTotal = diceRolls.reduce(0, +)
-        let diceString = diceRolls.map { "🎲\($0)" }.joined(separator: "+")
+        // Используем CombatCalculator для расчёта атаки
+        let result = CombatCalculator.calculatePlayerAttack(
+            player: player,
+            monsterDefense: monsterDef,
+            monsterCurrentHP: monsterCurrentHP,
+            monsterMaxHP: monsterMaxHP,
+            bonusDice: bonusDice,
+            bonusDamage: bonusDamage,
+            isFirstAttack: isFirstAttackThisCombat
+        )
 
-        // Учитываем бонус урона от класса
-        let heroClassBonus = player.getHeroClassDamageBonus(targetFullHP: isTargetFullHP)
-        let total = playerPower + diceTotal + bonusDamage
+        // Сохраняем результат для отображения
+        lastCombatResult = result
 
-        if total >= monsterDef {
-            // Успешная атака
-            let baseDamage = max(1, total - monsterDef + 2)
-            let damage = player.calculateTotalDamageDealt(baseDamage, targetFullHP: isTargetFullHP)
-
-            let newHealth = max(0, (monster.health ?? 0) - damage)
+        if result.isHit, let damageCalc = result.damageCalculation {
+            let damage = damageCalc.total
+            let newHealth = max(0, monsterCurrentHP - damage)
             monster.health = newHealth
 
-            var logMsg = "⚔️ Атака: \(playerPower)"
-            if bonusDamage > 0 { logMsg += "+\(bonusDamage)" }
-            logMsg += " + \(diceString) = \(total) vs защита \(monsterDef)"
-            if heroClassBonus > 0 {
-                logMsg += " (+\(heroClassBonus) класс)"
-            }
-            logMsg += " → Урон \(damage)!"
-            combatLog.append(logMsg)
+            combatLog.append("⚔️ ПОПАДАНИЕ! Урон: \(damage) (HP врага: \(newHealth))")
 
             if newHealth <= 0 {
                 finishCombat(victory: true)
             }
         } else {
-            combatLog.append("⚔️ Атака: \(playerPower) + \(diceString) = \(total) vs защита \(monsterDef) → Промах!")
+            combatLog.append("⚔️ ПРОМАХ! (\(result.attackRoll.total) vs \(monsterDef))")
         }
 
         // Сбросить бонусы после атаки
         bonusDice = 0
         bonusDamage = 0
-        isFirstAttackThisCombat = false  // Следопыт использовал бонус
+        isFirstAttackThisCombat = false
     }
 
     func playCard(_ card: Card) {

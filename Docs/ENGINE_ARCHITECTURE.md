@@ -705,14 +705,28 @@ Engine/Config/
 ```
 Engine/
 ├── Core/
-│   ├── EngineProtocols.swift    # Все контракты
-│   ├── TimeEngine.swift         # Управление временем
-│   ├── PressureEngine.swift     # Система давления
-│   ├── EconomyManager.swift     # Транзакции ресурсов
-│   └── GameLoop.swift           # Оркестратор
+│   ├── EngineProtocols.swift       # Все контракты
+│   ├── TimeEngine.swift            # Управление временем
+│   ├── PressureEngine.swift        # Система давления
+│   ├── EconomyManager.swift        # Транзакции ресурсов
+│   ├── RequirementsEvaluator.swift # Оценка требований
+│   └── GameLoop.swift              # Оркестратор
 ├── Config/
-│   └── TwilightMarchesConfig.swift  # Конфигурация игры
-└── ENGINE_ARCHITECTURE.md       # Этот документ
+│   ├── TwilightMarchesConfig.swift # Конфигурация игры
+│   └── DegradationRules.swift      # Правила деградации
+├── Heroes/                         # Модуль героев
+│   ├── HeroClass.swift             # Классы героев
+│   ├── HeroDefinition.swift        # Протоколы определения
+│   ├── HeroAbility.swift           # Система способностей
+│   ├── HeroRegistry.swift          # Реестр героев
+│   └── HEROES_MODULE.md            # Документация модуля
+├── Cards/                          # Модуль карт
+│   ├── CardDefinition.swift        # Протоколы определения
+│   ├── CardRegistry.swift          # Реестр карт
+│   └── CARDS_MODULE.md             # Документация модуля
+├── Combat/                         # Модуль боя
+│   └── CombatCalculator.swift      # Калькулятор боя
+└── ENGINE_ARCHITECTURE.md          # Этот документ
 ```
 
 ### Конфигурация "Сумрачных Пределов"
@@ -810,6 +824,130 @@ enum HeroClass: String, CaseIterable, Codable {
 
 - [QA_ACT_I_CHECKLIST.md](./QA_ACT_I_CHECKLIST.md) — Тестирование Акта I
 - [EXPLORATION_CORE_DESIGN.md](./EXPLORATION_CORE_DESIGN.md) — Дизайн исследования
+
+---
+
+## Приложение E: Модульная архитектура
+
+### E.1 Принципы модульности
+
+Модули движка проектируются для:
+- **Независимости** — можно подключать/отключать без изменения ядра
+- **Расширяемости** — легко добавлять новый контент через JSON или код
+- **Тестируемости** — каждый модуль имеет свои тесты
+
+### E.2 Модуль Heroes
+
+**Путь:** `Engine/Heroes/`
+**Документация:** [HEROES_MODULE.md](../Engine/Heroes/HEROES_MODULE.md)
+
+Компоненты:
+- `HeroClass` — классы героев (Warrior, Mage, Ranger, Priest, Shadow)
+- `HeroDefinition` — протокол определения героя
+- `HeroAbility` — система способностей
+- `HeroRegistry` — централизованный реестр героев
+
+```swift
+// Пример получения героя
+let hero = HeroRegistry.shared.hero(id: "warrior_ragnar")
+let startingDeck = hero?.startingDeckCardIDs
+```
+
+### E.3 Модуль Cards
+
+**Путь:** `Engine/Cards/`
+**Документация:** [CARDS_MODULE.md](../Engine/Cards/CARDS_MODULE.md)
+
+Компоненты:
+- `CardDefinition` — протокол определения карты
+- `CardOwnership` — система принадлежности (universal/class/hero)
+- `CardRegistry` — централизованный реестр карт
+
+Типы принадлежности карт:
+| Тип | Описание | Пример |
+|-----|----------|--------|
+| universal | Доступна всем | Базовый удар |
+| classSpecific | Только для класса | Яростный удар (Warrior) |
+| heroSignature | Уникальная для героя | Топор предков (Рагнар) |
+| expansion | Требует DLC | Карты дополнения |
+
+```swift
+// Пример получения доступных карт
+let cards = CardRegistry.shared.availableCards(
+    forHeroID: "warrior_ragnar",
+    heroClass: .warrior
+)
+```
+
+### E.4 Модуль Combat
+
+**Путь:** `Engine/Combat/`
+
+Компоненты:
+- `CombatCalculator` — расчёт боя с полной разбивкой факторов
+- `CombatResult` — результат с детализацией (hit/miss, факторы, урон)
+- `AttackRoll` — бросок атаки с модификаторами
+- `DamageCalculation` — расчёт урона
+
+```swift
+// Пример расчёта атаки
+let result = CombatCalculator.calculatePlayerAttack(
+    player: player,
+    monsterDefense: 5,
+    monsterCurrentHP: 10,
+    monsterMaxHP: 10,
+    bonusDice: bonusDice,
+    bonusDamage: bonusDamage,
+    isFirstAttack: true
+)
+// result.isHit, result.attackRoll, result.damageCalculation
+```
+
+### E.5 Интеграция модулей
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    GameEngine                            │
+│                         │                                │
+│     ┌──────────────────┼──────────────────┐              │
+│     ▼                  ▼                  ▼              │
+│ ┌──────────┐    ┌──────────┐      ┌──────────┐          │
+│ │  Heroes  │    │  Cards   │      │  Combat  │          │
+│ │ Registry │◄──►│ Registry │◄────►│Calculator│          │
+│ └──────────┘    └──────────┘      └──────────┘          │
+│     │                │                  │                │
+│     ▼                ▼                  ▼                │
+│ ┌──────────────────────────────────────────┐            │
+│ │           Player / GameState              │            │
+│ └──────────────────────────────────────────┘            │
+└─────────────────────────────────────────────────────────┘
+```
+
+### E.6 Расширение модулей
+
+**Добавление нового класса героя:**
+1. Добавить case в `HeroClass`
+2. Реализовать `baseStats`, `specialAbility`
+3. Создать `HeroAbility.xxxAbility`
+4. Зарегистрировать героя в `HeroRegistry`
+
+**Добавление DLC пакета:**
+```swift
+let dlcSource = DLCHeroDataSource(
+    id: "dark_expansion",
+    name: "Dark Expansion",
+    packID: "dark_expansion",
+    heroes: [/* heroes */]
+)
+HeroRegistry.shared.addDataSource(dlcSource)
+
+let cardSource = JSONCardDataSource(
+    id: "dark_cards",
+    name: "Dark Expansion Cards",
+    fileURL: Bundle.main.url(forResource: "dark_cards", withExtension: "json")!
+)
+CardRegistry.shared.addDataSource(cardSource)
+```
 
 ---
 
