@@ -356,51 +356,52 @@ final class Phase2ContractTests: XCTestCase {
 
 /// Test content provider for Phase 2 contract validation tests
 /// Implements ContentProvider protocol for testing
+/// Uses arrays to allow duplicate IDs for validation testing
 final class TestContentProvider: ContentProvider {
-    private var regions: [String: CardSampleGame.RegionDefinition] = [:]
-    private var anchors: [String: CardSampleGame.AnchorDefinition] = [:]
-    private var events: [String: CardSampleGame.EventDefinition] = [:]
-    private var quests: [String: CardSampleGame.QuestDefinition] = [:]
-    private var challenges: [String: CardSampleGame.MiniGameChallengeDefinition] = [:]
+    private var regionsList: [CardSampleGame.RegionDefinition] = []
+    private var anchorsList: [CardSampleGame.AnchorDefinition] = []
+    private var eventsList: [CardSampleGame.EventDefinition] = []
+    private var questsList: [CardSampleGame.QuestDefinition] = []
+    private var challengesList: [CardSampleGame.MiniGameChallengeDefinition] = []
 
     func addRegion(_ region: CardSampleGame.RegionDefinition) {
-        regions[region.id] = region
+        regionsList.append(region)
     }
 
     func addAnchor(_ anchor: CardSampleGame.AnchorDefinition) {
-        anchors[anchor.id] = anchor
+        anchorsList.append(anchor)
     }
 
     func addEvent(_ event: CardSampleGame.EventDefinition) {
-        events[event.id] = event
+        eventsList.append(event)
     }
 
     func getAllRegionDefinitions() -> [CardSampleGame.RegionDefinition] {
-        Array(regions.values)
+        regionsList
     }
 
     func getRegionDefinition(id: String) -> CardSampleGame.RegionDefinition? {
-        regions[id]
+        regionsList.first { $0.id == id }
     }
 
     func getAllAnchorDefinitions() -> [CardSampleGame.AnchorDefinition] {
-        Array(anchors.values)
+        anchorsList
     }
 
     func getAnchorDefinition(id: String) -> CardSampleGame.AnchorDefinition? {
-        anchors[id]
+        anchorsList.first { $0.id == id }
     }
 
     func getAnchorDefinition(forRegion regionId: String) -> CardSampleGame.AnchorDefinition? {
-        anchors.values.first { $0.regionId == regionId }
+        anchorsList.first { $0.regionId == regionId }
     }
 
     func getAllEventDefinitions() -> [CardSampleGame.EventDefinition] {
-        Array(events.values)
+        eventsList
     }
 
     func getEventDefinition(id: String) -> CardSampleGame.EventDefinition? {
-        events[id]
+        eventsList.first { $0.id == id }
     }
 
     func getEventDefinitions(forRegion regionId: String) -> [CardSampleGame.EventDefinition] {
@@ -412,19 +413,19 @@ final class TestContentProvider: ContentProvider {
     }
 
     func getAllQuestDefinitions() -> [CardSampleGame.QuestDefinition] {
-        Array(quests.values)
+        questsList
     }
 
     func getQuestDefinition(id: String) -> CardSampleGame.QuestDefinition? {
-        quests[id]
+        questsList.first { $0.id == id }
     }
 
     func getAllMiniGameChallenges() -> [CardSampleGame.MiniGameChallengeDefinition] {
-        Array(challenges.values)
+        challengesList
     }
 
     func getMiniGameChallenge(id: String) -> CardSampleGame.MiniGameChallengeDefinition? {
-        challenges[id]
+        challengesList.first { $0.id == id }
     }
 
     func validate() -> [CardSampleGame.ContentValidationError] {
