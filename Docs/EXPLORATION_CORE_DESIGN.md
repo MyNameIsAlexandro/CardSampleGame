@@ -1380,9 +1380,15 @@ Data/
 
 ### 18.1 Вход в ход дня (Day Start)
 
+> ⚠️ **Legacy API Warning:**
+> Код ниже показывает логику `WorldState.processDayStart()` — это legacy API.
+> **Канонический способ** движения времени — `GameEngine → TimeEngine.advance()`.
+> См. [ENGINE_ARCHITECTURE.md, раздел 3.1](./ENGINE_ARCHITECTURE.md)
+
 При начале каждого дня выполняется:
 
 ```swift
+// LEGACY: В Engine v1.0 заменяется на TimeEngine.advance()
 func processDayStart() {
     // 1. Увеличить счётчик дней
     daysPassed += 1
