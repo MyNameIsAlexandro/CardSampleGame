@@ -31,7 +31,7 @@ final class EngineContractsTests: XCTestCase {
     func testPerformActionIsOnlyStateChangeEntry() async {
         // Given: Initial state
         let initialTime = gameLoop.timeEngine.currentTime
-        let initialPressure = gameLoop.pressureEngine.currentPressure
+        _ = gameLoop.pressureEngine.currentPressure // Captured for potential future assertions
 
         // When: Perform a timed action
         let action = StandardAction.rest

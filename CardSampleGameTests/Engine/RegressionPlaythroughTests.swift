@@ -120,8 +120,8 @@ final class RegressionPlaythroughTests: XCTestCase {
             .travel("village"), // Day 5: Travel to village
         ]
 
-        // And: Expected checkpoints
-        let checkpoint1 = GameStateSnapshot(
+        // And: Expected checkpoints (for future snapshot comparison)
+        _ = GameStateSnapshot(
             pressure: 0,        // Before first threshold
             time: 2,
             healthRange: 18...20,
@@ -130,7 +130,7 @@ final class RegressionPlaythroughTests: XCTestCase {
             flagsSet: []
         )
 
-        let checkpoint2 = GameStateSnapshot(
+        _ = GameStateSnapshot(
             pressure: 5,        // After first threshold (day 3)
             time: 5,
             healthRange: 15...20,

@@ -104,7 +104,7 @@ final class Phase2ContractTests: XCTestCase {
 
         // When: Modify runtime state
         regionState.visit()
-        regionState.degrade()
+        _ = regionState.degrade()
 
         // Then: State changed
         XCTAssertEqual(regionState.visitCount, 1)
@@ -224,7 +224,7 @@ final class Phase2ContractTests: XCTestCase {
 
     func testTransactionsAreAtomic() {
         // Given: Player with limited resources
-        var player = PlayerRuntimeState(
+        let player = PlayerRuntimeState(
             resources: ["health": 10, "faith": 5]
         )
 
