@@ -107,11 +107,6 @@ class Player: ObservableObject, Identifiable {
         }
     }
 
-    /// Удобный инициализатор с классом героя
-    convenience init(name: String, heroClass: HeroClass) {
-        self.init(name: name, heroClass: heroClass)
-    }
-
     func drawCard() {
         // Auto-reshuffle discard when deck is empty
         if deck.isEmpty && !discard.isEmpty {
