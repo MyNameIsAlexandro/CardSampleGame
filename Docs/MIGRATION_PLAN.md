@@ -10,8 +10,8 @@
 | Phase | Название | Статус |
 |-------|----------|--------|
 | Phase 1 | Core Protocols & Engine Foundation | ✅ Done |
-| Phase 2 | Data Separation (Definitions + Runtime) | 🔄 In Progress |
-| Phase 3 | GameLoop Integration | ⬜ Planned |
+| Phase 2 | Data Separation (Definitions + Runtime) | ✅ Done |
+| Phase 3 | GameLoop Integration | 🔄 Next |
 | Phase 4 | Economy Transactions Everywhere | ⬜ Planned |
 | Phase 5 | Content Migration to JSON | ⬜ Planned |
 
@@ -27,13 +27,13 @@
 
 | Task | Файл | Статус |
 |------|------|--------|
-| Создать `Engine/Data/Definitions/` | — | ⬜ |
-| `RegionDefinition` | RegionDefinition.swift | ⬜ |
-| `AnchorDefinition` | AnchorDefinition.swift | ⬜ |
-| `EventDefinition` + `ChoiceDefinition` | EventDefinition.swift | ⬜ |
-| `QuestDefinition` + `ObjectiveDefinition` | QuestDefinition.swift | ⬜ |
-| `MiniGameChallengeDefinition` | MiniGameChallengeDefinition.swift | ⬜ |
-| Ключи локализации `titleKey/bodyKey/labelKey` | Все Definition файлы | ⬜ |
+| Создать `Engine/Data/Definitions/` | — | ✅ Done |
+| `RegionDefinition` | RegionDefinition.swift | ✅ Done |
+| `AnchorDefinition` | AnchorDefinition.swift | ✅ Done |
+| `EventDefinition` + `ChoiceDefinition` | EventDefinition.swift | ✅ Done |
+| `QuestDefinition` + `ObjectiveDefinition` | QuestDefinition.swift | ✅ Done |
+| `MiniGameChallengeDefinition` | MiniGameChallengeDefinition.swift | ✅ Done |
+| Ключи локализации `titleKey/bodyKey/labelKey` | Все Definition файлы | ✅ Done |
 
 **Контракт Definition:**
 ```swift
@@ -58,13 +58,14 @@ struct RegionDefinition: GameDefinition {
 
 | Task | Файл | Статус |
 |------|------|--------|
-| Создать `Engine/Runtime/` | — | ⬜ |
-| `WorldRuntimeState` | WorldRuntimeState.swift | ⬜ |
-| `EventRuntimeState` | EventRuntimeState.swift | ⬜ |
-| `QuestRuntimeState` | QuestRuntimeState.swift | ⬜ |
-| `PlayerRuntimeState` | PlayerRuntimeState.swift | ⬜ |
-| Migration adapter: `WorldState` → `WorldRuntimeState` | WorldStateAdapter.swift | ⬜ |
-| Migration adapter: `GameSave` → `GameState(Runtime)` | GameSaveAdapter.swift | ⬜ |
+| Создать `Engine/Runtime/` | — | ✅ Done |
+| `WorldRuntimeState` | WorldRuntimeState.swift | ✅ Done |
+| `EventRuntimeState` | EventRuntimeState.swift | ✅ Done |
+| `QuestRuntimeState` | QuestRuntimeState.swift | ✅ Done |
+| `PlayerRuntimeState` | PlayerRuntimeState.swift | ✅ Done |
+| `GameRuntimeState` (combined) | GameRuntimeState.swift | ✅ Done |
+| Migration adapter: `WorldState` → `WorldRuntimeState` | LegacyAdapters.swift | ✅ Done |
+| Migration adapter: `GameSave` → `GameState(Runtime)` | LegacyAdapters.swift | ✅ Done |
 
 **Контракт RuntimeState:**
 ```swift
@@ -92,10 +93,10 @@ struct RegionRuntimeState: Codable {
 
 | Task | Файл | Статус |
 |------|------|--------|
-| `ContentProvider` protocol | ContentProvider.swift | ⬜ |
-| `CodeContentProvider` (использует TwilightMarchesConfig) | CodeContentProvider.swift | ⬜ |
-| `JSONContentProvider` (заглушка) | JSONContentProvider.swift | ⬜ |
-| Content Validator | ContentValidator.swift | ⬜ |
+| `ContentProvider` protocol | ContentProvider.swift | ✅ Done |
+| `CodeContentProvider` (использует TwilightMarchesConfig) | CodeContentProvider.swift | ✅ Done |
+| `JSONContentProvider` (заглушка) | JSONContentProvider.swift | ✅ Done |
+| Content Validator | ContentProvider.swift (ContentValidator) | ✅ Done |
 
 **Контракт ContentProvider:**
 ```swift

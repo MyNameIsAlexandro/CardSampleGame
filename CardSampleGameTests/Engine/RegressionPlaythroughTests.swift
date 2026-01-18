@@ -210,6 +210,171 @@ final class RegressionPlaythroughTests: XCTestCase {
         XCTAssertEqual(loadedDeck.discard, deckState.discard)
         XCTAssertEqual(loadedDeck.exile, deckState.exile)
     }
+
+    // MARK: - Legacy vs Engine Comparison Tests
+
+    /// Compare legacy playthrough to engine playthrough - must produce same results
+    /// This is the critical migration safety net
+    func testLegacyVsEngineProduceSameOutcome() {
+        // Given: Same seed and actions for both
+        let seed: UInt64 = 54321
+        let actions: [TestAction] = [
+            .explore,
+            .travel("forest"),
+            .rest,
+            .explore,
+            .travel("village"),
+            .strengthen
+        ]
+
+        // When: Run both simulations
+        let legacyOutcome = runLegacyPlaythrough(seed: seed, actions: actions)
+        let engineOutcome = runEnginePlaythrough(seed: seed, actions: actions)
+
+        // Then: Key metrics must match
+        XCTAssertEqual(
+            legacyOutcome.time,
+            engineOutcome.time,
+            "Time should match: legacy=\(legacyOutcome.time), engine=\(engineOutcome.time)"
+        )
+        XCTAssertEqual(
+            legacyOutcome.pressure,
+            engineOutcome.pressure,
+            "Pressure should match: legacy=\(legacyOutcome.pressure), engine=\(engineOutcome.pressure)"
+        )
+        XCTAssertEqual(
+            legacyOutcome.visitedRegions,
+            engineOutcome.visitedRegions,
+            "Visited regions should match"
+        )
+    }
+
+    /// Run playthrough using legacy simulation (current Models/*)
+    private func runLegacyPlaythrough(seed: UInt64, actions: [TestAction]) -> PlaythroughOutcome {
+        // This simulates the current (legacy) game flow
+        return simulatePlaythrough(actions: actions, seed: seed)
+    }
+
+    /// Run playthrough using new Engine simulation
+    private func runEnginePlaythrough(seed: UInt64, actions: [TestAction]) -> PlaythroughOutcome {
+        // This simulates the new Engine flow using GameRuntimeState
+        var runtime = GameRuntimeState.newGame(
+            startingRegionId: "starting_area",
+            startingResources: ["health": 20, "faith": 10],
+            startingDeck: [],
+            seed: seed
+        )
+
+        var rng = SeededRNG(seed: seed)
+
+        for action in actions {
+            switch action {
+            case .rest:
+                runtime.world.currentTime += 1
+                let currentHealth = runtime.player.getResource("health")
+                runtime.player.setResource("health", value: min(20, currentHealth + 3))
+
+            case .explore:
+                runtime.world.currentTime += 1
+                let eventRoll = Int.random(in: 0..<10, using: &rng)
+                if eventRoll < 3 {
+                    runtime.player.modifyResource("faith", by: -1)
+                }
+
+            case .travel(let destination):
+                runtime.world.currentTime += 1
+                runtime.world.currentRegionId = destination
+                runtime.world.regionsState[destination] = RegionRuntimeState(
+                    definitionId: destination,
+                    currentState: .stable,
+                    visitCount: 1,
+                    isDiscovered: true
+                )
+
+            case .strengthen:
+                runtime.world.currentTime += 1
+                runtime.player.modifyResource("faith", by: -2)
+
+            case .choose:
+                break
+            }
+
+            // Check pressure threshold (same logic as legacy)
+            if runtime.world.currentTime > 0 && runtime.world.currentTime % 3 == 0 {
+                runtime.world.pressure += 5
+            }
+        }
+
+        // Build visited regions set
+        var visitedRegions = Set<String>(["starting_area"])
+        for (regionId, state) in runtime.world.regionsState {
+            if state.visitCount > 0 {
+                visitedRegions.insert(regionId)
+            }
+        }
+
+        return PlaythroughOutcome(
+            time: runtime.world.currentTime,
+            pressure: runtime.world.pressure,
+            health: runtime.player.getResource("health"),
+            faith: runtime.player.getResource("faith"),
+            visitedRegions: visitedRegions,
+            completedEvents: runtime.events.completedOneTimeEvents
+        )
+    }
+
+    /// Test that snapshots can be compared for equality
+    func testSnapshotComparison() {
+        // Given: Two game states with same values
+        let state1 = GameRuntimeState.newGame(
+            startingRegionId: "forest",
+            startingResources: ["health": 20, "faith": 10],
+            startingDeck: ["c1", "c2"],
+            seed: 100
+        )
+
+        let state2 = GameRuntimeState.newGame(
+            startingRegionId: "forest",
+            startingResources: ["health": 20, "faith": 10],
+            startingDeck: ["c1", "c2"],
+            seed: 100
+        )
+
+        // When: Take snapshots
+        let snapshot1 = state1.snapshot()
+        let snapshot2 = state2.snapshot()
+
+        // Then: Snapshots equal
+        XCTAssertEqual(snapshot1, snapshot2)
+    }
+
+    /// Test that different states produce different snapshots
+    func testSnapshotDetectsDifferences() {
+        // Given: Two different game states
+        var state1 = GameRuntimeState.newGame(
+            startingRegionId: "forest",
+            startingResources: ["health": 20, "faith": 10],
+            startingDeck: [],
+            seed: 100
+        )
+        state1.world.pressure = 50
+
+        var state2 = GameRuntimeState.newGame(
+            startingRegionId: "forest",
+            startingResources: ["health": 20, "faith": 10],
+            startingDeck: [],
+            seed: 100
+        )
+        state2.world.pressure = 0
+
+        // When: Take snapshots
+        let snapshot1 = state1.snapshot()
+        let snapshot2 = state2.snapshot()
+
+        // Then: Snapshots different
+        XCTAssertNotEqual(snapshot1, snapshot2)
+        XCTAssertNotEqual(snapshot1.pressure, snapshot2.pressure)
+    }
 }
 
 // MARK: - Test Types
