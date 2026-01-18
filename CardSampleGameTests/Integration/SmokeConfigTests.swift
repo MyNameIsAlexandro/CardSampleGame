@@ -123,6 +123,13 @@ final class SmokeConfigTests: XCTestCase {
         XCTAssertTrue(player.activeCurses.isEmpty, "Канон: нет проклятий при старте")
     }
 
+    func testInitialPlayerStrength() {
+        // Сила важна для боя: атака = strength + d6
+        // С силой 5 и кубиком 1-6, атака = 6-11
+        // Это позволяет бить монстров с защитой до 11
+        XCTAssertEqual(player.strength, 5, "Канон: стартовая сила = 5")
+    }
+
     // MARK: - Канонические значения GameState
 
     func testActionsPerTurn() {

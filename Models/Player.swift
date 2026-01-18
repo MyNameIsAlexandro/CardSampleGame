@@ -50,7 +50,7 @@ class Player: ObservableObject, Identifiable {
         health: Int = 10,
         maxHealth: Int = 10,
         maxHandSize: Int = 7,
-        strength: Int = 0,
+        strength: Int = 5,      // Базовая сила для боя (атака = strength + d6)
         dexterity: Int = 0,
         constitution: Int = 0,
         intelligence: Int = 0,
