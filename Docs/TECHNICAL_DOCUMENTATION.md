@@ -831,18 +831,10 @@ func initiateCombat(choice: EventChoice) {
 
 ### Краткая сводка
 
-| Параметр | Значение |
-|----------|----------|
-| Единица времени | 1 день = 1 действие |
-| Авто-деградация | Каждые 3 дня |
-| Tension инкремент | +2 каждые 3 дня |
-| Game Over | WorldTension ≥ 100 |
-
-**Стоимость действий:**
-- Travel (сосед): 1 день
-- Travel (дальний): 2 дня
-- Rest / Strengthen / Explore: 1 день
-- Instant события: 0 дней
+Детали механик описаны в канонических источниках выше:
+- **Time cost actions** — см. [EXPLORATION_CORE_DESIGN.md, раздел 18.1](./EXPLORATION_CORE_DESIGN.md#181-вход-в-ход-дня-day-start)
+- **Pressure escalation** — см. [ENGINE_ARCHITECTURE.md, раздел 3.2](./ENGINE_ARCHITECTURE.md) (PressureEngine)
+- **Defeat threshold** — см. [QA_ACT_I_CHECKLIST.md](./QA_ACT_I_CHECKLIST.md) (enforced DoD)
 
 > ⚠️ **Legacy API:** `daysPassed += 1` → заменяется на `TimeEngine.advance(cost:)`
 
