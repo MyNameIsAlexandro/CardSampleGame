@@ -357,42 +357,78 @@ final class Phase2ContractTests: XCTestCase {
 /// Test content provider for Phase 2 contract validation tests
 /// Implements ContentProvider protocol for testing
 final class TestContentProvider: ContentProvider {
-    private var regions: [String: RegionDefinition] = [:]
-    private var anchors: [String: AnchorDefinition] = [:]
-    private var events: [String: EventDefinition] = [:]
-    private var quests: [String: QuestDefinition] = [:]
-    private var challenges: [String: MiniGameChallengeDefinition] = [:]
+    private var regions: [String: CardSampleGame.RegionDefinition] = [:]
+    private var anchors: [String: CardSampleGame.AnchorDefinition] = [:]
+    private var events: [String: CardSampleGame.EventDefinition] = [:]
+    private var quests: [String: CardSampleGame.QuestDefinition] = [:]
+    private var challenges: [String: CardSampleGame.MiniGameChallengeDefinition] = [:]
 
-    func addRegion(_ region: RegionDefinition) {
+    func addRegion(_ region: CardSampleGame.RegionDefinition) {
         regions[region.id] = region
     }
 
-    func addAnchor(_ anchor: AnchorDefinition) {
+    func addAnchor(_ anchor: CardSampleGame.AnchorDefinition) {
         anchors[anchor.id] = anchor
     }
 
-    func addEvent(_ event: EventDefinition) {
+    func addEvent(_ event: CardSampleGame.EventDefinition) {
         events[event.id] = event
     }
 
-    func getAllRegionDefinitions() -> [RegionDefinition] { Array(regions.values) }
-    func getRegionDefinition(id: String) -> RegionDefinition? { regions[id] }
-    func getAllAnchorDefinitions() -> [AnchorDefinition] { Array(anchors.values) }
-    func getAnchorDefinition(id: String) -> AnchorDefinition? { anchors[id] }
-    func getAnchorDefinition(forRegion regionId: String) -> AnchorDefinition? {
+    func getAllRegionDefinitions() -> [CardSampleGame.RegionDefinition] {
+        Array(regions.values)
+    }
+
+    func getRegionDefinition(id: String) -> CardSampleGame.RegionDefinition? {
+        regions[id]
+    }
+
+    func getAllAnchorDefinitions() -> [CardSampleGame.AnchorDefinition] {
+        Array(anchors.values)
+    }
+
+    func getAnchorDefinition(id: String) -> CardSampleGame.AnchorDefinition? {
+        anchors[id]
+    }
+
+    func getAnchorDefinition(forRegion regionId: String) -> CardSampleGame.AnchorDefinition? {
         anchors.values.first { $0.regionId == regionId }
     }
-    func getAllEventDefinitions() -> [EventDefinition] { Array(events.values) }
-    func getEventDefinition(id: String) -> EventDefinition? { events[id] }
-    func getEventDefinitions(forRegion regionId: String) -> [EventDefinition] { [] }
-    func getEventDefinitions(forPool poolId: String) -> [EventDefinition] { [] }
-    func getAllQuestDefinitions() -> [QuestDefinition] { Array(quests.values) }
-    func getQuestDefinition(id: String) -> QuestDefinition? { quests[id] }
-    func getAllMiniGameChallenges() -> [MiniGameChallengeDefinition] { Array(challenges.values) }
-    func getMiniGameChallenge(id: String) -> MiniGameChallengeDefinition? { challenges[id] }
 
-    func validate() -> [ContentValidationError] {
-        let validator = ContentValidator(provider: self)
+    func getAllEventDefinitions() -> [CardSampleGame.EventDefinition] {
+        Array(events.values)
+    }
+
+    func getEventDefinition(id: String) -> CardSampleGame.EventDefinition? {
+        events[id]
+    }
+
+    func getEventDefinitions(forRegion regionId: String) -> [CardSampleGame.EventDefinition] {
+        []
+    }
+
+    func getEventDefinitions(forPool poolId: String) -> [CardSampleGame.EventDefinition] {
+        []
+    }
+
+    func getAllQuestDefinitions() -> [CardSampleGame.QuestDefinition] {
+        Array(quests.values)
+    }
+
+    func getQuestDefinition(id: String) -> CardSampleGame.QuestDefinition? {
+        quests[id]
+    }
+
+    func getAllMiniGameChallenges() -> [CardSampleGame.MiniGameChallengeDefinition] {
+        Array(challenges.values)
+    }
+
+    func getMiniGameChallenge(id: String) -> CardSampleGame.MiniGameChallengeDefinition? {
+        challenges[id]
+    }
+
+    func validate() -> [CardSampleGame.ContentValidationError] {
+        let validator = CardSampleGame.ContentValidator(provider: self)
         return validator.validate()
     }
 }
