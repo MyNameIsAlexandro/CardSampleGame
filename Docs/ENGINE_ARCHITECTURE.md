@@ -726,8 +726,11 @@ Engine/
 | Initial Health | 10 | `TwilightResource` |
 | Initial Faith | 3 | `TwilightResource` |
 | Initial Balance | 50 | `TwilightResource` |
+| **Initial Strength** | **5** | `Player.init` |
 | Combat Dice | d6 | `TwilightCombatConfig` |
 | Actions per Turn | 3 | `TwilightCombatConfig` |
+
+**Формула атаки:** `attack = strength + d6` (5 + 1-6 = 6-11)
 
 ---
 
