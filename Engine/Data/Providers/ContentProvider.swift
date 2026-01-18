@@ -289,7 +289,7 @@ struct ContentValidator {
 
         for event in provider.getAllEventDefinitions() {
             // Inline events should have at least 2 choices
-            if case .inline = event.eventType {
+            if case .inline = event.eventKind {
                 if event.choices.isEmpty {
                     errors.append(ContentValidationError(
                         type: .emptyChoices,

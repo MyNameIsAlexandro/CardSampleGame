@@ -36,7 +36,7 @@ final class Phase2ContractTests: XCTestCase {
             id: "event_test",
             titleKey: "event.test.title",
             bodyKey: "event.test.body",
-            eventType: .inline,
+            eventKind: .inline,
             isOneTime: true,
             choices: [
                 ChoiceDefinition(
@@ -84,7 +84,7 @@ final class Phase2ContractTests: XCTestCase {
             bodyKey: "e.body",
             choices: []
         )
-        // Only has: id, titleKey, bodyKey, eventType, availability, poolIds,
+        // Only has: id, titleKey, bodyKey, eventKind, availability, poolIds,
         // weight, isOneTime, isInstant, cooldown, choices, miniGameChallenge
 
         XCTAssertNotNil(region)

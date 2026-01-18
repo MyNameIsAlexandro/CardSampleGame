@@ -76,7 +76,7 @@ class CodeContentProvider: ContentProvider {
             id: "event_test",
             titleKey: "event.test.title",
             bodyKey: "event.test.body",
-            eventType: .inline,
+            eventKind: .inline,
             poolIds: ["pool_common"],
             choices: [
                 ChoiceDefinition(
@@ -123,7 +123,7 @@ class CodeContentProvider: ContentProvider {
         // Default implementation - subclass overrides
         let testCombat = MiniGameChallengeDefinition(
             id: "combat_test",
-            challengeType: .combat,
+            challengeKind: .combat,
             difficulty: 5
         )
         miniGameChallenges[testCombat.id] = testCombat

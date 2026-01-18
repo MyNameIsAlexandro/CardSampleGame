@@ -13,8 +13,8 @@ struct MiniGameChallengeDefinition: Codable, Hashable, Identifiable {
 
     // MARK: - Type
 
-    /// Type of mini-game
-    let challengeType: ChallengeType
+    /// Type of mini-game challenge
+    let challengeKind: MiniGameChallengeKind
 
     // MARK: - Difficulty
 
@@ -58,7 +58,7 @@ struct MiniGameChallengeDefinition: Codable, Hashable, Identifiable {
 
     init(
         id: String,
-        challengeType: ChallengeType,
+        challengeKind: MiniGameChallengeKind,
         difficulty: Int = 5,
         pressureScaling: Double = 0.1,
         enemyId: String? = nil,
@@ -71,7 +71,7 @@ struct MiniGameChallengeDefinition: Codable, Hashable, Identifiable {
         turnLimit: Int = 0
     ) {
         self.id = id
-        self.challengeType = challengeType
+        self.challengeKind = challengeKind
         self.difficulty = difficulty
         self.pressureScaling = pressureScaling
         self.enemyId = enemyId
@@ -91,10 +91,10 @@ struct MiniGameChallengeDefinition: Codable, Hashable, Identifiable {
     }
 }
 
-// MARK: - Challenge Type
+// MARK: - Mini-Game Challenge Kind
 
-/// Types of mini-game challenges
-enum ChallengeType: String, Codable, Hashable, CaseIterable {
+/// Types of mini-game challenges (Engine-specific, distinct from ChallengeType in EngineProtocols)
+enum MiniGameChallengeKind: String, Codable, Hashable, CaseIterable {
     /// Combat encounter with deck-building mechanics
     case combat
 

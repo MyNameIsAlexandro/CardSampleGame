@@ -23,8 +23,8 @@ struct EventDefinition: GameDefinition {
 
     // MARK: - Type Classification
 
-    /// Event type: inline or mini-game
-    let eventType: EventType
+    /// Event kind: inline or mini-game
+    let eventKind: EventKind
 
     // MARK: - Availability
 
@@ -62,7 +62,7 @@ struct EventDefinition: GameDefinition {
         id: String,
         titleKey: String,
         bodyKey: String,
-        eventType: EventType = .inline,
+        eventKind: EventKind = .inline,
         availability: Availability = .always,
         poolIds: [String] = [],
         weight: Int = 10,
@@ -75,7 +75,7 @@ struct EventDefinition: GameDefinition {
         self.id = id
         self.titleKey = titleKey
         self.bodyKey = bodyKey
-        self.eventType = eventType
+        self.eventKind = eventKind
         self.availability = availability
         self.poolIds = poolIds
         self.weight = weight
@@ -87,19 +87,19 @@ struct EventDefinition: GameDefinition {
     }
 }
 
-// MARK: - Event Type
+// MARK: - Event Kind
 
-/// Classification of event types
+/// Classification of event kinds (Engine-specific, distinct from legacy EventType)
 /// Reference: Docs/EVENT_MODULE_ARCHITECTURE.md, Section 2
-enum EventType: Codable, Hashable {
+enum EventKind: Codable, Hashable {
     /// Inline event - resolves within main game flow
     case inline
 
     /// Mini-game event - dispatches to external module
-    case miniGame(MiniGameType)
+    case miniGame(MiniGameKind)
 
-    /// All mini-game types
-    enum MiniGameType: String, Codable, Hashable {
+    /// All mini-game kinds
+    enum MiniGameKind: String, Codable, Hashable {
         case combat
         case ritual
         case exploration
@@ -165,19 +165,38 @@ struct ChoiceRequirements: Codable, Hashable {
     /// Flags that must NOT be set
     let forbiddenFlags: [String]
 
-    /// Balance range required
-    let balanceRange: ClosedRange<Int>?
+    /// Minimum balance required (nil = no minimum)
+    let minBalance: Int?
+
+    /// Maximum balance allowed (nil = no maximum)
+    let maxBalance: Int?
 
     init(
         minResources: [String: Int] = [:],
         requiredFlags: [String] = [],
         forbiddenFlags: [String] = [],
-        balanceRange: ClosedRange<Int>? = nil
+        minBalance: Int? = nil,
+        maxBalance: Int? = nil
     ) {
         self.minResources = minResources
         self.requiredFlags = requiredFlags
         self.forbiddenFlags = forbiddenFlags
-        self.balanceRange = balanceRange
+        self.minBalance = minBalance
+        self.maxBalance = maxBalance
+    }
+
+    /// Convenience initializer with balance range
+    init(
+        minResources: [String: Int] = [:],
+        requiredFlags: [String] = [],
+        forbiddenFlags: [String] = [],
+        balanceRange: ClosedRange<Int>?
+    ) {
+        self.minResources = minResources
+        self.requiredFlags = requiredFlags
+        self.forbiddenFlags = forbiddenFlags
+        self.minBalance = balanceRange?.lowerBound
+        self.maxBalance = balanceRange?.upperBound
     }
 
     /// Check if requirements can be met with given context
@@ -203,8 +222,11 @@ struct ChoiceRequirements: Codable, Hashable {
             }
         }
 
-        // Check balance
-        if let range = balanceRange, !range.contains(balance) {
+        // Check balance range
+        if let min = minBalance, balance < min {
+            return false
+        }
+        if let max = maxBalance, balance > max {
             return false
         }
 

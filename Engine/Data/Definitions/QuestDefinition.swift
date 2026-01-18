@@ -25,8 +25,8 @@ struct QuestDefinition: GameDefinition {
     /// Ordered list of objectives (stages)
     let objectives: [ObjectiveDefinition]
 
-    /// Quest type classification
-    let questType: QuestType
+    /// Quest kind classification
+    let questKind: QuestKind
 
     // MARK: - Availability
 
@@ -39,10 +39,10 @@ struct QuestDefinition: GameDefinition {
     // MARK: - Rewards
 
     /// Rewards given on quest completion
-    let completionRewards: QuestRewards
+    let completionRewards: QuestCompletionRewards
 
     /// Penalties on quest failure
-    let failurePenalties: QuestRewards
+    let failurePenalties: QuestCompletionRewards
 
     // MARK: - Initialization
 
@@ -51,17 +51,17 @@ struct QuestDefinition: GameDefinition {
         titleKey: String,
         descriptionKey: String,
         objectives: [ObjectiveDefinition],
-        questType: QuestType = .side,
+        questKind: QuestKind = .side,
         availability: Availability = .always,
         autoStart: Bool = false,
-        completionRewards: QuestRewards = .none,
-        failurePenalties: QuestRewards = .none
+        completionRewards: QuestCompletionRewards = .none,
+        failurePenalties: QuestCompletionRewards = .none
     ) {
         self.id = id
         self.titleKey = titleKey
         self.descriptionKey = descriptionKey
         self.objectives = objectives
-        self.questType = questType
+        self.questKind = questKind
         self.availability = availability
         self.autoStart = autoStart
         self.completionRewards = completionRewards
@@ -69,9 +69,10 @@ struct QuestDefinition: GameDefinition {
     }
 }
 
-// MARK: - Quest Type
+// MARK: - Quest Kind
 
-enum QuestType: String, Codable, Hashable {
+/// Quest kind classification (Engine-specific, distinct from legacy QuestType)
+enum QuestKind: String, Codable, Hashable {
     case main           // Main storyline
     case side           // Optional side quest
     case exploration    // Discovery/exploration quest
@@ -166,10 +167,10 @@ enum CompletionCondition: Codable, Hashable {
     case manual
 }
 
-// MARK: - Quest Rewards
+// MARK: - Quest Completion Rewards
 
-/// Rewards/penalties for quest completion
-struct QuestRewards: Codable, Hashable {
+/// Rewards/penalties for quest completion (Engine-specific, distinct from legacy QuestRewards)
+struct QuestCompletionRewards: Codable, Hashable {
     /// Resource changes
     let resourceChanges: [String: Int]
 
@@ -195,5 +196,5 @@ struct QuestRewards: Codable, Hashable {
     }
 
     /// No rewards
-    static let none = QuestRewards()
+    static let none = QuestCompletionRewards()
 }
