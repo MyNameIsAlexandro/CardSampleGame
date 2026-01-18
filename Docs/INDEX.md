@@ -17,6 +17,8 @@
 | "Как именно работает эта механика? Какая формула?" | [EXPLORATION_CORE_DESIGN.md](./EXPLORATION_CORE_DESIGN.md) | **СПЕЦИФИКАЦИЯ** (Spec) |
 | "Как правильно написать код? Куда положить файл?" | [ENGINE_ARCHITECTURE.md](./ENGINE_ARCHITECTURE.md) | **ЗАКОН** (Law) |
 | "Как работает Event Module? Inline vs Mini-Game?" | [EVENT_MODULE_ARCHITECTURE.md](./EVENT_MODULE_ARCHITECTURE.md) | **МОДУЛЬ** (Module) |
+| "Как работает система героев?" | [HEROES_MODULE.md](../Engine/Heroes/HEROES_MODULE.md) | **МОДУЛЬ** (Module) |
+| "Как работает система карт?" | [CARDS_MODULE.md](../Engine/Cards/CARDS_MODULE.md) | **МОДУЛЬ** (Module) |
 | "Где сейчас лежит этот класс? Какой статус у фичи?" | [TECHNICAL_DOCUMENTATION.md](./TECHNICAL_DOCUMENTATION.md) | **КАРТА КОДА** (Map) |
 | "Готова ли фича? Как её проверить?" | [QA_ACT_I_CHECKLIST.md](./QA_ACT_I_CHECKLIST.md) | **СУДЬЯ** (Judge) |
 | "Какой план миграции к Engine v1.0?" | [MIGRATION_PLAN.md](./MIGRATION_PLAN.md) | **ПЛАН** (Roadmap) |
@@ -143,7 +145,7 @@
 
 | Файл | Строк | Статус |
 |------|-------|--------|
-| ENGINE_ARCHITECTURE.md | ~700 | ✅ Source of Truth |
+| ENGINE_ARCHITECTURE.md | ~940 | ✅ Source of Truth |
 | EVENT_MODULE_ARCHITECTURE.md | ~450 | ✅ Active |
 | MIGRATION_PLAN.md | ~350 | 🔄 In Progress |
 | EXPLORATION_CORE_DESIGN.md | ~3100 | ✅ Active |
@@ -152,6 +154,13 @@
 | QA_ACT_I_CHECKLIST.md | ~700 | ✅ Active |
 | CAMPAIGN_IMPLEMENTATION_REPORT.md | ~500 | 🔒 Frozen v0.6.0 |
 | **INDEX.md** | — | 📍 Вы здесь |
+
+### Модульная документация (Engine)
+
+| Файл | Путь | Статус |
+|------|------|--------|
+| HEROES_MODULE.md | Engine/Heroes/ | ✅ Active |
+| CARDS_MODULE.md | Engine/Cards/ | ✅ Active |
 
 ---
 

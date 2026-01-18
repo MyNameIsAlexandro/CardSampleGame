@@ -114,6 +114,9 @@
 |-----------|--------|----------|
 | Engine/Core/ | ✅ Готово | Протоколы и базовые реализации |
 | Engine/Config/ | ✅ Готово | TwilightMarchesConfig.swift |
+| Engine/Heroes/ | ✅ Готово | HeroClass, HeroDefinition, HeroRegistry |
+| Engine/Cards/ | ✅ Готово | CardDefinition, CardRegistry, CardOwnership |
+| Engine/Combat/ | ✅ Готово | CombatCalculator с детализацией |
 | Engine/Data/Definitions/ | ✅ Готово | Все Definition-структуры созданы |
 | Engine/Runtime/ | ✅ Готово | RuntimeState модели созданы |
 | Engine/Data/Providers/ | ✅ Готово | ContentProvider + CodeContentProvider |
@@ -121,6 +124,9 @@
 
 **Текущее состояние:**
 - `Engine/Core/` — протоколы и базовые реализации движка
+- `Engine/Heroes/` — модуль героев (HeroClass, HeroRegistry) — [документация](../Engine/Heroes/HEROES_MODULE.md)
+- `Engine/Cards/` — модуль карт (CardDefinition, CardRegistry) — [документация](../Engine/Cards/CARDS_MODULE.md)
+- `Engine/Combat/` — модуль боя (CombatCalculator с детализацией)
 - `Engine/Data/Definitions/` — иммутабельные Definition-структуры
 - `Engine/Runtime/` — мутабельные RuntimeState-структуры
 - `Engine/Data/Providers/` — ContentProvider абстракция и CodeContentProvider
@@ -178,9 +184,23 @@ CardSampleGame/
 │   │   ├── TimeEngine.swift        # Управление временем
 │   │   ├── PressureEngine.swift    # Система давления/напряжения
 │   │   ├── EconomyManager.swift    # Транзакции ресурсов
+│   │   ├── RequirementsEvaluator.swift # Оценка требований
 │   │   └── GameLoop.swift          # Главный цикл игры
 │   ├── Config/              # Конфигурация игры (Layer 2)
-│   │   └── TwilightMarchesConfig.swift  # "Картридж" Сумрачных Пределов
+│   │   ├── TwilightMarchesConfig.swift  # "Картридж" Сумрачных Пределов
+│   │   └── DegradationRules.swift  # Правила деградации
+│   ├── Heroes/              # Модуль героев
+│   │   ├── HeroClass.swift         # Классы героев (Warrior, Mage, etc.)
+│   │   ├── HeroDefinition.swift    # Протокол определения героя
+│   │   ├── HeroAbility.swift       # Система способностей
+│   │   ├── HeroRegistry.swift      # Реестр героев
+│   │   └── HEROES_MODULE.md        # Документация модуля
+│   ├── Cards/               # Модуль карт
+│   │   ├── CardDefinition.swift    # Протокол определения карты
+│   │   ├── CardRegistry.swift      # Реестр карт
+│   │   └── CARDS_MODULE.md         # Документация модуля
+│   ├── Combat/              # Модуль боя
+│   │   └── CombatCalculator.swift  # Калькулятор боя с детализацией
 │   └── Modules/             # Опциональные подсистемы
 │
 ├── Models/                   # Модели данных (Runtime, Layer 3)
