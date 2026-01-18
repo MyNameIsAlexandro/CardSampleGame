@@ -25,7 +25,7 @@ struct GameRuntimeState: Codable, Equatable {
     // MARK: - Game Meta
 
     /// Current game phase
-    var phase: GamePhase
+    var phase: EngineGamePhase
 
     /// Random seed for this playthrough
     let playthroughSeed: UInt64
@@ -40,7 +40,7 @@ struct GameRuntimeState: Codable, Equatable {
         player: PlayerRuntimeState,
         events: EventRuntimeState = EventRuntimeState(),
         quests: QuestRuntimeState = QuestRuntimeState(),
-        phase: GamePhase = .playing,
+        phase: EngineGamePhase = .playing,
         playthroughSeed: UInt64 = 0,
         saveSlot: Int? = nil
     ) {

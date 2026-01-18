@@ -102,9 +102,10 @@ protocol PressureEngineProtocol {
 // MARK: - 3. Event System
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/// Abstract event definition (setting-agnostic)
-protocol EventDefinition {
-    associatedtype ChoiceType: ChoiceDefinition
+/// Abstract event definition protocol (setting-agnostic)
+/// Concrete implementation: Engine/Data/Definitions/EventDefinition.swift
+protocol EventDefinitionProtocol {
+    associatedtype ChoiceType: ChoiceDefinitionProtocol
 
     var id: String { get }
     var title: String { get }
@@ -121,10 +122,11 @@ protocol EventDefinition {
     func canOccur(in context: EventContext) -> Bool
 }
 
-/// Abstract choice definition
-protocol ChoiceDefinition {
-    associatedtype RequirementsType: RequirementsDefinition
-    associatedtype ConsequencesType: ConsequencesDefinition
+/// Abstract choice definition protocol
+/// Concrete implementation: Engine/Data/Definitions/EventDefinition.swift (ChoiceDefinition struct)
+protocol ChoiceDefinitionProtocol {
+    associatedtype RequirementsType: RequirementsDefinitionProtocol
+    associatedtype ConsequencesType: ConsequencesDefinitionProtocol
 
     var id: String { get }
     var text: String { get }
@@ -132,13 +134,13 @@ protocol ChoiceDefinition {
     var consequences: ConsequencesType { get }
 }
 
-/// Abstract requirements (gating conditions)
-protocol RequirementsDefinition {
+/// Abstract requirements protocol (gating conditions)
+protocol RequirementsDefinitionProtocol {
     func canMeet(with resources: ResourceProvider) -> Bool
 }
 
-/// Abstract consequences (outcomes)
-protocol ConsequencesDefinition {
+/// Abstract consequences protocol (outcomes)
+protocol ConsequencesDefinitionProtocol {
     /// Resource changes (positive or negative)
     var resourceChanges: [String: Int] { get }
 
@@ -167,7 +169,7 @@ protocol ResourceProvider {
 
 /// Event system protocol
 protocol EventSystemProtocol {
-    associatedtype Event: EventDefinition
+    associatedtype Event: EventDefinitionProtocol
 
     /// Get available events for current context
     func getAvailableEvents(in context: EventContext) -> [Event]

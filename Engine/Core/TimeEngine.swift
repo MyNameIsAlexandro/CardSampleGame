@@ -86,9 +86,9 @@ final class TimeEngine: TimeEngineProtocol {
 enum StandardTimeCost: Int, TimedAction {
     case instant = 0
     case quick = 1
-    case standard = 1
-    case extended = 2
-    case long = 3
+    case standard = 2
+    case extended = 3
+    case long = 4
 
     var timeCost: Int { rawValue }
 }

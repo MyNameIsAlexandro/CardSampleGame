@@ -4,8 +4,8 @@ import Foundation
 // The central coordinator that runs the game engine.
 // This is the "processor" - specific games are the "cartridge".
 
-/// Game phase enum (generic)
-enum GamePhase: String, Codable {
+/// Engine game phase enum (distinct from legacy GamePhase in Models/GameState.swift)
+enum EngineGamePhase: String, Codable {
     case setup
     case playing
     case paused
@@ -26,7 +26,7 @@ enum GameEndResult: Equatable {
 class GameLoopBase: ObservableObject {
     // MARK: - Published State
 
-    @Published private(set) var currentPhase: GamePhase = .setup
+    @Published private(set) var currentPhase: EngineGamePhase = .setup
     @Published private(set) var isGameOver: Bool = false
     @Published private(set) var endResult: GameEndResult?
 
