@@ -194,7 +194,7 @@
 		FF0003020000000000000001 /* RequirementsEvaluator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequirementsEvaluator.swift; sourceTree = "<group>"; };
 		/* Hero System Files */
 		GG0001020000000000000001 /* HeroClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroClass.swift; sourceTree = "<group>"; };
-		GG0002020000000000000001 /* HeroSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HeroSelectionView.swift; path = Views/HeroSelectionView.swift; sourceTree = "<group>"; };
+		GG0002020000000000000001 /* HeroSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroSelectionView.swift; sourceTree = "<group>"; };
 		/* Hero Class Tests */
 		HH0001020000000000000001 /* HeroClassTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroClassTests.swift; sourceTree = "<group>"; };
 		HH0002020000000000000001 /* CardModuleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardModuleTests.swift; sourceTree = "<group>"; };
