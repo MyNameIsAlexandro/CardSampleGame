@@ -123,6 +123,10 @@
 - Runtime всё ещё основан на старых `Models/*` (GameState, WorldState, Player)
 - Definitions/ContentProvider — следующая фаза внедрения
 
+> **Терминология "data-driven":**
+> В v0.6.0 под "data-driven" понималась Codable-модель в Swift-коде (struct + JSON serialization).
+> Настоящая "cartridge data-driven" архитектура (Definitions + JSONContentProvider, внешние JSON-файлы) — это Phase 2.
+
 **Подробный план миграции:** См. [ENGINE_ARCHITECTURE.md, раздел 8](./ENGINE_ARCHITECTURE.md)
 
 ### MVVM Pattern

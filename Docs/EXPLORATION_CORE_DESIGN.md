@@ -1374,7 +1374,9 @@ Data/
 
 ## 18. МЕХАНИЧЕСКАЯ СПЕЦИФИКАЦИЯ CORE LOOP (ТЗ)
 
-> **Этот раздел — закон. Он переводит концепт в однозначные правила исполнения.**
+> **Каноническая спецификация механик (Twilight Marches).**
+> Этот раздел описывает референс-реализацию механик для сеттинга Twilight Marches.
+> Engine-level контракты и инварианты — см. [ENGINE_ARCHITECTURE.md](./ENGINE_ARCHITECTURE.md) и [EVENT_MODULE_ARCHITECTURE.md](./EVENT_MODULE_ARCHITECTURE.md).
 
 ---
 
