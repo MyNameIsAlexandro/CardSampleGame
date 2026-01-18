@@ -55,13 +55,13 @@ struct CardView: View {
             if hasStats {
                 HStack(spacing: 16) {
                     if let power = card.power {
-                        StatBadge(icon: "sword.fill", value: power, color: .red)
+                        CardStatBadge(icon: "sword.fill", value: power, color: .red)
                     }
                     if let defense = card.defense {
-                        StatBadge(icon: "shield.fill", value: defense, color: .blue)
+                        CardStatBadge(icon: "shield.fill", value: defense, color: .blue)
                     }
                     if let health = card.health {
-                        StatBadge(icon: "heart.fill", value: health, color: .green)
+                        CardStatBadge(icon: "heart.fill", value: health, color: .green)
                     }
                     Spacer()
                 }
@@ -233,7 +233,7 @@ struct CardView: View {
     }
 }
 
-struct StatBadge: View {
+struct CardStatBadge: View {
     let icon: String
     let value: Int
     let color: Color
