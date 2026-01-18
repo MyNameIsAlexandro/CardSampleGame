@@ -9,6 +9,7 @@
 - 📖 [GAME_DESIGN_DOCUMENT.md](./GAME_DESIGN_DOCUMENT.md) - игровой дизайн (каноническая декомпозиция)
 - 🗺️ [EXPLORATION_CORE_DESIGN.md](./EXPLORATION_CORE_DESIGN.md) - этот файл (система исследования)
 - 🔧 [TECHNICAL_DOCUMENTATION.md](./TECHNICAL_DOCUMENTATION.md) - техническая документация
+- ⚙️ [ENGINE_ARCHITECTURE.md](./ENGINE_ARCHITECTURE.md) - **архитектура движка (source of truth)**
 - 📊 [CAMPAIGN_IMPLEMENTATION_REPORT.md](./CAMPAIGN_IMPLEMENTATION_REPORT.md) - отчёт о реализации
 
 ---

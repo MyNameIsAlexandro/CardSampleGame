@@ -2,9 +2,13 @@
 # Campaign Implementation Report
 
 **Проект:** Twilight Marches (Сумрачные Пределы)
-**Версия:** 0.6.1
+**Версия документа:** 0.6.1 (исторический)
 **Дата:** 16 января 2026
 **Статус:** ✅ MVP COMPLETE - ALL HIGH & MEDIUM PRIORITY TASKS DONE! 🎉
+
+> **⚠️ Примечание:** Это исторический документ, фиксирующий milestone v0.6.0 (MVP Complete).
+> Актуальный статус реализации: см. [TECHNICAL_DOCUMENTATION.md](./TECHNICAL_DOCUMENTATION.md)
+> Архитектура движка: см. [ENGINE_ARCHITECTURE.md](./ENGINE_ARCHITECTURE.md)
 
 ---
 
