@@ -1,10 +1,10 @@
 # Техническая документация проекта
 # Twilight Marches (Сумрачные Пределы)
 
-**Версия:** 0.6.1
-**Последнее обновление:** 16 января 2026
+**Версия:** 0.7.0
+**Последнее обновление:** 18 января 2026
 **Платформа:** iOS (SwiftUI)
-**Статус:** Campaign Systems Complete ✅
+**Статус:** Engine Architecture v1.0 ✅
 
 ---
 
@@ -73,6 +73,13 @@
 
 ### Общая архитектура
 
+> **Каноническая архитектура движка:** См. [Engine/ENGINE_ARCHITECTURE.md](./Engine/ENGINE_ARCHITECTURE.md)
+>
+> Проект использует архитектуру **"Processor + Cartridge"**:
+> - **Engine (Layer 1)** — переиспользуемый движок (TimeEngine, PressureEngine, EconomyManager)
+> - **Config (Layer 2)** — конфигурация игры "Сумрачные Пределы" (`TwilightMarchesConfig.swift`)
+> - **Runtime (Layer 3)** — состояние конкретной партии (GameState, WorldState)
+
 ```
 ┌─────────────────────────────────────────────┐
 │           ContentView (Root)                │
@@ -129,7 +136,19 @@ User Action → View → ViewModel (@Published) → Model Update → View Update
 
 ```
 CardSampleGame/
-├── Models/                   # Модели данных
+├── Engine/                  # Переиспользуемый игровой движок (v1.0)
+│   ├── ENGINE_ARCHITECTURE.md  # Каноническая документация
+│   ├── Core/                # Ядро движка (Layer 1)
+│   │   ├── EngineProtocols.swift   # Все контракты
+│   │   ├── TimeEngine.swift        # Управление временем
+│   │   ├── PressureEngine.swift    # Система давления/напряжения
+│   │   ├── EconomyManager.swift    # Транзакции ресурсов
+│   │   └── GameLoop.swift          # Главный цикл игры
+│   ├── Config/              # Конфигурация игры (Layer 2)
+│   │   └── TwilightMarchesConfig.swift  # "Картридж" Сумрачных Пределов
+│   └── Modules/             # Опциональные подсистемы
+│
+├── Models/                   # Модели данных (Runtime, Layer 3)
 │   ├── Card.swift           # Модель карты
 │   ├── CardType.swift       # Типы карт и редкость
 │   ├── Player.swift         # Модель игрока
@@ -1069,6 +1088,39 @@ private func degradeRegion(_ region: Region) {
 ---
 
 ## История изменений
+
+### v0.7.0 (18.01.2026) - Engine Architecture v1.0 ✅
+
+**Основные изменения:**
+
+**Engine/ - Переиспользуемый игровой движок**
+- Создана архитектура "Processor + Cartridge" (движок + картридж)
+- Строгое разделение Rules / Data / State
+- ENGINE_ARCHITECTURE.md — каноническая документация (source of truth)
+
+**Engine/Core/ - Ядро движка (Layer 1)**
+- EngineProtocols.swift — все контракты (TimeEngine, PressureEngine, EconomyManager, etc.)
+- TimeEngine.swift — управление временем с threshold detection
+- PressureEngine.swift — система давления/напряжения
+- EconomyManager.swift — атомарные транзакции ресурсов
+- GameLoop.swift — канонический 11-шаговый цикл действий
+
+**Engine/Config/ - Конфигурация игры (Layer 2)**
+- TwilightMarchesConfig.swift — "картридж" Сумрачных Пределов
+  - TwilightResource — ресурсы (health, faith, balance)
+  - TwilightPressureRules — правила давления
+  - TwilightRegionState — состояния регионов
+  - TwilightCurseDefinition — определения проклятий
+  - TwilightCombatConfig — настройки боя
+  - TwilightAnchorConfig — настройки якорей
+
+**Статистика:**
+- 6 новых файлов движка
+- ~1200 строк кода в Engine/
+- Документация ENGINE_ARCHITECTURE.md (~450 строк)
+- Подготовлена основа для миграции существующего кода
+
+---
 
 ### v0.6.0 (16.01.2026) - MVP Complete! ✅
 
