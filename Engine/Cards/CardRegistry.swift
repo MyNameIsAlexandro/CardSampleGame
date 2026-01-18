@@ -524,8 +524,8 @@ final class CardRegistry {
                 )],
                 faithCost: 4,
                 balance: .dark,
-                power: 3,
-                role: .control
+                role: .control,
+                power: 3
             )
         ]
 
