@@ -29,6 +29,33 @@
 		AA0000500000000000000001 /* TwilightMarchesCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000510000000000000001 /* TwilightMarchesCards.swift */; };
 		AA0000520000000000000001 /* GameSave.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000530000000000000001 /* GameSave.swift */; };
 		AA0000540000000000000001 /* StatisticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000550000000000000001 /* StatisticsView.swift */; };
+		/* Engine Core Build Files */
+		EE0001010000000000000001 /* EngineProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0001020000000000000001 /* EngineProtocols.swift */; };
+		EE0001030000000000000001 /* GameLoop.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0001040000000000000001 /* GameLoop.swift */; };
+		EE0001050000000000000001 /* TimeEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0001060000000000000001 /* TimeEngine.swift */; };
+		EE0001070000000000000001 /* PressureEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0001080000000000000001 /* PressureEngine.swift */; };
+		EE0001090000000000000001 /* EconomyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0001100000000000000001 /* EconomyManager.swift */; };
+		/* Engine Config Build Files */
+		EE0002010000000000000001 /* TwilightMarchesConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0002020000000000000001 /* TwilightMarchesConfig.swift */; };
+		/* Engine Definitions Build Files */
+		EE0003010000000000000001 /* GameDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0003020000000000000001 /* GameDefinition.swift */; };
+		EE0003030000000000000001 /* RegionDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0003040000000000000001 /* RegionDefinition.swift */; };
+		EE0003050000000000000001 /* AnchorDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0003060000000000000001 /* AnchorDefinition.swift */; };
+		EE0003070000000000000001 /* EventDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0003080000000000000001 /* EventDefinition.swift */; };
+		EE0003090000000000000001 /* QuestDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0003100000000000000001 /* QuestDefinition.swift */; };
+		EE0003110000000000000001 /* MiniGameChallengeDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0003120000000000000001 /* MiniGameChallengeDefinition.swift */; };
+		/* Engine Providers Build Files */
+		EE0004010000000000000001 /* ContentProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0004020000000000000001 /* ContentProvider.swift */; };
+		EE0004030000000000000001 /* CodeContentProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0004040000000000000001 /* CodeContentProvider.swift */; };
+		EE0004050000000000000001 /* JSONContentProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0004060000000000000001 /* JSONContentProvider.swift */; };
+		/* Engine Runtime Build Files */
+		EE0005010000000000000001 /* WorldRuntimeState.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0005020000000000000001 /* WorldRuntimeState.swift */; };
+		EE0005030000000000000001 /* EventRuntimeState.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0005040000000000000001 /* EventRuntimeState.swift */; };
+		EE0005050000000000000001 /* QuestRuntimeState.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0005060000000000000001 /* QuestRuntimeState.swift */; };
+		EE0005070000000000000001 /* PlayerRuntimeState.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0005080000000000000001 /* PlayerRuntimeState.swift */; };
+		EE0005090000000000000001 /* GameRuntimeState.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0005100000000000000001 /* GameRuntimeState.swift */; };
+		/* Engine Migration Build Files */
+		EE0006010000000000000001 /* LegacyAdapters.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0006020000000000000001 /* LegacyAdapters.swift */; };
 		/* Test Files */
 		BB0001010000000000000001 /* WorldStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001020000000000000001 /* WorldStateTests.swift */; };
 		BB0001030000000000000001 /* PlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001040000000000000001 /* PlayerTests.swift */; };
@@ -46,6 +73,12 @@
 		BB0001270000000000000001 /* PlaythroughSimulationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001280000000000000001 /* PlaythroughSimulationTests.swift */; };
 		BB0001290000000000000001 /* CriticalSystemsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001300000000000000001 /* CriticalSystemsTests.swift */; };
 		BB0001320000000000000001 /* MetricsDistributionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001310000000000000001 /* MetricsDistributionTests.swift */; };
+		/* Engine Test Files */
+		BB0004010000000000000001 /* EngineContractsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0004020000000000000001 /* EngineContractsTests.swift */; };
+		BB0004030000000000000001 /* EventModuleContractsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0004040000000000000001 /* EventModuleContractsTests.swift */; };
+		BB0004050000000000000001 /* DataSeparationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0004060000000000000001 /* DataSeparationTests.swift */; };
+		BB0004070000000000000001 /* RegressionPlaythroughTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0004080000000000000001 /* RegressionPlaythroughTests.swift */; };
+		BB0004090000000000000001 /* Phase2ContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0004100000000000000001 /* Phase2ContractTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -84,6 +117,33 @@
 		AA0000510000000000000001 /* TwilightMarchesCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwilightMarchesCards.swift; sourceTree = "<group>"; };
 		AA0000530000000000000001 /* GameSave.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameSave.swift; sourceTree = "<group>"; };
 		AA0000550000000000000001 /* StatisticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsView.swift; sourceTree = "<group>"; };
+		/* Engine Core Files */
+		EE0001020000000000000001 /* EngineProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngineProtocols.swift; sourceTree = "<group>"; };
+		EE0001040000000000000001 /* GameLoop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameLoop.swift; sourceTree = "<group>"; };
+		EE0001060000000000000001 /* TimeEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeEngine.swift; sourceTree = "<group>"; };
+		EE0001080000000000000001 /* PressureEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PressureEngine.swift; sourceTree = "<group>"; };
+		EE0001100000000000000001 /* EconomyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EconomyManager.swift; sourceTree = "<group>"; };
+		/* Engine Config Files */
+		EE0002020000000000000001 /* TwilightMarchesConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwilightMarchesConfig.swift; sourceTree = "<group>"; };
+		/* Engine Definitions Files */
+		EE0003020000000000000001 /* GameDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameDefinition.swift; sourceTree = "<group>"; };
+		EE0003040000000000000001 /* RegionDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionDefinition.swift; sourceTree = "<group>"; };
+		EE0003060000000000000001 /* AnchorDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnchorDefinition.swift; sourceTree = "<group>"; };
+		EE0003080000000000000001 /* EventDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDefinition.swift; sourceTree = "<group>"; };
+		EE0003100000000000000001 /* QuestDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestDefinition.swift; sourceTree = "<group>"; };
+		EE0003120000000000000001 /* MiniGameChallengeDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniGameChallengeDefinition.swift; sourceTree = "<group>"; };
+		/* Engine Providers Files */
+		EE0004020000000000000001 /* ContentProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentProvider.swift; sourceTree = "<group>"; };
+		EE0004040000000000000001 /* CodeContentProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeContentProvider.swift; sourceTree = "<group>"; };
+		EE0004060000000000000001 /* JSONContentProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONContentProvider.swift; sourceTree = "<group>"; };
+		/* Engine Runtime Files */
+		EE0005020000000000000001 /* WorldRuntimeState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldRuntimeState.swift; sourceTree = "<group>"; };
+		EE0005040000000000000001 /* EventRuntimeState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventRuntimeState.swift; sourceTree = "<group>"; };
+		EE0005060000000000000001 /* QuestRuntimeState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestRuntimeState.swift; sourceTree = "<group>"; };
+		EE0005080000000000000001 /* PlayerRuntimeState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerRuntimeState.swift; sourceTree = "<group>"; };
+		EE0005100000000000000001 /* GameRuntimeState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRuntimeState.swift; sourceTree = "<group>"; };
+		/* Engine Migration Files */
+		EE0006020000000000000001 /* LegacyAdapters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyAdapters.swift; sourceTree = "<group>"; };
 		/* Test Target */
 		BB0000010000000000000001 /* CardSampleGameTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CardSampleGameTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		/* Test Files */
@@ -103,6 +163,12 @@
 		BB0001280000000000000001 /* PlaythroughSimulationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaythroughSimulationTests.swift; sourceTree = "<group>"; };
 		BB0001300000000000000001 /* CriticalSystemsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CriticalSystemsTests.swift; sourceTree = "<group>"; };
 		BB0001310000000000000001 /* MetricsDistributionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricsDistributionTests.swift; sourceTree = "<group>"; };
+		/* Engine Test Files */
+		BB0004020000000000000001 /* EngineContractsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngineContractsTests.swift; sourceTree = "<group>"; };
+		BB0004040000000000000001 /* EventModuleContractsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventModuleContractsTests.swift; sourceTree = "<group>"; };
+		BB0004060000000000000001 /* DataSeparationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataSeparationTests.swift; sourceTree = "<group>"; };
+		BB0004080000000000000001 /* RegressionPlaythroughTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegressionPlaythroughTests.swift; sourceTree = "<group>"; };
+		BB0004100000000000000001 /* Phase2ContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Phase2ContractTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -136,6 +202,7 @@
 			isa = PBXGroup;
 			children = (
 				AA0000250000000000000001 /* . */,
+				EE0000000000000000000001 /* Engine */,
 				BB0003000000000000000001 /* CardSampleGameTests */,
 				AA0000260000000000000001 /* Products */,
 				E65102638302D3C4A04B78CD /* CardSampleGame */,
@@ -236,12 +303,106 @@
 			path = Utilities;
 			sourceTree = "<group>";
 		};
+		/* Engine Groups */
+		EE0000000000000000000001 /* Engine */ = {
+			isa = PBXGroup;
+			children = (
+				EE0000010000000000000001 /* Core */,
+				EE0000020000000000000001 /* Config */,
+				EE0000030000000000000001 /* Data */,
+				EE0000040000000000000001 /* Runtime */,
+				EE0000050000000000000001 /* Migration */,
+				EE0000060000000000000001 /* Modules */,
+			);
+			path = Engine;
+			sourceTree = "<group>";
+		};
+		EE0000010000000000000001 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				EE0001020000000000000001 /* EngineProtocols.swift */,
+				EE0001040000000000000001 /* GameLoop.swift */,
+				EE0001060000000000000001 /* TimeEngine.swift */,
+				EE0001080000000000000001 /* PressureEngine.swift */,
+				EE0001100000000000000001 /* EconomyManager.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		EE0000020000000000000001 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				EE0002020000000000000001 /* TwilightMarchesConfig.swift */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		EE0000030000000000000001 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				EE0000070000000000000001 /* Definitions */,
+				EE0000080000000000000001 /* Providers */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		EE0000070000000000000001 /* Definitions */ = {
+			isa = PBXGroup;
+			children = (
+				EE0003020000000000000001 /* GameDefinition.swift */,
+				EE0003040000000000000001 /* RegionDefinition.swift */,
+				EE0003060000000000000001 /* AnchorDefinition.swift */,
+				EE0003080000000000000001 /* EventDefinition.swift */,
+				EE0003100000000000000001 /* QuestDefinition.swift */,
+				EE0003120000000000000001 /* MiniGameChallengeDefinition.swift */,
+			);
+			path = Definitions;
+			sourceTree = "<group>";
+		};
+		EE0000080000000000000001 /* Providers */ = {
+			isa = PBXGroup;
+			children = (
+				EE0004020000000000000001 /* ContentProvider.swift */,
+				EE0004040000000000000001 /* CodeContentProvider.swift */,
+				EE0004060000000000000001 /* JSONContentProvider.swift */,
+			);
+			path = Providers;
+			sourceTree = "<group>";
+		};
+		EE0000040000000000000001 /* Runtime */ = {
+			isa = PBXGroup;
+			children = (
+				EE0005020000000000000001 /* WorldRuntimeState.swift */,
+				EE0005040000000000000001 /* EventRuntimeState.swift */,
+				EE0005060000000000000001 /* QuestRuntimeState.swift */,
+				EE0005080000000000000001 /* PlayerRuntimeState.swift */,
+				EE0005100000000000000001 /* GameRuntimeState.swift */,
+			);
+			path = Runtime;
+			sourceTree = "<group>";
+		};
+		EE0000050000000000000001 /* Migration */ = {
+			isa = PBXGroup;
+			children = (
+				EE0006020000000000000001 /* LegacyAdapters.swift */,
+			);
+			path = Migration;
+			sourceTree = "<group>";
+		};
+		EE0000060000000000000001 /* Modules */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Modules;
+			sourceTree = "<group>";
+		};
 		/* Test Groups */
 		BB0003000000000000000001 /* CardSampleGameTests */ = {
 			isa = PBXGroup;
 			children = (
 				BB0003010000000000000001 /* Unit */,
 				BB0003030000000000000001 /* Integration */,
+				BB0003050000000000000001 /* Engine */,
 			);
 			path = CardSampleGameTests;
 			sourceTree = "<group>";
@@ -274,6 +435,18 @@
 				BB0001260000000000000001 /* SmokeConfigTests.swift */,
 			);
 			path = Integration;
+			sourceTree = "<group>";
+		};
+		BB0003050000000000000001 /* Engine */ = {
+			isa = PBXGroup;
+			children = (
+				BB0004020000000000000001 /* EngineContractsTests.swift */,
+				BB0004040000000000000001 /* EventModuleContractsTests.swift */,
+				BB0004060000000000000001 /* DataSeparationTests.swift */,
+				BB0004080000000000000001 /* RegressionPlaythroughTests.swift */,
+				BB0004100000000000000001 /* Phase2ContractTests.swift */,
+			);
+			path = Engine;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -397,6 +570,33 @@
 				8F035EDB750B2C0441F077B0 /* WorldMapView.swift in Sources */,
 				CC0000020000000000000001 /* CombatView.swift in Sources */,
 				CC0000040000000000000001 /* AccessibilityIdentifiers.swift in Sources */,
+				/* Engine Core */
+				EE0001010000000000000001 /* EngineProtocols.swift in Sources */,
+				EE0001030000000000000001 /* GameLoop.swift in Sources */,
+				EE0001050000000000000001 /* TimeEngine.swift in Sources */,
+				EE0001070000000000000001 /* PressureEngine.swift in Sources */,
+				EE0001090000000000000001 /* EconomyManager.swift in Sources */,
+				/* Engine Config */
+				EE0002010000000000000001 /* TwilightMarchesConfig.swift in Sources */,
+				/* Engine Definitions */
+				EE0003010000000000000001 /* GameDefinition.swift in Sources */,
+				EE0003030000000000000001 /* RegionDefinition.swift in Sources */,
+				EE0003050000000000000001 /* AnchorDefinition.swift in Sources */,
+				EE0003070000000000000001 /* EventDefinition.swift in Sources */,
+				EE0003090000000000000001 /* QuestDefinition.swift in Sources */,
+				EE0003110000000000000001 /* MiniGameChallengeDefinition.swift in Sources */,
+				/* Engine Providers */
+				EE0004010000000000000001 /* ContentProvider.swift in Sources */,
+				EE0004030000000000000001 /* CodeContentProvider.swift in Sources */,
+				EE0004050000000000000001 /* JSONContentProvider.swift in Sources */,
+				/* Engine Runtime */
+				EE0005010000000000000001 /* WorldRuntimeState.swift in Sources */,
+				EE0005030000000000000001 /* EventRuntimeState.swift in Sources */,
+				EE0005050000000000000001 /* QuestRuntimeState.swift in Sources */,
+				EE0005070000000000000001 /* PlayerRuntimeState.swift in Sources */,
+				EE0005090000000000000001 /* GameRuntimeState.swift in Sources */,
+				/* Engine Migration */
+				EE0006010000000000000001 /* LegacyAdapters.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -420,6 +620,12 @@
 				BB0001320000000000000001 /* MetricsDistributionTests.swift in Sources */,
 				BB0001270000000000000001 /* PlaythroughSimulationTests.swift in Sources */,
 				BB0001250000000000000001 /* SmokeConfigTests.swift in Sources */,
+				/* Engine Tests */
+				BB0004010000000000000001 /* EngineContractsTests.swift in Sources */,
+				BB0004030000000000000001 /* EventModuleContractsTests.swift in Sources */,
+				BB0004050000000000000001 /* DataSeparationTests.swift in Sources */,
+				BB0004070000000000000001 /* RegressionPlaythroughTests.swift in Sources */,
+				BB0004090000000000000001 /* Phase2ContractTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
