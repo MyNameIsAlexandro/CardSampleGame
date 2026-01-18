@@ -36,6 +36,9 @@ class Player: ObservableObject, Identifiable {
     // Hand size management
     let maxHandSize: Int
 
+    // Hero class system
+    let heroClass: HeroClass?
+
     // Twilight Marches mechanics
     @Published var faith: Int  // Вера - resource for powerful abilities
     @Published var maxFaith: Int
@@ -59,29 +62,54 @@ class Player: ObservableObject, Identifiable {
         faith: Int = 3,
         maxFaith: Int = 10,
         balance: Int = 50,
-        currentRealm: Realm = .yav
+        currentRealm: Realm = .yav,
+        heroClass: HeroClass? = nil
     ) {
         self.id = id
         self.name = name
-        self.health = health
-        self.maxHealth = maxHealth
+        self.heroClass = heroClass
         self.maxHandSize = maxHandSize
         self.hand = []
         self.deck = []
         self.discard = []
         self.buried = []
-        self.strength = strength
-        self.dexterity = dexterity
-        self.constitution = constitution
-        self.intelligence = intelligence
-        self.wisdom = wisdom
-        self.charisma = charisma
-        self.faith = faith
-        self.maxFaith = maxFaith
-        self.balance = balance
         self.activeCurses = []
         self.currentRealm = currentRealm
         self.spirits = []
+
+        // Если указан класс героя, применяем его характеристики
+        if let heroClass = heroClass {
+            let stats = heroClass.baseStats
+            self.health = stats.health
+            self.maxHealth = stats.maxHealth
+            self.strength = stats.strength
+            self.dexterity = stats.dexterity
+            self.constitution = stats.constitution
+            self.intelligence = stats.intelligence
+            self.wisdom = stats.wisdom
+            self.charisma = stats.charisma
+            self.faith = stats.faith
+            self.maxFaith = stats.maxFaith
+            self.balance = stats.startingBalance
+        } else {
+            // Дефолтные значения для тестов
+            self.health = health
+            self.maxHealth = maxHealth
+            self.strength = strength
+            self.dexterity = dexterity
+            self.constitution = constitution
+            self.intelligence = intelligence
+            self.wisdom = wisdom
+            self.charisma = charisma
+            self.faith = faith
+            self.maxFaith = maxFaith
+            self.balance = balance
+        }
+    }
+
+    /// Удобный инициализатор с классом героя
+    convenience init(name: String, heroClass: HeroClass) {
+        self.init(name: name, heroClass: heroClass)
     }
 
     func drawCard() {
@@ -254,5 +282,84 @@ class Player: ObservableObject, Identifiable {
         default:
             return "Неизвестно"
         }
+    }
+
+    // MARK: - Hero Class Abilities
+
+    /// Бонус урона от способности класса
+    /// - Warrior: +2 при HP ниже 50%
+    /// - Shadow: +3 если цель на полном HP (targetFullHP = true)
+    func getHeroClassDamageBonus(targetFullHP: Bool = false) -> Int {
+        guard let heroClass = heroClass else { return 0 }
+
+        switch heroClass {
+        case .warrior:
+            // Ярость: +2 к урону при HP ниже 50%
+            if health < maxHealth / 2 {
+                return 2
+            }
+        case .shadow:
+            // Засада: +3 урона по полным HP
+            if targetFullHP {
+                return 3
+            }
+        default:
+            break
+        }
+        return 0
+    }
+
+    /// Снижение получаемого урона от способности класса
+    /// - Priest: -1 от тёмных источников
+    func getHeroClassDamageReduction(fromDarkSource: Bool = false) -> Int {
+        guard let heroClass = heroClass else { return 0 }
+
+        switch heroClass {
+        case .priest:
+            // Благословение: -1 урон от тёмных источников
+            if fromDarkSource {
+                return 1
+            }
+        default:
+            break
+        }
+        return 0
+    }
+
+    /// Бонусные кубики от способности класса (для первой атаки)
+    /// - Ranger: +1 кубик при первой атаке
+    func getHeroClassBonusDice(isFirstAttack: Bool) -> Int {
+        guard let heroClass = heroClass else { return 0 }
+
+        switch heroClass {
+        case .ranger:
+            // Выслеживание: +1 кубик при первой атаке
+            if isFirstAttack {
+                return 1
+            }
+        default:
+            break
+        }
+        return 0
+    }
+
+    /// Проверка способности Мага: +1 вера в конце хода
+    var shouldGainFaithEndOfTurn: Bool {
+        return heroClass == .mage
+    }
+
+    /// Полный расчёт урона с учётом проклятий и классовых способностей
+    func calculateTotalDamageDealt(_ baseDamage: Int, targetFullHP: Bool = false) -> Int {
+        let curseModifier = getDamageDealtModifier()
+        let heroBonus = getHeroClassDamageBonus(targetFullHP: targetFullHP)
+        return max(0, baseDamage + curseModifier + heroBonus)
+    }
+
+    /// Полный расчёт получаемого урона с учётом проклятий и классовых способностей
+    func takeDamageWithAllModifiers(_ baseDamage: Int, fromDarkSource: Bool = false) {
+        let curseModifier = getDamageTakenModifier()
+        let heroReduction = getHeroClassDamageReduction(fromDarkSource: fromDarkSource)
+        let actualDamage = max(0, baseDamage + curseModifier - heroReduction)
+        takeDamage(actualDamage)
     }
 }

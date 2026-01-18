@@ -130,6 +130,30 @@ final class SmokeConfigTests: XCTestCase {
         XCTAssertEqual(player.strength, 5, "Канон: стартовая сила = 5")
     }
 
+    // MARK: - Канонические значения классов героев
+
+    func testHeroClassWarriorStats() {
+        let stats = HeroClass.warrior.baseStats
+        XCTAssertEqual(stats.health, 12, "Канон: Воин HP = 12")
+        XCTAssertEqual(stats.strength, 7, "Канон: Воин сила = 7")
+    }
+
+    func testHeroClassMageStats() {
+        let stats = HeroClass.mage.baseStats
+        XCTAssertEqual(stats.health, 7, "Канон: Маг HP = 7")
+        XCTAssertEqual(stats.maxFaith, 15, "Канон: Маг maxFaith = 15")
+    }
+
+    func testHeroClassPriestBalance() {
+        let stats = HeroClass.priest.baseStats
+        XCTAssertEqual(stats.startingBalance, 70, "Канон: Жрец склонен к Свету (balance = 70)")
+    }
+
+    func testHeroClassShadowBalance() {
+        let stats = HeroClass.shadow.baseStats
+        XCTAssertEqual(stats.startingBalance, 30, "Канон: Тень склонена к Тьме (balance = 30)")
+    }
+
     // MARK: - Канонические значения GameState
 
     func testActionsPerTurn() {

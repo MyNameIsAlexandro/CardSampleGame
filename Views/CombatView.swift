@@ -28,6 +28,13 @@ struct CombatView: View {
     @State private var lastMessage: String = ""
     @State private var showingMessage = false
 
+    // Боевые бонусы (сбрасываются в конце хода)
+    @State private var bonusDice: Int = 0          // Дополнительные кубики от карт
+    @State private var bonusDamage: Int = 0        // Бонусный урон
+    @State private var canReroll: Bool = false     // Возможность перебросить кубик
+    @State private var summonedSpirits: [(power: Int, realm: Realm)] = []  // Призванные духи
+    @State private var isFirstAttackThisCombat: Bool = true  // Для способности Следопыта
+
     var body: some View {
         VStack(spacing: 0) {
             // Верхняя панель
@@ -472,27 +479,51 @@ struct CombatView: View {
         // Базовая атака: сила игрока vs защита монстра
         let playerPower = player.strength
         let monsterDef = monster.defense ?? 10
+        let monsterMaxHP = monster.health ?? 10  // Для проверки способности Тени
+        let isTargetFullHP = (monster.health ?? 0) == monsterMaxHP
 
-        // Бросок кубика d6
-        let diceRoll = Int.random(in: 1...6)
-        let total = playerPower + diceRoll
+        // Бросок кубиков: базовый d6 + бонусные от карт + бонус класса (Следопыт)
+        let rangerBonus = player.getHeroClassBonusDice(isFirstAttack: isFirstAttackThisCombat)
+        let totalDice = 1 + bonusDice + rangerBonus
+        var diceRolls: [Int] = []
+        for _ in 0..<totalDice {
+            diceRolls.append(Int.random(in: 1...6))
+        }
+        let diceTotal = diceRolls.reduce(0, +)
+        let diceString = diceRolls.map { "🎲\($0)" }.joined(separator: "+")
+
+        // Учитываем бонус урона от класса
+        let heroClassBonus = player.getHeroClassDamageBonus(targetFullHP: isTargetFullHP)
+        let total = playerPower + diceTotal + bonusDamage
 
         if total >= monsterDef {
             // Успешная атака
             let baseDamage = max(1, total - monsterDef + 2)
-            let damage = player.calculateDamageDealt(baseDamage)
+            let damage = player.calculateTotalDamageDealt(baseDamage, targetFullHP: isTargetFullHP)
 
             let newHealth = max(0, (monster.health ?? 0) - damage)
             monster.health = newHealth
 
-            combatLog.append("⚔️ Атака: \(playerPower) + 🎲\(diceRoll) = \(total) vs защита \(monsterDef) → Урон \(damage)!")
+            var logMsg = "⚔️ Атака: \(playerPower)"
+            if bonusDamage > 0 { logMsg += "+\(bonusDamage)" }
+            logMsg += " + \(diceString) = \(total) vs защита \(monsterDef)"
+            if heroClassBonus > 0 {
+                logMsg += " (+\(heroClassBonus) класс)"
+            }
+            logMsg += " → Урон \(damage)!"
+            combatLog.append(logMsg)
 
             if newHealth <= 0 {
                 finishCombat(victory: true)
             }
         } else {
-            combatLog.append("⚔️ Атака: \(playerPower) + 🎲\(diceRoll) = \(total) vs защита \(monsterDef) → Промах!")
+            combatLog.append("⚔️ Атака: \(playerPower) + \(diceString) = \(total) vs защита \(monsterDef) → Промах!")
         }
+
+        // Сбросить бонусы после атаки
+        bonusDice = 0
+        bonusDamage = 0
+        isFirstAttackThisCombat = false  // Следопыт использовал бонус
     }
 
     func playCard(_ card: Card) {
@@ -546,8 +577,64 @@ struct CombatView: View {
                 player.removeCurse(type: type)
                 combatLog.append("   🌟 Снято проклятие")
 
-            default:
-                break
+            case .addDice(let count):
+                bonusDice += count
+                combatLog.append("   🎲 +\(count) кубик(ов) к следующей атаке")
+
+            case .reroll:
+                // Reroll даёт +1 кубик (выбирается лучший результат)
+                bonusDice += 1
+                combatLog.append("   🔄 Перебросок: +1 кубик (лучший результат)")
+
+            case .shiftBalance(let towards, let amount):
+                player.shiftBalance(towards: towards, amount: amount)
+                let directionText = towards == .light ? "Свету" : towards == .dark ? "Тьме" : "Равновесию"
+                combatLog.append("   ⚖️ Баланс сдвинут к \(directionText) на \(amount)")
+
+            case .applyCurse(let curseType, let duration):
+                // В бою проклятие наносит урон монстру (тёмная магия)
+                let curseDamage = duration * 2
+                let newHealth = max(0, (monster.health ?? 0) - curseDamage)
+                monster.health = newHealth
+                combatLog.append("   💀 Проклятие \(curseType): \(curseDamage) урона врагу")
+
+            case .summonSpirit(let power, let realm):
+                summonedSpirits.append((power: power, realm: realm))
+                let realmName = realm == .yav ? "Явь" : realm == .nav ? "Навь" : "Правь"
+                combatLog.append("   👻 Призван дух из \(realmName) (сила: \(power))")
+                // Дух сразу атакует
+                let spiritDamage = power
+                let newHealth = max(0, (monster.health ?? 0) - spiritDamage)
+                monster.health = newHealth
+                combatLog.append("   👻 Дух атакует! Урон: \(spiritDamage)")
+
+            case .sacrifice(let cost, let benefit):
+                // Игрок теряет HP, получает бонус
+                player.takeDamage(cost)
+                combatLog.append("   🩸 Жертва: -\(cost) HP")
+                // Парсим benefit для эффекта
+                if benefit.lowercased().contains("урон") || benefit.lowercased().contains("damage") {
+                    bonusDamage += cost * 2
+                    combatLog.append("   🔥 +\(cost * 2) к урону следующей атаки")
+                } else if benefit.lowercased().contains("карт") || benefit.lowercased().contains("draw") {
+                    player.drawCards(count: cost)
+                    combatLog.append("   🃏 Взято карт: \(cost)")
+                } else {
+                    // Общий бонус - добавить урон
+                    bonusDamage += cost
+                    combatLog.append("   🔥 +\(cost) к урону (\(benefit))")
+                }
+
+            case .explore:
+                // Исследование не применимо в бою
+                combatLog.append("   🔍 Исследование недоступно в бою")
+
+            case .travelRealm:
+                // Путешествие между мирами не применимо в бою
+                combatLog.append("   🌀 Путешествие недоступно в бою")
+
+            case .custom(let description):
+                combatLog.append("   📜 \(description)")
             }
         }
     }
@@ -580,6 +667,30 @@ struct CombatView: View {
 
     func performEndTurn() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            // Духи атакуют в конце хода (если ещё живы)
+            if !summonedSpirits.isEmpty {
+                for spirit in summonedSpirits {
+                    let spiritDamage = spirit.power
+                    let newHealth = max(0, (monster.health ?? 0) - spiritDamage)
+                    monster.health = newHealth
+                    let realmName = spirit.realm == .yav ? "Явь" : spirit.realm == .nav ? "Навь" : "Правь"
+                    combatLog.append("👻 Дух \(realmName) атакует: \(spiritDamage) урона")
+                }
+                // Духи исчезают после атаки
+                summonedSpirits.removeAll()
+            }
+
+            // Проверяем победу после атак духов
+            if (monster.health ?? 0) <= 0 {
+                finishCombat(victory: true)
+                return
+            }
+
+            // Сбрасываем бонусы на конец хода
+            bonusDice = 0
+            bonusDamage = 0
+            canReroll = false
+
             // Сбрасываем руку
             while !player.hand.isEmpty {
                 player.playCard(player.hand[0])
@@ -590,6 +701,12 @@ struct CombatView: View {
 
             // Восстанавливаем веру
             player.gainFaith(1)
+
+            // Способность Мага: +1 вера в конце хода (Медитация)
+            if player.shouldGainFaithEndOfTurn {
+                player.gainFaith(1)
+                combatLog.append("🔮 Медитация: +1 вера")
+            }
 
             // Новый ход
             turnNumber += 1
@@ -747,7 +864,22 @@ struct CombatCardView: View {
         case .heal(let amount): return "Лечение: +\(amount)"
         case .drawCards(let count): return "Карты: +\(count)"
         case .gainFaith(let amount): return "Вера: +\(amount)"
-        default: return ability.description
+        case .addDice(let count): return "+\(count) 🎲"
+        case .reroll: return "Перебросок"
+        case .shiftBalance(let towards, let amount):
+            let dir = towards == .light ? "☀️" : towards == .dark ? "🌙" : "⚖️"
+            return "\(dir) +\(amount)"
+        case .applyCurse(let type, _): return "Проклятие: \(type)"
+        case .removeCurse: return "Снять проклятие"
+        case .summonSpirit(let power, let realm):
+            let realmIcon = realm == .yav ? "🌳" : realm == .nav ? "💀" : "⭐"
+            return "\(realmIcon) Дух (\(power))"
+        case .sacrifice(let cost, _): return "Жертва: \(cost) HP"
+        case .explore: return "Исследовать"
+        case .travelRealm(let realm):
+            let realmName = realm == .yav ? "Явь" : realm == .nav ? "Навь" : "Правь"
+            return "→ \(realmName)"
+        case .custom: return ability.description
         }
     }
 }

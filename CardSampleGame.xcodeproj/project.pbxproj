@@ -83,6 +83,11 @@
 		FF0001010000000000000001 /* WorldRNG.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0001020000000000000001 /* WorldRNG.swift */; };
 		FF0002010000000000000001 /* DegradationRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0002020000000000000001 /* DegradationRules.swift */; };
 		FF0003010000000000000001 /* RequirementsEvaluator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0003020000000000000001 /* RequirementsEvaluator.swift */; };
+		/* Hero System Files */
+		GG0001010000000000000001 /* HeroClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = GG0001020000000000000001 /* HeroClass.swift */; };
+		GG0002010000000000000001 /* HeroSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = GG0002020000000000000001 /* HeroSelectionView.swift */; };
+		/* Hero Class Tests */
+		HH0001010000000000000001 /* HeroClassTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = HH0001020000000000000001 /* HeroClassTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -177,6 +182,11 @@
 		FF0001020000000000000001 /* WorldRNG.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldRNG.swift; sourceTree = "<group>"; };
 		FF0002020000000000000001 /* DegradationRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DegradationRules.swift; sourceTree = "<group>"; };
 		FF0003020000000000000001 /* RequirementsEvaluator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequirementsEvaluator.swift; sourceTree = "<group>"; };
+		/* Hero System Files */
+		GG0001020000000000000001 /* HeroClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HeroClass.swift; path = Models/HeroClass.swift; sourceTree = "<group>"; };
+		GG0002020000000000000001 /* HeroSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HeroSelectionView.swift; path = Views/HeroSelectionView.swift; sourceTree = "<group>"; };
+		/* Hero Class Tests */
+		HH0001020000000000000001 /* HeroClassTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroClassTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -249,6 +259,7 @@
 				AA0000100000000000000001 /* Player.swift */,
 				AA0000120000000000000001 /* GameState.swift */,
 				AA0000530000000000000001 /* GameSave.swift */,
+				GG0001020000000000000001 /* HeroClass.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -261,6 +272,7 @@
 				AA0000180000000000000001 /* GameBoardView.swift */,
 				AA0000490000000000000001 /* RulesView.swift */,
 				AA0000550000000000000001 /* StatisticsView.swift */,
+				GG0002020000000000000001 /* HeroSelectionView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -432,6 +444,7 @@
 				BB0001180000000000000001 /* WorldMapModelTests.swift */,
 				BB0001200000000000000001 /* RegionActionsModelTests.swift */,
 				BB0001220000000000000001 /* EventFlowModelTests.swift */,
+				HH0001020000000000000001 /* HeroClassTests.swift */,
 			);
 			path = Unit;
 			sourceTree = "<group>";
@@ -592,6 +605,9 @@
 				/* Engine Config */
 				EE0002010000000000000001 /* TwilightMarchesConfig.swift in Sources */,
 				FF0002010000000000000001 /* DegradationRules.swift in Sources */,
+				/* Hero System */
+				GG0001010000000000000001 /* HeroClass.swift in Sources */,
+				GG0002010000000000000001 /* HeroSelectionView.swift in Sources */,
 				/* Engine Definitions */
 				EE0003010000000000000001 /* GameDefinition.swift in Sources */,
 				EE0003030000000000000001 /* RegionDefinition.swift in Sources */,
@@ -634,6 +650,8 @@
 				BB0001320000000000000001 /* MetricsDistributionTests.swift in Sources */,
 				BB0001270000000000000001 /* PlaythroughSimulationTests.swift in Sources */,
 				BB0001250000000000000001 /* SmokeConfigTests.swift in Sources */,
+				/* Hero Class Tests */
+				HH0001010000000000000001 /* HeroClassTests.swift in Sources */,
 				/* Engine Tests */
 				BB0004010000000000000001 /* EngineContractsTests.swift in Sources */,
 				BB0004030000000000000001 /* EventModuleContractsTests.swift in Sources */,

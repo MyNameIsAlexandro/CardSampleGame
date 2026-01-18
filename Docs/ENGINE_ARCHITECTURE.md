@@ -730,11 +730,83 @@ Engine/
 | Combat Dice | d6 | `TwilightCombatConfig` |
 | Actions per Turn | 3 | `TwilightCombatConfig` |
 
-**Формула атаки:** `attack = strength + d6` (5 + 1-6 = 6-11)
+**Формула атаки:** `attack = strength + d6 + bonusDice + bonusDamage`
 
 ---
 
-## Приложение B: Ссылки на документацию
+## Приложение B: Система классов героев (HeroClass)
+
+### B.1 Структура HeroClass
+
+```swift
+enum HeroClass: String, CaseIterable, Codable {
+    case warrior = "Воин"
+    case mage = "Маг"
+    case ranger = "Следопыт"
+    case priest = "Жрец"
+    case shadow = "Тень"
+}
+```
+
+### B.2 Базовые характеристики классов
+
+| Класс | HP | Сила | Вера | MaxFaith | Balance |
+|-------|-----|------|------|----------|---------|
+| Воин | 12 | 7 | 2 | 8 | 50 |
+| Маг | 7 | 2 | 5 | 15 | 50 |
+| Следопыт | 10 | 4 | 3 | 10 | 50 |
+| Жрец | 9 | 3 | 5 | 12 | 70 |
+| Тень | 8 | 4 | 4 | 10 | 30 |
+
+### B.3 Особые способности классов
+
+| Класс | Способность | Реализация |
+|-------|-------------|------------|
+| **Воин** | Ярость: +2 урон при HP < 50% | `getHeroClassDamageBonus()` |
+| **Маг** | Медитация: +1 вера в конце хода | `shouldGainFaithEndOfTurn` |
+| **Следопыт** | Выслеживание: +1 кубик при первой атаке | `getHeroClassBonusDice()` |
+| **Жрец** | Благословение: -1 урон от тёмных источников | `getHeroClassDamageReduction()` |
+| **Тень** | Засада: +3 урона по целям с полным HP | `getHeroClassDamageBonus()` |
+
+---
+
+## Приложение C: Эффекты карт в бою (AbilityEffect)
+
+### C.1 Полная формула боя
+
+```
+1. Бросок кубиков: totalDice = 1 + bonusDice + rangerBonus
+2. Сумма: total = strength + sum(diceRolls) + bonusDamage
+3. Попадание: total >= enemyDefense
+4. Урон: baseDamage = max(1, total - defense + 2)
+5. Итоговый урон: damage = baseDamage + curseModifier + heroClassBonus
+```
+
+### C.2 Реализованные эффекты карт
+
+| Эффект | Метод в CombatView | Действие |
+|--------|-------------------|----------|
+| `damage(amount, type)` | `applyCardEffects` | Урон врагу |
+| `heal(amount)` | `applyCardEffects` | HP игроку |
+| `drawCards(count)` | `applyCardEffects` | Взять карты |
+| `gainFaith(amount)` | `applyCardEffects` | Получить веру |
+| `addDice(count)` | `bonusDice += count` | +кубики к атаке |
+| `reroll` | `bonusDice += 1` | +1 кубик |
+| `shiftBalance(towards, amount)` | `player.shiftBalance()` | Сдвиг баланса |
+| `applyCurse(type, duration)` | Урон врагу `duration*2` | Тёмная магия |
+| `removeCurse(type)` | `player.removeCurse()` | Снять проклятие |
+| `summonSpirit(power, realm)` | `summonedSpirits.append()` | Призыв духа |
+| `sacrifice(cost, benefit)` | `-cost HP`, бонус | Жертва за силу |
+
+### C.3 Призванные духи
+
+- Атакуют **при призыве** (сразу)
+- Атакуют **в конце хода** (performEndTurn)
+- Исчезают после атаки в конце хода
+
+---
+
+## Приложение D: Ссылки на документацию
 
 - [QA_ACT_I_CHECKLIST.md](./QA_ACT_I_CHECKLIST.md) — Тестирование Акта I
 - [EXPLORATION_CORE_DESIGN.md](./EXPLORATION_CORE_DESIGN.md) — Дизайн исследования
