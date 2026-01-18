@@ -226,9 +226,10 @@ struct ActionResult {
 
 | Test File | Что проверяет | Статус |
 |-----------|---------------|--------|
-| `EngineContractsTests.swift` | Core engine invariants | ⬜ |
-| `EventModuleContractsTests.swift` | Event module contracts | ⬜ |
-| `DataSeparationTests.swift` | Definition/Runtime separation | ⬜ |
+| `EngineContractsTests.swift` | Core engine invariants | ✅ Done |
+| `EventModuleContractsTests.swift` | Event module contracts | ✅ Done |
+| `DataSeparationTests.swift` | Definition/Runtime separation | ✅ Done |
+| `Phase2ContractTests.swift` | Phase 2 contracts (ContentProvider) | ✅ Done |
 
 **EngineContractsTests:**
 ```swift
@@ -260,7 +261,7 @@ func testContentProviderValidationCatchesBrokenLinks()
 
 | Test File | Что проверяет | Статус |
 |-----------|---------------|--------|
-| `RegressionPlaythroughTests.swift` | Deterministic playthrough | ⬜ |
+| `RegressionPlaythroughTests.swift` | Deterministic playthrough | ✅ Done |
 
 ```swift
 func testFixedSeedPlaythroughProducesSameOutcome() {

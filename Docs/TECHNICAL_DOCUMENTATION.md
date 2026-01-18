@@ -108,24 +108,27 @@
 
 ### Миграция на Engine v1.0
 
-> **Статус миграции:** В процессе (Phase 1 из 5)
+> **Статус миграции:** Phase 2 завершён, Phase 3 следующий
 
 | Компонент | Статус | Описание |
 |-----------|--------|----------|
-| Engine/Core/ | ✅ Создан | Протоколы и базовые реализации |
-| Engine/Config/ | ✅ Создан | TwilightMarchesConfig.swift |
-| Definitions (ContentProvider) | ⬜ Планируется | Следующая фаза (Phase 2) |
-| Runtime миграция | ⬜ Планируется | Models/* пока используют старую структуру |
-| GameLoop интеграция | ⬜ Планируется | Phase 3-4 |
+| Engine/Core/ | ✅ Готово | Протоколы и базовые реализации |
+| Engine/Config/ | ✅ Готово | TwilightMarchesConfig.swift |
+| Engine/Data/Definitions/ | ✅ Готово | Все Definition-структуры созданы |
+| Engine/Runtime/ | ✅ Готово | RuntimeState модели созданы |
+| Engine/Data/Providers/ | ✅ Готово | ContentProvider + CodeContentProvider |
+| GameLoop интеграция | 🔄 Следующий | Phase 3 |
 
 **Текущее состояние:**
-- `Engine/Core/` и `Engine/Config/` уже созданы с протоколами и конфигурацией
-- Runtime всё ещё основан на старых `Models/*` (GameState, WorldState, Player)
-- Definitions/ContentProvider — следующая фаза внедрения
+- `Engine/Core/` — протоколы и базовые реализации движка
+- `Engine/Data/Definitions/` — иммутабельные Definition-структуры
+- `Engine/Runtime/` — мутабельные RuntimeState-структуры
+- `Engine/Data/Providers/` — ContentProvider абстракция и CodeContentProvider
+- GameLoop интеграция — следующий этап (Phase 3)
 
 > **Терминология "data-driven":**
-> В v0.6.0 под "data-driven" понималась Codable-модель в Swift-коде (struct + JSON serialization).
-> Настоящая "cartridge data-driven" архитектура (Definitions + JSONContentProvider, внешние JSON-файлы) — это Phase 2.
+> Cartridge data-driven архитектура (Definitions + ContentProvider) реализована в Phase 2.
+> Полная миграция на JSON (JSONContentProvider) запланирована в Phase 5.
 
 **Подробный план миграции:** См. [ENGINE_ARCHITECTURE.md, раздел 8](./ENGINE_ARCHITECTURE.md)
 

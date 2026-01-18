@@ -271,20 +271,26 @@ Mini-Game события:
 
 ### 6.1 EventDefinition (Data Layer)
 
+> **Примечание:** JSON-формат для Phase 5 (JSONContentProvider).
+> Swift-код использует `eventKind: EventKind` вместо `type`.
+
 ```json
 {
   "id": "evt_combat_wolf",
-  "type": "Combat",
+  "eventKind": {"miniGame": "combat"},
   "titleKey": "evt_combat_wolf_title",
   "bodyKey": "evt_combat_wolf_body",
   "isInstant": false,
   "isOneTime": false,
   "weight": 10,
+  "cooldown": 0,
+  "poolIds": ["forest_events", "combat_events"],
 
   "availability": {
-    "regionStates": ["Borderland", "Breach"],
+    "regionStates": ["borderland", "breach"],
     "regionTypes": ["forest", "mountain"],
-    "pressure": {"min": 20, "max": 80},
+    "minPressure": 20,
+    "maxPressure": 80,
     "requiredFlags": [],
     "forbiddenFlags": ["wolf_dead"],
     "questLinks": []
@@ -294,37 +300,49 @@ Mini-Game события:
     {
       "id": "choice_fight",
       "labelKey": "evt_combat_wolf_fight",
+      "tooltipKey": null,
       "requirements": {
-        "resources": {},
-        "flags": [],
-        "balance": {"min": 0, "max": 100}
+        "minResources": {},
+        "requiredFlags": [],
+        "forbiddenFlags": [],
+        "minBalance": null,
+        "maxBalance": null
       },
-      "outcome": {
-        "transaction": {
-          "costs": {},
-          "gains": {"faith": 5}
-        },
-        "flags": {"set": ["wolf_dead"], "unset": []},
-        "world": {"tensionDelta": -2}
-      },
-      "challenge": {
-        "type": "combat",
-        "ref": "enemy_wolf_pack",
-        "difficulty": 3
+      "consequences": {
+        "resourceChanges": {"faith": 5},
+        "setFlags": ["wolf_dead"],
+        "clearFlags": [],
+        "balanceDelta": -5,
+        "regionStateChange": null,
+        "questProgress": null,
+        "triggerEventId": null,
+        "resultKey": "evt_combat_wolf_victory"
       }
     },
     {
       "id": "choice_flee",
       "labelKey": "evt_combat_wolf_flee",
-      "requirements": {},
-      "outcome": {
-        "transaction": {"costs": {"health": -3}, "gains": {}},
-        "flags": {},
-        "world": {"tensionDelta": 1}
-      },
-      "challenge": null
+      "tooltipKey": null,
+      "requirements": null,
+      "consequences": {
+        "resourceChanges": {"health": -3},
+        "setFlags": [],
+        "clearFlags": [],
+        "balanceDelta": 0,
+        "regionStateChange": null,
+        "questProgress": null,
+        "triggerEventId": null,
+        "resultKey": "evt_combat_wolf_fled"
+      }
     }
-  ]
+  ],
+
+  "miniGameChallenge": {
+    "id": "challenge_wolf_pack",
+    "challengeKind": "combat",
+    "difficulty": 3,
+    "contextRef": "enemy_wolf_pack"
+  }
 }
 ```
 
@@ -344,18 +362,28 @@ Mini-Game события:
 }
 ```
 
-### 6.3 MiniGameChallenge
+### 6.3 MiniGameChallengeDefinition
+
+> **Примечание:** Swift-код использует `MiniGameChallengeKind` вместо `type`.
 
 ```json
 {
-  "type": "combat",
-  "ref": "enemy_wolf_pack",
+  "id": "challenge_wolf_pack",
+  "challengeKind": "combat",
   "difficulty": 3,
-  "modifiers": {
-    "pressure": 42,
-    "regionState": "Borderland",
-    "playerBalance": 65
-  }
+  "contextRef": "enemy_wolf_pack",
+  "titleKey": "challenge_wolf_title",
+  "baseReward": {"faith": 10},
+  "basePenalty": {"health": -5}
+}
+```
+
+**Runtime modifiers (передаются в MiniGame Module):**
+```json
+{
+  "pressure": 42,
+  "regionState": "borderland",
+  "playerBalance": 65
 }
 ```
 

@@ -204,18 +204,33 @@ protocol PressureEngineProtocol {
 **Идея:** Все взаимодействия проходят через события.
 
 ```swift
-protocol EventDefinition {
+// Протокол (абстрактный интерфейс)
+protocol EventDefinitionProtocol {
+    associatedtype ChoiceType: ChoiceDefinitionProtocol
     var id: String { get }
-    var title: String { get }
-    var choices: [ChoiceDefinition] { get }
+    var title: String { get }      // Для UI — resolved string
+    var description: String { get }
+    var choices: [ChoiceType] { get }
     var isInstant: Bool { get }
     var isOneTime: Bool { get }
-
     func canOccur(in context: EventContext) -> Bool
 }
 
+// Конкретная реализация (использует ключи локализации)
+struct EventDefinition: GameDefinition {
+    let id: String
+    let titleKey: String           // Ключ локализации
+    let bodyKey: String            // Ключ локализации
+    let eventKind: EventKind       // .inline или .miniGame(...)
+    let choices: [ChoiceDefinition]
+    let isInstant: Bool
+    let isOneTime: Bool
+    // ... availability, poolIds, weight, cooldown
+}
+
 protocol EventSystemProtocol {
-    func getAvailableEvents(in context: EventContext) -> [EventDefinition]
+    associatedtype Event: EventDefinitionProtocol
+    func getAvailableEvents(in context: EventContext) -> [Event]
     func markCompleted(eventId: String)
     func isCompleted(eventId: String) -> Bool
 }
@@ -243,13 +258,15 @@ protocol EventSystemProtocol {
 **Идея:** Конфликт — универсальная сущность, не равная бою.
 
 ```swift
+// Протокол для определения челленджей
 protocol ChallengeDefinition {
     var type: ChallengeType { get }
     var difficulty: Int { get }
     var context: Any? { get }
 }
 
-enum ChallengeType {
+// Общие типы челленджей (EngineProtocols.swift)
+enum ChallengeType: String, Codable {
     case combat
     case skillCheck
     case socialEncounter
@@ -258,8 +275,17 @@ enum ChallengeType {
     case sacrifice
 }
 
+// Типы Mini-Game (MiniGameChallengeDefinition.swift)
+enum MiniGameChallengeKind: String, Codable {
+    case combat, ritual, exploration, dialogue, puzzle
+}
+
 protocol ConflictResolverProtocol {
-    func resolve(challenge: ChallengeDefinition, actor: Player) async -> ResolutionResult
+    associatedtype Challenge: ChallengeDefinition
+    associatedtype Actor
+    associatedtype Reward
+    associatedtype Penalty
+    func resolve(challenge: Challenge, actor: Actor) async -> ResolutionResult<Reward, Penalty>
 }
 
 enum ResolutionResult<Reward, Penalty> {
