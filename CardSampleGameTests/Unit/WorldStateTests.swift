@@ -415,4 +415,62 @@ final class WorldStateTests: XCTestCase {
         // Сброс на системный RNG
         WorldRNG.shared.resetToSystem()
     }
+
+    /// Тест: рынок детерминирован при фиксированном seed
+    func testMarketDeterministicWithSeed() {
+        let seed: UInt64 = 123456
+
+        // Создаём тестовые карты
+        let testCards = (0..<20).map { i in
+            Card(
+                name: "TestCard\(i)",
+                type: .item,
+                rarity: .common,
+                role: i % 2 == 0 ? .sustain : .utility
+            )
+        }
+
+        // Первая генерация рынка
+        WorldRNG.shared.setSeed(seed)
+        let world1 = WorldState()
+        let market1 = world1.generateMarket(allCards: testCards, globalPoolSize: 3, regionalPoolSize: 2)
+
+        // Вторая генерация с тем же seed
+        WorldRNG.shared.setSeed(seed)
+        let world2 = WorldState()
+        let market2 = world2.generateMarket(allCards: testCards, globalPoolSize: 3, regionalPoolSize: 2)
+
+        // Рынки должны быть идентичны
+        XCTAssertEqual(market1.count, market2.count, "Размер рынка должен совпадать")
+        for i in 0..<min(market1.count, market2.count) {
+            XCTAssertEqual(market1[i].name, market2[i].name, "Карта \(i) должна совпадать")
+        }
+
+        // Сброс на системный RNG
+        WorldRNG.shared.resetToSystem()
+    }
+
+    /// Тест: low-tension recovery детерминирован
+    func testLowTensionRecoveryDeterministic() {
+        let seed: UInt64 = 999888
+
+        // Первый прогон
+        WorldRNG.shared.setSeed(seed)
+        let world1 = WorldState()
+        world1.worldTension = 15 // Low tension triggers recovery
+        world1.advanceTime(by: 3)
+        let regions1 = world1.regions.map { "\($0.name):\($0.state)" }
+
+        // Второй прогон с тем же seed
+        WorldRNG.shared.setSeed(seed)
+        let world2 = WorldState()
+        world2.worldTension = 15
+        world2.advanceTime(by: 3)
+        let regions2 = world2.regions.map { "\($0.name):\($0.state)" }
+
+        XCTAssertEqual(regions1, regions2, "Состояния регионов должны совпадать при одном seed")
+
+        // Сброс на системный RNG
+        WorldRNG.shared.resetToSystem()
+    }
 }
