@@ -69,7 +69,7 @@ struct WorldMapView: View {
                     .padding()
                 }
             }
-            .navigationTitle("Карта Мира")
+            .navigationTitle(L10n.tmGameTitle.localized)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -79,7 +79,7 @@ struct WorldMapView: View {
                         }) {
                             HStack(spacing: 4) {
                                 Image(systemName: "chevron.left")
-                                Text("Меню")
+                                Text(L10n.uiMenuButton.localized)
                             }
                         }
                     }
@@ -108,13 +108,13 @@ struct WorldMapView: View {
                     )
                 }
             }
-            .alert("Выйти в меню?", isPresented: $showingExitConfirmation) {
-                Button("Отмена", role: .cancel) { }
-                Button("Выйти") {
+            .alert(L10n.uiExit.localized + "?", isPresented: $showingExitConfirmation) {
+                Button(L10n.buttonOk.localized, role: .cancel) { }
+                Button(L10n.uiExit.localized) {
                     onExit?()
                 }
             } message: {
-                Text("Прогресс будет сохранен")
+                Text(L10n.uiProgressSaved.localized)
             }
             .alert(currentDayEvent?.title ?? "Событие мира", isPresented: $showingDayEvent) {
                 Button("Понятно", role: .cancel) {
@@ -261,7 +261,7 @@ struct WorldMapView: View {
             HStack {
                 // World Tension
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Напряжение")
+                    Text(L10n.tooltipBalance.localized)
                         .font(.caption2)
                         .foregroundColor(.secondary)
                     HStack(spacing: 4) {
