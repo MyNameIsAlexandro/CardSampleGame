@@ -459,3 +459,65 @@
 "action.trade" = "Торговать";
 "action.strengthen.anchor" = "Укрепить Якорь";
 "action.explore.region" = "Исследовать";
+
+// MARK: - Combat UI (Engine-First Migration)
+
+// Combat phases
+"combat.title" = "Бой";
+"combat.turn.number" = "Ход %d";
+"combat.actions.remaining" = "Действий: %d";
+"combat.phase.player.turn" = "Ваш ход";
+"combat.phase.enemy.turn" = "Ход врага";
+"combat.phase.end.turn" = "Конец хода";
+"combat.phase.over" = "Бой завершён";
+
+// Combat actions
+"combat.action.attack" = "Атака";
+"combat.action.end.turn" = "Завершить ход";
+"combat.action.flee" = "Бежать";
+"combat.action.play.card" = "Сыграть карту";
+
+// Combat stats
+"combat.stat.hp" = "ОЗ";
+"combat.stat.attack" = "Атака";
+"combat.stat.defense" = "Защита";
+"combat.stat.strength" = "Сила";
+
+// Combat messages
+"combat.message.victory" = "Победа!";
+"combat.message.defeat" = "Поражение";
+"combat.message.fled" = "Вы сбежали";
+"combat.message.hit" = "Попадание!";
+"combat.message.miss" = "Промах!";
+"combat.message.damage" = "%d урона";
+
+// Combat log
+"combat.log.title" = "Журнал боя";
+"combat.log.battle.start" = "Бой начался с %@";
+"combat.log.actions.per.turn" = "У вас %d действий за ход";
+"combat.log.enemy.attacks" = "%@ атакует!";
+"combat.log.spirit.attacks" = "%@ атакует противника";
+"combat.log.meditation" = "Медитация (+%d веры)";
+"combat.log.turn.separator" = "--- Ход %d ---";
+
+// Combat card effects
+"combat.effect.heal" = "Исцеление +%d";
+"combat.effect.damage" = "Урон %d";
+"combat.effect.draw.cards" = "Взято карт: %d";
+"combat.effect.gain.faith" = "Вера +%d";
+"combat.effect.spend.faith" = "Вера -%d";
+"combat.effect.remove.curse" = "Проклятие снято";
+"combat.effect.bonus.dice" = "Бонусные кубики: +%d";
+"combat.effect.shift.balance" = "Баланс сдвинут к %@";
+"combat.effect.summon.spirit" = "Призван дух (Сила: %d)";
+"combat.effect.sacrifice" = "Жертвоприношение";
+
+// Combat attack breakdown
+"combat.attack.roll" = "Бросок: %d + %d = %d";
+"combat.damage.calc" = "Урон: %d (база) + %d (бонус) = %d";
+"combat.damage.base" = "Базовый урон: %d";
+
+// Hand UI in combat
+"combat.your.hand" = "Ваши карты";
+"combat.tap.to.play" = "Нажмите для игры";
+"combat.not.enough.faith" = "Недостаточно веры";

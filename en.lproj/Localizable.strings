@@ -418,3 +418,65 @@
 "action.trade" = "Trade";
 "action.strengthen.anchor" = "Strengthen Anchor";
 "action.explore.region" = "Explore";
+
+// MARK: - Combat UI (Engine-First Migration)
+
+// Combat phases
+"combat.title" = "Combat";
+"combat.turn.number" = "Turn %d";
+"combat.actions.remaining" = "Actions: %d";
+"combat.phase.player.turn" = "Your Turn";
+"combat.phase.enemy.turn" = "Enemy Turn";
+"combat.phase.end.turn" = "End Turn";
+"combat.phase.over" = "Combat Over";
+
+// Combat actions
+"combat.action.attack" = "Attack";
+"combat.action.end.turn" = "End Turn";
+"combat.action.flee" = "Flee";
+"combat.action.play.card" = "Play Card";
+
+// Combat stats
+"combat.stat.hp" = "HP";
+"combat.stat.attack" = "Attack";
+"combat.stat.defense" = "Defense";
+"combat.stat.strength" = "Strength";
+
+// Combat messages
+"combat.message.victory" = "Victory!";
+"combat.message.defeat" = "Defeat";
+"combat.message.fled" = "You fled";
+"combat.message.hit" = "Hit!";
+"combat.message.miss" = "Miss!";
+"combat.message.damage" = "%d damage";
+
+// Combat log
+"combat.log.title" = "Combat Log";
+"combat.log.battle.start" = "Battle started with %@";
+"combat.log.actions.per.turn" = "You have %d actions per turn";
+"combat.log.enemy.attacks" = "%@ attacks!";
+"combat.log.spirit.attacks" = "%@ attacks the enemy";
+"combat.log.meditation" = "Meditation (+%d faith)";
+"combat.log.turn.separator" = "--- Turn %d ---";
+
+// Combat card effects
+"combat.effect.heal" = "Heal +%d";
+"combat.effect.damage" = "Damage %d";
+"combat.effect.draw.cards" = "Cards drawn: %d";
+"combat.effect.gain.faith" = "Faith +%d";
+"combat.effect.spend.faith" = "Faith -%d";
+"combat.effect.remove.curse" = "Curse removed";
+"combat.effect.bonus.dice" = "Bonus dice: +%d";
+"combat.effect.shift.balance" = "Balance shifted toward %@";
+"combat.effect.summon.spirit" = "Spirit summoned (Power: %d)";
+"combat.effect.sacrifice" = "Sacrifice";
+
+// Combat attack breakdown
+"combat.attack.roll" = "Roll: %d + %d = %d";
+"combat.damage.calc" = "Damage: %d (base) + %d (bonus) = %d";
+"combat.damage.base" = "Base damage: %d";
+
+// Hand UI in combat
+"combat.your.hand" = "Your Hand";
+"combat.tap.to.play" = "Tap to play";
+"combat.not.enough.faith" = "Not enough faith";

@@ -133,8 +133,8 @@ struct CombatView: View {
         }
         .background(Color(UIColor.systemBackground))
         .accessibilityIdentifier(AccessibilityIdentifiers.Combat.view)
-        .alert("Бой", isPresented: $showingMessage) {
-            Button("OK") { }
+        .alert(L10n.combatTitle.localized, isPresented: $showingMessage) {
+            Button(L10n.buttonOk.localized) { }
         } message: {
             Text(lastMessage)
         }
@@ -149,7 +149,7 @@ struct CombatView: View {
         HStack {
             // Ход и фаза
             VStack(alignment: .leading, spacing: 2) {
-                Text("Ход \(turnNumber)")
+                Text(L10n.combatTurnNumber.localized(with: turnNumber))
                     .font(.headline)
                 Text(phaseText)
                     .font(.subheadline)
@@ -180,7 +180,7 @@ struct CombatView: View {
             Button(action: flee) {
                 HStack(spacing: 4) {
                     Image(systemName: "figure.run")
-                    Text("Бежать")
+                    Text(L10n.combatFleeButton.localized)
                         .font(.caption)
                 }
                 .foregroundColor(.gray)
@@ -213,7 +213,7 @@ struct CombatView: View {
                     Text("\(monsterHealth)")
                         .font(.title)
                         .fontWeight(.bold)
-                    Text("HP")
+                    Text(L10n.combatHP.localized)
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -226,7 +226,7 @@ struct CombatView: View {
                     Text("\(monster.power ?? 3)")
                         .font(.title)
                         .fontWeight(.bold)
-                    Text("Атака")
+                    Text(L10n.combatAttack.localized)
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -239,7 +239,7 @@ struct CombatView: View {
                     Text("\(monster.defense ?? 10)")
                         .font(.title)
                         .fontWeight(.bold)
-                    Text("Защита")
+                    Text(L10n.combatDefense.localized)
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -276,7 +276,7 @@ struct CombatView: View {
                     .foregroundColor(.red)
                 Text("\(engine.playerHealth)/\(engine.playerMaxHealth)")
                     .fontWeight(.bold)
-                Text("HP")
+                Text(L10n.combatHP.localized)
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -286,7 +286,7 @@ struct CombatView: View {
                     .foregroundColor(.orange)
                 Text("\(player?.strength ?? 1)")
                     .fontWeight(.bold)
-                Text("Сила")
+                Text(L10n.combatStrength.localized)
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -296,7 +296,7 @@ struct CombatView: View {
                     .foregroundColor(.yellow)
                 Text("\(engine.playerFaith)")
                     .fontWeight(.bold)
-                Text("Вера")
+                Text(L10n.tmResourceFaith.localized)
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -314,21 +314,21 @@ struct CombatView: View {
         VStack(spacing: 16) {
             // Инструкция
             VStack(spacing: 4) {
-                Text("ВАШ ХОД")
+                Text(L10n.combatPlayerTurn.localized)
                     .font(.headline)
                     .foregroundColor(.green)
 
                 if actionsRemaining > 0 {
-                    Text("Осталось действий: \(actionsRemaining)")
+                    Text(L10n.combatActionsRemaining.localized(with: actionsRemaining))
                         .font(.subheadline)
-                    Text("Нажмите на карту чтобы сыграть её, или атакуйте")
+                    Text(L10n.combatTapToPlay.localized)
                         .font(.caption)
                         .foregroundColor(.secondary)
                 } else {
-                    Text("Действия закончились!")
+                    Text(L10n.combatActionsRemaining.localized(with: 0))
                         .font(.subheadline)
                         .foregroundColor(.orange)
-                    Text("Нажмите «Завершить ход»")
+                    Text(L10n.combatEndTurnButton.localized)
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -345,10 +345,10 @@ struct CombatView: View {
                     VStack(spacing: 4) {
                         Image(systemName: "hand.raised.fill")
                             .font(.title2)
-                        Text("Атака")
+                        Text(L10n.combatAttackButton.localized)
                             .font(.caption)
                             .fontWeight(.semibold)
-                        Text("(-1 действие)")
+                        Text("(-1)")
                             .font(.system(size: 9))
                             .foregroundColor(.white.opacity(0.7))
                     }
@@ -366,12 +366,9 @@ struct CombatView: View {
                     VStack(spacing: 4) {
                         Image(systemName: "arrow.right.circle.fill")
                             .font(.title2)
-                        Text("Завершить")
+                        Text(L10n.combatEndTurnButton.localized)
                             .font(.caption)
                             .fontWeight(.semibold)
-                        Text("ход")
-                            .font(.system(size: 9))
-                            .foregroundColor(.white.opacity(0.7))
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
@@ -389,14 +386,14 @@ struct CombatView: View {
 
     var enemyTurnView: some View {
         VStack(spacing: 12) {
-            Text("ХОД ВРАГА")
+            Text(L10n.combatEnemyTurn.localized)
                 .font(.headline)
                 .foregroundColor(.red)
 
             HStack {
                 Image(systemName: "burst.fill")
                     .foregroundColor(.red)
-                Text("\(monster.name) атакует!")
+                Text(L10n.combatLogEnemyAttacks.localized(with: monster.name))
             }
 
             ProgressView()
@@ -415,13 +412,9 @@ struct CombatView: View {
 
     var endTurnView: some View {
         VStack(spacing: 12) {
-            Text("КОНЕЦ ХОДА")
+            Text(L10n.combatEndTurn.localized)
                 .font(.headline)
                 .foregroundColor(.purple)
-
-            Text("Сброс руки → Взятие 5 карт → +1 Вера")
-                .font(.caption)
-                .foregroundColor(.secondary)
 
             ProgressView()
                 .progressViewStyle(CircularProgressViewStyle(tint: .purple))
@@ -440,14 +433,12 @@ struct CombatView: View {
     var combatOverView: some View {
         VStack(spacing: 12) {
             if monsterHealth <= 0 {
-                Text("🎉 ПОБЕДА!")
+                Text("🎉 " + L10n.combatVictory.localized)
                     .font(.title)
                     .fontWeight(.bold)
                     .foregroundColor(.green)
-                Text("\(monster.name) повержен!")
-                    .foregroundColor(.secondary)
             } else {
-                Text("💀 ПОРАЖЕНИЕ")
+                Text("💀 " + L10n.combatDefeat.localized)
                     .font(.title)
                     .fontWeight(.bold)
                     .foregroundColor(.red)
@@ -470,7 +461,7 @@ struct CombatView: View {
 
             // Журнал боя
             VStack(alignment: .leading, spacing: 4) {
-                Text("📜 Журнал боя")
+                Text("📜 " + L10n.combatLogTitle.localized)
                     .font(.caption)
                     .fontWeight(.bold)
                     .foregroundColor(.secondary)
@@ -623,14 +614,14 @@ struct CombatView: View {
     var playerHandView: some View {
         VStack(spacing: 4) {
             HStack {
-                Text("🃏 Ваша рука (\(playerHand.count) карт)")
+                Text("🃏 " + L10n.combatYourHand.localized + " (\(playerHand.count))")
                     .font(.caption)
                     .foregroundColor(.secondary)
 
                 Spacer()
 
                 if phase == .playerTurn && actionsRemaining > 0 {
-                    Text("Нажмите на карту = сыграть (-1 действие)")
+                    Text(L10n.combatTapToPlay.localized)
                         .font(.system(size: 10))
                         .foregroundColor(.green)
                 }
@@ -965,10 +956,10 @@ struct CombatView: View {
 
     var phaseText: String {
         switch phase {
-        case .playerTurn: return "Ваш ход"
-        case .enemyTurn: return "Ход врага"
-        case .endTurn: return "Конец хода"
-        case .combatOver: return "Бой окончен"
+        case .playerTurn: return L10n.combatPlayerTurn.localized
+        case .enemyTurn: return L10n.combatEnemyTurn.localized
+        case .endTurn: return L10n.combatEndTurn.localized
+        case .combatOver: return L10n.combatOver.localized
         }
     }
 

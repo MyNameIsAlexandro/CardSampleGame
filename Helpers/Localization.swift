@@ -214,4 +214,66 @@ enum L10n {
     static let actionTrade = "action.trade"
     static let actionStrengthenAnchor = "action.strengthen.anchor"
     static let actionExploreRegion = "action.explore.region"
+
+    // MARK: - Combat UI (Engine-First Migration)
+
+    // Combat phases
+    static let combatTitle = "combat.title"
+    static let combatTurnNumber = "combat.turn.number"
+    static let combatActionsRemaining = "combat.actions.remaining"
+    static let combatPlayerTurn = "combat.phase.player.turn"
+    static let combatEnemyTurn = "combat.phase.enemy.turn"
+    static let combatEndTurn = "combat.phase.end.turn"
+    static let combatOver = "combat.phase.over"
+
+    // Combat actions
+    static let combatAttackButton = "combat.action.attack"
+    static let combatEndTurnButton = "combat.action.end.turn"
+    static let combatFleeButton = "combat.action.flee"
+    static let combatPlayCard = "combat.action.play.card"
+
+    // Combat stats
+    static let combatHP = "combat.stat.hp"
+    static let combatAttack = "combat.stat.attack"
+    static let combatDefense = "combat.stat.defense"
+    static let combatStrength = "combat.stat.strength"
+
+    // Combat messages
+    static let combatVictory = "combat.message.victory"
+    static let combatDefeat = "combat.message.defeat"
+    static let combatFled = "combat.message.fled"
+    static let combatHit = "combat.message.hit"
+    static let combatMiss = "combat.message.miss"
+    static let combatDamage = "combat.message.damage"
+
+    // Combat log
+    static let combatLogTitle = "combat.log.title"
+    static let combatLogBattleStart = "combat.log.battle.start"
+    static let combatLogActionsPerTurn = "combat.log.actions.per.turn"
+    static let combatLogEnemyAttacks = "combat.log.enemy.attacks"
+    static let combatLogSpiritAttacks = "combat.log.spirit.attacks"
+    static let combatLogMeditation = "combat.log.meditation"
+    static let combatLogTurnSeparator = "combat.log.turn.separator"
+
+    // Combat card effects
+    static let combatEffectHeal = "combat.effect.heal"
+    static let combatEffectDamage = "combat.effect.damage"
+    static let combatEffectDrawCards = "combat.effect.draw.cards"
+    static let combatEffectGainFaith = "combat.effect.gain.faith"
+    static let combatEffectSpendFaith = "combat.effect.spend.faith"
+    static let combatEffectRemoveCurse = "combat.effect.remove.curse"
+    static let combatEffectBonusDice = "combat.effect.bonus.dice"
+    static let combatEffectShiftBalance = "combat.effect.shift.balance"
+    static let combatEffectSummonSpirit = "combat.effect.summon.spirit"
+    static let combatEffectSacrifice = "combat.effect.sacrifice"
+
+    // Combat attack breakdown
+    static let combatAttackRoll = "combat.attack.roll"
+    static let combatDamageCalc = "combat.damage.calc"
+    static let combatBaseDamage = "combat.damage.base"
+
+    // Hand UI
+    static let combatYourHand = "combat.your.hand"
+    static let combatTapToPlay = "combat.tap.to.play"
+    static let combatNotEnoughFaith = "combat.not.enough.faith"
 }
