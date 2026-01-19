@@ -338,7 +338,6 @@ class WorldState: ObservableObject, Codable {
     /// After full migration, this method will be removed.
     ///
     /// - Warning: Do not call directly from UI/ViewModel code. Use Engine actions.
-    @available(*, deprecated, message: "Use TwilightGameEngine.performAction() for UI. This is retained for tests and internal use only.")
     func processDayStart() {
         performDayStartLogic()
     }
@@ -512,7 +511,6 @@ class WorldState: ObservableObject, Codable {
     /// - **Internal**: Used by `moveToRegion` and similar legacy methods
     ///
     /// - Warning: Do not call directly from UI/ViewModel code. Use Engine actions.
-    @available(*, deprecated, message: "Use TwilightGameEngine.performAction() for UI. This is retained for tests and internal use only.")
     func advanceTime(by days: Int = 1) {
         advanceTimeInternal(by: days)
     }
