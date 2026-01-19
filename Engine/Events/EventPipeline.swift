@@ -9,18 +9,15 @@ final class EventPipeline {
 
     private let selector: EventSelector
     private let resolver: EventResolver
-    private let requirementsEvaluator: RequirementsEvaluator
 
     // MARK: - Initialization
 
     init(
         selector: EventSelector = EventSelector(),
-        resolver: EventResolver = EventResolver(),
-        requirementsEvaluator: RequirementsEvaluator = RequirementsEvaluator()
+        resolver: EventResolver = EventResolver()
     ) {
         self.selector = selector
         self.resolver = resolver
-        self.requirementsEvaluator = requirementsEvaluator
     }
 
     // MARK: - Pipeline Methods
@@ -63,14 +60,34 @@ final class EventPipeline {
 
         let choice = event.choices[choiceIndex]
 
-        // Check requirements
-        let reqsMet = requirementsEvaluator.evaluate(
-            requirements: choice.requirements,
-            context: context
-        )
+        // Check requirements if present
+        guard let requirements = choice.requirements else {
+            return (true, nil)  // No requirements = always available
+        }
 
-        if !reqsMet.allSatisfied {
-            return (false, reqsMet.failureReasons.first)
+        // Check minimum faith
+        if let minFaith = requirements.minimumFaith {
+            let currentFaith = context.resources["faith"] ?? 0
+            if currentFaith < minFaith {
+                return (false, "Недостаточно веры (нужно \(minFaith))")
+            }
+        }
+
+        // Check minimum health
+        if let minHealth = requirements.minimumHealth {
+            let currentHealth = context.resources["health"] ?? 0
+            if currentHealth < minHealth {
+                return (false, "Недостаточно здоровья (нужно \(minHealth))")
+            }
+        }
+
+        // Check required flags
+        if let requiredFlags = requirements.requiredFlags {
+            for flag in requiredFlags {
+                if context.flags[flag] != true {
+                    return (false, "Требуется флаг: \(flag)")
+                }
+            }
         }
 
         return (true, nil)
@@ -125,9 +142,18 @@ final class EventSelector {
             }
         }
 
-        // Check required flags (from context)
-        for flag in context.requiredFlags where context.flags[flag] != true {
-            return false
+        // Check event's required flags against context flags
+        if let eventRequiredFlags = event.requiredFlags {
+            for flag in eventRequiredFlags where context.flags[flag] != true {
+                return false
+            }
+        }
+
+        // Check event's forbidden flags
+        if let forbiddenFlags = event.forbiddenFlags {
+            for flag in forbiddenFlags where context.flags[flag] == true {
+                return false
+            }
         }
 
         return true
@@ -299,18 +325,8 @@ extension GameEvent {
     /// Event filter criteria for engine filtering
     var filterCriteria: EventFilterCriteria {
         // Build filter criteria from event data
-        var criteria = EventFilterCriteria()
-
-        // Extract from regionTypes if present
-        if !regionTypes.isEmpty {
-            // Location type requirement
-        }
-
-        // Extract from regionStates if present
-        if !regionStates.isEmpty {
-            // Location state requirement
-        }
-
+        // Note: Full implementation would extract criteria from regionTypes/regionStates
+        let criteria = EventFilterCriteria()
         return criteria
     }
 }

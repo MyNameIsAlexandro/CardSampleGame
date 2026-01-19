@@ -74,7 +74,7 @@ final class WorldStateEngineAdapter {
         case .questProgressed(let questId, let newStage):
             // Update quest stage in WorldState's activeQuests
             if let index = worldState.activeQuests.firstIndex(where: { $0.id == questId }) {
-                worldState.activeQuests[index].currentStage = newStage
+                worldState.activeQuests[index].stage = newStage
             }
 
         default:
@@ -130,13 +130,13 @@ final class WorldStateEngineAdapter {
 
         // Delegate to WorldState's quest checking
         // This is a simplified version - full implementation would check all triggers
-        for quest in worldState.activeQuests where quest.state == .active {
-            let previousStage = quest.currentStage
+        for quest in worldState.activeQuests where !quest.completed {
+            let previousStage = quest.stage
             worldState.checkQuestProgress(quest)
 
             if let updatedQuest = worldState.activeQuests.first(where: { $0.id == quest.id }),
-               updatedQuest.currentStage != previousStage {
-                changes.append(.questProgressed(questId: quest.id, newStage: updatedQuest.currentStage))
+               updatedQuest.stage != previousStage {
+                changes.append(.questProgressed(questId: quest.id, newStage: updatedQuest.stage))
             }
         }
 
@@ -271,11 +271,11 @@ final class GameStateEngineAdapter: ObservableObject {
             // Prepare combat UI
         }
 
-        if let eventId = result.currentEvent {
+        if result.currentEvent != nil {
             // Show event UI
         }
 
-        if let gameEnd = result.gameEnded {
+        if result.gameEnded != nil {
             // Show game over UI
         }
     }
