@@ -426,6 +426,7 @@ final class WorldStateTests: XCTestCase {
                 name: "TestCard\(i)",
                 type: .item,
                 rarity: .common,
+                description: "Test card \(i)",
                 role: i % 2 == 0 ? .sustain : .utility
             )
         }
