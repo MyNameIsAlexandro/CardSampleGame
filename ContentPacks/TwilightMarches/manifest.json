@@ -1,0 +1,39 @@
+{
+  "id": "twilight-marches-act1",
+  "name": {
+    "en": "Twilight Marches - Act I",
+    "ru": "Сумрачные Пределы - Акт I"
+  },
+  "description": {
+    "en": "The first act of Twilight Marches campaign. Explore the borderlands between worlds and protect the sacred anchors.",
+    "ru": "Первый акт кампании Сумрачных Пределов. Исследуйте порубежье между мирами и защитите священные якоря."
+  },
+  "version": "1.0.0",
+  "type": "campaign",
+  "core_version_min": "1.0.0",
+  "core_version_max": null,
+  "dependencies": [],
+  "required_capabilities": [],
+  "entry_region": "village",
+  "entry_quest": "main_quest",
+  "recommended_heroes": [
+    "warrior_ragnar",
+    "mage_elvira",
+    "ranger_thorin",
+    "priest_aurelius",
+    "shadow_umbra"
+  ],
+  "author": "CardSampleGame Team",
+  "license": "proprietary",
+  "release_date": "2026-01-01",
+  "locales": ["en", "ru"],
+  "checksums": null,
+  "regions_path": "Campaign/ActI/regions",
+  "events_path": "Campaign/ActI/events",
+  "quests_path": "Campaign/ActI/quests",
+  "anchors_path": "Campaign/ActI/anchors",
+  "heroes_path": "Investigators",
+  "cards_path": "Cards",
+  "balance_path": "Balance",
+  "localization_path": "Localization"
+}
