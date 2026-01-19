@@ -156,8 +156,7 @@ final class Phase3ContractTests: XCTestCase {
 
         // Move to region with anchor
         guard let regionWithAnchor = worldState.regions.first(where: { $0.anchor != nil }) else {
-            XCTSkip("No region with anchor found")
-            return
+            throw XCTSkip("No region with anchor found")
         }
         worldState.currentRegionId = regionWithAnchor.id
         engine.syncFromLegacy()
@@ -333,23 +332,22 @@ final class Phase3ContractTests: XCTestCase {
     }
 }
 
-// MARK: - TwilightGameAction Equatable Extension (for tests)
+// MARK: - Test Helpers
 
-extension TwilightGameAction: CustomStringConvertible {
-    var description: String {
-        switch self {
-        case .travel(let id): return "travel(\(id))"
-        case .rest: return "rest"
-        case .explore: return "explore"
-        case .trade: return "trade"
-        case .strengthenAnchor: return "strengthenAnchor"
-        case .chooseEventOption(let e, let c): return "choose(\(e), \(c))"
-        case .resolveMiniGame(let r): return "miniGame(\(r))"
-        case .startCombat(let id): return "combat(\(id))"
-        case .playCard(let c, let t): return "playCard(\(c), \(String(describing: t)))"
-        case .endCombatTurn: return "endCombatTurn"
-        case .skipTurn: return "skipTurn"
-        case .custom(let id, let cost): return "custom(\(id), \(cost))"
-        }
+/// Helper to describe TwilightGameAction for test output (avoids extension conformance issues)
+private func describeAction(_ action: TwilightGameAction) -> String {
+    switch action {
+    case .travel(let id): return "travel(\(id))"
+    case .rest: return "rest"
+    case .explore: return "explore"
+    case .trade: return "trade"
+    case .strengthenAnchor: return "strengthenAnchor"
+    case .chooseEventOption(let e, let c): return "choose(\(e), \(c))"
+    case .resolveMiniGame(let r): return "miniGame(\(r))"
+    case .startCombat(let id): return "combat(\(id))"
+    case .playCard(let c, let t): return "playCard(\(c), \(String(describing: t)))"
+    case .endCombatTurn: return "endCombatTurn"
+    case .skipTurn: return "skipTurn"
+    case .custom(let id, let cost): return "custom(\(id), \(cost))"
     }
 }
