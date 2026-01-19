@@ -470,7 +470,7 @@ CardSampleGameTests/
 │   ├── SmokeConfigTests.swift          # Валидация конфигурации (канонические значения)
 │   ├── MetricsDistributionTests.swift  # 1000 симуляций, статистические проверки
 │   └── PlaythroughSimulationTests.swift # E2E детерминированная симуляция
-└── Engine/                             # 4 файла, Engine Contract Tests
+└── Engine/                             # 6 файлов, Engine Contract Tests (Phase 1-3)
     ├── EngineContractsTests.swift      # Core engine invariants (INV-001..007)
     ├── EventModuleContractsTests.swift # Event module contracts (INV-E01..06)
     ├── DataSeparationTests.swift       # Definition/Runtime separation (INV-D01..05)
@@ -491,12 +491,24 @@ CardSampleGameTests/
 | Сохранения (TEST-016) | ✅ 38 | - | ✅ 4 | 42 |
 | E2E симуляция (TEST-015) | - | ✅ 20 | ✅ 3 | 23 |
 | Engine Contracts (NEW) | - | - | ✅ 18 | 18 |
-| **ИТОГО** | **211** | **53** | **36** | **300** |
+| Phase 3 Contracts (NEW) | - | - | ✅ 13 | 13 |
+| **ИТОГО** | **211** | **53** | **49** | **313** |
 
-> **Engine Contract Tests** — новый слой тестов, проверяющий инварианты движка.
+> **Engine Contract Tests** — слой тестов, проверяющий инварианты движка.
 > После миграции на Engine v1.0, тесты TEST-002/003 (время) и TEST-007/008 (события)
 > должны ссылаться на `EngineContractsTests` и `EventModuleContractsTests` как
 > канонические источники проверки контрактов.
+>
+> **Phase3ContractTests** (13 тестов) проверяют GameLoop интеграцию:
+> - INV-P3-001: Все действия возвращают ActionResult
+> - INV-P3-002: Время продвигается только через Engine
+> - INV-P3-003: StateChange отслеживает все изменения
+> - INV-P3-004: Валидация действий перед выполнением
+> - INV-P3-005: Эскалация напряжения по формуле 3 + day/10
+> - INV-P3-006: Legacy синхронизация после действий
+> - INV-P3-007–011: Rest heals, Anchor costs faith, Game Over conditions
+> - INV-P3-012: Event resolution через StateChange
+> - INV-P3-013: Детерминизм с seed
 
 > **Примечание:** UI-тесты (XCUIApplication) пока отсутствуют. Бывшие "UI-тесты"
 > переименованы в Model-тесты и перенесены в Unit/, т.к. они тестируют модели данных,
@@ -528,8 +540,10 @@ CardSampleGameTests/
 | EventModuleContractsTests.swift | Event module contracts | ~10 | ~350 |
 | DataSeparationTests.swift | Definition/Runtime separation | ~8 | ~280 |
 | RegressionPlaythroughTests.swift | Migration safety harness | ~10 | ~350 |
-| **Engine ИТОГО** | | **~36** | **~1230** |
-| **ВСЕГО** | | **~386** | **~6230** |
+| Phase2ContractTests.swift | Phase 2 data separation | ~8 | ~300 |
+| Phase3ContractTests.swift | Phase 3 GameLoop integration | ~13 | ~350 |
+| **Engine ИТОГО** | | **~57** | **~1880** |
+| **ВСЕГО** | | **~407** | **~6880** |
 
 ### Правила для MetricsDistributionTests
 
