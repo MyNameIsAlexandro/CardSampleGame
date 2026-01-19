@@ -15,7 +15,7 @@
   "dependencies": [],
   "required_capabilities": [],
   "entry_region": "village",
-  "entry_quest": "main_quest",
+  "entry_quest": "quest_main_act1",
   "recommended_heroes": [
     "warrior_ragnar",
     "mage_elvira",
@@ -28,12 +28,12 @@
   "release_date": "2026-01-01",
   "locales": ["en", "ru"],
   "checksums": null,
-  "regions_path": "Campaign/ActI/regions",
-  "events_path": "Campaign/ActI/events",
-  "quests_path": "Campaign/ActI/quests",
-  "anchors_path": "Campaign/ActI/anchors",
+  "regions_path": "Campaign/ActI/regions.json",
+  "events_path": "Campaign/ActI/events.json",
+  "quests_path": "Campaign/ActI/quests.json",
+  "anchors_path": "Campaign/ActI/anchors.json",
   "heroes_path": "Investigators",
   "cards_path": "Cards",
-  "balance_path": "Balance",
+  "balance_path": "Balance/balance.json",
   "localization_path": "Localization"
 }

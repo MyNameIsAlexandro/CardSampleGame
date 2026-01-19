@@ -1,0 +1,146 @@
+[
+  {
+    "id": "anchor_village_chapel",
+    "title": {
+      "en": "Village Chapel",
+      "ru": "Деревенская Часовня"
+    },
+    "description": {
+      "en": "A small chapel offering protection to the village",
+      "ru": "Небольшая часовня, защищающая деревню"
+    },
+    "region_id": "village",
+    "anchor_type": "chapel",
+    "initial_influence": "light",
+    "power": 6,
+    "max_integrity": 100,
+    "initial_integrity": 85,
+    "strengthen_amount": 15,
+    "strengthen_cost": {
+      "changes": [
+        {"resource_id": "faith", "amount": -5}
+      ]
+    },
+    "resistance_divisor": 100
+  },
+  {
+    "id": "anchor_sacred_oak",
+    "title": {
+      "en": "Sacred Oak",
+      "ru": "Священный Дуб"
+    },
+    "description": {
+      "en": "An ancient tree imbued with divine essence",
+      "ru": "Древнее дерево, наполненное божественной сущностью"
+    },
+    "region_id": "oak",
+    "anchor_type": "sacred_tree",
+    "initial_influence": "light",
+    "power": 8,
+    "max_integrity": 100,
+    "initial_integrity": 90,
+    "strengthen_amount": 20,
+    "strengthen_cost": {
+      "changes": [
+        {"resource_id": "faith", "amount": -8}
+      ]
+    },
+    "resistance_divisor": 100
+  },
+  {
+    "id": "anchor_forest_idol",
+    "title": {
+      "en": "Forest Stone Idol",
+      "ru": "Лесной Каменный Идол"
+    },
+    "description": {
+      "en": "A weathered stone idol of forgotten gods",
+      "ru": "Обветшалый каменный идол забытых богов"
+    },
+    "region_id": "forest",
+    "anchor_type": "stone_idol",
+    "initial_influence": "neutral",
+    "power": 5,
+    "max_integrity": 100,
+    "initial_integrity": 55,
+    "strengthen_amount": 15,
+    "strengthen_cost": {
+      "changes": [
+        {"resource_id": "faith", "amount": -5}
+      ]
+    },
+    "resistance_divisor": 100
+  },
+  {
+    "id": "anchor_swamp_spring",
+    "title": {
+      "en": "Corrupted Spring",
+      "ru": "Осквернённый Источник"
+    },
+    "description": {
+      "en": "A once-pure spring now tainted by darkness",
+      "ru": "Некогда чистый источник, осквернённый тьмой"
+    },
+    "region_id": "swamp",
+    "anchor_type": "spring",
+    "initial_influence": "dark",
+    "power": 4,
+    "max_integrity": 100,
+    "initial_integrity": 45,
+    "strengthen_amount": 15,
+    "strengthen_cost": {
+      "changes": [
+        {"resource_id": "faith", "amount": -6}
+      ]
+    },
+    "resistance_divisor": 100
+  },
+  {
+    "id": "anchor_mountain_barrow",
+    "title": {
+      "en": "Ancestor Barrow",
+      "ru": "Курган Предков"
+    },
+    "description": {
+      "en": "An ancient burial mound of revered ancestors",
+      "ru": "Древний курган почитаемых предков"
+    },
+    "region_id": "mountain",
+    "anchor_type": "barrow",
+    "initial_influence": "neutral",
+    "power": 5,
+    "max_integrity": 100,
+    "initial_integrity": 50,
+    "strengthen_amount": 15,
+    "strengthen_cost": {
+      "changes": [
+        {"resource_id": "faith", "amount": -5}
+      ]
+    },
+    "resistance_divisor": 100
+  },
+  {
+    "id": "anchor_breach_shrine",
+    "title": {
+      "en": "Breach Ward Shrine",
+      "ru": "Святилище у Разлома"
+    },
+    "description": {
+      "en": "A crumbling shrine that wards against the breach",
+      "ru": "Разрушающееся святилище, защищающее от разлома"
+    },
+    "region_id": "breach",
+    "anchor_type": "shrine",
+    "initial_influence": "dark",
+    "power": 3,
+    "max_integrity": 100,
+    "initial_integrity": 15,
+    "strengthen_amount": 10,
+    "strengthen_cost": {
+      "changes": [
+        {"resource_id": "faith", "amount": -10}
+      ]
+    },
+    "resistance_divisor": 100
+  }
+]

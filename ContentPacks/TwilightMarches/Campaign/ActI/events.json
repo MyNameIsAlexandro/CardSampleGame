@@ -1,0 +1,1054 @@
+[
+  {
+    "id": "event_elder_quest",
+    "title": {
+      "en": "Village Elder's Request",
+      "ru": "Просьба Старосты"
+    },
+    "body": {
+      "en": "The village elder asks for help. The Navi grows stronger, and the village needs a defender who can strengthen the anchors and resist the darkness.",
+      "ru": "Деревенский староста просит о помощи. Навь усиливается, и деревне нужен защитник, способный укрепить якоря и противостоять тьме."
+    },
+    "event_kind": "inline",
+    "availability": {
+      "required_flags": [],
+      "forbidden_flags": ["main_quest_started"],
+      "min_pressure": null,
+      "max_pressure": null,
+      "min_balance": null,
+      "max_balance": null,
+      "region_states": ["stable", "borderland"],
+      "region_ids": ["village"]
+    },
+    "pool_ids": ["pool_village"],
+    "weight": 100,
+    "is_one_time": true,
+    "is_instant": false,
+    "cooldown": 0,
+    "choices": [
+      {
+        "id": "accept_quest",
+        "label": {
+          "en": "Agree to help the village",
+          "ru": "Согласиться помочь деревне"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {"faith": 3},
+          "set_flags": ["main_quest_started", "helped_village"],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": {
+            "quest_id": "quest_main_act1",
+            "objective_id": "obj_learn_anchors",
+            "action": "unlock"
+          },
+          "trigger_event_id": null,
+          "result_key": "quest_accepted"
+        }
+      },
+      {
+        "id": "request_payment",
+        "label": {
+          "en": "Request payment (10 Faith)",
+          "ru": "Попросить награду (10 ✨)"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {"faith": 10},
+          "set_flags": ["main_quest_started", "mercenary_path"],
+          "clear_flags": [],
+          "balance_delta": -5,
+          "region_state_change": null,
+          "quest_progress": {
+            "quest_id": "quest_main_act1",
+            "objective_id": "obj_learn_anchors",
+            "action": "unlock"
+          },
+          "trigger_event_id": null,
+          "result_key": "mercenary_accepted"
+        }
+      },
+      {
+        "id": "refuse",
+        "label": {
+          "en": "Refuse and go your own way",
+          "ru": "Отказать и идти своим путем"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {},
+          "set_flags": ["refused_main_quest"],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "quest_refused"
+        }
+      }
+    ],
+    "mini_game_challenge": null
+  },
+  {
+    "id": "event_sacred_oak_wisdom",
+    "title": {
+      "en": "Wisdom of the Sacred Oak",
+      "ru": "Мудрость Священного Дуба"
+    },
+    "body": {
+      "en": "The ancient oak whispers to you in the language of the wind. You feel its ancient power and the wisdom of ages.",
+      "ru": "Древний дуб шепчет вам на языке ветра. Вы чувствуете его древнюю силу и мудрость веков."
+    },
+    "event_kind": "inline",
+    "availability": {
+      "required_flags": [],
+      "forbidden_flags": [],
+      "min_pressure": null,
+      "max_pressure": null,
+      "min_balance": null,
+      "max_balance": null,
+      "region_states": ["stable", "borderland"],
+      "region_ids": ["oak"]
+    },
+    "pool_ids": ["pool_sacred"],
+    "weight": 20,
+    "is_one_time": false,
+    "is_instant": false,
+    "cooldown": 3,
+    "choices": [
+      {
+        "id": "meditate",
+        "label": {
+          "en": "Meditate under the oak (6 Faith)",
+          "ru": "Медитировать под дубом (6 ✨)"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"faith": 6},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": -6, "health": 5},
+          "set_flags": ["oak_wisdom"],
+          "clear_flags": [],
+          "balance_delta": 10,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "wisdom_gained"
+        }
+      },
+      {
+        "id": "strengthen_oak",
+        "label": {
+          "en": "Strengthen the oak's bond with the earth (12 Faith)",
+          "ru": "Укрепить связь дуба с землей (12 ✨)"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"faith": 12},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": 60,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": -12},
+          "set_flags": ["oak_strengthened"],
+          "clear_flags": [],
+          "balance_delta": 15,
+          "region_state_change": null,
+          "quest_progress": {
+            "quest_id": "quest_main_act1",
+            "objective_id": "obj_strengthen_oak",
+            "action": "complete"
+          },
+          "trigger_event_id": null,
+          "result_key": "oak_strengthened"
+        }
+      },
+      {
+        "id": "rest",
+        "label": {
+          "en": "Simply rest in the oak's shade",
+          "ru": "Просто отдохнуть в тени дуба"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {"health": 2},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "rested"
+        }
+      }
+    ],
+    "mini_game_challenge": null
+  },
+  {
+    "id": "event_wanderer",
+    "title": {
+      "en": "Wanderer at the Crossroads",
+      "ru": "Странник на Развилке"
+    },
+    "body": {
+      "en": "An old traveler sits by a campfire. He offers to share knowledge about the world in exchange for help.",
+      "ru": "Старый путник сидит у костра. Он предлагает поделиться знаниями о мире в обмен на помощь."
+    },
+    "event_kind": "inline",
+    "availability": {
+      "required_flags": [],
+      "forbidden_flags": ["met_wanderer"],
+      "min_pressure": null,
+      "max_pressure": null,
+      "min_balance": null,
+      "max_balance": null,
+      "region_states": ["stable", "borderland"],
+      "region_ids": null
+    },
+    "pool_ids": ["pool_common"],
+    "weight": 15,
+    "is_one_time": true,
+    "is_instant": false,
+    "cooldown": 0,
+    "choices": [
+      {
+        "id": "listen",
+        "label": {
+          "en": "Listen to the wanderer's tales (3 Faith)",
+          "ru": "Выслушать рассказы странника (3 ✨)"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"faith": 3},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": -3},
+          "set_flags": ["met_wanderer"],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "wanderer_tales"
+        }
+      },
+      {
+        "id": "help",
+        "label": {
+          "en": "Help him with supplies",
+          "ru": "Помочь ему припасами"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {"faith": -2},
+          "set_flags": ["met_wanderer"],
+          "clear_flags": [],
+          "balance_delta": 5,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "wanderer_helped"
+        }
+      },
+      {
+        "id": "pass",
+        "label": {
+          "en": "Pass by",
+          "ru": "Пройти мимо"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "passed_by"
+        }
+      }
+    ],
+    "mini_game_challenge": null
+  },
+  {
+    "id": "event_wild_beast",
+    "title": {
+      "en": "Wild Beast",
+      "ru": "Дикий Зверь"
+    },
+    "body": {
+      "en": "A maddened creature leaps from the bushes with glowing red eyes. It growls and prepares to attack!",
+      "ru": "Из-за деревьев выскакивает озверевшее существо с горящими красными глазами. Оно рычит и готовится к атаке!"
+    },
+    "event_kind": {"mini_game": "combat"},
+    "availability": {
+      "required_flags": [],
+      "forbidden_flags": [],
+      "min_pressure": null,
+      "max_pressure": null,
+      "min_balance": null,
+      "max_balance": null,
+      "region_states": ["stable", "borderland", "breach"],
+      "region_ids": null
+    },
+    "pool_ids": ["pool_common"],
+    "weight": 20,
+    "is_one_time": false,
+    "is_instant": false,
+    "cooldown": 2,
+    "choices": [
+      {
+        "id": "fight",
+        "label": {
+          "en": "Fight the beast",
+          "ru": "Сразиться со зверем"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"health": 2},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "combat_start"
+        }
+      },
+      {
+        "id": "scare",
+        "label": {
+          "en": "Try to scare the beast (5 Faith)",
+          "ru": "Попытаться испугать зверя (5 ✨)"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"faith": 5},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": -5},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "beast_scared"
+        }
+      },
+      {
+        "id": "flee",
+        "label": {
+          "en": "Run away",
+          "ru": "Убежать"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {"health": -1},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "fled_injured"
+        }
+      }
+    ],
+    "mini_game_challenge": {
+      "enemy_id": "wild_beast",
+      "difficulty": 1,
+      "rewards": {
+        "resource_changes": {"faith": 3},
+        "set_flags": [],
+        "clear_flags": [],
+        "balance_delta": 0,
+        "region_state_change": null,
+        "quest_progress": null,
+        "trigger_event_id": null,
+        "result_key": null
+      }
+    }
+  },
+  {
+    "id": "event_swamp_witch",
+    "title": {
+      "en": "Swamp Witch",
+      "ru": "Болотная Ведьма"
+    },
+    "body": {
+      "en": "An old witch appears from the swamp mists. She offers a deal: knowledge in exchange for a part of your essence.",
+      "ru": "Среди болотных туманов появляется старая ведьма. Она предлагает сделку: знания в обмен на часть вашей сущности."
+    },
+    "event_kind": "inline",
+    "availability": {
+      "required_flags": [],
+      "forbidden_flags": ["witch_pact", "witch_refused"],
+      "min_pressure": null,
+      "max_pressure": null,
+      "min_balance": null,
+      "max_balance": null,
+      "region_states": ["borderland", "breach"],
+      "region_ids": ["swamp"]
+    },
+    "pool_ids": ["pool_swamp"],
+    "weight": 25,
+    "is_one_time": true,
+    "is_instant": false,
+    "cooldown": 0,
+    "choices": [
+      {
+        "id": "accept_deal",
+        "label": {
+          "en": "Accept the witch's deal",
+          "ru": "Принять сделку ведьмы"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"health": 4},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": 5, "health": -3},
+          "set_flags": ["witch_pact", "witch_mark"],
+          "clear_flags": [],
+          "balance_delta": -10,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "deal_accepted"
+        }
+      },
+      {
+        "id": "refuse_politely",
+        "label": {
+          "en": "Refuse and ask for help (7 Faith)",
+          "ru": "Отказаться и попросить о помощи (7 ✨)"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"faith": 7},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": -7, "health": 2},
+          "set_flags": ["witch_refused"],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "witch_respected"
+        }
+      },
+      {
+        "id": "leave",
+        "label": {
+          "en": "Leave without dealing with the witch",
+          "ru": "Уйти, не связываясь с ведьмой"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "avoided_witch"
+        }
+      }
+    ],
+    "mini_game_challenge": null
+  },
+  {
+    "id": "event_camp_rest",
+    "title": {
+      "en": "Safe Camping Spot",
+      "ru": "Безопасное Место для Привала"
+    },
+    "body": {
+      "en": "You find a sheltered spot suitable for rest. You can make a fire and restore your strength.",
+      "ru": "Вы находите укрытое место, подходящее для отдыха. Можно развести костер и восстановить силы."
+    },
+    "event_kind": "inline",
+    "availability": {
+      "required_flags": [],
+      "forbidden_flags": [],
+      "min_pressure": null,
+      "max_pressure": 60,
+      "min_balance": null,
+      "max_balance": null,
+      "region_states": ["stable", "borderland"],
+      "region_ids": null
+    },
+    "pool_ids": ["pool_common"],
+    "weight": 15,
+    "is_one_time": false,
+    "is_instant": false,
+    "cooldown": 5,
+    "choices": [
+      {
+        "id": "full_rest",
+        "label": {
+          "en": "Rest and recover",
+          "ru": "Отдохнуть и восстановиться"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {"faith": 2, "health": 4},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "fully_rested"
+        }
+      },
+      {
+        "id": "purification_ritual",
+        "label": {
+          "en": "Perform a purification ritual (5 Faith)",
+          "ru": "Провести ритуал очищения (5 ✨)"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"faith": 5},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": -5, "health": 3},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 5,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "purified"
+        }
+      },
+      {
+        "id": "quick_rest",
+        "label": {
+          "en": "Quick snack and move on",
+          "ru": "Быстро перекусить и идти дальше"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {"health": 1},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "quick_rest"
+        }
+      }
+    ],
+    "mini_game_challenge": null
+  },
+  {
+    "id": "event_breach_surge",
+    "title": {
+      "en": "Navi Breakthrough",
+      "ru": "Прорыв Нави"
+    },
+    "body": {
+      "en": "The boundary between worlds thins. Dark forces try to break through into Yav through a weak anchor.",
+      "ru": "Граница между мирами истончается. Темные силы пытаются прорваться в Явь через слабый якорь."
+    },
+    "event_kind": "inline",
+    "availability": {
+      "required_flags": [],
+      "forbidden_flags": [],
+      "min_pressure": 50,
+      "max_pressure": null,
+      "min_balance": null,
+      "max_balance": null,
+      "region_states": ["breach"],
+      "region_ids": null
+    },
+    "pool_ids": ["pool_breach"],
+    "weight": 30,
+    "is_one_time": false,
+    "is_instant": false,
+    "cooldown": 3,
+    "choices": [
+      {
+        "id": "strengthen_anchor",
+        "label": {
+          "en": "Strengthen the anchor with faith (15 Faith)",
+          "ru": "Укрепить якорь своей верой (15 ✨)"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"faith": 15},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": -15},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 10,
+          "region_state_change": {
+            "region_id": null,
+            "new_state": null,
+            "transition": "restore"
+          },
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "anchor_strengthened"
+        }
+      },
+      {
+        "id": "retreat_warn",
+        "label": {
+          "en": "Retreat and warn others",
+          "ru": "Отступить и предупредить других"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "warned_others"
+        }
+      },
+      {
+        "id": "use_breach_power",
+        "label": {
+          "en": "Try to use breach power",
+          "ru": "Попытаться использовать силу прорыва"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": 40
+        },
+        "consequences": {
+          "resource_changes": {"faith": 10, "health": -5},
+          "set_flags": ["breach_corruption"],
+          "clear_flags": [],
+          "balance_delta": -15,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "power_gained"
+        }
+      }
+    ],
+    "mini_game_challenge": null
+  },
+  {
+    "id": "event_mountain_spirit",
+    "title": {
+      "en": "Trial of the Pass",
+      "ru": "Испытание Перевала"
+    },
+    "body": {
+      "en": "A stone spirit appears at the mountain pass. It speaks: 'Prove your strength or turn back, mortal!'",
+      "ru": "На горном перевале появляется каменный дух. Он говорит: 'Докажи свою силу или вернись назад, смертный!'"
+    },
+    "event_kind": {"mini_game": "combat"},
+    "availability": {
+      "required_flags": [],
+      "forbidden_flags": ["mountain_blessing"],
+      "min_pressure": null,
+      "max_pressure": null,
+      "min_balance": null,
+      "max_balance": null,
+      "region_states": ["stable", "borderland", "breach"],
+      "region_ids": ["mountain"]
+    },
+    "pool_ids": ["pool_mountain"],
+    "weight": 25,
+    "is_one_time": true,
+    "is_instant": false,
+    "cooldown": 0,
+    "choices": [
+      {
+        "id": "accept_challenge",
+        "label": {
+          "en": "Accept the spirit's challenge",
+          "ru": "Принять вызов духа"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"health": 4},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": 2},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "combat_start"
+        }
+      },
+      {
+        "id": "offer_gift",
+        "label": {
+          "en": "Offer a gift to the mountains (10 Faith)",
+          "ru": "Предложить дар горам (10 ✨)"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"faith": 10},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": -10},
+          "set_flags": ["mountain_blessing"],
+          "clear_flags": [],
+          "balance_delta": 8,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "mountain_blessed"
+        }
+      },
+      {
+        "id": "retreat_pass",
+        "label": {
+          "en": "Retreat from the pass",
+          "ru": "Отступить с перевала"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "retreated"
+        }
+      }
+    ],
+    "mini_game_challenge": {
+      "enemy_id": "mountain_spirit",
+      "difficulty": 2,
+      "rewards": {
+        "resource_changes": {"faith": 5},
+        "set_flags": ["mountain_blessing"],
+        "clear_flags": [],
+        "balance_delta": 10,
+        "region_state_change": null,
+        "quest_progress": null,
+        "trigger_event_id": null,
+        "result_key": null
+      }
+    }
+  },
+  {
+    "id": "event_leshy_encounter",
+    "title": {
+      "en": "Encounter with Leshy",
+      "ru": "Встреча с Лешим"
+    },
+    "body": {
+      "en": "The ancient forest guardian emerges from the thicket. His eyes burn with green fire, and branches creak menacingly. The Leshy blocks your path.",
+      "ru": "Из чащи появляется древний страж леса. Его глаза горят зеленым огнем, а ветви скрипят угрожающе. Леший преграждает путь."
+    },
+    "event_kind": {"mini_game": "combat"},
+    "availability": {
+      "required_flags": [],
+      "forbidden_flags": [],
+      "min_pressure": null,
+      "max_pressure": null,
+      "min_balance": null,
+      "max_balance": null,
+      "region_states": ["borderland", "breach"],
+      "region_ids": ["forest", "swamp"]
+    },
+    "pool_ids": ["pool_forest", "pool_swamp"],
+    "weight": 18,
+    "is_one_time": false,
+    "is_instant": false,
+    "cooldown": 4,
+    "choices": [
+      {
+        "id": "fight_leshy",
+        "label": {
+          "en": "Fight the forest spirit",
+          "ru": "Вступить в бой с духом леса"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"health": 3},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": 1},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "combat_start"
+        }
+      },
+      {
+        "id": "appease_leshy",
+        "label": {
+          "en": "Try to appease with gifts (5 Faith)",
+          "ru": "Попытаться задобрить дарами (5 ✨)"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"faith": 5},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": -5},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 5,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "leshy_appeased"
+        }
+      },
+      {
+        "id": "retreat_leshy",
+        "label": {
+          "en": "Retreat and go around",
+          "ru": "Отступить и обойти стороной"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": -5,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "retreated_leshy"
+        }
+      }
+    ],
+    "mini_game_challenge": {
+      "enemy_id": "leshy",
+      "difficulty": 2,
+      "rewards": {
+        "resource_changes": {"faith": 4},
+        "set_flags": [],
+        "clear_flags": [],
+        "balance_delta": 3,
+        "region_state_change": null,
+        "quest_progress": null,
+        "trigger_event_id": null,
+        "result_key": null
+      }
+    }
+  },
+  {
+    "id": "event_boss_leshy_guardian",
+    "title": {
+      "en": "Leshy Guardian",
+      "ru": "Леший-Хранитель"
+    },
+    "body": {
+      "en": "Before you towers the ancient guardian of the Twilight Marches. The Leshy Guardian - a being of immense power whose roots reach into the very foundations of the world. Green flame burns eternally in his eyes. This is the final trial of Act I.",
+      "ru": "Перед вами возвышается древний страж Сумрачных Пределов. Леший-Хранитель - существо невиданной силы, чьи корни уходят в самые основы мира. Зелёное пламя в его глазах горит вечностью. Это финальное испытание Акта I."
+    },
+    "event_kind": {"mini_game": "combat"},
+    "availability": {
+      "required_flags": ["main_quest_started", "oak_strengthened"],
+      "forbidden_flags": ["leshy_guardian_defeated"],
+      "min_pressure": null,
+      "max_pressure": null,
+      "min_balance": null,
+      "max_balance": null,
+      "region_states": ["breach"],
+      "region_ids": ["dark_lowland"]
+    },
+    "pool_ids": ["pool_boss"],
+    "weight": 100,
+    "is_one_time": true,
+    "is_instant": false,
+    "cooldown": 0,
+    "choices": [
+      {
+        "id": "fight_boss",
+        "label": {
+          "en": "Enter the final battle",
+          "ru": "Вступить в решающий бой"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"faith": 10, "health": 8},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "boss_combat_start"
+        }
+      },
+      {
+        "id": "negotiate_boss",
+        "label": {
+          "en": "Try to negotiate (20 Faith)",
+          "ru": "Попытаться договориться (20 ✨)"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"faith": 20},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": 70,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": -20},
+          "set_flags": ["leshy_guardian_peaceful", "leshy_guardian_defeated"],
+          "clear_flags": [],
+          "balance_delta": 15,
+          "region_state_change": null,
+          "quest_progress": {
+            "quest_id": "quest_main_act1",
+            "objective_id": "obj_defeat_guardian",
+            "action": "complete"
+          },
+          "trigger_event_id": null,
+          "result_key": "boss_negotiated"
+        }
+      },
+      {
+        "id": "dark_power_boss",
+        "label": {
+          "en": "Use dark power (15 Faith)",
+          "ru": "Использовать силу тьмы (15 ✨)"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"faith": 15},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": 30
+        },
+        "consequences": {
+          "resource_changes": {"faith": -15, "health": -5},
+          "set_flags": ["leshy_guardian_corrupted", "leshy_guardian_defeated"],
+          "clear_flags": [],
+          "balance_delta": -20,
+          "region_state_change": null,
+          "quest_progress": {
+            "quest_id": "quest_main_act1",
+            "objective_id": "obj_defeat_guardian",
+            "action": "complete"
+          },
+          "trigger_event_id": null,
+          "result_key": "boss_corrupted"
+        }
+      }
+    ],
+    "mini_game_challenge": {
+      "enemy_id": "leshy_guardian_boss",
+      "difficulty": 5,
+      "rewards": {
+        "resource_changes": {"faith": 20},
+        "set_flags": ["leshy_guardian_defeated"],
+        "clear_flags": [],
+        "balance_delta": 10,
+        "region_state_change": null,
+        "quest_progress": {
+          "quest_id": "quest_main_act1",
+          "objective_id": "obj_defeat_guardian",
+          "action": "complete"
+        },
+        "trigger_event_id": null,
+        "result_key": null
+      }
+    }
+  }
+]
