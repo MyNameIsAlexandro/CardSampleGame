@@ -8,17 +8,31 @@
 
 **Дата:** 2026-01-19
 **Ветка:** `claude/add-game-tests-PxCCP`
-**Последний коммит:** `988a81e Add JSON content files for Phase 5`
+**Последний коммит:** `7cd68f6 Update AUDIT with complete status`
 
-### Что сделано сегодня (продолжение)
+### Что сделано сегодня
 
-- [x] Combat L10n keys добавлены в Helpers/Localization.swift
-- [x] CombatView мигрирован на L10n (~60 строк)
-- [x] WorldMapView частично мигрирован на L10n
-- [x] Переводы EN/RU для combat UI добавлены
-- [x] Анализ Legacy Adapters - всё ещё используются
-- [x] Resources/Content/regions.json создан (7 регионов)
-- [x] Resources/Content/anchors.json создан (6 якорей)
+**Локализация:**
+- [x] Combat L10n keys добавлены (~60 ключей)
+- [x] CombatView полностью мигрирован на L10n
+- [x] WorldMapView частично мигрирован
+- [x] EN/RU переводы добавлены
+
+**JSON Content (полный набор):**
+- [x] regions.json (7 регионов)
+- [x] anchors.json (6 якорей)
+- [x] quests.json (4 квеста: 1 main + 3 side)
+- [x] challenges.json (7 челленджей)
+- [x] events/pool_common.json (3 события)
+- [x] events/pool_village.json (3 события)
+- [x] events/pool_forest.json (3 события + combat)
+- [x] events/pool_swamp.json (3 события + combat)
+- [x] events/pool_mountain.json (3 события + combat)
+- [x] events/pool_sacred.json (2 события)
+- [x] events/pool_breach.json (3 события + combat)
+- [x] events/pool_boss.json (1 босс Act I)
+
+**Итого JSON:** 24 события, 7 регионов, 6 якорей, 4 квеста, 7 челленджей
 
 ### Release Gates Status
 
@@ -31,22 +45,37 @@
 
 ### Прогресс по Audit Issues
 
-| Issue | Статус | Описание |
-|-------|--------|----------|
-| #1 Hardcoded Strings | 🟡 Частично | Combat L10n done, Views partial |
-| #3 Legacy Adapters | 🟡 Анализ | ContentView/GameBoardView используют legacy init |
-| #8 JSON Content | 🟡 Начато | regions.json, anchors.json созданы |
+| # | Issue | Статус |
+|---|-------|--------|
+| 1 | Hardcoded Strings | 🟡 Combat done, Views partial |
+| 2 | Тесты на двух стульях | ✅ Закрыто |
+| 3 | Legacy Adapters | 🟡 Phase 4+ |
+| 4 | Audit файлы | ✅ Закрыто |
+| 5 | MIGRATION_PLAN | ✅ Закрыто |
+| 6 | CI Configuration | ✅ Закрыто |
+| 7 | Удаление Адаптеров | 📋 Phase 4+ |
+| 8 | JSON Content | ✅ Создано |
+
+**Итого: 5/8 закрыто, 3/8 Phase 4+**
 
 ---
 
 ## Приоритеты (по порядку)
 
-1. ~~**[КРИТИЧНО]** Исправить Gate 1: Мигрировать CombatView на Engine~~ ✅ DONE
-2. ~~Gate 3: Тест Save/Load parity~~ ✅ DONE
-3. ~~Gate 4: Act I end-to-end тест~~ ✅ DONE
-4. 🟡 Локализация: Вынести hardcoded strings в Localizable.strings (Combat done)
-5. 🟡 JSON Content: Перенести контент в JSON файлы (regions/anchors done)
-6. Remove Legacy: Удалить EngineAdapters после миграции ContentView
+### ✅ Завершено
+1. ~~Gate 1: CombatView Engine-First~~ ✅
+2. ~~Gate 2: Determinism~~ ✅
+3. ~~Gate 3: Save/Load parity~~ ✅
+4. ~~Gate 4: Act I end-to-end~~ ✅
+5. ~~JSON Content: Создать все JSON файлы~~ ✅
+
+### 🟡 Частично
+6. Локализация: Views → L10n (Combat done, остальное partial)
+
+### 📋 Phase 4+
+7. Мигрировать ContentView на Engine-First init
+8. Удалить legacy adapters
+9. Реализовать JSONContentProvider загрузку
 
 ---
 
