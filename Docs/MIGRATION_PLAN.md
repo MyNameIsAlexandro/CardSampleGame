@@ -11,7 +11,7 @@
 |-------|----------|--------|
 | Phase 1 | Core Protocols & Engine Foundation | ✅ Done |
 | Phase 2 | Data Separation (Definitions + Runtime) | ✅ Done |
-| Phase 3 | GameLoop Integration | 🔄 Next |
+| Phase 3 | GameLoop Integration | 🔄 In Progress (80%) |
 | Phase 4 | Economy Transactions Everywhere | ⬜ Planned |
 | Phase 5 | Content Migration to JSON | ⬜ Planned |
 
@@ -188,32 +188,33 @@ protocol ContentProvider {
 
 **Цель:** UI не мутирует state напрямую. Вся игра идёт через `GameEngine.performAction()`.
 
+**Статус:** 🔄 В процессе (основные компоненты готовы)
+
 ### Feature B1 — GameAction и единая точка входа
 
 | Task | Файл | Статус |
 |------|------|--------|
-| `GameAction` enum (все действия) | GameAction.swift | ⬜ |
-| `GameEngine.performAction(action)` по 11-step loop | GameEngine.swift | ⬜ |
-| `ActionResult` с diff и ошибками | ActionResult.swift | ⬜ |
+| `TwilightGameAction` enum (все действия) | TwilightGameAction.swift | ✅ Done |
+| `TwilightGameEngine.performAction(action)` по 11-step loop | TwilightGameEngine.swift | ✅ Done |
+| `ActionResult` с diff и ошибками | TwilightGameAction.swift | ✅ Done |
+| `StateChange` enum для отслеживания изменений | TwilightGameAction.swift | ✅ Done |
+| `ActionError` enum для ошибок | TwilightGameAction.swift | ✅ Done |
 
-**Контракт GameAction:**
+**Реализованные действия:**
 ```swift
-enum GameAction: TimedAction {
-    case travel(to: String)
+enum TwilightGameAction: TimedAction {
+    case travel(toRegionId: UUID)
     case rest
-    case strengthenAnchor
     case explore
-    case choose(eventId: String, choiceId: String)
+    case trade
+    case strengthenAnchor
+    case chooseEventOption(eventId: UUID, choiceIndex: Int)
     case resolveMiniGame(result: MiniGameResult)
-
-    var timeCost: Int { ... }
-}
-
-struct ActionResult {
-    let success: Bool
-    let error: ActionError?
-    let stateChanges: [StateChange]
-    let triggeredEvents: [String]
+    case startCombat(encounterId: UUID)
+    case playCard(cardId: UUID, targetId: UUID?)
+    case endCombatTurn
+    case skipTurn
+    case custom(id: String, timeCost: Int)
 }
 ```
 
@@ -221,20 +222,47 @@ struct ActionResult {
 
 | Task | Файл | Статус |
 |------|------|--------|
-| `WorldState` → thin adapter/compat layer | WorldState.swift | ⬜ |
-| Закрыть public `daysPassed += 1` | WorldState.swift | ⬜ |
-| Пометить `processDayStart()` deprecated | WorldState.swift | ⬜ |
-| Time advance через `TimeEngine.advance(cost:)` | GameEngine.swift | ⬜ |
+| `WorldStateEngineAdapter` для связи | EngineAdapters.swift | ✅ Done |
+| `PlayerEngineAdapter` для связи | EngineAdapters.swift | ✅ Done |
+| `GameStateEngineAdapter` для связи | EngineAdapters.swift | ✅ Done |
+| `GameViewModel` для UI | GameViewModel.swift | ✅ Done |
+| Закрыть public `daysPassed += 1` | WorldState.swift | ⬜ TODO |
+| Пометить `processDayStart()` deprecated | WorldState.swift | ⬜ TODO |
 
 ### Feature B3 — Event Module подключение
 
 | Task | Файл | Статус |
 |------|------|--------|
-| `EventPipeline` (selection + resolution) | EventPipeline.swift | ⬜ |
-| Selection: filter → weight → seed | EventSelector.swift | ⬜ |
-| Resolution: requirements → transaction → flags → diff | EventResolver.swift | ⬜ |
-| `MiniGameDispatcher` | MiniGameDispatcher.swift | ⬜ |
-| `CombatModule` интеграция | Engine/Modules/CombatModule.swift | ⬜ |
+| `EventPipeline` (selection + resolution) | EventPipeline.swift | ✅ Done |
+| `EventSelector`: filter → weight → seed | EventPipeline.swift | ✅ Done |
+| `EventResolver`: requirements → flags → diff | EventPipeline.swift | ✅ Done |
+| `MiniGameDispatcher` | MiniGameDispatcher.swift | ⬜ TODO |
+| `CombatModule` интеграция | Engine/Modules/CombatModule.swift | ⬜ TODO |
+
+### Feature B4 — Contract Tests
+
+| Task | Файл | Статус |
+|------|------|--------|
+| Phase 3 Contract Tests | Phase3ContractTests.swift | ✅ Done |
+
+### Новые файлы Phase 3:
+
+```
+Engine/
+├── Core/
+│   ├── TwilightGameAction.swift    # Actions + ActionResult + StateChange
+│   └── TwilightGameEngine.swift    # Main game engine
+├── Events/
+│   └── EventPipeline.swift         # EventSelector + EventResolver
+└── Migration/
+    └── EngineAdapters.swift        # Legacy adapters
+
+ViewModels/
+└── GameViewModel.swift             # UI ViewModel using Engine
+
+CardSampleGameTests/Engine/
+└── Phase3ContractTests.swift       # Contract tests
+```
 
 ---
 
