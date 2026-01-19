@@ -311,12 +311,13 @@ final class WorldStateTests: XCTestCase {
 
     // MARK: - Канон: Tension Escalation
 
-    /// Тест: tension increment = +3 (канон зафиксирован)
-    /// Если этот тест падает — значит код разошёлся с документацией
+    /// Тест: базовый tension increment = +3 на ранних днях
+    /// Формула: +3 + (daysPassed / 10)
     func testPressureEscalationMatchesCanon() {
-        // Канон: каждые 3 дня worldTension += 3
+        // Канон: каждые 3 дня worldTension += 3 + (daysPassed / 10)
+        // На день 3: 3 + (3/10) = 3 + 0 = 3
         let canonInterval = 3
-        let canonIncrement = 3
+        let expectedIncrement = 3  // На ранних днях (до дня 10)
 
         let initialTension = worldState.worldTension
 
@@ -325,12 +326,31 @@ final class WorldStateTests: XCTestCase {
             worldState.advanceTime(by: 1)
         }
 
-        let expectedTension = initialTension + canonIncrement
+        let expectedTension = initialTension + expectedIncrement
         XCTAssertEqual(
             worldState.worldTension,
             expectedTension,
-            "Канон: каждые \(canonInterval) дня tension += \(canonIncrement). " +
+            "Базовый канон: на день 3 tension += 3. " +
             "Ожидалось \(expectedTension), получено \(worldState.worldTension)"
+        )
+    }
+
+    /// Тест: эскалация давления на поздних днях
+    /// День 12: +3 + (12/10) = +4
+    func testPressureEscalationIncreasesOverTime() {
+        // Пропускаем до дня 9
+        worldState.advanceTime(by: 9)
+        // День 9: был тик на день 3, 6, 9 (+3 каждый = +9)
+        let tensionAtDay9 = worldState.worldTension
+
+        // День 10, 11, 12
+        worldState.advanceTime(by: 3)
+        // День 12: +3 + (12/10) = +3 + 1 = +4
+        let expectedIncrement = 4
+        XCTAssertEqual(
+            worldState.worldTension,
+            tensionAtDay9 + expectedIncrement,
+            "Эскалация: на день 12 tension += 4 (базовые 3 + бонус 1)"
         )
     }
 

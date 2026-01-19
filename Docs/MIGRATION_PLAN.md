@@ -271,6 +271,16 @@ struct ActionResult {
 | Export Act I → JSON | Resources/Content/ActI/ | ⬜ |
 | `JSONContentProvider` полноценно | JSONContentProvider.swift | ⬜ |
 | Test: same seed → same outcome | RegressionTests | ⬜ |
+| **UI icons from data** | Definition + UI | ⬜ |
+
+### UI Data-Driven Icons
+
+> **Текущее ограничение:** Иконки регионов/якорей определены как computed properties в enum'ах (ExplorationModels.swift). Это не позволяет добавлять новые типы через JSON без перекомпиляции.
+
+**Что нужно сделать:**
+1. Добавить поле `icon: String` в `RegionDefinition`, `AnchorDefinition`
+2. UI берёт иконку из Definition, не из switch
+3. JSON может определять новые типы регионов с кастомными иконками
 
 ---
 

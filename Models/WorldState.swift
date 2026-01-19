@@ -225,13 +225,18 @@ class WorldState: ObservableObject, Codable {
         // 1. Каждые 3 дня — автоматическая деградация мира
         guard daysPassed > 0 && daysPassed % 3 == 0 else { return }
 
-        // 2. Увеличить напряжение мира (+3 каждые 3 дня)
-        // Увеличено с +2 до +3 для баланса (см. MetricsDistributionTests)
-        increaseTension(by: 3)
+        // 2. Увеличить напряжение мира с ЭСКАЛАЦИЕЙ
+        // Базовая формула: +3 + (daysPassed / 10)
+        // День 1-9: +3, День 10-19: +4, День 20-29: +5, ...
+        // Это создаёт ощущение нарастающей угрозы к середине игры
+        let baseIncrement = 3
+        let escalationBonus = daysPassed / 10
+        let totalIncrement = baseIncrement + escalationBonus
+        increaseTension(by: totalIncrement)
 
         // Уведомить о росте напряжения
         lastDayEvent = .tensionIncrease(day: daysPassed, newTension: worldTension)
-        logWorldChange(description: "Напряжение мира выросло до \(worldTension)%")
+        logWorldChange(description: "Напряжение мира выросло до \(worldTension)% (+\(totalIncrement))")
 
         // 3. Проверить деградацию региона с вероятностью (Tension/100)
         // Используем WorldRNG для детерминизма при тестировании
