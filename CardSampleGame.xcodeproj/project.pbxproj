@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CTB0000000000001 /* PackLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CT00000000000001 /* PackLoaderTests.swift */; };
+		CTB0000000000002 /* ContentRegistryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CT00000000000002 /* ContentRegistryTests.swift */; };
+
 		CB00000000000002 /* PackValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CP00000000000002 /* PackValidator.swift */; };
 
 		CB08DBD8123C514251864650 /* PackTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = CP38FEE143B4F44A6FB1ABC6 /* PackTypes.swift */; };
@@ -127,6 +130,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		CT00000000000001 /* PackLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackLoaderTests.swift; sourceTree = "<group>"; };
+		CT00000000000002 /* ContentRegistryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentRegistryTests.swift; sourceTree = "<group>"; };
+
 		CP00000000000002 /* PackValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PackValidator.swift; path = Engine/ContentPacks/PackValidator.swift; sourceTree = SOURCE_ROOT; };
 
 		CP38FEE143B4F44A6FB1ABC6 /* PackTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PackTypes.swift; path = Engine/ContentPacks/PackTypes.swift; sourceTree = SOURCE_ROOT; };
@@ -258,6 +264,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		CT00000000000003 /* ContentPackTests */ = {
+			isa = PBXGroup;
+			children = (
+				CT00000000000001 /* PackLoaderTests.swift */,
+				CT00000000000002 /* ContentRegistryTests.swift */,
+			);
+			path = ContentPackTests;
+			sourceTree = "<group>";
+		};
+
 		CP00000000000001 /* ContentPacks */ = {
 			isa = PBXGroup;
 			children = (
@@ -397,6 +413,7 @@
 		BB0003010000000000000001 /* Unit */ = {
 			isa = PBXGroup;
 			children = (
+				CT00000000000003 /* ContentPackTests */,
 				BB0001020000000000000001 /* WorldStateTests.swift */,
 				BB0001040000000000000001 /* PlayerTests.swift */,
 				BB0001060000000000000001 /* EventSystemTests.swift */,
