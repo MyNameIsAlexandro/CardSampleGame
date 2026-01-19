@@ -1,18 +1,72 @@
 import SwiftUI
 
+/// Event view with Engine-First Architecture
+/// - All state mutations go through engine.performAction()
+/// - UI reads state from engine properties
 struct EventView: View {
+    // MARK: - Engine-First Architecture
+    @ObservedObject var engine: TwilightGameEngine
+
     let event: GameEvent
-    let player: Player
-    let worldState: WorldState
     let regionId: UUID
     let onChoiceSelected: (EventChoice) -> Void
     let onDismiss: () -> Void
+
+    // MARK: - Legacy Support (for backwards compatibility)
+    private var legacyPlayer: Player?
+    private var legacyWorldState: WorldState?
 
     @State private var selectedChoice: EventChoice?
     @State private var showingResult = false
     @State private var resultMessage: String = ""
     @State private var combatMonster: Card?
     @State private var combatVictory: Bool?
+
+    // MARK: - Computed Properties (Engine-First with legacy fallback)
+
+    private var player: Player? {
+        legacyPlayer
+    }
+
+    // MARK: - Initialization (Engine-First)
+
+    init(
+        engine: TwilightGameEngine,
+        event: GameEvent,
+        regionId: UUID,
+        onChoiceSelected: @escaping (EventChoice) -> Void,
+        onDismiss: @escaping () -> Void
+    ) {
+        self.engine = engine
+        self.event = event
+        self.regionId = regionId
+        self.onChoiceSelected = onChoiceSelected
+        self.onDismiss = onDismiss
+        self.legacyPlayer = nil
+        self.legacyWorldState = nil
+    }
+
+    // MARK: - Legacy Initialization (for backwards compatibility)
+
+    init(
+        event: GameEvent,
+        player: Player,
+        worldState: WorldState,
+        regionId: UUID,
+        onChoiceSelected: @escaping (EventChoice) -> Void,
+        onDismiss: @escaping () -> Void
+    ) {
+        // Create engine connected to legacy
+        let newEngine = TwilightGameEngine()
+        newEngine.connectToLegacy(worldState: worldState, player: player)
+        self.engine = newEngine
+        self.event = event
+        self.regionId = regionId
+        self.onChoiceSelected = onChoiceSelected
+        self.onDismiss = onDismiss
+        self.legacyPlayer = player
+        self.legacyWorldState = worldState
+    }
 
     var body: some View {
         NavigationView {
@@ -65,12 +119,9 @@ struct EventView: View {
                 Text(resultMessage)
             }
             .fullScreenCover(item: $combatMonster) { monster in
+                // Engine-First: Setup combat in engine and pass engine to CombatView
                 CombatView(
-                    player: player,
-                    monster: Binding(
-                        get: { combatMonster ?? monster },
-                        set: { combatMonster = $0 }
-                    ),
+                    engine: engineWithCombatSetup(monster),
                     onCombatEnd: { outcome in
                         handleCombatEnd(outcome: outcome)
                     }
@@ -176,9 +227,10 @@ struct EventView: View {
                         .font(.caption2)
                     Text("Требуется: \(minFaith) веры")
                         .font(.caption2)
-                    Text("(у вас: \(player.faith))")
+                    // Engine-First: read from engine
+                    Text("(у вас: \(engine.playerFaith))")
                         .font(.caption2)
-                        .foregroundColor(player.faith >= minFaith ? .green : .red)
+                        .foregroundColor(engine.playerFaith >= minFaith ? .green : .red)
                 }
                 .foregroundColor(.secondary)
             }
@@ -189,15 +241,17 @@ struct EventView: View {
                         .font(.caption2)
                     Text("Требуется: \(minHealth) здоровья")
                         .font(.caption2)
-                    Text("(у вас: \(player.health))")
+                    // Engine-First: read from engine
+                    Text("(у вас: \(engine.playerHealth))")
                         .font(.caption2)
-                        .foregroundColor(player.health >= minHealth ? .green : .red)
+                        .foregroundColor(engine.playerHealth >= minHealth ? .green : .red)
                 }
                 .foregroundColor(.secondary)
             }
 
             if let reqBalance = requirements.requiredBalance {
-                let playerBalanceEnum = getBalanceEnum(player.balance)
+                // Engine-First: read from engine
+                let playerBalanceEnum = getBalanceEnum(engine.playerBalance)
                 let meetsRequirement = playerBalanceEnum == reqBalance
 
                 HStack(spacing: 4) {
@@ -283,12 +337,11 @@ struct EventView: View {
     func initiateCombat(choice: EventChoice) {
         guard let monster = event.monsterCard else { return }
 
-        // Получить контекст региона для модификаторов боя
-        let currentRegion = worldState.getCurrentRegion()
-        let regionState = currentRegion?.state ?? .stable
+        // Engine-First: Get combat context from engine or legacy
+        let regionState = engine.currentRegion?.state ?? .stable
         let combatContext = CombatContext(
             regionState: regionState,
-            playerCurses: player.activeCurses.map { $0.type }
+            playerCurses: player?.activeCurses.map { $0.type } ?? []
         )
 
         // Создать врага с модификаторами региона
@@ -334,11 +387,24 @@ struct EventView: View {
         }
     }
 
+    // MARK: - Engine-First Helpers
+
+    /// Setup combat in engine and return it for CombatView
+    private func engineWithCombatSetup(_ monster: Card) -> TwilightGameEngine {
+        engine.setupCombatEnemy(monster)
+        return engine
+    }
+
     // MARK: - Helpers
 
     func canMeetRequirements(_ choice: EventChoice) -> Bool {
         guard let requirements = choice.requirements else { return true }
-        return requirements.canMeet(with: player, worldState: worldState)
+        // Engine-First: check requirements using engine state or legacy fallback
+        if let ws = legacyWorldState, let p = legacyPlayer {
+            return requirements.canMeet(with: p, worldState: ws)
+        }
+        // TODO: Implement pure engine-based requirement checking
+        return true
     }
 
     func balanceText(_ balance: CardBalance) -> String {

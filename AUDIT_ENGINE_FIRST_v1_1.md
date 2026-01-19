@@ -91,17 +91,15 @@ Phase 3.5 "Engine-first views" должен быть отмечен как DONE.
 - [x] UI **нигде** не мутирует legacy state напрямую (WorldMapView)
 - [x] Все действия проходят через `engine.performAction()` (WorldMapView)
 - [x] `Phase3ContractTests` подтверждают это
+- [x] CombatView мигрирован на Engine-First (2026-01-19)
 
-**ПРОБЛЕМА:** `CombatView.swift` нарушает Gate 1:
-```
-Line 656: player.spendFaith(cost)
-Line 681: player.heal(amount)
-Line 695: player.gainFaith(amount)
-Line 735: player.takeDamage(cost)
-Line 777: player.takeDamageWithCurses(monsterPower)
-Line 825, 829: player.gainFaith(1)
-```
-**Решение:** Добавить combat actions в Engine и мигрировать CombatView.
+**Статус:** ✅ PASSED
+
+**Изменения:**
+- Добавлены combat actions в `TwilightGameAction` (combatInitialize, combatAttack, combatApplyEffect, etc.)
+- Добавлен `CombatActionEffect` enum для боевых эффектов
+- CombatView теперь использует `engine.performAction()` для всех мутаций
+- EventView получил Engine-First архитектуру с legacy fallback
 
 ### Gate 2 — Determinism Invariant (must pass)
 

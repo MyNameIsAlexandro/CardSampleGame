@@ -29,15 +29,37 @@ enum TwilightGameAction: TimedAction, Equatable {
     /// Resolve a mini-game result
     case resolveMiniGame(input: MiniGameInput)
 
-    // MARK: - Combat
+    // MARK: - Combat Setup
     /// Start combat with encounter
     case startCombat(encounterId: UUID)
+
+    /// Initialize combat: shuffle deck and draw initial hand
+    case combatInitialize
+
+    // MARK: - Combat Actions
+    /// Perform basic attack in combat
+    case combatAttack(bonusDice: Int, bonusDamage: Int, isFirstAttack: Bool)
 
     /// Play a card in combat
     case playCard(cardId: UUID, targetId: UUID?)
 
-    /// End combat turn
+    /// Apply card ability effect
+    case combatApplyEffect(effect: CombatActionEffect)
+
+    /// End combat turn (goes to enemy phase)
     case endCombatTurn
+
+    /// Perform enemy attack
+    case combatEnemyAttack(damage: Int)
+
+    /// End turn phase: discard hand, draw new cards, restore faith
+    case combatEndTurnPhase
+
+    /// Flee from combat
+    case combatFlee
+
+    /// Finish combat with result
+    case combatFinish(victory: Bool)
 
     // MARK: - UI Actions
     /// Dismiss current event (after UI handles it)
@@ -83,11 +105,32 @@ enum TwilightGameAction: TimedAction, Equatable {
         case .startCombat:
             return 0  // Combat is part of event
 
+        case .combatInitialize:
+            return 0  // Setup, no time cost
+
+        case .combatAttack:
+            return 0  // Within combat turn
+
         case .playCard:
             return 0  // Cards are within combat turn
 
+        case .combatApplyEffect:
+            return 0  // Effect application
+
         case .endCombatTurn:
             return 0  // Turn management
+
+        case .combatEnemyAttack:
+            return 0  // Enemy phase
+
+        case .combatEndTurnPhase:
+            return 0  // End of turn
+
+        case .combatFlee:
+            return 0  // Escape
+
+        case .combatFinish:
+            return 0  // Combat end
 
         case .dismissCurrentEvent:
             return 0  // UI action, no time cost
@@ -120,6 +163,44 @@ struct MiniGameInput: Equatable {
         self.score = score
         self.bonusRewards = bonusRewards
     }
+}
+
+// MARK: - Combat Effect
+
+/// Effect to apply during combat (from cards or abilities)
+enum CombatActionEffect: Equatable {
+    /// Heal player
+    case heal(amount: Int)
+
+    /// Deal damage to enemy
+    case damageEnemy(amount: Int)
+
+    /// Draw cards
+    case drawCards(count: Int)
+
+    /// Gain faith
+    case gainFaith(amount: Int)
+
+    /// Spend faith
+    case spendFaith(amount: Int)
+
+    /// Take damage (sacrifice)
+    case takeDamage(amount: Int)
+
+    /// Remove curse
+    case removeCurse(type: String?)
+
+    /// Shift balance
+    case shiftBalance(towards: String, amount: Int)
+
+    /// Add bonus dice for next attack
+    case addBonusDice(count: Int)
+
+    /// Add bonus damage for next attack
+    case addBonusDamage(amount: Int)
+
+    /// Summon spirit to attack enemy
+    case summonSpirit(power: Int, realm: String)
 }
 
 // MARK: - Action Result

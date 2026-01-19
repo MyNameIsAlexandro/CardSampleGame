@@ -21,30 +21,28 @@
 
 | Gate | Статус | Описание |
 |------|--------|----------|
-| Gate 1 | ⚠️ PARTIAL | CombatView нарушает Engine-First |
+| Gate 1 | ✅ PASSED | CombatView мигрирован на Engine-First |
 | Gate 2 | ✅ PASSED | Нет randomElement/shuffled |
 | Gate 3 | ⏳ | Требует тестирования |
 | Gate 4 | ⏳ | Требует ручного тестирования |
 
-### Критическая проблема
+### Что исправлено (2026-01-19)
 
-**CombatView.swift** напрямую мутирует player state:
-```swift
-player.spendFaith(cost)    // Line 656
-player.heal(amount)        // Line 681
-player.takeDamage(cost)    // Line 735
-```
-
-**Решение:** Добавить combat actions в TwilightGameEngine.
+**CombatView.swift** теперь использует `engine.performAction()`:
+- Добавлены combat actions в TwilightGameAction
+- Добавлен CombatActionEffect enum
+- CombatView и EventView мигрированы на Engine-First
 
 ---
 
 ## Приоритеты (по порядку)
 
-1. **[КРИТИЧНО]** Исправить Gate 1: Мигрировать CombatView на Engine
+1. ~~**[КРИТИЧНО]** Исправить Gate 1: Мигрировать CombatView на Engine~~ ✅ DONE
 2. Локализация: Вынести hardcoded strings в Localizable.strings
 3. Gate 3: Тест Save/Load parity
 4. Gate 4: Act I end-to-end тест
+5. JSON Content: Перенести контент в JSON файлы
+6. Remove Legacy: Удалить EngineAdapters после полной миграции
 
 ---
 

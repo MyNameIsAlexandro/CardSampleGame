@@ -149,6 +149,29 @@ final class TwilightGameEngine: ObservableObject {
     private var playerHand: [Card] = []
     private var playerDiscard: [Card] = []
 
+    // MARK: - Combat State
+
+    /// Current enemy card in combat
+    @Published private(set) var combatEnemy: Card?
+
+    /// Enemy current health
+    @Published private(set) var combatEnemyHealth: Int = 0
+
+    /// Combat actions remaining this turn
+    @Published private(set) var combatActionsRemaining: Int = 3
+
+    /// Combat turn number
+    @Published private(set) var combatTurnNumber: Int = 1
+
+    /// Bonus dice for next attack (from cards)
+    private var combatBonusDice: Int = 0
+
+    /// Bonus damage for next attack (from cards)
+    private var combatBonusDamage: Int = 0
+
+    /// Is this the first attack in this combat (for abilities)
+    private var combatIsFirstAttack: Bool = true
+
     // MARK: - Configuration Constants
 
     private let tensionTickInterval: Int = 3
@@ -457,14 +480,110 @@ final class TwilightGameEngine: ObservableObject {
             let changes = executeMiniGameInput(input)
             stateChanges.append(contentsOf: changes)
 
-        case .startCombat:
+        case .startCombat(let encounterId):
             combatStarted = true
             isInCombat = true
-            // Combat initialization
+            combatTurnNumber = 1
+            combatActionsRemaining = 3
+            combatBonusDice = 0
+            combatBonusDamage = 0
+            combatIsFirstAttack = true
+            // Enemy setup done when combat view appears
 
-        case .playCard, .endCombatTurn:
-            // Combat actions - handled by combat subsystem
+        case .combatInitialize:
+            // Shuffle deck and draw initial hand
+            if let player = playerAdapter?.player {
+                player.shuffleDeck()
+                player.drawCards(count: player.maxHandSize)
+                playerHand = player.hand
+            }
+            combatActionsRemaining = 3
+
+        case .combatAttack(let bonusDice, let bonusDamage, let isFirstAttack):
+            guard combatActionsRemaining > 0 else { break }
+            combatActionsRemaining -= 1
+            let changes = executeCombatAttack(bonusDice: bonusDice, bonusDamage: bonusDamage, isFirstAttack: isFirstAttack)
+            stateChanges.append(contentsOf: changes)
+            combatIsFirstAttack = false
+            // Check if enemy defeated
+            if combatEnemyHealth <= 0 {
+                // Victory will be handled by combatFinish
+            }
+
+        case .playCard(let cardId, _):
+            guard combatActionsRemaining > 0 else { break }
+            if let player = playerAdapter?.player,
+               let cardIndex = player.hand.firstIndex(where: { $0.id == cardId }) {
+                let card = player.hand[cardIndex]
+                // Check faith cost
+                if let cost = card.cost, cost > 0 {
+                    guard player.faith >= cost else { break }
+                    player.spendFaith(cost)
+                    playerFaith = player.faith
+                    stateChanges.append(.faithChanged(delta: -cost, newValue: playerFaith))
+                }
+                combatActionsRemaining -= 1
+                player.playCard(card)
+                playerHand = player.hand
+            }
+
+        case .combatApplyEffect(let effect):
+            let changes = executeCombatEffect(effect)
+            stateChanges.append(contentsOf: changes)
+
+        case .endCombatTurn:
+            // Player ended their turn, enemy attacks next
             break
+
+        case .combatEnemyAttack(let damage):
+            // Enemy deals damage to player
+            if let player = playerAdapter?.player {
+                let healthBefore = player.health
+                player.takeDamageWithCurses(damage)
+                let actualDamage = healthBefore - player.health
+                playerHealth = player.health
+                stateChanges.append(.healthChanged(delta: -actualDamage, newValue: playerHealth))
+            }
+
+        case .combatEndTurnPhase:
+            // End of turn: discard hand, draw new cards, restore faith
+            if let player = playerAdapter?.player {
+                // Discard hand
+                while !player.hand.isEmpty {
+                    player.playCard(player.hand[0])
+                }
+                // Draw new hand
+                player.drawCards(count: player.maxHandSize)
+                playerHand = player.hand
+                // Restore faith
+                player.gainFaith(1)
+                playerFaith = player.faith
+                stateChanges.append(.faithChanged(delta: 1, newValue: playerFaith))
+                // Ability: extra faith at end of turn
+                if player.shouldGainFaithEndOfTurn {
+                    player.gainFaith(1)
+                    playerFaith = player.faith
+                    stateChanges.append(.faithChanged(delta: 1, newValue: playerFaith))
+                }
+            }
+            // Reset for next turn
+            combatTurnNumber += 1
+            combatActionsRemaining = 3
+            combatBonusDice = 0
+            combatBonusDamage = 0
+
+        case .combatFlee:
+            isInCombat = false
+            combatEnemy = nil
+            stateChanges.append(.combatEnded(victory: false))
+
+        case .combatFinish(let victory):
+            isInCombat = false
+            combatEnemy = nil
+            stateChanges.append(.combatEnded(victory: victory))
+            if victory {
+                stateChanges.append(.enemyDefeated(enemyId: UUID()))
+            }
 
         case .dismissCurrentEvent:
             currentEvent = nil
@@ -997,6 +1116,160 @@ final class TwilightGameEngine: ObservableObject {
         lastDayEvent = event
     }
 
+    // MARK: - Combat Helper Methods
+
+    /// Execute a combat attack with bonus dice and damage
+    private func executeCombatAttack(bonusDice: Int, bonusDamage: Int, isFirstAttack: Bool) -> [StateChange] {
+        var changes: [StateChange] = []
+
+        guard let enemy = combatEnemy,
+              let player = playerAdapter?.player else {
+            return changes
+        }
+
+        let monsterDef = enemy.defense ?? 10
+        let monsterCurrentHP = combatEnemyHealth
+        let monsterMaxHP = enemy.health ?? 10
+
+        // Use CombatCalculator for attack calculation
+        let result = CombatCalculator.calculatePlayerAttack(
+            player: player,
+            monsterDefense: monsterDef,
+            monsterCurrentHP: monsterCurrentHP,
+            monsterMaxHP: monsterMaxHP,
+            bonusDice: bonusDice + combatBonusDice,
+            bonusDamage: bonusDamage + combatBonusDamage,
+            isFirstAttack: isFirstAttack
+        )
+
+        if result.isHit, let damageCalc = result.damageCalculation {
+            let damage = damageCalc.total
+            combatEnemyHealth = max(0, combatEnemyHealth - damage)
+            changes.append(.enemyDamaged(enemyId: enemy.id, damage: damage, newHealth: combatEnemyHealth))
+        }
+
+        // Reset bonuses after attack
+        combatBonusDice = 0
+        combatBonusDamage = 0
+
+        return changes
+    }
+
+    /// Execute a combat effect from card or ability
+    private func executeCombatEffect(_ effect: CombatActionEffect) -> [StateChange] {
+        var changes: [StateChange] = []
+
+        switch effect {
+        case .heal(let amount):
+            if let player = playerAdapter?.player {
+                let newHealth = min(player.maxHealth, player.health + amount)
+                let delta = newHealth - player.health
+                playerAdapter?.updateHealth(newHealth)
+                playerHealth = newHealth
+                changes.append(.healthChanged(delta: delta, newValue: newHealth))
+            }
+
+        case .damageEnemy(let amount):
+            if let player = playerAdapter?.player, let enemy = combatEnemy {
+                let actualDamage = player.calculateDamageDealt(amount)
+                combatEnemyHealth = max(0, combatEnemyHealth - actualDamage)
+                changes.append(.enemyDamaged(enemyId: enemy.id, damage: actualDamage, newHealth: combatEnemyHealth))
+            }
+
+        case .drawCards(let count):
+            if let player = playerAdapter?.player {
+                player.drawCards(count: count)
+                playerHand = player.hand
+            }
+
+        case .gainFaith(let amount):
+            if let player = playerAdapter?.player {
+                player.gainFaith(amount)
+                playerFaith = player.faith
+                changes.append(.faithChanged(delta: amount, newValue: playerFaith))
+            }
+
+        case .spendFaith(let amount):
+            if let player = playerAdapter?.player {
+                _ = player.spendFaith(amount)
+                playerFaith = player.faith
+                changes.append(.faithChanged(delta: -amount, newValue: playerFaith))
+            }
+
+        case .takeDamage(let amount):
+            if let player = playerAdapter?.player {
+                let healthBefore = player.health
+                player.takeDamage(amount)
+                let actualDamage = healthBefore - player.health
+                playerHealth = player.health
+                changes.append(.healthChanged(delta: -actualDamage, newValue: playerHealth))
+            }
+
+        case .removeCurse(let type):
+            if let player = playerAdapter?.player {
+                // Convert String to CurseType
+                let curseType: CurseType? = type.flatMap { CurseType(rawValue: $0) }
+                player.removeCurse(type: curseType)
+            }
+
+        case .shiftBalance(let towards, let amount):
+            if let player = playerAdapter?.player {
+                let direction: CardBalance
+                switch towards.lowercased() {
+                case "light", "свет": direction = .light
+                case "dark", "тьма": direction = .dark
+                default: direction = .neutral
+                }
+                player.shiftBalance(towards: direction, amount: amount)
+                playerBalance = player.balance
+                changes.append(.balanceChanged(delta: amount, newValue: playerBalance))
+            }
+
+        case .addBonusDice(let count):
+            combatBonusDice += count
+
+        case .addBonusDamage(let amount):
+            combatBonusDamage += amount
+
+        case .summonSpirit(let power, _):
+            // Spirit attacks enemy immediately
+            if let enemy = combatEnemy {
+                combatEnemyHealth = max(0, combatEnemyHealth - power)
+                changes.append(.enemyDamaged(enemyId: enemy.id, damage: power, newHealth: combatEnemyHealth))
+            }
+        }
+
+        return changes
+    }
+
+    // MARK: - Combat Setup Methods
+
+    /// Setup enemy for combat
+    func setupCombatEnemy(_ enemy: Card) {
+        combatEnemy = enemy
+        combatEnemyHealth = enemy.health ?? 10
+        combatTurnNumber = 1
+        combatActionsRemaining = 3
+        combatBonusDice = 0
+        combatBonusDamage = 0
+        combatIsFirstAttack = true
+        isInCombat = true
+    }
+
+    /// Get current combat state for UI
+    var combatState: CombatState? {
+        guard isInCombat, let enemy = combatEnemy else { return nil }
+        return CombatState(
+            enemy: enemy,
+            enemyHealth: combatEnemyHealth,
+            turnNumber: combatTurnNumber,
+            actionsRemaining: combatActionsRemaining,
+            bonusDice: combatBonusDice,
+            bonusDamage: combatBonusDamage,
+            isFirstAttack: combatIsFirstAttack
+        )
+    }
+
     // MARK: - Save/Load Support Methods
 
     /// Get completed quest IDs for save
@@ -1155,5 +1428,30 @@ struct EngineAnchorState {
         self.id = id
         self.name = name
         self.integrity = max(0, min(100, integrity))
+    }
+}
+
+// MARK: - Combat State (for UI)
+
+/// Read-only combat state for UI binding
+struct CombatState {
+    let enemy: Card
+    let enemyHealth: Int
+    let turnNumber: Int
+    let actionsRemaining: Int
+    let bonusDice: Int
+    let bonusDamage: Int
+    let isFirstAttack: Bool
+
+    var enemyMaxHealth: Int {
+        enemy.health ?? 10
+    }
+
+    var enemyDefense: Int {
+        enemy.defense ?? 10
+    }
+
+    var enemyPower: Int {
+        enemy.power ?? 3
     }
 }

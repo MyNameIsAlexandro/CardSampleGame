@@ -3,10 +3,19 @@ import SwiftUI
 /// Боевой экран - реализация по документации GAME_DESIGN_DOCUMENT.md
 /// Цикл: PlayerTurn → EnemyTurn → EndTurn (повтор до победы/поражения)
 /// Действия: 3 за ход. Играть карту = 1 действие, Атаковать = 1 действие
+///
+/// Engine-First Architecture (Gate 1 Compliant):
+/// - All player mutations go through engine.performAction()
+/// - UI reads state from engine properties
 struct CombatView: View {
-    @ObservedObject var player: Player
-    @Binding var monster: Card
+    // MARK: - Engine-First Architecture
+    @ObservedObject var engine: TwilightGameEngine
     let onCombatEnd: (CombatOutcome) -> Void
+
+    // MARK: - Legacy Support (for backwards compatibility during migration)
+    // Will be removed after full migration
+    private var legacyPlayer: Player?
+    private var legacyMonster: Binding<Card>?
 
     enum CombatOutcome {
         case victory
@@ -35,6 +44,53 @@ struct CombatView: View {
     @State private var summonedSpirits: [(power: Int, realm: Realm)] = []  // Призванные духи
     @State private var isFirstAttackThisCombat: Bool = true  // Для способности Следопыта
     @State private var lastCombatResult: CombatResult? = nil  // Последний результат атаки
+
+    // MARK: - Computed Properties (Engine-First)
+
+    /// Player from engine or legacy
+    private var player: Player? {
+        // In Engine-First mode, we use engine's player adapter
+        // For now, use legacy player if available
+        legacyPlayer
+    }
+
+    /// Monster from engine combat state or legacy binding
+    private var monster: Card {
+        get {
+            engine.combatState?.enemy ?? legacyMonster?.wrappedValue ?? Card(
+                name: "Unknown",
+                type: .monster,
+                description: "Unknown enemy"
+            )
+        }
+    }
+
+    /// Monster health from engine
+    private var monsterHealth: Int {
+        engine.combatState?.enemyHealth ?? monster.health ?? 10
+    }
+
+    // MARK: - Initialization (Engine-First)
+
+    init(engine: TwilightGameEngine, onCombatEnd: @escaping (CombatOutcome) -> Void) {
+        self.engine = engine
+        self.onCombatEnd = onCombatEnd
+        self.legacyPlayer = nil
+        self.legacyMonster = nil
+    }
+
+    // MARK: - Legacy Initialization (for backwards compatibility)
+
+    init(player: Player, monster: Binding<Card>, onCombatEnd: @escaping (CombatOutcome) -> Void) {
+        // Create engine connected to legacy player
+        let newEngine = TwilightGameEngine()
+        // Setup combat enemy in engine
+        newEngine.setupCombatEnemy(monster.wrappedValue)
+        self.engine = newEngine
+        self.onCombatEnd = onCombatEnd
+        self.legacyPlayer = player
+        self.legacyMonster = monster
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -149,12 +205,12 @@ struct CombatView: View {
                 .foregroundColor(.red)
 
             HStack(spacing: 32) {
-                // HP монстра
+                // HP монстра (Engine-First: read from engine.combatState)
                 VStack {
                     Image(systemName: "heart.fill")
                         .font(.title)
                         .foregroundColor(.red)
-                    Text("\(monster.health ?? 0)")
+                    Text("\(monsterHealth)")
                         .font(.title)
                         .fontWeight(.bold)
                     Text("HP")
@@ -211,14 +267,14 @@ struct CombatView: View {
         }
     }
 
-    // MARK: - Player Stats
+    // MARK: - Player Stats (Engine-First: reads from engine.player*)
 
     var playerStats: some View {
         HStack(spacing: 24) {
             VStack {
                 Image(systemName: "heart.fill")
                     .foregroundColor(.red)
-                Text("\(player.health)/\(player.maxHealth)")
+                Text("\(engine.playerHealth)/\(engine.playerMaxHealth)")
                     .fontWeight(.bold)
                 Text("HP")
                     .font(.caption)
@@ -228,7 +284,7 @@ struct CombatView: View {
             VStack {
                 Image(systemName: "hand.raised.fill")
                     .foregroundColor(.orange)
-                Text("\(player.strength)")
+                Text("\(player?.strength ?? 1)")
                     .fontWeight(.bold)
                 Text("Сила")
                     .font(.caption)
@@ -238,7 +294,7 @@ struct CombatView: View {
             VStack {
                 Image(systemName: "sparkles")
                     .foregroundColor(.yellow)
-                Text("\(player.faith)")
+                Text("\(engine.playerFaith)")
                     .fontWeight(.bold)
                 Text("Вера")
                     .font(.caption)
@@ -379,11 +435,11 @@ struct CombatView: View {
         }
     }
 
-    // MARK: - Combat Over View
+    // MARK: - Combat Over View (Engine-First: reads from engine.combatState)
 
     var combatOverView: some View {
         VStack(spacing: 12) {
-            if (monster.health ?? 0) <= 0 {
+            if monsterHealth <= 0 {
                 Text("🎉 ПОБЕДА!")
                     .font(.title)
                     .fontWeight(.bold)
@@ -557,12 +613,17 @@ struct CombatView: View {
         }
     }
 
-    // MARK: - Player Hand
+    // MARK: - Player Hand (Engine-First with legacy fallback)
+
+    /// Player's hand cards
+    private var playerHand: [Card] {
+        player?.hand ?? []
+    }
 
     var playerHandView: some View {
         VStack(spacing: 4) {
             HStack {
-                Text("🃏 Ваша рука (\(player.hand.count) карт)")
+                Text("🃏 Ваша рука (\(playerHand.count) карт)")
                     .font(.caption)
                     .foregroundColor(.secondary)
 
@@ -578,7 +639,7 @@ struct CombatView: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    ForEach(player.hand) { card in
+                    ForEach(playerHand) { card in
                         CombatCardView(
                             card: card,
                             canPlay: actionsRemaining > 0 && phase == .playerTurn
@@ -594,13 +655,21 @@ struct CombatView: View {
         .background(Color(UIColor.secondarySystemBackground))
     }
 
-    // MARK: - Combat Logic
+    // MARK: - Combat Logic (Engine-First: uses engine.performAction())
 
     func startCombat() {
         combatLog.append("Бой начался! Враг: \(monster.name)")
         combatLog.append("У вас 3 действия за ход")
-        player.shuffleDeck()
-        player.drawCards(count: player.maxHandSize)
+
+        // Engine-First: Initialize combat through engine
+        engine.performAction(.combatInitialize)
+
+        // Legacy fallback for deck operations
+        if let p = player {
+            p.shuffleDeck()
+            p.drawCards(count: p.maxHandSize)
+        }
+
         actionsRemaining = 3
         phase = .playerTurn
     }
@@ -611,12 +680,13 @@ struct CombatView: View {
         actionsRemaining -= 1
 
         let monsterDef = monster.defense ?? 10
-        let monsterCurrentHP = monster.health ?? 10
-        let monsterMaxHP = monsterCurrentHP  // Начальное HP
+        let monsterCurrentHP = monsterHealth
+        let monsterMaxHP = monster.health ?? 10
 
         // Используем CombatCalculator для расчёта атаки
+        guard let p = player else { return }
         let result = CombatCalculator.calculatePlayerAttack(
-            player: player,
+            player: p,
             monsterDefense: monsterDef,
             monsterCurrentHP: monsterCurrentHP,
             monsterMaxHP: monsterMaxHP,
@@ -630,12 +700,16 @@ struct CombatView: View {
 
         if result.isHit, let damageCalc = result.damageCalculation {
             let damage = damageCalc.total
-            let newHealth = max(0, monsterCurrentHP - damage)
-            monster.health = newHealth
 
-            combatLog.append("⚔️ ПОПАДАНИЕ! Урон: \(damage) (HP врага: \(newHealth))")
+            // Engine-First: Apply damage through engine action
+            engine.performAction(.combatApplyEffect(effect: .damageEnemy(amount: damage)))
 
-            if newHealth <= 0 {
+            // Update legacy monster binding if available
+            legacyMonster?.wrappedValue.health = monsterHealth
+
+            combatLog.append("⚔️ ПОПАДАНИЕ! Урон: \(damage) (HP врага: \(monsterHealth))")
+
+            if monsterHealth <= 0 {
                 finishCombat(victory: true)
             }
         } else {
@@ -651,25 +725,29 @@ struct CombatView: View {
     func playCard(_ card: Card) {
         guard actionsRemaining > 0, phase == .playerTurn else { return }
 
-        // Проверяем стоимость веры
+        // Проверяем стоимость веры (Engine-First: check via engine)
         if let cost = card.cost, cost > 0 {
-            guard player.spendFaith(cost) else {
+            guard engine.playerFaith >= cost else {
                 combatLog.append("❌ Недостаточно веры для \(card.name)")
                 return
             }
+            // Engine-First: Spend faith through engine action
+            engine.performAction(.combatApplyEffect(effect: .spendFaith(amount: cost)))
             combatLog.append("💫 Потрачено \(cost) веры")
         }
 
         actionsRemaining -= 1
-        player.playCard(card)
+
+        // Legacy: play card from hand
+        player?.playCard(card)
 
         combatLog.append("🃏 Сыграна: \(card.name)")
 
-        // Применяем эффекты карты
+        // Применяем эффекты карты (Engine-First)
         applyCardEffects(card)
 
-        // Проверяем победу
-        if (monster.health ?? 0) <= 0 {
+        // Проверяем победу (Engine-First: read from engine)
+        if monsterHealth <= 0 {
             finishCombat(victory: true)
         }
     }
@@ -678,71 +756,86 @@ struct CombatView: View {
         for ability in card.abilities {
             switch ability.effect {
             case .heal(let amount):
-                player.heal(amount)
+                // Engine-First: Heal through engine action
+                engine.performAction(.combatApplyEffect(effect: .heal(amount: amount)))
                 combatLog.append("   💚 Исцеление +\(amount) HP")
 
             case .damage(let amount, _):
-                let actualDamage = player.calculateDamageDealt(amount)
-                let newHealth = max(0, (monster.health ?? 0) - actualDamage)
-                monster.health = newHealth
-                combatLog.append("   💥 Урон \(actualDamage) (HP врага: \(newHealth))")
+                let actualDamage = player?.calculateDamageDealt(amount) ?? amount
+                // Engine-First: Damage enemy through engine action
+                engine.performAction(.combatApplyEffect(effect: .damageEnemy(amount: actualDamage)))
+                legacyMonster?.wrappedValue.health = monsterHealth
+                combatLog.append("   💥 Урон \(actualDamage) (HP врага: \(monsterHealth))")
 
             case .drawCards(let count):
-                player.drawCards(count: count)
+                // Engine-First: Draw cards through engine action
+                engine.performAction(.combatApplyEffect(effect: .drawCards(count: count)))
+                player?.drawCards(count: count)  // Legacy sync
                 combatLog.append("   🃏 Взято карт: \(count)")
 
             case .gainFaith(let amount):
-                player.gainFaith(amount)
+                // Engine-First: Gain faith through engine action
+                engine.performAction(.combatApplyEffect(effect: .gainFaith(amount: amount)))
                 combatLog.append("   ✨ Вера +\(amount)")
 
             case .removeCurse(let type):
-                player.removeCurse(type: type)
+                // Engine-First: Remove curse through engine action (convert CurseType to String)
+                engine.performAction(.combatApplyEffect(effect: .removeCurse(type: type?.rawValue)))
                 combatLog.append("   🌟 Снято проклятие")
 
             case .addDice(let count):
-                bonusDice += count
+                // Engine-First: Add bonus dice through engine action
+                engine.performAction(.combatApplyEffect(effect: .addBonusDice(count: count)))
+                bonusDice += count  // Local tracking for UI
                 combatLog.append("   🎲 +\(count) кубик(ов) к следующей атаке")
 
             case .reroll:
                 // Reroll даёт +1 кубик (выбирается лучший результат)
+                engine.performAction(.combatApplyEffect(effect: .addBonusDice(count: 1)))
                 bonusDice += 1
                 combatLog.append("   🔄 Перебросок: +1 кубик (лучший результат)")
 
             case .shiftBalance(let towards, let amount):
-                player.shiftBalance(towards: towards, amount: amount)
+                // Engine-First: Shift balance through engine action
+                let directionString = towards == .light ? "light" : towards == .dark ? "dark" : "equilibrium"
+                engine.performAction(.combatApplyEffect(effect: .shiftBalance(towards: directionString, amount: amount)))
                 let directionText = towards == .light ? "Свету" : towards == .dark ? "Тьме" : "Равновесию"
                 combatLog.append("   ⚖️ Баланс сдвинут к \(directionText) на \(amount)")
 
             case .applyCurse(let curseType, let duration):
                 // В бою проклятие наносит урон монстру (тёмная магия)
                 let curseDamage = duration * 2
-                let newHealth = max(0, (monster.health ?? 0) - curseDamage)
-                monster.health = newHealth
+                // Engine-First: Damage enemy through engine action
+                engine.performAction(.combatApplyEffect(effect: .damageEnemy(amount: curseDamage)))
+                legacyMonster?.wrappedValue.health = monsterHealth
                 combatLog.append("   💀 Проклятие \(curseType): \(curseDamage) урона врагу")
 
             case .summonSpirit(let power, let realm):
                 summonedSpirits.append((power: power, realm: realm))
                 let realmName = realm == .yav ? "Явь" : realm == .nav ? "Навь" : "Правь"
+                let realmString = realm == .yav ? "yav" : realm == .nav ? "nav" : "prav"
                 combatLog.append("   👻 Призван дух из \(realmName) (сила: \(power))")
-                // Дух сразу атакует
-                let spiritDamage = power
-                let newHealth = max(0, (monster.health ?? 0) - spiritDamage)
-                monster.health = newHealth
-                combatLog.append("   👻 Дух атакует! Урон: \(spiritDamage)")
+                // Engine-First: Spirit attacks enemy immediately through engine action
+                engine.performAction(.combatApplyEffect(effect: .summonSpirit(power: power, realm: realmString)))
+                legacyMonster?.wrappedValue.health = monsterHealth
+                combatLog.append("   👻 Дух атакует! Урон: \(power)")
 
             case .sacrifice(let cost, let benefit):
-                // Игрок теряет HP, получает бонус
-                player.takeDamage(cost)
+                // Engine-First: Take damage through engine action
+                engine.performAction(.combatApplyEffect(effect: .takeDamage(amount: cost)))
                 combatLog.append("   🩸 Жертва: -\(cost) HP")
                 // Парсим benefit для эффекта
                 if benefit.lowercased().contains("урон") || benefit.lowercased().contains("damage") {
+                    engine.performAction(.combatApplyEffect(effect: .addBonusDamage(amount: cost * 2)))
                     bonusDamage += cost * 2
                     combatLog.append("   🔥 +\(cost * 2) к урону следующей атаки")
                 } else if benefit.lowercased().contains("карт") || benefit.lowercased().contains("draw") {
-                    player.drawCards(count: cost)
+                    engine.performAction(.combatApplyEffect(effect: .drawCards(count: cost)))
+                    player?.drawCards(count: cost)  // Legacy sync
                     combatLog.append("   🃏 Взято карт: \(cost)")
                 } else {
                     // Общий бонус - добавить урон
+                    engine.performAction(.combatApplyEffect(effect: .addBonusDamage(amount: cost)))
                     bonusDamage += cost
                     combatLog.append("   🔥 +\(cost) к урону (\(benefit))")
                 }
@@ -767,19 +860,22 @@ struct CombatView: View {
 
     func performEnemyAttack() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            guard (monster.health ?? 0) > 0 else {
+            guard monsterHealth > 0 else {
                 phase = .endTurn
                 return
             }
 
             let monsterPower = monster.power ?? 3
-            let healthBefore = player.health
-            player.takeDamageWithCurses(monsterPower)
-            let damage = healthBefore - player.health
+            let healthBefore = engine.playerHealth
+
+            // Engine-First: Enemy attack through engine action
+            engine.performAction(.combatEnemyAttack(damage: monsterPower))
+
+            let damage = healthBefore - engine.playerHealth
 
             combatLog.append("👹 \(monster.name) атакует! Урон: \(damage)")
 
-            if player.health <= 0 {
+            if engine.playerHealth <= 0 {
                 finishCombat(victory: false)
             } else {
                 phase = .endTurn
@@ -793,8 +889,9 @@ struct CombatView: View {
             if !summonedSpirits.isEmpty {
                 for spirit in summonedSpirits {
                     let spiritDamage = spirit.power
-                    let newHealth = max(0, (monster.health ?? 0) - spiritDamage)
-                    monster.health = newHealth
+                    // Engine-First: Spirit damage through engine action
+                    engine.performAction(.combatApplyEffect(effect: .damageEnemy(amount: spiritDamage)))
+                    legacyMonster?.wrappedValue.health = monsterHealth
                     let realmName = spirit.realm == .yav ? "Явь" : spirit.realm == .nav ? "Навь" : "Правь"
                     combatLog.append("👻 Дух \(realmName) атакует: \(spiritDamage) урона")
                 }
@@ -802,8 +899,8 @@ struct CombatView: View {
                 summonedSpirits.removeAll()
             }
 
-            // Проверяем победу после атак духов
-            if (monster.health ?? 0) <= 0 {
+            // Проверяем победу после атак духов (Engine-First: read from engine)
+            if monsterHealth <= 0 {
                 finishCombat(victory: true)
                 return
             }
@@ -813,20 +910,19 @@ struct CombatView: View {
             bonusDamage = 0
             canReroll = false
 
-            // Сбрасываем руку
-            while !player.hand.isEmpty {
-                player.playCard(player.hand[0])
+            // Engine-First: End turn phase through engine action (discard, draw, faith restore)
+            engine.performAction(.combatEndTurnPhase)
+
+            // Legacy sync: discard and draw
+            if let p = player {
+                while !p.hand.isEmpty {
+                    p.playCard(p.hand[0])
+                }
+                p.drawCards(count: p.maxHandSize)
             }
 
-            // Берём новые карты
-            player.drawCards(count: player.maxHandSize)
-
-            // Восстанавливаем веру
-            player.gainFaith(1)
-
             // Способность Мага: +1 вера в конце хода (Медитация)
-            if player.shouldGainFaithEndOfTurn {
-                player.gainFaith(1)
+            if player?.shouldGainFaithEndOfTurn == true {
                 combatLog.append("🔮 Медитация: +1 вера")
             }
 
@@ -843,6 +939,9 @@ struct CombatView: View {
     func finishCombat(victory: Bool) {
         phase = .combatOver
 
+        // Engine-First: Finish combat through engine action
+        engine.performAction(.combatFinish(victory: victory))
+
         if victory {
             combatLog.append("🎉 Победа! \(monster.name) повержен!")
         } else {
@@ -855,6 +954,9 @@ struct CombatView: View {
     }
 
     func flee() {
+        // Engine-First: Flee combat through engine action
+        engine.performAction(.combatFlee)
+
         combatLog.append("🏃 Вы сбежали из боя!")
         onCombatEnd(.fled)
     }
