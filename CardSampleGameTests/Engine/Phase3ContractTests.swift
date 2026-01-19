@@ -96,8 +96,6 @@ final class Phase3ContractTests: XCTestCase {
     // MARK: - INV-P3-005: Tension Escalation Through Engine
 
     func testTensionEscalatesOnDay3() {
-        let initialTension = engine.worldTension
-
         // Advance to day 3
         _ = engine.performAction(.rest)  // Day 1
         _ = engine.performAction(.rest)  // Day 2
@@ -119,9 +117,6 @@ final class Phase3ContractTests: XCTestCase {
     // MARK: - INV-P3-006: Legacy Sync After Action
 
     func testLegacySyncAfterAction() {
-        let initialLegacyDay = worldState.daysPassed
-        let initialLegacyTension = worldState.worldTension
-
         // Perform action
         _ = engine.performAction(.rest)
 
