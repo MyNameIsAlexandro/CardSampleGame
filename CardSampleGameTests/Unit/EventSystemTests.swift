@@ -212,16 +212,19 @@ final class EventSystemTests: XCTestCase {
         XCTAssertEqual(totalWeight, 11, "Общий вес = 11")
 
         // Статистический тест: выбираем 100 раз и проверяем распределение
+        // Используем WorldRNG с seed для детерминизма в CI
+        WorldRNG.shared.setSeed(42)
         var highWeightCount = 0
         for _ in 0..<100 {
-            let randomValue = Int.random(in: 0..<totalWeight)
+            let randomValue = WorldRNG.shared.nextInt(in: 0..<totalWeight)
             if randomValue < highWeightEvent.weight {
                 highWeightCount += 1
             }
         }
+        WorldRNG.shared.resetToSystem()
 
         // Ожидаем примерно 90% выборов highWeight (10/11 ≈ 90%)
-        // Допускаем большой разброс для стабильности теста
+        // С seed=42 получаем стабильный результат
         XCTAssertGreaterThan(highWeightCount, 60, "Событие с высоким весом выбирается чаще")
     }
 

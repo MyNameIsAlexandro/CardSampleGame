@@ -323,9 +323,9 @@ struct TwilightCombatConfig {
         return max(1, modifiedDamage) // Minimum 1 damage
     }
 
-    /// Roll dice
+    /// Roll dice (deterministic via WorldRNG)
     static func rollDice() -> Int {
-        return Int.random(in: 1...diceMax)
+        return WorldRNG.shared.nextInt(in: 1...diceMax)
     }
 }
 

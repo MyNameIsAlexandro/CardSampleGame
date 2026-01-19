@@ -178,7 +178,7 @@ struct CombatCalculator {
 
         var diceRolls: [Int] = []
         for _ in 0..<totalDice {
-            diceRolls.append(Int.random(in: 1...6))
+            diceRolls.append(WorldRNG.shared.nextInt(in: 1...6))
         }
 
         // Создаём бросок атаки
