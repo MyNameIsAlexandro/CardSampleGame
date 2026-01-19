@@ -8,20 +8,47 @@
 
 **Дата:** 2026-01-19
 **Ветка:** `claude/add-game-tests-PxCCP`
-**Последний коммит:** `b762f56 Remove misleading @available deprecated from test-retained methods`
+**Последний коммит:** `0e1639d Add CI workflow and audit documentation`
 
-### Что сделано
+### Что сделано сегодня
 
-- [x] Engine-First Architecture (Phase 3.5) - полностью реализована
-- [x] EngineSave.swift - persistence без WorldState
-- [x] Engine-First Views (EngineRegionCardView, EngineRegionDetailView, EngineEventLogView)
-- [x] Новые actions: dismissCurrentEvent, dismissDayEvent
-- [x] Fix determinism: регионы сортируются по имени
-- [x] Fix warnings: убраны @available deprecated с test-retained методов
-- [x] Все 170+ тестов проходят
-- [x] 0 warnings в production коде
+- [x] AUDIT_ENGINE_FIRST_v1_1.md - объединённый аудит в markdown
+- [x] .github/workflows/tests.yml - CI gates для тестов
+- [x] Удалены Audit.rtf файлы
+- [x] Проверка Release Gates (Gate 1 partial, Gate 2 passed)
 
-### Архитектура
+### Release Gates Status
+
+| Gate | Статус | Описание |
+|------|--------|----------|
+| Gate 1 | ⚠️ PARTIAL | CombatView нарушает Engine-First |
+| Gate 2 | ✅ PASSED | Нет randomElement/shuffled |
+| Gate 3 | ⏳ | Требует тестирования |
+| Gate 4 | ⏳ | Требует ручного тестирования |
+
+### Критическая проблема
+
+**CombatView.swift** напрямую мутирует player state:
+```swift
+player.spendFaith(cost)    // Line 656
+player.heal(amount)        // Line 681
+player.takeDamage(cost)    // Line 735
+```
+
+**Решение:** Добавить combat actions в TwilightGameEngine.
+
+---
+
+## Приоритеты (по порядку)
+
+1. **[КРИТИЧНО]** Исправить Gate 1: Мигрировать CombatView на Engine
+2. Локализация: Вынести hardcoded strings в Localizable.strings
+3. Gate 3: Тест Save/Load parity
+4. Gate 4: Act I end-to-end тест
+
+---
+
+## Архитектура
 
 ```
 UI Layer (SwiftUI Views)
@@ -36,75 +63,49 @@ EngineSave (Codable) - для persistence
 
 ---
 
-## Что осталось (Phase 4+)
-
-| Задача | Phase | Приоритет |
-|--------|-------|-----------|
-| Card system migration | Phase 4 | High |
-| RNG state persistence | Phase 4 | Medium |
-| Trade/Market UI через Engine | Phase 4 | Medium |
-| Content from JSON | Phase 5 | Low |
-| Localization | Phase 5 | Low |
-| Remove Legacy Adapters | После миграции | Low |
-
----
-
 ## Ключевые файлы
 
-| Файл | Описание |
-|------|----------|
-| `Engine/Core/TwilightGameEngine.swift` | Главный движок, Single Source of Truth |
-| `Engine/Core/EngineSave.swift` | Структура для save/load |
-| `Engine/Core/TwilightGameAction.swift` | Все игровые действия |
-| `Views/WorldMapView.swift` | Engine-First Views |
-| `Models/WorldState.swift` | Legacy, используется через adapters |
-| `CHANGELOG_ENGINE_FIRST.md` | Лог изменений для аудиторов |
+| Файл | Статус |
+|------|--------|
+| `Views/CombatView.swift` | ❌ Нарушает Gate 1 |
+| `Views/WorldMapView.swift` | ✅ Engine-First |
+| `Engine/Core/TwilightGameEngine.swift` | ✅ Single Source of Truth |
+| `AUDIT_ENGINE_FIRST_v1_1.md` | Полный аудит |
+| `.github/workflows/tests.yml` | CI gates |
 
 ---
 
-## Как продолжить работу
+## Как продолжить
+
+### На iPhone (Claude App)
+```
+Продолжаем работу над CardSampleGame.
+Ветка: claude/add-game-tests-PxCCP
+Последний коммит: 0e1639d
+
+КРИТИЧНО: CombatView нарушает Engine-First.
+Нужно добавить combat actions в Engine:
+- combatDealDamage(amount:)
+- combatHeal(amount:)
+- combatSpendFaith(amount:)
+
+Файл: Views/CombatView.swift
+```
 
 ### На Mac (Claude Code)
 ```bash
-cd "/Users/abondarenko/Library/Mobile Documents/com~apple~CloudDocs/XCode/CardSampleGame"
-git pull  # если были изменения
-claude    # запустить Claude Code
-```
-
-### На iPhone (Claude App)
-1. Открой этот файл через GitHub или iCloud
-2. Скопируй контекст в Claude App:
-```
-Продолжаем работу над CardSampleGame (Twilight Marches).
-Ветка: claude/add-game-tests-PxCCP
-Последний коммит: b762f56
-Архитектура: Engine-First, TwilightGameEngine = Single Source of Truth
-Что сделано: Phase 3.5 завершена, все тесты проходят
-Нужно: [твоя задача]
-```
-
-### Перед уходом с Mac
-```bash
-git add .
-git commit -m "WIP: [описание где остановился]"
-git push
-# Попроси Claude Code обновить этот файл:
-# "обнови HANDOFF.md с текущим статусом"
+git pull
+claude
+# "продолжи работу над Gate 1 - миграция CombatView"
 ```
 
 ---
 
 ## Известные проблемы
 
-*Нет активных проблем*
-
----
-
-## Заметки
-
-- Legacy код (WorldState, Adapters) оставлен для обратной совместимости
-- UI постепенно мигрирует на Engine-First
-- Тесты используют WorldState напрямую (это нормально - "retained for tests")
+1. **CombatView Gate 1 violation** - прямые мутации player
+2. **Hardcoded strings** - Views не используют Localizable.strings
+3. **Legacy adapters** - EngineAdapters.swift ещё существует
 
 ---
 
