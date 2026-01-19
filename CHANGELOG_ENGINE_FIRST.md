@@ -122,10 +122,37 @@ init(worldState: WorldState, player: Player, onExit: (() -> Void)?)
 
 ---
 
+## Исправления после Engine-First (Post Phase 3.5)
+
+### c8fb53f - Fix determinism: sort regions by name
+
+**Проблема:** `testDeterministicReproducibility` падал с `XCTAssertEqual failed: ("4") is not equal to ("6")`
+
+**Причина:** `Array(regionMap.values)` возвращает регионы в недетерминированном порядке (Dictionary не гарантирует порядок итерации).
+
+**Решение:**
+```swift
+// Было:
+return Array(regionMap.values)
+
+// Стало:
+return Array(regionMap.values).sorted { $0.name < $1.name }
+```
+
+### b762f56 - Remove misleading @available deprecated
+
+**Проблема:** 37 warnings в тестах о deprecated методах `advanceTime(by:)` и `processDayStart()`.
+
+**Причина:** Методы помечены как deprecated, но в документации указано "retained for tests and internal use only".
+
+**Решение:** Удалены `@available(*, deprecated)` аннотации. Doc comments уже объясняют правильное использование.
+
+---
+
 ## Тесты
 
 - **Все тесты проходят** (170+ тестов)
-- **Сборка успешна**
+- **Сборка успешна** (0 warnings в production коде)
 - Phase3ContractTests обновлены для новых actions
 
 ---
