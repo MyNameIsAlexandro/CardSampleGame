@@ -1,0 +1,66 @@
+{
+  "version": "1.0.0",
+  "description": "Twilight Marches Act I - Anchor Definitions",
+  "anchors": [
+    {
+      "id": "anchor_village_chapel",
+      "titleKey": "anchor.village_chapel.title",
+      "descriptionKey": "anchor.village_chapel.description",
+      "regionId": "village",
+      "anchorType": "chapel",
+      "initialInfluence": "light",
+      "power": 6,
+      "initialIntegrity": 85
+    },
+    {
+      "id": "anchor_sacred_oak",
+      "titleKey": "anchor.sacred_oak.title",
+      "descriptionKey": "anchor.sacred_oak.description",
+      "regionId": "oak",
+      "anchorType": "sacred_tree",
+      "initialInfluence": "light",
+      "power": 8,
+      "initialIntegrity": 90
+    },
+    {
+      "id": "anchor_forest_idol",
+      "titleKey": "anchor.forest_idol.title",
+      "descriptionKey": "anchor.forest_idol.description",
+      "regionId": "forest",
+      "anchorType": "stone_idol",
+      "initialInfluence": "neutral",
+      "power": 5,
+      "initialIntegrity": 55
+    },
+    {
+      "id": "anchor_swamp_spring",
+      "titleKey": "anchor.swamp_spring.title",
+      "descriptionKey": "anchor.swamp_spring.description",
+      "regionId": "swamp",
+      "anchorType": "spring",
+      "initialInfluence": "dark",
+      "power": 4,
+      "initialIntegrity": 45
+    },
+    {
+      "id": "anchor_mountain_barrow",
+      "titleKey": "anchor.mountain_barrow.title",
+      "descriptionKey": "anchor.mountain_barrow.description",
+      "regionId": "mountain",
+      "anchorType": "barrow",
+      "initialInfluence": "neutral",
+      "power": 5,
+      "initialIntegrity": 50
+    },
+    {
+      "id": "anchor_breach_shrine",
+      "titleKey": "anchor.breach_shrine.title",
+      "descriptionKey": "anchor.breach_shrine.description",
+      "regionId": "breach",
+      "anchorType": "shrine",
+      "initialInfluence": "dark",
+      "power": 3,
+      "initialIntegrity": 15
+    }
+  ]
+}

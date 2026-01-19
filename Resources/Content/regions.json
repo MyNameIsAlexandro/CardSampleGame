@@ -1,0 +1,83 @@
+{
+  "version": "1.0.0",
+  "description": "Twilight Marches Act I - Region Definitions",
+  "regions": [
+    {
+      "id": "village",
+      "titleKey": "region.village.title",
+      "descriptionKey": "region.village.description",
+      "neighborIds": ["oak", "forest", "swamp"],
+      "initiallyDiscovered": true,
+      "anchorId": "anchor_village_chapel",
+      "eventPoolIds": ["pool_village", "pool_common"],
+      "initialState": "stable",
+      "degradationWeight": 0
+    },
+    {
+      "id": "oak",
+      "titleKey": "region.oak.title",
+      "descriptionKey": "region.oak.description",
+      "neighborIds": ["village", "forest"],
+      "initiallyDiscovered": false,
+      "anchorId": "anchor_sacred_oak",
+      "eventPoolIds": ["pool_sacred", "pool_common"],
+      "initialState": "stable",
+      "degradationWeight": 0
+    },
+    {
+      "id": "forest",
+      "titleKey": "region.forest.title",
+      "descriptionKey": "region.forest.description",
+      "neighborIds": ["village", "oak", "mountain"],
+      "initiallyDiscovered": false,
+      "anchorId": "anchor_forest_idol",
+      "eventPoolIds": ["pool_forest", "pool_common"],
+      "initialState": "borderland",
+      "degradationWeight": 1
+    },
+    {
+      "id": "swamp",
+      "titleKey": "region.swamp.title",
+      "descriptionKey": "region.swamp.description",
+      "neighborIds": ["village", "breach"],
+      "initiallyDiscovered": false,
+      "anchorId": "anchor_swamp_spring",
+      "eventPoolIds": ["pool_swamp", "pool_common"],
+      "initialState": "borderland",
+      "degradationWeight": 1
+    },
+    {
+      "id": "mountain",
+      "titleKey": "region.mountain.title",
+      "descriptionKey": "region.mountain.description",
+      "neighborIds": ["forest", "breach"],
+      "initiallyDiscovered": false,
+      "anchorId": "anchor_mountain_barrow",
+      "eventPoolIds": ["pool_mountain", "pool_common"],
+      "initialState": "borderland",
+      "degradationWeight": 1
+    },
+    {
+      "id": "breach",
+      "titleKey": "region.breach.title",
+      "descriptionKey": "region.breach.description",
+      "neighborIds": ["swamp", "mountain", "dark_lowland"],
+      "initiallyDiscovered": false,
+      "anchorId": "anchor_breach_shrine",
+      "eventPoolIds": ["pool_breach", "pool_common"],
+      "initialState": "breach",
+      "degradationWeight": 2
+    },
+    {
+      "id": "dark_lowland",
+      "titleKey": "region.dark_lowland.title",
+      "descriptionKey": "region.dark_lowland.description",
+      "neighborIds": ["breach"],
+      "initiallyDiscovered": false,
+      "anchorId": null,
+      "eventPoolIds": ["pool_boss", "pool_breach"],
+      "initialState": "breach",
+      "degradationWeight": 2
+    }
+  ]
+}
