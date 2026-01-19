@@ -8,8 +8,14 @@ struct ContentView: View {
     @State private var showingStatistics = false
     @State private var selectedCharacterIndex = 0
     @State private var selectedSaveSlot: Int?
-    @StateObject private var gameState = GameState(players: [])
+
+    // MARK: - Engine-First Architecture
+    // Engine is the single source of truth - replaces GameState
+    @StateObject private var engine = TwilightGameEngine()
     @StateObject private var saveManager = SaveManager.shared
+
+    // Legacy support for save/load during transition
+    @StateObject private var gameState = GameState(players: [])
 
     // Using Twilight Marches characters
     let characters = TwilightMarchesCards.createGuardians()
@@ -22,11 +28,11 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             if showingWorldMap {
+                // MARK: - Engine-First: Pass engine directly to WorldMapView
                 WorldMapView(
-                    worldState: gameState.worldState,
-                    player: gameState.currentPlayer,
+                    engine: engine,
                     onExit: {
-                        // Save game before exiting
+                        // Save game before exiting (using legacy save system)
                         if let slot = selectedSaveSlot {
                             saveManager.saveGame(to: slot, gameState: gameState)
                         }
@@ -184,7 +190,7 @@ struct ContentView: View {
                             Button(action: { handleContinueGame() }) {
                                 HStack {
                                     Image(systemName: "play.fill")
-                                    Text("Продолжить")
+                                    Text(L10n.uiContinue.localized)
                                 }
                                 .font(.title3)
                                 .fontWeight(.bold)
@@ -233,13 +239,13 @@ struct ContentView: View {
                 Button(action: { showingSaveSlots = false }) {
                     HStack(spacing: 4) {
                         Image(systemName: "chevron.left")
-                        Text("Назад")
+                        Text(L10n.uiBack.localized)
                     }
                     .foregroundColor(.blue)
                 }
                 Spacer()
                 VStack(alignment: .trailing, spacing: 4) {
-                    Text("Выбор слота")
+                    Text(L10n.uiSlotSelection.localized)
                         .font(.title2)
                         .fontWeight(.bold)
                     if selectedCharacterIndex < characters.count {
@@ -299,8 +305,8 @@ struct ContentView: View {
         gameState.encounterDeck.shuffle()
         gameState.marketCards = TwilightMarchesCards.createMarketCards()
 
-        // Don't start combat - just initialize the world
-        // Combat will be triggered by events in WorldMapView
+        // MARK: - Engine-First: Connect engine to legacy state
+        engine.connectToLegacy(worldState: gameState.worldState, player: player)
 
         // Save to selected slot
         selectedSaveSlot = slot
@@ -336,9 +342,17 @@ struct ContentView: View {
         player.faith = saveData.faith
         player.balance = saveData.balance
 
-        // Build player's starting deck (10 unique cards per hero)
-        player.deck = TwilightMarchesCards.createStartingDeck(for: saveData.characterName)
-        player.shuffleDeck()
+        // Restore deck composition if saved
+        if !saveData.playerDeck.isEmpty {
+            player.deck = saveData.playerDeck
+            player.hand = saveData.playerHand
+            player.discard = saveData.playerDiscard
+            player.buried = saveData.playerBuried
+        } else {
+            // Fallback: create starting deck
+            player.deck = TwilightMarchesCards.createStartingDeck(for: saveData.characterName)
+            player.shuffleDeck()
+        }
 
         // Initialize game state with market
         gameState.players = [player]
@@ -348,8 +362,11 @@ struct ContentView: View {
         gameState.turnNumber = saveData.turnNumber
         gameState.encountersDefeated = saveData.encountersDefeated
 
-        // Don't start combat - just show world map
-        // Combat will be triggered by events
+        // Restore world state from save
+        gameState.worldState = saveData.worldState
+
+        // MARK: - Engine-First: Connect engine to loaded state
+        engine.connectToLegacy(worldState: gameState.worldState, player: player)
 
         selectedSaveSlot = slot
         showingWorldMap = true
@@ -379,12 +396,12 @@ struct ContentView: View {
                 Button(action: { showingLoadSlots = false }) {
                     HStack(spacing: 4) {
                         Image(systemName: "chevron.left")
-                        Text("Назад")
+                        Text(L10n.uiBack.localized)
                     }
                     .foregroundColor(.blue)
                 }
                 Spacer()
-                Text("Продолжить игру")
+                Text(L10n.uiContinueGame.localized)
                     .font(.title2)
                     .fontWeight(.bold)
             }
@@ -441,7 +458,7 @@ struct SaveSlotCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Слот \(slotNumber)")
+                Text(L10n.uiSlotNumber.localized(with: slotNumber))
                     .font(.headline)
                 Spacer()
                 if saveData != nil {
@@ -470,9 +487,9 @@ struct SaveSlotCard: View {
                     .font(.subheadline)
 
                     HStack {
-                        Text("Ход: \(save.turnNumber)")
+                        Text(L10n.uiTurnNumber.localized(with: save.turnNumber))
                         Text("•")
-                        Text("Побед: \(save.encountersDefeated)")
+                        Text(L10n.uiVictories.localized(with: save.encountersDefeated))
                     }
                     .font(.caption)
                     .foregroundColor(.secondary)
@@ -485,7 +502,7 @@ struct SaveSlotCard: View {
 
                     HStack(spacing: 12) {
                         Button(action: onLoadGame) {
-                            Text("Загрузить")
+                            Text(L10n.uiLoad.localized)
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
                                 .foregroundColor(.white)
@@ -496,7 +513,7 @@ struct SaveSlotCard: View {
                         }
 
                         Button(action: { showingOverwriteAlert = true }) {
-                            Text("Новая игра")
+                            Text(L10n.uiNewGame.localized)
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
                                 .foregroundColor(.blue)
@@ -514,12 +531,12 @@ struct SaveSlotCard: View {
                         .font(.largeTitle)
                         .foregroundColor(.secondary)
 
-                    Text("Пустой слот")
+                    Text(L10n.uiEmptySlot.localized)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
 
                     Button(action: onNewGame) {
-                        Text("Начать новую игру")
+                        Text(L10n.uiStartNewGame.localized)
                             .font(.subheadline)
                             .fontWeight(.semibold)
                             .foregroundColor(.white)
@@ -536,21 +553,21 @@ struct SaveSlotCard: View {
         .padding()
         .background(Color(UIColor.secondarySystemBackground))
         .cornerRadius(12)
-        .alert("Удалить сохранение?", isPresented: $showingDeleteAlert) {
-            Button("Отмена", role: .cancel) { }
-            Button("Удалить", role: .destructive) {
+        .alert(L10n.uiDeleteSave.localized, isPresented: $showingDeleteAlert) {
+            Button(L10n.uiCancel.localized, role: .cancel) { }
+            Button(L10n.uiDelete.localized, role: .destructive) {
                 onDelete()
             }
         } message: {
-            Text("Это действие нельзя отменить.")
+            Text(L10n.uiDeleteConfirm.localized)
         }
-        .alert("Перезаписать сохранение?", isPresented: $showingOverwriteAlert) {
-            Button("Отмена", role: .cancel) { }
-            Button("Перезаписать", role: .destructive) {
+        .alert(L10n.uiOverwriteSave.localized, isPresented: $showingOverwriteAlert) {
+            Button(L10n.uiCancel.localized, role: .cancel) { }
+            Button(L10n.uiOverwrite.localized, role: .destructive) {
                 onNewGame()
             }
         } message: {
-            Text("Текущее сохранение будет потеряно.")
+            Text(L10n.uiOverwriteConfirm.localized)
         }
     }
 }
@@ -565,7 +582,7 @@ struct LoadSlotCard: View {
         VStack(alignment: .leading, spacing: 12) {
             // Save info
             HStack {
-                Text("Слот \(saveData.slotNumber)")
+                Text(L10n.uiSlotNumber.localized(with: saveData.slotNumber))
                     .font(.headline)
                 Spacer()
                 Image(systemName: "chevron.right")
@@ -588,9 +605,9 @@ struct LoadSlotCard: View {
                 .font(.subheadline)
 
                 HStack {
-                    Text("Ход: \(saveData.turnNumber)")
+                    Text(L10n.uiTurnNumber.localized(with: saveData.turnNumber))
                     Text("•")
-                    Text("Побед: \(saveData.encountersDefeated)")
+                    Text(L10n.uiVictories.localized(with: saveData.encountersDefeated))
                 }
                 .font(.caption)
                 .foregroundColor(.secondary)

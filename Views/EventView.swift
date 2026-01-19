@@ -87,7 +87,7 @@ struct EventView: View {
 
                     // Choices
                     VStack(spacing: 12) {
-                        Text("Выберите действие:")
+                        Text(L10n.eventChooseAction.localized)
                             .font(.headline)
                             .padding(.horizontal)
 
@@ -103,13 +103,13 @@ struct EventView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Закрыть") {
+                    Button(L10n.uiClose.localized) {
                         onDismiss()
                     }
                 }
             }
-            .alert("Результат", isPresented: $showingResult) {
-                Button("ОК") {
+            .alert(L10n.uiResult.localized, isPresented: $showingResult) {
+                Button(L10n.buttonOk.localized) {
                     if let choice = selectedChoice {
                         onChoiceSelected(choice)
                     }
@@ -186,7 +186,7 @@ struct EventView: View {
                 if isCombatChoice {
                     initiateCombat(choice: choice)
                 } else {
-                    resultMessage = choice.consequences.message ?? "Выбор сделан."
+                    resultMessage = choice.consequences.message ?? L10n.eventChoiceMade.localized
                     showingResult = true
                 }
             }
@@ -225,10 +225,10 @@ struct EventView: View {
                 HStack(spacing: 4) {
                     Image(systemName: "sparkles")
                         .font(.caption2)
-                    Text("Требуется: \(minFaith) веры")
+                    Text(L10n.eventRequiresFaith.localized(with: minFaith))
                         .font(.caption2)
                     // Engine-First: read from engine
-                    Text("(у вас: \(engine.playerFaith))")
+                    Text(L10n.eventYouHaveFaith.localized(with: engine.playerFaith))
                         .font(.caption2)
                         .foregroundColor(engine.playerFaith >= minFaith ? .green : .red)
                 }
@@ -239,10 +239,10 @@ struct EventView: View {
                 HStack(spacing: 4) {
                     Image(systemName: "heart.fill")
                         .font(.caption2)
-                    Text("Требуется: \(minHealth) здоровья")
+                    Text(L10n.eventRequiresHealth.localized(with: minHealth))
                         .font(.caption2)
                     // Engine-First: read from engine
-                    Text("(у вас: \(engine.playerHealth))")
+                    Text(L10n.eventYouHaveHealth.localized(with: engine.playerHealth))
                         .font(.caption2)
                         .foregroundColor(engine.playerHealth >= minHealth ? .green : .red)
                 }
@@ -257,9 +257,9 @@ struct EventView: View {
                 HStack(spacing: 4) {
                     Image(systemName: "circle.lefthalf.filled")
                         .font(.caption2)
-                    Text("Требуется путь: \(balanceText(reqBalance))")
+                    Text(L10n.eventRequiresPath.localized(with: balanceText(reqBalance)))
                         .font(.caption2)
-                    Text("(ваш: \(balanceText(playerBalanceEnum)))")
+                    Text(L10n.eventYourPath.localized(with: balanceText(playerBalanceEnum)))
                         .font(.caption2)
                         .foregroundColor(meetsRequirement ? .green : .red)
                 }
@@ -274,7 +274,7 @@ struct EventView: View {
                 HStack(spacing: 4) {
                     Image(systemName: faithChange > 0 ? "arrow.up" : "arrow.down")
                         .font(.caption2)
-                    Text("Вера: \(faithChange > 0 ? "+" : "")\(faithChange)")
+                    Text(L10n.eventFaithChange.localized(with: faithChange > 0 ? "+" : "", faithChange))
                         .font(.caption2)
                 }
                 .foregroundColor(faithChange > 0 ? .green : .orange)
@@ -284,7 +284,7 @@ struct EventView: View {
                 HStack(spacing: 4) {
                     Image(systemName: healthChange > 0 ? "arrow.up" : "arrow.down")
                         .font(.caption2)
-                    Text("Здоровье: \(healthChange > 0 ? "+" : "")\(healthChange)")
+                    Text(L10n.eventHealthChange.localized(with: healthChange > 0 ? "+" : "", healthChange))
                         .font(.caption2)
                 }
                 .foregroundColor(healthChange > 0 ? .green : .red)
@@ -294,7 +294,7 @@ struct EventView: View {
                 HStack(spacing: 4) {
                     Image(systemName: balanceChange > 0 ? "sun.max.fill" : "moon.fill")
                         .font(.caption2)
-                    Text("Баланс: \(balanceChange > 0 ? "к Свету" : "к Тьме")")
+                    Text(balanceChange > 0 ? L10n.eventBalanceToLight.localized : L10n.eventBalanceToDark.localized)
                         .font(.caption2)
                 }
                 .foregroundColor(balanceChange > 0 ? .yellow : .purple)
@@ -304,7 +304,7 @@ struct EventView: View {
                 HStack(spacing: 4) {
                     Image(systemName: reputationChange > 0 ? "hand.thumbsup.fill" : "hand.thumbsdown.fill")
                         .font(.caption2)
-                    Text("Репутация: \(reputationChange > 0 ? "+" : "")\(reputationChange)")
+                    Text(L10n.eventReputationChange.localized(with: reputationChange > 0 ? "+" : "", reputationChange))
                         .font(.caption2)
                 }
                 .foregroundColor(reputationChange > 0 ? .green : .red)
@@ -314,7 +314,7 @@ struct EventView: View {
                 HStack(spacing: 4) {
                     Image(systemName: "rectangle.stack.fill.badge.plus")
                         .font(.caption2)
-                    Text("Получите карту")
+                    Text(L10n.eventReceiveCard.localized)
                         .font(.caption2)
                 }
                 .foregroundColor(.blue)
@@ -324,7 +324,7 @@ struct EventView: View {
                 HStack(spacing: 4) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .font(.caption2)
-                    Text("Получите проклятие")
+                    Text(L10n.eventReceiveCurse.localized)
                         .font(.caption2)
                 }
                 .foregroundColor(.red)
@@ -365,13 +365,13 @@ struct EventView: View {
         switch outcome {
         case .victory:
             combatVictory = true
-            resultMessage = "Победа! Вы одержали верх в бою."
+            resultMessage = L10n.eventCombatVictoryMessage.localized
         case .defeat:
             combatVictory = false
-            resultMessage = "Поражение... Вы потерпели неудачу в бою."
+            resultMessage = L10n.eventCombatDefeatMessage.localized
         case .fled:
             combatVictory = nil
-            resultMessage = "Вы сбежали из боя."
+            resultMessage = L10n.eventCombatFledMessage.localized
         }
 
         // Apply non-combat consequences from the choice (if victory)
@@ -409,9 +409,9 @@ struct EventView: View {
 
     func balanceText(_ balance: CardBalance) -> String {
         switch balance {
-        case .light: return "Света"
-        case .neutral: return "Нейтральный"
-        case .dark: return "Тьмы"
+        case .light: return L10n.tmBalanceLightGenitive.localized
+        case .neutral: return L10n.tmBalanceNeutralGenitive.localized
+        case .dark: return L10n.tmBalanceDarkGenitive.localized
         }
     }
 

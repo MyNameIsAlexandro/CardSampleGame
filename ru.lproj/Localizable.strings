@@ -521,3 +521,343 @@
 "combat.your.hand" = "Ваши карты";
 "combat.tap.to.play" = "Нажмите для игры";
 "combat.not.enough.faith" = "Недостаточно веры";
+
+// MARK: - JSON Content Localization
+
+// MARK: Регионы
+"region.village.title" = "Пограничная Деревня";
+"region.village.description" = "Небольшая деревня на краю сумрачных земель, защищённая древней часовней.";
+"region.oak.title" = "Священный Дуб";
+"region.oak.description" = "Древняя роща, где стоит могучий священный дуб, соединяющий наш мир с Правью.";
+"region.forest.title" = "Тёмный Лес";
+"region.forest.description" = "Густой бор, где обитает Леший, темнеющий по мере приближения Нави.";
+"region.swamp.title" = "Проклятое Болото";
+"region.swamp.description" = "Мутная топь, где бродят утопленники и ведьмы варят свои зелья.";
+"region.mountain.title" = "Горный Перевал";
+"region.mountain.description" = "Опасный путь через древние горы, охраняемый каменными стражами.";
+"region.breach.title" = "Разлом";
+"region.breach.description" = "Разрыв между мирами, где тьма Нави просачивается в Явь.";
+"region.dark_lowland.title" = "Тёмная Низина";
+"region.dark_lowland.description" = "Сердце вторжения, где Морой ожидает в вечной тьме.";
+
+// MARK: Якоря
+"anchor.village_chapel.title" = "Деревенская Часовня";
+"anchor.village_chapel.description" = "Небольшая, но крепкая часовня, благословлённая поколениями верующих селян.";
+"anchor.sacred_oak.title" = "Священный Дуб";
+"anchor.sacred_oak.description" = "Великое древо, посаженное Велесом во времена до времён, якорь старых обычаев.";
+"anchor.forest_idol.title" = "Лесной Каменный Идол";
+"anchor.forest_idol.description" = "Древний идол, высеченный забытыми народами, всё ещё хранящий силу против тьмы.";
+"anchor.swamp_spring.title" = "Осквернённый Источник";
+"anchor.swamp_spring.description" = "Когда-то целебный источник, ныне отравленный прикосновением Нави. Ещё можно очистить.";
+"anchor.mountain_barrow.title" = "Курган Предков";
+"anchor.mountain_barrow.description" = "Погребальный холм древних героев, чьи духи всё ещё охраняют этот перевал.";
+"anchor.breach_shrine.title" = "Святилище у Разлома";
+"anchor.breach_shrine.description" = "Отчаянная последняя защита, святилище, возведённое для замедления наступающей тьмы.";
+
+// MARK: Квесты
+"quest.main_act1.title" = "Грядущая Тьма";
+"quest.main_act1.description" = "Остановите распространение влияния Нави, пока Морой не прорвётся окончательно.";
+"quest.main_act1.obj1" = "Посетите Священный Дуб, чтобы узнать о старых обычаях";
+"quest.main_act1.obj2" = "Укрепите якоря Лесного Идола и Болотного Источника (целостность > 50)";
+"quest.main_act1.obj3" = "Доберитесь до Разлома и противостаньте тьме";
+"quest.main_act1.obj4" = "Победите Мороя Чернобога";
+
+"quest.village_defense.title" = "Защита Деревни";
+"quest.village_defense.description" = "Помогите деревенскому старосте защитить поселение от наступающей тьмы.";
+"quest.village_defense.obj1" = "Укрепите якорь Часовни (целостность > 90)";
+"quest.village_defense.obj2" = "Патрулируйте границы: посетите Лес и Болото";
+
+"quest.sacred_restoration.title" = "Восстановление Святыни";
+"quest.sacred_restoration.description" = "Восстановите силу Священного Дуба, чтобы отбросить тьму.";
+"quest.sacred_restoration.obj1" = "Найдите и выполните ритуал восстановления";
+"quest.sacred_restoration.obj2" = "Восстановите Священный Дуб до полной силы (целостность = 100)";
+
+"quest.dark_path.title" = "Тёмный Путь";
+"quest.dark_path.description" = "Примите силу Нави и подчините её тьму своей воле.";
+"quest.dark_path.obj1" = "Примите тьму внутри себя";
+"quest.dark_path.obj2" = "Осквернить Лесной Идол (целостность < 20)";
+
+// MARK: Испытания
+"challenge.combat_leshy.title" = "Бой: Леший";
+"challenge.combat_leshy.description" = "Сразитесь с осквернённым лесным духом.";
+"challenge.combat_shadow.title" = "Бой: Тварь из Нави";
+"challenge.combat_shadow.description" = "Существо из чистой тьмы Нави атакует.";
+"challenge.combat_moroi.title" = "Босс: Морой Чернобог";
+"challenge.combat_moroi.description" = "Слуга Чернобога, вестник вечной ночи.";
+"challenge.ritual_anchor.title" = "Ритуал: Восстановление Якоря";
+"challenge.ritual_anchor.description" = "Проведите ритуал для восстановления защитной силы якоря.";
+"challenge.ritual_seal.title" = "Ритуал: Запечатать Разлом";
+"challenge.ritual_seal.description" = "Опасный ритуал для запечатывания разрыва между мирами.";
+"challenge.explore_forest.title" = "Исследование: Тёмный Лес";
+"challenge.explore_forest.description" = "Найдите путь через предательские тропы тёмного леса.";
+"challenge.explore_breach.title" = "Исследование: Разлом";
+"challenge.explore_breach.description" = "Отважьтесь войти в опасный разлом между мирами.";
+
+// MARK: События - Общие
+"event.wanderer.title" = "Странник";
+"event.wanderer.body" = "Усталый путник приближается, его глаза несут тяжесть далёких земель. Он ищет отдых и, возможно, готов поделиться историями.";
+"event.wanderer.listen" = "Выслушать его рассказы (3 Веры)";
+"event.wanderer.help" = "Предложить помощь (2 Веры)";
+"event.wanderer.ignore" = "Продолжить свой путь";
+"event.wanderer.listen.result" = "Странник делится древней мудростью о сумрачных землях.";
+"event.wanderer.help.result" = "Ваша доброта вознаграждена благодарностью деревни.";
+"event.wanderer.ignore.result" = "Вы проходите мимо, взгляд странника следует за вами.";
+
+"event.camp.title" = "Привал у Костра";
+"event.camp.body" = "Вы находите безопасное место для отдыха. Огонь потрескивает, на мгновение отгоняя тьму.";
+"event.camp.rest" = "Отдохнуть телом";
+"event.camp.meditate" = "Медитировать и молиться";
+"event.camp.continue" = "Идти дальше";
+"event.camp.rest.result" = "Ваши раны начинают заживать у тёплого огня.";
+"event.camp.meditate.result" = "Ваша вера укрепляется в общении со старыми богами.";
+"event.camp.continue.result" = "Усталым нет покоя. Тьма не будет ждать.";
+
+"event.merchant.title" = "Странствующий Торговец";
+"event.merchant.body" = "Торговец с необычным товаром разбил лагерь. Его товары мерцают потусторонней энергией.";
+"event.merchant.buy_blessing" = "Купить благословение (5 Веры)";
+"event.merchant.buy_artifact" = "Купить артефакт (8 Веры)";
+"event.merchant.decline" = "Отказаться и уйти";
+"event.merchant.buy_blessing.result" = "Вы получаете карту, благословлённую по старым обычаям.";
+"event.merchant.buy_artifact.result" = "Амулет пульсирует защитной энергией.";
+"event.merchant.decline.result" = "Возможно, в другой раз. Торговец понимающе кивает.";
+
+// MARK: События - Деревня
+"event.elder.title" = "Деревенский Староста";
+"event.elder.body" = "Деревенский староста приближается, тревога глубоко отпечаталась на его обветренном лице. Тьма крепнет с каждым днём.";
+"event.elder.accept" = "Принять задание";
+"event.elder.wisdom" = "Попросить мудрости (2 Веры)";
+"event.elder.decline" = "Отказаться помогать";
+"event.elder.accept.result" = "Вы клянётесь защитить деревню от наступающей тьмы.";
+"event.elder.wisdom.result" = "Староста делится секретами древней защиты.";
+"event.elder.decline.result" = "Разочарование старосты ощутимо. Возможно, у вас свои причины.";
+
+"event.lost_child.title" = "Потерявшийся Ребёнок";
+"event.lost_child.body" = "Ребёнок забрёл слишком близко к краю леса. Его крики эхом разносятся в сумерках.";
+"event.lost_child.search" = "Искать ребёнка";
+"event.lost_child.pray" = "Молиться о наставлении (5 Веры)";
+"event.lost_child.ignore" = "Слишком опасно";
+"event.lost_child.search.result" = "Вы находите ребёнка и безопасно возвращаете его. Деревня ликует.";
+"event.lost_child.pray.result" = "Божественный свет ведёт вас к ребёнку.";
+"event.lost_child.ignore.result" = "Крики затихают во тьме. Вы стараетесь не думать об этом.";
+
+"event.celebration.title" = "Деревенский Праздник";
+"event.celebration.body" = "Несмотря на тьму, деревня устраивает празднество в честь старых богов и для укрепления духа.";
+"event.celebration.join" = "Присоединиться к празднику";
+"event.celebration.bless" = "Дать благословение (3 Веры)";
+"event.celebration.pass" = "Пройти мимо тихо";
+"event.celebration.join.result" = "Радость и единство укрепляют и тело, и дух.";
+"event.celebration.bless.result" = "Ваше благословение приносит надежду. Тьма словно немного отступает.";
+"event.celebration.pass.result" = "Вы наблюдаете из тени, думая о более тёмных делах.";
+
+// MARK: События - Лес
+"event.leshy.title" = "Пробуждение Лешего";
+"event.leshy.body" = "Осквернённый лесной дух выходит из искривлённых деревьев, глаза горят злобой Нави.";
+"event.leshy.fight" = "Сразиться с Лешим";
+"event.leshy.appease" = "Умилостивить дарами (5 Веры)";
+"event.leshy.retreat" = "Отступить из леса";
+"event.leshy.fight.result" = "Вы готовитесь к бою с осквернённым духом.";
+"event.leshy.appease.result" = "Ваши дары возвращают немного рассудка духу. Он мирно отступает.";
+"event.leshy.retreat.result" = "Вы бежите, но лес запомнит вашу трусость.";
+
+"event.ritual.title" = "Древнее Место Силы";
+"event.ritual.body" = "Вы обнаруживаете поляну, где когда-то проводились старые ритуалы. Сила всё ещё витает здесь.";
+"event.ritual.restore" = "Провести ритуал восстановления (10 Веры)";
+"event.ritual.corrupt" = "Осквернить место";
+"event.ritual.leave" = "Оставить нетронутым";
+"event.ritual.restore.result" = "Свет возвращается! Якорь укрепляется по завершении ритуала.";
+"event.ritual.corrupt.result" = "Тёмная сила наполняет вас. Место падает пред Навью.";
+"event.ritual.leave.result" = "Место остаётся, ожидая того, у кого хватит воли действовать.";
+
+"event.forest_whispers.title" = "Шёпот Леса";
+"event.forest_whispers.body" = "Голоса плывут меж деревьев - одни знакомые, другие чуждые. Они зовут вас по имени.";
+"event.forest_whispers.listen" = "Внимательно слушать (2 Веры)";
+"event.forest_whispers.ignore" = "Заглушить их";
+"event.forest_whispers.listen.result" = "Духи делятся обрывками забытых знаний.";
+"event.forest_whispers.ignore.result" = "Усилия по игнорированию истощают вас. Что-то царапает, когда вы проходите.";
+
+// MARK: События - Болото
+"event.swamp_witch.title" = "Болотная Ведьма";
+"event.swamp_witch.body" = "Фигура выступает из тумана - болотная ведьма, ни живая, ни мёртвая, предлагающая запретные сделки.";
+"event.swamp_witch.bargain" = "Заключить сделку";
+"event.swamp_witch.cleanse" = "Очистить от порчи (8 Веры)";
+"event.swamp_witch.flee" = "Бежать в туман";
+"event.swamp_witch.bargain.result" = "Дары ведьмы имеют свою цену. И благословение, и проклятие теперь ваши.";
+"event.swamp_witch.cleanse.result" = "Святой свет сжигает порчу. Болото дышит легче.";
+"event.swamp_witch.flee.result" = "Вы спасаетесь, но проклятие ведьмы следует за вами.";
+
+"event.drowned_spirits.title" = "Утопленные Духи";
+"event.drowned_spirits.body" = "Бледные фигуры поднимаются из мутной воды - утопленные души, жаждущие утянуть живых.";
+"event.drowned_spirits.fight" = "Сразиться с духами";
+"event.drowned_spirits.pray" = "Молиться об их покое (4 Веры)";
+"event.drowned_spirits.wade" = "Пробраться сквозь них";
+"event.drowned_spirits.fight.result" = "Вы готовитесь к бою с неупокоенными мертвецами.";
+"event.drowned_spirits.pray.result" = "Ваши молитвы приносят покой. Духи погружаются обратно в глубины.";
+"event.drowned_spirits.wade.result" = "Холодные руки хватают вас, пока вы пробираетесь.";
+
+"event.corrupted_spring.title" = "Осквернённый Источник";
+"event.corrupted_spring.body" = "Источник бьёт ключом, но воды его черны как ночь, осквернённые прикосновением Нави.";
+"event.corrupted_spring.purify" = "Очистить воды (6 Веры)";
+"event.corrupted_spring.drink" = "Испить тёмных вод";
+"event.corrupted_spring.ignore" = "Оставить как есть";
+"event.corrupted_spring.purify.result" = "Воды очищаются, и якорь черпает силу из очищенного источника.";
+"event.corrupted_spring.drink.result" = "Сила наполняет вас, но тьма пускает корни в вашей душе.";
+"event.corrupted_spring.ignore.result" = "Источник продолжает отравлять землю.";
+
+// MARK: События - Горы
+"event.mountain_shrine.title" = "Горное Святилище";
+"event.mountain_shrine.body" = "Небольшое святилище примостилось на скальном выступе, всё ещё поддерживаемое кем-то верующим.";
+"event.mountain_shrine.pray" = "Помолиться у святилища";
+"event.mountain_shrine.meditate" = "Медитировать, любуясь видом";
+"event.mountain_shrine.search" = "Искать скрытые сокровища";
+"event.mountain_shrine.pray.result" = "Ваши молитвы укрепляют и веру, и якорь.";
+"event.mountain_shrine.meditate.result" = "Покой наполняет разум. Вы чувствуете себя обновлённым.";
+"event.mountain_shrine.search.result" = "Вы находите старый талисман, но тревожить святилище стоит вам дорого.";
+
+"event.mountain_storm.title" = "Горная Буря";
+"event.mountain_storm.body" = "Тёмные тучи собираются с неестественной скоростью. Это не обычная буря - сила Нави несётся на ветру.";
+"event.mountain_storm.shelter" = "Найти укрытие";
+"event.mountain_storm.brave" = "Выстоять в буре";
+"event.mountain_storm.invoke" = "Призвать защиту Перуна (5 Веры)";
+"event.mountain_storm.shelter.result" = "Вы пережидаете, но сомнения подтачивают вашу веру.";
+"event.mountain_storm.brave.result" = "Ярость бури обрушивается на вас, но вы выходите сильнее.";
+"event.mountain_storm.invoke.result" = "Благословение бога-громовержца защищает вас. Тьма бури рассеивается.";
+
+"event.ancient_guardian.title" = "Древний Страж";
+"event.ancient_guardian.body" = "Каменная фигура оживает - древний страж горных перевалов, ныне осквернённый тьмой.";
+"event.ancient_guardian.fight" = "Сразиться со стражем";
+"event.ancient_guardian.honor" = "Почтить старые обычаи (6 Веры)";
+"event.ancient_guardian.retreat" = "Отступить с перевала";
+"event.ancient_guardian.fight.result" = "Вам придётся уничтожить то, что когда-то было защитником.";
+"event.ancient_guardian.honor.result" = "Ваше почтение пробуждает истинную природу стража. Он пропускает вас.";
+"event.ancient_guardian.retreat.result" = "Нужно найти другой путь.";
+
+// MARK: События - Священная Роща
+"event.oak_spirit.title" = "Дух Дуба";
+"event.oak_spirit.body" = "Дух великого дуба проявляется - древний без меры, хранитель старых обычаев.";
+"event.oak_spirit.commune" = "Пообщаться с духом (5 Веры)";
+"event.oak_spirit.offer" = "Сделать подношение (3 Веры)";
+"event.oak_spirit.observe" = "Просто наблюдать";
+"event.oak_spirit.commune.result" = "Дух дарует своё благословение - карту древней силы.";
+"event.oak_spirit.offer.result" = "Ваше подношение укрепляет защитную ауру дуба.";
+"event.oak_spirit.observe.result" = "Вы становитесь свидетелем того, что мало кто из смертных когда-либо видел.";
+
+"event.veles_vision.title" = "Видение Велеса";
+"event.veles_vision.body" = "Бог подземного мира посылает вам видение грядущей тьмы.";
+"event.veles_vision.accept" = "Принять видение";
+"event.veles_vision.reject" = "Отвергнуть тёмное знание";
+"event.veles_vision.accept.result" = "Видение выжигается в вашем разуме - теперь вы знаете, где лежит Тёмная Низина.";
+"event.veles_vision.reject.result" = "Вы отказываетесь от дара. Недовольство Велеса ощутимо.";
+
+// MARK: События - Разлом
+"event.shadow_beast.title" = "Тварь из Нави";
+"event.shadow_beast.body" = "Существо из чистой тьмы выскакивает из теней - зверь из самой Нави.";
+"event.shadow_beast.fight" = "Сразиться с тварью";
+"event.shadow_beast.banish" = "Изгнать святым светом (8 Веры)";
+"event.shadow_beast.flee" = "Бежать";
+"event.shadow_beast.fight.result" = "Вы готовитесь противостоять воплощённой тьме.";
+"event.shadow_beast.banish.result" = "Святой свет сжигает существо, отправляя его обратно в Навь.";
+"event.shadow_beast.flee.result" = "Когти рвут вашу спину, пока вы бежите.";
+
+"event.dark_portal.title" = "Тёмный Портал";
+"event.dark_portal.body" = "Разрыв реальности висит в воздухе - прямой проход в Навь. От него исходит сила и опасность.";
+"event.dark_portal.seal" = "Запечатать портал (12 Веры)";
+"event.dark_portal.empower" = "Вбирать его силу";
+"event.dark_portal.avoid" = "Осторожно обойти";
+"event.dark_portal.seal.result" = "Огромным усилием вы запечатываете разлом. Якорь укрепляется.";
+"event.dark_portal.empower.result" = "Тёмная сила вливается в вас. Вы перешли черту.";
+"event.dark_portal.avoid.result" = "Вы обходите его стороной, но его присутствие ослабляет границу.";
+
+"event.barrow.title" = "Древний Курган";
+"event.barrow.body" = "Древний погребальный холм, обитель героев минувших эпох. Их духи всё ещё здесь.";
+"event.barrow.honor" = "Почтить предков (5 Веры)";
+"event.barrow.plunder" = "Разграбить могилу";
+"event.barrow.leave" = "Уйти с миром";
+"event.barrow.honor.result" = "Предки дарят вам своё благословение - защитный артефакт.";
+"event.barrow.plunder.result" = "Вы забираете древние сокровища, но получаете ужасное проклятие.";
+"event.barrow.leave.result" = "Некоторые места лучше не тревожить.";
+
+// MARK: События - Босс
+"event.boss_moroi.title" = "Морой Чернобог";
+"event.boss_moroi.body" = "Перед вами слуга тёмного бога - Морой Чернобог. Финальное противостояние настало.";
+"event.boss_moroi.fight_light" = "Сразиться силой света";
+"event.boss_moroi.fight_dark" = "Сразиться, используя тьму";
+"event.boss_moroi.retreat" = "Отступить, чтобы набраться сил";
+"event.boss_moroi.fight_light.result" = "Вы призываете весь собранный свет. Битва за Явь начинается.";
+"event.boss_moroi.fight_dark.result" = "Вы черпаете из тьмы внутри. Огнём против огня.";
+"event.boss_moroi.retreat.result" = "Вы не готовы. Тьма крепнет с каждым мгновением.";
+
+// MARK: - UI Strings
+
+// ContentView
+"ui.continue" = "Продолжить";
+"ui.back" = "Назад";
+"ui.slot.selection" = "Выбор слота";
+"ui.continue.game" = "Продолжить игру";
+"ui.slot.number" = "Слот %d";
+"ui.turn.number" = "Ход: %d";
+"ui.victories" = "Побед: %d";
+"ui.load" = "Загрузить";
+"ui.new.game" = "Новая игра";
+"ui.empty.slot" = "Пустой слот";
+"ui.start.new.game" = "Начать новую игру";
+"ui.delete.confirm" = "Это действие нельзя отменить.";
+"ui.overwrite.confirm" = "Текущее сохранение будет потеряно.";
+"ui.delete.save" = "Удалить сохранение?";
+"ui.overwrite.save" = "Перезаписать сохранение?";
+"ui.cancel" = "Отмена";
+"ui.delete" = "Удалить";
+"ui.overwrite" = "Перезаписать";
+
+// EventView
+"event.choose.action" = "Выберите действие:";
+"event.requires.faith" = "Требуется: %d веры";
+"event.you.have.faith" = "(у вас: %d)";
+"event.requires.health" = "Требуется: %d здоровья";
+"event.you.have.health" = "(у вас: %d)";
+"event.requires.path" = "Требуется путь: %@";
+"event.your.path" = "(ваш: %@)";
+"event.faith.change" = "Вера: %@%d";
+"event.health.change" = "Здоровье: %@%d";
+"event.balance.to.light" = "Баланс: к Свету";
+"event.balance.to.dark" = "Баланс: к Тьме";
+"event.reputation.change" = "Репутация: %@%d";
+"event.receive.card" = "Получите карту";
+"event.receive.curse" = "Получите проклятие";
+"event.choice.made" = "Выбор сделан.";
+"event.combat.victory.message" = "Победа! Вы одержали верх в бою.";
+"event.combat.defeat.message" = "Поражение... Вы потерпели неудачу в бою.";
+"event.combat.fled.message" = "Вы сбежали из боя.";
+
+// UI Common
+"ui.close" = "Закрыть";
+"ui.result" = "Результат";
+
+// Balance (genitive form)
+"tm.balance.light.genitive" = "Света";
+"tm.balance.neutral.genitive" = "Нейтральный";
+"tm.balance.dark.genitive" = "Тьмы";
+
+// StatisticsView
+"stats.title" = "Статистика";
+"stats.game.name" = "Twilight Marches";
+"stats.general" = "Общая статистика";
+"stats.leaderboard" = "Таблица лидеров";
+"stats.history" = "История игр";
+"stats.no.saves" = "Пока нет сохранённых игр";
+"stats.start.hint" = "Начните новую игру, чтобы увидеть статистику";
+"stats.done" = "Готово";
+"stats.resources" = "Ресурсы";
+"stats.progress" = "Прогресс";
+"stats.games.count" = "Игр";
+"stats.best.result" = "Лучший результат";
+"stats.longest.survival" = "Дольше всего";
+"stats.turns.count" = "%d ходов";
+"stats.victories.label" = "побед";
+"stats.turns.label" = "ходов";
+
+// CombatView additional
+"combat.vs" = "ПРОТИВ";
+"combat.attack.roll" = "Бросок атаки:";
+"combat.damage.calc.title" = "Расчёт урона:";
+"combat.base.value" = "Базовый: %d";
+"combat.total.damage" = "= %d";

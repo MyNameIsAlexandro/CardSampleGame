@@ -26,10 +26,10 @@ struct StatisticsView: View {
                 VStack(spacing: 24) {
                     // Header
                     VStack(spacing: 8) {
-                        Text("📊 Статистика")
+                        Text("📊 " + L10n.statsTitle.localized)
                             .font(.largeTitle)
                             .fontWeight(.bold)
-                        Text("Twilight Marches")
+                        Text(L10n.statsGameName.localized)
                             .font(.title3)
                             .foregroundColor(.secondary)
                     }
@@ -37,28 +37,28 @@ struct StatisticsView: View {
 
                     // Overall Statistics
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Общая статистика")
+                        Text(L10n.statsGeneral.localized)
                             .font(.headline)
 
                         HStack(spacing: 16) {
                             StatCard(
                                 icon: "gamecontroller.fill",
-                                title: "Игр",
+                                title: L10n.statsGamesCount.localized,
                                 value: "\(totalGames)",
                                 color: .blue
                             )
 
                             StatCard(
                                 icon: "trophy.fill",
-                                title: "Лучший результат",
+                                title: L10n.statsBestResult.localized,
                                 value: "\(bestEncountersDefeated)",
                                 color: .orange
                             )
 
                             StatCard(
                                 icon: "clock.fill",
-                                title: "Дольше всего",
-                                value: "\(longestSurvival) ходов",
+                                title: L10n.statsLongestSurvival.localized,
+                                value: L10n.statsTurnsCount.localized(with: longestSurvival),
                                 color: .green
                             )
                         }
@@ -70,7 +70,7 @@ struct StatisticsView: View {
                     // Leaderboard
                     if !allSaves.isEmpty {
                         VStack(alignment: .leading, spacing: 16) {
-                            Text("Таблица лидеров")
+                            Text(L10n.statsLeaderboard.localized)
                                 .font(.headline)
 
                             ForEach(Array(allSaves.sorted(by: { $0.encountersDefeated > $1.encountersDefeated }).enumerated()), id: \.element.id) { index, save in
@@ -86,7 +86,7 @@ struct StatisticsView: View {
 
                         // Detailed Game Records
                         VStack(alignment: .leading, spacing: 16) {
-                            Text("История игр")
+                            Text(L10n.statsHistory.localized)
                                 .font(.headline)
 
                             ForEach(allSaves.sorted(by: { $0.timestamp > $1.timestamp })) { save in
@@ -101,10 +101,10 @@ struct StatisticsView: View {
                             Image(systemName: "chart.bar.xaxis")
                                 .font(.system(size: 60))
                                 .foregroundColor(.secondary)
-                            Text("Пока нет сохранённых игр")
+                            Text(L10n.statsNoSaves.localized)
                                 .font(.headline)
                                 .foregroundColor(.secondary)
-                            Text("Начните новую игру, чтобы увидеть статистику")
+                            Text(L10n.statsStartHint.localized)
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center)
@@ -120,7 +120,7 @@ struct StatisticsView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { dismiss() }) {
-                        Text("Готово")
+                        Text(L10n.statsDone.localized)
                             .fontWeight(.semibold)
                     }
                 }
@@ -193,7 +193,7 @@ struct LeaderboardRow: View {
             Spacer()
 
             VStack(alignment: .trailing, spacing: 4) {
-                Text("Слот \(save.slotNumber)")
+                Text(L10n.uiSlotNumber.localized(with: save.slotNumber))
                     .font(.caption2)
                     .foregroundColor(.secondary)
                 Text(save.formattedDate)
@@ -216,7 +216,7 @@ struct GameRecordCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(save.characterName)
                         .font(.headline)
-                    Text("Слот \(save.slotNumber)")
+                    Text(L10n.uiSlotNumber.localized(with: save.slotNumber))
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -232,7 +232,7 @@ struct GameRecordCard: View {
 
             HStack(spacing: 20) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Ресурсы")
+                    Text(L10n.statsResources.localized)
                         .font(.caption)
                         .foregroundColor(.secondary)
                     HStack(spacing: 12) {
@@ -249,21 +249,21 @@ struct GameRecordCard: View {
                 Spacer()
 
                 VStack(alignment: .trailing, spacing: 4) {
-                    Text("Прогресс")
+                    Text(L10n.statsProgress.localized)
                         .font(.caption)
                         .foregroundColor(.secondary)
                     HStack(spacing: 12) {
                         VStack(alignment: .trailing, spacing: 2) {
                             Text("\(save.encountersDefeated)")
                                 .font(.headline)
-                            Text("побед")
+                            Text(L10n.statsVictoriesLabel.localized)
                                 .font(.caption2)
                                 .foregroundColor(.secondary)
                         }
                         VStack(alignment: .trailing, spacing: 2) {
                             Text("\(save.turnNumber)")
                                 .font(.headline)
-                            Text("ходов")
+                            Text(L10n.statsTurnsLabel.localized)
                                 .font(.caption2)
                                 .foregroundColor(.secondary)
                         }

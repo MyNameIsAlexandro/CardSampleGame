@@ -276,4 +276,79 @@ enum L10n {
     static let combatYourHand = "combat.your.hand"
     static let combatTapToPlay = "combat.tap.to.play"
     static let combatNotEnoughFaith = "combat.not.enough.faith"
+
+    // MARK: - UI Strings (Audit Issue #1 - Hardcoded Strings)
+
+    // ContentView / Save Slots
+    static let uiContinue = "ui.continue"
+    static let uiBack = "ui.back"
+    static let uiSlotSelection = "ui.slot.selection"
+    static let uiContinueGame = "ui.continue.game"
+    static let uiSlotNumber = "ui.slot.number"
+    static let uiTurnNumber = "ui.turn.number"
+    static let uiVictories = "ui.victories"
+    static let uiLoad = "ui.load"
+    static let uiNewGame = "ui.new.game"
+    static let uiEmptySlot = "ui.empty.slot"
+    static let uiStartNewGame = "ui.start.new.game"
+    static let uiDeleteConfirm = "ui.delete.confirm"
+    static let uiOverwriteConfirm = "ui.overwrite.confirm"
+    static let uiDeleteSave = "ui.delete.save"
+    static let uiOverwriteSave = "ui.overwrite.save"
+    static let uiCancel = "ui.cancel"
+    static let uiDelete = "ui.delete"
+    static let uiOverwrite = "ui.overwrite"
+
+    // EventView
+    static let eventChooseAction = "event.choose.action"
+    static let eventRequiresFaith = "event.requires.faith"
+    static let eventYouHaveFaith = "event.you.have.faith"
+    static let eventRequiresHealth = "event.requires.health"
+    static let eventYouHaveHealth = "event.you.have.health"
+    static let eventRequiresPath = "event.requires.path"
+    static let eventYourPath = "event.your.path"
+    static let eventFaithChange = "event.faith.change"
+    static let eventHealthChange = "event.health.change"
+    static let eventBalanceToLight = "event.balance.to.light"
+    static let eventBalanceToDark = "event.balance.to.dark"
+    static let eventReputationChange = "event.reputation.change"
+    static let eventReceiveCard = "event.receive.card"
+    static let eventReceiveCurse = "event.receive.curse"
+    static let eventChoiceMade = "event.choice.made"
+    static let eventCombatVictoryMessage = "event.combat.victory.message"
+    static let eventCombatDefeatMessage = "event.combat.defeat.message"
+    static let eventCombatFledMessage = "event.combat.fled.message"
+
+    // UI Common
+    static let uiClose = "ui.close"
+
+    // Balance (genitive form)
+    static let tmBalanceLightGenitive = "tm.balance.light.genitive"
+    static let tmBalanceNeutralGenitive = "tm.balance.neutral.genitive"
+    static let tmBalanceDarkGenitive = "tm.balance.dark.genitive"
+
+    // StatisticsView
+    static let statsTitle = "stats.title"
+    static let statsGameName = "stats.game.name"
+    static let statsGeneral = "stats.general"
+    static let statsLeaderboard = "stats.leaderboard"
+    static let statsHistory = "stats.history"
+    static let statsNoSaves = "stats.no.saves"
+    static let statsStartHint = "stats.start.hint"
+    static let statsDone = "stats.done"
+    static let statsResources = "stats.resources"
+    static let statsProgress = "stats.progress"
+    static let statsGamesCount = "stats.games.count"
+    static let statsBestResult = "stats.best.result"
+    static let statsLongestSurvival = "stats.longest.survival"
+    static let statsTurnsCount = "stats.turns.count"
+    static let statsVictoriesLabel = "stats.victories.label"
+    static let statsTurnsLabel = "stats.turns.label"
+
+    // CombatView additional
+    static let combatVs = "combat.vs"
+    static let combatAttackRollTitle = "combat.attack.roll"
+    static let combatDamageCalcTitle = "combat.damage.calc.title"
+    static let combatBaseValue = "combat.base.value"
+    static let combatTotalDamage = "combat.total.damage"
 }
