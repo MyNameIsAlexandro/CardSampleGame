@@ -64,9 +64,10 @@
   },
   "anchor": {
     "max_integrity": 100,
-    "stable_threshold": 70,
-    "breach_threshold": 30,
     "strengthen_amount": 20,
-    "degrade_amount": 20
+    "strengthen_cost": 5,
+    "stable_threshold": 70,
+    "breach_threshold": 0,
+    "decay_per_turn": 5
   }
 }

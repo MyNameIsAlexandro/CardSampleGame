@@ -278,6 +278,11 @@ struct BalanceConfiguration: Codable {
     /// Time system configuration
     let time: TimeBalanceConfig
 
+    // MARK: - Anchors
+
+    /// Anchor system configuration
+    let anchor: AnchorBalanceConfig
+
     // MARK: - End Conditions
 
     /// Game end conditions
@@ -290,6 +295,7 @@ struct BalanceConfiguration: Codable {
         pressure: .default,
         combat: nil,
         time: .default,
+        anchor: .default,
         endConditions: .default
     )
 }
@@ -465,5 +471,35 @@ struct EndConditionConfig: Codable {
         pressureLoss: 100,
         breachLoss: nil,
         victoryQuests: []
+    )
+}
+
+/// Anchor system balance configuration
+struct AnchorBalanceConfig: Codable {
+    /// Maximum anchor integrity
+    let maxIntegrity: Int
+
+    /// Amount to strengthen per action
+    let strengthenAmount: Int
+
+    /// Faith cost to strengthen
+    let strengthenCost: Int
+
+    /// Integrity threshold for stable status
+    let stableThreshold: Int
+
+    /// Integrity threshold for breach
+    let breachThreshold: Int
+
+    /// Base decay rate per turn in threatened regions
+    let decayPerTurn: Int
+
+    static let `default` = AnchorBalanceConfig(
+        maxIntegrity: 100,
+        strengthenAmount: 15,
+        strengthenCost: 5,
+        stableThreshold: 70,
+        breachThreshold: 0,
+        decayPerTurn: 5
     )
 }

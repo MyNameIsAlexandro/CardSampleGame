@@ -172,18 +172,27 @@ final class TwilightGameEngine: ObservableObject {
     /// Is this the first attack in this combat (for abilities)
     private var combatIsFirstAttack: Bool = true
 
-    // MARK: - Configuration Constants
+    // MARK: - Content Registry
 
-    private let tensionTickInterval: Int = 3
-    // baseTensionIncrease removed - using TwilightPressureRules.calculateTensionIncrease() (Audit v1.1 Issue #6)
-    private let restHealAmount: Int = 3
-    private let anchorStrengthenCost: Int = 5
-    private let anchorStrengthenAmount: Int = 20
+    /// Content registry for loading content packs
+    private let contentRegistry: ContentRegistry
+
+    /// Balance configuration from content pack
+    private var balanceConfig: BalanceConfiguration
+
+    // MARK: - Configuration Constants (Legacy - migrate to balanceConfig)
+
+    private var tensionTickInterval: Int { 3 }  // Could come from balanceConfig.pressure
+    private var restHealAmount: Int { 3 }  // Could come from balanceConfig
+    private var anchorStrengthenCost: Int { balanceConfig.anchor.strengthenCost }
+    private var anchorStrengthenAmount: Int { balanceConfig.anchor.strengthenAmount }
 
     // MARK: - Initialization
 
-    init() {
-        self.timeEngine = TimeEngine(thresholdInterval: tensionTickInterval)
+    init(registry: ContentRegistry = .shared) {
+        self.contentRegistry = registry
+        self.balanceConfig = registry.getBalanceConfig() ?? .default
+        self.timeEngine = TimeEngine(thresholdInterval: 3)
         self.pressureEngine = PressureEngine(rules: TwilightPressureRules())
         self.economyManager = EconomyManager()
     }
@@ -261,20 +270,20 @@ final class TwilightGameEngine: ObservableObject {
         lastDayEvent = nil
         isInCombat = false
 
-        // Load content from provider
-        let provider = TwilightMarchesCodeContentProvider()
+        // Load balance config from content registry
+        balanceConfig = contentRegistry.getBalanceConfig() ?? .default
 
-        // Setup player
+        // Setup player from balance config
         self.playerName = playerName
-        playerHealth = 10
-        playerMaxHealth = 10
-        playerFaith = 3
-        playerMaxFaith = 10
+        playerHealth = balanceConfig.resources.startingHealth
+        playerMaxHealth = balanceConfig.resources.maxHealth
+        playerFaith = balanceConfig.resources.startingFaith
+        playerMaxFaith = balanceConfig.resources.maxFaith
         playerBalance = 50
 
-        // Setup world
+        // Setup world from balance config
         currentDay = 0
-        worldTension = 30
+        worldTension = balanceConfig.pressure.startingPressure
         lightDarkBalance = 50
         mainQuestStage = 1
         worldFlags = [:]
@@ -282,8 +291,8 @@ final class TwilightGameEngine: ObservableObject {
         completedQuestIds = []
         eventLog = []
 
-        // Load regions from ContentProvider
-        setupRegionsFromProvider(provider)
+        // Load regions from ContentRegistry
+        setupRegionsFromRegistry()
 
         // Load events
         allEvents = createInitialEvents()
@@ -356,6 +365,77 @@ final class TwilightGameEngine: ObservableObject {
 
         regions = newRegions
         publishedRegions = newRegions
+    }
+
+    /// Setup regions from ContentRegistry (Engine-First architecture)
+    private func setupRegionsFromRegistry() {
+        let regionDefs = contentRegistry.getAllRegions()
+        var newRegions: [UUID: EngineRegionState] = [:]
+        var stringToUUID: [String: UUID] = [:]  // Map string IDs to UUIDs
+
+        // Determine entry region from loaded pack
+        let entryRegionId = contentRegistry.loadedPacks.values.first?.manifest.entryRegionId ?? "village"
+
+        // First pass: create regions and map IDs
+        for def in regionDefs {
+            let regionUUID = UUID()
+            stringToUUID[def.id] = regionUUID
+
+            let anchor = contentRegistry.getAnchor(forRegion: def.id).map { anchorDef in
+                EngineAnchorState(
+                    id: UUID(),
+                    name: anchorDef.title.localized,
+                    integrity: anchorDef.initialIntegrity
+                )
+            }
+
+            let regionType = mapRegionType(def.id)
+            let regionState = mapRegionState(def.initialState)
+
+            let engineRegion = EngineRegionState(
+                id: regionUUID,
+                name: def.title.localized,
+                type: regionType,
+                state: regionState,
+                anchor: anchor,
+                neighborIds: [],  // Will be set in second pass
+                canTrade: regionState == .stable && regionType == .settlement
+            )
+            newRegions[regionUUID] = engineRegion
+
+            // Set starting region
+            if def.id == entryRegionId {
+                currentRegionId = regionUUID
+            }
+        }
+
+        // Second pass: resolve neighbor IDs
+        for def in regionDefs {
+            guard let regionUUID = stringToUUID[def.id],
+                  var region = newRegions[regionUUID] else { continue }
+
+            let neighborUUIDs = def.neighborIds.compactMap { stringToUUID[$0] }
+            region = EngineRegionState(
+                id: region.id,
+                name: region.name,
+                type: region.type,
+                state: region.state,
+                anchor: region.anchor,
+                neighborIds: neighborUUIDs,
+                canTrade: region.canTrade,
+                visited: region.visited,
+                reputation: region.reputation
+            )
+            newRegions[regionUUID] = region
+        }
+
+        regions = newRegions
+        publishedRegions = newRegions
+
+        // Set first region as current if none set
+        if currentRegionId == nil {
+            currentRegionId = newRegions.keys.first
+        }
     }
 
     /// Create EngineAnchorState from AnchorDefinition

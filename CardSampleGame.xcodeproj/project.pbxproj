@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CB08DBD8123C514251864650 /* PackTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = CP38FEE143B4F44A6FB1ABC6 /* PackTypes.swift */; };
+		CB50EAD25364CF425EAF6DA2 /* PackManifest.swift in Sources */ = {isa = PBXBuildFile; fileRef = CP369CE2F981F64F768313B9 /* PackManifest.swift */; };
+		CBDDB67C77B6B2456B8D6E85 /* ContentRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = CP0AEC59DDE4BB4190A9676D /* ContentRegistry.swift */; };
+		CB1986EB1E630D4643855BEF /* PackLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = CPA7568BA17ABF44F2938D92 /* PackLoader.swift */; };
+		CB909EFA0DDD5249A581938E /* CoreGameEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = CPC53F48F00545404490B13F /* CoreGameEngine.swift */; };
+
 		01D384D3F190A3976183B126 /* EventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43D4E3FBE4DC34B63B61E061 /* EventView.swift */; };
 		219EC3E8F6FE3FC7EC3961DC /* pool_breach.json in Resources */ = {isa = PBXBuildFile; fileRef = 9EF40FDD4C6146C9E9BF6B68 /* pool_breach.json */; };
 		43B100CAFE2C4FF8EDF97E1F /* quests.json in Resources */ = {isa = PBXBuildFile; fileRef = 4461D0F2D6001B31416B2120 /* quests.json */; };
@@ -119,6 +125,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		CP38FEE143B4F44A6FB1ABC6 /* PackTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PackTypes.swift; path = Engine/ContentPacks/PackTypes.swift; sourceTree = SOURCE_ROOT; };
+		CP369CE2F981F64F768313B9 /* PackManifest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PackManifest.swift; path = Engine/ContentPacks/PackManifest.swift; sourceTree = SOURCE_ROOT; };
+		CP0AEC59DDE4BB4190A9676D /* ContentRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ContentRegistry.swift; path = Engine/ContentPacks/ContentRegistry.swift; sourceTree = SOURCE_ROOT; };
+		CPA7568BA17ABF44F2938D92 /* PackLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PackLoader.swift; path = Engine/ContentPacks/PackLoader.swift; sourceTree = SOURCE_ROOT; };
+		CPC53F48F00545404490B13F /* CoreGameEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CoreGameEngine.swift; path = Engine/Core/CoreGameEngine.swift; sourceTree = SOURCE_ROOT; };
+
 		0BE0C9930A837029C5CD71A5 /* ExplorationModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExplorationModels.swift; path = Models/ExplorationModels.swift; sourceTree = "<group>"; };
 		180D9390663A50D5E72CF9B2 /* LocalizedString.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalizedString.swift; sourceTree = "<group>"; };
 		19A9D12ABBBC60983B504ABF /* challenges.json */ = {isa = PBXFileReference; includeInIndex = 1; path = challenges.json; sourceTree = "<group>"; };
@@ -242,6 +254,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		CP00000000000001 /* ContentPacks */ = {
+			isa = PBXGroup;
+			children = (
+				CP38FEE143B4F44A6FB1ABC6 /* PackTypes.swift */,
+				CP369CE2F981F64F768313B9 /* PackManifest.swift */,
+				CP0AEC59DDE4BB4190A9676D /* ContentRegistry.swift */,
+				CPA7568BA17ABF44F2938D92 /* PackLoader.swift */,
+			);
+			path = ContentPacks;
+			sourceTree = "<group>";
+		};
+
 		0EE40F73C4754A16EB24BF83 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
@@ -477,6 +501,7 @@
 				EE0001020000000000000001 /* EngineProtocols.swift */,
 				EE0001040000000000000001 /* GameLoop.swift */,
 				EE0001060000000000000001 /* TimeEngine.swift */,
+				CPC53F48F00545404490B13F /* CoreGameEngine.swift */,
 				EE0001080000000000000001 /* PressureEngine.swift */,
 				EE0001100000000000000001 /* EconomyManager.swift */,
 				FF0003020000000000000001 /* RequirementsEvaluator.swift */,
@@ -769,6 +794,11 @@
 				KK0001010000000000000001 /* CombatCalculator.swift in Sources */,
 				LL0001010000000000000001 /* TwilightGameAction.swift in Sources */,
 				LL0002010000000000000001 /* TwilightGameEngine.swift in Sources */,
+				CB08DBD8123C514251864650 /* PackTypes.swift in Sources */,
+				CB50EAD25364CF425EAF6DA2 /* PackManifest.swift in Sources */,
+				CBDDB67C77B6B2456B8D6E85 /* ContentRegistry.swift in Sources */,
+				CB1986EB1E630D4643855BEF /* PackLoader.swift in Sources */,
+				CB909EFA0DDD5249A581938E /* CoreGameEngine.swift in Sources */,
 				LL0003010000000000000001 /* EventPipeline.swift in Sources */,
 				LL0004010000000000000001 /* MiniGameDispatcher.swift in Sources */,
 				LL0005010000000000000001 /* EngineAdapters.swift in Sources */,
