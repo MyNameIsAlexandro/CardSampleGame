@@ -294,14 +294,19 @@ struct CombatEncounter {
     }
 
     /// Create from Card (monster)
+    /// Maps Card stats: health -> maxHP, power -> strength, defense -> defense
+    /// Boss detection: legendary rarity or "boss" trait
     static func from(card: Card) -> CombatEncounter {
-        CombatEncounter(
+        // Determine if card is a boss (legendary rarity or has boss trait)
+        let isBoss = card.rarity == .legendary || card.traits.contains("boss")
+
+        return CombatEncounter(
             id: card.id,
             name: card.name,
-            maxHP: card.enemyHealth ?? 10,
-            strength: card.enemyAttack ?? 3,
-            defense: card.enemyDefense ?? 5,
-            isBoss: card.isBoss
+            maxHP: card.health ?? 10,
+            strength: card.power ?? 3,
+            defense: card.defense ?? 5,
+            isBoss: isBoss
         )
     }
 }

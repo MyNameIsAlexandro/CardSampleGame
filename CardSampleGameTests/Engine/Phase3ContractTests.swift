@@ -240,21 +240,22 @@ final class Phase3ContractTests: XCTestCase {
 
         let resolver = EventResolver()
 
-        // Create test event
+        // Create test event with proper EventConsequences structure
         let consequences = EventConsequences(
-            healthChange: -2,
             faithChange: 3,
+            healthChange: -2,
             tensionChange: 1,
-            flagsToSet: ["test_flag"]
+            setFlags: ["test_flag": true],
+            message: "Test result"
         )
 
         let choice = EventChoice(
             text: "Test Choice",
-            consequences: consequences,
-            resultText: "Test result"
+            consequences: consequences
         )
 
         let event = GameEvent(
+            eventType: .exploration,
             title: "Test Event",
             description: "Test description",
             choices: [choice],

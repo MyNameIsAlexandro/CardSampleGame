@@ -26,7 +26,6 @@ final class TwilightGameEngine: ObservableObject {
     private let timeEngine: TimeEngine
     private let pressureEngine: PressureEngine
     private let economyManager: EconomyManager
-    private let degradationRules: DegradationRules
 
     // MARK: - State Adapters
 
@@ -43,18 +42,20 @@ final class TwilightGameEngine: ObservableObject {
     private var worldFlags: [String: Bool] = [:]
     private var questStages: [String: Int] = [:]
 
-    // MARK: - Configuration
+    // MARK: - Configuration Constants
 
-    private let config: TwilightMarchesConfig
+    private let tensionTickInterval: Int = 3
+    private let baseTensionIncrease: Int = 3
+    private let restHealAmount: Int = 3
+    private let anchorStrengthenCost: Int = 5
+    private let anchorStrengthenAmount: Int = 20
 
     // MARK: - Initialization
 
-    init(config: TwilightMarchesConfig = TwilightMarchesConfig.default) {
-        self.config = config
-        self.timeEngine = TimeEngine(thresholdInterval: config.tensionTickInterval)
+    init() {
+        self.timeEngine = TimeEngine(thresholdInterval: tensionTickInterval)
         self.pressureEngine = PressureEngine(rules: TwilightPressureRules())
         self.economyManager = EconomyManager()
-        self.degradationRules = DegradationRules()
     }
 
     // MARK: - Setup
@@ -84,8 +85,10 @@ final class TwilightGameEngine: ObservableObject {
         // Sync flags
         worldFlags = adapter.worldState.worldFlags
 
-        // Sync completed events
-        completedEventIds = adapter.worldState.completedEventIds
+        // Sync completed events from GameEvent.completed
+        for event in adapter.worldState.allEvents where event.completed {
+            completedEventIds.insert(event.id)
+        }
     }
 
     // MARK: - Main Action Entry Point
@@ -299,7 +302,7 @@ final class TwilightGameEngine: ObservableObject {
         }
 
         // Check resource cost
-        let cost = config.anchorStrengthenCost
+        let cost = anchorStrengthenCost
         if let player = playerAdapter?.player, player.faith < cost {
             return .insufficientResources(resource: "faith", required: cost, available: player.faith)
         }
@@ -343,7 +346,7 @@ final class TwilightGameEngine: ObservableObject {
             changes.append(.dayAdvanced(newDay: currentDay))
 
             // Check tension tick (every 3 days)
-            if currentDay > 0 && currentDay % config.tensionTickInterval == 0 {
+            if currentDay > 0 && currentDay % tensionTickInterval == 0 {
                 let tensionIncrease = calculateTensionIncrease()
                 worldTension = min(100, worldTension + tensionIncrease)
                 changes.append(.tensionChanged(delta: tensionIncrease, newValue: worldTension))
@@ -359,7 +362,7 @@ final class TwilightGameEngine: ObservableObject {
 
     private func calculateTensionIncrease() -> Int {
         // Escalation formula: +3 + (daysPassed / 10)
-        return config.baseTensionIncrease + (currentDay / 10)
+        return baseTensionIncrease + (currentDay / 10)
     }
 
     private func processWorldDegradation() -> [StateChange] {
@@ -376,7 +379,7 @@ final class TwilightGameEngine: ObservableObject {
         guard !degradableRegions.isEmpty else { return changes }
 
         // Weighted selection using WorldRNG
-        let weights = degradableRegions.map { degradationRules.weight(for: $0.state) }
+        let weights = degradableRegions.map { DegradationRules.current.selectionWeight(for: $0.state) }
         let totalWeight = weights.reduce(0, +)
 
         if totalWeight > 0 {
@@ -387,10 +390,13 @@ final class TwilightGameEngine: ObservableObject {
                 if roll < cumulative {
                     let region = Array(degradableRegions)[index]
 
-                    // Check anchor resistance
-                    if let anchor = region.anchor,
-                       !degradationRules.anchorResists(integrity: anchor.integrity) {
-                        // Degrade region
+                    // Check anchor resistance using probability
+                    let anchorIntegrity = region.anchor?.integrity ?? 0
+                    let resistProb = DegradationRules.current.resistanceProbability(anchorIntegrity: anchorIntegrity)
+                    let resistRoll = Double(WorldRNG.shared.nextInt(in: 0..<100)) / 100.0
+
+                    if resistRoll >= resistProb {
+                        // Anchor failed to resist - degrade region
                         if var mutableRegion = regions[region.id] {
                             let newState = degradeState(mutableRegion.state)
                             mutableRegion.state = newState
@@ -438,7 +444,7 @@ final class TwilightGameEngine: ObservableObject {
 
         // Heal player
         if let player = playerAdapter?.player {
-            let healAmount = config.restHealAmount
+            let healAmount = restHealAmount
             let newHealth = min(player.maxHealth, player.health + healAmount)
             let delta = newHealth - player.health
             playerAdapter?.updateHealth(newHealth)
@@ -475,7 +481,7 @@ final class TwilightGameEngine: ObservableObject {
         }
 
         // Spend faith
-        let cost = config.anchorStrengthenCost
+        let cost = anchorStrengthenCost
         if let player = playerAdapter?.player {
             let newFaith = player.faith - cost
             playerAdapter?.updateFaith(newFaith)
@@ -483,7 +489,7 @@ final class TwilightGameEngine: ObservableObject {
         }
 
         // Strengthen anchor
-        let strengthAmount = config.anchorStrengthenAmount
+        let strengthAmount = anchorStrengthenAmount
         let newIntegrity = min(100, anchor.integrity + strengthAmount)
         let delta = newIntegrity - anchor.integrity
         anchor.integrity = newIntegrity
@@ -546,37 +552,39 @@ final class TwilightGameEngine: ObservableObject {
 
         if let player = playerAdapter?.player {
             // Health
-            if consequences.healthChange != 0 {
-                let newHealth = max(0, min(player.maxHealth, player.health + consequences.healthChange))
+            if let healthDelta = consequences.healthChange, healthDelta != 0 {
+                let newHealth = max(0, min(player.maxHealth, player.health + healthDelta))
                 playerAdapter?.updateHealth(newHealth)
-                changes.append(.healthChanged(delta: consequences.healthChange, newValue: newHealth))
+                changes.append(.healthChanged(delta: healthDelta, newValue: newHealth))
             }
 
             // Faith
-            if consequences.faithChange != 0 {
-                let newFaith = max(0, player.faith + consequences.faithChange)
+            if let faithDelta = consequences.faithChange, faithDelta != 0 {
+                let newFaith = max(0, player.faith + faithDelta)
                 playerAdapter?.updateFaith(newFaith)
-                changes.append(.faithChanged(delta: consequences.faithChange, newValue: newFaith))
+                changes.append(.faithChanged(delta: faithDelta, newValue: newFaith))
             }
 
             // Balance
-            if consequences.balanceChange != 0 {
-                let newBalance = max(0, min(100, player.balance + consequences.balanceChange))
+            if let balanceDelta = consequences.balanceChange, balanceDelta != 0 {
+                let newBalance = max(0, min(100, player.balance + balanceDelta))
                 playerAdapter?.updateBalance(newBalance)
-                changes.append(.balanceChanged(delta: consequences.balanceChange, newValue: newBalance))
+                changes.append(.balanceChanged(delta: balanceDelta, newValue: newBalance))
             }
         }
 
         // Tension
-        if consequences.tensionChange != 0 {
-            worldTension = max(0, min(100, worldTension + consequences.tensionChange))
-            changes.append(.tensionChanged(delta: consequences.tensionChange, newValue: worldTension))
+        if let tensionDelta = consequences.tensionChange, tensionDelta != 0 {
+            worldTension = max(0, min(100, worldTension + tensionDelta))
+            changes.append(.tensionChanged(delta: tensionDelta, newValue: worldTension))
         }
 
-        // Flags
-        for flag in consequences.flagsToSet {
-            worldFlags[flag] = true
-            changes.append(.flagSet(key: flag, value: true))
+        // Flags (setFlags is [String: Bool]?)
+        if let flagsToSet = consequences.setFlags {
+            for (flag, value) in flagsToSet {
+                worldFlags[flag] = value
+                changes.append(.flagSet(key: flag, value: value))
+            }
         }
 
         return changes
@@ -660,27 +668,15 @@ struct EngineRegionState {
 
 // MARK: - Engine Anchor State (Bridge from Legacy)
 
-/// Internal state for engine anchor tracking (bridges from legacy RegionAnchor model)
+/// Internal state for engine anchor tracking (bridges from legacy Anchor model)
 struct EngineAnchorState {
     let id: UUID
     let name: String
     var integrity: Int
 
-    init(from anchor: RegionAnchor) {
+    init(from anchor: Anchor) {
         self.id = anchor.id
         self.name = anchor.name
         self.integrity = anchor.integrity
     }
-}
-
-// MARK: - Configuration Extension
-
-extension TwilightMarchesConfig {
-    static let `default` = TwilightMarchesConfig()
-
-    var tensionTickInterval: Int { 3 }
-    var baseTensionIncrease: Int { 3 }
-    var restHealAmount: Int { 3 }
-    var anchorStrengthenCost: Int { 5 }
-    var anchorStrengthenAmount: Int { 20 }
 }

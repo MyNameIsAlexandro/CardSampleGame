@@ -82,11 +82,8 @@ final class GameViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
-        engine.$isGameOver
-            .sink { [weak self] isOver in
-                self?.gameState.isGameOver = isOver
-            }
-            .store(in: &cancellables)
+        // Note: gameState.isGameOver is computed from isVictory || isDefeat
+        // Engine game result already handles setting these via $gameResult subscriber below
 
         engine.$gameResult
             .compactMap { $0 }
@@ -189,7 +186,7 @@ final class GameViewModel: ObservableObject {
                     regionName: region.name,
                     eventTitle: event.title,
                     choiceMade: choice.text,
-                    outcome: choice.resultText ?? "Выбор сделан",
+                    outcome: choice.consequences.message ?? "Выбор сделан",
                     type: .exploration
                 )
             }
@@ -259,10 +256,31 @@ final class GameViewModel: ObservableObject {
         // Get available events
         let events = worldState.getAvailableEvents(for: region)
 
-        if let event = worldState.selectWeightedEvent(from: events) {
+        // Weighted selection from available events
+        if let event = selectWeightedEvent(from: events) {
             currentEvent = event
             showEventSheet = true
         }
+    }
+
+    /// Select event using weighted random selection
+    private func selectWeightedEvent(from events: [GameEvent]) -> GameEvent? {
+        guard !events.isEmpty else { return nil }
+
+        let totalWeight = events.reduce(0) { $0 + $1.weight }
+        guard totalWeight > 0 else { return events.first }
+
+        let roll = WorldRNG.shared.nextInt(in: 0..<totalWeight)
+        var cumulative = 0
+
+        for event in events {
+            cumulative += event.weight
+            if roll < cumulative {
+                return event
+            }
+        }
+
+        return events.first
     }
 
     // MARK: - Result Handling
@@ -332,9 +350,17 @@ final class GameViewModel: ObservableObject {
     }
 }
 
-// MARK: - Region Action Extension
+// MARK: - Region Action
 
-extension RegionAction {
+/// Actions available in a region (for ViewModel bridge)
+/// Mirrors WorldMapView.RegionAction for migration compatibility
+enum RegionAction {
+    case travel
+    case rest
+    case trade
+    case strengthenAnchor
+    case explore
+
     /// Convert to TwilightGameAction
     func toEngineAction(for region: Region) -> TwilightGameAction {
         switch self {

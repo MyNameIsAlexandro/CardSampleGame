@@ -66,12 +66,15 @@ final class WorldStateEngineAdapter {
             worldState.worldFlags[key] = value
 
         case .eventCompleted(let eventId):
-            worldState.completedEventIds.insert(eventId)
+            // Mark event as completed in allEvents
+            if let index = worldState.allEvents.firstIndex(where: { $0.id == eventId }) {
+                worldState.allEvents[index].completed = true
+            }
 
         case .questProgressed(let questId, let newStage):
-            // Update quest stage in WorldState
-            if let index = worldState.quests.firstIndex(where: { $0.id == questId }) {
-                worldState.quests[index].currentStage = newStage
+            // Update quest stage in WorldState's activeQuests
+            if let index = worldState.activeQuests.firstIndex(where: { $0.id == questId }) {
+                worldState.activeQuests[index].currentStage = newStage
             }
 
         default:
@@ -105,8 +108,20 @@ final class WorldStateEngineAdapter {
         // Weight-based selection using WorldRNG
         guard !events.isEmpty else { return nil }
 
-        let selectedEvent = worldState.selectWeightedEvent(from: events)
-        return selectedEvent?.id
+        // Select event using weights
+        let totalWeight = events.reduce(0) { $0 + $1.weight }
+        guard totalWeight > 0 else { return events.first?.id }
+
+        let roll = WorldRNG.shared.nextInt(in: 0..<totalWeight)
+        var cumulative = 0
+        for event in events {
+            cumulative += event.weight
+            if roll < cumulative {
+                return event.id
+            }
+        }
+
+        return events.first?.id
     }
 
     /// Check quest progress and return changes
@@ -115,11 +130,11 @@ final class WorldStateEngineAdapter {
 
         // Delegate to WorldState's quest checking
         // This is a simplified version - full implementation would check all triggers
-        for quest in worldState.quests where quest.state == .active {
+        for quest in worldState.activeQuests where quest.state == .active {
             let previousStage = quest.currentStage
-            worldState.checkQuestProgress(for: quest.id)
+            worldState.checkQuestProgress(quest)
 
-            if let updatedQuest = worldState.quests.first(where: { $0.id == quest.id }),
+            if let updatedQuest = worldState.activeQuests.first(where: { $0.id == quest.id }),
                updatedQuest.currentStage != previousStage {
                 changes.append(.questProgressed(questId: quest.id, newStage: updatedQuest.currentStage))
             }
@@ -209,13 +224,7 @@ final class GameStateEngineAdapter: ObservableObject {
     }
 
     private func setupBindings() {
-        // Forward engine game over state to legacy
-        engine.$isGameOver
-            .sink { [weak self] isOver in
-                self?.gameState.isGameOver = isOver
-            }
-            .store(in: &cancellables)
-
+        // Forward engine game result to legacy (isGameOver is computed from isVictory/isDefeat)
         engine.$gameResult
             .compactMap { $0 }
             .sink { [weak self] result in

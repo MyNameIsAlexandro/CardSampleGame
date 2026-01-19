@@ -93,54 +93,41 @@ final class EventSelector {
         }
     }
 
-    /// Check if single event is available
+    /// Check if single event is available based on GameEvent's actual properties
     func isEventAvailable(_ event: GameEvent, context: EventContext) -> Bool {
         // Check if already completed (for oneTime events)
+        if event.oneTime && event.completed {
+            return false
+        }
+
+        // Also check against context's completed set
         if event.oneTime && context.completedEvents.contains(event.id.uuidString) {
             return false
         }
 
-        // Check location requirements
-        if let requiredLocation = event.requirements.location {
-            if context.currentLocation != requiredLocation {
+        // Check region type requirements (empty = any region)
+        if !event.regionTypes.isEmpty {
+            guard let regionType = RegionType(rawValue: context.currentLocation) else {
+                return false
+            }
+            if !event.regionTypes.contains(regionType) {
                 return false
             }
         }
 
-        // Check location state requirements
-        if let requiredState = event.requirements.locationState {
-            if context.locationState != requiredState {
+        // Check region state requirements (empty = any state)
+        if !event.regionStates.isEmpty {
+            guard let regionState = RegionState(rawValue: context.locationState) else {
+                return false
+            }
+            if !event.regionStates.contains(regionState) {
                 return false
             }
         }
 
-        // Check pressure range
-        if let pressureRange = event.requirements.pressureRange {
-            if context.pressure < pressureRange.lowerBound ||
-               context.pressure > pressureRange.upperBound {
-                return false
-            }
-        }
-
-        // Check required flags
-        for flag in event.requirements.requiredFlags {
-            if context.flags[flag] != true {
-                return false
-            }
-        }
-
-        // Check forbidden flags
-        for flag in event.requirements.forbiddenFlags {
-            if context.flags[flag] == true {
-                return false
-            }
-        }
-
-        // Check resource requirements
-        for (resource, minValue) in event.requirements.minResources {
-            if (context.resources[resource] ?? 0) < minValue {
-                return false
-            }
+        // Check required flags (from context)
+        for flag in context.requiredFlags where context.flags[flag] != true {
+            return false
         }
 
         return true
@@ -202,58 +189,59 @@ final class EventResolver {
         // Apply consequences
         let consequences = choice.consequences
 
-        // Health changes
-        if consequences.healthChange != 0 {
-            let newHealth = max(0, context.currentHealth + consequences.healthChange)
+        // Health changes (optional Int?)
+        if let healthDelta = consequences.healthChange, healthDelta != 0 {
+            let newHealth = max(0, context.currentHealth + healthDelta)
             stateChanges.append(.healthChanged(
-                delta: consequences.healthChange,
+                delta: healthDelta,
                 newValue: newHealth
             ))
         }
 
-        // Faith changes
-        if consequences.faithChange != 0 {
-            let newFaith = max(0, context.currentFaith + consequences.faithChange)
+        // Faith changes (optional Int?)
+        if let faithDelta = consequences.faithChange, faithDelta != 0 {
+            let newFaith = max(0, context.currentFaith + faithDelta)
             stateChanges.append(.faithChanged(
-                delta: consequences.faithChange,
+                delta: faithDelta,
                 newValue: newFaith
             ))
         }
 
-        // Balance changes
-        if consequences.balanceChange != 0 {
-            let newBalance = max(0, min(100, context.currentBalance + consequences.balanceChange))
+        // Balance changes (optional Int?)
+        if let balanceDelta = consequences.balanceChange, balanceDelta != 0 {
+            let newBalance = max(0, min(100, context.currentBalance + balanceDelta))
             stateChanges.append(.balanceChanged(
-                delta: consequences.balanceChange,
+                delta: balanceDelta,
                 newValue: newBalance
             ))
         }
 
-        // Tension changes
-        if consequences.tensionChange != 0 {
-            let newTension = max(0, min(100, context.currentTension + consequences.tensionChange))
+        // Tension changes (optional Int?)
+        if let tensionDelta = consequences.tensionChange, tensionDelta != 0 {
+            let newTension = max(0, min(100, context.currentTension + tensionDelta))
             stateChanges.append(.tensionChanged(
-                delta: consequences.tensionChange,
+                delta: tensionDelta,
                 newValue: newTension
             ))
         }
 
-        // Set flags
-        for flag in consequences.flagsToSet {
-            stateChanges.append(.flagSet(key: flag, value: true))
+        // Set flags (optional dictionary)
+        if let flagsToSet = consequences.setFlags {
+            for (flag, value) in flagsToSet {
+                stateChanges.append(.flagSet(key: flag, value: value))
+            }
         }
 
-        // Check for triggered combat
+        // Check for triggered combat (monster card in event)
         var triggeredCombat: UUID? = nil
-        if let encounterId = consequences.triggeredEncounter {
-            triggeredCombat = encounterId
+        if event.monsterCard != nil {
+            // Combat events have monsterCard, use event ID as combat trigger
+            triggeredCombat = event.id
         }
 
-        // Check for triggered mini-game
-        var triggeredMiniGame: UUID? = nil
-        if let miniGameId = consequences.triggeredMiniGame {
-            triggeredMiniGame = miniGameId
-        }
+        // Check for triggered mini-game (not directly in EventConsequences,
+        // would be triggered through specific event types or flags)
+        let triggeredMiniGame: UUID? = nil
 
         // Mark event as completed if oneTime
         if event.oneTime {
@@ -266,7 +254,7 @@ final class EventResolver {
             stateChanges: stateChanges,
             triggeredCombat: triggeredCombat,
             triggeredMiniGame: triggeredMiniGame,
-            narrativeText: choice.resultText
+            narrativeText: consequences.message
         )
     }
 }
@@ -327,18 +315,6 @@ extension GameEvent {
     }
 }
 
-// MARK: - EventConsequences Extension
-
-extension EventConsequences {
-    /// Triggered encounter ID (if any)
-    var triggeredEncounter: UUID? {
-        // Check if consequences include encounter trigger
-        return nil  // Extended in subclass/specific implementation
-    }
-
-    /// Triggered mini-game ID (if any)
-    var triggeredMiniGame: UUID? {
-        // Check if consequences include mini-game trigger
-        return nil  // Extended in subclass/specific implementation
-    }
-}
+// Note: EventConsequences doesn't have triggeredEncounter or triggeredMiniGame
+// Combat is triggered through GameEvent.monsterCard != nil
+// Mini-games are triggered through specific event types or game logic
