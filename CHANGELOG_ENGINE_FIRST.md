@@ -17,13 +17,13 @@
 | # | Проблема | Статус | Решение |
 |---|----------|--------|---------|
 | 1 | Legacy WorldState Object - UI привязан к WorldState | ✅ Решено | Engine-First Views читают из `engine.*` |
-| 2 | Hardcoded Strings in UI | ⏳ Phase 5 | Планируется с локализацией |
-| 3 | Тесты "на двух стульях" | ✅ Частично | Phase3ContractTests через Engine |
+| 2 | Hardcoded Strings in UI | ✅ Решено | Все Views мигрированы на L10n (~300+ ключей) |
+| 3 | Тесты "на двух стульях" | ✅ Решено | CI с RegressionPlaythroughTests |
 | 4 | Phase 3 - единственная точка изменения state | ✅ Решено | Все действия через `performAction()` |
 | 5 | Seed задаётся после WorldState() | ✅ Решено | Исправлено ранее |
 | 6 | Дублирование day-start логики | ✅ Решено | `TwilightPressureRules` - single source |
 | 7 | Singleton RNG без reset | ✅ Решено | `resetToSystem()` в tearDown |
-| 8 | Legacy Adapters Overhead | ✅ Решено | Engine-First Views |
+| 8 | Legacy Adapters Overhead | ✅ Решено | Engine-First Views + adapter cleanup |
 
 ---
 
@@ -151,22 +151,33 @@ return Array(regionMap.values).sorted { $0.name < $1.name }
 
 ## Тесты
 
-- **Все тесты проходят** (170+ тестов)
+- **Все тесты проходят** (562 тестов)
 - **Сборка успешна** (0 warnings в production коде)
 - Phase3ContractTests обновлены для новых actions
+- JSONContentProviderTests добавлены (20+ тестов)
 
 ---
 
-## Что осталось на Phase 4+
+## ✅ Что завершено (Phase 4 & 5)
 
-| Задача | Phase |
-|--------|-------|
-| Card system migration | Phase 4 |
-| RNG state persistence | Phase 4 |
-| Trade/Market UI | Phase 4 |
-| Content from JSON | Phase 5 |
-| Localization | Phase 5 |
-| Remove Legacy Adapters | После полной миграции |
+| Задача | Статус |
+|--------|--------|
+| ContentView Engine-First | ✅ Done |
+| Adapter cleanup | ✅ Done (unused removed) |
+| Content from JSON | ✅ Done (JSONContentProvider) |
+| Localization (L10n) | ✅ Done (все Views) |
+| JSONContentProvider tests | ✅ Done (20+ тестов) |
+
+---
+
+## Что осталось (Future)
+
+| Задача | Приоритет |
+|--------|-----------|
+| Card system full migration | Low |
+| RNG state persistence | Low |
+| Trade/Market UI | Low |
+| Remove WorldState/Player adapters | После EngineSave |
 
 ---
 

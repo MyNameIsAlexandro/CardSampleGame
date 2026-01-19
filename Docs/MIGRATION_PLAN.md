@@ -13,8 +13,8 @@
 | Phase 2 | Data Separation (Definitions + Runtime) | ✅ Done |
 | Phase 3 | GameLoop Integration | ✅ Done |
 | Phase 3.5 | **Engine-First Architecture** | ✅ Done |
-| Phase 4 | Economy Transactions Everywhere | ⬜ Planned |
-| Phase 5 | Content Migration to JSON | ⬜ Planned |
+| Phase 4 | ContentView Engine-First + Adapter Cleanup | ✅ Done |
+| Phase 5 | JSON Content + JSONContentProvider | ✅ Done |
 
 ---
 
