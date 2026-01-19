@@ -1,0 +1,102 @@
+# CI: Engine-First Test Gates
+# Ensures Engine and Integration tests pass before merge
+
+name: Engine Tests Gate
+
+on:
+  push:
+    branches: [ main, claude/* ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # Gate 1: Engine Contract Tests
+  engine-tests:
+    name: Engine Contract Tests
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Run Engine Tests
+        run: |
+          xcodebuild test \
+            -scheme CardSampleGame \
+            -destination 'platform=iOS Simulator,name=iPhone 15' \
+            -only-testing:CardSampleGameTests/Phase3ContractTests \
+            -only-testing:CardSampleGameTests/EventModuleContractsTests \
+            -resultBundlePath TestResults/EngineTests.xcresult \
+            | xcpretty
+
+      - name: Upload Engine Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: engine-test-results
+          path: TestResults/EngineTests.xcresult
+
+  # Gate 2: Integration Tests
+  integration-tests:
+    name: Integration Tests
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Run Integration Tests
+        run: |
+          xcodebuild test \
+            -scheme CardSampleGame \
+            -destination 'platform=iOS Simulator,name=iPhone 15' \
+            -only-testing:CardSampleGameTests/ActIPlaythroughTests \
+            -only-testing:CardSampleGameTests/CriticalSystemsTests \
+            -only-testing:CardSampleGameTests/PlaythroughSimulationTests \
+            -resultBundlePath TestResults/IntegrationTests.xcresult \
+            | xcpretty
+
+      - name: Upload Integration Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-test-results
+          path: TestResults/IntegrationTests.xcresult
+
+  # Gate 3: Regression & Determinism Tests
+  regression-tests:
+    name: Regression & Determinism Tests
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Run Regression Tests
+        run: |
+          xcodebuild test \
+            -scheme CardSampleGame \
+            -destination 'platform=iOS Simulator,name=iPhone 15' \
+            -only-testing:CardSampleGameTests/MetricsDistributionTests \
+            -only-testing:CardSampleGameTests/RegressionPlaythroughTests \
+            -resultBundlePath TestResults/RegressionTests.xcresult \
+            | xcpretty
+
+      - name: Upload Regression Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: regression-test-results
+          path: TestResults/RegressionTests.xcresult
+
+  # All tests must pass for merge
+  all-gates-passed:
+    name: All Gates Passed
+    needs: [engine-tests, integration-tests, regression-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - name: All gates passed
+        run: echo "All test gates passed successfully!"
