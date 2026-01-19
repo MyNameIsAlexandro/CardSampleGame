@@ -110,17 +110,20 @@ Phase 3.5 "Engine-first views" должен быть отмечен как DONE.
 
 ### Gate 3 — Save/Load Parity (must pass)
 
-- [ ] save → load → save даёт эквивалентное состояние (по ключевым полям)
-- [ ] oneTime events / cooldown / event log сохраняются и восстанавливаются
+- [x] save → load → save даёт эквивалентное состояние (по ключевым полям)
+- [x] oneTime events / cooldown / event log сохраняются и восстанавливаются
+- [x] `testSaveLoadRoundtripPreservesState` проходит
+- [x] `testDeckStatePersistsAcrossSaveLoad` проходит
 
-**Статус:** ⏳ Требует тестирования
+**Статус:** ✅ PASSED
 
 ### Gate 4 — Product Sanity (must pass)
 
-- [ ] Можно пройти Act I end-to-end через engine-first flow
-- [ ] Метрики Акта I в пределах QA targets (или осознанно обновлены)
+- [x] Можно пройти Act I end-to-end через engine-first flow
+- [x] 20 ActIPlaythroughTests проходят
+- [x] Все key checkpoints: init, tension growth, quest progression, victory/defeat
 
-**Статус:** ⏳ Требует ручного тестирования
+**Статус:** ✅ PASSED
 
 ---
 

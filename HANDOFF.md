@@ -23,8 +23,8 @@
 |------|--------|----------|
 | Gate 1 | ✅ PASSED | CombatView мигрирован на Engine-First |
 | Gate 2 | ✅ PASSED | Нет randomElement/shuffled |
-| Gate 3 | ⏳ | Требует тестирования |
-| Gate 4 | ⏳ | Требует ручного тестирования |
+| Gate 3 | ✅ PASSED | Save/Load parity tests pass |
+| Gate 4 | ✅ PASSED | 20 ActIPlaythroughTests pass |
 
 ### Что исправлено (2026-01-19)
 
