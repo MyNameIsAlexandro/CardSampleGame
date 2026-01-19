@@ -30,10 +30,11 @@ final class TwilightGameEngine: ObservableObject {
     // MARK: - State Adapters
 
     /// Adapter to sync with legacy WorldState (during migration)
-    private weak var worldStateAdapter: WorldStateEngineAdapter?
+    /// Engine owns these adapters (not weak to prevent immediate deallocation)
+    private var worldStateAdapter: WorldStateEngineAdapter?
 
     /// Player adapter
-    private weak var playerAdapter: PlayerEngineAdapter?
+    private var playerAdapter: PlayerEngineAdapter?
 
     // MARK: - Internal State
 
@@ -162,7 +163,7 @@ final class TwilightGameEngine: ObservableObject {
             let changes = executeMiniGameInput(input)
             stateChanges.append(contentsOf: changes)
 
-        case .startCombat(let encounterId):
+        case .startCombat:
             combatStarted = true
             isInCombat = true
             // Combat initialization
@@ -175,7 +176,7 @@ final class TwilightGameEngine: ObservableObject {
             // Just time passes
             break
 
-        case .custom(let id, _):
+        case .custom:
             // Custom action handling
             break
         }
@@ -368,8 +369,8 @@ final class TwilightGameEngine: ObservableObject {
     private func processWorldDegradation() -> [StateChange] {
         var changes: [StateChange] = []
 
-        // Use DegradationRules to determine degradation
-        let probability = Double(worldTension) / 100.0
+        // Degradation probability increases with world tension
+        // (probability logic can be used when implementing random degradation checks)
 
         // Select region to degrade based on weights
         let degradableRegions = regions.values.filter {
@@ -455,7 +456,7 @@ final class TwilightGameEngine: ObservableObject {
     }
 
     private func executeExplore() -> ([StateChange], [UUID]) {
-        var changes: [StateChange] = []
+        let changes: [StateChange] = []
         var events: [UUID] = []
 
         guard let regionId = currentRegionId else {
