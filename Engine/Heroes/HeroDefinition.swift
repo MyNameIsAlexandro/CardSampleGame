@@ -39,7 +39,7 @@ enum HeroAvailability: Codable, Equatable {
 }
 
 /// Дефолтная реализация для базовых героев
-struct StandardHeroDefinition: HeroDefinition {
+struct StandardHeroDefinition: HeroDefinition, Codable {
     let id: String
     let name: String
     let heroClass: HeroClass

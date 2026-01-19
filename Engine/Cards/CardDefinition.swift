@@ -64,7 +64,7 @@ enum CardOwnership: Codable, Equatable {
 }
 
 /// Стандартная реализация определения карты
-struct StandardCardDefinition: CardDefinition {
+struct StandardCardDefinition: CardDefinition, Codable {
     let id: String
     let name: String
     let cardType: CardType
