@@ -149,7 +149,7 @@ final class Phase3ContractTests: XCTestCase {
 
     // MARK: - INV-P3-008: Strengthen Anchor Costs Faith
 
-    func testStrengthenAnchorCostsFaith() {
+    func testStrengthenAnchorCostsFaith() throws {
         // Ensure player has enough faith
         player.faith = 20
         engine.syncFromLegacy()
