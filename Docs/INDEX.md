@@ -19,6 +19,7 @@
 | "Как работает Event Module? Inline vs Mini-Game?" | [EVENT_MODULE_ARCHITECTURE.md](./EVENT_MODULE_ARCHITECTURE.md) | **МОДУЛЬ** (Module) |
 | "Как работает система героев?" | [HEROES_MODULE.md](../Engine/Heroes/HEROES_MODULE.md) | **МОДУЛЬ** (Module) |
 | "Как работает система карт?" | [CARDS_MODULE.md](../Engine/Cards/CARDS_MODULE.md) | **МОДУЛЬ** (Module) |
+| "Как работает боевая система?" | [COMBAT_MODULE.md](../Engine/Combat/COMBAT_MODULE.md) | **МОДУЛЬ** (Module) |
 | "Где сейчас лежит этот класс? Какой статус у фичи?" | [TECHNICAL_DOCUMENTATION.md](./TECHNICAL_DOCUMENTATION.md) | **КАРТА КОДА** (Map) |
 | "Готова ли фича? Как её проверить?" | [QA_ACT_I_CHECKLIST.md](./QA_ACT_I_CHECKLIST.md) | **СУДЬЯ** (Judge) |
 | "Какой план миграции к Engine v1.0?" | [MIGRATION_PLAN.md](./MIGRATION_PLAN.md) | **ПЛАН** (Roadmap) |
@@ -161,7 +162,8 @@
 |------|------|--------|
 | HEROES_MODULE.md | Engine/Heroes/ | ✅ Active |
 | CARDS_MODULE.md | Engine/Cards/ | ✅ Active |
+| COMBAT_MODULE.md | Engine/Combat/ | ✅ Active |
 
 ---
 
-**Последнее обновление:** 18 января 2026
+**Последнее обновление:** 19 января 2026
