@@ -971,8 +971,7 @@ struct RegionDetailView: View {
 
         // Исследование события тратит день (кроме instant событий)
         if !event.instant {
-            worldState.daysPassed += 1
-            worldState.processDayStart()
+            worldState.advanceDayForUI()
         }
     }
 
@@ -1028,8 +1027,7 @@ struct RegionDetailView: View {
         case .rest:
             // Rest and heal
             player.heal(5)
-            worldState.daysPassed += 1
-            worldState.processDayStart()
+            worldState.advanceDayForUI()
             worldState.logEvent(
                 regionName: region.name,
                 eventTitle: "Отдых",
@@ -1046,8 +1044,7 @@ struct RegionDetailView: View {
             // Strengthen anchor if player has enough faith
             if player.spendFaith(10) {
                 _ = worldState.strengthenAnchor(in: region.id, amount: 20)
-                worldState.daysPassed += 1
-                worldState.processDayStart()
+                worldState.advanceDayForUI()
                 worldState.logEvent(
                     regionName: region.name,
                     eventTitle: "Укрепление якоря",

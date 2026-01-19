@@ -309,7 +309,7 @@ class WorldState: ObservableObject, Codable {
 
         // Продвинуть время корректно - каждый день обрабатывается отдельно
         // Это критично: travel cost 2 должен обработать день 3, если мы были на дне 2
-        advanceTime(by: travelCost)
+        advanceTimeInternal(by: travelCost)
     }
 
     /// Рассчитать стоимость путешествия в регион
@@ -339,6 +339,22 @@ class WorldState: ObservableObject, Codable {
     /// - Warning: Do not call directly from UI/ViewModel code. Use Engine actions.
     @available(*, deprecated, message: "Use TwilightGameEngine.performAction() for UI. This is retained for tests and internal use only.")
     func processDayStart() {
+        performDayStartLogic()
+    }
+
+    /// Advance day and process day start logic.
+    ///
+    /// **TRANSITIONAL API**: This method exists for Views that don't yet have access to TwilightGameEngine.
+    /// Once full migration to Engine is complete, this will be deprecated in favor of Engine actions.
+    ///
+    /// - Note: Increments `daysPassed` by 1 and processes day start logic (tension, degradation, etc.)
+    func advanceDayForUI() {
+        daysPassed += 1
+        performDayStartLogic()
+    }
+
+    /// Internal day start logic - shared by processDayStart() and advanceDayForUI()
+    private func performDayStartLogic() {
         // ⚠️ MIGRATION: This method contains canonical day logic used by tests
         // TwilightGameEngine has parallel implementation for production use
         // 1. Каждые 3 дня — автоматическая деградация мира
@@ -501,10 +517,15 @@ class WorldState: ObservableObject, Codable {
     /// - Warning: Do not call directly from UI/ViewModel code. Use Engine actions.
     @available(*, deprecated, message: "Use TwilightGameEngine.performAction() for UI. This is retained for tests and internal use only.")
     func advanceTime(by days: Int = 1) {
+        advanceTimeInternal(by: days)
+    }
+
+    /// Internal time advancement - used by travelToRegion and other internal methods
+    private func advanceTimeInternal(by days: Int) {
         // ⚠️ MIGRATION: This method contains canonical time logic used by tests
         for _ in 0..<days {
             daysPassed += 1
-            processDayStart()
+            performDayStartLogic()
         }
     }
 
