@@ -1,0 +1,317 @@
+import XCTest
+@testable import CardSampleGame
+
+/// Tests for JSONContentProvider - verifies JSON content loading
+final class JSONContentProviderTests: XCTestCase {
+
+    // MARK: - Properties
+
+    var provider: JSONContentProvider!
+
+    // MARK: - Setup
+
+    override func setUp() {
+        super.setUp()
+        provider = JSONContentProvider()
+    }
+
+    override func tearDown() {
+        provider = nil
+        super.tearDown()
+    }
+
+    // MARK: - Basic Loading Tests
+
+    func testProviderInitialState() {
+        XCTAssertFalse(provider.isLoaded, "Provider should not be loaded initially")
+        XCTAssertTrue(provider.loadErrors.isEmpty, "Should have no load errors initially")
+    }
+
+    func testLoadAllContent() throws {
+        // Given: A fresh provider
+        // When: Loading all content
+        do {
+            try provider.loadAllContent()
+        } catch {
+            XCTFail("loadAllContent should not throw: \(error)")
+            return
+        }
+
+        // Then: Provider should be loaded
+        XCTAssertTrue(provider.isLoaded, "Provider should be marked as loaded")
+    }
+
+    // MARK: - Region Tests
+
+    func testRegionsLoaded() throws {
+        try provider.loadAllContent()
+
+        // Should have loaded regions
+        XCTAssertGreaterThan(provider.regions.count, 0, "Should have loaded at least one region")
+    }
+
+    func testSpecificRegionsExist() throws {
+        try provider.loadAllContent()
+
+        // Check for expected regions from regions.json
+        let expectedRegionIds = ["village", "oak", "forest", "swamp", "mountain", "breach", "dark_lowland"]
+
+        for regionId in expectedRegionIds {
+            XCTAssertNotNil(
+                provider.regions[regionId],
+                "Region '\(regionId)' should exist"
+            )
+        }
+    }
+
+    func testRegionDefinitionStructure() throws {
+        try provider.loadAllContent()
+
+        guard let village = provider.regions["village"] else {
+            XCTFail("Village region should exist")
+            return
+        }
+
+        // Verify region structure
+        XCTAssertEqual(village.id, "village")
+        XCTAssertEqual(village.titleKey, "region.village.title")
+        XCTAssertEqual(village.descriptionKey, "region.village.description")
+        XCTAssertFalse(village.neighborIds.isEmpty, "Village should have neighbors")
+        XCTAssertTrue(village.initiallyDiscovered, "Village should be initially discovered")
+    }
+
+    // MARK: - Anchor Tests
+
+    func testAnchorsLoaded() throws {
+        try provider.loadAllContent()
+
+        XCTAssertGreaterThan(provider.anchors.count, 0, "Should have loaded at least one anchor")
+    }
+
+    func testSpecificAnchorsExist() throws {
+        try provider.loadAllContent()
+
+        let expectedAnchorIds = [
+            "anchor_village_chapel",
+            "anchor_sacred_oak",
+            "anchor_forest_idol",
+            "anchor_swamp_spring",
+            "anchor_mountain_barrow",
+            "anchor_breach_shrine"
+        ]
+
+        for anchorId in expectedAnchorIds {
+            XCTAssertNotNil(
+                provider.anchors[anchorId],
+                "Anchor '\(anchorId)' should exist"
+            )
+        }
+    }
+
+    // MARK: - Quest Tests
+
+    func testQuestsLoaded() throws {
+        try provider.loadAllContent()
+
+        XCTAssertGreaterThan(provider.quests.count, 0, "Should have loaded at least one quest")
+    }
+
+    func testMainQuestExists() throws {
+        try provider.loadAllContent()
+
+        XCTAssertNotNil(
+            provider.quests["quest_main_act1"],
+            "Main Act I quest should exist"
+        )
+    }
+
+    func testQuestStructure() throws {
+        try provider.loadAllContent()
+
+        guard let mainQuest = provider.quests["quest_main_act1"] else {
+            XCTFail("Main quest should exist")
+            return
+        }
+
+        XCTAssertEqual(mainQuest.id, "quest_main_act1")
+        XCTAssertEqual(mainQuest.titleKey, "quest.main_act1.title")
+        XCTAssertFalse(mainQuest.objectives.isEmpty, "Quest should have objectives")
+    }
+
+    // MARK: - Challenge Tests
+
+    func testChallengesLoaded() throws {
+        try provider.loadAllContent()
+
+        XCTAssertGreaterThan(provider.challenges.count, 0, "Should have loaded at least one challenge")
+    }
+
+    func testChallengeKinds() throws {
+        try provider.loadAllContent()
+
+        // Check for different challenge kinds
+        let kinds = Set(provider.challenges.values.map { $0.challengeKind })
+
+        XCTAssertTrue(kinds.contains(.combat), "Should have combat challenges")
+        XCTAssertTrue(kinds.contains(.ritual), "Should have ritual challenges")
+        XCTAssertTrue(kinds.contains(.exploration), "Should have exploration challenges")
+    }
+
+    // MARK: - Event Tests
+
+    func testEventsLoaded() throws {
+        try provider.loadAllContent()
+
+        XCTAssertGreaterThan(provider.events.count, 0, "Should have loaded at least one event")
+    }
+
+    func testEventPoolsExist() throws {
+        try provider.loadAllContent()
+
+        // Should have events from different pools
+        let eventIds = Array(provider.events.keys)
+
+        // Check for events from various pools
+        let commonEvents = eventIds.filter { $0.hasPrefix("event_wanderer") || $0.hasPrefix("event_camp") || $0.hasPrefix("event_merchant") }
+        XCTAssertFalse(commonEvents.isEmpty, "Should have common pool events")
+    }
+
+    func testEventStructure() throws {
+        try provider.loadAllContent()
+
+        guard let wanderer = provider.events["event_wanderer"] else {
+            XCTFail("Wanderer event should exist")
+            return
+        }
+
+        XCTAssertEqual(wanderer.id, "event_wanderer")
+        XCTAssertEqual(wanderer.titleKey, "event.wanderer.title")
+        XCTAssertEqual(wanderer.bodyKey, "event.wanderer.body")
+        XCTAssertFalse(wanderer.choices.isEmpty, "Event should have choices")
+    }
+
+    func testCombatEventHasCombatData() throws {
+        try provider.loadAllContent()
+
+        // Find a combat event
+        let combatEvent = provider.events.values.first { $0.eventType == .combat }
+
+        XCTAssertNotNil(combatEvent, "Should have at least one combat event")
+
+        if let event = combatEvent {
+            XCTAssertNotNil(event.combatData, "Combat event should have combat data")
+        }
+    }
+
+    // MARK: - Event Pool Index Tests
+
+    func testEventPoolIndexBuilt() throws {
+        try provider.loadAllContent()
+
+        XCTAssertGreaterThan(provider.eventsByPool.count, 0, "Should have event pool index")
+    }
+
+    func testSpecificPoolsHaveEvents() throws {
+        try provider.loadAllContent()
+
+        let expectedPools = ["pool_common", "pool_village", "pool_forest", "pool_swamp", "pool_mountain", "pool_sacred", "pool_breach", "pool_boss"]
+
+        for poolId in expectedPools {
+            let events = provider.getEvents(forPool: poolId)
+            XCTAssertGreaterThan(
+                events.count, 0,
+                "Pool '\(poolId)' should have at least one event"
+            )
+        }
+    }
+
+    // MARK: - Content Query Tests
+
+    func testGetRegion() throws {
+        try provider.loadAllContent()
+
+        let region = provider.getRegion(id: "village")
+        XCTAssertNotNil(region, "Should find village region")
+        XCTAssertEqual(region?.id, "village")
+    }
+
+    func testGetAnchor() throws {
+        try provider.loadAllContent()
+
+        let anchor = provider.getAnchor(id: "anchor_village_chapel")
+        XCTAssertNotNil(anchor, "Should find village chapel anchor")
+    }
+
+    func testGetQuest() throws {
+        try provider.loadAllContent()
+
+        let quest = provider.getQuest(id: "quest_main_act1")
+        XCTAssertNotNil(quest, "Should find main quest")
+    }
+
+    func testGetChallenge() throws {
+        try provider.loadAllContent()
+
+        let challenge = provider.getChallenge(id: "combat_leshy")
+        XCTAssertNotNil(challenge, "Should find Leshy combat challenge")
+    }
+
+    func testGetEvent() throws {
+        try provider.loadAllContent()
+
+        let event = provider.getEvent(id: "event_wanderer")
+        XCTAssertNotNil(event, "Should find wanderer event")
+    }
+
+    // MARK: - Localization Key Tests
+
+    func testRegionLocalizationKeys() throws {
+        try provider.loadAllContent()
+
+        for region in provider.regions.values {
+            XCTAssertTrue(
+                region.titleKey.hasPrefix("region."),
+                "Region title key should start with 'region.'"
+            )
+            XCTAssertTrue(
+                region.descriptionKey.hasPrefix("region."),
+                "Region description key should start with 'region.'"
+            )
+        }
+    }
+
+    func testEventLocalizationKeys() throws {
+        try provider.loadAllContent()
+
+        for event in provider.events.values {
+            XCTAssertTrue(
+                event.titleKey.hasPrefix("event."),
+                "Event title key should start with 'event.'"
+            )
+            XCTAssertTrue(
+                event.bodyKey.hasPrefix("event."),
+                "Event body key should start with 'event.'"
+            )
+
+            for choice in event.choices {
+                XCTAssertTrue(
+                    choice.labelKey.hasPrefix("event."),
+                    "Choice label key should start with 'event.'"
+                )
+            }
+        }
+    }
+
+    // MARK: - Content Count Tests
+
+    func testExpectedContentCounts() throws {
+        try provider.loadAllContent()
+
+        // Based on HANDOFF.md: 24 events, 7 regions, 6 anchors, 4 quests, 7 challenges
+        XCTAssertEqual(provider.regions.count, 7, "Should have 7 regions")
+        XCTAssertEqual(provider.anchors.count, 6, "Should have 6 anchors")
+        XCTAssertEqual(provider.quests.count, 4, "Should have 4 quests")
+        XCTAssertEqual(provider.challenges.count, 7, "Should have 7 challenges")
+        XCTAssertEqual(provider.events.count, 24, "Should have 24 events")
+    }
+}

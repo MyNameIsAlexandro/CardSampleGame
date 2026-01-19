@@ -3,7 +3,8 @@ import Combine
 
 // MARK: - Engine Adapters
 // Bridge between new Engine and legacy Models during migration
-// These will be removed once full migration is complete
+// NOTE: These adapters are still required for save/load compatibility
+// They can be removed once EngineSave replaces GameSave completely
 
 // MARK: - WorldState Engine Adapter
 
@@ -194,135 +195,6 @@ final class PlayerEngineAdapter {
     }
 }
 
-// MARK: - GameState Engine Adapter
-
-/// Bridges TwilightGameEngine with legacy GameState
-final class GameStateEngineAdapter: ObservableObject {
-    // MARK: - Properties
-
-    let gameState: GameState
-    let engine: TwilightGameEngine
-
-    private var cancellables = Set<AnyCancellable>()
-
-    // MARK: - Published (for UI binding during transition)
-
-    @Published var isProcessingAction: Bool = false
-
-    // MARK: - Initialization
-
-    init(gameState: GameState) {
-        self.gameState = gameState
-        self.engine = TwilightGameEngine()
-
-        // Connect engine to legacy models
-        engine.connectToLegacy(
-            worldState: gameState.worldState,
-            player: gameState.players.first ?? Player(name: "Default")
-        )
-
-        setupBindings()
-    }
-
-    private func setupBindings() {
-        // Forward engine game result to legacy (isGameOver is computed from isVictory/isDefeat)
-        engine.$gameResult
-            .compactMap { $0 }
-            .sink { [weak self] result in
-                switch result {
-                case .victory:
-                    self?.gameState.isVictory = true
-                case .defeat:
-                    self?.gameState.isDefeat = true
-                case .abandoned:
-                    break
-                }
-            }
-            .store(in: &cancellables)
-    }
-
-    // MARK: - Action Forwarding
-
-    /// Perform action through engine (recommended way)
-    @MainActor
-    func performAction(_ action: TwilightGameAction) async -> ActionResult {
-        isProcessingAction = true
-        defer { isProcessingAction = false }
-
-        let result = engine.performAction(action)
-
-        // Handle UI updates based on result
-        await handleActionResult(result)
-
-        return result
-    }
-
-    /// Synchronous version for simple actions
-    @discardableResult
-    func performActionSync(_ action: TwilightGameAction) -> ActionResult {
-        isProcessingAction = true
-        defer { isProcessingAction = false }
-
-        return engine.performAction(action)
-    }
-
-    private func handleActionResult(_ result: ActionResult) async {
-        // UI-specific handling
-        if result.combatStarted {
-            // Prepare combat UI
-        }
-
-        if result.currentEvent != nil {
-            // Show event UI
-        }
-
-        if result.gameEnded != nil {
-            // Show game over UI
-        }
-    }
-
-    // MARK: - Legacy Action Translation
-
-    /// Translate legacy action calls to engine actions
-    /// Used during migration to intercept old-style calls
-
-    func travel(to regionId: UUID) -> ActionResult {
-        return performActionSync(.travel(toRegionId: regionId))
-    }
-
-    func rest() -> ActionResult {
-        return performActionSync(.rest)
-    }
-
-    func explore() -> ActionResult {
-        return performActionSync(.explore)
-    }
-
-    func strengthenAnchor() -> ActionResult {
-        return performActionSync(.strengthenAnchor)
-    }
-
-    func chooseEventOption(eventId: UUID, choiceIndex: Int) -> ActionResult {
-        return performActionSync(.chooseEventOption(eventId: eventId, choiceIndex: choiceIndex))
-    }
-}
-
-// MARK: - Migration Helper
-
-/// Helper to gradually migrate UI from direct WorldState access to Engine
-struct EngineMigrationHelper {
-    /// Check if engine is being used (for feature flags)
-    static var useEngine: Bool {
-        // Set to true to enable engine-based actions
-        // During migration, this can be toggled for testing
-        return true
-    }
-
-    /// Log migration warnings for direct state mutations
-    static func warnDirectMutation(method: String, file: String = #file, line: Int = #line) {
-        #if DEBUG
-        print("⚠️ MIGRATION WARNING: Direct state mutation '\(method)' at \(file):\(line)")
-        print("   → Use Engine.performAction() instead")
-        #endif
-    }
-}
+// MARK: - Unused Adapters Removed
+// GameStateEngineAdapter and EngineMigrationHelper were removed as part of Phase 4 cleanup.
+// ContentView now uses Engine-First architecture directly.
