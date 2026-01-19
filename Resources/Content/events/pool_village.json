@@ -5,8 +5,14 @@
   "events": [
     {
       "id": "event_elder",
-      "titleKey": "event.elder.title",
-      "bodyKey": "event.elder.body",
+      "title": {
+        "en": "Village Elder",
+        "ru": "Деревенский Староста"
+      },
+      "body": {
+        "en": "The village elder approaches, worry etched deep in their weathered face. The darkness grows stronger each day.",
+        "ru": "Деревенский староста приближается, тревога глубоко отпечаталась на его обветренном лице. Тьма крепнет с каждым днём."
+      },
       "eventType": "inline",
       "poolIds": ["pool_village"],
       "availability": {
@@ -19,39 +25,63 @@
       "choices": [
         {
           "id": "accept_quest",
-          "labelKey": "event.elder.accept",
+          "label": {
+            "en": "Accept the quest",
+            "ru": "Принять задание"
+          },
           "consequences": {
             "setFlags": {"elder_quest_accepted": true},
             "startQuest": "quest_village_defense",
-            "messageKey": "event.elder.accept.result"
+            "message": {
+              "en": "You swear to defend the village from the encroaching darkness.",
+              "ru": "Вы клянётесь защитить деревню от наступающей тьмы."
+            }
           }
         },
         {
           "id": "ask_wisdom",
-          "labelKey": "event.elder.wisdom",
+          "label": {
+            "en": "Seek wisdom (2 Faith)",
+            "ru": "Попросить мудрости (2 Веры)"
+          },
           "requirements": {
             "minFaith": 2
           },
           "consequences": {
             "resourceChanges": {"faith": -2},
             "setFlags": {"elder_wisdom": true},
-            "messageKey": "event.elder.wisdom.result"
+            "message": {
+              "en": "The elder shares secrets of the old protections.",
+              "ru": "Староста делится секретами древней защиты."
+            }
           }
         },
         {
           "id": "decline",
-          "labelKey": "event.elder.decline",
+          "label": {
+            "en": "Decline to help",
+            "ru": "Отказаться помогать"
+          },
           "consequences": {
             "reputationChange": -5,
-            "messageKey": "event.elder.decline.result"
+            "message": {
+              "en": "The elder's disappointment is palpable. Perhaps you have your reasons.",
+              "ru": "Разочарование старосты ощутимо. Возможно, у вас свои причины."
+            }
           }
         }
       ]
     },
     {
       "id": "event_lost_child",
-      "titleKey": "event.lost_child.title",
-      "bodyKey": "event.lost_child.body",
+      "title": {
+        "en": "Lost Child",
+        "ru": "Потерявшийся Ребёнок"
+      },
+      "body": {
+        "en": "A child has wandered too close to the forest's edge. Their cries echo in the twilight.",
+        "ru": "Ребёнок забрёл слишком близко к краю леса. Его крики эхом разносятся в сумерках."
+      },
       "eventType": "inline",
       "poolIds": ["pool_village"],
       "availability": {
@@ -64,18 +94,27 @@
       "choices": [
         {
           "id": "search",
-          "labelKey": "event.lost_child.search",
+          "label": {
+            "en": "Search for the child",
+            "ru": "Искать ребёнка"
+          },
           "consequences": {
             "resourceChanges": {"health": -1},
             "balanceShift": 10,
             "reputationChange": 15,
             "setFlags": {"saved_child": true},
-            "messageKey": "event.lost_child.search.result"
+            "message": {
+              "en": "You find the child and return them safely. The village rejoices.",
+              "ru": "Вы находите ребёнка и безопасно возвращаете его. Деревня ликует."
+            }
           }
         },
         {
           "id": "pray",
-          "labelKey": "event.lost_child.pray",
+          "label": {
+            "en": "Pray for guidance (5 Faith)",
+            "ru": "Молиться о наставлении (5 Веры)"
+          },
           "requirements": {
             "minFaith": 5,
             "minBalance": 60
@@ -84,24 +123,39 @@
             "resourceChanges": {"faith": -5},
             "balanceShift": 5,
             "setFlags": {"saved_child_prayer": true},
-            "messageKey": "event.lost_child.pray.result"
+            "message": {
+              "en": "Divine light guides you to the child.",
+              "ru": "Божественный свет ведёт вас к ребёнку."
+            }
           }
         },
         {
           "id": "ignore",
-          "labelKey": "event.lost_child.ignore",
+          "label": {
+            "en": "It's too dangerous",
+            "ru": "Слишком опасно"
+          },
           "consequences": {
             "balanceShift": -10,
             "reputationChange": -10,
-            "messageKey": "event.lost_child.ignore.result"
+            "message": {
+              "en": "The cries fade into the darkness. You try not to think about it.",
+              "ru": "Крики затихают во тьме. Вы стараетесь не думать об этом."
+            }
           }
         }
       ]
     },
     {
       "id": "event_village_celebration",
-      "titleKey": "event.celebration.title",
-      "bodyKey": "event.celebration.body",
+      "title": {
+        "en": "Village Celebration",
+        "ru": "Деревенский Праздник"
+      },
+      "body": {
+        "en": "Despite the darkness, the village holds a celebration to honor the old gods and strengthen their spirits.",
+        "ru": "Несмотря на тьму, деревня устраивает празднество в честь старых богов и для укрепления духа."
+      },
       "eventType": "inline",
       "poolIds": ["pool_village"],
       "availability": {
@@ -114,16 +168,25 @@
       "choices": [
         {
           "id": "join",
-          "labelKey": "event.celebration.join",
+          "label": {
+            "en": "Join the celebration",
+            "ru": "Присоединиться к празднику"
+          },
           "consequences": {
             "resourceChanges": {"health": 1, "faith": 1},
             "balanceShift": 5,
-            "messageKey": "event.celebration.join.result"
+            "message": {
+              "en": "Joy and community strengthen both body and spirit.",
+              "ru": "Радость и единство укрепляют и тело, и дух."
+            }
           }
         },
         {
           "id": "bless",
-          "labelKey": "event.celebration.bless",
+          "label": {
+            "en": "Offer a blessing (3 Faith)",
+            "ru": "Дать благословение (3 Веры)"
+          },
           "requirements": {
             "minFaith": 3,
             "minBalance": 50
@@ -132,14 +195,23 @@
             "resourceChanges": {"faith": -3},
             "reputationChange": 10,
             "tensionChange": -3,
-            "messageKey": "event.celebration.bless.result"
+            "message": {
+              "en": "Your blessing brings hope. The darkness seems to retreat slightly.",
+              "ru": "Ваше благословение приносит надежду. Тьма словно немного отступает."
+            }
           }
         },
         {
           "id": "pass",
-          "labelKey": "event.celebration.pass",
+          "label": {
+            "en": "Pass by quietly",
+            "ru": "Пройти мимо тихо"
+          },
           "consequences": {
-            "messageKey": "event.celebration.pass.result"
+            "message": {
+              "en": "You watch from the shadows, mind on darker matters.",
+              "ru": "Вы наблюдаете из тени, думая о более тёмных делах."
+            }
           }
         }
       ]

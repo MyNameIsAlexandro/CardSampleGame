@@ -5,8 +5,14 @@
   "events": [
     {
       "id": "event_swamp_witch",
-      "titleKey": "event.swamp_witch.title",
-      "bodyKey": "event.swamp_witch.body",
+      "title": {
+        "en": "Swamp Witch",
+        "ru": "Болотная Ведьма"
+      },
+      "body": {
+        "en": "A figure emerges from the mist - the swamp witch, neither alive nor dead, offering forbidden bargains.",
+        "ru": "Фигура выступает из тумана - болотная ведьма, ни живая, ни мёртвая, предлагающая запретные сделки."
+      },
       "eventType": "inline",
       "poolIds": ["pool_swamp"],
       "availability": {
@@ -19,17 +25,26 @@
       "choices": [
         {
           "id": "bargain",
-          "labelKey": "event.swamp_witch.bargain",
+          "label": {
+            "en": "Make a bargain",
+            "ru": "Заключить сделку"
+          },
           "consequences": {
             "resourceChanges": {"health": -2},
             "addCards": ["witch_curse", "witch_blessing"],
             "setFlags": {"made_witch_bargain": true},
-            "messageKey": "event.swamp_witch.bargain.result"
+            "message": {
+              "en": "The witch's gifts come with a price. Both blessing and curse are now yours.",
+              "ru": "Дары ведьмы имеют свою цену. И благословение, и проклятие теперь ваши."
+            }
           }
         },
         {
           "id": "cleanse",
-          "labelKey": "event.swamp_witch.cleanse",
+          "label": {
+            "en": "Cleanse the corruption (8 Faith)",
+            "ru": "Очистить от порчи (8 Веры)"
+          },
           "requirements": {
             "minFaith": 8,
             "minBalance": 60
@@ -39,24 +54,39 @@
             "balanceShift": 10,
             "anchorIntegrityChange": 15,
             "setFlags": {"cleansed_swamp": true},
-            "messageKey": "event.swamp_witch.cleanse.result"
+            "message": {
+              "en": "Holy light burns away the corruption. The swamp breathes easier.",
+              "ru": "Святой свет сжигает порчу. Болото дышит легче."
+            }
           }
         },
         {
           "id": "flee",
-          "labelKey": "event.swamp_witch.flee",
+          "label": {
+            "en": "Flee into the mist",
+            "ru": "Бежать в туман"
+          },
           "consequences": {
             "resourceChanges": {"health": -1},
             "addCurse": "swamp_sickness",
-            "messageKey": "event.swamp_witch.flee.result"
+            "message": {
+              "en": "You escape, but the witch's curse clings to you.",
+              "ru": "Вы спасаетесь, но проклятие ведьмы следует за вами."
+            }
           }
         }
       ]
     },
     {
       "id": "event_drowned_spirits",
-      "titleKey": "event.drowned_spirits.title",
-      "bodyKey": "event.drowned_spirits.body",
+      "title": {
+        "en": "Drowned Spirits",
+        "ru": "Утопленные Духи"
+      },
+      "body": {
+        "en": "Pale forms rise from the murky water - drowned souls seeking to drag the living down.",
+        "ru": "Бледные фигуры поднимаются из мутной воды - утопленные души, жаждущие утянуть живых."
+      },
       "eventType": "combat",
       "poolIds": ["pool_swamp"],
       "availability": {
@@ -76,38 +106,62 @@
       "choices": [
         {
           "id": "fight",
-          "labelKey": "event.drowned_spirits.fight",
+          "label": {
+            "en": "Fight the spirits",
+            "ru": "Сразиться с духами"
+          },
           "consequences": {
             "startCombat": true,
-            "messageKey": "event.drowned_spirits.fight.result"
+            "message": {
+              "en": "You ready yourself to face the restless dead.",
+              "ru": "Вы готовитесь к бою с неупокоенными мертвецами."
+            }
           }
         },
         {
           "id": "pray",
-          "labelKey": "event.drowned_spirits.pray",
+          "label": {
+            "en": "Pray for their rest (4 Faith)",
+            "ru": "Молиться об их покое (4 Веры)"
+          },
           "requirements": {
             "minFaith": 4
           },
           "consequences": {
             "resourceChanges": {"faith": -4},
             "balanceShift": 5,
-            "messageKey": "event.drowned_spirits.pray.result"
+            "message": {
+              "en": "Your prayers bring peace. The spirits sink back into the depths.",
+              "ru": "Ваши молитвы приносят покой. Духи погружаются обратно в глубины."
+            }
           }
         },
         {
           "id": "wade_through",
-          "labelKey": "event.drowned_spirits.wade",
+          "label": {
+            "en": "Wade through them",
+            "ru": "Пробраться сквозь них"
+          },
           "consequences": {
             "resourceChanges": {"health": -2},
-            "messageKey": "event.drowned_spirits.wade.result"
+            "message": {
+              "en": "Cold hands grasp at you as you push through.",
+              "ru": "Холодные руки хватают вас, пока вы пробираетесь."
+            }
           }
         }
       ]
     },
     {
       "id": "event_corrupted_spring",
-      "titleKey": "event.corrupted_spring.title",
-      "bodyKey": "event.corrupted_spring.body",
+      "title": {
+        "en": "Corrupted Spring",
+        "ru": "Осквернённый Источник"
+      },
+      "body": {
+        "en": "A spring bubbles forth, but its waters are black as night, corrupted by Nav's touch.",
+        "ru": "Источник бьёт ключом, но воды его черны как ночь, осквернённые прикосновением Нави."
+      },
       "eventType": "inline",
       "poolIds": ["pool_swamp"],
       "availability": {
@@ -120,7 +174,10 @@
       "choices": [
         {
           "id": "purify",
-          "labelKey": "event.corrupted_spring.purify",
+          "label": {
+            "en": "Purify the waters (6 Faith)",
+            "ru": "Очистить воды (6 Веры)"
+          },
           "requirements": {
             "minFaith": 6,
             "minBalance": 50
@@ -130,24 +187,39 @@
             "anchorIntegrityChange": 20,
             "tensionChange": -5,
             "setFlags": {"spring_purified": true},
-            "messageKey": "event.corrupted_spring.purify.result"
+            "message": {
+              "en": "The waters clear, and the anchor draws strength from the cleansed spring.",
+              "ru": "Воды очищаются, и якорь черпает силу из очищенного источника."
+            }
           }
         },
         {
           "id": "drink",
-          "labelKey": "event.corrupted_spring.drink",
+          "label": {
+            "en": "Drink the dark waters",
+            "ru": "Испить тёмных вод"
+          },
           "consequences": {
             "resourceChanges": {"faith": 5},
             "balanceShift": -10,
             "addCurse": "dark_thirst",
-            "messageKey": "event.corrupted_spring.drink.result"
+            "message": {
+              "en": "Power floods through you, but darkness takes root in your soul.",
+              "ru": "Сила наполняет вас, но тьма пускает корни в вашей душе."
+            }
           }
         },
         {
           "id": "ignore",
-          "labelKey": "event.corrupted_spring.ignore",
+          "label": {
+            "en": "Leave it be",
+            "ru": "Оставить как есть"
+          },
           "consequences": {
-            "messageKey": "event.corrupted_spring.ignore.result"
+            "message": {
+              "en": "The spring continues to poison the land.",
+              "ru": "Источник продолжает отравлять землю."
+            }
           }
         }
       ]

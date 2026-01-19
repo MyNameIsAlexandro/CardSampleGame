@@ -2595,8 +2595,8 @@ final class TwilightMarchesCodeContentProvider: CodeContentProvider {
         // 1. Village (Stable) - starting point
         let village = RegionDefinition(
             id: "village",
-            titleKey: "region.village.title",
-            descriptionKey: "region.village.description",
+            title: LocalizedString(en: "Border Village", ru: "Пограничная Деревня"),
+            description: LocalizedString(en: "A small village on the edge of the realm", ru: "Небольшая деревня на краю королевства"),
             neighborIds: ["oak", "forest", "swamp"],
             initiallyDiscovered: true,
             anchorId: "anchor_village_chapel",
@@ -2608,8 +2608,8 @@ final class TwilightMarchesCodeContentProvider: CodeContentProvider {
         // 2. Sacred Oak (Stable) - point of power
         let oak = RegionDefinition(
             id: "oak",
-            titleKey: "region.oak.title",
-            descriptionKey: "region.oak.description",
+            title: LocalizedString(en: "Sacred Oak", ru: "Священный Дуб"),
+            description: LocalizedString(en: "An ancient oak radiating divine power", ru: "Древний дуб, излучающий божественную силу"),
             neighborIds: ["village", "forest"],
             initiallyDiscovered: false,
             anchorId: "anchor_sacred_oak",
@@ -2621,8 +2621,8 @@ final class TwilightMarchesCodeContentProvider: CodeContentProvider {
         // 3. Dense Forest (Borderland)
         let forest = RegionDefinition(
             id: "forest",
-            titleKey: "region.forest.title",
-            descriptionKey: "region.forest.description",
+            title: LocalizedString(en: "Dark Forest", ru: "Тёмный Лес"),
+            description: LocalizedString(en: "A dense forest shrouded in shadow", ru: "Густой лес, окутанный тенью"),
             neighborIds: ["village", "oak", "mountain"],
             initiallyDiscovered: false,
             anchorId: "anchor_forest_idol",
@@ -2635,8 +2635,8 @@ final class TwilightMarchesCodeContentProvider: CodeContentProvider {
         // 4. Navi Swamp (Borderland)
         let swamp = RegionDefinition(
             id: "swamp",
-            titleKey: "region.swamp.title",
-            descriptionKey: "region.swamp.description",
+            title: LocalizedString(en: "Cursed Swamp", ru: "Проклятое Болото"),
+            description: LocalizedString(en: "A murky swamp tainted by dark magic", ru: "Мрачное болото, отравленное тёмной магией"),
             neighborIds: ["village", "breach"],
             initiallyDiscovered: false,
             anchorId: "anchor_swamp_spring",
@@ -2649,8 +2649,8 @@ final class TwilightMarchesCodeContentProvider: CodeContentProvider {
         // 5. Mountain Pass (Borderland)
         let mountain = RegionDefinition(
             id: "mountain",
-            titleKey: "region.mountain.title",
-            descriptionKey: "region.mountain.description",
+            title: LocalizedString(en: "Mountain Pass", ru: "Горный Перевал"),
+            description: LocalizedString(en: "A treacherous pass through the mountains", ru: "Опасный путь через горы"),
             neighborIds: ["forest", "breach"],
             initiallyDiscovered: false,
             anchorId: "anchor_mountain_barrow",
@@ -2663,8 +2663,8 @@ final class TwilightMarchesCodeContentProvider: CodeContentProvider {
         // 6. Barrow Breach (Breach)
         let breach = RegionDefinition(
             id: "breach",
-            titleKey: "region.breach.title",
-            descriptionKey: "region.breach.description",
+            title: LocalizedString(en: "The Breach", ru: "Разлом"),
+            description: LocalizedString(en: "A tear in reality where darkness seeps through", ru: "Разрыв в реальности, откуда сочится тьма"),
             neighborIds: ["swamp", "mountain", "dark_lowland"],
             initiallyDiscovered: false,
             anchorId: "anchor_breach_shrine",
@@ -2677,8 +2677,8 @@ final class TwilightMarchesCodeContentProvider: CodeContentProvider {
         // 7. Dark Lowlands (Breach) - Act I finale
         let darkLowland = RegionDefinition(
             id: "dark_lowland",
-            titleKey: "region.dark_lowland.title",
-            descriptionKey: "region.dark_lowland.description",
+            title: LocalizedString(en: "Dark Lowland", ru: "Тёмная Низина"),
+            description: LocalizedString(en: "A forsaken land consumed by darkness", ru: "Проклятая земля, поглощённая тьмой"),
             neighborIds: ["breach"],
             initiallyDiscovered: false,
             anchorId: nil, // No anchor - fully destroyed
@@ -2697,8 +2697,8 @@ final class TwilightMarchesCodeContentProvider: CodeContentProvider {
         // Village anchor
         let villageChapel = AnchorDefinition(
             id: "anchor_village_chapel",
-            titleKey: "anchor.village_chapel.title",
-            descriptionKey: "anchor.village_chapel.description",
+            title: LocalizedString(en: "Village Chapel", ru: "Деревенская Часовня"),
+            description: LocalizedString(en: "A small chapel offering protection to the village", ru: "Небольшая часовня, защищающая деревню"),
             regionId: "village",
             anchorType: "chapel",
             initialInfluence: .light,
@@ -2710,8 +2710,8 @@ final class TwilightMarchesCodeContentProvider: CodeContentProvider {
         // Sacred Oak anchor
         let sacredOak = AnchorDefinition(
             id: "anchor_sacred_oak",
-            titleKey: "anchor.sacred_oak.title",
-            descriptionKey: "anchor.sacred_oak.description",
+            title: LocalizedString(en: "Sacred Oak", ru: "Священный Дуб"),
+            description: LocalizedString(en: "An ancient tree imbued with divine essence", ru: "Древнее дерево, наполненное божественной сущностью"),
             regionId: "oak",
             anchorType: "sacred_tree",
             initialInfluence: .light,
@@ -2723,8 +2723,8 @@ final class TwilightMarchesCodeContentProvider: CodeContentProvider {
         // Forest idol anchor
         let forestIdol = AnchorDefinition(
             id: "anchor_forest_idol",
-            titleKey: "anchor.forest_idol.title",
-            descriptionKey: "anchor.forest_idol.description",
+            title: LocalizedString(en: "Forest Stone Idol", ru: "Лесной Каменный Идол"),
+            description: LocalizedString(en: "A weathered stone idol of forgotten gods", ru: "Обветшалый каменный идол забытых богов"),
             regionId: "forest",
             anchorType: "stone_idol",
             initialInfluence: .neutral,
@@ -2736,8 +2736,8 @@ final class TwilightMarchesCodeContentProvider: CodeContentProvider {
         // Swamp spring anchor
         let swampSpring = AnchorDefinition(
             id: "anchor_swamp_spring",
-            titleKey: "anchor.swamp_spring.title",
-            descriptionKey: "anchor.swamp_spring.description",
+            title: LocalizedString(en: "Corrupted Spring", ru: "Осквернённый Источник"),
+            description: LocalizedString(en: "A once-pure spring now tainted by darkness", ru: "Некогда чистый источник, осквернённый тьмой"),
             regionId: "swamp",
             anchorType: "spring",
             initialInfluence: .dark,
@@ -2749,8 +2749,8 @@ final class TwilightMarchesCodeContentProvider: CodeContentProvider {
         // Mountain barrow anchor
         let mountainBarrow = AnchorDefinition(
             id: "anchor_mountain_barrow",
-            titleKey: "anchor.mountain_barrow.title",
-            descriptionKey: "anchor.mountain_barrow.description",
+            title: LocalizedString(en: "Ancestor Barrow", ru: "Курган Предков"),
+            description: LocalizedString(en: "An ancient burial mound of revered ancestors", ru: "Древний курган почитаемых предков"),
             regionId: "mountain",
             anchorType: "barrow",
             initialInfluence: .neutral,
@@ -2762,8 +2762,8 @@ final class TwilightMarchesCodeContentProvider: CodeContentProvider {
         // Breach shrine anchor
         let breachShrine = AnchorDefinition(
             id: "anchor_breach_shrine",
-            titleKey: "anchor.breach_shrine.title",
-            descriptionKey: "anchor.breach_shrine.description",
+            title: LocalizedString(en: "Breach Ward Shrine", ru: "Святилище у Разлома"),
+            description: LocalizedString(en: "A crumbling shrine that wards against the breach", ru: "Разрушающееся святилище, защищающее от разлома"),
             regionId: "breach",
             anchorType: "shrine",
             initialInfluence: .dark,

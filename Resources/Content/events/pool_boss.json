@@ -5,8 +5,14 @@
   "events": [
     {
       "id": "event_boss_moroi",
-      "titleKey": "event.boss_moroi.title",
-      "bodyKey": "event.boss_moroi.body",
+      "title": {
+        "en": "The Moroi Chernobog",
+        "ru": "Морой Чернобог"
+      },
+      "body": {
+        "en": "Before you stands the servant of the dark god - Moroi Chernobog. The final confrontation has come.",
+        "ru": "Перед вами слуга тёмного бога - Морой Чернобог. Финальное противостояние настало."
+      },
       "eventType": "combat",
       "poolIds": ["pool_boss"],
       "availability": {
@@ -29,7 +35,10 @@
       "choices": [
         {
           "id": "fight_light",
-          "labelKey": "event.boss_moroi.fight_light",
+          "label": {
+            "en": "Fight with the light's power",
+            "ru": "Сразиться силой света"
+          },
           "requirements": {
             "minHealth": 7,
             "minBalance": 50
@@ -37,12 +46,18 @@
           "consequences": {
             "startCombat": true,
             "setFlags": {"boss_fight_started": true},
-            "messageKey": "event.boss_moroi.fight_light.result"
+            "message": {
+              "en": "You call upon all the light you've gathered. The battle for Yav begins.",
+              "ru": "Вы призываете весь собранный свет. Битва за Явь начинается."
+            }
           }
         },
         {
           "id": "fight_dark",
-          "labelKey": "event.boss_moroi.fight_dark",
+          "label": {
+            "en": "Fight using darkness",
+            "ru": "Сразиться, используя тьму"
+          },
           "requirements": {
             "minHealth": 5,
             "maxBalance": 40
@@ -51,15 +66,24 @@
             "startCombat": true,
             "setFlags": {"boss_fight_started": true, "dark_path": true},
             "resourceChanges": {"faith": 5},
-            "messageKey": "event.boss_moroi.fight_dark.result"
+            "message": {
+              "en": "You draw upon the darkness within. Fight fire with fire.",
+              "ru": "Вы черпаете из тьмы внутри. Огнём против огня."
+            }
           }
         },
         {
           "id": "retreat",
-          "labelKey": "event.boss_moroi.retreat",
+          "label": {
+            "en": "Retreat to gather strength",
+            "ru": "Отступить, чтобы набраться сил"
+          },
           "consequences": {
             "tensionChange": 10,
-            "messageKey": "event.boss_moroi.retreat.result"
+            "message": {
+              "en": "You're not ready. The darkness grows stronger with each passing moment.",
+              "ru": "Вы не готовы. Тьма крепнет с каждым мгновением."
+            }
           }
         }
       ]

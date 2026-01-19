@@ -22,13 +22,13 @@ struct AnchorDefinition: GameDefinition {
     /// Unique anchor identifier (e.g., "anchor_forest_shrine")
     let id: String
 
-    // MARK: - Localization Keys
+    // MARK: - Localized Content
 
-    /// Localization key for anchor name
-    let titleKey: String
+    /// Anchor name with all language variants
+    let title: LocalizedString
 
-    /// Localization key for anchor description
-    let descriptionKey: String
+    /// Anchor description with all language variants
+    let description: LocalizedString
 
     // MARK: - Location
 
@@ -70,8 +70,8 @@ struct AnchorDefinition: GameDefinition {
 
     init(
         id: String,
-        titleKey: String,
-        descriptionKey: String,
+        title: LocalizedString,
+        description: LocalizedString,
         regionId: String,
         anchorType: String = "shrine",
         initialInfluence: AnchorInfluence = .neutral,
@@ -83,8 +83,8 @@ struct AnchorDefinition: GameDefinition {
         resistanceDivisor: Int = 100
     ) {
         self.id = id
-        self.titleKey = titleKey
-        self.descriptionKey = descriptionKey
+        self.title = title
+        self.description = description
         self.regionId = regionId
         self.anchorType = anchorType
         self.initialInfluence = initialInfluence

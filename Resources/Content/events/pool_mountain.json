@@ -5,8 +5,14 @@
   "events": [
     {
       "id": "event_mountain_shrine",
-      "titleKey": "event.mountain_shrine.title",
-      "bodyKey": "event.mountain_shrine.body",
+      "title": {
+        "en": "Mountain Shrine",
+        "ru": "Горное Святилище"
+      },
+      "body": {
+        "en": "A small shrine perches on a rocky outcrop, still maintained by some faithful soul.",
+        "ru": "Небольшое святилище примостилось на скальном выступе, всё ещё поддерживаемое кем-то верующим."
+      },
       "eventType": "inline",
       "poolIds": ["pool_mountain"],
       "availability": {
@@ -19,7 +25,10 @@
       "choices": [
         {
           "id": "pray",
-          "labelKey": "event.mountain_shrine.pray",
+          "label": {
+            "en": "Pray at the shrine",
+            "ru": "Помолиться у святилища"
+          },
           "requirements": {
             "minBalance": 40
           },
@@ -27,33 +36,54 @@
             "resourceChanges": {"faith": 3},
             "balanceShift": 5,
             "anchorIntegrityChange": 10,
-            "messageKey": "event.mountain_shrine.pray.result"
+            "message": {
+              "en": "Your prayers strengthen both faith and anchor.",
+              "ru": "Ваши молитвы укрепляют и веру, и якорь."
+            }
           }
         },
         {
           "id": "meditate",
-          "labelKey": "event.mountain_shrine.meditate",
+          "label": {
+            "en": "Meditate on the view",
+            "ru": "Медитировать, любуясь видом"
+          },
           "consequences": {
             "resourceChanges": {"health": 2},
             "setFlags": {"mountain_meditation": true},
-            "messageKey": "event.mountain_shrine.meditate.result"
+            "message": {
+              "en": "Peace fills your mind. You feel refreshed.",
+              "ru": "Покой наполняет разум. Вы чувствуете себя обновлённым."
+            }
           }
         },
         {
           "id": "search",
-          "labelKey": "event.mountain_shrine.search",
+          "label": {
+            "en": "Search for hidden treasures",
+            "ru": "Искать скрытые сокровища"
+          },
           "consequences": {
             "balanceShift": -5,
             "giveArtifact": "old_talisman",
-            "messageKey": "event.mountain_shrine.search.result"
+            "message": {
+              "en": "You find an old talisman, but disturbing the shrine costs you.",
+              "ru": "Вы находите старый талисман, но тревожить святилище стоит вам дорого."
+            }
           }
         }
       ]
     },
     {
       "id": "event_mountain_storm",
-      "titleKey": "event.mountain_storm.title",
-      "bodyKey": "event.mountain_storm.body",
+      "title": {
+        "en": "Mountain Storm",
+        "ru": "Горная Буря"
+      },
+      "body": {
+        "en": "Dark clouds gather with unnatural speed. This is no ordinary storm - Nav's power rides the wind.",
+        "ru": "Тёмные тучи собираются с неестественной скоростью. Это не обычная буря - сила Нави несётся на ветру."
+      },
       "eventType": "inline",
       "poolIds": ["pool_mountain"],
       "availability": {
@@ -66,27 +96,42 @@
       "choices": [
         {
           "id": "shelter",
-          "labelKey": "event.mountain_storm.shelter",
+          "label": {
+            "en": "Find shelter",
+            "ru": "Найти укрытие"
+          },
           "consequences": {
             "resourceChanges": {"faith": -1},
-            "messageKey": "event.mountain_storm.shelter.result"
+            "message": {
+              "en": "You wait it out, but doubt gnaws at your faith.",
+              "ru": "Вы пережидаете, но сомнения подтачивают вашу веру."
+            }
           }
         },
         {
           "id": "brave",
-          "labelKey": "event.mountain_storm.brave",
+          "label": {
+            "en": "Brave the storm",
+            "ru": "Выстоять в буре"
+          },
           "requirements": {
             "minHealth": 5
           },
           "consequences": {
             "resourceChanges": {"health": -2},
             "setFlags": {"braved_storm": true},
-            "messageKey": "event.mountain_storm.brave.result"
+            "message": {
+              "en": "The storm's fury batters you, but you emerge stronger.",
+              "ru": "Ярость бури обрушивается на вас, но вы выходите сильнее."
+            }
           }
         },
         {
           "id": "invoke",
-          "labelKey": "event.mountain_storm.invoke",
+          "label": {
+            "en": "Invoke Perun's protection (5 Faith)",
+            "ru": "Призвать защиту Перуна (5 Веры)"
+          },
           "requirements": {
             "minFaith": 5,
             "minBalance": 50
@@ -95,15 +140,24 @@
             "resourceChanges": {"faith": -5},
             "tensionChange": -3,
             "balanceShift": 5,
-            "messageKey": "event.mountain_storm.invoke.result"
+            "message": {
+              "en": "Thunder god's blessing shields you. The storm's darkness diminishes.",
+              "ru": "Благословение бога-громовержца защищает вас. Тьма бури рассеивается."
+            }
           }
         }
       ]
     },
     {
       "id": "event_ancient_guardian",
-      "titleKey": "event.ancient_guardian.title",
-      "bodyKey": "event.ancient_guardian.body",
+      "title": {
+        "en": "Ancient Guardian",
+        "ru": "Древний Страж"
+      },
+      "body": {
+        "en": "A stone figure stirs to life, ancient guardian of the mountain passes now corrupted by darkness.",
+        "ru": "Каменная фигура оживает - древний страж горных перевалов, ныне осквернённый тьмой."
+      },
       "eventType": "combat",
       "poolIds": ["pool_mountain"],
       "availability": {
@@ -123,18 +177,27 @@
       "choices": [
         {
           "id": "fight",
-          "labelKey": "event.ancient_guardian.fight",
+          "label": {
+            "en": "Fight the guardian",
+            "ru": "Сразиться со стражем"
+          },
           "requirements": {
             "minHealth": 4
           },
           "consequences": {
             "startCombat": true,
-            "messageKey": "event.ancient_guardian.fight.result"
+            "message": {
+              "en": "You must destroy what was once a protector.",
+              "ru": "Вам придётся уничтожить то, что когда-то было защитником."
+            }
           }
         },
         {
           "id": "honor",
-          "labelKey": "event.ancient_guardian.honor",
+          "label": {
+            "en": "Honor the old ways (6 Faith)",
+            "ru": "Почтить старые обычаи (6 Веры)"
+          },
           "requirements": {
             "minFaith": 6,
             "minBalance": 50
@@ -143,14 +206,23 @@
             "resourceChanges": {"faith": -6},
             "setFlags": {"honored_guardian": true},
             "balanceShift": 10,
-            "messageKey": "event.ancient_guardian.honor.result"
+            "message": {
+              "en": "Your reverence awakens the guardian's true nature. It lets you pass.",
+              "ru": "Ваше почтение пробуждает истинную природу стража. Он пропускает вас."
+            }
           }
         },
         {
           "id": "retreat",
-          "labelKey": "event.ancient_guardian.retreat",
+          "label": {
+            "en": "Retreat from the pass",
+            "ru": "Отступить с перевала"
+          },
           "consequences": {
-            "messageKey": "event.ancient_guardian.retreat.result"
+            "message": {
+              "en": "Another path must be found.",
+              "ru": "Нужно найти другой путь."
+            }
           }
         }
       ]

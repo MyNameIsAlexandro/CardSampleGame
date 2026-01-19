@@ -76,8 +76,9 @@ final class JSONContentProviderTests: XCTestCase {
 
         // Verify region structure
         XCTAssertEqual(village.id, "village")
-        XCTAssertEqual(village.titleKey, "region.village.title")
-        XCTAssertEqual(village.descriptionKey, "region.village.description")
+        XCTAssertFalse(village.title.en.isEmpty, "Village should have English title")
+        XCTAssertFalse(village.title.ru.isEmpty, "Village should have Russian title")
+        XCTAssertFalse(village.description.en.isEmpty, "Village should have English description")
         XCTAssertFalse(village.neighborIds.isEmpty, "Village should have neighbors")
         XCTAssertTrue(village.initiallyDiscovered, "Village should be initially discovered")
     }
@@ -136,7 +137,8 @@ final class JSONContentProviderTests: XCTestCase {
         }
 
         XCTAssertEqual(mainQuest.id, "quest_main_act1")
-        XCTAssertEqual(mainQuest.titleKey, "quest.main_act1.title")
+        XCTAssertFalse(mainQuest.title.en.isEmpty, "Quest should have English title")
+        XCTAssertFalse(mainQuest.title.ru.isEmpty, "Quest should have Russian title")
         XCTAssertFalse(mainQuest.objectives.isEmpty, "Quest should have objectives")
     }
 
@@ -187,8 +189,9 @@ final class JSONContentProviderTests: XCTestCase {
         }
 
         XCTAssertEqual(wanderer.id, "event_wanderer")
-        XCTAssertEqual(wanderer.titleKey, "event.wanderer.title")
-        XCTAssertEqual(wanderer.bodyKey, "event.wanderer.body")
+        XCTAssertFalse(wanderer.title.en.isEmpty, "Event should have English title")
+        XCTAssertFalse(wanderer.title.ru.isEmpty, "Event should have Russian title")
+        XCTAssertFalse(wanderer.body.en.isEmpty, "Event should have English body")
         XCTAssertFalse(wanderer.choices.isEmpty, "Event should have choices")
     }
 
@@ -275,40 +278,50 @@ final class JSONContentProviderTests: XCTestCase {
         XCTAssertNotNil(event, "Should find wanderer event")
     }
 
-    // MARK: - Localization Key Tests
+    // MARK: - Localized Content Tests
 
-    func testRegionLocalizationKeys() throws {
+    func testRegionLocalizedContent() throws {
         try provider.loadAllContent()
 
         for region in provider.regions.values {
-            XCTAssertTrue(
-                region.titleKey.hasPrefix("region."),
-                "Region title key should start with 'region.'"
+            // Verify both English and Russian titles exist
+            XCTAssertFalse(
+                region.title.en.isEmpty,
+                "Region '\(region.id)' should have English title"
             )
-            XCTAssertTrue(
-                region.descriptionKey.hasPrefix("region."),
-                "Region description key should start with 'region.'"
+            XCTAssertFalse(
+                region.title.ru.isEmpty,
+                "Region '\(region.id)' should have Russian title"
+            )
+            XCTAssertFalse(
+                region.description.en.isEmpty,
+                "Region '\(region.id)' should have English description"
+            )
+            XCTAssertFalse(
+                region.description.ru.isEmpty,
+                "Region '\(region.id)' should have Russian description"
             )
         }
     }
 
-    func testEventLocalizationKeys() throws {
+    func testEventLocalizedContent() throws {
         try provider.loadAllContent()
 
         for event in provider.events.values {
-            XCTAssertTrue(
-                event.titleKey.hasPrefix("event."),
-                "Event title key should start with 'event.'"
+            // Verify both languages for event
+            XCTAssertFalse(
+                event.title.en.isEmpty,
+                "Event '\(event.id)' should have English title"
             )
-            XCTAssertTrue(
-                event.bodyKey.hasPrefix("event."),
-                "Event body key should start with 'event.'"
+            XCTAssertFalse(
+                event.body.en.isEmpty,
+                "Event '\(event.id)' should have English body"
             )
 
             for choice in event.choices {
-                XCTAssertTrue(
-                    choice.labelKey.hasPrefix("event."),
-                    "Choice label key should start with 'event.'"
+                XCTAssertFalse(
+                    choice.label.en.isEmpty,
+                    "Choice '\(choice.id)' in event '\(event.id)' should have English label"
                 )
             }
         }

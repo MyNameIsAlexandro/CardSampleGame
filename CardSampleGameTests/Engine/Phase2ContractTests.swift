@@ -12,8 +12,8 @@ final class Phase2ContractTests: XCTestCase {
         // Given: A real RegionDefinition
         let region = RegionDefinition(
             id: "test_region",
-            titleKey: "region.test.title",
-            descriptionKey: "region.test.description",
+            title: LocalizedString(en: "Test Region", ru: "Тестовый Регион"),
+            description: LocalizedString(en: "A test region", ru: "Тестовый регион"),
             neighborIds: ["neighbor_a", "neighbor_b"],
             initiallyDiscovered: true,
             anchorId: "anchor_test",
@@ -34,19 +34,19 @@ final class Phase2ContractTests: XCTestCase {
         // Given: A real EventDefinition
         let event = EventDefinition(
             id: "event_test",
-            titleKey: "event.test.title",
-            bodyKey: "event.test.body",
+            title: LocalizedString(en: "Test Event", ru: "Тестовое Событие"),
+            body: LocalizedString(en: "Test body text", ru: "Тестовый текст"),
             eventKind: .inline,
             isOneTime: true,
             choices: [
                 ChoiceDefinition(
                     id: "choice_a",
-                    labelKey: "choice.a.label",
+                    label: LocalizedString(en: "Choice A", ru: "Выбор А"),
                     consequences: .none
                 ),
                 ChoiceDefinition(
                     id: "choice_b",
-                    labelKey: "choice.b.label",
+                    label: LocalizedString(en: "Choice B", ru: "Выбор Б"),
                     consequences: .none
                 )
             ]
@@ -70,21 +70,21 @@ final class Phase2ContractTests: XCTestCase {
         // RegionDefinition - NO: visitCount, currentState (mutable), isVisited
         let region = RegionDefinition(
             id: "r1",
-            titleKey: "r.title",
-            descriptionKey: "r.desc",
+            title: LocalizedString(en: "Test Region", ru: "Тестовый Регион"),
+            description: LocalizedString(en: "A test region", ru: "Тестовый регион"),
             neighborIds: []
         )
-        // Only has: id, titleKey, descriptionKey, neighborIds, initiallyDiscovered,
+        // Only has: id, title, description, neighborIds, initiallyDiscovered,
         // anchorId, eventPoolIds, initialState (as enum), degradationWeight
 
         // EventDefinition - NO: isCompleted, timesOccurred, lastOccurrence
         let event = EventDefinition(
             id: "e1",
-            titleKey: "e.title",
-            bodyKey: "e.body",
+            title: LocalizedString(en: "Test Event", ru: "Тестовое Событие"),
+            body: LocalizedString(en: "Test body text", ru: "Тестовый текст"),
             choices: []
         )
-        // Only has: id, titleKey, bodyKey, eventKind, availability, poolIds,
+        // Only has: id, title, body, eventKind, availability, poolIds,
         // weight, isOneTime, isInstant, cooldown, choices, miniGameChallenge
 
         XCTAssertNotNil(region)
@@ -136,8 +136,8 @@ final class Phase2ContractTests: XCTestCase {
         // Given: Definition and RuntimeState
         let regionDef = RegionDefinition(
             id: "forest",
-            titleKey: "region.forest.title",
-            descriptionKey: "region.forest.desc",
+            title: LocalizedString(en: "Forest", ru: "Лес"),
+            description: LocalizedString(en: "A dark forest", ru: "Тёмный лес"),
             neighborIds: []
         )
 
@@ -160,14 +160,14 @@ final class Phase2ContractTests: XCTestCase {
         let provider = TestContentProvider()
         provider.addRegion(RegionDefinition(
             id: "region_a",
-            titleKey: "r.a.title",
-            descriptionKey: "r.a.desc",
+            title: LocalizedString(en: "Region A", ru: "Регион А"),
+            description: LocalizedString(en: "First region", ru: "Первый регион"),
             neighborIds: []
         ))
         provider.addRegion(RegionDefinition(
             id: "region_a", // Duplicate!
-            titleKey: "r.a2.title",
-            descriptionKey: "r.a2.desc",
+            title: LocalizedString(en: "Region A2", ru: "Регион А2"),
+            description: LocalizedString(en: "Second region", ru: "Второй регион"),
             neighborIds: []
         ))
 
@@ -184,8 +184,8 @@ final class Phase2ContractTests: XCTestCase {
         let provider = TestContentProvider()
         provider.addRegion(RegionDefinition(
             id: "island",
-            titleKey: "r.island.title",
-            descriptionKey: "r.island.desc",
+            title: LocalizedString(en: "Island", ru: "Остров"),
+            description: LocalizedString(en: "A lonely island", ru: "Одинокий остров"),
             neighborIds: ["nonexistent_region"] // ← Broken!
         ))
 
@@ -202,14 +202,14 @@ final class Phase2ContractTests: XCTestCase {
         let provider = TestContentProvider()
         provider.addRegion(RegionDefinition(
             id: "forest",
-            titleKey: "r.forest.title",
-            descriptionKey: "r.forest.desc",
+            title: LocalizedString(en: "Forest", ru: "Лес"),
+            description: LocalizedString(en: "A dark forest", ru: "Тёмный лес"),
             neighborIds: ["village"]
         ))
         provider.addRegion(RegionDefinition(
             id: "village",
-            titleKey: "r.village.title",
-            descriptionKey: "r.village.desc",
+            title: LocalizedString(en: "Village", ru: "Деревня"),
+            description: LocalizedString(en: "A small village", ru: "Маленькая деревня"),
             neighborIds: ["forest"]
         ))
 
@@ -281,8 +281,8 @@ final class Phase2ContractTests: XCTestCase {
         // Given: Event with availability constraints
         let event = EventDefinition(
             id: "pressure_event",
-            titleKey: "e.title",
-            bodyKey: "e.body",
+            title: LocalizedString(en: "Pressure Event", ru: "Событие давления"),
+            body: LocalizedString(en: "Something happens under pressure", ru: "Что-то происходит под давлением"),
             availability: Availability(
                 requiredFlags: ["quest_started"],
                 forbiddenFlags: ["event_completed"],

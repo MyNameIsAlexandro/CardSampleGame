@@ -5,8 +5,14 @@
   "events": [
     {
       "id": "event_wanderer",
-      "titleKey": "event.wanderer.title",
-      "bodyKey": "event.wanderer.body",
+      "title": {
+        "en": "The Wanderer",
+        "ru": "Странник"
+      },
+      "body": {
+        "en": "A weary traveler approaches, their eyes carrying the weight of distant lands. They seek rest and perhaps have tales to share.",
+        "ru": "Усталый путник приближается, его глаза несут тяжесть далёких земель. Он ищет отдых и, возможно, готов поделиться историями."
+      },
       "eventType": "inline",
       "poolIds": ["pool_common"],
       "availability": {
@@ -19,39 +25,63 @@
       "choices": [
         {
           "id": "listen",
-          "labelKey": "event.wanderer.listen",
+          "label": {
+            "en": "Listen to their tales (3 Faith)",
+            "ru": "Выслушать его рассказы (3 Веры)"
+          },
           "requirements": {
             "minFaith": 3
           },
           "consequences": {
             "resourceChanges": {"faith": -3},
             "setFlags": {"met_wanderer": true},
-            "messageKey": "event.wanderer.listen.result"
+            "message": {
+              "en": "The wanderer shares ancient wisdom about the twilight lands.",
+              "ru": "Странник делится древней мудростью о сумрачных землях."
+            }
           }
         },
         {
           "id": "help",
-          "labelKey": "event.wanderer.help",
+          "label": {
+            "en": "Offer aid (2 Faith)",
+            "ru": "Предложить помощь (2 Веры)"
+          },
           "consequences": {
             "resourceChanges": {"faith": -2},
             "balanceShift": 5,
             "reputationChange": 10,
-            "messageKey": "event.wanderer.help.result"
+            "message": {
+              "en": "Your kindness is rewarded with the village's gratitude.",
+              "ru": "Ваша доброта вознаграждена благодарностью деревни."
+            }
           }
         },
         {
           "id": "ignore",
-          "labelKey": "event.wanderer.ignore",
+          "label": {
+            "en": "Continue on your way",
+            "ru": "Продолжить свой путь"
+          },
           "consequences": {
-            "messageKey": "event.wanderer.ignore.result"
+            "message": {
+              "en": "You pass by, the wanderer's eyes following you.",
+              "ru": "Вы проходите мимо, взгляд странника следует за вами."
+            }
           }
         }
       ]
     },
     {
       "id": "event_camp",
-      "titleKey": "event.camp.title",
-      "bodyKey": "event.camp.body",
+      "title": {
+        "en": "Campfire Rest",
+        "ru": "Привал у Костра"
+      },
+      "body": {
+        "en": "You find a safe spot to rest. The fire crackles, pushing back the darkness for a moment.",
+        "ru": "Вы находите безопасное место для отдыха. Огонь потрескивает, на мгновение отгоняя тьму."
+      },
       "eventType": "inline",
       "poolIds": ["pool_common"],
       "availability": {
@@ -64,33 +94,57 @@
       "choices": [
         {
           "id": "rest",
-          "labelKey": "event.camp.rest",
+          "label": {
+            "en": "Rest your body",
+            "ru": "Отдохнуть телом"
+          },
           "consequences": {
             "resourceChanges": {"health": 2},
-            "messageKey": "event.camp.rest.result"
+            "message": {
+              "en": "Your wounds begin to heal by the warm fire.",
+              "ru": "Ваши раны начинают заживать у тёплого огня."
+            }
           }
         },
         {
           "id": "meditate",
-          "labelKey": "event.camp.meditate",
+          "label": {
+            "en": "Meditate and pray",
+            "ru": "Медитировать и молиться"
+          },
           "consequences": {
             "resourceChanges": {"faith": 2},
-            "messageKey": "event.camp.meditate.result"
+            "message": {
+              "en": "Your faith strengthens as you commune with the old gods.",
+              "ru": "Ваша вера укрепляется в общении со старыми богами."
+            }
           }
         },
         {
           "id": "continue",
-          "labelKey": "event.camp.continue",
+          "label": {
+            "en": "Press onward",
+            "ru": "Идти дальше"
+          },
           "consequences": {
-            "messageKey": "event.camp.continue.result"
+            "message": {
+              "en": "No rest for the weary. The darkness won't wait.",
+              "ru": "Усталым нет покоя. Тьма не будет ждать."
+            }
           }
         }
       ]
     },
     {
       "id": "event_merchant",
-      "titleKey": "event.merchant.title",
-      "bodyKey": "event.merchant.body",
+      "title": {
+        "en": "Traveling Merchant",
+        "ru": "Странствующий Торговец"
+      },
+      "body": {
+        "en": "A merchant with peculiar wares has set up camp. Their goods shimmer with otherworldly energy.",
+        "ru": "Торговец с необычным товаром разбил лагерь. Его товары мерцают потусторонней энергией."
+      },
       "eventType": "inline",
       "poolIds": ["pool_common"],
       "availability": {
@@ -103,33 +157,51 @@
       "choices": [
         {
           "id": "buy_blessing",
-          "labelKey": "event.merchant.buy_blessing",
+          "label": {
+            "en": "Buy a blessing (5 Faith)",
+            "ru": "Купить благословение (5 Веры)"
+          },
           "requirements": {
             "minFaith": 5
           },
           "consequences": {
             "resourceChanges": {"faith": -5},
             "addCards": ["blessing_light"],
-            "messageKey": "event.merchant.buy_blessing.result"
+            "message": {
+              "en": "You receive a card blessed by the old ways.",
+              "ru": "Вы получаете карту, благословлённую по старым обычаям."
+            }
           }
         },
         {
           "id": "buy_artifact",
-          "labelKey": "event.merchant.buy_artifact",
+          "label": {
+            "en": "Buy an artifact (8 Faith)",
+            "ru": "Купить артефакт (8 Веры)"
+          },
           "requirements": {
             "minFaith": 8
           },
           "consequences": {
             "resourceChanges": {"faith": -8},
             "giveArtifact": "amulet_protection",
-            "messageKey": "event.merchant.buy_artifact.result"
+            "message": {
+              "en": "The amulet pulses with protective energy.",
+              "ru": "Амулет пульсирует защитной энергией."
+            }
           }
         },
         {
           "id": "decline",
-          "labelKey": "event.merchant.decline",
+          "label": {
+            "en": "Decline and leave",
+            "ru": "Отказаться и уйти"
+          },
           "consequences": {
-            "messageKey": "event.merchant.decline.result"
+            "message": {
+              "en": "Perhaps another time. The merchant nods knowingly.",
+              "ru": "Возможно, в другой раз. Торговец понимающе кивает."
+            }
           }
         }
       ]

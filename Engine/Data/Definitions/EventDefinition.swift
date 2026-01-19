@@ -13,13 +13,13 @@ struct EventDefinition: GameDefinition {
     /// Unique event identifier (e.g., "event_forest_whispers")
     let id: String
 
-    // MARK: - Localization Keys
+    // MARK: - Localized Content
 
-    /// Localization key for event title
-    let titleKey: String
+    /// Event title with all language variants
+    let title: LocalizedString
 
-    /// Localization key for event body/narrative text
-    let bodyKey: String
+    /// Event body/narrative text with all language variants
+    let body: LocalizedString
 
     // MARK: - Type Classification
 
@@ -60,8 +60,8 @@ struct EventDefinition: GameDefinition {
 
     init(
         id: String,
-        titleKey: String,
-        bodyKey: String,
+        title: LocalizedString,
+        body: LocalizedString,
         eventKind: EventKind = .inline,
         availability: Availability = .always,
         poolIds: [String] = [],
@@ -73,8 +73,8 @@ struct EventDefinition: GameDefinition {
         miniGameChallenge: MiniGameChallengeDefinition? = nil
     ) {
         self.id = id
-        self.titleKey = titleKey
-        self.bodyKey = bodyKey
+        self.title = title
+        self.body = body
         self.eventKind = eventKind
         self.availability = availability
         self.poolIds = poolIds
@@ -117,13 +117,13 @@ struct ChoiceDefinition: Codable, Hashable, Identifiable {
     /// Unique choice identifier within the event
     let id: String
 
-    // MARK: - Localization Keys
+    // MARK: - Localized Content
 
-    /// Localization key for choice button text
-    let labelKey: String
+    /// Choice button text with all language variants
+    let label: LocalizedString
 
-    /// Optional localization key for choice tooltip/description
-    let tooltipKey: String?
+    /// Optional choice tooltip/description with all language variants
+    let tooltip: LocalizedString?
 
     // MARK: - Requirements
 
@@ -139,14 +139,14 @@ struct ChoiceDefinition: Codable, Hashable, Identifiable {
 
     init(
         id: String,
-        labelKey: String,
-        tooltipKey: String? = nil,
+        label: LocalizedString,
+        tooltip: LocalizedString? = nil,
         requirements: ChoiceRequirements? = nil,
         consequences: ChoiceConsequences
     ) {
         self.id = id
-        self.labelKey = labelKey
-        self.tooltipKey = tooltipKey
+        self.label = label
+        self.tooltip = tooltip
         self.requirements = requirements
         self.consequences = consequences
     }

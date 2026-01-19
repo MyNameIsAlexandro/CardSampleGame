@@ -46,8 +46,8 @@ class CodeContentProvider: ContentProvider {
         // Example region for testing:
         let forest = RegionDefinition(
             id: "forest",
-            titleKey: "region.forest.title",
-            descriptionKey: "region.forest.description",
+            title: LocalizedString(en: "Dark Forest", ru: "Тёмный Лес"),
+            description: LocalizedString(en: "A mysterious forest", ru: "Таинственный лес"),
             neighborIds: ["village", "crossroads"],
             initiallyDiscovered: true,
             anchorId: "anchor_forest",
@@ -62,8 +62,8 @@ class CodeContentProvider: ContentProvider {
         // Default implementation - subclass overrides
         let forestAnchor = AnchorDefinition(
             id: "anchor_forest",
-            titleKey: "anchor.forest.title",
-            descriptionKey: "anchor.forest.description",
+            title: LocalizedString(en: "Forest Idol", ru: "Лесной Идол"),
+            description: LocalizedString(en: "An ancient idol", ru: "Древний идол"),
             regionId: "forest"
         )
         anchors[forestAnchor.id] = forestAnchor
@@ -74,19 +74,19 @@ class CodeContentProvider: ContentProvider {
         // Default implementation - subclass overrides
         let testEvent = EventDefinition(
             id: "event_test",
-            titleKey: "event.test.title",
-            bodyKey: "event.test.body",
+            title: LocalizedString(en: "Test Event", ru: "Тестовое Событие"),
+            body: LocalizedString(en: "A test event", ru: "Тестовое событие"),
             eventKind: .inline,
             poolIds: ["pool_common"],
             choices: [
                 ChoiceDefinition(
                     id: "choice_a",
-                    labelKey: "event.test.choice_a",
+                    label: LocalizedString(en: "Choice A", ru: "Выбор А"),
                     consequences: ChoiceConsequences(resourceChanges: ["faith": -2])
                 ),
                 ChoiceDefinition(
                     id: "choice_b",
-                    labelKey: "event.test.choice_b",
+                    label: LocalizedString(en: "Choice B", ru: "Выбор Б"),
                     consequences: ChoiceConsequences(resourceChanges: ["health": -3])
                 )
             ]
@@ -99,18 +99,18 @@ class CodeContentProvider: ContentProvider {
         // Default implementation - subclass overrides
         let testQuest = QuestDefinition(
             id: "quest_test",
-            titleKey: "quest.test.title",
-            descriptionKey: "quest.test.description",
+            title: LocalizedString(en: "Test Quest", ru: "Тестовое Задание"),
+            description: LocalizedString(en: "A test quest", ru: "Тестовое задание"),
             objectives: [
                 ObjectiveDefinition(
                     id: "obj_1",
-                    descriptionKey: "quest.test.obj1",
+                    description: LocalizedString(en: "Objective 1", ru: "Цель 1"),
                     completionCondition: .manual,
                     nextObjectiveId: "obj_2"
                 ),
                 ObjectiveDefinition(
                     id: "obj_2",
-                    descriptionKey: "quest.test.obj2",
+                    description: LocalizedString(en: "Objective 2", ru: "Цель 2"),
                     completionCondition: .manual
                 )
             ]

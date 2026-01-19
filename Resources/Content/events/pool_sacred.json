@@ -5,8 +5,14 @@
   "events": [
     {
       "id": "event_oak_spirit",
-      "titleKey": "event.oak_spirit.title",
-      "bodyKey": "event.oak_spirit.body",
+      "title": {
+        "en": "Spirit of the Oak",
+        "ru": "Дух Дуба"
+      },
+      "body": {
+        "en": "The great oak's spirit manifests - ancient beyond measure, guardian of the old ways.",
+        "ru": "Дух великого дуба проявляется - древний без меры, хранитель старых обычаев."
+      },
       "eventType": "inline",
       "poolIds": ["pool_sacred"],
       "availability": {
@@ -19,7 +25,10 @@
       "choices": [
         {
           "id": "commune",
-          "labelKey": "event.oak_spirit.commune",
+          "label": {
+            "en": "Commune with the spirit (5 Faith)",
+            "ru": "Пообщаться с духом (5 Веры)"
+          },
           "requirements": {
             "minFaith": 5,
             "minBalance": 50
@@ -29,32 +38,53 @@
             "balanceShift": 10,
             "setFlags": {"oak_spirit_blessing": true},
             "addCards": ["oak_blessing"],
-            "messageKey": "event.oak_spirit.commune.result"
+            "message": {
+              "en": "The spirit shares its blessing - a card of ancient power.",
+              "ru": "Дух дарует своё благословение - карту древней силы."
+            }
           }
         },
         {
           "id": "offer",
-          "labelKey": "event.oak_spirit.offer",
+          "label": {
+            "en": "Make an offering (3 Faith)",
+            "ru": "Сделать подношение (3 Веры)"
+          },
           "consequences": {
             "resourceChanges": {"faith": -3},
             "anchorIntegrityChange": 10,
-            "messageKey": "event.oak_spirit.offer.result"
+            "message": {
+              "en": "Your offering strengthens the oak's protective aura.",
+              "ru": "Ваше подношение укрепляет защитную ауру дуба."
+            }
           }
         },
         {
           "id": "observe",
-          "labelKey": "event.oak_spirit.observe",
+          "label": {
+            "en": "Simply observe",
+            "ru": "Просто наблюдать"
+          },
           "consequences": {
             "setFlags": {"witnessed_oak_spirit": true},
-            "messageKey": "event.oak_spirit.observe.result"
+            "message": {
+              "en": "You witness something few mortals ever see.",
+              "ru": "Вы становитесь свидетелем того, что мало кто из смертных когда-либо видел."
+            }
           }
         }
       ]
     },
     {
       "id": "event_veles_vision",
-      "titleKey": "event.veles_vision.title",
-      "bodyKey": "event.veles_vision.body",
+      "title": {
+        "en": "Veles' Vision",
+        "ru": "Видение Велеса"
+      },
+      "body": {
+        "en": "The god of the underworld sends you a vision of the darkness to come.",
+        "ru": "Бог подземного мира посылает вам видение грядущей тьмы."
+      },
       "eventType": "inline",
       "poolIds": ["pool_sacred"],
       "availability": {
@@ -67,22 +97,34 @@
       "choices": [
         {
           "id": "accept_vision",
-          "labelKey": "event.veles_vision.accept",
+          "label": {
+            "en": "Accept the vision",
+            "ru": "Принять видение"
+          },
           "requirements": {
             "minBalance": 40
           },
           "consequences": {
             "resourceChanges": {"health": -1},
             "setFlags": {"veles_vision_seen": true, "knows_dark_lowland": true},
-            "messageKey": "event.veles_vision.accept.result"
+            "message": {
+              "en": "The vision burns into your mind - you now know where the Dark Lowland lies.",
+              "ru": "Видение выжигается в вашем разуме - теперь вы знаете, где лежит Тёмная Низина."
+            }
           }
         },
         {
           "id": "reject_vision",
-          "labelKey": "event.veles_vision.reject",
+          "label": {
+            "en": "Reject the dark knowledge",
+            "ru": "Отвергнуть тёмное знание"
+          },
           "consequences": {
             "balanceShift": -5,
-            "messageKey": "event.veles_vision.reject.result"
+            "message": {
+              "en": "You refuse the gift. Veles' displeasure is palpable.",
+              "ru": "Вы отказываетесь от дара. Недовольство Велеса ощутимо."
+            }
           }
         }
       ]

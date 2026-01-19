@@ -106,6 +106,24 @@ struct WorldMapView: View {
                             showingRegionDetails = false
                         }
                     )
+                } else {
+                    // Fallback: Region not found in publishedRegions
+                    VStack(spacing: 16) {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.largeTitle)
+                            .foregroundColor(.orange)
+                        Text("Регион загружается...")
+                            .font(.headline)
+                        Text("Попробуйте закрыть и открыть снова")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        Button("Закрыть") {
+                            selectedRegionId = nil
+                            showingRegionDetails = false
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                    .padding()
                 }
             }
             .alert(L10n.uiExit.localized + "?", isPresented: $showingExitConfirmation) {
@@ -1306,6 +1324,10 @@ struct EngineRegionDetailView: View {
 
     @State private var showingActionConfirmation = false
     @State private var selectedAction: EngineRegionAction?
+    @State private var eventToShow: GameEvent?
+    @State private var showingNoEventsAlert = false
+    @State private var showingActionError = false
+    @State private var actionErrorMessage = ""
 
     enum EngineRegionAction {
         case travel
@@ -1358,6 +1380,37 @@ struct EngineRegionDetailView: View {
                 Button("Отмена", role: .cancel) { }
             } message: {
                 Text(actionConfirmationMessage)
+            }
+            .alert("Ничего не найдено", isPresented: $showingNoEventsAlert) {
+                Button("Понятно", role: .cancel) { }
+            } message: {
+                Text("В этом регионе сейчас нечего исследовать. Попробуйте позже или посетите другой регион.")
+            }
+            .alert("Действие невозможно", isPresented: $showingActionError) {
+                Button("Понятно", role: .cancel) { }
+            } message: {
+                Text(actionErrorMessage)
+            }
+            .sheet(item: $eventToShow) { event in
+                EventView(
+                    engine: engine,
+                    event: event,
+                    regionId: region.id,
+                    onChoiceSelected: { choice in
+                        handleEventChoice(choice, event: event)
+                    },
+                    onDismiss: {
+                        eventToShow = nil
+                        // Dismiss current event in engine
+                        engine.performAction(.dismissCurrentEvent)
+                    }
+                )
+            }
+            .onChange(of: engine.currentEvent?.id) { _ in
+                // When engine triggers an event, show it
+                if let event = engine.currentEvent {
+                    eventToShow = event
+                }
             }
         }
     }
@@ -1667,8 +1720,12 @@ struct EngineRegionDetailView: View {
                     outcome: "Прибыл в \(region.name)",
                     type: .travel
                 )
+                onDismiss()
+            } else {
+                // Show error to user
+                actionErrorMessage = errorMessage(for: result.error)
+                showingActionError = true
             }
-            onDismiss()
 
         case .rest:
             let result = engine.performAction(.rest)
@@ -1701,15 +1758,71 @@ struct EngineRegionDetailView: View {
         case .explore:
             let result = engine.performAction(.explore)
             if result.success {
+                // Check if an event was triggered
+                if result.currentEvent == nil {
+                    // No event available - show alert
+                    showingNoEventsAlert = true
+                    engine.addLogEntry(
+                        regionName: region.name,
+                        eventTitle: "Исследование",
+                        choiceMade: "Исследовал регион",
+                        outcome: "Ничего интересного не найдено",
+                        type: .exploration
+                    )
+                }
+                // If event was triggered, it will be shown via onChange of engine.currentEvent
+            }
+        }
+    }
+
+    // MARK: - Error Messages
+
+    func errorMessage(for error: ActionError?) -> String {
+        guard let error = error else { return "Неизвестная ошибка" }
+        switch error {
+        case .regionNotNeighbor:
+            return "Этот регион слишком далеко. Сначала переместитесь в соседний регион."
+        case .regionNotAccessible:
+            return "Этот регион недоступен."
+        case .healthTooLow:
+            return "У вас слишком мало здоровья для этого действия."
+        case .insufficientResources(let resource, let required, let available):
+            return "Недостаточно \(resource): нужно \(required), есть \(available)."
+        case .invalidAction(let reason):
+            return reason
+        case .combatInProgress:
+            return "Невозможно во время боя."
+        case .eventInProgress:
+            return "Сначала завершите текущее событие."
+        default:
+            return "Действие невозможно: \(error)"
+        }
+    }
+
+    // MARK: - Event Choice Handling
+
+    func handleEventChoice(_ choice: EventChoice, event: GameEvent) {
+        // Execute choice via engine
+        if let choiceIndex = event.choices.firstIndex(where: { $0.id == choice.id }) {
+            let result = engine.performAction(.chooseEventOption(eventId: event.id, choiceIndex: choiceIndex))
+
+            if result.success {
+                // Log the event
+                let logType: EventLogType = event.eventType == .combat ? .combat : .exploration
+                let outcomeMessage = choice.consequences.message ?? "Выбор сделан"
                 engine.addLogEntry(
                     regionName: region.name,
-                    eventTitle: "Исследование",
-                    choiceMade: "Исследовал регион",
-                    outcome: "Обследовал окрестности",
-                    type: .exploration
+                    eventTitle: event.title,
+                    choiceMade: choice.text,
+                    outcome: outcomeMessage,
+                    type: logType
                 )
             }
         }
+
+        // Dismiss event view
+        eventToShow = nil
+        engine.performAction(.dismissCurrentEvent)
     }
 }
 

@@ -480,7 +480,7 @@ final class TwilightGameEngine: ObservableObject {
             let changes = executeMiniGameInput(input)
             stateChanges.append(contentsOf: changes)
 
-        case .startCombat(let encounterId):
+        case .startCombat:
             combatStarted = true
             isInCombat = true
             combatTurnNumber = 1
@@ -518,7 +518,7 @@ final class TwilightGameEngine: ObservableObject {
                 // Check faith cost
                 if let cost = card.cost, cost > 0 {
                     guard player.faith >= cost else { break }
-                    player.spendFaith(cost)
+                    _ = player.spendFaith(cost)
                     playerFaith = player.faith
                     stateChanges.append(.faithChanged(delta: -cost, newValue: playerFaith))
                 }
@@ -1070,6 +1070,14 @@ final class TwilightGameEngine: ObservableObject {
         // Update quests and log
         publishedActiveQuests = activeQuests
         publishedEventLog = Array(eventLog.suffix(100))
+
+        // Update current event from ID (Bridge UUID to GameEvent object)
+        if let eventId = currentEventId,
+           let event = worldStateAdapter?.worldState.allEvents.first(where: { $0.id == eventId }) {
+            currentEvent = event
+        } else if currentEventId == nil {
+            currentEvent = nil
+        }
 
         // Update player stats from adapter (legacy mode)
         if let player = playerAdapter?.player {

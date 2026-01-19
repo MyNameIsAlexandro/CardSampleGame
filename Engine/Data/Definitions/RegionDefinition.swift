@@ -12,13 +12,13 @@ struct RegionDefinition: GameDefinition {
     /// Unique region identifier (e.g., "forest", "village_square")
     let id: String
 
-    // MARK: - Localization Keys
+    // MARK: - Localized Content
 
-    /// Localization key for region name (e.g., "region.forest.title")
-    let titleKey: String
+    /// Region name with all language variants
+    let title: LocalizedString
 
-    /// Localization key for region description (e.g., "region.forest.description")
-    let descriptionKey: String
+    /// Region description with all language variants
+    let description: LocalizedString
 
     // MARK: - Connections
 
@@ -48,8 +48,8 @@ struct RegionDefinition: GameDefinition {
 
     init(
         id: String,
-        titleKey: String,
-        descriptionKey: String,
+        title: LocalizedString,
+        description: LocalizedString,
         neighborIds: [String],
         initiallyDiscovered: Bool = false,
         anchorId: String? = nil,
@@ -58,8 +58,8 @@ struct RegionDefinition: GameDefinition {
         degradationWeight: Int = 1
     ) {
         self.id = id
-        self.titleKey = titleKey
-        self.descriptionKey = descriptionKey
+        self.title = title
+        self.description = description
         self.neighborIds = neighborIds
         self.initiallyDiscovered = initiallyDiscovered
         self.anchorId = anchorId

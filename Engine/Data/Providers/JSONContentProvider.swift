@@ -294,8 +294,8 @@ private struct EventPoolContainer: Codable {
 
 private struct JSONRegion: Codable {
     let id: String
-    let titleKey: String
-    let descriptionKey: String
+    let title: LocalizedString
+    let description: LocalizedString
     let neighborIds: [String]
     let initiallyDiscovered: Bool?
     let anchorId: String?
@@ -314,8 +314,8 @@ private struct JSONRegion: Codable {
 
         return RegionDefinition(
             id: id,
-            titleKey: titleKey,
-            descriptionKey: descriptionKey,
+            title: title,
+            description: description,
             neighborIds: neighborIds,
             initiallyDiscovered: initiallyDiscovered ?? false,
             anchorId: anchorId,
@@ -328,8 +328,8 @@ private struct JSONRegion: Codable {
 
 private struct JSONAnchor: Codable {
     let id: String
-    let titleKey: String
-    let descriptionKey: String
+    let title: LocalizedString
+    let description: LocalizedString
     let regionId: String
     let anchorType: String?
     let initialInfluence: String?
@@ -346,8 +346,8 @@ private struct JSONAnchor: Codable {
 
         return AnchorDefinition(
             id: id,
-            titleKey: titleKey,
-            descriptionKey: descriptionKey,
+            title: title,
+            description: description,
             regionId: regionId,
             anchorType: anchorType ?? "shrine",
             initialInfluence: influence,
@@ -359,8 +359,8 @@ private struct JSONAnchor: Codable {
 
 private struct JSONEvent: Codable {
     let id: String
-    let titleKey: String
-    let bodyKey: String
+    let title: LocalizedString
+    let body: LocalizedString
     let eventType: String?
     let poolIds: [String]?
     let availability: JSONAvailability?
@@ -384,8 +384,8 @@ private struct JSONEvent: Codable {
 
         return EventDefinition(
             id: id,
-            titleKey: titleKey,
-            bodyKey: bodyKey,
+            title: title,
+            body: body,
             eventKind: kind,
             availability: avail,
             poolIds: poolIds ?? [],
@@ -422,8 +422,8 @@ private struct JSONAvailability: Codable {
 
 private struct JSONChoice: Codable {
     let id: String
-    let labelKey: String
-    let tooltipKey: String?
+    let label: LocalizedString
+    let tooltip: LocalizedString?
     let requirements: JSONChoiceRequirements?
     let consequences: JSONChoiceConsequences?
 
@@ -433,8 +433,8 @@ private struct JSONChoice: Codable {
 
         return ChoiceDefinition(
             id: id,
-            labelKey: labelKey,
-            tooltipKey: tooltipKey,
+            label: label,
+            tooltip: tooltip,
             requirements: reqs,
             consequences: cons
         )
@@ -507,8 +507,8 @@ private struct JSONCombatData: Codable {
 
 private struct JSONQuest: Codable {
     let id: String
-    let titleKey: String
-    let descriptionKey: String
+    let title: LocalizedString
+    let description: LocalizedString
     let questType: String?
     let initialStatus: String?
     let objectives: [JSONObjective]?
@@ -519,8 +519,8 @@ private struct JSONQuest: Codable {
 
         return QuestDefinition(
             id: id,
-            titleKey: titleKey,
-            descriptionKey: descriptionKey,
+            title: title,
+            description: description,
             objectives: objDefs
         )
     }
@@ -528,7 +528,8 @@ private struct JSONQuest: Codable {
 
 private struct JSONObjective: Codable {
     let id: String
-    let descriptionKey: String
+    let description: LocalizedString
+    let hint: LocalizedString?
     let completionCondition: JSONCompletionCondition?
     let nextObjectiveId: String?
 
@@ -537,7 +538,8 @@ private struct JSONObjective: Codable {
 
         return ObjectiveDefinition(
             id: id,
-            descriptionKey: descriptionKey,
+            description: description,
+            hint: hint,
             completionCondition: condition,
             nextObjectiveId: nextObjectiveId
         )

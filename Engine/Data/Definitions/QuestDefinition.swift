@@ -12,13 +12,13 @@ struct QuestDefinition: GameDefinition {
     /// Unique quest identifier (e.g., "quest_main_act1")
     let id: String
 
-    // MARK: - Localization Keys
+    // MARK: - Localized Content
 
-    /// Localization key for quest title
-    let titleKey: String
+    /// Quest title with all language variants
+    let title: LocalizedString
 
-    /// Localization key for quest description
-    let descriptionKey: String
+    /// Quest description with all language variants
+    let description: LocalizedString
 
     // MARK: - Structure
 
@@ -48,8 +48,8 @@ struct QuestDefinition: GameDefinition {
 
     init(
         id: String,
-        titleKey: String,
-        descriptionKey: String,
+        title: LocalizedString,
+        description: LocalizedString,
         objectives: [ObjectiveDefinition],
         questKind: QuestKind = .side,
         availability: Availability = .always,
@@ -58,8 +58,8 @@ struct QuestDefinition: GameDefinition {
         failurePenalties: QuestCompletionRewards = .none
     ) {
         self.id = id
-        self.titleKey = titleKey
-        self.descriptionKey = descriptionKey
+        self.title = title
+        self.description = description
         self.objectives = objectives
         self.questKind = questKind
         self.availability = availability
@@ -88,13 +88,13 @@ struct ObjectiveDefinition: Codable, Hashable, Identifiable {
     /// Unique objective identifier within the quest
     let id: String
 
-    // MARK: - Localization Keys
+    // MARK: - Localized Content
 
-    /// Localization key for objective description
-    let descriptionKey: String
+    /// Objective description with all language variants
+    let description: LocalizedString
 
-    /// Localization key for objective hint (optional)
-    let hintKey: String?
+    /// Objective hint with all language variants (optional)
+    let hint: LocalizedString?
 
     // MARK: - Completion Conditions
 
@@ -119,8 +119,8 @@ struct ObjectiveDefinition: Codable, Hashable, Identifiable {
 
     init(
         id: String,
-        descriptionKey: String,
-        hintKey: String? = nil,
+        description: LocalizedString,
+        hint: LocalizedString? = nil,
         completionCondition: CompletionCondition,
         targetValue: Int = 1,
         isOptional: Bool = false,
@@ -128,8 +128,8 @@ struct ObjectiveDefinition: Codable, Hashable, Identifiable {
         alternativeNextIds: [String] = []
     ) {
         self.id = id
-        self.descriptionKey = descriptionKey
-        self.hintKey = hintKey
+        self.description = description
+        self.hint = hint
         self.completionCondition = completionCondition
         self.targetValue = targetValue
         self.isOptional = isOptional

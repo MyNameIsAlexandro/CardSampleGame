@@ -4,8 +4,14 @@
   "anchors": [
     {
       "id": "anchor_village_chapel",
-      "titleKey": "anchor.village_chapel.title",
-      "descriptionKey": "anchor.village_chapel.description",
+      "title": {
+        "en": "Village Chapel",
+        "ru": "Деревенская Часовня"
+      },
+      "description": {
+        "en": "A small but sturdy chapel blessed by generations of faithful villagers.",
+        "ru": "Небольшая, но крепкая часовня, благословлённая поколениями верующих селян."
+      },
       "regionId": "village",
       "anchorType": "chapel",
       "initialInfluence": "light",
@@ -14,8 +20,14 @@
     },
     {
       "id": "anchor_sacred_oak",
-      "titleKey": "anchor.sacred_oak.title",
-      "descriptionKey": "anchor.sacred_oak.description",
+      "title": {
+        "en": "Sacred Oak",
+        "ru": "Священный Дуб"
+      },
+      "description": {
+        "en": "The great tree Veles planted in the time before time, anchor of the old ways.",
+        "ru": "Великое древо, посаженное Велесом во времена до времён, якорь старых обычаев."
+      },
       "regionId": "oak",
       "anchorType": "sacred_tree",
       "initialInfluence": "light",
@@ -24,8 +36,14 @@
     },
     {
       "id": "anchor_forest_idol",
-      "titleKey": "anchor.forest_idol.title",
-      "descriptionKey": "anchor.forest_idol.description",
+      "title": {
+        "en": "Forest Stone Idol",
+        "ru": "Лесной Каменный Идол"
+      },
+      "description": {
+        "en": "An ancient idol carved by forgotten peoples, still holding power against the dark.",
+        "ru": "Древний идол, высеченный забытыми народами, всё ещё хранящий силу против тьмы."
+      },
       "regionId": "forest",
       "anchorType": "stone_idol",
       "initialInfluence": "neutral",
@@ -34,8 +52,14 @@
     },
     {
       "id": "anchor_swamp_spring",
-      "titleKey": "anchor.swamp_spring.title",
-      "descriptionKey": "anchor.swamp_spring.description",
+      "title": {
+        "en": "Corrupted Spring",
+        "ru": "Осквернённый Источник"
+      },
+      "description": {
+        "en": "Once a healing spring, now tainted by Nav's touch. Can still be purified.",
+        "ru": "Когда-то целебный источник, ныне отравленный прикосновением Нави. Ещё можно очистить."
+      },
       "regionId": "swamp",
       "anchorType": "spring",
       "initialInfluence": "dark",
@@ -44,8 +68,14 @@
     },
     {
       "id": "anchor_mountain_barrow",
-      "titleKey": "anchor.mountain_barrow.title",
-      "descriptionKey": "anchor.mountain_barrow.description",
+      "title": {
+        "en": "Ancestor Barrow",
+        "ru": "Курган Предков"
+      },
+      "description": {
+        "en": "The burial mound of ancient heroes, their spirits still guard this pass.",
+        "ru": "Погребальный холм древних героев, чьи духи всё ещё охраняют этот перевал."
+      },
       "regionId": "mountain",
       "anchorType": "barrow",
       "initialInfluence": "neutral",
@@ -54,8 +84,14 @@
     },
     {
       "id": "anchor_breach_shrine",
-      "titleKey": "anchor.breach_shrine.title",
-      "descriptionKey": "anchor.breach_shrine.description",
+      "title": {
+        "en": "Breach Ward Shrine",
+        "ru": "Святилище у Разлома"
+      },
+      "description": {
+        "en": "A desperate last defense, a shrine built to slow the encroaching darkness.",
+        "ru": "Отчаянная последняя защита, святилище, возведённое для замедления наступающей тьмы."
+      },
       "regionId": "breach",
       "anchorType": "shrine",
       "initialInfluence": "dark",

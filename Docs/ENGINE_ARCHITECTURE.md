@@ -254,16 +254,24 @@ protocol EventDefinitionProtocol {
     func canOccur(in context: EventContext) -> Bool
 }
 
-// Конкретная реализация (использует ключи локализации)
+// Конкретная реализация (использует inline LocalizedString)
 struct EventDefinition: GameDefinition {
     let id: String
-    let titleKey: String           // Ключ локализации
-    let bodyKey: String            // Ключ локализации
+    let title: LocalizedString     // Inline локализованный текст
+    let body: LocalizedString      // Inline локализованный текст
     let eventKind: EventKind       // .inline или .miniGame(...)
     let choices: [ChoiceDefinition]
     let isInstant: Bool
     let isOneTime: Bool
     // ... availability, poolIds, weight, cooldown
+}
+
+// LocalizedString - тип для inline локализации в JSON
+// Позволяет добавлять контент без пересборки приложения ("Cartridge" подход)
+struct LocalizedString: Codable, Hashable {
+    let en: String  // Английский текст
+    let ru: String  // Русский текст
+    var localized: String { /* возвращает текст для текущей локали */ }
 }
 
 protocol EventSystemProtocol {
@@ -553,8 +561,8 @@ struct RegionRuntimeState: Codable {
 ```swift
 struct EventDefinition: Codable {
     let id: String
-    let titleKey: String
-    let descriptionKey: String
+    let title: LocalizedString      // Inline локализованный текст
+    let body: LocalizedString       // Inline локализованный текст
     let regionTypes: [RegionType]
     let regionStates: [RegionState]
     let tensionRange: ClosedRange<Int>?
@@ -581,7 +589,8 @@ struct EventRuntimeState: Codable {
 ```swift
 struct QuestDefinition: Codable {
     let id: String
-    let titleKey: String
+    let title: LocalizedString      // Inline локализованный текст
+    let description: LocalizedString
     let isMain: Bool
     let objectives: [ObjectiveDefinition]
     let rewardTransaction: Transaction

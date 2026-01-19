@@ -59,6 +59,7 @@
 		BB0004090000000000000001 /* Phase2ContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0004100000000000000001 /* Phase2ContractTests.swift */; };
 		CC0000020000000000000001 /* CombatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000010000000000000001 /* CombatView.swift */; };
 		CC0000040000000000000001 /* AccessibilityIdentifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000030000000000000001 /* AccessibilityIdentifiers.swift */; };
+		D7CC2DD5F5409ABC08EAF177 /* LocalizedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180D9390663A50D5E72CF9B2 /* LocalizedString.swift */; };
 		EE0001010000000000000001 /* EngineProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0001020000000000000001 /* EngineProtocols.swift */; };
 		EE0001030000000000000001 /* GameLoop.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0001040000000000000001 /* GameLoop.swift */; };
 		EE0001050000000000000001 /* TimeEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0001060000000000000001 /* TimeEngine.swift */; };
@@ -119,6 +120,7 @@
 
 /* Begin PBXFileReference section */
 		0BE0C9930A837029C5CD71A5 /* ExplorationModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExplorationModels.swift; path = Models/ExplorationModels.swift; sourceTree = "<group>"; };
+		180D9390663A50D5E72CF9B2 /* LocalizedString.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalizedString.swift; sourceTree = "<group>"; };
 		19A9D12ABBBC60983B504ABF /* challenges.json */ = {isa = PBXFileReference; includeInIndex = 1; path = challenges.json; sourceTree = "<group>"; };
 		2263FEB0CBAF703EC97141A7 /* WorldState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WorldState.swift; path = Models/WorldState.swift; sourceTree = "<group>"; };
 		43D4E3FBE4DC34B63B61E061 /* EventView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EventView.swift; path = Views/EventView.swift; sourceTree = "<group>"; };
@@ -532,6 +534,7 @@
 				EE0003080000000000000001 /* EventDefinition.swift */,
 				EE0003100000000000000001 /* QuestDefinition.swift */,
 				EE0003120000000000000001 /* MiniGameChallengeDefinition.swift */,
+				180D9390663A50D5E72CF9B2 /* LocalizedString.swift */,
 			);
 			path = Definitions;
 			sourceTree = "<group>";
@@ -771,6 +774,7 @@
 				LL0005010000000000000001 /* EngineAdapters.swift in Sources */,
 				LL0006010000000000000001 /* CombatModule.swift in Sources */,
 				LL0007010000000000000001 /* GameViewModel.swift in Sources */,
+				D7CC2DD5F5409ABC08EAF177 /* LocalizedString.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

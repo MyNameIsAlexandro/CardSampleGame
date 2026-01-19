@@ -14,7 +14,7 @@ final class DataSeparationTests: XCTestCase {
         // Given: A region definition
         let regionDef = MockRegionDefinition(
             id: "test_region",
-            titleKey: "region.test.title",
+            title: LocalizedString(en: "Test Region", ru: "Тестовый регион"),
             neighborIds: ["north", "south"],
             anchorId: "anchor_001",
             eventPoolIds: ["pool_common", "pool_special"],
@@ -34,8 +34,8 @@ final class DataSeparationTests: XCTestCase {
         // Given: Event definition
         let eventDef = MockEventDefinition(
             id: "event_001",
-            titleKey: "event.test.title",
-            bodyKey: "event.test.body",
+            title: LocalizedString(en: "Test Event", ru: "Тестовое событие"),
+            body: LocalizedString(en: "Test body", ru: "Тестовое тело"),
             choiceIds: ["choice_a", "choice_b"],
             isOneTime: true,
             pressureRange: 0...100,
@@ -149,22 +149,23 @@ final class DataSeparationTests: XCTestCase {
         XCTAssertEqual(eventIds.count, Set(eventIds).count, "Event IDs should be unique")
     }
 
-    // MARK: - INV-D05: Localization Keys Present
+    // MARK: - INV-D05: Localized Strings Present
 
-    func testDefinitionsHaveLocalizationKeys() {
-        // Given: Definitions
+    func testDefinitionsHaveLocalizedStrings() {
+        // Given: Definitions with LocalizedString
         let regionDef = MockRegionDefinition(
             id: "test",
-            titleKey: "region.test.title",
+            title: LocalizedString(en: "Test Region", ru: "Тестовый регион"),
             neighborIds: [],
             anchorId: nil,
             eventPoolIds: [],
             initialState: "stable"
         )
 
-        // Then: Uses key, not hardcoded string
-        XCTAssertTrue(regionDef.titleKey.contains("."), "Should be localization key format")
-        XCTAssertFalse(regionDef.titleKey.contains(" "), "Should not be display string")
+        // Then: Both English and Russian localizations are present
+        XCTAssertFalse(regionDef.title.en.isEmpty, "Should have English localization")
+        XCTAssertFalse(regionDef.title.ru.isEmpty, "Should have Russian localization")
+        XCTAssertNotEqual(regionDef.title.en, regionDef.title.ru, "Localizations should be different")
     }
 
     // MARK: - INV-D06: TwilightMarchesCodeContentProvider Tests
@@ -272,7 +273,7 @@ final class DataSeparationTests: XCTestCase {
 
 struct MockRegionDefinition {
     let id: String
-    let titleKey: String
+    let title: LocalizedString
     let neighborIds: [String]
     let anchorId: String?
     let eventPoolIds: [String]
@@ -281,8 +282,8 @@ struct MockRegionDefinition {
 
 struct MockEventDefinition {
     let id: String
-    let titleKey: String
-    let bodyKey: String
+    let title: LocalizedString
+    let body: LocalizedString
     let choiceIds: [String]
     let isOneTime: Bool
     let pressureRange: ClosedRange<Int>
@@ -324,7 +325,7 @@ class MockContentProvider {
     private let regions: [MockRegionDefinition] = [
         MockRegionDefinition(
             id: "forest",
-            titleKey: "region.forest.title",
+            title: LocalizedString(en: "Forest", ru: "Лес"),
             neighborIds: ["village"],
             anchorId: "anchor_forest",
             eventPoolIds: ["pool_forest"],
@@ -332,7 +333,7 @@ class MockContentProvider {
         ),
         MockRegionDefinition(
             id: "village",
-            titleKey: "region.village.title",
+            title: LocalizedString(en: "Village", ru: "Деревня"),
             neighborIds: ["forest", "mountains"],
             anchorId: nil,
             eventPoolIds: ["pool_village"],
@@ -340,7 +341,7 @@ class MockContentProvider {
         ),
         MockRegionDefinition(
             id: "mountains",
-            titleKey: "region.mountains.title",
+            title: LocalizedString(en: "Mountains", ru: "Горы"),
             neighborIds: ["village"],
             anchorId: "anchor_mountains",
             eventPoolIds: ["pool_mountains"],
@@ -351,8 +352,8 @@ class MockContentProvider {
     private let events: [MockEventDefinition] = [
         MockEventDefinition(
             id: "event_001",
-            titleKey: "event.001.title",
-            bodyKey: "event.001.body",
+            title: LocalizedString(en: "Event 001", ru: "Событие 001"),
+            body: LocalizedString(en: "Event body", ru: "Тело события"),
             choiceIds: ["choice_a", "choice_b"],
             isOneTime: false,
             pressureRange: 0...50,
@@ -360,8 +361,8 @@ class MockContentProvider {
         ),
         MockEventDefinition(
             id: "event_002",
-            titleKey: "event.002.title",
-            bodyKey: "event.002.body",
+            title: LocalizedString(en: "Event 002", ru: "Событие 002"),
+            body: LocalizedString(en: "Event body 2", ru: "Тело события 2"),
             choiceIds: ["choice_c"],
             isOneTime: true,
             pressureRange: 30...100,
@@ -405,7 +406,7 @@ class MockContentProviderWithBrokenLinks: MockContentProvider {
     private let brokenRegions: [MockRegionDefinition] = [
         MockRegionDefinition(
             id: "island",
-            titleKey: "region.island.title",
+            title: LocalizedString(en: "Island", ru: "Остров"),
             neighborIds: ["nonexistent_region"], // Broken link!
             anchorId: nil,
             eventPoolIds: [],

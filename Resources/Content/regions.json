@@ -4,8 +4,14 @@
   "regions": [
     {
       "id": "village",
-      "titleKey": "region.village.title",
-      "descriptionKey": "region.village.description",
+      "title": {
+        "en": "Border Village",
+        "ru": "Пограничная Деревня"
+      },
+      "description": {
+        "en": "A small village on the edge of the twilight lands, protected by an ancient chapel.",
+        "ru": "Небольшая деревня на краю сумрачных земель, защищённая древней часовней."
+      },
       "neighborIds": ["oak", "forest", "swamp"],
       "initiallyDiscovered": true,
       "anchorId": "anchor_village_chapel",
@@ -15,8 +21,14 @@
     },
     {
       "id": "oak",
-      "titleKey": "region.oak.title",
-      "descriptionKey": "region.oak.description",
+      "title": {
+        "en": "Sacred Oak",
+        "ru": "Священный Дуб"
+      },
+      "description": {
+        "en": "An ancient grove where the mighty sacred oak stands, connecting our world with Prav.",
+        "ru": "Древняя роща, где стоит могучий священный дуб, соединяющий наш мир с Правью."
+      },
       "neighborIds": ["village", "forest"],
       "initiallyDiscovered": false,
       "anchorId": "anchor_sacred_oak",
@@ -26,8 +38,14 @@
     },
     {
       "id": "forest",
-      "titleKey": "region.forest.title",
-      "descriptionKey": "region.forest.description",
+      "title": {
+        "en": "Dark Forest",
+        "ru": "Тёмный Лес"
+      },
+      "description": {
+        "en": "Dense woods where the Leshy dwells, growing darker as Nav draws near.",
+        "ru": "Густой бор, где обитает Леший, темнеющий по мере приближения Нави."
+      },
       "neighborIds": ["village", "oak", "mountain"],
       "initiallyDiscovered": false,
       "anchorId": "anchor_forest_idol",
@@ -37,8 +55,14 @@
     },
     {
       "id": "swamp",
-      "titleKey": "region.swamp.title",
-      "descriptionKey": "region.swamp.description",
+      "title": {
+        "en": "Cursed Swamp",
+        "ru": "Проклятое Болото"
+      },
+      "description": {
+        "en": "A murky marsh where drowned spirits wander and witches brew their potions.",
+        "ru": "Мутная топь, где бродят утопленники и ведьмы варят свои зелья."
+      },
       "neighborIds": ["village", "breach"],
       "initiallyDiscovered": false,
       "anchorId": "anchor_swamp_spring",
@@ -48,8 +72,14 @@
     },
     {
       "id": "mountain",
-      "titleKey": "region.mountain.title",
-      "descriptionKey": "region.mountain.description",
+      "title": {
+        "en": "Mountain Pass",
+        "ru": "Горный Перевал"
+      },
+      "description": {
+        "en": "A treacherous path through ancient mountains, guarded by stone sentinels.",
+        "ru": "Опасный путь через древние горы, охраняемый каменными стражами."
+      },
       "neighborIds": ["forest", "breach"],
       "initiallyDiscovered": false,
       "anchorId": "anchor_mountain_barrow",
@@ -59,8 +89,14 @@
     },
     {
       "id": "breach",
-      "titleKey": "region.breach.title",
-      "descriptionKey": "region.breach.description",
+      "title": {
+        "en": "The Breach",
+        "ru": "Разлом"
+      },
+      "description": {
+        "en": "A tear between worlds where Nav's darkness seeps into Yav.",
+        "ru": "Разрыв между мирами, где тьма Нави просачивается в Явь."
+      },
       "neighborIds": ["swamp", "mountain", "dark_lowland"],
       "initiallyDiscovered": false,
       "anchorId": "anchor_breach_shrine",
@@ -70,8 +106,14 @@
     },
     {
       "id": "dark_lowland",
-      "titleKey": "region.dark_lowland.title",
-      "descriptionKey": "region.dark_lowland.description",
+      "title": {
+        "en": "Dark Lowland",
+        "ru": "Тёмная Низина"
+      },
+      "description": {
+        "en": "The heart of the incursion, where the Moroi waits in eternal darkness.",
+        "ru": "Сердце вторжения, где Морой ожидает в вечной тьме."
+      },
       "neighborIds": ["breach"],
       "initiallyDiscovered": false,
       "anchorId": null,

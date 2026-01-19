@@ -139,7 +139,7 @@ Adapters остаются для обратной совместимости в�
 | `EventDefinition` + `ChoiceDefinition` | EventDefinition.swift | ✅ Done |
 | `QuestDefinition` + `ObjectiveDefinition` | QuestDefinition.swift | ✅ Done |
 | `MiniGameChallengeDefinition` | MiniGameChallengeDefinition.swift | ✅ Done |
-| Ключи локализации `titleKey/bodyKey/labelKey` | Все Definition файлы | ✅ Done |
+| Inline локализация `LocalizedString` | Все Definition файлы | ✅ Done |
 
 **Контракт Definition:**
 ```swift
@@ -148,9 +148,17 @@ protocol GameDefinition: Codable, Identifiable {
     var id: String { get }
 }
 
+// Inline локализация для "Cartridge" подхода - контент без пересборки
+struct LocalizedString: Codable, Hashable {
+    let en: String
+    let ru: String
+    var localized: String { /* текст для текущей локали */ }
+}
+
 struct RegionDefinition: GameDefinition {
     let id: String
-    let titleKey: String           // Локализация
+    let title: LocalizedString     // Inline локализация
+    let description: LocalizedString
     let neighborIds: [String]
     let anchorId: String?
     let eventPoolIds: [String]

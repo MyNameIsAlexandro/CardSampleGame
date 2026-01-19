@@ -5,8 +5,14 @@
   "events": [
     {
       "id": "event_leshy",
-      "titleKey": "event.leshy.title",
-      "bodyKey": "event.leshy.body",
+      "title": {
+        "en": "Leshy Awakens",
+        "ru": "Пробуждение Лешего"
+      },
+      "body": {
+        "en": "The corrupted forest spirit emerges from the twisted trees, eyes burning with Nav's malice.",
+        "ru": "Осквернённый лесной дух выходит из искривлённых деревьев, глаза горят злобой Нави."
+      },
       "eventType": "combat",
       "poolIds": ["pool_forest"],
       "availability": {
@@ -26,19 +32,28 @@
       "choices": [
         {
           "id": "fight",
-          "labelKey": "event.leshy.fight",
+          "label": {
+            "en": "Fight the Leshy",
+            "ru": "Сразиться с Лешим"
+          },
           "requirements": {
             "minHealth": 3
           },
           "consequences": {
             "resourceChanges": {"faith": 1},
             "startCombat": true,
-            "messageKey": "event.leshy.fight.result"
+            "message": {
+              "en": "You prepare to face the corrupted spirit.",
+              "ru": "Вы готовитесь к бою с осквернённым духом."
+            }
           }
         },
         {
           "id": "appease",
-          "labelKey": "event.leshy.appease",
+          "label": {
+            "en": "Appease with offerings (5 Faith)",
+            "ru": "Умилостивить дарами (5 Веры)"
+          },
           "requirements": {
             "minFaith": 5
           },
@@ -46,23 +61,38 @@
             "resourceChanges": {"faith": -5},
             "balanceShift": 5,
             "tensionChange": -5,
-            "messageKey": "event.leshy.appease.result"
+            "message": {
+              "en": "Your offerings restore some sanity to the spirit. It retreats peacefully.",
+              "ru": "Ваши дары возвращают немного рассудка духу. Он мирно отступает."
+            }
           }
         },
         {
           "id": "retreat",
-          "labelKey": "event.leshy.retreat",
+          "label": {
+            "en": "Retreat from the forest",
+            "ru": "Отступить из леса"
+          },
           "consequences": {
             "reputationChange": -5,
-            "messageKey": "event.leshy.retreat.result"
+            "message": {
+              "en": "You flee, but the forest remembers your cowardice.",
+              "ru": "Вы бежите, но лес запомнит вашу трусость."
+            }
           }
         }
       ]
     },
     {
       "id": "event_ritual",
-      "titleKey": "event.ritual.title",
-      "bodyKey": "event.ritual.body",
+      "title": {
+        "en": "Ancient Ritual Site",
+        "ru": "Древнее Место Силы"
+      },
+      "body": {
+        "en": "You discover a clearing where the old rituals were once performed. Power still lingers here.",
+        "ru": "Вы обнаруживаете поляну, где когда-то проводились старые ритуалы. Сила всё ещё витает здесь."
+      },
       "eventType": "inline",
       "poolIds": ["pool_forest", "pool_sacred"],
       "availability": {
@@ -75,7 +105,10 @@
       "choices": [
         {
           "id": "restore_light",
-          "labelKey": "event.ritual.restore",
+          "label": {
+            "en": "Perform restoration ritual (10 Faith)",
+            "ru": "Провести ритуал восстановления (10 Веры)"
+          },
           "requirements": {
             "minFaith": 10,
             "minBalance": 60
@@ -85,12 +118,18 @@
             "balanceShift": 15,
             "tensionChange": -10,
             "anchorIntegrityChange": 20,
-            "messageKey": "event.ritual.restore.result"
+            "message": {
+              "en": "The light returns! The anchor strengthens as the ritual completes.",
+              "ru": "Свет возвращается! Якорь укрепляется по завершении ритуала."
+            }
           }
         },
         {
           "id": "corrupt",
-          "labelKey": "event.ritual.corrupt",
+          "label": {
+            "en": "Corrupt the site",
+            "ru": "Осквернить место"
+          },
           "requirements": {
             "maxBalance": 40
           },
@@ -100,22 +139,37 @@
             "tensionChange": 15,
             "addCards": ["dark_power"],
             "anchorIntegrityChange": -30,
-            "messageKey": "event.ritual.corrupt.result"
+            "message": {
+              "en": "Dark power floods through you. The site falls to Nav.",
+              "ru": "Тёмная сила наполняет вас. Место падает пред Навью."
+            }
           }
         },
         {
           "id": "leave",
-          "labelKey": "event.ritual.leave",
+          "label": {
+            "en": "Leave undisturbed",
+            "ru": "Оставить нетронутым"
+          },
           "consequences": {
-            "messageKey": "event.ritual.leave.result"
+            "message": {
+              "en": "The site remains, waiting for someone with the will to act.",
+              "ru": "Место остаётся, ожидая того, у кого хватит воли действовать."
+            }
           }
         }
       ]
     },
     {
       "id": "event_forest_whispers",
-      "titleKey": "event.forest_whispers.title",
-      "bodyKey": "event.forest_whispers.body",
+      "title": {
+        "en": "Forest Whispers",
+        "ru": "Шёпот Леса"
+      },
+      "body": {
+        "en": "Voices drift through the trees - some familiar, some alien. They call your name.",
+        "ru": "Голоса плывут меж деревьев - одни знакомые, другие чуждые. Они зовут вас по имени."
+      },
       "eventType": "inline",
       "poolIds": ["pool_forest"],
       "availability": {
@@ -128,19 +182,31 @@
       "choices": [
         {
           "id": "listen",
-          "labelKey": "event.forest_whispers.listen",
+          "label": {
+            "en": "Listen carefully (2 Faith)",
+            "ru": "Внимательно слушать (2 Веры)"
+          },
           "consequences": {
             "resourceChanges": {"faith": -2},
             "setFlags": {"heard_whispers": true},
-            "messageKey": "event.forest_whispers.listen.result"
+            "message": {
+              "en": "The spirits share fragments of forgotten knowledge.",
+              "ru": "Духи делятся обрывками забытых знаний."
+            }
           }
         },
         {
           "id": "ignore",
-          "labelKey": "event.forest_whispers.ignore",
+          "label": {
+            "en": "Block them out",
+            "ru": "Заглушить их"
+          },
           "consequences": {
             "resourceChanges": {"health": -1},
-            "messageKey": "event.forest_whispers.ignore.result"
+            "message": {
+              "en": "The effort of ignoring them drains you. Something scratches as you pass.",
+              "ru": "Усилия по игнорированию истощают вас. Что-то царапает, когда вы проходите."
+            }
           }
         }
       ]
