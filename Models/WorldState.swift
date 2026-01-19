@@ -457,9 +457,9 @@ class WorldState: ObservableObject, Codable {
 
         let targetRegion: Region?
         if !breachRegions.isEmpty {
-            targetRegion = breachRegions.randomElement()
+            targetRegion = WorldRNG.shared.randomElement(from: breachRegions)
         } else if !borderlandRegions.isEmpty {
-            targetRegion = borderlandRegions.randomElement()
+            targetRegion = WorldRNG.shared.randomElement(from: borderlandRegions)
         } else {
             targetRegion = nil
         }
@@ -491,13 +491,13 @@ class WorldState: ObservableObject, Codable {
             guard let role = card.role else { return false }
             return role == .sustain || role == .utility
         }
-        let shuffledGlobal = globalCards.shuffled()
+        let shuffledGlobal = WorldRNG.shared.shuffled(globalCards)
         market.append(contentsOf: shuffledGlobal.prefix(globalPoolSize))
 
         // 2. Regional pool (based on current region state)
         if let region = currentRegion {
             let regionalCards = getRegionalCards(allCards: allCards, regionState: region.state)
-            let shuffledRegional = regionalCards.shuffled()
+            let shuffledRegional = WorldRNG.shared.shuffled(regionalCards)
             market.append(contentsOf: shuffledRegional.prefix(regionalPoolSize))
         }
 
@@ -542,7 +542,7 @@ class WorldState: ObservableObject, Codable {
             guard let requirement = card.regionRequirement else { return false }
             return hasFlag(requirement)
         }
-        return storyCards.randomElement()
+        return WorldRNG.shared.randomElement(from: storyCards)
     }
 
     /// Calculate adjusted card cost based on Light/Dark balance

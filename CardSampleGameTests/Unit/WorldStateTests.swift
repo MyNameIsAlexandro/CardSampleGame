@@ -306,4 +306,113 @@ final class WorldStateTests: XCTestCase {
 
         XCTAssertLessThanOrEqual(worldState.eventLog.count, 100, "Журнал не должен превышать 100 записей")
     }
+
+    // MARK: - Канон: Tension Escalation
+
+    /// Тест: tension increment = +3 (канон зафиксирован)
+    /// Если этот тест падает — значит код разошёлся с документацией
+    func testPressureEscalationMatchesCanon() {
+        // Канон: каждые 3 дня worldTension += 3
+        let canonInterval = 3
+        let canonIncrement = 3
+
+        let initialTension = worldState.worldTension
+
+        // Проход canonInterval дней
+        for _ in 0..<canonInterval {
+            worldState.advanceTime(by: 1)
+        }
+
+        let expectedTension = initialTension + canonIncrement
+        XCTAssertEqual(
+            worldState.worldTension,
+            expectedTension,
+            "Канон: каждые \(canonInterval) дня tension += \(canonIncrement). " +
+            "Ожидалось \(expectedTension), получено \(worldState.worldTension)"
+        )
+    }
+
+    // MARK: - Determinism Tests
+
+    /// Тест: WorldRNG с фиксированным seed даёт одинаковые результаты
+    func testWorldRNGDeterminism() {
+        let seed: UInt64 = 12345
+
+        // Первый запуск
+        WorldRNG.shared.setSeed(seed)
+        let values1 = (0..<10).map { _ in WorldRNG.shared.nextInt(in: 0..<100) }
+
+        // Второй запуск с тем же seed
+        WorldRNG.shared.setSeed(seed)
+        let values2 = (0..<10).map { _ in WorldRNG.shared.nextInt(in: 0..<100) }
+
+        XCTAssertEqual(values1, values2, "WorldRNG с одинаковым seed должен давать одинаковые значения")
+
+        // Сброс на системный RNG
+        WorldRNG.shared.resetToSystem()
+    }
+
+    /// Тест: детерминированный shuffle
+    func testDeterministicShuffle() {
+        let seed: UInt64 = 54321
+        let array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+        // Первый shuffle
+        WorldRNG.shared.setSeed(seed)
+        let shuffled1 = WorldRNG.shared.shuffled(array)
+
+        // Второй shuffle с тем же seed
+        WorldRNG.shared.setSeed(seed)
+        let shuffled2 = WorldRNG.shared.shuffled(array)
+
+        XCTAssertEqual(shuffled1, shuffled2, "Shuffle с одинаковым seed должен давать одинаковый порядок")
+        XCTAssertNotEqual(shuffled1, array, "Shuffle должен изменить порядок элементов")
+
+        // Сброс на системный RNG
+        WorldRNG.shared.resetToSystem()
+    }
+
+    /// Тест: детерминированный выбор элемента
+    func testDeterministicRandomElement() {
+        let seed: UInt64 = 99999
+        let array = ["A", "B", "C", "D", "E"]
+
+        // Первая серия выборов
+        WorldRNG.shared.setSeed(seed)
+        let choices1 = (0..<5).compactMap { _ in WorldRNG.shared.randomElement(from: array) }
+
+        // Вторая серия с тем же seed
+        WorldRNG.shared.setSeed(seed)
+        let choices2 = (0..<5).compactMap { _ in WorldRNG.shared.randomElement(from: array) }
+
+        XCTAssertEqual(choices1, choices2, "randomElement с одинаковым seed должен давать одинаковые выборы")
+
+        // Сброс на системный RNG
+        WorldRNG.shared.resetToSystem()
+    }
+
+    /// Тест: мир детерминирован при фиксированном seed
+    func testWorldDeterminismWithSeed() {
+        let seed: UInt64 = 777777
+
+        // Первый прогон
+        WorldRNG.shared.setSeed(seed)
+        let world1 = WorldState()
+        world1.advanceTime(by: 9) // 3 цикла давления
+        let tension1 = world1.worldTension
+        let flags1 = world1.worldFlags
+
+        // Второй прогон с тем же seed
+        WorldRNG.shared.setSeed(seed)
+        let world2 = WorldState()
+        world2.advanceTime(by: 9)
+        let tension2 = world2.worldTension
+        let flags2 = world2.worldFlags
+
+        XCTAssertEqual(tension1, tension2, "Tension должен быть одинаковым при одном seed")
+        XCTAssertEqual(flags1, flags2, "Флаги должны быть одинаковыми при одном seed")
+
+        // Сброс на системный RNG
+        WorldRNG.shared.resetToSystem()
+    }
 }

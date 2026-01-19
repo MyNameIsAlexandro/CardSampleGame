@@ -212,7 +212,7 @@
 **Механизм:**
 ```
 Каждые 3 дня:
-1. worldTension += 2
+1. worldTension += 3
 2. P = worldTension / 100
 3. С вероятностью P один регион деградирует (anchor.integrity -= 20)
 ```

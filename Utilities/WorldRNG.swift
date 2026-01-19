@@ -105,4 +105,26 @@ final class WorldRNG {
     func checkProbability(_ p: Double) -> Bool {
         return nextDouble() < p
     }
+
+    // MARK: - Collection Helpers (Deterministic)
+
+    /// Выбрать случайный элемент из массива (детерминировано)
+    func randomElement<T>(from array: [T]) -> T? {
+        guard !array.isEmpty else { return nil }
+        let index = nextInt(in: 0..<array.count)
+        return array[index]
+    }
+
+    /// Детерминированный shuffle массива (Fisher-Yates с WorldRNG)
+    func shuffled<T>(_ array: [T]) -> [T] {
+        guard array.count > 1 else { return array }
+        var result = array
+        for i in stride(from: result.count - 1, through: 1, by: -1) {
+            let j = nextInt(in: 0...i)
+            if i != j {
+                result.swapAt(i, j)
+            }
+        }
+        return result
+    }
 }

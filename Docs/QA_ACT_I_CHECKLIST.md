@@ -137,9 +137,9 @@
 2. Проверить изменения на 3, 6, 9 день
 
 **Ожидаемый результат:**
-- [x] День 3: WorldTension += 2
-- [x] День 6: WorldTension += 2
-- [x] День 9: WorldTension += 2
+- [x] День 3: WorldTension += 3
+- [x] День 6: WorldTension += 3
+- [x] День 9: WorldTension += 3
 - [x] При высоком Tension: вероятность деградации региона
 - [x] Stable регионы НЕ деградируют напрямую
 - [x] Только Borderland (вес 1) и Breach (вес 2) деградируют

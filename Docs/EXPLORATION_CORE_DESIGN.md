@@ -1408,7 +1408,7 @@ func processDayStart() {
     // 2. Каждые N дней (N=3 по умолчанию):
     if daysPassed % 3 == 0 {
         // a) Увеличить напряжение мира
-        worldTension += 2
+        worldTension += 3
 
         // b) Выполнить проверку деградации регионов
         checkRegionDegradation()
@@ -1590,7 +1590,7 @@ if worldFlags["main_quest_started"] == true {
 
 | Проверка | Механическое условие |
 |----------|---------------------|
-| ✅ Авто-деградация | `daysPassed % 3 == 0` → `worldTension += 2` |
+| ✅ Авто-деградация | `daysPassed % 3 == 0` → `worldTension += 3` |
 | ✅ Риск виден | RegionDetailView показывает state + modifiers |
 | ✅ Нет бесплатных выборов | Каждый EventChoice имеет consequences |
 | ✅ Альтернативный проигрыш | `worldTension >= 100` → Game Over |
