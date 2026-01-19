@@ -155,8 +155,8 @@ final class TwilightGameEngine: ObservableObject {
             stateChanges.append(contentsOf: changes)
             currentEventId = nil
 
-        case .resolveMiniGame(let result):
-            let changes = executeMiniGameResult(result)
+        case .resolveMiniGame(let input):
+            let changes = executeMiniGameInput(input)
             stateChanges.append(contentsOf: changes)
 
         case .startCombat(let encounterId):
@@ -513,11 +513,11 @@ final class TwilightGameEngine: ObservableObject {
         return changes
     }
 
-    private func executeMiniGameResult(_ result: MiniGameResult) -> [StateChange] {
+    private func executeMiniGameInput(_ input: MiniGameInput) -> [StateChange] {
         var changes: [StateChange] = []
 
         // Apply bonus rewards
-        for (resource, amount) in result.bonusRewards {
+        for (resource, amount) in input.bonusRewards {
             switch resource {
             case "health":
                 if let player = playerAdapter?.player {

@@ -365,7 +365,7 @@ enum CombatActor {
 
 /// Effects that cards can have in combat
 enum CardEffect {
-    case damage(amount: Int, type: DamageType)
+    case damage(amount: Int, type: CombatDamageKind)
     case heal(amount: Int)
     case drawCards(count: Int)
     case gainFaith(amount: Int)
@@ -374,7 +374,9 @@ enum CardEffect {
     case balanceShift(amount: Int)
 }
 
-enum DamageType {
+/// Simplified damage categories for combat resolution
+/// Different from DamageType in CardType.swift (detailed card damage types)
+enum CombatDamageKind {
     case physical
     case magical
     case light

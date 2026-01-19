@@ -27,7 +27,7 @@ enum TwilightGameAction: TimedAction, Equatable {
     case chooseEventOption(eventId: UUID, choiceIndex: Int)
 
     /// Resolve a mini-game result
-    case resolveMiniGame(result: MiniGameResult)
+    case resolveMiniGame(input: MiniGameInput)
 
     // MARK: - Combat
     /// Start combat with encounter
@@ -50,7 +50,7 @@ enum TwilightGameAction: TimedAction, Equatable {
 
     var timeCost: Int {
         switch self {
-        case .travel(let regionId):
+        case .travel:
             // Travel cost determined by engine based on distance
             // Default to 1, actual cost calculated in engine
             return 1
@@ -91,10 +91,11 @@ enum TwilightGameAction: TimedAction, Equatable {
     }
 }
 
-// MARK: - Mini-Game Result
+// MARK: - Mini-Game Input
 
-/// Result from a mini-game challenge
-struct MiniGameResult: Equatable {
+/// Input data for resolving a mini-game action
+/// Different from MiniGameResult in MiniGameChallengeDefinition.swift (serializable state diff)
+struct MiniGameInput: Equatable {
     let challengeId: UUID
     let success: Bool
     let score: Int?
