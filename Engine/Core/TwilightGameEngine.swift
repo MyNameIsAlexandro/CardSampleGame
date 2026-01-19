@@ -90,6 +90,12 @@ final class TwilightGameEngine: ObservableObject {
         for event in adapter.worldState.allEvents where event.completed {
             completedEventIds.insert(event.id)
         }
+
+        // CRITICAL: Sync pressure engine state to prevent duplicate threshold events
+        // PressureEngine tracks which thresholds have fired to avoid repeats
+        // After load, we reconstruct this from the current pressure value
+        pressureEngine.setPressure(worldTension)
+        pressureEngine.syncTriggeredThresholdsFromPressure()
     }
 
     // MARK: - Main Action Entry Point

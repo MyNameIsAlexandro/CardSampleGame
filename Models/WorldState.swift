@@ -140,8 +140,11 @@ class WorldState: ObservableObject, Codable {
     // MARK: - World Setup
 
     private func setupInitialWorld() {
-        // Создаем начальные регионы (MVP: 3 региона)
-        regions = createInitialRegions()
+        // DATA-DRIVEN: Load regions from ContentProvider
+        // Reference: ENGINE_ARCHITECTURE.md, Section 5
+        // Use CodeContentProvider with Twilight Marches content
+        let provider = TwilightMarchesCodeContentProvider()
+        regions = createRegionsFromProvider(provider)
 
         // Создаем начальные события
         allEvents = createInitialEvents()
@@ -159,9 +162,109 @@ class WorldState: ObservableObject, Codable {
         mainQuestStage = 1
         daysPassed = 0
 
-        // Стартовый регион - первый стабильный регион
-        if let firstStable = regions.first(where: { $0.state == .stable }) {
+        // Стартовый регион - "Деревня у тракта" (village)
+        // Canonical starting region is the Village per game design
+        if let villageRegion = regions.first(where: { $0.name == "Деревня у тракта" }) {
+            currentRegionId = villageRegion.id
+        } else if let firstStable = regions.first(where: { $0.state == .stable }) {
+            // Fallback to any stable region if village not found
             currentRegionId = firstStable.id
+        }
+    }
+
+    /// Convert RegionDefinitions from ContentProvider to legacy Region models
+    /// This bridges the new Data-Driven architecture with existing runtime models
+    private func createRegionsFromProvider(_ provider: ContentProvider) -> [Region] {
+        let regionDefs = provider.getAllRegionDefinitions()
+        var regionMap: [String: Region] = [:]
+
+        // First pass: create regions without neighbor links
+        for def in regionDefs {
+            let anchor = createAnchorFromDefinition(provider.getAnchorDefinition(forRegion: def.id))
+            let regionType = mapRegionType(def.id)
+            let regionState = mapRegionState(def.initialState)
+
+            var region = Region(
+                name: TwilightMarchesCodeContentProvider.regionName(for: def.id),
+                type: regionType,
+                state: regionState,
+                anchor: anchor,
+                reputation: 0
+            )
+            region.updateStateFromAnchor()
+            regionMap[def.id] = region
+        }
+
+        // Second pass: link neighbors using UUIDs
+        for def in regionDefs {
+            guard var region = regionMap[def.id] else { continue }
+            region.neighborIds = def.neighborIds.compactMap { regionMap[$0]?.id }
+            regionMap[def.id] = region
+        }
+
+        return Array(regionMap.values)
+    }
+
+    /// Create legacy Anchor from AnchorDefinition
+    private func createAnchorFromDefinition(_ def: AnchorDefinition?) -> Anchor? {
+        guard let def = def else { return nil }
+
+        let anchorType = mapAnchorType(def.anchorType)
+        let influence = mapInfluence(def.initialInfluence)
+
+        return Anchor(
+            name: TwilightMarchesCodeContentProvider.anchorName(for: def.id),
+            type: anchorType,
+            integrity: def.initialIntegrity,
+            influence: influence,
+            power: def.power
+        )
+    }
+
+    /// Map string anchor type to AnchorType enum
+    private func mapAnchorType(_ typeString: String) -> AnchorType {
+        switch typeString {
+        case "chapel": return .chapel
+        case "shrine": return .shrine
+        case "sacred_tree": return .sacredTree
+        case "stone_idol": return .stoneIdol
+        case "spring": return .spring
+        case "barrow": return .barrow
+        case "temple": return .temple
+        case "cross": return .cross
+        default: return .shrine
+        }
+    }
+
+    /// Map AnchorInfluence to CardBalance
+    private func mapInfluence(_ influence: AnchorInfluence) -> CardBalance {
+        switch influence {
+        case .light: return .light
+        case .neutral: return .neutral
+        case .dark: return .dark
+        }
+    }
+
+    /// Map RegionStateType to RegionState
+    private func mapRegionState(_ state: RegionStateType) -> RegionState {
+        switch state {
+        case .stable: return .stable
+        case .borderland: return .borderland
+        case .breach: return .breach
+        }
+    }
+
+    /// Map region ID to RegionType (game-specific mapping)
+    private func mapRegionType(_ regionId: String) -> RegionType {
+        switch regionId {
+        case "village": return .settlement
+        case "oak": return .sacred
+        case "forest": return .forest
+        case "swamp": return .swamp
+        case "mountain": return .mountain
+        case "breach": return .wasteland
+        case "dark_lowland": return .swamp
+        default: return .forest // Default to forest for unknown regions
         }
     }
 
@@ -224,10 +327,20 @@ class WorldState: ObservableObject, Codable {
 
     /// Канонический алгоритм начала дня (см. EXPLORATION_CORE_DESIGN.md, раздел 18.1)
     /// Вызывается при каждом увеличении daysPassed
-    /// - Warning: DEPRECATED для UI. Time advance должен происходить через `TwilightGameEngine.performAction()`.
-    /// Этот метод вызывается автоматически из `advanceTime(by:)` и Engine.
+    ///
+    /// ## DEPRECATED
+    /// - **UI Code**: Use `TwilightGameEngine.performAction()` instead
+    /// - **Tests**: This method is retained for testing the canonical day algorithm
+    /// - **Internal**: Called automatically from `advanceTime(by:)`
+    ///
+    /// Duplicate logic exists in `TwilightGameEngine.advanceTime(by:)`.
+    /// After full migration, this method will be removed.
+    ///
+    /// - Warning: Do not call directly from UI/ViewModel code. Use Engine actions.
+    @available(*, deprecated, message: "Use TwilightGameEngine.performAction() for UI. This is retained for tests and internal use only.")
     func processDayStart() {
-        // ⚠️ MIGRATION: После Phase 3 этот метод будет вызываться только из Engine
+        // ⚠️ MIGRATION: This method contains canonical day logic used by tests
+        // TwilightGameEngine has parallel implementation for production use
         // 1. Каждые 3 дня — автоматическая деградация мира
         guard daysPassed > 0 && daysPassed % 3 == 0 else { return }
 
@@ -264,6 +377,8 @@ class WorldState: ObservableObject, Codable {
     }
 
     /// Проверка автоматической деградации мира (legacy alias)
+    /// - Warning: DEPRECATED. Use `processDayStart()` or `TwilightGameEngine.performAction()`
+    @available(*, deprecated, renamed: "processDayStart()")
     func checkTimeDegradation() {
         processDayStart()
     }
@@ -377,10 +492,16 @@ class WorldState: ObservableObject, Codable {
     }
 
     /// Метод для ручного продвижения времени (для Rest, StrengthenAnchor и т.д.)
-    /// - Warning: DEPRECATED для UI. Используйте `TwilightGameEngine.performAction()` для действий, требующих время.
-    /// Этот метод оставлен для совместимости и внутреннего использования Engine.
+    ///
+    /// ## DEPRECATED
+    /// - **UI Code**: Use `TwilightGameEngine.performAction()` instead
+    /// - **Tests**: This method is retained for testing time mechanics
+    /// - **Internal**: Used by `moveToRegion` and similar legacy methods
+    ///
+    /// - Warning: Do not call directly from UI/ViewModel code. Use Engine actions.
+    @available(*, deprecated, message: "Use TwilightGameEngine.performAction() for UI. This is retained for tests and internal use only.")
     func advanceTime(by days: Int = 1) {
-        // ⚠️ MIGRATION: После Phase 3 этот метод будет вызываться только из Engine
+        // ⚠️ MIGRATION: This method contains canonical time logic used by tests
         for _ in 0..<days {
             daysPassed += 1
             processDayStart()
@@ -996,10 +1117,16 @@ class WorldState: ObservableObject, Codable {
         }
     }
 
-    // MARK: - Data Creation (for MVP)
+    // MARK: - Data Creation (LEGACY - Replaced by ContentProvider)
 
+    /// DEPRECATED: This method is no longer used.
+    /// Region creation now uses `createRegionsFromProvider()` with `TwilightMarchesCodeContentProvider`.
+    /// This code is kept as reference only and will be removed in a future version.
+    /// See: ENGINE_ARCHITECTURE.md, Section 5 (Data-Driven Architecture)
+    @available(*, deprecated, message: "Use createRegionsFromProvider(TwilightMarchesCodeContentProvider.shared) instead")
     private func createInitialRegions() -> [Region] {
         // АКТ I - 7 регионов (2 Stable, 3 Borderland, 2 Breach)
+        // LEGACY CODE - Now handled by TwilightMarchesCodeContentProvider
 
         // 1. Деревня у тракта (Stable) - стартовая точка
         let villageAnchor = Anchor(
@@ -2433,5 +2560,229 @@ class WorldState: ObservableObject, Codable {
         try container.encodeIfPresent(currentRegionId, forKey: .currentRegionId)
         try container.encode(daysPassed, forKey: .daysPassed)
         try container.encode(eventLog, forKey: .eventLog)
+    }
+}
+
+// MARK: - Twilight Marches Content Provider
+// Reference: Docs/ENGINE_ARCHITECTURE.md, Section 5 (Data-Driven Architecture)
+// This provider defines all game content for Twilight Marches
+
+/// Content provider with Twilight Marches game definitions.
+/// Separates content (Data) from runtime state (WorldState).
+final class TwilightMarchesCodeContentProvider: CodeContentProvider {
+
+    // MARK: - Region Loading
+
+    override func loadRegions() {
+        // ACT I - 7 regions (2 Stable, 3 Borderland, 2 Breach)
+
+        // 1. Village (Stable) - starting point
+        let village = RegionDefinition(
+            id: "village",
+            titleKey: "region.village.title",
+            descriptionKey: "region.village.description",
+            neighborIds: ["oak", "forest", "swamp"],
+            initiallyDiscovered: true,
+            anchorId: "anchor_village_chapel",
+            eventPoolIds: ["pool_village", "pool_common"],
+            initialState: .stable
+        )
+        registerRegion(village)
+
+        // 2. Sacred Oak (Stable) - point of power
+        let oak = RegionDefinition(
+            id: "oak",
+            titleKey: "region.oak.title",
+            descriptionKey: "region.oak.description",
+            neighborIds: ["village", "forest"],
+            initiallyDiscovered: false,
+            anchorId: "anchor_sacred_oak",
+            eventPoolIds: ["pool_sacred", "pool_common"],
+            initialState: .stable
+        )
+        registerRegion(oak)
+
+        // 3. Dense Forest (Borderland)
+        let forest = RegionDefinition(
+            id: "forest",
+            titleKey: "region.forest.title",
+            descriptionKey: "region.forest.description",
+            neighborIds: ["village", "oak", "mountain"],
+            initiallyDiscovered: false,
+            anchorId: "anchor_forest_idol",
+            eventPoolIds: ["pool_forest", "pool_common"],
+            initialState: .borderland,
+            degradationWeight: 1
+        )
+        registerRegion(forest)
+
+        // 4. Navi Swamp (Borderland)
+        let swamp = RegionDefinition(
+            id: "swamp",
+            titleKey: "region.swamp.title",
+            descriptionKey: "region.swamp.description",
+            neighborIds: ["village", "breach"],
+            initiallyDiscovered: false,
+            anchorId: "anchor_swamp_spring",
+            eventPoolIds: ["pool_swamp", "pool_common"],
+            initialState: .borderland,
+            degradationWeight: 1
+        )
+        registerRegion(swamp)
+
+        // 5. Mountain Pass (Borderland)
+        let mountain = RegionDefinition(
+            id: "mountain",
+            titleKey: "region.mountain.title",
+            descriptionKey: "region.mountain.description",
+            neighborIds: ["forest", "breach"],
+            initiallyDiscovered: false,
+            anchorId: "anchor_mountain_barrow",
+            eventPoolIds: ["pool_mountain", "pool_common"],
+            initialState: .borderland,
+            degradationWeight: 1
+        )
+        registerRegion(mountain)
+
+        // 6. Barrow Breach (Breach)
+        let breach = RegionDefinition(
+            id: "breach",
+            titleKey: "region.breach.title",
+            descriptionKey: "region.breach.description",
+            neighborIds: ["swamp", "mountain", "dark_lowland"],
+            initiallyDiscovered: false,
+            anchorId: "anchor_breach_shrine",
+            eventPoolIds: ["pool_breach", "pool_common"],
+            initialState: .breach,
+            degradationWeight: 2
+        )
+        registerRegion(breach)
+
+        // 7. Dark Lowlands (Breach) - Act I finale
+        let darkLowland = RegionDefinition(
+            id: "dark_lowland",
+            titleKey: "region.dark_lowland.title",
+            descriptionKey: "region.dark_lowland.description",
+            neighborIds: ["breach"],
+            initiallyDiscovered: false,
+            anchorId: nil, // No anchor - fully destroyed
+            eventPoolIds: ["pool_boss", "pool_breach"],
+            initialState: .breach,
+            degradationWeight: 2
+        )
+        registerRegion(darkLowland)
+
+        rebuildIndices()
+    }
+
+    // MARK: - Anchor Loading
+
+    override func loadAnchors() {
+        // Village anchor
+        let villageChapel = AnchorDefinition(
+            id: "anchor_village_chapel",
+            titleKey: "anchor.village_chapel.title",
+            descriptionKey: "anchor.village_chapel.description",
+            regionId: "village",
+            anchorType: "chapel",
+            initialInfluence: .light,
+            power: 6,
+            initialIntegrity: 85
+        )
+        registerAnchor(villageChapel)
+
+        // Sacred Oak anchor
+        let sacredOak = AnchorDefinition(
+            id: "anchor_sacred_oak",
+            titleKey: "anchor.sacred_oak.title",
+            descriptionKey: "anchor.sacred_oak.description",
+            regionId: "oak",
+            anchorType: "sacred_tree",
+            initialInfluence: .light,
+            power: 8,
+            initialIntegrity: 90
+        )
+        registerAnchor(sacredOak)
+
+        // Forest idol anchor
+        let forestIdol = AnchorDefinition(
+            id: "anchor_forest_idol",
+            titleKey: "anchor.forest_idol.title",
+            descriptionKey: "anchor.forest_idol.description",
+            regionId: "forest",
+            anchorType: "stone_idol",
+            initialInfluence: .neutral,
+            power: 5,
+            initialIntegrity: 55
+        )
+        registerAnchor(forestIdol)
+
+        // Swamp spring anchor
+        let swampSpring = AnchorDefinition(
+            id: "anchor_swamp_spring",
+            titleKey: "anchor.swamp_spring.title",
+            descriptionKey: "anchor.swamp_spring.description",
+            regionId: "swamp",
+            anchorType: "spring",
+            initialInfluence: .dark,
+            power: 4,
+            initialIntegrity: 45
+        )
+        registerAnchor(swampSpring)
+
+        // Mountain barrow anchor
+        let mountainBarrow = AnchorDefinition(
+            id: "anchor_mountain_barrow",
+            titleKey: "anchor.mountain_barrow.title",
+            descriptionKey: "anchor.mountain_barrow.description",
+            regionId: "mountain",
+            anchorType: "barrow",
+            initialInfluence: .neutral,
+            power: 5,
+            initialIntegrity: 50
+        )
+        registerAnchor(mountainBarrow)
+
+        // Breach shrine anchor
+        let breachShrine = AnchorDefinition(
+            id: "anchor_breach_shrine",
+            titleKey: "anchor.breach_shrine.title",
+            descriptionKey: "anchor.breach_shrine.description",
+            regionId: "breach",
+            anchorType: "shrine",
+            initialInfluence: .dark,
+            power: 3,
+            initialIntegrity: 15
+        )
+        registerAnchor(breachShrine)
+    }
+
+    // MARK: - Localization Helpers
+
+    /// Get localized region name
+    static func regionName(for id: String) -> String {
+        switch id {
+        case "village": return "Деревня у тракта"
+        case "oak": return "Священный Дуб"
+        case "forest": return "Дремучий Лес"
+        case "swamp": return "Болото Нави"
+        case "mountain": return "Горный Перевал"
+        case "breach": return "Разлом Курганов"
+        case "dark_lowland": return "Чёрная Низина"
+        default: return id
+        }
+    }
+
+    /// Get localized anchor name
+    static func anchorName(for id: String) -> String {
+        switch id {
+        case "anchor_village_chapel": return "Часовня Света"
+        case "anchor_sacred_oak": return "Священный Дуб Велеса"
+        case "anchor_forest_idol": return "Каменный Идол"
+        case "anchor_swamp_spring": return "Осквернённый Родник"
+        case "anchor_mountain_barrow": return "Курган Предков"
+        case "anchor_breach_shrine": return "Разрушенное Капище"
+        default: return id
+        }
     }
 }

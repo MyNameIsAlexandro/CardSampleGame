@@ -301,6 +301,86 @@ final class EngineContractsTests: XCTestCase {
         )
         XCTAssertFalse(canMeet3, "Should not meet requirements - forbidden flag")
     }
+
+    // MARK: - INV-010: PressureEngine Save/Load
+
+    /// Triggered thresholds must be preserved across save/load
+    /// Reference: Audit.rtf - Save/Load state loss bug
+    func testPressureEngineTriggeredThresholdsSaveLoad() {
+        // Given: Pressure engine with some triggered thresholds
+        let pressureEngine = gameLoop.pressureEngine
+
+        // Trigger some thresholds by advancing pressure
+        pressureEngine.adjust(by: 25)  // Trigger 10, 20
+        pressureEngine.adjust(by: 30)  // Trigger 30, 40, 50
+
+        let originalThresholds = pressureEngine.getTriggeredThresholds()
+        let originalPressure = pressureEngine.currentPressure
+
+        // When: Save and restore thresholds
+        let savedThresholds = pressureEngine.getTriggeredThresholds()
+
+        // Simulate reload by creating new engine and restoring
+        let newPressureEngine = PressureEngine(rules: testPressureRules)
+        newPressureEngine.setPressure(originalPressure)
+        newPressureEngine.setTriggeredThresholds(savedThresholds)
+
+        // Then: Thresholds should match
+        XCTAssertEqual(
+            newPressureEngine.getTriggeredThresholds(),
+            originalThresholds,
+            "Triggered thresholds should be preserved after save/load"
+        )
+        XCTAssertEqual(
+            newPressureEngine.currentPressure,
+            originalPressure,
+            "Pressure should be preserved after save/load"
+        )
+    }
+
+    /// syncTriggeredThresholdsFromPressure should reconstruct state from pressure value
+    /// Reference: Audit.rtf - Save/Load state loss fix
+    func testPressureEngineSyncTriggeredThresholdsFromPressure() {
+        // Given: Pressure engine with pressure at 55
+        let pressureEngine = PressureEngine(rules: testPressureRules)
+        pressureEngine.setPressure(55)
+
+        // When: Sync triggered thresholds from pressure
+        pressureEngine.syncTriggeredThresholdsFromPressure()
+
+        // Then: All thresholds <= 55 should be marked as triggered
+        let triggered = pressureEngine.getTriggeredThresholds()
+        XCTAssertTrue(triggered.contains(10), "Threshold 10 should be triggered")
+        XCTAssertTrue(triggered.contains(20), "Threshold 20 should be triggered")
+        XCTAssertTrue(triggered.contains(30), "Threshold 30 should be triggered")
+        XCTAssertTrue(triggered.contains(40), "Threshold 40 should be triggered")
+        XCTAssertTrue(triggered.contains(50), "Threshold 50 should be triggered")
+        XCTAssertFalse(triggered.contains(60), "Threshold 60 should NOT be triggered")
+        XCTAssertFalse(triggered.contains(70), "Threshold 70 should NOT be triggered")
+    }
+
+    /// After sync from pressure, triggered thresholds should prevent duplicates
+    /// Reference: Audit.rtf - Duplicate events after load
+    func testPressureEngineTriggeredThresholdsPreventDuplicates() {
+        // Given: Pressure engine that synced from pressure 50
+        let pressureEngine = PressureEngine(rules: testPressureRules)
+        pressureEngine.setPressure(50)
+        pressureEngine.syncTriggeredThresholdsFromPressure()
+
+        // When: Get triggered thresholds
+        let triggeredBefore = pressureEngine.getTriggeredThresholds()
+
+        // Advance slightly
+        pressureEngine.adjust(by: 5) // Now at 55
+        let triggeredAfter = pressureEngine.getTriggeredThresholds()
+
+        // Then: Previously triggered thresholds should still be marked
+        // All thresholds <= 50 should be in both sets
+        for threshold in [10, 20, 30, 40, 50] {
+            XCTAssertTrue(triggeredBefore.contains(threshold), "Threshold \(threshold) should be triggered before")
+            XCTAssertTrue(triggeredAfter.contains(threshold), "Threshold \(threshold) should still be triggered after")
+        }
+    }
 }
 
 // MARK: - Test Helpers

@@ -638,6 +638,54 @@ struct QuestRuntimeState: Codable {
 | **Upgrade Economy** | 📋 Planned | Улучшение карт/предметов. Запланировано для будущих актов. |
 | **Barter Economy** | 📋 Planned | Обмен с NPC. Запланировано как extension. |
 
+### 7.2 Реализации ContentProvider (v1.0)
+
+> **Status:** ✅ Implemented
+
+ContentProvider — абстракция для загрузки игрового контента (регионы, якоря, события, квесты).
+
+| Реализация | Описание | Файл |
+|------------|----------|------|
+| `ContentProvider` | Протокол, определяющий API для загрузки контента | `Engine/Data/Providers/ContentProvider.swift` |
+| `CodeContentProvider` | Базовый класс для загрузки контента из Swift кода | `Engine/Data/Providers/CodeContentProvider.swift` |
+| `TwilightMarchesCodeContentProvider` | Конкретная реализация для игры "Сумрачные Пределы" | `Models/WorldState.swift` |
+| `JSONContentProvider` | Загрузка контента из JSON (для Phase 5) | `Engine/Data/Providers/JSONContentProvider.swift` |
+
+**TwilightMarchesCodeContentProvider** — это "картридж" для конкретной игры:
+
+```swift
+final class TwilightMarchesCodeContentProvider: CodeContentProvider {
+    override func loadRegions() {
+        // 7 регионов Act I: village, oak, forest, swamp, mountain, breach, dark_lowland
+        registerRegion(RegionDefinition(id: "village", ...))
+        // ...
+    }
+
+    override func loadAnchors() {
+        // 6 якорей с различными типами и influence
+        registerAnchor(AnchorDefinition(id: "anchor_village_chapel", ...))
+        // ...
+    }
+
+    // Локализация названий
+    static func regionName(for id: String) -> String { ... }
+    static func anchorName(for id: String) -> String { ... }
+}
+```
+
+**Использование в WorldState:**
+```swift
+private func setupInitialWorld() {
+    let provider = TwilightMarchesCodeContentProvider()
+    regions = createRegionsFromProvider(provider)  // Data-Driven!
+}
+```
+
+**Bridge методы** (преобразование Definition → Legacy Model):
+- `createRegionsFromProvider(_:)` — RegionDefinition → Region
+- `createAnchorFromDefinition(_:)` — AnchorDefinition → Anchor
+- Маппинг функции: `mapRegionType()`, `mapAnchorType()`, `mapInfluence()`, `mapRegionState()`
+
 ---
 
 ## 8. План Внедрения

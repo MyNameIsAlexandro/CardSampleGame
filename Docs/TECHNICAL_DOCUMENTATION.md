@@ -372,6 +372,16 @@ class WorldState: ObservableObject {
 - Управляет регионами, событиями, квестами
 - Используется в `WorldMapView`, `EventView`
 
+**⚠️ Deprecated методы (Phase 3 Migration):**
+- `processDayStart()` — использовать `TwilightGameEngine.performAction()` вместо прямого вызова
+- `advanceTime(by:)` — использовать Engine actions (Rest, Travel) вместо прямого вызова
+- `checkTimeDegradation()` — alias для `processDayStart()`, также deprecated
+- `createInitialRegions()` — заменён на `createRegionsFromProvider(TwilightMarchesCodeContentProvider)`
+
+**Data-Driven Architecture (Phase 2):**
+- `setupInitialWorld()` теперь использует `TwilightMarchesCodeContentProvider` для загрузки регионов
+- Bridge методы: `createRegionsFromProvider()`, `createAnchorFromDefinition()`
+
 ---
 
 ### 5. ExplorationModels

@@ -52,6 +52,33 @@ final class PressureEngine: PressureEngineProtocol {
         currentPressure = min(max(0, value), rules.maxPressure)
     }
 
+    // MARK: - Save/Load Support
+
+    /// Get triggered thresholds for save
+    func getTriggeredThresholds() -> Set<Int> {
+        return triggeredThresholds
+    }
+
+    /// Restore triggered thresholds from save
+    /// Call this after loading game to prevent duplicate threshold events
+    func setTriggeredThresholds(_ thresholds: Set<Int>) {
+        triggeredThresholds = thresholds
+    }
+
+    /// Reconstruct triggered thresholds from current pressure value
+    /// Use this when loading a save that doesn't have explicit thresholds saved
+    /// All thresholds below or equal to current pressure are marked as triggered
+    func syncTriggeredThresholdsFromPressure() {
+        triggeredThresholds.removeAll()
+        // Use checkThresholds to find which effects would trigger at current pressure
+        // Then mark standard threshold levels (10, 20, 30, etc.) as triggered
+        // This is a heuristic - actual threshold levels depend on the rule set
+        let standardThresholds = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+        for threshold in standardThresholds where threshold <= currentPressure {
+            triggeredThresholds.insert(threshold)
+        }
+    }
+
     /// Get pressure as percentage (0.0 - 1.0)
     var pressurePercentage: Double {
         guard rules.maxPressure > 0 else { return 0 }

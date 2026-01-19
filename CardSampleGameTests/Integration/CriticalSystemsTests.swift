@@ -50,9 +50,18 @@ final class CriticalSystemsTests: XCTestCase {
         // Breach регионы должны деградировать чаще чем Borderland
         // Устанавливаем один Borderland и один Breach с одинаковым низким integrity
 
-        guard let borderlandIndex = worldState.regions.firstIndex(where: { $0.state == .borderland }),
-              let breachIndex = worldState.regions.firstIndex(where: { $0.state == .breach }) else {
+        // Find borderland with anchor
+        guard let borderlandIndex = worldState.regions.firstIndex(where: {
+            $0.state == .borderland && $0.anchor != nil
+        }) else {
             return // Нет нужных регионов для теста
+        }
+
+        // Find breach with anchor (dark_lowland has no anchor, but "breach" region does)
+        guard let breachIndex = worldState.regions.firstIndex(where: {
+            $0.state == .breach && $0.anchor != nil
+        }) else {
+            return // Нет breach регионов с anchor для теста
         }
 
         // Устанавливаем одинаковый низкий integrity

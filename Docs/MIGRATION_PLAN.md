@@ -134,8 +134,16 @@ struct RegionRuntimeState: Codable {
 |------|------|--------|
 | `ContentProvider` protocol | ContentProvider.swift | ✅ Done |
 | `CodeContentProvider` (использует TwilightMarchesConfig) | CodeContentProvider.swift | ✅ Done |
+| `TwilightMarchesCodeContentProvider` (конкретная реализация) | WorldState.swift | ✅ Done |
 | `JSONContentProvider` (заглушка) | JSONContentProvider.swift | ✅ Done |
 | Content Validator | ContentProvider.swift (ContentValidator) | ✅ Done |
+| WorldState.setupInitialWorld() использует ContentProvider | WorldState.swift | ✅ Done |
+
+**Реализация TwilightMarchesCodeContentProvider:**
+- 7 регионов Act I: village, oak, forest, swamp, mountain, breach, dark_lowland
+- 6 якорей с типами и influence (chapel, sacred_tree, stone_idol, spring, barrow, shrine)
+- Bridge методы для преобразования Definition → Legacy Model
+- Локализация через статические методы `regionName(for:)`, `anchorName(for:)`
 
 **Контракт ContentProvider:**
 ```swift
@@ -350,16 +358,21 @@ CardSampleGameTests/Engine/
 
 | Test File | Что проверяет | Статус |
 |-----------|---------------|--------|
-| `EngineContractsTests.swift` | Core engine invariants | ✅ Done |
+| `EngineContractsTests.swift` | Core engine invariants + PressureEngine save/load | ✅ Done |
 | `EventModuleContractsTests.swift` | Event module contracts | ✅ Done |
-| `DataSeparationTests.swift` | Definition/Runtime separation | ✅ Done |
+| `DataSeparationTests.swift` | Definition/Runtime separation + TwilightMarchesCodeContentProvider | ✅ Done |
 | `Phase2ContractTests.swift` | Phase 2 contracts (ContentProvider) | ✅ Done |
+| `Phase3ContractTests.swift` | Phase 3 contracts (Engine integration) | ✅ Done |
 
 **EngineContractsTests:**
 ```swift
 func testUIDoesNotMutateStateDirectly()
 func testPerformActionAdvancesTimeOnlyViaTimeEngine()
 func testWorldTickTriggeredByTimeThresholds()
+// NEW: PressureEngine save/load tests (Audit fix)
+func testPressureEngineTriggeredThresholdsSaveLoad()
+func testPressureEngineSyncTriggeredThresholdsFromPressure()
+func testPressureEngineTriggeredThresholdsPreventDuplicates()
 ```
 
 **EventModuleContractsTests:**
@@ -377,6 +390,12 @@ func testCooldownRespected()
 func testDefinitionsAreImmutable()
 func testRuntimeReferencesValidDefinitions()
 func testContentProviderValidationCatchesBrokenLinks()
+// NEW: TwilightMarchesCodeContentProvider tests (Audit fix)
+func testTwilightMarchesProviderLoadsAllRegions()
+func testTwilightMarchesProviderLoadsAnchors()
+func testTwilightMarchesProviderNeighborLinksValid()
+func testTwilightMarchesLocalizationHelpers()
+func testTwilightMarchesRegionInitialStates()
 ```
 
 ### Regression Harness
@@ -427,4 +446,4 @@ func testFixedSeedPlaythroughProducesSameOutcome() {
 
 ---
 
-**Последнее обновление:** 18 января 2026
+**Последнее обновление:** 19 января 2026

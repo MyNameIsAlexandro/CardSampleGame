@@ -1,5 +1,14 @@
 import Foundation
 
+// MARK: - Anchor Influence
+
+/// Influence alignment of an anchor (maps to CardBalance in legacy models)
+enum AnchorInfluence: String, Codable, Hashable {
+    case light
+    case neutral
+    case dark
+}
+
 // MARK: - Anchor Definition
 // Reference: Docs/ENGINE_ARCHITECTURE.md, Section 4.1
 // Reference: Docs/EXPLORATION_CORE_DESIGN.md, Section 6
@@ -25,6 +34,17 @@ struct AnchorDefinition: GameDefinition {
 
     /// ID of the region where this anchor is located
     let regionId: String
+
+    // MARK: - Type & Influence (Twilight Marches specific)
+
+    /// Anchor type (e.g., "chapel", "shrine", "sacred_tree")
+    let anchorType: String
+
+    /// Initial influence: "light", "neutral", or "dark"
+    let initialInfluence: AnchorInfluence
+
+    /// Power level (radius of influence, 1-10)
+    let power: Int
 
     // MARK: - Mechanics
 
@@ -53,6 +73,9 @@ struct AnchorDefinition: GameDefinition {
         titleKey: String,
         descriptionKey: String,
         regionId: String,
+        anchorType: String = "shrine",
+        initialInfluence: AnchorInfluence = .neutral,
+        power: Int = 5,
         maxIntegrity: Int = 100,
         initialIntegrity: Int = 50,
         strengthenAmount: Int = 15,
@@ -63,6 +86,9 @@ struct AnchorDefinition: GameDefinition {
         self.titleKey = titleKey
         self.descriptionKey = descriptionKey
         self.regionId = regionId
+        self.anchorType = anchorType
+        self.initialInfluence = initialInfluence
+        self.power = power
         self.maxIntegrity = maxIntegrity
         self.initialIntegrity = initialIntegrity
         self.strengthenAmount = strengthenAmount

@@ -133,7 +133,7 @@ final class WorldStateTests: XCTestCase {
     // MARK: - TEST-003: Авто-деградация мира
 
     func testTensionIncreasesThroughAdvanceTime() {
-        // Каждые 3 дня worldTension должен увеличиваться на 2
+        // Каждые 3 дня worldTension должен увеличиваться на 3 (базовая формула: +3 + daysPassed/10)
         // Используем advanceTime() вместо ручной установки daysPassed
         let initialTension = worldState.worldTension
 
@@ -475,21 +475,25 @@ final class WorldStateTests: XCTestCase {
 
     /// Тест: low-tension recovery детерминирован
     func testLowTensionRecoveryDeterministic() {
+        // Reset RNG to known state before test
+        WorldRNG.shared.resetToSystem()
+
         let seed: UInt64 = 999888
 
-        // Первый прогон
-        WorldRNG.shared.setSeed(seed)
+        // Первый прогон - create world BEFORE setting seed to consume any RNG from init
         let world1 = WorldState()
+        WorldRNG.shared.setSeed(seed)
         world1.worldTension = 15 // Low tension triggers recovery
         world1.advanceTime(by: 3)
-        let regions1 = world1.regions.map { "\($0.name):\($0.state)" }
+        // Sort by name to ensure deterministic comparison (regions come from Dictionary)
+        let regions1 = world1.regions.map { "\($0.name):\($0.state)" }.sorted()
 
         // Второй прогон с тем же seed
-        WorldRNG.shared.setSeed(seed)
         let world2 = WorldState()
+        WorldRNG.shared.setSeed(seed)
         world2.worldTension = 15
         world2.advanceTime(by: 3)
-        let regions2 = world2.regions.map { "\($0.name):\($0.state)" }
+        let regions2 = world2.regions.map { "\($0.name):\($0.state)" }.sorted()
 
         XCTAssertEqual(regions1, regions2, "Состояния регионов должны совпадать при одном seed")
 

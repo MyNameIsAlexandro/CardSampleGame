@@ -146,7 +146,7 @@
 
 | Файл | Строк | Статус |
 |------|-------|--------|
-| ENGINE_ARCHITECTURE.md | ~940 | ✅ Source of Truth |
+| ENGINE_ARCHITECTURE.md | ~760 | ✅ Source of Truth |
 | EVENT_MODULE_ARCHITECTURE.md | ~450 | ✅ Active |
 | MIGRATION_PLAN.md | ~450 | ✅ Phase 1-3 Done |
 | EXPLORATION_CORE_DESIGN.md | ~3100 | ✅ Active |
