@@ -209,6 +209,15 @@ struct Anchor: Identifiable, Codable {
 
 // MARK: - Region
 
+/// Legacy Region model used for world state persistence and direct UI binding.
+///
+/// ⚠️ МИГРАЦИЯ (Audit v1.1 Issue #9):
+/// - Для нового кода предпочтительнее использовать Engine модели:
+///   - `RegionDefinition` - статические данные региона (из ContentProvider)
+///   - `RegionRuntimeState` - изменяемое состояние (Engine/Runtime/WorldRuntimeState.swift)
+///   - `EngineRegionState` - объединённое состояние для UI (TwilightGameEngine.swift)
+/// - Эта модель сохраняется для: сериализации сейвов, legacy UI, unit-тестов
+/// - После полной миграции UI на Engine эта модель станет internal для persistence
 struct Region: Identifiable, Codable {
     let id: UUID
     let name: String

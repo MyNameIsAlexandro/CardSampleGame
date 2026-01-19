@@ -5,12 +5,28 @@ struct WorldMapView: View {
     @ObservedObject var player: Player
     var onExit: (() -> Void)? = nil
 
+    // MARK: - Engine (Audit v1.1 Issue #4: all state changes via Engine)
+    @StateObject private var engine: TwilightGameEngine
+
     @State private var selectedRegion: Region?
     @State private var showingRegionDetails = false
     @State private var showingExitConfirmation = false
     @State private var showingEventLog = false
     @State private var showingDayEvent = false
     @State private var currentDayEvent: DayEvent?
+
+    // MARK: - Initialization
+
+    init(worldState: WorldState, player: Player, onExit: (() -> Void)? = nil) {
+        self.worldState = worldState
+        self.player = player
+        self.onExit = onExit
+
+        // Create and connect engine to legacy models (Audit v1.1)
+        let newEngine = TwilightGameEngine()
+        newEngine.connectToLegacy(worldState: worldState, player: player)
+        self._engine = StateObject(wrappedValue: newEngine)
+    }
 
     var body: some View {
         NavigationView {
@@ -73,6 +89,7 @@ struct WorldMapView: View {
                     region: region,
                     worldState: worldState,
                     player: player,
+                    engine: engine,  // Audit v1.1 Issue #4
                     onDismiss: {
                         selectedRegion = nil
                         showingRegionDetails = false
@@ -434,6 +451,7 @@ struct RegionDetailView: View {
     let region: Region
     @ObservedObject var worldState: WorldState
     @ObservedObject var player: Player
+    @ObservedObject var engine: TwilightGameEngine  // Audit v1.1 Issue #4
     let onDismiss: () -> Void
     @State private var showingActionConfirmation = false
     @State private var selectedAction: RegionAction?
@@ -1006,50 +1024,51 @@ struct RegionDetailView: View {
         }
     }
 
+    // MARK: - Actions via Engine (Audit v1.1 Issue #4)
+
     func performAction(_ action: RegionAction) {
         switch action {
         case .travel:
-            // Записать путешествие в журнал
+            // Use Engine for travel (Audit v1.1)
             let fromRegion = worldState.getCurrentRegion()?.name ?? "Неизвестно"
-            let cost = worldState.calculateTravelCost(to: region.id)
+            let result = engine.performAction(.travel(toRegionId: region.id))
 
-            // Move to this region
-            worldState.moveToRegion(region.id)
-
-            // Log travel
-            worldState.logTravel(from: fromRegion, to: region.name, days: cost)
-
-            // Check quest objectives when visiting a region
-            worldState.checkQuestObjectivesByRegion(regionId: region.id, player: player)
-
+            if result.success {
+                // Log travel (legacy logging still supported)
+                let cost = worldState.calculateTravelCost(to: region.id)
+                worldState.logTravel(from: fromRegion, to: region.name, days: cost)
+                worldState.checkQuestObjectivesByRegion(regionId: region.id, player: player)
+            }
             onDismiss()
 
         case .rest:
-            // Rest and heal
-            player.heal(5)
-            worldState.advanceDayForUI()
-            worldState.logEvent(
-                regionName: region.name,
-                eventTitle: "Отдых",
-                choiceMade: "Решил отдохнуть",
-                outcome: "Восстановлено 5 здоровья",
-                type: .exploration
-            )
+            // Use Engine for rest (Audit v1.1)
+            let result = engine.performAction(.rest)
+
+            if result.success {
+                worldState.logEvent(
+                    regionName: region.name,
+                    eventTitle: "Отдых",
+                    choiceMade: "Решил отдохнуть",
+                    outcome: "Восстановлено здоровье",
+                    type: .exploration
+                )
+            }
 
         case .trade:
             // TODO: Implement trade/market view
             break
 
         case .strengthenAnchor:
-            // Strengthen anchor if player has enough faith
-            if player.spendFaith(10) {
-                _ = worldState.strengthenAnchor(in: region.id, amount: 20)
-                worldState.advanceDayForUI()
+            // Use Engine for strengthen anchor (Audit v1.1)
+            let result = engine.performAction(.strengthenAnchor)
+
+            if result.success {
                 worldState.logEvent(
                     regionName: region.name,
                     eventTitle: "Укрепление якоря",
-                    choiceMade: "Потрачено 10 веры",
-                    outcome: "Якорь укреплён на 20%",
+                    choiceMade: "Потрачено вера",
+                    outcome: "Якорь укреплён",
                     type: .worldChange
                 )
             }

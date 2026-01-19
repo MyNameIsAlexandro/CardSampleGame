@@ -441,3 +441,21 @@
 "tooltip.faith" = "Вера - ресурс для игры карт";
 "tooltip.balance" = "Баланс между Светом и Тьмой";
 "tooltip.next.phase" = "Следующая фаза хода";
+
+// MARK: - Регионы (Audit v1.1 Issue #2)
+
+// Состояние региона
+"region.state.stable" = "Стабильный";
+"region.state.borderland" = "Пограничье";
+"region.state.breach" = "Разлом";
+
+// Информация о регионе
+"region.reputation" = "Репутация: %d";
+"region.current.location" = "Текущее местоположение";
+
+// Действия в регионе
+"action.travel" = "Путешествовать";
+"action.rest" = "Отдыхать";
+"action.trade" = "Торговать";
+"action.strengthen.anchor" = "Укрепить Якорь";
+"action.explore.region" = "Исследовать";

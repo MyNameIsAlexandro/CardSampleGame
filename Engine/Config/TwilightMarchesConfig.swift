@@ -44,11 +44,12 @@ func twilightInitialResources() -> [String: Int] {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /// Twilight Marches pressure (WorldTension) rules
+/// SINGLE SOURCE OF TRUTH for tension escalation formula (Audit v1.1 Issue #6)
 struct TwilightPressureRules: PressureRuleSet {
     let maxPressure: Int = 100
     let initialPressure: Int = 30
     let escalationInterval: Int = 3  // Every 3 days
-    let escalationAmount: Int = 3    // +3 tension (increased for balance)
+    let escalationAmount: Int = 3    // Base +3 tension (increased for balance)
 
     /// Thresholds and their effects
     var thresholds: [Int: [WorldEffect]] {
@@ -59,9 +60,22 @@ struct TwilightPressureRules: PressureRuleSet {
         ]
     }
 
+    /// Canonical escalation formula: base + (daysPassed / 10)
+    /// - Day 1-9: +3
+    /// - Day 10-19: +4
+    /// - Day 20-29: +5
+    /// Creates increasing urgency as game progresses
     func calculateEscalation(currentPressure: Int, currentTime: Int) -> Int {
-        // Base escalation
-        return escalationAmount
+        let escalationBonus = currentTime / 10
+        return escalationAmount + escalationBonus
+    }
+
+    /// Static helper for use outside of PressureEngine context
+    /// Both WorldState and TwilightGameEngine should use this
+    static func calculateTensionIncrease(daysPassed: Int) -> Int {
+        let base = 3  // escalationAmount
+        let escalationBonus = daysPassed / 10
+        return base + escalationBonus
     }
 
     func checkThresholds(pressure: Int) -> [WorldEffect] {

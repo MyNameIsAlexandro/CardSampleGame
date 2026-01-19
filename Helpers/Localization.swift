@@ -196,4 +196,22 @@ enum L10n {
     static let tooltipFaith = "tooltip.faith"
     static let tooltipBalance = "tooltip.balance"
     static let tooltipNextPhase = "tooltip.next.phase"
+
+    // MARK: - Region UI (Audit v1.1 Issue #2)
+
+    // Region States
+    static let regionStateStable = "region.state.stable"
+    static let regionStateBorderland = "region.state.borderland"
+    static let regionStateBreach = "region.state.breach"
+
+    // Region Info
+    static let regionReputation = "region.reputation"
+    static let regionCurrentLocation = "region.current.location"
+
+    // Actions
+    static let actionTravel = "action.travel"
+    static let actionRest = "action.rest"
+    static let actionTrade = "action.trade"
+    static let actionStrengthenAnchor = "action.strengthen.anchor"
+    static let actionExploreRegion = "action.explore.region"
 }

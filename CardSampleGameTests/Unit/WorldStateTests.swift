@@ -4,6 +4,13 @@ import XCTest
 /// Unit тесты для WorldState
 /// Покрывает: инициализация, время, деградация, регионы
 /// См. QA_ACT_I_CHECKLIST.md, тесты TEST-001, TEST-002, TEST-003
+///
+/// АРХИТЕКТУРА ТЕСТИРОВАНИЯ (Audit v1.1 Issue #3):
+/// - Этот файл содержит UNIT тесты модели WorldState
+/// - Тесты напрямую вызывают методы WorldState (advanceTime, moveToRegion)
+/// - Это КОРРЕКТНО для unit-тестирования модели
+/// - Для интеграционного тестирования игрового потока используйте Phase3ContractTests
+/// - Phase3ContractTests проверяет действия через TwilightGameEngine.performAction()
 final class WorldStateTests: XCTestCase {
 
     var worldState: WorldState!

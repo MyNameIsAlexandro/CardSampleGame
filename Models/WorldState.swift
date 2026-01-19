@@ -355,18 +355,14 @@ class WorldState: ObservableObject, Codable {
 
     /// Internal day start logic - shared by processDayStart() and advanceDayForUI()
     private func performDayStartLogic() {
-        // ⚠️ MIGRATION: This method contains canonical day logic used by tests
-        // TwilightGameEngine has parallel implementation for production use
+        // ⚠️ MIGRATION: This method uses TwilightPressureRules as single source of truth (Audit v1.1 Issue #6)
         // 1. Каждые 3 дня — автоматическая деградация мира
         guard daysPassed > 0 && daysPassed % 3 == 0 else { return }
 
         // 2. Увеличить напряжение мира с ЭСКАЛАЦИЕЙ
-        // Базовая формула: +3 + (daysPassed / 10)
+        // Формула из TwilightPressureRules: base + (daysPassed / 10)
         // День 1-9: +3, День 10-19: +4, День 20-29: +5, ...
-        // Это создаёт ощущение нарастающей угрозы к середине игры
-        let baseIncrement = 3
-        let escalationBonus = daysPassed / 10
-        let totalIncrement = baseIncrement + escalationBonus
+        let totalIncrement = TwilightPressureRules.calculateTensionIncrease(daysPassed: daysPassed)
         increaseTension(by: totalIncrement)
 
         // Уведомить о росте напряжения

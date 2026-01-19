@@ -9,6 +9,7 @@ import Combine
 final class TwilightGameEngine: ObservableObject {
 
     // MARK: - Published State (for UI binding)
+    // Audit v1.1 Issue #1, #8: UI reads directly from Engine, not WorldState
 
     @Published private(set) var currentDay: Int = 0
     @Published private(set) var worldTension: Int = 30
@@ -20,6 +21,44 @@ final class TwilightGameEngine: ObservableObject {
     @Published private(set) var isInCombat: Bool = false
 
     @Published private(set) var lastActionResult: ActionResult?
+
+    // MARK: - Published State for UI (Audit v1.1)
+
+    /// All regions with their current state - UI reads this directly
+    @Published private(set) var publishedRegions: [UUID: EngineRegionState] = [:]
+
+    /// Player stats - UI reads these directly instead of Player model
+    @Published private(set) var playerHealth: Int = 10
+    @Published private(set) var playerMaxHealth: Int = 10
+    @Published private(set) var playerFaith: Int = 3
+    @Published private(set) var playerBalance: Int = 50
+
+    /// World flags - for quest/event conditions
+    @Published private(set) var publishedWorldFlags: [String: Bool] = [:]
+
+    // MARK: - UI Convenience Accessors (Audit v1.1)
+
+    /// Get regions as sorted array for UI iteration
+    var regionsArray: [EngineRegionState] {
+        publishedRegions.values.sorted { $0.name < $1.name }
+    }
+
+    /// Get current region
+    var currentRegion: EngineRegionState? {
+        guard let id = currentRegionId else { return nil }
+        return publishedRegions[id]
+    }
+
+    /// Check if player can afford faith cost
+    func canAffordFaith(_ cost: Int) -> Bool {
+        return playerFaith >= cost
+    }
+
+    /// Check if region is neighbor to current region
+    func isNeighbor(regionId: UUID) -> Bool {
+        guard let current = currentRegion else { return false }
+        return current.neighborIds.contains(regionId)
+    }
 
     // MARK: - Core Subsystems
 
@@ -46,7 +85,7 @@ final class TwilightGameEngine: ObservableObject {
     // MARK: - Configuration Constants
 
     private let tensionTickInterval: Int = 3
-    private let baseTensionIncrease: Int = 3
+    // baseTensionIncrease removed - using TwilightPressureRules.calculateTensionIncrease() (Audit v1.1 Issue #6)
     private let restHealAmount: Int = 3
     private let anchorStrengthenCost: Int = 5
     private let anchorStrengthenAmount: Int = 20
@@ -78,17 +117,29 @@ final class TwilightGameEngine: ObservableObject {
         worldTension = adapter.worldState.worldTension
         currentRegionId = adapter.worldState.currentRegionId
 
-        // Sync regions
+        // Sync regions (both internal and published)
+        var newRegions: [UUID: EngineRegionState] = [:]
         for region in adapter.worldState.regions {
-            regions[region.id] = EngineRegionState(from: region)
+            newRegions[region.id] = EngineRegionState(from: region)
         }
+        regions = newRegions
+        publishedRegions = newRegions  // Audit v1.1: publish for UI
 
-        // Sync flags
+        // Sync flags (both internal and published)
         worldFlags = adapter.worldState.worldFlags
+        publishedWorldFlags = worldFlags  // Audit v1.1: publish for UI
 
         // Sync completed events from GameEvent.completed
         for event in adapter.worldState.allEvents where event.completed {
             completedEventIds.insert(event.id)
+        }
+
+        // Sync player stats (Audit v1.1: publish for UI)
+        if let player = playerAdapter?.player {
+            playerHealth = player.health
+            playerMaxHealth = player.maxHealth
+            playerFaith = player.faith
+            playerBalance = player.balance
         }
 
         // CRITICAL: Sync pressure engine state to prevent duplicate threshold events
@@ -201,7 +252,10 @@ final class TwilightGameEngine: ObservableObject {
         // 8. Sync to legacy (during migration period)
         syncToLegacy(changes: stateChanges)
 
-        // 9. Build and return result
+        // 9. Update published state for UI (Audit v1.1)
+        updatePublishedState()
+
+        // 10. Build and return result
         let result = ActionResult(
             success: true,
             error: nil,
@@ -368,8 +422,8 @@ final class TwilightGameEngine: ObservableObject {
     }
 
     private func calculateTensionIncrease() -> Int {
-        // Escalation formula: +3 + (daysPassed / 10)
-        return baseTensionIncrease + (currentDay / 10)
+        // Use TwilightPressureRules as single source of truth (Audit v1.1 Issue #6)
+        return TwilightPressureRules.calculateTensionIncrease(daysPassed: currentDay)
     }
 
     private func processWorldDegradation() -> [StateChange] {
@@ -638,6 +692,26 @@ final class TwilightGameEngine: ObservableObject {
         worldStateAdapter?.applyChanges(changes)
         playerAdapter?.syncFromEngine()
     }
+
+    // MARK: - Published State Update (Audit v1.1)
+
+    /// Update all published properties from internal state
+    /// Called after actions to keep UI in sync
+    private func updatePublishedState() {
+        // Update regions
+        publishedRegions = regions
+
+        // Update flags
+        publishedWorldFlags = worldFlags
+
+        // Update player stats from adapter
+        if let player = playerAdapter?.player {
+            playerHealth = player.health
+            playerMaxHealth = player.maxHealth
+            playerFaith = player.faith
+            playerBalance = player.balance
+        }
+    }
 }
 
 // MARK: - Event Trigger
@@ -652,7 +726,18 @@ enum EventTrigger {
 
 // MARK: - Engine Region State (Bridge from Legacy)
 
-/// Internal state for engine region tracking (bridges from legacy Region model)
+/// Объединённое состояние региона для UI (Audit v1.1 Issue #9)
+///
+/// Это ПРЕДПОЧТИТЕЛЬНАЯ модель для UI:
+/// - Создаётся из legacy Region через TwilightGameEngine.syncFromLegacy()
+/// - Публикуется через engine.publishedRegions
+/// - UI должен использовать engine.regionsArray или engine.currentRegion
+///
+/// Архитектура моделей:
+/// - `RegionDefinition` - статические данные (ContentProvider)
+/// - `RegionRuntimeState` - изменяемое состояние (WorldRuntimeState)
+/// - `EngineRegionState` - объединённое для UI (этот struct)
+/// - `Region` (legacy) - persistence и совместимость
 struct EngineRegionState {
     let id: UUID
     let name: String

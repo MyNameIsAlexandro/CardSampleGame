@@ -4,6 +4,11 @@ import XCTest
 /// Модельные тесты для действий в регионах
 /// Покрывает: доступность действий (canRest/canTrade), стоимость перемещения, ограничения
 /// См. QA_ACT_I_CHECKLIST.md, тест TEST-005
+///
+/// АРХИТЕКТУРА ТЕСТИРОВАНИЯ (Audit v1.1 Issue #3):
+/// - Этот файл содержит UNIT тесты модели Region
+/// - Тесты проверяют computed properties (canRest, canTrade) и поведение модели
+/// - Для интеграционного тестирования действий через Engine см. Phase3ContractTests
 final class RegionActionsModelTests: XCTestCase {
 
     var worldState: WorldState!

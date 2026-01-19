@@ -3,6 +3,13 @@ import XCTest
 
 /// Phase 3 Contract Tests: GameLoop Integration
 /// Verifies that all actions go through Engine and state changes are correct
+///
+/// АРХИТЕКТУРА ТЕСТИРОВАНИЯ (Audit v1.1 Issue #3):
+/// - Этот файл содержит ИНТЕГРАЦИОННЫЕ тесты игрового потока
+/// - ВСЕ действия тестируются через TwilightGameEngine.performAction()
+/// - Это канонический способ тестирования игровой логики
+/// - Для unit-тестов моделей см. WorldStateTests, RegionActionsModelTests
+/// - Engine обеспечивает: валидацию, синхронизацию legacy, отслеживание изменений
 final class Phase3ContractTests: XCTestCase {
 
     var engine: TwilightGameEngine!

@@ -400,3 +400,21 @@
 "tm.card.type.spirit" = "Spirit";
 "tm.card.type.artifact" = "Artifact";
 "tm.card.type.ritual" = "Ritual";
+
+// MARK: - Region UI (Audit v1.1 Issue #2)
+
+// Region States
+"region.state.stable" = "Stable";
+"region.state.borderland" = "Borderland";
+"region.state.breach" = "Breach";
+
+// Region Info
+"region.reputation" = "Reputation: %d";
+"region.current.location" = "Current Location";
+
+// Region Actions
+"action.travel" = "Travel";
+"action.rest" = "Rest";
+"action.trade" = "Trade";
+"action.strengthen.anchor" = "Strengthen Anchor";
+"action.explore.region" = "Explore";
