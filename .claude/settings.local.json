@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(textutil:*)",
+      "Bash(xcodebuild:*)",
+      "Bash(ruby -e '\nrequire \"\"xcodeproj\"\"\n\nproject_path = \"\"CardSampleGame.xcodeproj\"\"\nproject = Xcodeproj::Project.open\\(project_path\\)\n\n# Find the main target\ntarget = project.targets.find { |t| t.name == \"\"CardSampleGame\"\" }\n\n# Find the Engine/Data/Providers group\nproviders_group = project.main_group.find_subpath\\(\"\"Engine/Data/Providers\"\", true\\)\n\n# Add the new file\nfile_path = \"\"Engine/Data/Providers/TwilightMarchesContentProvider.swift\"\"\nfile_ref = providers_group.new_reference\\(file_path.split\\(\"\"/\"\"\\).last\\)\nfile_ref.set_source_tree\\(\"\"<group>\"\"\\)\n\n# Add to target\ntarget.add_file_references\\([file_ref]\\)\n\nproject.save\nputs \"\"Added TwilightMarchesContentProvider.swift to project\"\"\n')",
+      "Bash(xcrun xcresulttool:*)",
+      "Bash(grep:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(gh auth:*)",
+      "Bash(brew install:*)",
+      "Bash(ssh-keygen:*)",
+      "Bash(ssh-add:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(ssh:*)",
+      "Bash(xcrun simctl list:*)"
+    ]
+  }
+}

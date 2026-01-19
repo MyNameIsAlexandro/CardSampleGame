@@ -1,0 +1,602 @@
+/*
+  Localizable.strings
+  CardSampleGame - Russian
+*/
+
+// MARK: - Main Screen
+"game.title" = "Карточное Приключение";
+"character.select.title" = "Выберите персонажа";
+"character.stats" = "Характеристики персонажа";
+"character.abilities" = "Способности";
+"button.start.adventure" = "Начать приключение";
+
+// MARK: - Game Board
+"turn.label" = "Ход %d";
+"button.next.phase" = "Следующая фаза";
+"button.explore" = "Исследовать";
+"button.roll.dice" = "Бросить кубик";
+"dice.result" = "Результат: %d";
+"dice.roll.title" = "Бросок кубика";
+"dice.roll.message" = "Вы выбросили: %d";
+"button.ok" = "ОК";
+
+// MARK: - Game Phases
+"phase.setup" = "Подготовка";
+"phase.exploration" = "Исследование";
+"phase.encounter" = "Столкновение";
+"phase.player.turn" = "Ход игрока";
+"phase.enemy.turn" = "Ход врага";
+"phase.end.turn" = "Конец хода";
+"phase.game.over" = "Игра окончена";
+
+// MARK: - Encounter
+"encounter.active" = "Активное столкновение";
+
+// MARK: - Deck
+"deck.encounters" = "Столкновения";
+"deck.locations" = "Локации";
+"deck.cards" = "Карт: %d";
+
+// MARK: - Player Hand
+"player.hand.title" = "Ваша рука";
+"player.discard.pile" = "Сброс: %d";
+"player.deck.remaining" = "Колода: %d";
+
+// MARK: - Card Types
+"card.type.character" = "Персонаж";
+"card.type.weapon" = "Оружие";
+"card.type.spell" = "Заклинание";
+"card.type.armor" = "Броня";
+"card.type.item" = "Предмет";
+"card.type.blessing" = "Благословение";
+"card.type.monster" = "Монстр";
+"card.type.location" = "Локация";
+"card.type.ally" = "Союзник";
+
+// MARK: - Stats
+"stat.health" = "Здоровье";
+"stat.power" = "Сила";
+"stat.defense" = "Защита";
+"stat.strength" = "Сила";
+"stat.dexterity" = "Ловкость";
+"stat.constitution" = "Телосложение";
+"stat.intelligence" = "Интеллект";
+"stat.wisdom" = "Мудрость";
+"stat.charisma" = "Харизма";
+
+// MARK: - Rarity
+"rarity.common" = "Обычная";
+"rarity.uncommon" = "Необычная";
+"rarity.rare" = "Редкая";
+"rarity.epic" = "Эпическая";
+"rarity.legendary" = "Легендарная";
+
+// MARK: - Damage Types
+"damage.physical" = "Физический";
+"damage.fire" = "Огонь";
+"damage.cold" = "Холод";
+"damage.lightning" = "Молния";
+"damage.poison" = "Яд";
+"damage.acid" = "Кислота";
+"damage.holy" = "Святой";
+"damage.shadow" = "Тень";
+
+// MARK: - Actions
+"action.play" = "Сыграть";
+"action.discard" = "Сбросить";
+"action.examine" = "Осмотреть";
+
+// MARK: - Rules
+"rules.title" = "Как играть";
+"rules.button" = "Правила";
+
+// Rules Sections
+"rules.objective.title" = "Цель игры";
+"rules.objective.content" = "Отправляйтесь в эпическое приключение! Выберите героя, исследуйте опасные локации, побеждайте монстров и собирайте мощные карты, чтобы стать величайшим искателем приключений.";
+
+"rules.phases.title" = "Фазы хода";
+"rules.phases.content" = "Каждый ход состоит из нескольких фаз. Завершите все фазы, чтобы закончить свой ход:";
+
+"rules.phase.exploration" = "Вытяните карту столкновения и встретьтесь с новым испытанием.";
+"rules.phase.encounter" = "Столкновение активировано. Подготовьтесь к бою!";
+"rules.phase.player.turn" = "Ваш ход! У вас есть 3 действия: атакуйте (1 действие), играйте карты (1 действие), используйте способности. Враг не атакует в эту фазу.";
+"rules.phase.enemy.turn" = "Ход врага! Враг автоматически атакует вас. Подготовьтесь к урону.";
+"rules.phase.endturn" = "Сбросьте сыгранные карты и доберите до размера руки.";
+
+"rules.cards.title" = "Типы карт";
+"rules.cards.content" = "Оружие усиливает атаку, Заклинания дают магические эффекты, Броня защищает от урона, Предметы дают особые способности, а Благословения предоставляют временные бонусы. Стройте колоду с умом!";
+
+"rules.resources.title" = "Ресурсы";
+"rules.resources.content" = "В игре три основных ресурса:\n\n• Здоровье (❤️) - ваша жизненная сила. Когда достигает нуля, игра заканчивается поражением.\n\n• Вера (✨) - используется для активации мощных карт и способностей. Восстанавливается в начале каждого хода.\n\n• Баланс (☯️) - отражает вашу связь с миром Яви, Нави и Прави. Влияет на силу некоторых карт и способностей.";
+
+"rules.actions.title" = "Действия в ход";
+"rules.actions.content" = "У вас есть 3 действия (⚡) каждый ход. Действия тратятся на:\n\n• Атака (1 действие) - бросьте кубик и атакуйте врага\n\n• Игра карты (1 действие) - сыграйте карту из руки\n\n• Использование способности (1 действие) - активируйте способность карты\n\nДействия сбрасываются в начале следующего хода. Используйте их мудро!";
+
+"rules.dice.title" = "Броски кубиков";
+"rules.dice.content" = "Встречая испытания, бросайте кубик! Добавляйте бонусы от карт и способностей. Выбросите больше, чем сложность, чтобы преуспеть.";
+
+"rules.victory.title" = "Победа";
+"rules.victory.content" = "Побеждайте всех противников, переживайте опасные ситуации и следите за здоровьем. Когда здоровье достигнет нуля, игра заканчивается!";
+
+"rules.tips.title" = "Стратегические советы";
+"rules.tips.content" = "• Берегите мощные карты для сложных столкновений\n• Балансируйте колоду разными типами карт\n• Используйте благословения в правильный момент\n• Следите за размером руки\n• Помните: некоторые карты можно играть вместе для комбо-эффектов!";
+
+// MARK: - Card Names
+// Characters
+"card.valeros.name" = "Валерос";
+"card.valeros.desc" = "Отважный воин из городской стражи, мастер меча и щита.";
+"card.seoni.name" = "Сеони";
+"card.seoni.desc" = "Могущественная волшебница, управляющая тайной энергией.";
+"card.kyra.name" = "Кайра";
+"card.kyra.desc" = "Преданная жрица, исцеляющая союзников и карающая зло.";
+
+// Character Abilities
+"ability.weapon.master" = "Мастер Оружия";
+"ability.weapon.master.desc" = "Добавьте 2 кубика при использовании оружия";
+"ability.arcane.blast" = "Магический Взрыв";
+"ability.arcane.blast.desc" = "Нанесите 3 урона огнём любому врагу";
+"ability.spell.focus" = "Концентрация Заклинаний";
+"ability.spell.focus.desc" = "Возьмите 1 дополнительную карту при сотворении заклинаний";
+"ability.divine.healing" = "Божественное Исцеление";
+"ability.divine.healing.desc" = "Излечите 4 урона себе или союзнику";
+"ability.channel.energy" = "Направление Энергии";
+"ability.channel.energy.desc" = "Излечите 2 урона всем союзникам";
+
+// Weapons
+"card.longsword.name" = "Длинный Меч";
+"card.longsword.desc" = "Хорошо сбалансированный клинок, смертельный в умелых руках.";
+"card.longbow.name" = "Длинный Лук";
+"card.longbow.desc" = "Поражайте врагов издалека с точностью.";
+"card.staff.power.name" = "Посох Силы";
+"card.staff.power.desc" = "Магический посох, направляющий мистическую энергию.";
+
+// Weapon Abilities
+"ability.power.strike" = "Мощный Удар";
+"ability.power.strike.desc" = "Нанесите +3 урона";
+"ability.precise.shot" = "Точный Выстрел";
+"ability.precise.shot.desc" = "Игнорируйте броню";
+"ability.arcane.surge" = "Магический Всплеск";
+"ability.arcane.surge.desc" = "Добавьте силу заклинаний к атаке";
+
+// Spells
+"card.fireball.name" = "Огненный Шар";
+"card.fireball.desc" = "Швырните шар пламени во врагов.";
+"card.lightning.bolt.name" = "Молния";
+"card.lightning.bolt.desc" = "Призовите удар молнии.";
+"card.healing.touch.name" = "Исцеляющее Прикосновение";
+"card.healing.touch.desc" = "Восстановите здоровье божественной магией.";
+
+// Spell Abilities
+"ability.burn" = "Поджог";
+"ability.burn.desc" = "Нанесите 4 урона огнём";
+"ability.chain.lightning" = "Цепная Молния";
+"ability.chain.lightning.desc" = "Нанесите 3 урона молнией 2 врагам";
+"ability.restore" = "Восстановление";
+"ability.restore.desc" = "Излечите 5 урона";
+
+// Armor
+"card.leather.armor.name" = "Кожаная Броня";
+"card.leather.armor.desc" = "Легкая защита, не мешающая движению.";
+"card.plate.armor.name" = "Латная Броня";
+"card.plate.armor.desc" = "Тяжелая броня, обеспечивающая отличную защиту.";
+
+// Items
+"card.healing.potion.name" = "Зелье Лечения";
+"card.healing.potion.desc" = "Флакон магической жидкости, восстанавливающей жизнь.";
+"card.magic.ring.name" = "Магическое Кольцо";
+"card.magic.ring.desc" = "Кольцо с защитными чарами.";
+
+// Item Abilities
+"ability.quick.heal" = "Быстрое Лечение";
+"ability.quick.heal.desc" = "Мгновенно излечите 3 урона";
+"ability.shield" = "Щит";
+"ability.shield.desc" = "Добавьте +2 к защите до конца хода";
+
+// Blessings
+"card.blessing.luck.name" = "Благословение Удачи";
+"card.blessing.luck.desc" = "Фортуна улыбается вам.";
+"card.blessing.gods.name" = "Благословение Богов";
+"card.blessing.gods.desc" = "Божественная милость дарует вам силу.";
+
+// Blessing Abilities
+"ability.lucky" = "Удача";
+"ability.lucky.desc" = "Перебросьте любую неудавшуюся проверку";
+"ability.divine.favor" = "Божественная Милость";
+"ability.divine.favor.desc" = "Добавьте 3 к любой проверке";
+
+// Monsters
+"card.goblin.raider.name" = "Гоблин-Налётчик";
+"card.goblin.raider.desc" = "Маленькое, но злобное существо с грубым оружием.";
+"card.orc.warrior.name" = "Орк-Воин";
+"card.orc.warrior.desc" = "Грубый боец с огромной силой.";
+"card.skeleton.warrior.name" = "Скелет-Воин";
+"card.skeleton.warrior.desc" = "Нежить-солдат с древним оружием.";
+"card.ancient.dragon.name" = "Древний Дракон";
+"card.ancient.dragon.desc" = "Массивный змей с чешуёй как железо и огненным дыханием.";
+
+// Traits
+"trait.human" = "Человек";
+"trait.warrior" = "Воин";
+"trait.fighter" = "Боец";
+"trait.sorcerer" = "Волшебник";
+"trait.magic" = "Магия";
+"trait.cleric" = "Жрец";
+"trait.divine" = "Божественный";
+"trait.melee" = "Ближний Бой";
+"trait.ranged" = "Дальний Бой";
+"trait.arcane" = "Тайный";
+"trait.fire" = "Огонь";
+"trait.lightning" = "Молния";
+"trait.healing" = "Лечение";
+"trait.light" = "Легкий";
+"trait.heavy" = "Тяжелый";
+"trait.potion" = "Зелье";
+"trait.magical" = "Магический";
+"trait.blessing" = "Благословение";
+"trait.goblin" = "Гоблин";
+"trait.evil" = "Зло";
+"trait.orc" = "Орк";
+"trait.undead" = "Нежить";
+"trait.skeleton" = "Скелет";
+"trait.dragon" = "Дракон";
+"trait.ancient" = "Древний";
+
+// MARK: - Сумрачные Пределы (Twilight Marches)
+
+// Название игры
+"tm.game.title" = "Сумрачные Пределы";
+"tm.game.subtitle" = "Темные Славянские Легенды";
+
+// Миры
+"tm.realm.yav" = "Явь - Мир Живых";
+"tm.realm.nav" = "Навь - Мир Мертвых";
+"tm.realm.prav" = "Правь - Мир Богов";
+
+// Баланс
+"tm.balance.light" = "Свет";
+"tm.balance.neutral" = "Нейтральный";
+"tm.balance.dark" = "Тьма";
+
+// Ресурсы
+"tm.resource.faith" = "Вера";
+"tm.resource.balance" = "Баланс";
+
+// Персонажи
+"tm.char.veleslava.name" = "Велеслава";
+"tm.char.veleslava.desc" = "Ведунья пограничья, хранительница древних искусств исцеления и защитница от проклятий.";
+"tm.char.ratibor.name" = "Ратибор";
+"tm.char.ratibor.desc" = "Изгнанный воевода, ищущий искупления, мастер меча и командования.";
+"tm.char.miroslav.name" = "Мирослав";
+"tm.char.miroslav.desc" = "Волхв-отступник, заключивший темный договор, владеющий запретными силами Нави.";
+"tm.char.zabava.name" = "Забава";
+"tm.char.zabava.desc" = "Хитрая охотница на нечисть, выслеживающая духов и чудовищ по сумрачным землям.";
+
+// Способности персонажей
+"tm.ability.herb.wisdom" = "Травяная Мудрость";
+"tm.ability.herb.wisdom.desc" = "Исцелить 3 здоровья древним травничеством";
+"tm.ability.curse.breaker" = "Снятие Проклятий";
+"tm.ability.curse.breaker.desc" = "Снять одно проклятие с себя или союзника";
+"tm.ability.battle.fury" = "Боевая Ярость";
+"tm.ability.battle.fury.desc" = "Добавить 3 кубика к следующей боевой проверке";
+"tm.ability.commanders.will" = "Воля Командира";
+"tm.ability.commanders.will.desc" = "Получить 2 Веры от вашего лидерства";
+"tm.ability.dark.pact" = "Темный Договор";
+"tm.ability.dark.pact.desc" = "Призвать духа из Нави (Сила 5)";
+"tm.ability.soul.drain" = "Вытягивание Души";
+"tm.ability.soul.drain.desc" = "Пожертвовать 2 здоровья, чтобы взять 3 карты";
+"tm.ability.silver.arrow" = "Серебряная Стрела";
+"tm.ability.silver.arrow.desc" = "Нанести 5 урона любому существу";
+"tm.ability.track.prey" = "Выследить Добычу";
+"tm.ability.track.prey.desc" = "Взять 2 карты, следуя по следу";
+
+// Враги
+"tm.enemy.navii.name" = "Навий";
+"tm.enemy.navii.desc" = "Неупокоенный дух мертвого, блуждающий между мирами.";
+"tm.enemy.upyr.name" = "Упырь";
+"tm.enemy.upyr.desc" = "Древний вампир, высасывающий жизненную силу из живых.";
+"tm.enemy.leshiy.name" = "Леший";
+"tm.enemy.leshiy.desc" = "Искаженный дух леса, сбивающий путников с дороги.";
+"tm.enemy.rusalka.name" = "Русалка";
+"tm.enemy.rusalka.desc" = "Дух утопленной девы, поющая смертельные песни при лунном свете.";
+"tm.enemy.zmey.name" = "Змей Горыныч";
+"tm.enemy.zmey.desc" = "Легендарный трехглавый дракон, древний ужас небес.";
+
+// Способности врагов
+"tm.ability.soul.touch" = "Касание Души";
+"tm.ability.soul.touch.desc" = "Наложить проклятие Слабости на 2 хода";
+"tm.ability.blood.drain" = "Вытягивание Крови";
+"tm.ability.blood.drain.desc" = "Нанести 4 ментального урона";
+"tm.ability.life.steal" = "Кража Жизни";
+"tm.ability.life.steal.desc" = "Исцелить 2 здоровья вытянутой жизнью";
+"tm.ability.forest.maze" = "Лесной Лабиринт";
+"tm.ability.forest.maze.desc" = "Наложить проклятие Забвения на 3 хода";
+"tm.ability.natures.wrath" = "Гнев Природы";
+"tm.ability.natures.wrath.desc" = "Нанести 3 физического урона";
+"tm.ability.drowning.song" = "Песня Утопленницы";
+"tm.ability.drowning.song.desc" = "Наложить проклятие Безумия на 2 хода";
+"tm.ability.water.grasp" = "Водная Хватка";
+"tm.ability.water.grasp.desc" = "Нанести 3 урона холодом";
+"tm.ability.three.breaths" = "Три Дыхания";
+"tm.ability.three.breaths.desc" = "Нанести 10 урона огнем тремя драконьими головами";
+"tm.ability.ancient.curse" = "Древнее Проклятие";
+"tm.ability.ancient.curse.desc" = "Наложить проклятие Болезни на 5 ходов";
+
+// Духи
+"tm.spirit.domovoy.name" = "Домовой";
+"tm.spirit.domovoy.desc" = "Домашний дух, хранитель очага и дома.";
+"tm.spirit.bereginya.name" = "Берегиня";
+"tm.spirit.bereginya.desc" = "Защитный дух, оберегающий от тьмы.";
+
+// Способности духов
+"tm.ability.home.guard" = "Домашняя Стража";
+"tm.ability.home.guard.desc" = "Добавить 1 кубик к проверкам защиты";
+"tm.ability.protective.aura" = "Защитная Аура";
+"tm.ability.protective.aura.desc" = "Снять одно проклятие";
+"tm.ability.blessing.shield" = "Благословенный Щит";
+"tm.ability.blessing.shield.desc" = "Сдвинуть баланс на 2 пункта к Свету";
+
+// Проклятия
+"tm.curse.black.mark.name" = "Черная Метка";
+"tm.curse.black.mark.desc" = "Темная печать из Нави, вытягивающая вашу силу.";
+"tm.curse.madness.name" = "Безумие";
+"tm.curse.madness.desc" = "Реальность искажается и извивается перед вашими глазами.";
+
+// Типы проклятий
+"tm.curse.type.blindness" = "Слепота";
+"tm.curse.type.muteness" = "Немота";
+"tm.curse.type.weakness" = "Слабость";
+"tm.curse.type.forgetfulness" = "Забвение";
+"tm.curse.type.sickness" = "Болезнь";
+"tm.curse.type.madness" = "Безумие";
+"tm.curse.type.transformation" = "Превращение";
+
+// Способности проклятий
+"tm.ability.mark.of.nav" = "Метка Нави";
+"tm.ability.mark.of.nav.desc" = "Наложить Слабость на 3 хода";
+"tm.ability.lose.sanity" = "Потеря Рассудка";
+"tm.ability.lose.sanity.desc" = "Наложить Безумие на 4 хода";
+
+// Артефакты
+"tm.artifact.kalinov.sword.name" = "Калинов Меч";
+"tm.artifact.kalinov.sword.desc" = "Легендарный клинок, выкованный в мире богов, погибель тьмы.";
+"tm.artifact.alatyr.stone.name" = "Алатырь-Камень";
+"tm.artifact.alatyr.stone.desc" = "Священный камень в центре всех миров, якорь реальности.";
+
+// Способности артефактов
+"tm.ability.cleaving.strike" = "Рассекающий Удар";
+"tm.ability.cleaving.strike.desc" = "Нанести 8 урона легендарным клинком";
+"tm.ability.banish.darkness" = "Изгнание Тьмы";
+"tm.ability.banish.darkness.desc" = "Сдвинуть баланс на 3 пункта к Свету";
+"tm.ability.realm.anchor" = "Якорь Миров";
+"tm.ability.realm.anchor.desc" = "Вернуться в Явь из любого мира";
+"tm.ability.restore.balance" = "Восстановить Баланс";
+"tm.ability.restore.balance.desc" = "Сдвинуть баланс на 5 пунктов к Нейтральному";
+
+// Характеристики
+"tm.trait.healer" = "Целитель";
+"tm.trait.vedunya" = "Ведунья";
+"tm.trait.warrior" = "Воин";
+"tm.trait.voevoda" = "Воевода";
+"tm.trait.sorcerer" = "Колдун";
+"tm.trait.volkhv" = "Волхв";
+"tm.trait.hunter" = "Охотник";
+"tm.trait.ranger" = "Следопыт";
+"tm.trait.spirit" = "Дух";
+"tm.trait.guardian" = "Хранитель";
+"tm.trait.bereginya" = "Берегиня";
+"tm.trait.curse" = "Проклятие";
+"tm.trait.mental" = "Ментальный";
+"tm.trait.artifact" = "Артефакт";
+"tm.trait.weapon" = "Оружие";
+"tm.trait.legendary" = "Легендарный";
+"tm.trait.sacred" = "Священный";
+"tm.trait.light" = "Свет";
+"tm.trait.dark" = "Тьма";
+"tm.trait.neutral" = "Нейтральный";
+"tm.trait.nav" = "Навь";
+"tm.trait.yav" = "Явь";
+"tm.trait.prav" = "Правь";
+"tm.trait.upyr" = "Упырь";
+"tm.trait.leshiy" = "Леший";
+"tm.trait.rusalka" = "Русалка";
+"tm.trait.zmey" = "Змей";
+"tm.trait.nature" = "Природа";
+"tm.trait.water" = "Вода";
+
+// Типы карт
+"tm.card.type.curse" = "Проклятие";
+"tm.card.type.spirit" = "Дух";
+"tm.card.type.artifact" = "Артефакт";
+"tm.card.type.ritual" = "Ритуал";
+
+// Интерфейс игры
+"ui.menu.button" = "Меню";
+"ui.pause.menu" = "Игровое Меню";
+"ui.resume" = "Продолжить";
+"ui.save.game" = "Сохранить игру";
+"ui.rules" = "Правила";
+"ui.exit" = "Выход";
+"ui.roll" = "Бросить";
+"ui.result" = "Результат: %d";
+"ui.encounters" = "Столкновения";
+"ui.your.deck" = "Ваша Колода";
+"ui.discard" = "Сброс";
+"ui.active.encounter" = "Активное столкновение";
+"ui.explore" = "Исследовать";
+"ui.deck.info" = "Информация о колоде";
+"ui.hand.title" = "Ваши карты";
+"ui.game.saved" = "Игра сохранена";
+"ui.progress.saved" = "Ваш прогресс успешно сохранён.";
+
+// Победа/Поражение
+"ui.victory.title" = "Победа!";
+"ui.defeat.title" = "Поражение";
+"ui.encounters.defeated" = "Побеждено столкновений: %d";
+"ui.turns.taken" = "Ходов сделано: %d";
+"ui.turns.survived" = "Ходов выжито: %d";
+"ui.return.menu" = "Вернуться в Меню";
+
+// Подсказки для иконок
+"tooltip.health" = "Здоровье";
+"tooltip.faith" = "Вера - ресурс для игры карт";
+"tooltip.balance" = "Баланс между Светом и Тьмой";
+"tooltip.next.phase" = "Следующая фаза хода";
+
+// MARK: - Регионы (Audit v1.1 Issue #2)
+
+// Состояние региона
+"region.state.stable" = "Стабильный";
+"region.state.borderland" = "Пограничье";
+"region.state.breach" = "Разлом";
+
+// Информация о регионе
+"region.reputation" = "Репутация: %d";
+"region.current.location" = "Текущее местоположение";
+
+// Действия в регионе
+"action.travel" = "Путешествовать";
+"action.rest" = "Отдыхать";
+"action.trade" = "Торговать";
+"action.strengthen.anchor" = "Укрепить Якорь";
+"action.explore.region" = "Исследовать";
+
+// MARK: - Combat UI (Engine-First Migration)
+
+// Combat phases
+"combat.title" = "Бой";
+"combat.turn.number" = "Ход %d";
+"combat.actions.remaining" = "Действий: %d";
+"combat.phase.player.turn" = "Ваш ход";
+"combat.phase.enemy.turn" = "Ход врага";
+"combat.phase.end.turn" = "Конец хода";
+"combat.phase.over" = "Бой завершён";
+
+// Combat actions
+"combat.action.attack" = "Атака";
+"combat.action.end.turn" = "Завершить ход";
+"combat.action.flee" = "Бежать";
+"combat.action.play.card" = "Сыграть карту";
+
+// Combat stats
+"combat.stat.hp" = "ОЗ";
+"combat.stat.attack" = "Атака";
+"combat.stat.defense" = "Защита";
+"combat.stat.strength" = "Сила";
+
+// Combat messages
+"combat.message.victory" = "Победа!";
+"combat.message.defeat" = "Поражение";
+"combat.message.fled" = "Вы сбежали";
+"combat.message.hit" = "Попадание!";
+"combat.message.miss" = "Промах!";
+"combat.message.damage" = "%d урона";
+
+// Combat log
+"combat.log.title" = "Журнал боя";
+"combat.log.battle.start" = "Бой начался с %@";
+"combat.log.actions.per.turn" = "У вас %d действий за ход";
+"combat.log.enemy.attacks" = "%@ атакует!";
+"combat.log.spirit.attacks" = "%@ атакует противника";
+"combat.log.meditation" = "Медитация (+%d веры)";
+"combat.log.turn.separator" = "--- Ход %d ---";
+
+// Combat card effects
+"combat.effect.heal" = "Исцеление +%d";
+"combat.effect.damage" = "Урон %d";
+"combat.effect.draw.cards" = "Взято карт: %d";
+"combat.effect.gain.faith" = "Вера +%d";
+"combat.effect.spend.faith" = "Вера -%d";
+"combat.effect.remove.curse" = "Проклятие снято";
+"combat.effect.bonus.dice" = "Бонусные кубики: +%d";
+"combat.effect.shift.balance" = "Баланс сдвинут к %@";
+"combat.effect.summon.spirit" = "Призван дух (Сила: %d)";
+"combat.effect.sacrifice" = "Жертвоприношение";
+
+// Combat attack breakdown
+"combat.attack.roll" = "Бросок: %d + %d = %d";
+"combat.damage.calc" = "Урон: %d (база) + %d (бонус) = %d";
+"combat.damage.base" = "Базовый урон: %d";
+
+// Hand UI in combat
+"combat.your.hand" = "Ваши карты";
+"combat.tap.to.play" = "Нажмите для игры";
+"combat.not.enough.faith" = "Недостаточно веры";
+
+// NOTE: JSON контент (регионы, якоря, квесты, испытания, события) теперь использует
+// встроенные локализованные строки в JSON файлах. См. Resources/Content/*.json
+
+// MARK: - UI Strings
+
+// ContentView
+"ui.continue" = "Продолжить";
+"ui.back" = "Назад";
+"ui.slot.selection" = "Выбор слота";
+"ui.continue.game" = "Продолжить игру";
+"ui.slot.number" = "Слот %d";
+"ui.turn.number" = "Ход: %d";
+"ui.victories" = "Побед: %d";
+"ui.load" = "Загрузить";
+"ui.new.game" = "Новая игра";
+"ui.empty.slot" = "Пустой слот";
+"ui.start.new.game" = "Начать новую игру";
+"ui.delete.confirm" = "Это действие нельзя отменить.";
+"ui.overwrite.confirm" = "Текущее сохранение будет потеряно.";
+"ui.delete.save" = "Удалить сохранение?";
+"ui.overwrite.save" = "Перезаписать сохранение?";
+"ui.cancel" = "Отмена";
+"ui.delete" = "Удалить";
+"ui.overwrite" = "Перезаписать";
+
+// EventView
+"event.choose.action" = "Выберите действие:";
+"event.requires.faith" = "Требуется: %d веры";
+"event.you.have.faith" = "(у вас: %d)";
+"event.requires.health" = "Требуется: %d здоровья";
+"event.you.have.health" = "(у вас: %d)";
+"event.requires.path" = "Требуется путь: %@";
+"event.your.path" = "(ваш: %@)";
+"event.faith.change" = "Вера: %@%d";
+"event.health.change" = "Здоровье: %@%d";
+"event.balance.to.light" = "Баланс: к Свету";
+"event.balance.to.dark" = "Баланс: к Тьме";
+"event.reputation.change" = "Репутация: %@%d";
+"event.receive.card" = "Получите карту";
+"event.receive.curse" = "Получите проклятие";
+"event.choice.made" = "Выбор сделан.";
+"event.combat.victory.message" = "Победа! Вы одержали верх в бою.";
+"event.combat.defeat.message" = "Поражение... Вы потерпели неудачу в бою.";
+"event.combat.fled.message" = "Вы сбежали из боя.";
+
+// UI Common
+"ui.close" = "Закрыть";
+"ui.result" = "Результат";
+
+// Balance (genitive form)
+"tm.balance.light.genitive" = "Света";
+"tm.balance.neutral.genitive" = "Нейтральный";
+"tm.balance.dark.genitive" = "Тьмы";
+
+// StatisticsView
+"stats.title" = "Статистика";
+"stats.game.name" = "Twilight Marches";
+"stats.general" = "Общая статистика";
+"stats.leaderboard" = "Таблица лидеров";
+"stats.history" = "История игр";
+"stats.no.saves" = "Пока нет сохранённых игр";
+"stats.start.hint" = "Начните новую игру, чтобы увидеть статистику";
+"stats.done" = "Готово";
+"stats.resources" = "Ресурсы";
+"stats.progress" = "Прогресс";
+"stats.games.count" = "Игр";
+"stats.best.result" = "Лучший результат";
+"stats.longest.survival" = "Дольше всего";
+"stats.turns.count" = "%d ходов";
+"stats.victories.label" = "побед";
+"stats.turns.label" = "ходов";
+
+// CombatView additional
+"combat.vs" = "ПРОТИВ";
+"combat.attack.roll" = "Бросок атаки:";
+"combat.damage.calc.title" = "Расчёт урона:";
+"combat.base.value" = "Базовый: %d";
+"combat.total.damage" = "= %d";

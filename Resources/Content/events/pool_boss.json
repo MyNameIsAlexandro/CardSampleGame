@@ -1,0 +1,92 @@
+{
+  "version": "1.0.0",
+  "poolId": "pool_boss",
+  "description": "Act I Boss events",
+  "events": [
+    {
+      "id": "event_boss_moroi",
+      "title": {
+        "en": "The Moroi Chernobog",
+        "ru": "Морой Чернобог"
+      },
+      "body": {
+        "en": "Before you stands the servant of the dark god - Moroi Chernobog. The final confrontation has come.",
+        "ru": "Перед вами слуга тёмного бога - Морой Чернобог. Финальное противостояние настало."
+      },
+      "eventType": "combat",
+      "poolIds": ["pool_boss"],
+      "availability": {
+        "regionIds": ["dark_lowland"],
+        "regionStates": ["breach"],
+        "minPressure": 50,
+        "maxPressure": 100,
+        "requiredFlags": ["reached_dark_lowland"]
+      },
+      "weight": 100,
+      "isOneTime": true,
+      "combatData": {
+        "enemyId": "boss_moroi",
+        "enemyName": "Морой Чернобог",
+        "enemyPower": 7,
+        "enemyDefense": 10,
+        "enemyHealth": 25,
+        "isBoss": true
+      },
+      "choices": [
+        {
+          "id": "fight_light",
+          "label": {
+            "en": "Fight with the light's power",
+            "ru": "Сразиться силой света"
+          },
+          "requirements": {
+            "minHealth": 7,
+            "minBalance": 50
+          },
+          "consequences": {
+            "startCombat": true,
+            "setFlags": {"boss_fight_started": true},
+            "message": {
+              "en": "You call upon all the light you've gathered. The battle for Yav begins.",
+              "ru": "Вы призываете весь собранный свет. Битва за Явь начинается."
+            }
+          }
+        },
+        {
+          "id": "fight_dark",
+          "label": {
+            "en": "Fight using darkness",
+            "ru": "Сразиться, используя тьму"
+          },
+          "requirements": {
+            "minHealth": 5,
+            "maxBalance": 40
+          },
+          "consequences": {
+            "startCombat": true,
+            "setFlags": {"boss_fight_started": true, "dark_path": true},
+            "resourceChanges": {"faith": 5},
+            "message": {
+              "en": "You draw upon the darkness within. Fight fire with fire.",
+              "ru": "Вы черпаете из тьмы внутри. Огнём против огня."
+            }
+          }
+        },
+        {
+          "id": "retreat",
+          "label": {
+            "en": "Retreat to gather strength",
+            "ru": "Отступить, чтобы набраться сил"
+          },
+          "consequences": {
+            "tensionChange": 10,
+            "message": {
+              "en": "You're not ready. The darkness grows stronger with each passing moment.",
+              "ru": "Вы не готовы. Тьма крепнет с каждым мгновением."
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,223 @@
+{
+  "version": "1.0.0",
+  "description": "Twilight Marches Act I - Quest Definitions",
+  "quests": [
+    {
+      "id": "quest_main_act1",
+      "title": {
+        "en": "The Coming Darkness",
+        "ru": "Грядущая Тьма"
+      },
+      "description": {
+        "en": "Stop the spread of Nav's influence before the Moroi breaks through completely.",
+        "ru": "Остановите распространение влияния Нави, пока Морой не прорвётся окончательно."
+      },
+      "questType": "main",
+      "initialStatus": "active",
+      "objectives": [
+        {
+          "id": "obj_visit_oak",
+          "description": {
+            "en": "Visit the Sacred Oak to learn about the old ways",
+            "ru": "Посетите Священный Дуб, чтобы узнать о старых обычаях"
+          },
+          "completionCondition": {
+            "type": "visitRegion",
+            "regionId": "oak"
+          },
+          "nextObjectiveId": "obj_strengthen_anchors"
+        },
+        {
+          "id": "obj_strengthen_anchors",
+          "description": {
+            "en": "Strengthen the Forest Idol and Swamp Spring anchors (integrity > 50)",
+            "ru": "Укрепите якоря Лесного Идола и Болотного Источника (целостность > 50)"
+          },
+          "completionCondition": {
+            "type": "anchorIntegrityAbove",
+            "anchorIds": ["anchor_forest_idol", "anchor_swamp_spring"],
+            "threshold": 50
+          },
+          "nextObjectiveId": "obj_reach_breach"
+        },
+        {
+          "id": "obj_reach_breach",
+          "description": {
+            "en": "Reach the Breach and confront the darkness",
+            "ru": "Доберитесь до Разлома и противостаньте тьме"
+          },
+          "completionCondition": {
+            "type": "visitRegion",
+            "regionId": "breach"
+          },
+          "nextObjectiveId": "obj_defeat_boss"
+        },
+        {
+          "id": "obj_defeat_boss",
+          "description": {
+            "en": "Defeat the Moroi Chernobog",
+            "ru": "Победите Мороя Чернобога"
+          },
+          "completionCondition": {
+            "type": "flagSet",
+            "flag": "boss_moroi_defeated"
+          },
+          "nextObjectiveId": null
+        }
+      ],
+      "rewards": {
+        "setFlags": {"act1_completed": true},
+        "resourceChanges": {"faith": 10},
+        "unlockRegions": ["act2_start"]
+      }
+    },
+    {
+      "id": "quest_village_defense",
+      "title": {
+        "en": "Defend the Village",
+        "ru": "Защита Деревни"
+      },
+      "description": {
+        "en": "Help the village elder protect the settlement from the encroaching darkness.",
+        "ru": "Помогите деревенскому старосте защитить поселение от наступающей тьмы."
+      },
+      "questType": "side",
+      "initialStatus": "locked",
+      "unlockCondition": {
+        "type": "flagSet",
+        "flag": "elder_quest_accepted"
+      },
+      "objectives": [
+        {
+          "id": "obj_strengthen_chapel",
+          "description": {
+            "en": "Strengthen the Chapel anchor (integrity > 90)",
+            "ru": "Укрепите якорь Часовни (целостность > 90)"
+          },
+          "completionCondition": {
+            "type": "anchorIntegrityAbove",
+            "anchorIds": ["anchor_village_chapel"],
+            "threshold": 90
+          },
+          "nextObjectiveId": "obj_patrol_borders"
+        },
+        {
+          "id": "obj_patrol_borders",
+          "description": {
+            "en": "Patrol the borders: visit the Forest and Swamp",
+            "ru": "Патрулируйте границы: посетите Лес и Болото"
+          },
+          "completionCondition": {
+            "type": "visitRegions",
+            "regionIds": ["forest", "swamp"],
+            "visitAll": true
+          },
+          "nextObjectiveId": null
+        }
+      ],
+      "rewards": {
+        "reputationChange": 20,
+        "resourceChanges": {"faith": 5},
+        "giveArtifact": "village_defender_badge"
+      }
+    },
+    {
+      "id": "quest_sacred_restoration",
+      "title": {
+        "en": "Restoration of the Sacred",
+        "ru": "Восстановление Святыни"
+      },
+      "description": {
+        "en": "Restore the power of the Sacred Oak to push back the darkness.",
+        "ru": "Восстановите силу Священного Дуба, чтобы отбросить тьму."
+      },
+      "questType": "side",
+      "initialStatus": "locked",
+      "unlockCondition": {
+        "type": "regionVisited",
+        "regionId": "oak"
+      },
+      "objectives": [
+        {
+          "id": "obj_find_ritual_site",
+          "description": {
+            "en": "Find and complete the restoration ritual",
+            "ru": "Найдите и выполните ритуал восстановления"
+          },
+          "completionCondition": {
+            "type": "eventCompleted",
+            "eventId": "event_ritual"
+          },
+          "nextObjectiveId": "obj_restore_oak"
+        },
+        {
+          "id": "obj_restore_oak",
+          "description": {
+            "en": "Restore the Sacred Oak to full power (integrity = 100)",
+            "ru": "Восстановите Священный Дуб до полной силы (целостность = 100)"
+          },
+          "completionCondition": {
+            "type": "anchorIntegrityAbove",
+            "anchorIds": ["anchor_sacred_oak"],
+            "threshold": 100
+          },
+          "nextObjectiveId": null
+        }
+      ],
+      "rewards": {
+        "balanceShift": 15,
+        "tensionChange": -10,
+        "setFlags": {"oak_fully_restored": true}
+      }
+    },
+    {
+      "id": "quest_dark_path",
+      "title": {
+        "en": "The Dark Path",
+        "ru": "Тёмный Путь"
+      },
+      "description": {
+        "en": "Embrace the power of Nav and bend its darkness to your will.",
+        "ru": "Примите силу Нави и подчините её тьму своей воле."
+      },
+      "questType": "side",
+      "initialStatus": "locked",
+      "unlockCondition": {
+        "type": "balanceBelow",
+        "threshold": 30
+      },
+      "objectives": [
+        {
+          "id": "obj_embrace_darkness",
+          "description": {
+            "en": "Accept the darkness within",
+            "ru": "Примите тьму внутри себя"
+          },
+          "completionCondition": {
+            "type": "flagSet",
+            "flag": "embraced_darkness"
+          },
+          "nextObjectiveId": "obj_corrupt_anchor"
+        },
+        {
+          "id": "obj_corrupt_anchor",
+          "description": {
+            "en": "Corrupt the Forest Idol (integrity < 20)",
+            "ru": "Осквернить Лесной Идол (целостность < 20)"
+          },
+          "completionCondition": {
+            "type": "anchorIntegrityBelow",
+            "anchorIds": ["anchor_forest_idol"],
+            "threshold": 20
+          },
+          "nextObjectiveId": null
+        }
+      ],
+      "rewards": {
+        "resourceChanges": {"faith": 15},
+        "addCurse": "pact_of_nav",
+        "setFlags": {"dark_path_completed": true}
+      }
+    }
+  ]
+}

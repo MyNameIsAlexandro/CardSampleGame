@@ -1,0 +1,561 @@
+/*
+  Localizable.strings
+  CardSampleGame - English
+*/
+
+// MARK: - Main Screen
+"game.title" = "Card Adventure Game";
+"character.select.title" = "Select Your Character";
+"character.stats" = "Character Stats";
+"character.abilities" = "Abilities";
+"button.start.adventure" = "Start Adventure";
+
+// MARK: - Game Board
+"turn.label" = "Turn %d";
+"button.next.phase" = "Next Phase";
+"button.explore" = "Explore";
+"button.roll.dice" = "Roll Dice";
+"dice.result" = "Result: %d";
+"dice.roll.title" = "Dice Roll";
+"dice.roll.message" = "You rolled: %d";
+"button.ok" = "OK";
+
+// MARK: - Game Phases
+"phase.setup" = "Setup";
+"phase.exploration" = "Exploration";
+"phase.encounter" = "Encounter";
+"phase.combat" = "Combat";
+"phase.end.turn" = "End Turn";
+"phase.game.over" = "Game Over";
+
+// MARK: - Encounter
+"encounter.active" = "Active Encounter";
+
+// MARK: - Deck
+"deck.encounters" = "Encounters";
+"deck.locations" = "Locations";
+"deck.cards" = "%d cards";
+
+// MARK: - Player Hand
+"player.hand.title" = "Your Hand";
+"player.discard.pile" = "Discard: %d";
+"player.deck.remaining" = "Deck: %d";
+
+// MARK: - Card Types
+"card.type.character" = "Character";
+"card.type.weapon" = "Weapon";
+"card.type.spell" = "Spell";
+"card.type.armor" = "Armor";
+"card.type.item" = "Item";
+"card.type.blessing" = "Blessing";
+"card.type.monster" = "Monster";
+"card.type.location" = "Location";
+"card.type.ally" = "Ally";
+
+// MARK: - Stats
+"stat.health" = "Health";
+"stat.power" = "Power";
+"stat.defense" = "Defense";
+"stat.strength" = "Strength";
+"stat.dexterity" = "Dexterity";
+"stat.constitution" = "Constitution";
+"stat.intelligence" = "Intelligence";
+"stat.wisdom" = "Wisdom";
+"stat.charisma" = "Charisma";
+
+// MARK: - Rarity
+"rarity.common" = "Common";
+"rarity.uncommon" = "Uncommon";
+"rarity.rare" = "Rare";
+"rarity.epic" = "Epic";
+"rarity.legendary" = "Legendary";
+
+// MARK: - Damage Types
+"damage.physical" = "Physical";
+"damage.fire" = "Fire";
+"damage.cold" = "Cold";
+"damage.lightning" = "Lightning";
+"damage.poison" = "Poison";
+"damage.acid" = "Acid";
+"damage.holy" = "Holy";
+"damage.shadow" = "Shadow";
+
+// MARK: - Actions
+"action.play" = "Play";
+"action.discard" = "Discard";
+"action.examine" = "Examine";
+
+// MARK: - Rules
+"rules.title" = "How to Play";
+"rules.button" = "Rules";
+
+// Rules Sections
+"rules.objective.title" = "Game Objective";
+"rules.objective.content" = "Embark on an epic adventure! Choose your hero, explore dangerous locations, defeat monsters, and collect powerful cards to become the ultimate adventurer.";
+
+"rules.phases.title" = "Turn Phases";
+"rules.phases.content" = "Each turn consists of several phases. Complete all phases to finish your turn:";
+
+"rules.phase.exploration" = "Draw an encounter card and face a new challenge.";
+"rules.phase.encounter" = "Use cards from your hand to overcome the encounter.";
+"rules.phase.combat" = "Roll dice and use abilities to defeat monsters.";
+"rules.phase.endturn" = "Discard played cards and draw back up to your hand size.";
+
+"rules.cards.title" = "Card Types";
+"rules.cards.content" = "Weapons boost your attack, Spells provide magical effects, Armor protects you from damage, Items give special abilities, and Blessings grant temporary bonuses. Build your deck wisely!";
+
+"rules.dice.title" = "Dice Rolls";
+"rules.dice.content" = "When facing challenges, roll the dice! Add bonuses from your cards and abilities. Roll higher than the difficulty to succeed.";
+
+"rules.victory.title" = "Victory";
+"rules.victory.content" = "Defeat all encounters, survive dangerous situations, and manage your health carefully. When your health reaches zero, the game ends!";
+
+"rules.tips.title" = "Strategic Tips";
+"rules.tips.content" = "• Save powerful cards for difficult encounters\n• Balance your deck with different card types\n• Use blessings at the right moment\n• Manage your hand size carefully\n• Remember: some cards can be played together for combo effects!";
+
+// MARK: - Card Names
+// Characters
+"card.valeros.name" = "Valeros";
+"card.valeros.desc" = "A brave fighter from the city guard, skilled with sword and shield.";
+"card.seoni.name" = "Seoni";
+"card.seoni.desc" = "A powerful sorceress who channels arcane energies.";
+"card.kyra.name" = "Kyra";
+"card.kyra.desc" = "A devoted cleric who heals allies and smites evil.";
+
+// Character Abilities
+"ability.weapon.master" = "Weapon Master";
+"ability.weapon.master.desc" = "Add 2 dice when using weapons";
+"ability.arcane.blast" = "Arcane Blast";
+"ability.arcane.blast.desc" = "Deal 3 fire damage to any enemy";
+"ability.spell.focus" = "Spell Focus";
+"ability.spell.focus.desc" = "Draw 1 extra card when casting spells";
+"ability.divine.healing" = "Divine Healing";
+"ability.divine.healing.desc" = "Heal 4 damage to yourself or an ally";
+"ability.channel.energy" = "Channel Energy";
+"ability.channel.energy.desc" = "Heal 2 damage to all allies";
+
+// Weapons
+"card.longsword.name" = "Longsword";
+"card.longsword.desc" = "A well-balanced blade, deadly in skilled hands.";
+"card.longbow.name" = "Longbow";
+"card.longbow.desc" = "Strike enemies from afar with precision.";
+"card.staff.power.name" = "Staff of Power";
+"card.staff.power.desc" = "A magical staff that channels mystical energies.";
+
+// Weapon Abilities
+"ability.power.strike" = "Power Strike";
+"ability.power.strike.desc" = "Deal +3 damage";
+"ability.precise.shot" = "Precise Shot";
+"ability.precise.shot.desc" = "Ignore armor";
+"ability.arcane.surge" = "Arcane Surge";
+"ability.arcane.surge.desc" = "Add spell power to attack";
+
+// Spells
+"card.fireball.name" = "Fireball";
+"card.fireball.desc" = "Hurl a ball of flame at your enemies.";
+"card.lightning.bolt.name" = "Lightning Bolt";
+"card.lightning.bolt.desc" = "Call down a bolt of electricity.";
+"card.healing.touch.name" = "Healing Touch";
+"card.healing.touch.desc" = "Restore health with divine magic.";
+
+// Spell Abilities
+"ability.burn" = "Burn";
+"ability.burn.desc" = "Deal 4 fire damage";
+"ability.chain.lightning" = "Chain Lightning";
+"ability.chain.lightning.desc" = "Deal 3 lightning damage to 2 enemies";
+"ability.restore" = "Restore";
+"ability.restore.desc" = "Heal 5 damage";
+
+// Armor
+"card.leather.armor.name" = "Leather Armor";
+"card.leather.armor.desc" = "Light protection that doesn't hinder movement.";
+"card.plate.armor.name" = "Plate Armor";
+"card.plate.armor.desc" = "Heavy armor that provides excellent protection.";
+
+// Items
+"card.healing.potion.name" = "Healing Potion";
+"card.healing.potion.desc" = "A vial of magical liquid that restores vitality.";
+"card.magic.ring.name" = "Magic Ring";
+"card.magic.ring.desc" = "A ring imbued with protective enchantments.";
+
+// Item Abilities
+"ability.quick.heal" = "Quick Heal";
+"ability.quick.heal.desc" = "Heal 3 damage instantly";
+"ability.shield" = "Shield";
+"ability.shield.desc" = "Add +2 defense until end of turn";
+
+// Blessings
+"card.blessing.luck.name" = "Blessing of Luck";
+"card.blessing.luck.desc" = "Fortune smiles upon you.";
+"card.blessing.gods.name" = "Blessing of the Gods";
+"card.blessing.gods.desc" = "Divine favor grants you strength.";
+
+// Blessing Abilities
+"ability.lucky" = "Lucky";
+"ability.lucky.desc" = "Reroll any failed check";
+"ability.divine.favor" = "Divine Favor";
+"ability.divine.favor.desc" = "Add 3 to any check";
+
+// Monsters
+"card.goblin.raider.name" = "Goblin Raider";
+"card.goblin.raider.desc" = "A small but vicious creature armed with crude weapons.";
+"card.orc.warrior.name" = "Orc Warrior";
+"card.orc.warrior.desc" = "A brutish fighter with immense strength.";
+"card.skeleton.warrior.name" = "Skeleton Warrior";
+"card.skeleton.warrior.desc" = "An undead soldier wielding ancient weapons.";
+"card.ancient.dragon.name" = "Ancient Dragon";
+"card.ancient.dragon.desc" = "A massive wyrm with scales like iron and breath of flame.";
+
+// Traits
+"trait.human" = "Human";
+"trait.warrior" = "Warrior";
+"trait.fighter" = "Fighter";
+"trait.sorcerer" = "Sorcerer";
+"trait.magic" = "Magic";
+"trait.cleric" = "Cleric";
+"trait.divine" = "Divine";
+"trait.melee" = "Melee";
+"trait.ranged" = "Ranged";
+"trait.arcane" = "Arcane";
+"trait.fire" = "Fire";
+"trait.lightning" = "Lightning";
+"trait.healing" = "Healing";
+"trait.light" = "Light";
+"trait.heavy" = "Heavy";
+"trait.potion" = "Potion";
+"trait.magical" = "Magical";
+"trait.blessing" = "Blessing";
+"trait.goblin" = "Goblin";
+"trait.evil" = "Evil";
+"trait.orc" = "Orc";
+"trait.undead" = "Undead";
+"trait.skeleton" = "Skeleton";
+"trait.dragon" = "Dragon";
+"trait.ancient" = "Ancient";
+
+// MARK: - Twilight Marches (Сумрачные Пределы)
+
+// Game Title
+"tm.game.title" = "Twilight Marches";
+"tm.game.subtitle" = "Dark Slavic Legends";
+
+// Realms
+"tm.realm.yav" = "Yav - World of the Living";
+"tm.realm.nav" = "Nav - World of the Dead";
+"tm.realm.prav" = "Prav - World of the Gods";
+
+// Balance
+"tm.balance.light" = "Light";
+"tm.balance.neutral" = "Neutral";
+"tm.balance.dark" = "Dark";
+
+// Resources
+"tm.resource.faith" = "Faith";
+"tm.resource.balance" = "Balance";
+
+// Characters
+"tm.char.veleslava.name" = "Veleslava";
+"tm.char.veleslava.desc" = "A wise woman of the borderlands, keeper of ancient healing arts and protector against curses.";
+"tm.char.ratibor.name" = "Ratibor";
+"tm.char.ratibor.desc" = "An exiled warlord seeking redemption, master of blade and command.";
+"tm.char.miroslav.name" = "Miroslav";
+"tm.char.miroslav.desc" = "An apostate sorcerer who made a dark pact, wielding forbidden powers from Nav.";
+"tm.char.zabava.name" = "Zabava";
+"tm.char.zabava.desc" = "A cunning hunter of the unclean, tracking spirits and monsters across the twilight lands.";
+
+// Character Abilities
+"tm.ability.herb.wisdom" = "Herb Wisdom";
+"tm.ability.herb.wisdom.desc" = "Heal 3 health using ancient herbal lore";
+"tm.ability.curse.breaker" = "Curse Breaker";
+"tm.ability.curse.breaker.desc" = "Remove one curse from yourself or ally";
+"tm.ability.battle.fury" = "Battle Fury";
+"tm.ability.battle.fury.desc" = "Add 3 dice to your next combat check";
+"tm.ability.commanders.will" = "Commander's Will";
+"tm.ability.commanders.will.desc" = "Gain 2 Faith from your leadership";
+"tm.ability.dark.pact" = "Dark Pact";
+"tm.ability.dark.pact.desc" = "Summon a spirit from Nav (Power 5)";
+"tm.ability.soul.drain" = "Soul Drain";
+"tm.ability.soul.drain.desc" = "Sacrifice 2 health to draw 3 cards";
+"tm.ability.silver.arrow" = "Silver Arrow";
+"tm.ability.silver.arrow.desc" = "Deal 5 damage to any creature";
+"tm.ability.track.prey" = "Track Prey";
+"tm.ability.track.prey.desc" = "Draw 2 cards by following the trail";
+
+// Enemies
+"tm.enemy.navii.name" = "Navii";
+"tm.enemy.navii.desc" = "A restless spirit of the dead, wandering between worlds.";
+"tm.enemy.upyr.name" = "Upyr";
+"tm.enemy.upyr.desc" = "An ancient vampire, draining life force from the living.";
+"tm.enemy.leshiy.name" = "Leshiy";
+"tm.enemy.leshiy.desc" = "A corrupted forest spirit, leading travelers astray.";
+"tm.enemy.rusalka.name" = "Rusalka";
+"tm.enemy.rusalka.desc" = "A drowned maiden's spirit, singing deadly songs by moonlit waters.";
+"tm.enemy.zmey.name" = "Zmey Gorynych";
+"tm.enemy.zmey.desc" = "The legendary three-headed dragon, ancient terror of the skies.";
+
+// Enemy Abilities
+"tm.ability.soul.touch" = "Soul Touch";
+"tm.ability.soul.touch.desc" = "Apply Weakness curse for 2 turns";
+"tm.ability.blood.drain" = "Blood Drain";
+"tm.ability.blood.drain.desc" = "Deal 4 mental damage";
+"tm.ability.life.steal" = "Life Steal";
+"tm.ability.life.steal.desc" = "Heal 2 health from drained life";
+"tm.ability.forest.maze" = "Forest Maze";
+"tm.ability.forest.maze.desc" = "Apply Forgetfulness curse for 3 turns";
+"tm.ability.natures.wrath" = "Nature's Wrath";
+"tm.ability.natures.wrath.desc" = "Deal 3 physical damage";
+"tm.ability.drowning.song" = "Drowning Song";
+"tm.ability.drowning.song.desc" = "Apply Madness curse for 2 turns";
+"tm.ability.water.grasp" = "Water Grasp";
+"tm.ability.water.grasp.desc" = "Deal 3 cold damage";
+"tm.ability.three.breaths" = "Three Breaths";
+"tm.ability.three.breaths.desc" = "Deal 10 fire damage with three dragon heads";
+"tm.ability.ancient.curse" = "Ancient Curse";
+"tm.ability.ancient.curse.desc" = "Apply Sickness curse for 5 turns";
+
+// Spirits
+"tm.spirit.domovoy.name" = "Domovoy";
+"tm.spirit.domovoy.desc" = "A house spirit, guardian of hearth and home.";
+"tm.spirit.bereginya.name" = "Bereginya";
+"tm.spirit.bereginya.desc" = "A protective spirit, shielding from darkness.";
+
+// Spirit Abilities
+"tm.ability.home.guard" = "Home Guard";
+"tm.ability.home.guard.desc" = "Add 1 die to defense checks";
+"tm.ability.protective.aura" = "Protective Aura";
+"tm.ability.protective.aura.desc" = "Remove one curse";
+"tm.ability.blessing.shield" = "Blessing Shield";
+"tm.ability.blessing.shield.desc" = "Shift balance 2 points toward Light";
+
+// Curses
+"tm.curse.black.mark.name" = "Black Mark";
+"tm.curse.black.mark.desc" = "A dark sigil from Nav, sapping your strength.";
+"tm.curse.madness.name" = "Madness";
+"tm.curse.madness.desc" = "Reality warps and twists before your eyes.";
+
+// Curse Types
+"tm.curse.type.blindness" = "Blindness";
+"tm.curse.type.muteness" = "Muteness";
+"tm.curse.type.weakness" = "Weakness";
+"tm.curse.type.forgetfulness" = "Forgetfulness";
+"tm.curse.type.sickness" = "Sickness";
+"tm.curse.type.madness" = "Madness";
+"tm.curse.type.transformation" = "Transformation";
+
+// Curse Abilities
+"tm.ability.mark.of.nav" = "Mark of Nav";
+"tm.ability.mark.of.nav.desc" = "Apply Weakness for 3 turns";
+"tm.ability.lose.sanity" = "Lose Sanity";
+"tm.ability.lose.sanity.desc" = "Apply Madness for 4 turns";
+
+// Artifacts
+"tm.artifact.kalinov.sword.name" = "Kalinov Sword";
+"tm.artifact.kalinov.sword.desc" = "A legendary blade forged in the realm of gods, bane of darkness.";
+"tm.artifact.alatyr.stone.name" = "Alatyr Stone";
+"tm.artifact.alatyr.stone.desc" = "The sacred stone at the center of all worlds, anchor of reality.";
+
+// Artifact Abilities
+"tm.ability.cleaving.strike" = "Cleaving Strike";
+"tm.ability.cleaving.strike.desc" = "Deal 8 damage with legendary blade";
+"tm.ability.banish.darkness" = "Banish Darkness";
+"tm.ability.banish.darkness.desc" = "Shift balance 3 points toward Light";
+"tm.ability.realm.anchor" = "Realm Anchor";
+"tm.ability.realm.anchor.desc" = "Return to Yav from any realm";
+"tm.ability.restore.balance" = "Restore Balance";
+"tm.ability.restore.balance.desc" = "Shift balance 5 points toward Neutral";
+
+// Traits
+"tm.trait.healer" = "Healer";
+"tm.trait.vedunya" = "Vedunya";
+"tm.trait.warrior" = "Warrior";
+"tm.trait.voevoda" = "Voevoda";
+"tm.trait.sorcerer" = "Sorcerer";
+"tm.trait.volkhv" = "Volkhv";
+"tm.trait.hunter" = "Hunter";
+"tm.trait.ranger" = "Ranger";
+"tm.trait.spirit" = "Spirit";
+"tm.trait.guardian" = "Guardian";
+"tm.trait.bereginya" = "Bereginya";
+"tm.trait.curse" = "Curse";
+"tm.trait.mental" = "Mental";
+"tm.trait.artifact" = "Artifact";
+"tm.trait.weapon" = "Weapon";
+"tm.trait.legendary" = "Legendary";
+"tm.trait.sacred" = "Sacred";
+"tm.trait.light" = "Light";
+"tm.trait.dark" = "Dark";
+"tm.trait.neutral" = "Neutral";
+"tm.trait.nav" = "Nav";
+"tm.trait.yav" = "Yav";
+"tm.trait.prav" = "Prav";
+"tm.trait.upyr" = "Upyr";
+"tm.trait.leshiy" = "Leshiy";
+"tm.trait.rusalka" = "Rusalka";
+"tm.trait.zmey" = "Zmey";
+"tm.trait.nature" = "Nature";
+"tm.trait.water" = "Water";
+
+// Card Types
+"tm.card.type.curse" = "Curse";
+"tm.card.type.spirit" = "Spirit";
+"tm.card.type.artifact" = "Artifact";
+"tm.card.type.ritual" = "Ritual";
+
+// MARK: - Region UI (Audit v1.1 Issue #2)
+
+// Region States
+"region.state.stable" = "Stable";
+"region.state.borderland" = "Borderland";
+"region.state.breach" = "Breach";
+
+// Region Info
+"region.reputation" = "Reputation: %d";
+"region.current.location" = "Current Location";
+
+// Region Actions
+"action.travel" = "Travel";
+"action.rest" = "Rest";
+"action.trade" = "Trade";
+"action.strengthen.anchor" = "Strengthen Anchor";
+"action.explore.region" = "Explore";
+
+// MARK: - Combat UI (Engine-First Migration)
+
+// Combat phases
+"combat.title" = "Combat";
+"combat.turn.number" = "Turn %d";
+"combat.actions.remaining" = "Actions: %d";
+"combat.phase.player.turn" = "Your Turn";
+"combat.phase.enemy.turn" = "Enemy Turn";
+"combat.phase.end.turn" = "End Turn";
+"combat.phase.over" = "Combat Over";
+
+// Combat actions
+"combat.action.attack" = "Attack";
+"combat.action.end.turn" = "End Turn";
+"combat.action.flee" = "Flee";
+"combat.action.play.card" = "Play Card";
+
+// Combat stats
+"combat.stat.hp" = "HP";
+"combat.stat.attack" = "Attack";
+"combat.stat.defense" = "Defense";
+"combat.stat.strength" = "Strength";
+
+// Combat messages
+"combat.message.victory" = "Victory!";
+"combat.message.defeat" = "Defeat";
+"combat.message.fled" = "You fled";
+"combat.message.hit" = "Hit!";
+"combat.message.miss" = "Miss!";
+"combat.message.damage" = "%d damage";
+
+// Combat log
+"combat.log.title" = "Combat Log";
+"combat.log.battle.start" = "Battle started with %@";
+"combat.log.actions.per.turn" = "You have %d actions per turn";
+"combat.log.enemy.attacks" = "%@ attacks!";
+"combat.log.spirit.attacks" = "%@ attacks the enemy";
+"combat.log.meditation" = "Meditation (+%d faith)";
+"combat.log.turn.separator" = "--- Turn %d ---";
+
+// Combat card effects
+"combat.effect.heal" = "Heal +%d";
+"combat.effect.damage" = "Damage %d";
+"combat.effect.draw.cards" = "Cards drawn: %d";
+"combat.effect.gain.faith" = "Faith +%d";
+"combat.effect.spend.faith" = "Faith -%d";
+"combat.effect.remove.curse" = "Curse removed";
+"combat.effect.bonus.dice" = "Bonus dice: +%d";
+"combat.effect.shift.balance" = "Balance shifted toward %@";
+"combat.effect.summon.spirit" = "Spirit summoned (Power: %d)";
+"combat.effect.sacrifice" = "Sacrifice";
+
+// Combat attack breakdown
+"combat.attack.roll" = "Roll: %d + %d = %d";
+"combat.damage.calc" = "Damage: %d (base) + %d (bonus) = %d";
+"combat.damage.base" = "Base damage: %d";
+
+// Hand UI in combat
+"combat.your.hand" = "Your Hand";
+"combat.tap.to.play" = "Tap to play";
+"combat.not.enough.faith" = "Not enough faith";
+
+// NOTE: JSON content (regions, anchors, quests, challenges, events) now uses
+// inline localized strings in JSON files. See Resources/Content/*.json
+
+// MARK: - UI Strings
+
+// ContentView
+"ui.continue" = "Continue";
+"ui.back" = "Back";
+"ui.slot.selection" = "Select Slot";
+"ui.continue.game" = "Continue Game";
+"ui.slot.number" = "Slot %d";
+"ui.turn.number" = "Turn: %d";
+"ui.victories" = "Victories: %d";
+"ui.load" = "Load";
+"ui.new.game" = "New Game";
+"ui.empty.slot" = "Empty Slot";
+"ui.start.new.game" = "Start New Game";
+"ui.delete.confirm" = "This action cannot be undone.";
+"ui.overwrite.confirm" = "Current save will be lost.";
+"ui.delete.save" = "Delete Save?";
+"ui.overwrite.save" = "Overwrite Save?";
+"ui.cancel" = "Cancel";
+"ui.delete" = "Delete";
+"ui.overwrite" = "Overwrite";
+
+// EventView
+"event.choose.action" = "Choose an action:";
+"event.requires.faith" = "Requires: %d faith";
+"event.you.have.faith" = "(you have: %d)";
+"event.requires.health" = "Requires: %d health";
+"event.you.have.health" = "(you have: %d)";
+"event.requires.path" = "Requires path: %@";
+"event.your.path" = "(yours: %@)";
+"event.faith.change" = "Faith: %@%d";
+"event.health.change" = "Health: %@%d";
+"event.balance.to.light" = "Balance: towards Light";
+"event.balance.to.dark" = "Balance: towards Dark";
+"event.reputation.change" = "Reputation: %@%d";
+"event.receive.card" = "Receive a card";
+"event.receive.curse" = "Receive a curse";
+"event.choice.made" = "Choice made.";
+"event.combat.victory.message" = "Victory! You have won the battle.";
+"event.combat.defeat.message" = "Defeat... You have lost the battle.";
+"event.combat.fled.message" = "You fled from the battle.";
+
+// UI Common
+"ui.close" = "Close";
+"ui.result" = "Result";
+
+// Balance (genitive form)
+"tm.balance.light.genitive" = "of Light";
+"tm.balance.neutral.genitive" = "Neutral";
+"tm.balance.dark.genitive" = "of Dark";
+
+// StatisticsView
+"stats.title" = "Statistics";
+"stats.game.name" = "Twilight Marches";
+"stats.general" = "General Statistics";
+"stats.leaderboard" = "Leaderboard";
+"stats.history" = "Game History";
+"stats.no.saves" = "No saved games yet";
+"stats.start.hint" = "Start a new game to see statistics";
+"stats.done" = "Done";
+"stats.resources" = "Resources";
+"stats.progress" = "Progress";
+"stats.games.count" = "Games";
+"stats.best.result" = "Best Result";
+"stats.longest.survival" = "Longest";
+"stats.turns.count" = "%d turns";
+"stats.victories.label" = "victories";
+"stats.turns.label" = "turns";
+
+// CombatView additional
+"combat.vs" = "VS";
+"combat.attack.roll" = "Attack Roll:";
+"combat.damage.calc.title" = "Damage Calculation:";
+"combat.base.value" = "Base: %d";
+"combat.total.damage" = "= %d";

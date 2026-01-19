@@ -1,0 +1,237 @@
+{
+  "version": "1.0.0",
+  "poolId": "pool_breach",
+  "description": "Dangerous breach events",
+  "events": [
+    {
+      "id": "event_shadow_beast",
+      "title": {
+        "en": "Shadow Beast",
+        "ru": "Тварь из Нави"
+      },
+      "body": {
+        "en": "A creature of pure darkness lunges from the shadows - a beast from Nav itself.",
+        "ru": "Существо из чистой тьмы выскакивает из теней - зверь из самой Нави."
+      },
+      "eventType": "combat",
+      "poolIds": ["pool_breach"],
+      "availability": {
+        "regionStates": ["breach"],
+        "minPressure": 40,
+        "maxPressure": 100
+      },
+      "weight": 15,
+      "isOneTime": false,
+      "combatData": {
+        "enemyId": "monster_shadow_beast",
+        "enemyName": "Тварь из Нави",
+        "enemyPower": 5,
+        "enemyDefense": 6,
+        "enemyHealth": 15
+      },
+      "choices": [
+        {
+          "id": "fight",
+          "label": {
+            "en": "Fight the beast",
+            "ru": "Сразиться с тварью"
+          },
+          "requirements": {
+            "minHealth": 5
+          },
+          "consequences": {
+            "startCombat": true,
+            "message": {
+              "en": "You steel yourself against the darkness incarnate.",
+              "ru": "Вы готовитесь противостоять воплощённой тьме."
+            }
+          }
+        },
+        {
+          "id": "banish",
+          "label": {
+            "en": "Banish with holy light (8 Faith)",
+            "ru": "Изгнать святым светом (8 Веры)"
+          },
+          "requirements": {
+            "minFaith": 8,
+            "minBalance": 60
+          },
+          "consequences": {
+            "resourceChanges": {"faith": -8},
+            "balanceShift": 10,
+            "tensionChange": -5,
+            "message": {
+              "en": "Holy light sears the creature, sending it back to Nav.",
+              "ru": "Святой свет сжигает существо, отправляя его обратно в Навь."
+            }
+          }
+        },
+        {
+          "id": "flee",
+          "label": {
+            "en": "Flee",
+            "ru": "Бежать"
+          },
+          "consequences": {
+            "resourceChanges": {"health": -2},
+            "message": {
+              "en": "Claws rake your back as you run.",
+              "ru": "Когти рвут вашу спину, пока вы бежите."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "event_dark_portal",
+      "title": {
+        "en": "Dark Portal",
+        "ru": "Тёмный Портал"
+      },
+      "body": {
+        "en": "A tear in reality hangs in the air - a direct passage to Nav. Power and danger radiate from it.",
+        "ru": "Разрыв реальности висит в воздухе - прямой проход в Навь. От него исходит сила и опасность."
+      },
+      "eventType": "inline",
+      "poolIds": ["pool_breach"],
+      "availability": {
+        "regionStates": ["breach"],
+        "minPressure": 60,
+        "maxPressure": 100
+      },
+      "weight": 10,
+      "isOneTime": true,
+      "choices": [
+        {
+          "id": "seal",
+          "label": {
+            "en": "Seal the portal (12 Faith)",
+            "ru": "Запечатать портал (12 Веры)"
+          },
+          "requirements": {
+            "minFaith": 12,
+            "minBalance": 70
+          },
+          "consequences": {
+            "resourceChanges": {"faith": -12},
+            "anchorIntegrityChange": 30,
+            "tensionChange": -15,
+            "balanceShift": 15,
+            "setFlags": {"portal_sealed": true},
+            "message": {
+              "en": "With tremendous effort, you seal the breach. The anchor strengthens.",
+              "ru": "Огромным усилием вы запечатываете разлом. Якорь укрепляется."
+            }
+          }
+        },
+        {
+          "id": "empower",
+          "label": {
+            "en": "Draw upon its power",
+            "ru": "Вбирать его силу"
+          },
+          "requirements": {
+            "maxBalance": 30
+          },
+          "consequences": {
+            "resourceChanges": {"faith": 10},
+            "balanceShift": -25,
+            "tensionChange": 20,
+            "addCurse": "shadow_mark",
+            "setFlags": {"embraced_darkness": true},
+            "message": {
+              "en": "Dark power floods into you. You have crossed a line.",
+              "ru": "Тёмная сила вливается в вас. Вы перешли черту."
+            }
+          }
+        },
+        {
+          "id": "avoid",
+          "label": {
+            "en": "Carefully avoid it",
+            "ru": "Осторожно обойти"
+          },
+          "consequences": {
+            "tensionChange": 5,
+            "message": {
+              "en": "You give it wide berth, but its presence weakens the boundary.",
+              "ru": "Вы обходите его стороной, но его присутствие ослабляет границу."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "event_barrow",
+      "title": {
+        "en": "Ancient Barrow",
+        "ru": "Древний Курган"
+      },
+      "body": {
+        "en": "An ancient burial mound, home to heroes of ages past. Their spirits still linger.",
+        "ru": "Древний погребальный холм, обитель героев минувших эпох. Их духи всё ещё здесь."
+      },
+      "eventType": "inline",
+      "poolIds": ["pool_breach", "pool_mountain"],
+      "availability": {
+        "regionStates": ["borderland", "breach"],
+        "minPressure": 30,
+        "maxPressure": 100
+      },
+      "weight": 10,
+      "isOneTime": true,
+      "choices": [
+        {
+          "id": "honor",
+          "label": {
+            "en": "Honor the ancestors (5 Faith)",
+            "ru": "Почтить предков (5 Веры)"
+          },
+          "requirements": {
+            "minFaith": 5
+          },
+          "consequences": {
+            "resourceChanges": {"faith": -5},
+            "balanceShift": 10,
+            "setFlags": {"honored_ancestors": true},
+            "giveArtifact": "ancestor_blessing",
+            "message": {
+              "en": "The ancestors grant you their blessing - an artifact of protection.",
+              "ru": "Предки дарят вам своё благословение - защитный артефакт."
+            }
+          }
+        },
+        {
+          "id": "plunder",
+          "label": {
+            "en": "Plunder the grave",
+            "ru": "Разграбить могилу"
+          },
+          "consequences": {
+            "balanceShift": -15,
+            "addCurse": "ancestor_curse",
+            "giveArtifact": "ancient_weapon",
+            "message": {
+              "en": "You claim ancient treasures, but earn a terrible curse.",
+              "ru": "Вы забираете древние сокровища, но получаете ужасное проклятие."
+            }
+          }
+        },
+        {
+          "id": "leave",
+          "label": {
+            "en": "Leave in peace",
+            "ru": "Уйти с миром"
+          },
+          "consequences": {
+            "message": {
+              "en": "Some places are best left undisturbed.",
+              "ru": "Некоторые места лучше не тревожить."
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

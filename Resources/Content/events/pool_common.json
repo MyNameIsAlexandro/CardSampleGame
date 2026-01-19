@@ -1,0 +1,210 @@
+{
+  "version": "1.0.0",
+  "poolId": "pool_common",
+  "description": "Common events available in all regions",
+  "events": [
+    {
+      "id": "event_wanderer",
+      "title": {
+        "en": "The Wanderer",
+        "ru": "Странник"
+      },
+      "body": {
+        "en": "A weary traveler approaches, their eyes carrying the weight of distant lands. They seek rest and perhaps have tales to share.",
+        "ru": "Усталый путник приближается, его глаза несут тяжесть далёких земель. Он ищет отдых и, возможно, готов поделиться историями."
+      },
+      "eventType": "inline",
+      "poolIds": ["pool_common"],
+      "availability": {
+        "regionStates": ["stable", "borderland"],
+        "minPressure": 0,
+        "maxPressure": 80
+      },
+      "weight": 10,
+      "isOneTime": false,
+      "choices": [
+        {
+          "id": "listen",
+          "label": {
+            "en": "Listen to their tales (3 Faith)",
+            "ru": "Выслушать его рассказы (3 Веры)"
+          },
+          "requirements": {
+            "minFaith": 3
+          },
+          "consequences": {
+            "resourceChanges": {"faith": -3},
+            "setFlags": {"met_wanderer": true},
+            "message": {
+              "en": "The wanderer shares ancient wisdom about the twilight lands.",
+              "ru": "Странник делится древней мудростью о сумрачных землях."
+            }
+          }
+        },
+        {
+          "id": "help",
+          "label": {
+            "en": "Offer aid (2 Faith)",
+            "ru": "Предложить помощь (2 Веры)"
+          },
+          "consequences": {
+            "resourceChanges": {"faith": -2},
+            "balanceShift": 5,
+            "reputationChange": 10,
+            "message": {
+              "en": "Your kindness is rewarded with the village's gratitude.",
+              "ru": "Ваша доброта вознаграждена благодарностью деревни."
+            }
+          }
+        },
+        {
+          "id": "ignore",
+          "label": {
+            "en": "Continue on your way",
+            "ru": "Продолжить свой путь"
+          },
+          "consequences": {
+            "message": {
+              "en": "You pass by, the wanderer's eyes following you.",
+              "ru": "Вы проходите мимо, взгляд странника следует за вами."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "event_camp",
+      "title": {
+        "en": "Campfire Rest",
+        "ru": "Привал у Костра"
+      },
+      "body": {
+        "en": "You find a safe spot to rest. The fire crackles, pushing back the darkness for a moment.",
+        "ru": "Вы находите безопасное место для отдыха. Огонь потрескивает, на мгновение отгоняя тьму."
+      },
+      "eventType": "inline",
+      "poolIds": ["pool_common"],
+      "availability": {
+        "regionStates": ["stable", "borderland"],
+        "minPressure": 0,
+        "maxPressure": 100
+      },
+      "weight": 15,
+      "isOneTime": false,
+      "choices": [
+        {
+          "id": "rest",
+          "label": {
+            "en": "Rest your body",
+            "ru": "Отдохнуть телом"
+          },
+          "consequences": {
+            "resourceChanges": {"health": 2},
+            "message": {
+              "en": "Your wounds begin to heal by the warm fire.",
+              "ru": "Ваши раны начинают заживать у тёплого огня."
+            }
+          }
+        },
+        {
+          "id": "meditate",
+          "label": {
+            "en": "Meditate and pray",
+            "ru": "Медитировать и молиться"
+          },
+          "consequences": {
+            "resourceChanges": {"faith": 2},
+            "message": {
+              "en": "Your faith strengthens as you commune with the old gods.",
+              "ru": "Ваша вера укрепляется в общении со старыми богами."
+            }
+          }
+        },
+        {
+          "id": "continue",
+          "label": {
+            "en": "Press onward",
+            "ru": "Идти дальше"
+          },
+          "consequences": {
+            "message": {
+              "en": "No rest for the weary. The darkness won't wait.",
+              "ru": "Усталым нет покоя. Тьма не будет ждать."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "event_merchant",
+      "title": {
+        "en": "Traveling Merchant",
+        "ru": "Странствующий Торговец"
+      },
+      "body": {
+        "en": "A merchant with peculiar wares has set up camp. Their goods shimmer with otherworldly energy.",
+        "ru": "Торговец с необычным товаром разбил лагерь. Его товары мерцают потусторонней энергией."
+      },
+      "eventType": "inline",
+      "poolIds": ["pool_common"],
+      "availability": {
+        "regionStates": ["stable"],
+        "minPressure": 0,
+        "maxPressure": 60
+      },
+      "weight": 8,
+      "isOneTime": false,
+      "choices": [
+        {
+          "id": "buy_blessing",
+          "label": {
+            "en": "Buy a blessing (5 Faith)",
+            "ru": "Купить благословение (5 Веры)"
+          },
+          "requirements": {
+            "minFaith": 5
+          },
+          "consequences": {
+            "resourceChanges": {"faith": -5},
+            "addCards": ["blessing_light"],
+            "message": {
+              "en": "You receive a card blessed by the old ways.",
+              "ru": "Вы получаете карту, благословлённую по старым обычаям."
+            }
+          }
+        },
+        {
+          "id": "buy_artifact",
+          "label": {
+            "en": "Buy an artifact (8 Faith)",
+            "ru": "Купить артефакт (8 Веры)"
+          },
+          "requirements": {
+            "minFaith": 8
+          },
+          "consequences": {
+            "resourceChanges": {"faith": -8},
+            "giveArtifact": "amulet_protection",
+            "message": {
+              "en": "The amulet pulses with protective energy.",
+              "ru": "Амулет пульсирует защитной энергией."
+            }
+          }
+        },
+        {
+          "id": "decline",
+          "label": {
+            "en": "Decline and leave",
+            "ru": "Отказаться и уйти"
+          },
+          "consequences": {
+            "message": {
+              "en": "Perhaps another time. The merchant nods knowingly.",
+              "ru": "Возможно, в другой раз. Торговец понимающе кивает."
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

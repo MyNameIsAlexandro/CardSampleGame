@@ -1,0 +1,4 @@
+=== DUMP GENERATED ===
+Source: /Users/abondarenko/Library/Mobile Documents/com~apple~CloudDocs/XCode/CardSampleGame
+
+=== FILE STRUCTURE ===
