@@ -15,6 +15,7 @@ final class PlayerTests: XCTestCase {
 
     override func tearDown() {
         player = nil
+        WorldRNG.shared.resetToSystem()
         super.tearDown()
     }
 

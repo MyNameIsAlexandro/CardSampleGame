@@ -18,6 +18,7 @@ final class RegionActionsModelTests: XCTestCase {
     override func tearDown() {
         worldState = nil
         player = nil
+        WorldRNG.shared.resetToSystem()
         super.tearDown()
     }
 

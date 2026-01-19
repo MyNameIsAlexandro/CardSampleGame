@@ -18,6 +18,7 @@ final class CombatSystemTests: XCTestCase {
     override func tearDown() {
         player = nil
         gameState = nil
+        WorldRNG.shared.resetToSystem()
         super.tearDown()
     }
 

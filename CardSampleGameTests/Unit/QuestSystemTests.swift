@@ -15,6 +15,7 @@ final class QuestSystemTests: XCTestCase {
 
     override func tearDown() {
         worldState = nil
+        WorldRNG.shared.resetToSystem()
         super.tearDown()
     }
 

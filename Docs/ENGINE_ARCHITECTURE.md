@@ -209,6 +209,15 @@ protocol PressureEngineProtocol {
 - Пороговые значения вызывают `WorldEffect`
 - Давление влияет на сложность, события, доступные опции
 
+**Формула эскалации (v1.3):**
+```
+escalationAmount = 3 + (daysPassed / 10)
+```
+- День 1-9: +3 per tick
+- День 10-19: +4 per tick
+- День 20-29: +5 per tick
+- Это создаёт нарастающую угрозу вместо линейного медленного роста
+
 **Инварианты:**
 - ✅ Давление в среднем растёт
 - ✅ Игрок может замедлять, но не отменять
@@ -750,7 +759,7 @@ Engine/
 | Initial Pressure | 30 | `TwilightPressureRules` |
 | Max Pressure | 100 | `TwilightPressureRules` |
 | Escalation Interval | 3 дня | `TwilightPressureRules` |
-| Escalation Amount | +3 | `TwilightPressureRules` |
+| Escalation Amount | +3 base (+ daysPassed/10) | `TwilightPressureRules` |
 | Initial Health | 10 | `TwilightResource` |
 | Initial Faith | 3 | `TwilightResource` |
 | Initial Balance | 50 | `TwilightResource` |

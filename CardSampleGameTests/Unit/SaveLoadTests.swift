@@ -30,6 +30,7 @@ final class SaveLoadTests: XCTestCase {
         player = nil
         gameState = nil
         saveManager = nil
+        WorldRNG.shared.resetToSystem()
         super.tearDown()
     }
 

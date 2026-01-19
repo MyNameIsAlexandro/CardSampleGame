@@ -24,6 +24,7 @@ final class EventModuleContractsTests: XCTestCase {
 
     override func tearDown() {
         eventContext = nil
+        WorldRNG.shared.resetToSystem()
         super.tearDown()
     }
 

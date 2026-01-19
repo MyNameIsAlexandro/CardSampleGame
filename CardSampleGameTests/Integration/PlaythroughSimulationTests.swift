@@ -47,6 +47,7 @@ final class PlaythroughSimulationTests: XCTestCase {
         player = nil
         gameState = nil
         worldState = nil
+        WorldRNG.shared.resetToSystem()
         super.tearDown()
     }
 

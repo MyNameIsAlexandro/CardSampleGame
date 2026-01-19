@@ -22,6 +22,7 @@ final class ActIPlaythroughTests: XCTestCase {
         worldState = nil
         player = nil
         gameState = nil
+        WorldRNG.shared.resetToSystem()
         super.tearDown()
     }
 

@@ -20,6 +20,7 @@ final class CriticalSystemsTests: XCTestCase {
         worldState = nil
         player = nil
         gameState = nil
+        WorldRNG.shared.resetToSystem()
         super.tearDown()
     }
 
