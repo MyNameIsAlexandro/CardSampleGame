@@ -349,6 +349,8 @@ private func describeAction(_ action: TwilightGameAction) -> String {
     case .startCombat(let id): return "combat(\(id))"
     case .playCard(let c, let t): return "playCard(\(c), \(String(describing: t)))"
     case .endCombatTurn: return "endCombatTurn"
+    case .dismissCurrentEvent: return "dismissCurrentEvent"
+    case .dismissDayEvent: return "dismissDayEvent"
     case .skipTurn: return "skipTurn"
     case .custom(let id, let cost): return "custom(\(id), \(cost))"
     }

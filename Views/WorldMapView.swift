@@ -1,31 +1,42 @@
 import SwiftUI
 
 struct WorldMapView: View {
-    @ObservedObject var worldState: WorldState
-    @ObservedObject var player: Player
+    // MARK: - Engine-First Architecture
+    // Engine is the ONLY source of truth for UI
+    @ObservedObject var engine: TwilightGameEngine
     var onExit: (() -> Void)? = nil
 
-    // MARK: - Engine (Audit v1.1 Issue #4: all state changes via Engine)
-    @StateObject private var engine: TwilightGameEngine
+    // MARK: - Legacy Support (for gradual migration)
+    // These will be removed once all Views are migrated
+    private var worldState: WorldState?
+    private var player: Player?
 
-    @State private var selectedRegion: Region?
+    @State private var selectedRegionId: UUID?
     @State private var showingRegionDetails = false
     @State private var showingExitConfirmation = false
     @State private var showingEventLog = false
     @State private var showingDayEvent = false
     @State private var currentDayEvent: DayEvent?
 
-    // MARK: - Initialization
+    // MARK: - Initialization (Engine-First)
+
+    init(engine: TwilightGameEngine, onExit: (() -> Void)? = nil) {
+        self.engine = engine
+        self.onExit = onExit
+        self.worldState = nil
+        self.player = nil
+    }
+
+    // MARK: - Legacy Initialization (for backwards compatibility during migration)
 
     init(worldState: WorldState, player: Player, onExit: (() -> Void)? = nil) {
-        self.worldState = worldState
-        self.player = player
-        self.onExit = onExit
-
-        // Create and connect engine to legacy models (Audit v1.1)
+        // Create new engine connected to legacy
         let newEngine = TwilightGameEngine()
         newEngine.connectToLegacy(worldState: worldState, player: player)
-        self._engine = StateObject(wrappedValue: newEngine)
+        self.engine = newEngine
+        self.onExit = onExit
+        self.worldState = worldState
+        self.player = player
     }
 
     var body: some View {
@@ -41,16 +52,16 @@ struct WorldMapView: View {
 
                 Divider()
 
-                // Regions list
+                // Regions list (Engine-First: reads from engine.regionsArray)
                 ScrollView {
                     LazyVStack(spacing: 12) {
-                        ForEach(worldState.regions) { region in
-                            RegionCardView(
+                        ForEach(engine.regionsArray, id: \.id) { region in
+                            EngineRegionCardView(
                                 region: region,
-                                isCurrentLocation: region.id == worldState.currentRegionId
+                                isCurrentLocation: region.id == engine.currentRegionId
                             )
                             .onTapGesture {
-                                selectedRegion = region
+                                selectedRegionId = region.id
                                 showingRegionDetails = true
                             }
                         }
@@ -82,19 +93,20 @@ struct WorldMapView: View {
                 }
             }
             .sheet(isPresented: $showingEventLog) {
-                EventLogView(worldState: worldState)
+                EngineEventLogView(engine: engine)
             }
-            .sheet(item: $selectedRegion) { region in
-                RegionDetailView(
-                    region: region,
-                    worldState: worldState,
-                    player: player,
-                    engine: engine,  // Audit v1.1 Issue #4
-                    onDismiss: {
-                        selectedRegion = nil
-                        showingRegionDetails = false
-                    }
-                )
+            .sheet(isPresented: $showingRegionDetails) {
+                if let regionId = selectedRegionId,
+                   let region = engine.publishedRegions[regionId] {
+                    EngineRegionDetailView(
+                        region: region,
+                        engine: engine,
+                        onDismiss: {
+                            selectedRegionId = nil
+                            showingRegionDetails = false
+                        }
+                    )
+                }
             }
             .alert("Выйти в меню?", isPresented: $showingExitConfirmation) {
                 Button("Отмена", role: .cancel) { }
@@ -113,23 +125,24 @@ struct WorldMapView: View {
                     Text("День \(event.day)\n\n\(event.description)")
                 }
             }
-            .onChange(of: worldState.lastDayEvent?.id) { _ in
-                if let event = worldState.lastDayEvent {
+            .onChange(of: engine.lastDayEvent?.id) { _ in
+                if let event = engine.lastDayEvent {
                     currentDayEvent = event
                     showingDayEvent = true
-                    worldState.lastDayEvent = nil
+                    // Dismiss via Engine action (Engine-First)
+                    engine.performAction(.dismissDayEvent)
                 }
             }
         }
     }
 
-    // MARK: - Player Info Bar
+    // MARK: - Player Info Bar (Engine-First: reads from engine.player*)
 
     var playerInfoBar: some View {
         HStack(spacing: 16) {
             // Player name
             VStack(alignment: .leading, spacing: 2) {
-                Text(player.name)
+                Text(engine.playerName)
                     .font(.subheadline)
                     .fontWeight(.bold)
                 Text("Странник")
@@ -144,7 +157,7 @@ struct WorldMapView: View {
                 Image(systemName: "heart.fill")
                     .font(.caption)
                     .foregroundColor(.red)
-                Text("\(player.health)/\(player.maxHealth)")
+                Text("\(engine.playerHealth)/\(engine.playerMaxHealth)")
                     .font(.caption)
                     .fontWeight(.semibold)
             }
@@ -158,7 +171,7 @@ struct WorldMapView: View {
                 Image(systemName: "sparkles")
                     .font(.caption)
                     .foregroundColor(.yellow)
-                Text("\(player.faith)")
+                Text("\(engine.playerFaith)")
                     .font(.caption)
                     .fontWeight(.semibold)
             }
@@ -170,19 +183,19 @@ struct WorldMapView: View {
             // Balance (0-100 scale)
             VStack(spacing: 2) {
                 HStack(spacing: 4) {
-                    Image(systemName: getBalanceIcon(player.balance))
+                    Image(systemName: getBalanceIcon(engine.playerBalance))
                         .font(.caption)
-                        .foregroundColor(getPlayerBalanceColor(player.balance))
-                    Text("\(player.balance)")
+                        .foregroundColor(getPlayerBalanceColor(engine.playerBalance))
+                    Text("\(engine.playerBalance)")
                         .font(.caption)
                         .fontWeight(.semibold)
-                    Text(player.balanceDescription)
+                    Text(engine.playerBalanceDescription)
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 }
                 .padding(.horizontal, 8)
                 .padding(.vertical, 4)
-                .background(getPlayerBalanceColor(player.balance).opacity(0.1))
+                .background(getPlayerBalanceColor(engine.playerBalance).opacity(0.1))
                 .cornerRadius(6)
 
                 // Balance progress bar (0-100 visualization)
@@ -204,9 +217,9 @@ struct WorldMapView: View {
 
                         // Current balance indicator
                         Rectangle()
-                            .fill(getPlayerBalanceColor(player.balance))
+                            .fill(getPlayerBalanceColor(engine.playerBalance))
                             .frame(
-                                width: geometry.size.width * CGFloat(player.balance) / 100,
+                                width: geometry.size.width * CGFloat(engine.playerBalance) / 100,
                                 height: 4
                             )
                     }
@@ -241,7 +254,7 @@ struct WorldMapView: View {
         }
     }
 
-    // MARK: - World Info Bar
+    // MARK: - World Info Bar (Engine-First: reads from engine.*)
 
     var worldInfoBar: some View {
         VStack(spacing: 8) {
@@ -255,7 +268,7 @@ struct WorldMapView: View {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .font(.caption)
                             .foregroundColor(tensionColor)
-                        Text("\(worldState.worldTension)%")
+                        Text("\(engine.worldTension)%")
                             .font(.caption)
                             .fontWeight(.bold)
                     }
@@ -268,7 +281,7 @@ struct WorldMapView: View {
                     Text("Баланс")
                         .font(.caption2)
                         .foregroundColor(.secondary)
-                    Text(worldState.balanceDescription)
+                    Text(engine.worldBalanceDescription)
                         .font(.caption)
                         .fontWeight(.bold)
                         .foregroundColor(balanceColor)
@@ -281,7 +294,7 @@ struct WorldMapView: View {
                     Text("Дней в пути")
                         .font(.caption2)
                         .foregroundColor(.secondary)
-                    Text("\(worldState.daysPassed)")
+                    Text("\(engine.currentDay)")
                         .font(.caption)
                         .fontWeight(.bold)
                 }
@@ -298,7 +311,7 @@ struct WorldMapView: View {
                     Rectangle()
                         .fill(tensionColor)
                         .frame(
-                            width: geometry.size.width * CGFloat(worldState.worldTension) / 100,
+                            width: geometry.size.width * CGFloat(engine.worldTension) / 100,
                             height: 4
                         )
                 }
@@ -311,7 +324,7 @@ struct WorldMapView: View {
     }
 
     var tensionColor: Color {
-        switch worldState.worldTension {
+        switch engine.worldTension {
         case 0..<30: return .green
         case 30..<60: return .yellow
         case 60..<80: return .orange
@@ -320,7 +333,7 @@ struct WorldMapView: View {
     }
 
     var balanceColor: Color {
-        switch worldState.lightDarkBalance {
+        switch engine.lightDarkBalance {
         case 0..<30: return .purple      // Тьма
         case 30..<70: return .gray       // Нейтрально
         case 70...100: return .yellow    // Свет
@@ -1056,7 +1069,7 @@ struct RegionDetailView: View {
             }
 
         case .trade:
-            // TODO: Implement trade/market view
+            // Phase 4: Implement trade/market view
             break
 
         case .strengthenAnchor:
@@ -1164,6 +1177,570 @@ struct EventLogEntryView: View {
         case .quest: return .purple
         case .travel: return .green
         case .worldChange: return .yellow
+        }
+    }
+}
+
+// MARK: - Engine-First Region Card View
+
+struct EngineRegionCardView: View {
+    let region: EngineRegionState
+    let isCurrentLocation: Bool
+
+    var body: some View {
+        HStack(spacing: 12) {
+            // Icon
+            ZStack {
+                Circle()
+                    .fill(stateColor.opacity(0.2))
+                    .frame(width: 60, height: 60)
+
+                Image(systemName: region.type.icon)
+                    .font(.title2)
+                    .foregroundColor(stateColor)
+            }
+
+            // Info
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text(region.name)
+                        .font(.headline)
+                        .fontWeight(.bold)
+
+                    if isCurrentLocation {
+                        Image(systemName: "location.fill")
+                            .font(.caption)
+                            .foregroundColor(.blue)
+                    }
+                }
+
+                HStack(spacing: 8) {
+                    Text(region.state.emoji)
+                        .font(.caption)
+                    Text(region.state.displayName)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+
+                    Spacer()
+
+                    Text(region.type.displayName)
+                        .font(.caption2)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color.gray.opacity(0.2))
+                        .cornerRadius(4)
+                }
+
+                // Anchor info
+                if let anchor = region.anchor {
+                    HStack(spacing: 4) {
+                        Image(systemName: "flame")
+                            .font(.caption2)
+                            .foregroundColor(.orange)
+                        Text(anchor.name)
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text("\(anchor.integrity)%")
+                            .font(.caption2)
+                            .fontWeight(.bold)
+                            .foregroundColor(anchorIntegrityColor(anchor.integrity))
+                    }
+                }
+
+                // Reputation
+                if region.reputation != 0 {
+                    HStack(spacing: 4) {
+                        Image(systemName: region.reputation > 0 ? "hand.thumbsup.fill" : "hand.thumbsdown.fill")
+                            .font(.caption2)
+                            .foregroundColor(region.reputation > 0 ? .green : .red)
+                        Text("Репутация: \(region.reputation > 0 ? "+" : "")\(region.reputation)")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+
+            Spacer()
+
+            // Arrow
+            Image(systemName: "chevron.right")
+                .font(.caption)
+                .foregroundColor(.gray)
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(UIColor.secondarySystemBackground))
+                .shadow(color: isCurrentLocation ? .blue.opacity(0.3) : .clear, radius: 4)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(isCurrentLocation ? Color.blue : Color.clear, lineWidth: 2)
+        )
+    }
+
+    var stateColor: Color {
+        switch region.state {
+        case .stable: return .green
+        case .borderland: return .orange
+        case .breach: return .red
+        }
+    }
+
+    func anchorIntegrityColor(_ integrity: Int) -> Color {
+        switch integrity {
+        case 70...100: return .green
+        case 30..<70: return .orange
+        default: return .red
+        }
+    }
+}
+
+// MARK: - Engine-First Region Detail View
+
+struct EngineRegionDetailView: View {
+    let region: EngineRegionState
+    @ObservedObject var engine: TwilightGameEngine
+    let onDismiss: () -> Void
+
+    @State private var showingActionConfirmation = false
+    @State private var selectedAction: EngineRegionAction?
+
+    enum EngineRegionAction {
+        case travel
+        case rest
+        case trade
+        case strengthenAnchor
+        case explore
+    }
+
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    // Region header
+                    regionHeader
+
+                    // Risk display for non-stable regions
+                    if region.state != .stable {
+                        riskInfoSection
+                    }
+
+                    Divider()
+
+                    // Anchor section
+                    if let anchor = region.anchor {
+                        anchorSection(anchor: anchor)
+                        Divider()
+                    }
+
+                    // Available actions
+                    actionsSection
+                }
+                .padding()
+            }
+            .navigationTitle(region.name)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Закрыть") {
+                        onDismiss()
+                    }
+                }
+            }
+            .alert(actionConfirmationTitle, isPresented: $showingActionConfirmation) {
+                Button("Подтвердить") {
+                    if let action = selectedAction {
+                        performAction(action)
+                    }
+                }
+                Button("Отмена", role: .cancel) { }
+            } message: {
+                Text(actionConfirmationMessage)
+            }
+        }
+    }
+
+    // MARK: - Region Header
+
+    var regionHeader: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: region.type.icon)
+                    .font(.largeTitle)
+                    .foregroundColor(stateColor)
+
+                VStack(alignment: .leading) {
+                    Text(region.type.displayName)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+
+                    HStack {
+                        Text(region.state.emoji)
+                        Text(region.state.displayName)
+                            .font(.title3)
+                            .fontWeight(.bold)
+                            .foregroundColor(stateColor)
+                    }
+                }
+
+                Spacer()
+
+                // Current location indicator
+                if isPlayerHere {
+                    HStack(spacing: 4) {
+                        Image(systemName: "person.fill")
+                        Text("Вы здесь")
+                    }
+                    .font(.caption)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Color.blue)
+                    .cornerRadius(12)
+                }
+            }
+
+            Text(regionDescription)
+                .font(.body)
+                .foregroundColor(.secondary)
+        }
+    }
+
+    var regionDescription: String {
+        switch region.state {
+        case .stable:
+            return "Регион спокоен. Влияние Нави минимально. Здесь безопасно отдыхать и торговать."
+        case .borderland:
+            return "Регион балансирует между Явью и Навью. Повышенная опасность, но и больше возможностей."
+        case .breach:
+            return "Навь активно проникает в регион. Очень опасно. Требуется восстановление якоря."
+        }
+    }
+
+    // MARK: - Risk Info Section
+
+    var riskInfoSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundColor(region.state == .breach ? .red : .orange)
+                Text("Предупреждение")
+                    .font(.caption)
+                    .fontWeight(.bold)
+            }
+
+            Text("В этом регионе повышенная опасность. Будьте осторожны!")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(region.state == .breach ? Color.red.opacity(0.1) : Color.orange.opacity(0.1))
+        )
+    }
+
+    // MARK: - Anchor Section
+
+    func anchorSection(anchor: EngineAnchorState) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Якорь Яви")
+                .font(.headline)
+
+            HStack(spacing: 12) {
+                Image(systemName: "flame")
+                    .font(.title)
+                    .foregroundColor(.orange)
+                    .frame(width: 50, height: 50)
+                    .background(Circle().fill(Color.orange.opacity(0.2)))
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(anchor.name)
+                        .font(.subheadline)
+                        .fontWeight(.bold)
+
+                    // Integrity bar
+                    HStack(spacing: 4) {
+                        Text("Целостность:")
+                            .font(.caption2)
+                        GeometryReader { geometry in
+                            ZStack(alignment: .leading) {
+                                Rectangle()
+                                    .fill(Color.gray.opacity(0.2))
+                                    .frame(height: 6)
+
+                                Rectangle()
+                                    .fill(anchorIntegrityColor(anchor.integrity))
+                                    .frame(
+                                        width: geometry.size.width * CGFloat(anchor.integrity) / 100,
+                                        height: 6
+                                    )
+                            }
+                        }
+                        .frame(height: 6)
+
+                        Text("\(anchor.integrity)%")
+                            .font(.caption2)
+                            .fontWeight(.bold)
+                            .foregroundColor(anchorIntegrityColor(anchor.integrity))
+                    }
+                }
+            }
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(UIColor.tertiarySystemBackground))
+            )
+        }
+    }
+
+    // MARK: - Actions Section
+
+    var isPlayerHere: Bool {
+        region.id == engine.currentRegionId
+    }
+
+    var actionsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Доступные действия")
+                .font(.headline)
+
+            VStack(spacing: 8) {
+                // Travel action - only if player is NOT here
+                if !isPlayerHere {
+                    actionButton(
+                        title: "Отправиться",
+                        icon: "arrow.right.circle.fill",
+                        color: .blue,
+                        enabled: true
+                    ) {
+                        selectedAction = .travel
+                        showingActionConfirmation = true
+                    }
+
+                    HStack {
+                        Image(systemName: "info.circle")
+                            .foregroundColor(.secondary)
+                        Text("Переместитесь в регион, чтобы взаимодействовать с ним")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.vertical, 8)
+                }
+
+                // Actions available ONLY if player is in the region
+                if isPlayerHere {
+                    // Rest action
+                    actionButton(
+                        title: "Отдохнуть (+3 ❤️)",
+                        icon: "bed.double.fill",
+                        color: .green,
+                        enabled: region.canRest
+                    ) {
+                        selectedAction = .rest
+                        showingActionConfirmation = true
+                    }
+
+                    // Trade action
+                    actionButton(
+                        title: "Торговать",
+                        icon: "cart.fill",
+                        color: .orange,
+                        enabled: region.canTrade
+                    ) {
+                        selectedAction = .trade
+                        showingActionConfirmation = true
+                    }
+
+                    // Strengthen anchor
+                    if region.anchor != nil {
+                        actionButton(
+                            title: "Укрепить якорь (-5 ✨, +20%)",
+                            icon: "hammer.fill",
+                            color: .purple,
+                            enabled: engine.canAffordFaith(5)
+                        ) {
+                            selectedAction = .strengthenAnchor
+                            showingActionConfirmation = true
+                        }
+                    }
+
+                    // Explore
+                    actionButton(
+                        title: "Исследовать",
+                        icon: "magnifyingglass",
+                        color: .cyan,
+                        enabled: true
+                    ) {
+                        selectedAction = .explore
+                        showingActionConfirmation = true
+                    }
+                }
+            }
+        }
+    }
+
+    func actionButton(
+        title: String,
+        icon: String,
+        color: Color,
+        enabled: Bool,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            HStack {
+                Image(systemName: icon)
+                    .font(.body)
+                Text(title)
+                    .font(.body)
+                Spacer()
+            }
+            .padding()
+            .foregroundColor(enabled ? .white : .gray)
+            .background(enabled ? color : Color.gray.opacity(0.3))
+            .cornerRadius(10)
+        }
+        .disabled(!enabled)
+    }
+
+    // MARK: - Helpers
+
+    var stateColor: Color {
+        switch region.state {
+        case .stable: return .green
+        case .borderland: return .orange
+        case .breach: return .red
+        }
+    }
+
+    func anchorIntegrityColor(_ integrity: Int) -> Color {
+        switch integrity {
+        case 70...100: return .green
+        case 30..<70: return .orange
+        default: return .red
+        }
+    }
+
+    // MARK: - Action Handling
+
+    var actionConfirmationTitle: String {
+        guard let action = selectedAction else { return "Подтверждение" }
+        switch action {
+        case .travel: return "Отправиться в регион"
+        case .rest: return "Отдохнуть"
+        case .trade: return "Торговать"
+        case .strengthenAnchor: return "Укрепить якорь"
+        case .explore: return "Исследовать"
+        }
+    }
+
+    var actionConfirmationMessage: String {
+        guard let action = selectedAction else { return "" }
+        switch action {
+        case .travel:
+            return "Отправиться в регион '\(region.name)'? Это займёт 1 день пути."
+        case .rest:
+            return "Отдохнуть в этом месте? Вы восстановите 3 здоровья."
+        case .trade:
+            return "Торговая система пока не реализована."
+        case .strengthenAnchor:
+            return "Укрепить якорь? Это стоит 5 веры и добавит 20% целостности."
+        case .explore:
+            return "Исследовать регион? Это займёт день."
+        }
+    }
+
+    // MARK: - Actions via Engine
+
+    func performAction(_ action: EngineRegionAction) {
+        switch action {
+        case .travel:
+            let result = engine.performAction(.travel(toRegionId: region.id))
+            if result.success {
+                engine.addLogEntry(
+                    regionName: region.name,
+                    eventTitle: "Путешествие",
+                    choiceMade: "Отправился в путь",
+                    outcome: "Прибыл в \(region.name)",
+                    type: .travel
+                )
+            }
+            onDismiss()
+
+        case .rest:
+            let result = engine.performAction(.rest)
+            if result.success {
+                engine.addLogEntry(
+                    regionName: region.name,
+                    eventTitle: "Отдых",
+                    choiceMade: "Решил отдохнуть",
+                    outcome: "Восстановлено здоровье",
+                    type: .exploration
+                )
+            }
+
+        case .trade:
+            // Phase 4: Implement trade/market view
+            break
+
+        case .strengthenAnchor:
+            let result = engine.performAction(.strengthenAnchor)
+            if result.success {
+                engine.addLogEntry(
+                    regionName: region.name,
+                    eventTitle: "Укрепление якоря",
+                    choiceMade: "Потрачена вера",
+                    outcome: "Якорь укреплён",
+                    type: .worldChange
+                )
+            }
+
+        case .explore:
+            let result = engine.performAction(.explore)
+            if result.success {
+                engine.addLogEntry(
+                    regionName: region.name,
+                    eventTitle: "Исследование",
+                    choiceMade: "Исследовал регион",
+                    outcome: "Обследовал окрестности",
+                    type: .exploration
+                )
+            }
+        }
+    }
+}
+
+// MARK: - Engine-First Event Log View
+
+struct EngineEventLogView: View {
+    @ObservedObject var engine: TwilightGameEngine
+    @Environment(\.dismiss) var dismiss
+
+    var body: some View {
+        NavigationView {
+            List {
+                if engine.publishedEventLog.isEmpty {
+                    Text("Журнал пуст. Ваши приключения ещё впереди...")
+                        .foregroundColor(.secondary)
+                        .padding()
+                } else {
+                    ForEach(engine.publishedEventLog.reversed()) { entry in
+                        EventLogEntryView(entry: entry)
+                    }
+                }
+            }
+            .navigationTitle("Журнал")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Закрыть") {
+                        dismiss()
+                    }
+                }
+            }
         }
     }
 }

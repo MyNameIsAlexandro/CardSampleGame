@@ -39,6 +39,13 @@ enum TwilightGameAction: TimedAction, Equatable {
     /// End combat turn
     case endCombatTurn
 
+    // MARK: - UI Actions
+    /// Dismiss current event (after UI handles it)
+    case dismissCurrentEvent
+
+    /// Dismiss day event notification
+    case dismissDayEvent
+
     // MARK: - Special
     /// Skip/pass turn
     case skipTurn
@@ -81,6 +88,12 @@ enum TwilightGameAction: TimedAction, Equatable {
 
         case .endCombatTurn:
             return 0  // Turn management
+
+        case .dismissCurrentEvent:
+            return 0  // UI action, no time cost
+
+        case .dismissDayEvent:
+            return 0  // UI action, no time cost
 
         case .skipTurn:
             return 1

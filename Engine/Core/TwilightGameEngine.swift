@@ -22,7 +22,7 @@ final class TwilightGameEngine: ObservableObject {
 
     @Published private(set) var lastActionResult: ActionResult?
 
-    // MARK: - Published State for UI (Audit v1.1)
+    // MARK: - Published State for UI (Engine-First Architecture)
 
     /// All regions with their current state - UI reads this directly
     @Published private(set) var publishedRegions: [UUID: EngineRegionState] = [:]
@@ -31,12 +31,32 @@ final class TwilightGameEngine: ObservableObject {
     @Published private(set) var playerHealth: Int = 10
     @Published private(set) var playerMaxHealth: Int = 10
     @Published private(set) var playerFaith: Int = 3
+    @Published private(set) var playerMaxFaith: Int = 10
     @Published private(set) var playerBalance: Int = 50
+    @Published private(set) var playerName: String = "Герой"
 
     /// World flags - for quest/event conditions
     @Published private(set) var publishedWorldFlags: [String: Bool] = [:]
 
-    // MARK: - UI Convenience Accessors (Audit v1.1)
+    /// Current event being displayed to player
+    @Published private(set) var currentEvent: GameEvent?
+
+    /// Day event notification (tension increase, degradation, etc.)
+    @Published private(set) var lastDayEvent: DayEvent?
+
+    /// Active quests
+    @Published private(set) var publishedActiveQuests: [Quest] = []
+
+    /// Event log (last 100 entries)
+    @Published private(set) var publishedEventLog: [EventLogEntry] = []
+
+    /// Light/Dark balance of the world
+    @Published private(set) var lightDarkBalance: Int = 50
+
+    /// Main quest stage (1-5)
+    @Published private(set) var mainQuestStage: Int = 1
+
+    // MARK: - UI Convenience Accessors (Engine-First Architecture)
 
     /// Get regions as sorted array for UI iteration
     var regionsArray: [EngineRegionState] {
@@ -60,6 +80,36 @@ final class TwilightGameEngine: ObservableObject {
         return current.neighborIds.contains(regionId)
     }
 
+    /// Player balance description for UI
+    var playerBalanceDescription: String {
+        switch playerBalance {
+        case 70...100: return "Свет"
+        case 31..<70: return "Равновесие"
+        default: return "Тьма"
+        }
+    }
+
+    /// World balance description
+    var worldBalanceDescription: String {
+        switch lightDarkBalance {
+        case 70...100: return "Явь сильна"
+        case 31..<70: return "Сумрак"
+        default: return "Навь наступает"
+        }
+    }
+
+    /// Check if region can rest
+    func canRestInCurrentRegion() -> Bool {
+        guard let region = currentRegion else { return false }
+        return region.state == .stable
+    }
+
+    /// Check if region can trade
+    func canTradeInCurrentRegion() -> Bool {
+        guard let region = currentRegion else { return false }
+        return region.canTrade
+    }
+
     // MARK: - Core Subsystems
 
     private let timeEngine: TimeEngine
@@ -81,6 +131,23 @@ final class TwilightGameEngine: ObservableObject {
     private var completedEventIds: Set<UUID> = []
     private var worldFlags: [String: Bool] = [:]
     private var questStages: [String: Int] = [:]
+
+    /// All events in the game (from ContentProvider)
+    private var allEvents: [GameEvent] = []
+
+    /// Active quests
+    private var activeQuests: [Quest] = []
+
+    /// Completed quest IDs
+    private var completedQuestIds: Set<String> = []
+
+    /// Event log
+    private var eventLog: [EventLogEntry] = []
+
+    /// Player deck (for save/load)
+    private var playerDeck: [Card] = []
+    private var playerHand: [Card] = []
+    private var playerDiscard: [Card] = []
 
     // MARK: - Configuration Constants
 
@@ -147,6 +214,176 @@ final class TwilightGameEngine: ObservableObject {
         // After load, we reconstruct this from the current pressure value
         pressureEngine.setPressure(worldTension)
         pressureEngine.syncTriggeredThresholdsFromPressure()
+
+        // Sync additional state for Engine-First architecture
+        lightDarkBalance = adapter.worldState.lightDarkBalance
+        mainQuestStage = adapter.worldState.mainQuestStage
+        allEvents = adapter.worldState.allEvents
+        activeQuests = adapter.worldState.activeQuests
+        eventLog = adapter.worldState.eventLog
+        publishedActiveQuests = activeQuests
+        publishedEventLog = eventLog
+    }
+
+    // MARK: - Engine-First Initialization
+
+    /// Initialize a new game without legacy WorldState
+    /// This is the Engine-First way to start a game
+    func initializeNewGame(playerName: String = "Герой") {
+        // Reset state
+        isGameOver = false
+        gameResult = nil
+        currentEventId = nil
+        currentEvent = nil
+        lastDayEvent = nil
+        isInCombat = false
+
+        // Load content from provider
+        let provider = TwilightMarchesCodeContentProvider()
+
+        // Setup player
+        self.playerName = playerName
+        playerHealth = 10
+        playerMaxHealth = 10
+        playerFaith = 3
+        playerMaxFaith = 10
+        playerBalance = 50
+
+        // Setup world
+        currentDay = 0
+        worldTension = 30
+        lightDarkBalance = 50
+        mainQuestStage = 1
+        worldFlags = [:]
+        completedEventIds = []
+        completedQuestIds = []
+        eventLog = []
+
+        // Load regions from ContentProvider
+        setupRegionsFromProvider(provider)
+
+        // Load events
+        allEvents = createInitialEvents()
+
+        // Load quests and start main quest
+        let initialQuests = createInitialQuests()
+        if let mainQuest = initialQuests.first(where: { $0.questType == .main }) {
+            activeQuests = [mainQuest]
+        }
+
+        // Setup pressure engine
+        pressureEngine.setPressure(worldTension)
+        pressureEngine.syncTriggeredThresholdsFromPressure()
+
+        // Update all published state
+        updatePublishedState()
+    }
+
+    /// Setup regions from ContentProvider
+    private func setupRegionsFromProvider(_ provider: ContentProvider) {
+        let regionDefs = provider.getAllRegionDefinitions()
+        var newRegions: [UUID: EngineRegionState] = [:]
+        var stringToUUID: [String: UUID] = [:]  // Map string IDs to UUIDs
+
+        // First pass: create regions and map IDs
+        for def in regionDefs {
+            let regionUUID = UUID()
+            stringToUUID[def.id] = regionUUID
+
+            let anchor = createEngineAnchor(from: provider.getAnchorDefinition(forRegion: def.id))
+            let regionType = mapRegionType(def.id)
+            let regionState = mapRegionState(def.initialState)
+
+            let engineRegion = EngineRegionState(
+                id: regionUUID,
+                name: TwilightMarchesCodeContentProvider.regionName(for: def.id),
+                type: regionType,
+                state: regionState,
+                anchor: anchor,
+                neighborIds: [],  // Will be set in second pass
+                canTrade: regionState == .stable && regionType == .settlement
+            )
+            newRegions[regionUUID] = engineRegion
+
+            // Set starting region
+            if def.id == "village" {
+                currentRegionId = regionUUID
+            }
+        }
+
+        // Second pass: resolve neighbor IDs
+        for def in regionDefs {
+            guard let regionUUID = stringToUUID[def.id],
+                  var region = newRegions[regionUUID] else { continue }
+
+            let neighborUUIDs = def.neighborIds.compactMap { stringToUUID[$0] }
+            region = EngineRegionState(
+                id: region.id,
+                name: region.name,
+                type: region.type,
+                state: region.state,
+                anchor: region.anchor,
+                neighborIds: neighborUUIDs,
+                canTrade: region.canTrade,
+                visited: region.visited,
+                reputation: region.reputation
+            )
+            newRegions[regionUUID] = region
+        }
+
+        regions = newRegions
+        publishedRegions = newRegions
+    }
+
+    /// Create EngineAnchorState from AnchorDefinition
+    private func createEngineAnchor(from def: AnchorDefinition?) -> EngineAnchorState? {
+        guard let def = def else { return nil }
+        return EngineAnchorState(
+            id: UUID(),
+            name: TwilightMarchesCodeContentProvider.anchorName(for: def.id),
+            integrity: def.initialIntegrity
+        )
+    }
+
+    /// Resolve neighbor region IDs from string IDs to UUIDs
+    private func resolveNeighborIds(_ neighborStringIds: [String], from defs: [RegionDefinition]) -> [UUID] {
+        // This would need to be implemented properly with a mapping
+        // For now, return empty - neighbors will be set up separately
+        return []
+    }
+
+    /// Map region ID to RegionType
+    private func mapRegionType(_ id: String) -> RegionType {
+        switch id {
+        case "village", "temple", "fortress": return .settlement
+        case "forest": return .forest
+        case "swamp": return .swamp
+        case "ruins", "wasteland": return .wasteland
+        case "sanctuary": return .sacred
+        case "mountain": return .mountain
+        default: return .forest
+        }
+    }
+
+    /// Map RegionStateType to RegionState
+    private func mapRegionState(_ stateType: RegionStateType) -> RegionState {
+        switch stateType {
+        case .stable: return .stable
+        case .borderland: return .borderland
+        case .breach: return .breach
+        }
+    }
+
+    /// Create initial events (simplified - would load from ContentProvider)
+    private func createInitialEvents() -> [GameEvent] {
+        // Phase 5: Load from ContentProvider/JSON
+        return []
+    }
+
+    /// Create initial quests (simplified - would load from ContentProvider)
+    private func createInitialQuests() -> [Quest] {
+        // Phase 5: Load from ContentProvider/JSON
+        return []
     }
 
     // MARK: - Main Action Entry Point
@@ -228,6 +465,13 @@ final class TwilightGameEngine: ObservableObject {
         case .playCard, .endCombatTurn:
             // Combat actions - handled by combat subsystem
             break
+
+        case .dismissCurrentEvent:
+            currentEvent = nil
+            currentEventId = nil
+
+        case .dismissDayEvent:
+            lastDayEvent = nil
 
         case .skipTurn:
             // Just time passes
@@ -693,7 +937,7 @@ final class TwilightGameEngine: ObservableObject {
         playerAdapter?.syncFromEngine()
     }
 
-    // MARK: - Published State Update (Audit v1.1)
+    // MARK: - Published State Update (Engine-First Architecture)
 
     /// Update all published properties from internal state
     /// Called after actions to keep UI in sync
@@ -704,13 +948,113 @@ final class TwilightGameEngine: ObservableObject {
         // Update flags
         publishedWorldFlags = worldFlags
 
-        // Update player stats from adapter
+        // Update quests and log
+        publishedActiveQuests = activeQuests
+        publishedEventLog = Array(eventLog.suffix(100))
+
+        // Update player stats from adapter (legacy mode)
         if let player = playerAdapter?.player {
             playerHealth = player.health
             playerMaxHealth = player.maxHealth
             playerFaith = player.faith
             playerBalance = player.balance
         }
+        // In Engine-First mode, player stats are updated directly
+    }
+
+    // MARK: - Event Log
+
+    /// Add entry to event log
+    func addLogEntry(
+        regionName: String,
+        eventTitle: String,
+        choiceMade: String,
+        outcome: String,
+        type: EventLogType
+    ) {
+        let entry = EventLogEntry(
+            dayNumber: currentDay,
+            regionName: regionName,
+            eventTitle: eventTitle,
+            choiceMade: choiceMade,
+            outcome: outcome,
+            type: type
+        )
+        eventLog.append(entry)
+
+        // Trim log to 100 entries
+        if eventLog.count > 100 {
+            eventLog.removeFirst(eventLog.count - 100)
+        }
+
+        publishedEventLog = eventLog
+    }
+
+    // MARK: - Day Events
+
+    /// Trigger day event (tension increase, degradation, etc.)
+    private func triggerDayEvent(_ event: DayEvent) {
+        lastDayEvent = event
+    }
+
+    // MARK: - Save/Load Support Methods
+
+    /// Get completed quest IDs for save
+    func getCompletedQuestIds() -> Set<String> {
+        return completedQuestIds
+    }
+
+    /// Get quest stages for save
+    func getQuestStages() -> [String: Int] {
+        return questStages
+    }
+
+    /// Get completed event IDs for save
+    func getCompletedEventIds() -> Set<UUID> {
+        return completedEventIds
+    }
+
+    /// Set regions from save
+    func setRegions(_ newRegions: [UUID: EngineRegionState]) {
+        regions = newRegions
+        publishedRegions = newRegions
+    }
+
+    /// Set world flags from save
+    func setWorldFlags(_ newFlags: [String: Bool]) {
+        worldFlags = newFlags
+        publishedWorldFlags = newFlags
+    }
+
+    /// Set completed event IDs from save
+    func setCompletedEventIds(_ ids: Set<UUID>) {
+        completedEventIds = ids
+    }
+
+    /// Set event log from save
+    func setEventLog(_ log: [EventLogEntry]) {
+        eventLog = log
+        publishedEventLog = Array(log.suffix(100))
+    }
+
+    /// Set main quest stage from save
+    func setMainQuestStage(_ stage: Int) {
+        mainQuestStage = stage
+    }
+
+    /// Set completed quest IDs from save
+    func setCompletedQuestIds(_ ids: Set<String>) {
+        completedQuestIds = ids
+    }
+
+    /// Set quest stages from save
+    func setQuestStages(_ stages: [String: Int]) {
+        questStages = stages
+    }
+
+    /// Update published state after loading
+    func updatePublishedStateAfterLoad() {
+        updatePublishedState()
     }
 }
 
@@ -746,7 +1090,10 @@ struct EngineRegionState {
     var anchor: EngineAnchorState?
     let neighborIds: [UUID]
     var canTrade: Bool
+    var visited: Bool = false
+    var reputation: Int = 0
 
+    /// Create from legacy Region (for migration)
     init(from region: Region) {
         self.id = region.id
         self.name = region.name
@@ -755,6 +1102,36 @@ struct EngineRegionState {
         self.anchor = region.anchor.map { EngineAnchorState(from: $0) }
         self.neighborIds = region.neighborIds
         self.canTrade = region.canTrade
+        self.visited = region.visited
+        self.reputation = region.reputation
+    }
+
+    /// Create directly (Engine-First)
+    init(
+        id: UUID = UUID(),
+        name: String,
+        type: RegionType,
+        state: RegionState,
+        anchor: EngineAnchorState? = nil,
+        neighborIds: [UUID] = [],
+        canTrade: Bool = false,
+        visited: Bool = false,
+        reputation: Int = 0
+    ) {
+        self.id = id
+        self.name = name
+        self.type = type
+        self.state = state
+        self.anchor = anchor
+        self.neighborIds = neighborIds
+        self.canTrade = canTrade
+        self.visited = visited
+        self.reputation = reputation
+    }
+
+    /// Can rest in this region
+    var canRest: Bool {
+        state == .stable && (type == .settlement || type == .sacred)
     }
 }
 
@@ -766,9 +1143,17 @@ struct EngineAnchorState {
     let name: String
     var integrity: Int
 
+    /// Create from legacy Anchor (for migration)
     init(from anchor: Anchor) {
         self.id = anchor.id
         self.name = anchor.name
         self.integrity = anchor.integrity
+    }
+
+    /// Create directly (Engine-First)
+    init(id: UUID = UUID(), name: String, integrity: Int) {
+        self.id = id
+        self.name = name
+        self.integrity = max(0, min(100, integrity))
     }
 }

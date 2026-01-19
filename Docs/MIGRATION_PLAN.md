@@ -12,8 +12,75 @@
 | Phase 1 | Core Protocols & Engine Foundation | ✅ Done |
 | Phase 2 | Data Separation (Definitions + Runtime) | ✅ Done |
 | Phase 3 | GameLoop Integration | ✅ Done |
+| Phase 3.5 | **Engine-First Architecture** | ✅ Done |
 | Phase 4 | Economy Transactions Everywhere | ⬜ Planned |
 | Phase 5 | Content Migration to JSON | ⬜ Planned |
+
+---
+
+## ✅ Phase 3.5: Engine-First Architecture
+
+**Цель:** UI читает состояние ТОЛЬКО из Engine, не из WorldState/Player напрямую.
+
+### Выполнено
+
+| Компонент | Файл | Статус |
+|-----------|------|--------|
+| Engine Published State | TwilightGameEngine.swift | ✅ Done |
+| New Actions (dismiss events) | TwilightGameAction.swift | ✅ Done |
+| EngineSave (persistence) | EngineSave.swift | ✅ Done |
+| EngineRegionCardView | WorldMapView.swift | ✅ Done |
+| EngineRegionDetailView | WorldMapView.swift | ✅ Done |
+| EngineEventLogView | WorldMapView.swift | ✅ Done |
+| WorldMapView Engine-First init | WorldMapView.swift | ✅ Done |
+
+### Архитектура Engine-First
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         UI Layer                             │
+│   WorldMapView, RegionDetailView, EventLogView              │
+│   @ObservedObject engine: TwilightGameEngine                │
+│   Reads: engine.* (published properties)                    │
+│   Writes: engine.performAction()                            │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    TwilightGameEngine                        │
+│   @Published: regions, playerHealth, currentDay, etc.       │
+│   Actions: travel, rest, explore, dismissEvent, etc.        │
+│   Save/Load: engine.createSave() / engine.loadFromSave()    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Engine Published Properties
+
+```swift
+// Player state
+@Published var playerHealth, playerFaith, playerBalance: Int
+@Published var playerName: String
+
+// World state
+@Published var currentDay, worldTension, lightDarkBalance: Int
+@Published var publishedRegions: [UUID: EngineRegionState]
+@Published var currentRegionId: UUID?
+
+// Events & Quests
+@Published var currentEvent: GameEvent?
+@Published var lastDayEvent: DayEvent?
+@Published var publishedActiveQuests: [Quest]
+@Published var publishedEventLog: [EventLogEntry]
+```
+
+### Legacy Adapters Status
+
+Adapters остаются для обратной совместимости во время постепенной миграции:
+- `WorldStateEngineAdapter` - синхронизация с WorldState
+- `PlayerEngineAdapter` - синхронизация с Player
+- `GameStateEngineAdapter` - синхронизация с GameState
+
+**Примечание:** Adapters будут удалены когда ВСЕ Views перейдут на Engine-First.
 
 ---
 
