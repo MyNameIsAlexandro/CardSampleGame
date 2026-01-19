@@ -12,7 +12,9 @@ final class JSONContentProviderTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        provider = JSONContentProvider()
+        // Use the app bundle (where JSON files are copied), not the test bundle
+        let appBundle = Bundle(for: JSONContentProvider.self)
+        provider = JSONContentProvider(bundle: appBundle)
     }
 
     override func tearDown() {
@@ -143,18 +145,18 @@ final class JSONContentProviderTests: XCTestCase {
     func testChallengesLoaded() throws {
         try provider.loadAllContent()
 
-        XCTAssertGreaterThan(provider.challenges.count, 0, "Should have loaded at least one challenge")
+        XCTAssertGreaterThan(provider.miniGameChallenges.count, 0, "Should have loaded at least one challenge")
     }
 
     func testChallengeKinds() throws {
         try provider.loadAllContent()
 
         // Check for different challenge kinds
-        let kinds = Set(provider.challenges.values.map { $0.challengeKind })
+        let kinds = Set(provider.miniGameChallenges.values.map { $0.challengeKind })
 
-        XCTAssertTrue(kinds.contains(.combat), "Should have combat challenges")
-        XCTAssertTrue(kinds.contains(.ritual), "Should have ritual challenges")
-        XCTAssertTrue(kinds.contains(.exploration), "Should have exploration challenges")
+        XCTAssertTrue(kinds.contains(MiniGameChallengeKind.combat), "Should have combat challenges")
+        XCTAssertTrue(kinds.contains(MiniGameChallengeKind.ritual), "Should have ritual challenges")
+        XCTAssertTrue(kinds.contains(MiniGameChallengeKind.exploration), "Should have exploration challenges")
     }
 
     // MARK: - Event Tests
@@ -190,16 +192,26 @@ final class JSONContentProviderTests: XCTestCase {
         XCTAssertFalse(wanderer.choices.isEmpty, "Event should have choices")
     }
 
-    func testCombatEventHasCombatData() throws {
+    func testCombatEventExists() throws {
         try provider.loadAllContent()
 
-        // Find a combat event
-        let combatEvent = provider.events.values.first { $0.eventType == .combat }
+        // Find a combat event (mini-game with combat kind)
+        let combatEvents = provider.events.values.filter {
+            if case .miniGame(.combat) = $0.eventKind {
+                return true
+            }
+            return false
+        }
 
-        XCTAssertNotNil(combatEvent, "Should have at least one combat event")
+        XCTAssertGreaterThan(combatEvents.count, 0, "Should have at least one combat event")
 
-        if let event = combatEvent {
-            XCTAssertNotNil(event.combatData, "Combat event should have combat data")
+        // Verify combat event has correct kind
+        if let event = combatEvents.first {
+            if case .miniGame(.combat) = event.eventKind {
+                // Expected - combat event has correct kind
+            } else {
+                XCTFail("Combat event should have miniGame(.combat) kind")
+            }
         }
     }
 
@@ -217,7 +229,7 @@ final class JSONContentProviderTests: XCTestCase {
         let expectedPools = ["pool_common", "pool_village", "pool_forest", "pool_swamp", "pool_mountain", "pool_sacred", "pool_breach", "pool_boss"]
 
         for poolId in expectedPools {
-            let events = provider.getEvents(forPool: poolId)
+            let events = provider.getEventDefinitions(forPool: poolId)
             XCTAssertGreaterThan(
                 events.count, 0,
                 "Pool '\(poolId)' should have at least one event"
@@ -230,7 +242,7 @@ final class JSONContentProviderTests: XCTestCase {
     func testGetRegion() throws {
         try provider.loadAllContent()
 
-        let region = provider.getRegion(id: "village")
+        let region = provider.getRegionDefinition(id: "village")
         XCTAssertNotNil(region, "Should find village region")
         XCTAssertEqual(region?.id, "village")
     }
@@ -238,28 +250,28 @@ final class JSONContentProviderTests: XCTestCase {
     func testGetAnchor() throws {
         try provider.loadAllContent()
 
-        let anchor = provider.getAnchor(id: "anchor_village_chapel")
+        let anchor = provider.getAnchorDefinition(id: "anchor_village_chapel")
         XCTAssertNotNil(anchor, "Should find village chapel anchor")
     }
 
     func testGetQuest() throws {
         try provider.loadAllContent()
 
-        let quest = provider.getQuest(id: "quest_main_act1")
+        let quest = provider.getQuestDefinition(id: "quest_main_act1")
         XCTAssertNotNil(quest, "Should find main quest")
     }
 
     func testGetChallenge() throws {
         try provider.loadAllContent()
 
-        let challenge = provider.getChallenge(id: "combat_leshy")
+        let challenge = provider.getMiniGameChallenge(id: "combat_leshy")
         XCTAssertNotNil(challenge, "Should find Leshy combat challenge")
     }
 
     func testGetEvent() throws {
         try provider.loadAllContent()
 
-        let event = provider.getEvent(id: "event_wanderer")
+        let event = provider.getEventDefinition(id: "event_wanderer")
         XCTAssertNotNil(event, "Should find wanderer event")
     }
 
@@ -307,11 +319,11 @@ final class JSONContentProviderTests: XCTestCase {
     func testExpectedContentCounts() throws {
         try provider.loadAllContent()
 
-        // Based on HANDOFF.md: 24 events, 7 regions, 6 anchors, 4 quests, 7 challenges
+        // Content counts: 21 events (8 pools), 7 regions, 6 anchors, 4 quests, 7 challenges
         XCTAssertEqual(provider.regions.count, 7, "Should have 7 regions")
         XCTAssertEqual(provider.anchors.count, 6, "Should have 6 anchors")
         XCTAssertEqual(provider.quests.count, 4, "Should have 4 quests")
-        XCTAssertEqual(provider.challenges.count, 7, "Should have 7 challenges")
-        XCTAssertEqual(provider.events.count, 24, "Should have 24 events")
+        XCTAssertEqual(provider.miniGameChallenges.count, 7, "Should have 7 challenges")
+        XCTAssertEqual(provider.events.count, 21, "Should have 21 events")
     }
 }

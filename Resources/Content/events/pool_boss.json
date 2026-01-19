@@ -14,7 +14,7 @@
         "regionStates": ["breach"],
         "minPressure": 50,
         "maxPressure": 100,
-        "requiredFlags": {"reached_dark_lowland": true}
+        "requiredFlags": ["reached_dark_lowland"]
       },
       "weight": 100,
       "isOneTime": true,

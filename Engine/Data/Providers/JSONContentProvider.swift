@@ -15,18 +15,18 @@ class JSONContentProvider: ContentProvider {
     /// Bundle containing content (nil = main bundle)
     let bundle: Bundle
 
-    // MARK: - Cached Definitions
+    // MARK: - Cached Definitions (internal for @testable import)
 
-    private var regions: [String: RegionDefinition] = [:]
-    private var anchors: [String: AnchorDefinition] = [:]
-    private var events: [String: EventDefinition] = [:]
-    private var quests: [String: QuestDefinition] = [:]
-    private var miniGameChallenges: [String: MiniGameChallengeDefinition] = [:]
+    private(set) var regions: [String: RegionDefinition] = [:]
+    private(set) var anchors: [String: AnchorDefinition] = [:]
+    private(set) var events: [String: EventDefinition] = [:]
+    private(set) var quests: [String: QuestDefinition] = [:]
+    private(set) var miniGameChallenges: [String: MiniGameChallengeDefinition] = [:]
 
-    // MARK: - Event Indices
+    // MARK: - Event Indices (internal for @testable import)
 
-    private var eventsByPool: [String: [EventDefinition]] = [:]
-    private var eventsByRegion: [String: [EventDefinition]] = [:]
+    private(set) var eventsByPool: [String: [EventDefinition]] = [:]
+    private(set) var eventsByRegion: [String: [EventDefinition]] = [:]
 
     // MARK: - Loading State
 
@@ -58,29 +58,29 @@ class JSONContentProvider: ContentProvider {
     func loadAllContent() throws {
         loadErrors.removeAll()
 
-        // Load regions
-        if let regionsURL = bundle.url(forResource: "regions", withExtension: "json", subdirectory: "Resources/\(contentPath)") {
+        // Load regions (files are at bundle root after Xcode copies them)
+        if let regionsURL = bundle.url(forResource: "regions", withExtension: "json") {
             try loadRegions(from: regionsURL)
         } else {
             loadErrors.append("regions.json not found")
         }
 
         // Load anchors
-        if let anchorsURL = bundle.url(forResource: "anchors", withExtension: "json", subdirectory: "Resources/\(contentPath)") {
+        if let anchorsURL = bundle.url(forResource: "anchors", withExtension: "json") {
             try loadAnchors(from: anchorsURL)
         } else {
             loadErrors.append("anchors.json not found")
         }
 
         // Load quests
-        if let questsURL = bundle.url(forResource: "quests", withExtension: "json", subdirectory: "Resources/\(contentPath)") {
+        if let questsURL = bundle.url(forResource: "quests", withExtension: "json") {
             try loadQuests(from: questsURL)
         } else {
             loadErrors.append("quests.json not found")
         }
 
         // Load challenges
-        if let challengesURL = bundle.url(forResource: "challenges", withExtension: "json", subdirectory: "Resources/\(contentPath)") {
+        if let challengesURL = bundle.url(forResource: "challenges", withExtension: "json") {
             try loadChallenges(from: challengesURL)
         } else {
             loadErrors.append("challenges.json not found")
@@ -144,15 +144,12 @@ class JSONContentProvider: ContentProvider {
     }
 
     private func loadEventPools() throws {
-        // Look for event pool files in events/ subdirectory
-        let eventsPath = "Resources/\(contentPath)/events"
-
-        // Try to find pool files by known names
+        // Event pool files are at bundle root after Xcode copies them
         let poolNames = ["pool_common", "pool_village", "pool_forest", "pool_swamp",
                         "pool_mountain", "pool_sacred", "pool_breach", "pool_boss"]
 
         for poolName in poolNames {
-            if let poolURL = bundle.url(forResource: poolName, withExtension: "json", subdirectory: eventsPath) {
+            if let poolURL = bundle.url(forResource: poolName, withExtension: "json") {
                 try loadEventPool(from: poolURL)
             }
         }
