@@ -8,14 +8,17 @@
 
 **Дата:** 2026-01-19
 **Ветка:** `claude/add-game-tests-PxCCP`
-**Последний коммит:** `0e1639d Add CI workflow and audit documentation`
+**Последний коммит:** `988a81e Add JSON content files for Phase 5`
 
-### Что сделано сегодня
+### Что сделано сегодня (продолжение)
 
-- [x] AUDIT_ENGINE_FIRST_v1_1.md - объединённый аудит в markdown
-- [x] .github/workflows/tests.yml - CI gates для тестов
-- [x] Удалены Audit.rtf файлы
-- [x] Проверка Release Gates (Gate 1 partial, Gate 2 passed)
+- [x] Combat L10n keys добавлены в Helpers/Localization.swift
+- [x] CombatView мигрирован на L10n (~60 строк)
+- [x] WorldMapView частично мигрирован на L10n
+- [x] Переводы EN/RU для combat UI добавлены
+- [x] Анализ Legacy Adapters - всё ещё используются
+- [x] Resources/Content/regions.json создан (7 регионов)
+- [x] Resources/Content/anchors.json создан (6 якорей)
 
 ### Release Gates Status
 
@@ -26,23 +29,24 @@
 | Gate 3 | ✅ PASSED | Save/Load parity tests pass |
 | Gate 4 | ✅ PASSED | 20 ActIPlaythroughTests pass |
 
-### Что исправлено (2026-01-19)
+### Прогресс по Audit Issues
 
-**CombatView.swift** теперь использует `engine.performAction()`:
-- Добавлены combat actions в TwilightGameAction
-- Добавлен CombatActionEffect enum
-- CombatView и EventView мигрированы на Engine-First
+| Issue | Статус | Описание |
+|-------|--------|----------|
+| #1 Hardcoded Strings | 🟡 Частично | Combat L10n done, Views partial |
+| #3 Legacy Adapters | 🟡 Анализ | ContentView/GameBoardView используют legacy init |
+| #8 JSON Content | 🟡 Начато | regions.json, anchors.json созданы |
 
 ---
 
 ## Приоритеты (по порядку)
 
 1. ~~**[КРИТИЧНО]** Исправить Gate 1: Мигрировать CombatView на Engine~~ ✅ DONE
-2. Локализация: Вынести hardcoded strings в Localizable.strings
-3. Gate 3: Тест Save/Load parity
-4. Gate 4: Act I end-to-end тест
-5. JSON Content: Перенести контент в JSON файлы
-6. Remove Legacy: Удалить EngineAdapters после полной миграции
+2. ~~Gate 3: Тест Save/Load parity~~ ✅ DONE
+3. ~~Gate 4: Act I end-to-end тест~~ ✅ DONE
+4. 🟡 Локализация: Вынести hardcoded strings в Localizable.strings (Combat done)
+5. 🟡 JSON Content: Перенести контент в JSON файлы (regions/anchors done)
+6. Remove Legacy: Удалить EngineAdapters после миграции ContentView
 
 ---
 
