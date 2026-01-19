@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CB00000000000002 /* PackValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CP00000000000002 /* PackValidator.swift */; };
+
 		CB08DBD8123C514251864650 /* PackTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = CP38FEE143B4F44A6FB1ABC6 /* PackTypes.swift */; };
 		CB50EAD25364CF425EAF6DA2 /* PackManifest.swift in Sources */ = {isa = PBXBuildFile; fileRef = CP369CE2F981F64F768313B9 /* PackManifest.swift */; };
 		CBDDB67C77B6B2456B8D6E85 /* ContentRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = CP0AEC59DDE4BB4190A9676D /* ContentRegistry.swift */; };
@@ -125,6 +127,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		CP00000000000002 /* PackValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PackValidator.swift; path = Engine/ContentPacks/PackValidator.swift; sourceTree = SOURCE_ROOT; };
+
 		CP38FEE143B4F44A6FB1ABC6 /* PackTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PackTypes.swift; path = Engine/ContentPacks/PackTypes.swift; sourceTree = SOURCE_ROOT; };
 		CP369CE2F981F64F768313B9 /* PackManifest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PackManifest.swift; path = Engine/ContentPacks/PackManifest.swift; sourceTree = SOURCE_ROOT; };
 		CP0AEC59DDE4BB4190A9676D /* ContentRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ContentRegistry.swift; path = Engine/ContentPacks/ContentRegistry.swift; sourceTree = SOURCE_ROOT; };
@@ -257,6 +261,7 @@
 		CP00000000000001 /* ContentPacks */ = {
 			isa = PBXGroup;
 			children = (
+				CP00000000000002 /* PackValidator.swift */,
 				CP38FEE143B4F44A6FB1ABC6 /* PackTypes.swift */,
 				CP369CE2F981F64F768313B9 /* PackManifest.swift */,
 				CP0AEC59DDE4BB4190A9676D /* ContentRegistry.swift */,
@@ -794,6 +799,7 @@
 				KK0001010000000000000001 /* CombatCalculator.swift in Sources */,
 				LL0001010000000000000001 /* TwilightGameAction.swift in Sources */,
 				LL0002010000000000000001 /* TwilightGameEngine.swift in Sources */,
+				CB00000000000002 /* PackValidator.swift in Sources */,
 				CB08DBD8123C514251864650 /* PackTypes.swift in Sources */,
 				CB50EAD25364CF425EAF6DA2 /* PackManifest.swift in Sources */,
 				CBDDB67C77B6B2456B8D6E85 /* ContentRegistry.swift in Sources */,
