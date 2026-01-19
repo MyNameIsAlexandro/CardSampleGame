@@ -18,6 +18,7 @@ final class EventSystemTests: XCTestCase {
     override func tearDown() {
         worldState = nil
         player = nil
+        WorldRNG.shared.resetToSystem()
         super.tearDown()
     }
 

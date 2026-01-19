@@ -39,6 +39,13 @@ final class MetricsDistributionTests: XCTestCase {
         let victory: Bool
     }
 
+    // MARK: - Setup / TearDown
+
+    override func tearDown() {
+        WorldRNG.shared.resetToSystem()
+        super.tearDown()
+    }
+
     // MARK: - Helpers
 
     /// Запускает одну симуляцию с заданным seed

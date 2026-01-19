@@ -195,15 +195,15 @@ class WorldState: ObservableObject, Codable {
 
         // Переместиться в новый регион
         currentRegionId = regionId
-        daysPassed += travelCost
 
         // Отметить новый регион как посещенный
         if let index = regions.firstIndex(where: { $0.id == regionId }) {
             regions[index].visited = true
         }
 
-        // Проверить автоматическую деградацию мира
-        checkTimeDegradation()
+        // Продвинуть время корректно - каждый день обрабатывается отдельно
+        // Это критично: travel cost 2 должен обработать день 3, если мы были на дне 2
+        advanceTime(by: travelCost)
     }
 
     /// Рассчитать стоимость путешествия в регион

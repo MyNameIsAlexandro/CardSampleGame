@@ -17,6 +17,62 @@
 
 ---
 
+## 🔴 КРИТИЧЕСКИЙ РАЗРЫВ: Legacy vs Engine (Split Personality)
+
+> **Статус:** UI работает на Legacy-моделях, Engine готов но не подключён
+
+### Проблема
+
+Проект находится в состоянии "раздвоения личности":
+
+| Слой | Что есть | Что использует UI |
+|------|----------|-------------------|
+| **Engine** (новый) | `Engine/Runtime/GameRuntimeState.swift` | ❌ Не используется |
+| **Legacy** (старый) | `Models/WorldState.swift` | ✅ UI привязан сюда |
+
+**UI-компоненты привязаны к Legacy:**
+- `WorldMapView` → `Models/WorldState.swift`
+- `RegionDetailView` → `Models/WorldState.swift`
+- `ContentView` → `Models/GameState.swift`
+
+**Engine готов, но стоит в гараже:**
+- `Engine/Core/GameLoop.swift` — существует
+- `Engine/Core/TimeEngine.swift` — существует
+- `Engine/Runtime/GameRuntimeState.swift` — существует
+
+### Нарушение архитектуры
+
+`Models/WorldState.swift` содержит бизнес-логику:
+- `processDayStart()` — логика должна быть в Engine
+- `checkRegionDegradation()` — логика должна быть в DegradationRules
+- `increaseTension()` — должен вызываться через Engine
+
+### План устранения (Phase 3)
+
+1. **UI Adapter**: создать прослойку `WorldStateAdapter` которая:
+   - Принимает данные из `GameRuntimeState`
+   - Реализует интерфейс для SwiftUI (@Published)
+
+2. **Deprecate Legacy**: пометить методы в `WorldState.swift`:
+   - `processDayStart()` → deprecated
+   - `checkRegionDegradation()` → deprecated
+   - Прямые `daysPassed +=` → через `GameEngine.performAction()`
+
+3. **Connect Engine**: UI вызывает `GameEngine.performAction()` вместо прямых мутаций
+
+### Временные меры (до Phase 3)
+
+✅ Исправлено:
+- `moveToRegion()` теперь использует `advanceTime(by:)` для корректной обработки дней
+- Все random используют `WorldRNG.shared` для детерминизма
+- Канон tension = +3 синхронизирован везде
+
+⚠️ Остаётся:
+- UI напрямую вызывает методы WorldState
+- Бизнес-логика внутри Models
+
+---
+
 ## EPIC A — Phase 2: Data Separation (Definitions + ContentProvider)
 
 **Цель:** перейти от "Codable structs в коде" к Cartridge-модели: `*Definition` + `*RuntimeState`.

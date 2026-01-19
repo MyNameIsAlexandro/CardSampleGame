@@ -15,6 +15,8 @@ final class WorldStateTests: XCTestCase {
 
     override func tearDown() {
         worldState = nil
+        // КРИТИЧНО: сброс WorldRNG для изоляции тестов
+        WorldRNG.shared.resetToSystem()
         super.tearDown()
     }
 
@@ -473,5 +475,72 @@ final class WorldStateTests: XCTestCase {
 
         // Сброс на системный RNG
         WorldRNG.shared.resetToSystem()
+    }
+
+    // MARK: - Time Progression Critical Tests
+
+    /// КРИТИЧЕСКИЙ ТЕСТ: travel cost 2 должен обработать day 3 tick
+    /// Если игрок на дне 2 и путешествует с cost 2, день 3 должен быть обработан
+    func testTravelCostTwoDaysTriggersDay3Tick() {
+        // Подготовка: установить день 2
+        worldState.advanceTime(by: 2)
+        XCTAssertEqual(worldState.daysPassed, 2, "Стартовое условие: день 2")
+
+        let initialTension = worldState.worldTension
+
+        // Найти дальний регион (travel cost = 2)
+        guard let currentRegion = worldState.getCurrentRegion() else {
+            XCTFail("Нет текущего региона")
+            return
+        }
+
+        // Найти регион, который НЕ является соседом (cost = 2)
+        let farRegion = worldState.regions.first { region in
+            region.id != currentRegion.id && !currentRegion.isNeighbor(region.id)
+        }
+
+        guard let targetRegion = farRegion else {
+            // Если нет дальних регионов, просто проверяем advanceTime напрямую
+            worldState.advanceTime(by: 2)
+            XCTAssertEqual(worldState.daysPassed, 4, "День должен быть 4")
+            // День 3 должен был триггернуть +3 tension
+            XCTAssertEqual(
+                worldState.worldTension,
+                initialTension + 3,
+                "День 3 tick должен увеличить tension на 3"
+            )
+            return
+        }
+
+        // Путешествие с cost 2 (день 2 → день 4)
+        worldState.moveToRegion(targetRegion.id)
+
+        XCTAssertEqual(worldState.daysPassed, 4, "После travel cost 2: день должен быть 4")
+
+        // КРИТИЧЕСКАЯ ПРОВЕРКА: день 3 должен был обработаться
+        // Tension должен был увеличиться на 3 (day 3 tick)
+        XCTAssertEqual(
+            worldState.worldTension,
+            initialTension + 3,
+            "День 3 tick ДОЛЖЕН был сработать при travel cost 2. " +
+            "Tension должен вырасти на 3. Было: \(initialTension), стало: \(worldState.worldTension)"
+        )
+    }
+
+    /// Тест: advanceTime правильно обрабатывает каждый день
+    func testAdvanceTimeProcessesEachDay() {
+        // День 0 → день 6 (должны обработаться дни 3 и 6)
+        let initialTension = worldState.worldTension
+
+        worldState.advanceTime(by: 6)
+
+        XCTAssertEqual(worldState.daysPassed, 6, "Должно быть 6 дней")
+
+        // Дни 3 и 6 должны были дать по +3 tension = +6 всего
+        XCTAssertEqual(
+            worldState.worldTension,
+            initialTension + 6,
+            "Дни 3 и 6 должны дать +6 tension"
+        )
     }
 }

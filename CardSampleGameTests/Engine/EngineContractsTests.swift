@@ -21,6 +21,7 @@ final class EngineContractsTests: XCTestCase {
     override func tearDown() {
         gameLoop = nil
         testPressureRules = nil
+        WorldRNG.shared.resetToSystem()
         super.tearDown()
     }
 
