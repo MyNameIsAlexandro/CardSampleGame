@@ -223,6 +223,20 @@ escalationAmount = 3 + (daysPassed / 10)
 - ✅ Игрок может замедлять, но не отменять
 - ✅ Давление определяет фазы игры
 
+**Save/Load Support (v1.0):**
+```swift
+// PressureEngine save/load methods
+func setPressure(_ value: Int)                    // Restore pressure from save
+func getTriggeredThresholds() -> Set<Int>         // Get triggered thresholds for save
+func setTriggeredThresholds(_ thresholds: Set<Int>) // Restore thresholds from save
+func syncTriggeredThresholdsFromPressure()        // Reconstruct thresholds from pressure value
+```
+
+**Важно для save/load:**
+- `triggeredThresholds` отслеживает какие пороги уже сработали
+- При загрузке вызывать `syncTriggeredThresholdsFromPressure()` чтобы избежать повторных событий
+- TwilightGameEngine.syncFromLegacy() автоматически вызывает эту синхронизацию
+
 ### 3.3 Event Engine
 
 **Идея:** Все взаимодействия проходят через события.

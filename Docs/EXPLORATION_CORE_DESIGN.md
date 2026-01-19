@@ -293,7 +293,10 @@ STABLE ←→ BORDERLAND ←→ BREACH
 **Триггер:** Каждые **3 дня** (`daysPassed % 3 == 0`)
 
 **Эффект:**
-1. `worldTension += 3` (напряжение мира растёт, увеличено для баланса)
+1. `worldTension += (3 + daysPassed/10)` — **эскалирующая формула v1.3**:
+   - Базовый инкремент: +3
+   - Бонус эскалации: +1 за каждые 10 дней
+   - Примеры: день 5 → +3, день 15 → +4, день 25 → +5
 2. С вероятностью `P = worldTension / 100` один случайный регион деградирует
 
 **Выбор региона для деградации (веса):**
@@ -1407,8 +1410,9 @@ func processDayStart() {
 
     // 2. Каждые N дней (N=3 по умолчанию):
     if daysPassed % 3 == 0 {
-        // a) Увеличить напряжение мира
-        worldTension += 3
+        // a) Увеличить напряжение мира (эскалирующая формула v1.3)
+        let increment = 3 + (daysPassed / 10)
+        worldTension += increment
 
         // b) Выполнить проверку деградации регионов
         checkRegionDegradation()
@@ -1590,7 +1594,7 @@ if worldFlags["main_quest_started"] == true {
 
 | Проверка | Механическое условие |
 |----------|---------------------|
-| ✅ Авто-деградация | `daysPassed % 3 == 0` → `worldTension += 3` |
+| ✅ Авто-деградация | `daysPassed % 3 == 0` → `worldTension += (3 + daysPassed/10)` |
 | ✅ Риск виден | RegionDetailView показывает state + modifiers |
 | ✅ Нет бесплатных выборов | Каждый EventChoice имеет consequences |
 | ✅ Альтернативный проигрыш | `worldTension >= 100` → Game Over |
