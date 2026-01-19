@@ -202,7 +202,8 @@ class WorldState: ObservableObject, Codable {
             regionMap[def.id] = region
         }
 
-        return Array(regionMap.values)
+        // Sort by name for deterministic ordering (Dictionary values order is non-deterministic)
+        return Array(regionMap.values).sorted { $0.name < $1.name }
     }
 
     /// Create legacy Anchor from AnchorDefinition
