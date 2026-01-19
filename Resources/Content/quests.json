@@ -1,0 +1,169 @@
+{
+  "version": "1.0.0",
+  "description": "Twilight Marches Act I - Quest Definitions",
+  "quests": [
+    {
+      "id": "quest_main_act1",
+      "titleKey": "quest.main_act1.title",
+      "descriptionKey": "quest.main_act1.description",
+      "questType": "main",
+      "initialStatus": "active",
+      "objectives": [
+        {
+          "id": "obj_visit_oak",
+          "descriptionKey": "quest.main_act1.obj1",
+          "completionCondition": {
+            "type": "visitRegion",
+            "regionId": "oak"
+          },
+          "nextObjectiveId": "obj_strengthen_anchors"
+        },
+        {
+          "id": "obj_strengthen_anchors",
+          "descriptionKey": "quest.main_act1.obj2",
+          "completionCondition": {
+            "type": "anchorIntegrityAbove",
+            "anchorIds": ["anchor_forest_idol", "anchor_swamp_spring"],
+            "threshold": 50
+          },
+          "nextObjectiveId": "obj_reach_breach"
+        },
+        {
+          "id": "obj_reach_breach",
+          "descriptionKey": "quest.main_act1.obj3",
+          "completionCondition": {
+            "type": "visitRegion",
+            "regionId": "breach"
+          },
+          "nextObjectiveId": "obj_defeat_boss"
+        },
+        {
+          "id": "obj_defeat_boss",
+          "descriptionKey": "quest.main_act1.obj4",
+          "completionCondition": {
+            "type": "flagSet",
+            "flag": "boss_moroi_defeated"
+          },
+          "nextObjectiveId": null
+        }
+      ],
+      "rewards": {
+        "setFlags": {"act1_completed": true},
+        "resourceChanges": {"faith": 10},
+        "unlockRegions": ["act2_start"]
+      }
+    },
+    {
+      "id": "quest_village_defense",
+      "titleKey": "quest.village_defense.title",
+      "descriptionKey": "quest.village_defense.description",
+      "questType": "side",
+      "initialStatus": "locked",
+      "unlockCondition": {
+        "type": "flagSet",
+        "flag": "elder_quest_accepted"
+      },
+      "objectives": [
+        {
+          "id": "obj_strengthen_chapel",
+          "descriptionKey": "quest.village_defense.obj1",
+          "completionCondition": {
+            "type": "anchorIntegrityAbove",
+            "anchorIds": ["anchor_village_chapel"],
+            "threshold": 90
+          },
+          "nextObjectiveId": "obj_patrol_borders"
+        },
+        {
+          "id": "obj_patrol_borders",
+          "descriptionKey": "quest.village_defense.obj2",
+          "completionCondition": {
+            "type": "visitRegions",
+            "regionIds": ["forest", "swamp"],
+            "visitAll": true
+          },
+          "nextObjectiveId": null
+        }
+      ],
+      "rewards": {
+        "reputationChange": 20,
+        "resourceChanges": {"faith": 5},
+        "giveArtifact": "village_defender_badge"
+      }
+    },
+    {
+      "id": "quest_sacred_restoration",
+      "titleKey": "quest.sacred_restoration.title",
+      "descriptionKey": "quest.sacred_restoration.description",
+      "questType": "side",
+      "initialStatus": "locked",
+      "unlockCondition": {
+        "type": "regionVisited",
+        "regionId": "oak"
+      },
+      "objectives": [
+        {
+          "id": "obj_find_ritual_site",
+          "descriptionKey": "quest.sacred_restoration.obj1",
+          "completionCondition": {
+            "type": "eventCompleted",
+            "eventId": "event_ritual"
+          },
+          "nextObjectiveId": "obj_restore_oak"
+        },
+        {
+          "id": "obj_restore_oak",
+          "descriptionKey": "quest.sacred_restoration.obj2",
+          "completionCondition": {
+            "type": "anchorIntegrityAbove",
+            "anchorIds": ["anchor_sacred_oak"],
+            "threshold": 100
+          },
+          "nextObjectiveId": null
+        }
+      ],
+      "rewards": {
+        "balanceShift": 15,
+        "tensionChange": -10,
+        "setFlags": {"oak_fully_restored": true}
+      }
+    },
+    {
+      "id": "quest_dark_path",
+      "titleKey": "quest.dark_path.title",
+      "descriptionKey": "quest.dark_path.description",
+      "questType": "side",
+      "initialStatus": "locked",
+      "unlockCondition": {
+        "type": "balanceBelow",
+        "threshold": 30
+      },
+      "objectives": [
+        {
+          "id": "obj_embrace_darkness",
+          "descriptionKey": "quest.dark_path.obj1",
+          "completionCondition": {
+            "type": "flagSet",
+            "flag": "embraced_darkness"
+          },
+          "nextObjectiveId": "obj_corrupt_anchor"
+        },
+        {
+          "id": "obj_corrupt_anchor",
+          "descriptionKey": "quest.dark_path.obj2",
+          "completionCondition": {
+            "type": "anchorIntegrityBelow",
+            "anchorIds": ["anchor_forest_idol"],
+            "threshold": 20
+          },
+          "nextObjectiveId": null
+        }
+      ],
+      "rewards": {
+        "resourceChanges": {"faith": 15},
+        "addCurse": "pact_of_nav",
+        "setFlags": {"dark_path_completed": true}
+      }
+    }
+  ]
+}

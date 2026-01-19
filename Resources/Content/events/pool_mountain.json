@@ -1,0 +1,159 @@
+{
+  "version": "1.0.0",
+  "poolId": "pool_mountain",
+  "description": "Mountain Pass region events",
+  "events": [
+    {
+      "id": "event_mountain_shrine",
+      "titleKey": "event.mountain_shrine.title",
+      "bodyKey": "event.mountain_shrine.body",
+      "eventType": "inline",
+      "poolIds": ["pool_mountain"],
+      "availability": {
+        "regionStates": ["stable", "borderland"],
+        "minPressure": 0,
+        "maxPressure": 70
+      },
+      "weight": 12,
+      "isOneTime": true,
+      "choices": [
+        {
+          "id": "pray",
+          "labelKey": "event.mountain_shrine.pray",
+          "requirements": {
+            "minBalance": 40
+          },
+          "consequences": {
+            "resourceChanges": {"faith": 3},
+            "balanceShift": 5,
+            "anchorIntegrityChange": 10,
+            "messageKey": "event.mountain_shrine.pray.result"
+          }
+        },
+        {
+          "id": "meditate",
+          "labelKey": "event.mountain_shrine.meditate",
+          "consequences": {
+            "resourceChanges": {"health": 2},
+            "setFlags": {"mountain_meditation": true},
+            "messageKey": "event.mountain_shrine.meditate.result"
+          }
+        },
+        {
+          "id": "search",
+          "labelKey": "event.mountain_shrine.search",
+          "consequences": {
+            "balanceShift": -5,
+            "giveArtifact": "old_talisman",
+            "messageKey": "event.mountain_shrine.search.result"
+          }
+        }
+      ]
+    },
+    {
+      "id": "event_mountain_storm",
+      "titleKey": "event.mountain_storm.title",
+      "bodyKey": "event.mountain_storm.body",
+      "eventType": "inline",
+      "poolIds": ["pool_mountain"],
+      "availability": {
+        "regionStates": ["borderland", "breach"],
+        "minPressure": 40,
+        "maxPressure": 100
+      },
+      "weight": 10,
+      "isOneTime": false,
+      "choices": [
+        {
+          "id": "shelter",
+          "labelKey": "event.mountain_storm.shelter",
+          "consequences": {
+            "resourceChanges": {"faith": -1},
+            "messageKey": "event.mountain_storm.shelter.result"
+          }
+        },
+        {
+          "id": "brave",
+          "labelKey": "event.mountain_storm.brave",
+          "requirements": {
+            "minHealth": 5
+          },
+          "consequences": {
+            "resourceChanges": {"health": -2},
+            "setFlags": {"braved_storm": true},
+            "messageKey": "event.mountain_storm.brave.result"
+          }
+        },
+        {
+          "id": "invoke",
+          "labelKey": "event.mountain_storm.invoke",
+          "requirements": {
+            "minFaith": 5,
+            "minBalance": 50
+          },
+          "consequences": {
+            "resourceChanges": {"faith": -5},
+            "tensionChange": -3,
+            "balanceShift": 5,
+            "messageKey": "event.mountain_storm.invoke.result"
+          }
+        }
+      ]
+    },
+    {
+      "id": "event_ancient_guardian",
+      "titleKey": "event.ancient_guardian.title",
+      "bodyKey": "event.ancient_guardian.body",
+      "eventType": "combat",
+      "poolIds": ["pool_mountain"],
+      "availability": {
+        "regionStates": ["borderland", "breach"],
+        "minPressure": 50,
+        "maxPressure": 100
+      },
+      "weight": 8,
+      "isOneTime": false,
+      "combatData": {
+        "enemyId": "monster_stone_guardian",
+        "enemyName": "Каменный Страж",
+        "enemyPower": 4,
+        "enemyDefense": 12,
+        "enemyHealth": 10
+      },
+      "choices": [
+        {
+          "id": "fight",
+          "labelKey": "event.ancient_guardian.fight",
+          "requirements": {
+            "minHealth": 4
+          },
+          "consequences": {
+            "startCombat": true,
+            "messageKey": "event.ancient_guardian.fight.result"
+          }
+        },
+        {
+          "id": "honor",
+          "labelKey": "event.ancient_guardian.honor",
+          "requirements": {
+            "minFaith": 6,
+            "minBalance": 50
+          },
+          "consequences": {
+            "resourceChanges": {"faith": -6},
+            "setFlags": {"honored_guardian": true},
+            "balanceShift": 10,
+            "messageKey": "event.ancient_guardian.honor.result"
+          }
+        },
+        {
+          "id": "retreat",
+          "labelKey": "event.ancient_guardian.retreat",
+          "consequences": {
+            "messageKey": "event.ancient_guardian.retreat.result"
+          }
+        }
+      ]
+    }
+  ]
+}

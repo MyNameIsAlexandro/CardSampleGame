@@ -1,0 +1,68 @@
+{
+  "version": "1.0.0",
+  "poolId": "pool_boss",
+  "description": "Act I Boss events",
+  "events": [
+    {
+      "id": "event_boss_moroi",
+      "titleKey": "event.boss_moroi.title",
+      "bodyKey": "event.boss_moroi.body",
+      "eventType": "combat",
+      "poolIds": ["pool_boss"],
+      "availability": {
+        "regionIds": ["dark_lowland"],
+        "regionStates": ["breach"],
+        "minPressure": 50,
+        "maxPressure": 100,
+        "requiredFlags": {"reached_dark_lowland": true}
+      },
+      "weight": 100,
+      "isOneTime": true,
+      "combatData": {
+        "enemyId": "boss_moroi",
+        "enemyName": "Морой Чернобог",
+        "enemyPower": 7,
+        "enemyDefense": 10,
+        "enemyHealth": 25,
+        "isBoss": true
+      },
+      "choices": [
+        {
+          "id": "fight_light",
+          "labelKey": "event.boss_moroi.fight_light",
+          "requirements": {
+            "minHealth": 7,
+            "minBalance": 50
+          },
+          "consequences": {
+            "startCombat": true,
+            "setFlags": {"boss_fight_started": true},
+            "messageKey": "event.boss_moroi.fight_light.result"
+          }
+        },
+        {
+          "id": "fight_dark",
+          "labelKey": "event.boss_moroi.fight_dark",
+          "requirements": {
+            "minHealth": 5,
+            "maxBalance": 40
+          },
+          "consequences": {
+            "startCombat": true,
+            "setFlags": {"boss_fight_started": true, "dark_path": true},
+            "resourceChanges": {"faith": 5},
+            "messageKey": "event.boss_moroi.fight_dark.result"
+          }
+        },
+        {
+          "id": "retreat",
+          "labelKey": "event.boss_moroi.retreat",
+          "consequences": {
+            "tensionChange": 10,
+            "messageKey": "event.boss_moroi.retreat.result"
+          }
+        }
+      ]
+    }
+  ]
+}

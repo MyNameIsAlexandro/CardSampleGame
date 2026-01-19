@@ -1,0 +1,149 @@
+{
+  "version": "1.0.0",
+  "poolId": "pool_forest",
+  "description": "Forest-specific events",
+  "events": [
+    {
+      "id": "event_leshy",
+      "titleKey": "event.leshy.title",
+      "bodyKey": "event.leshy.body",
+      "eventType": "combat",
+      "poolIds": ["pool_forest"],
+      "availability": {
+        "regionStates": ["borderland", "breach"],
+        "minPressure": 20,
+        "maxPressure": 100
+      },
+      "weight": 12,
+      "isOneTime": false,
+      "combatData": {
+        "enemyId": "monster_leshy",
+        "enemyName": "Леший",
+        "enemyPower": 4,
+        "enemyDefense": 8,
+        "enemyHealth": 12
+      },
+      "choices": [
+        {
+          "id": "fight",
+          "labelKey": "event.leshy.fight",
+          "requirements": {
+            "minHealth": 3
+          },
+          "consequences": {
+            "resourceChanges": {"faith": 1},
+            "startCombat": true,
+            "messageKey": "event.leshy.fight.result"
+          }
+        },
+        {
+          "id": "appease",
+          "labelKey": "event.leshy.appease",
+          "requirements": {
+            "minFaith": 5
+          },
+          "consequences": {
+            "resourceChanges": {"faith": -5},
+            "balanceShift": 5,
+            "tensionChange": -5,
+            "messageKey": "event.leshy.appease.result"
+          }
+        },
+        {
+          "id": "retreat",
+          "labelKey": "event.leshy.retreat",
+          "consequences": {
+            "reputationChange": -5,
+            "messageKey": "event.leshy.retreat.result"
+          }
+        }
+      ]
+    },
+    {
+      "id": "event_ritual",
+      "titleKey": "event.ritual.title",
+      "bodyKey": "event.ritual.body",
+      "eventType": "inline",
+      "poolIds": ["pool_forest", "pool_sacred"],
+      "availability": {
+        "regionStates": ["stable", "borderland"],
+        "minPressure": 0,
+        "maxPressure": 70
+      },
+      "weight": 8,
+      "isOneTime": true,
+      "choices": [
+        {
+          "id": "restore_light",
+          "labelKey": "event.ritual.restore",
+          "requirements": {
+            "minFaith": 10,
+            "minBalance": 60
+          },
+          "consequences": {
+            "resourceChanges": {"faith": -10},
+            "balanceShift": 15,
+            "tensionChange": -10,
+            "anchorIntegrityChange": 20,
+            "messageKey": "event.ritual.restore.result"
+          }
+        },
+        {
+          "id": "corrupt",
+          "labelKey": "event.ritual.corrupt",
+          "requirements": {
+            "maxBalance": 40
+          },
+          "consequences": {
+            "resourceChanges": {"faith": 15},
+            "balanceShift": -20,
+            "tensionChange": 15,
+            "addCards": ["dark_power"],
+            "anchorIntegrityChange": -30,
+            "messageKey": "event.ritual.corrupt.result"
+          }
+        },
+        {
+          "id": "leave",
+          "labelKey": "event.ritual.leave",
+          "consequences": {
+            "messageKey": "event.ritual.leave.result"
+          }
+        }
+      ]
+    },
+    {
+      "id": "event_forest_whispers",
+      "titleKey": "event.forest_whispers.title",
+      "bodyKey": "event.forest_whispers.body",
+      "eventType": "inline",
+      "poolIds": ["pool_forest"],
+      "availability": {
+        "regionStates": ["stable", "borderland"],
+        "minPressure": 0,
+        "maxPressure": 60
+      },
+      "weight": 10,
+      "isOneTime": false,
+      "choices": [
+        {
+          "id": "listen",
+          "labelKey": "event.forest_whispers.listen",
+          "consequences": {
+            "resourceChanges": {"faith": -2},
+            "setFlags": {"heard_whispers": true},
+            "messageKey": "event.forest_whispers.listen.result"
+          }
+        },
+        {
+          "id": "ignore",
+          "labelKey": "event.forest_whispers.ignore",
+          "consequences": {
+            "resourceChanges": {"health": -1},
+            "messageKey": "event.forest_whispers.ignore.result"
+          }
+        }
+      ]
+    }
+  ]
+}

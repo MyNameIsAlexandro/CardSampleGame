@@ -1,0 +1,139 @@
+{
+  "version": "1.0.0",
+  "description": "Twilight Marches - Mini-Game Challenge Definitions",
+  "challenges": [
+    {
+      "id": "combat_leshy",
+      "challengeKind": "combat",
+      "difficulty": 5,
+      "titleKey": "challenge.combat_leshy.title",
+      "descriptionKey": "challenge.combat_leshy.description",
+      "enemyData": {
+        "name": "Леший",
+        "power": 4,
+        "defense": 8,
+        "health": 12
+      },
+      "rewards": {
+        "victoryFaith": 3,
+        "victoryBalance": 5
+      },
+      "penalties": {
+        "defeatHealth": -3
+      }
+    },
+    {
+      "id": "combat_shadow_beast",
+      "challengeKind": "combat",
+      "difficulty": 7,
+      "titleKey": "challenge.combat_shadow.title",
+      "descriptionKey": "challenge.combat_shadow.description",
+      "enemyData": {
+        "name": "Тварь из Нави",
+        "power": 5,
+        "defense": 6,
+        "health": 15
+      },
+      "rewards": {
+        "victoryFaith": 5,
+        "victoryBalance": 3
+      },
+      "penalties": {
+        "defeatHealth": -4,
+        "defeatTension": 5
+      }
+    },
+    {
+      "id": "combat_boss_moroi",
+      "challengeKind": "combat",
+      "difficulty": 10,
+      "titleKey": "challenge.combat_moroi.title",
+      "descriptionKey": "challenge.combat_moroi.description",
+      "isBoss": true,
+      "enemyData": {
+        "name": "Морой Чернобог",
+        "power": 7,
+        "defense": 10,
+        "health": 25
+      },
+      "rewards": {
+        "victoryFaith": 10,
+        "victoryBalance": 15,
+        "setFlags": {"boss_moroi_defeated": true}
+      },
+      "penalties": {
+        "defeatHealth": -5,
+        "defeatTension": 15
+      }
+    },
+    {
+      "id": "ritual_restore_anchor",
+      "challengeKind": "ritual",
+      "difficulty": 4,
+      "titleKey": "challenge.ritual_anchor.title",
+      "descriptionKey": "challenge.ritual_anchor.description",
+      "requirements": {
+        "minFaith": 5,
+        "minBalance": 40
+      },
+      "rewards": {
+        "anchorIntegrityChange": 20,
+        "tensionChange": -5
+      },
+      "penalties": {
+        "faithCost": -3
+      }
+    },
+    {
+      "id": "ritual_seal_breach",
+      "challengeKind": "ritual",
+      "difficulty": 8,
+      "titleKey": "challenge.ritual_seal.title",
+      "descriptionKey": "challenge.ritual_seal.description",
+      "requirements": {
+        "minFaith": 10,
+        "minBalance": 60
+      },
+      "rewards": {
+        "tensionChange": -15,
+        "regionStateImprove": true
+      },
+      "penalties": {
+        "faithCost": -8,
+        "healthCost": -2
+      }
+    },
+    {
+      "id": "exploration_forest",
+      "challengeKind": "exploration",
+      "difficulty": 3,
+      "titleKey": "challenge.explore_forest.title",
+      "descriptionKey": "challenge.explore_forest.description",
+      "rewards": {
+        "discoverRegion": true,
+        "faithGain": 1
+      },
+      "penalties": {
+        "healthCost": -1
+      }
+    },
+    {
+      "id": "exploration_breach",
+      "challengeKind": "exploration",
+      "difficulty": 6,
+      "titleKey": "challenge.explore_breach.title",
+      "descriptionKey": "challenge.explore_breach.description",
+      "requirements": {
+        "minHealth": 5
+      },
+      "rewards": {
+        "discoverRegion": true,
+        "findArtifact": true
+      },
+      "penalties": {
+        "healthCost": -2,
+        "tensionGain": 3
+      }
+    }
+  ]
+}

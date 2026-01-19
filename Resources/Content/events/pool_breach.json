@@ -1,0 +1,165 @@
+{
+  "version": "1.0.0",
+  "poolId": "pool_breach",
+  "description": "Dangerous breach events",
+  "events": [
+    {
+      "id": "event_shadow_beast",
+      "titleKey": "event.shadow_beast.title",
+      "bodyKey": "event.shadow_beast.body",
+      "eventType": "combat",
+      "poolIds": ["pool_breach"],
+      "availability": {
+        "regionStates": ["breach"],
+        "minPressure": 40,
+        "maxPressure": 100
+      },
+      "weight": 15,
+      "isOneTime": false,
+      "combatData": {
+        "enemyId": "monster_shadow_beast",
+        "enemyName": "Тварь из Нави",
+        "enemyPower": 5,
+        "enemyDefense": 6,
+        "enemyHealth": 15
+      },
+      "choices": [
+        {
+          "id": "fight",
+          "labelKey": "event.shadow_beast.fight",
+          "requirements": {
+            "minHealth": 5
+          },
+          "consequences": {
+            "startCombat": true,
+            "messageKey": "event.shadow_beast.fight.result"
+          }
+        },
+        {
+          "id": "banish",
+          "labelKey": "event.shadow_beast.banish",
+          "requirements": {
+            "minFaith": 8,
+            "minBalance": 60
+          },
+          "consequences": {
+            "resourceChanges": {"faith": -8},
+            "balanceShift": 10,
+            "tensionChange": -5,
+            "messageKey": "event.shadow_beast.banish.result"
+          }
+        },
+        {
+          "id": "flee",
+          "labelKey": "event.shadow_beast.flee",
+          "consequences": {
+            "resourceChanges": {"health": -2},
+            "messageKey": "event.shadow_beast.flee.result"
+          }
+        }
+      ]
+    },
+    {
+      "id": "event_dark_portal",
+      "titleKey": "event.dark_portal.title",
+      "bodyKey": "event.dark_portal.body",
+      "eventType": "inline",
+      "poolIds": ["pool_breach"],
+      "availability": {
+        "regionStates": ["breach"],
+        "minPressure": 60,
+        "maxPressure": 100
+      },
+      "weight": 10,
+      "isOneTime": true,
+      "choices": [
+        {
+          "id": "seal",
+          "labelKey": "event.dark_portal.seal",
+          "requirements": {
+            "minFaith": 12,
+            "minBalance": 70
+          },
+          "consequences": {
+            "resourceChanges": {"faith": -12},
+            "anchorIntegrityChange": 30,
+            "tensionChange": -15,
+            "balanceShift": 15,
+            "setFlags": {"portal_sealed": true},
+            "messageKey": "event.dark_portal.seal.result"
+          }
+        },
+        {
+          "id": "empower",
+          "labelKey": "event.dark_portal.empower",
+          "requirements": {
+            "maxBalance": 30
+          },
+          "consequences": {
+            "resourceChanges": {"faith": 10},
+            "balanceShift": -25,
+            "tensionChange": 20,
+            "addCurse": "shadow_mark",
+            "setFlags": {"embraced_darkness": true},
+            "messageKey": "event.dark_portal.empower.result"
+          }
+        },
+        {
+          "id": "avoid",
+          "labelKey": "event.dark_portal.avoid",
+          "consequences": {
+            "tensionChange": 5,
+            "messageKey": "event.dark_portal.avoid.result"
+          }
+        }
+      ]
+    },
+    {
+      "id": "event_barrow",
+      "titleKey": "event.barrow.title",
+      "bodyKey": "event.barrow.body",
+      "eventType": "inline",
+      "poolIds": ["pool_breach", "pool_mountain"],
+      "availability": {
+        "regionStates": ["borderland", "breach"],
+        "minPressure": 30,
+        "maxPressure": 100
+      },
+      "weight": 10,
+      "isOneTime": true,
+      "choices": [
+        {
+          "id": "honor",
+          "labelKey": "event.barrow.honor",
+          "requirements": {
+            "minFaith": 5
+          },
+          "consequences": {
+            "resourceChanges": {"faith": -5},
+            "balanceShift": 10,
+            "setFlags": {"honored_ancestors": true},
+            "giveArtifact": "ancestor_blessing",
+            "messageKey": "event.barrow.honor.result"
+          }
+        },
+        {
+          "id": "plunder",
+          "labelKey": "event.barrow.plunder",
+          "consequences": {
+            "balanceShift": -15,
+            "addCurse": "ancestor_curse",
+            "giveArtifact": "ancient_weapon",
+            "messageKey": "event.barrow.plunder.result"
+          }
+        },
+        {
+          "id": "leave",
+          "labelKey": "event.barrow.leave",
+          "consequences": {
+            "messageKey": "event.barrow.leave.result"
+          }
+        }
+      ]
+    }
+  ]
+}

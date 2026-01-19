@@ -1,0 +1,148 @@
+{
+  "version": "1.0.0",
+  "poolId": "pool_village",
+  "description": "Village-specific events",
+  "events": [
+    {
+      "id": "event_elder",
+      "titleKey": "event.elder.title",
+      "bodyKey": "event.elder.body",
+      "eventType": "inline",
+      "poolIds": ["pool_village"],
+      "availability": {
+        "regionStates": ["stable"],
+        "minPressure": 0,
+        "maxPressure": 50
+      },
+      "weight": 15,
+      "isOneTime": true,
+      "choices": [
+        {
+          "id": "accept_quest",
+          "labelKey": "event.elder.accept",
+          "consequences": {
+            "setFlags": {"elder_quest_accepted": true},
+            "startQuest": "quest_village_defense",
+            "messageKey": "event.elder.accept.result"
+          }
+        },
+        {
+          "id": "ask_wisdom",
+          "labelKey": "event.elder.wisdom",
+          "requirements": {
+            "minFaith": 2
+          },
+          "consequences": {
+            "resourceChanges": {"faith": -2},
+            "setFlags": {"elder_wisdom": true},
+            "messageKey": "event.elder.wisdom.result"
+          }
+        },
+        {
+          "id": "decline",
+          "labelKey": "event.elder.decline",
+          "consequences": {
+            "reputationChange": -5,
+            "messageKey": "event.elder.decline.result"
+          }
+        }
+      ]
+    },
+    {
+      "id": "event_lost_child",
+      "titleKey": "event.lost_child.title",
+      "bodyKey": "event.lost_child.body",
+      "eventType": "inline",
+      "poolIds": ["pool_village"],
+      "availability": {
+        "regionStates": ["stable", "borderland"],
+        "minPressure": 20,
+        "maxPressure": 80
+      },
+      "weight": 10,
+      "isOneTime": true,
+      "choices": [
+        {
+          "id": "search",
+          "labelKey": "event.lost_child.search",
+          "consequences": {
+            "resourceChanges": {"health": -1},
+            "balanceShift": 10,
+            "reputationChange": 15,
+            "setFlags": {"saved_child": true},
+            "messageKey": "event.lost_child.search.result"
+          }
+        },
+        {
+          "id": "pray",
+          "labelKey": "event.lost_child.pray",
+          "requirements": {
+            "minFaith": 5,
+            "minBalance": 60
+          },
+          "consequences": {
+            "resourceChanges": {"faith": -5},
+            "balanceShift": 5,
+            "setFlags": {"saved_child_prayer": true},
+            "messageKey": "event.lost_child.pray.result"
+          }
+        },
+        {
+          "id": "ignore",
+          "labelKey": "event.lost_child.ignore",
+          "consequences": {
+            "balanceShift": -10,
+            "reputationChange": -10,
+            "messageKey": "event.lost_child.ignore.result"
+          }
+        }
+      ]
+    },
+    {
+      "id": "event_village_celebration",
+      "titleKey": "event.celebration.title",
+      "bodyKey": "event.celebration.body",
+      "eventType": "inline",
+      "poolIds": ["pool_village"],
+      "availability": {
+        "regionStates": ["stable"],
+        "minPressure": 0,
+        "maxPressure": 40
+      },
+      "weight": 8,
+      "isOneTime": false,
+      "choices": [
+        {
+          "id": "join",
+          "labelKey": "event.celebration.join",
+          "consequences": {
+            "resourceChanges": {"health": 1, "faith": 1},
+            "balanceShift": 5,
+            "messageKey": "event.celebration.join.result"
+          }
+        },
+        {
+          "id": "bless",
+          "labelKey": "event.celebration.bless",
+          "requirements": {
+            "minFaith": 3,
+            "minBalance": 50
+          },
+          "consequences": {
+            "resourceChanges": {"faith": -3},
+            "reputationChange": 10,
+            "tensionChange": -3,
+            "messageKey": "event.celebration.bless.result"
+          }
+        },
+        {
+          "id": "pass",
+          "labelKey": "event.celebration.pass",
+          "consequences": {
+            "messageKey": "event.celebration.pass.result"
+          }
+        }
+      ]
+    }
+  ]
+}

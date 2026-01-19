@@ -1,0 +1,138 @@
+{
+  "version": "1.0.0",
+  "poolId": "pool_common",
+  "description": "Common events available in all regions",
+  "events": [
+    {
+      "id": "event_wanderer",
+      "titleKey": "event.wanderer.title",
+      "bodyKey": "event.wanderer.body",
+      "eventType": "inline",
+      "poolIds": ["pool_common"],
+      "availability": {
+        "regionStates": ["stable", "borderland"],
+        "minPressure": 0,
+        "maxPressure": 80
+      },
+      "weight": 10,
+      "isOneTime": false,
+      "choices": [
+        {
+          "id": "listen",
+          "labelKey": "event.wanderer.listen",
+          "requirements": {
+            "minFaith": 3
+          },
+          "consequences": {
+            "resourceChanges": {"faith": -3},
+            "setFlags": {"met_wanderer": true},
+            "messageKey": "event.wanderer.listen.result"
+          }
+        },
+        {
+          "id": "help",
+          "labelKey": "event.wanderer.help",
+          "consequences": {
+            "resourceChanges": {"faith": -2},
+            "balanceShift": 5,
+            "reputationChange": 10,
+            "messageKey": "event.wanderer.help.result"
+          }
+        },
+        {
+          "id": "ignore",
+          "labelKey": "event.wanderer.ignore",
+          "consequences": {
+            "messageKey": "event.wanderer.ignore.result"
+          }
+        }
+      ]
+    },
+    {
+      "id": "event_camp",
+      "titleKey": "event.camp.title",
+      "bodyKey": "event.camp.body",
+      "eventType": "inline",
+      "poolIds": ["pool_common"],
+      "availability": {
+        "regionStates": ["stable", "borderland"],
+        "minPressure": 0,
+        "maxPressure": 100
+      },
+      "weight": 15,
+      "isOneTime": false,
+      "choices": [
+        {
+          "id": "rest",
+          "labelKey": "event.camp.rest",
+          "consequences": {
+            "resourceChanges": {"health": 2},
+            "messageKey": "event.camp.rest.result"
+          }
+        },
+        {
+          "id": "meditate",
+          "labelKey": "event.camp.meditate",
+          "consequences": {
+            "resourceChanges": {"faith": 2},
+            "messageKey": "event.camp.meditate.result"
+          }
+        },
+        {
+          "id": "continue",
+          "labelKey": "event.camp.continue",
+          "consequences": {
+            "messageKey": "event.camp.continue.result"
+          }
+        }
+      ]
+    },
+    {
+      "id": "event_merchant",
+      "titleKey": "event.merchant.title",
+      "bodyKey": "event.merchant.body",
+      "eventType": "inline",
+      "poolIds": ["pool_common"],
+      "availability": {
+        "regionStates": ["stable"],
+        "minPressure": 0,
+        "maxPressure": 60
+      },
+      "weight": 8,
+      "isOneTime": false,
+      "choices": [
+        {
+          "id": "buy_blessing",
+          "labelKey": "event.merchant.buy_blessing",
+          "requirements": {
+            "minFaith": 5
+          },
+          "consequences": {
+            "resourceChanges": {"faith": -5},
+            "addCards": ["blessing_light"],
+            "messageKey": "event.merchant.buy_blessing.result"
+          }
+        },
+        {
+          "id": "buy_artifact",
+          "labelKey": "event.merchant.buy_artifact",
+          "requirements": {
+            "minFaith": 8
+          },
+          "consequences": {
+            "resourceChanges": {"faith": -8},
+            "giveArtifact": "amulet_protection",
+            "messageKey": "event.merchant.buy_artifact.result"
+          }
+        },
+        {
+          "id": "decline",
+          "labelKey": "event.merchant.decline",
+          "consequences": {
+            "messageKey": "event.merchant.decline.result"
+          }
+        }
+      ]
+    }
+  ]
+}

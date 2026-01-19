@@ -1,0 +1,91 @@
+{
+  "version": "1.0.0",
+  "poolId": "pool_sacred",
+  "description": "Sacred Oak region events",
+  "events": [
+    {
+      "id": "event_oak_spirit",
+      "titleKey": "event.oak_spirit.title",
+      "bodyKey": "event.oak_spirit.body",
+      "eventType": "inline",
+      "poolIds": ["pool_sacred"],
+      "availability": {
+        "regionStates": ["stable"],
+        "minPressure": 0,
+        "maxPressure": 50
+      },
+      "weight": 15,
+      "isOneTime": true,
+      "choices": [
+        {
+          "id": "commune",
+          "labelKey": "event.oak_spirit.commune",
+          "requirements": {
+            "minFaith": 5,
+            "minBalance": 50
+          },
+          "consequences": {
+            "resourceChanges": {"faith": -5},
+            "balanceShift": 10,
+            "setFlags": {"oak_spirit_blessing": true},
+            "addCards": ["oak_blessing"],
+            "messageKey": "event.oak_spirit.commune.result"
+          }
+        },
+        {
+          "id": "offer",
+          "labelKey": "event.oak_spirit.offer",
+          "consequences": {
+            "resourceChanges": {"faith": -3},
+            "anchorIntegrityChange": 10,
+            "messageKey": "event.oak_spirit.offer.result"
+          }
+        },
+        {
+          "id": "observe",
+          "labelKey": "event.oak_spirit.observe",
+          "consequences": {
+            "setFlags": {"witnessed_oak_spirit": true},
+            "messageKey": "event.oak_spirit.observe.result"
+          }
+        }
+      ]
+    },
+    {
+      "id": "event_veles_vision",
+      "titleKey": "event.veles_vision.title",
+      "bodyKey": "event.veles_vision.body",
+      "eventType": "inline",
+      "poolIds": ["pool_sacred"],
+      "availability": {
+        "regionStates": ["stable", "borderland"],
+        "minPressure": 20,
+        "maxPressure": 70
+      },
+      "weight": 8,
+      "isOneTime": true,
+      "choices": [
+        {
+          "id": "accept_vision",
+          "labelKey": "event.veles_vision.accept",
+          "requirements": {
+            "minBalance": 40
+          },
+          "consequences": {
+            "resourceChanges": {"health": -1},
+            "setFlags": {"veles_vision_seen": true, "knows_dark_lowland": true},
+            "messageKey": "event.veles_vision.accept.result"
+          }
+        },
+        {
+          "id": "reject_vision",
+          "labelKey": "event.veles_vision.reject",
+          "consequences": {
+            "balanceShift": -5,
+            "messageKey": "event.veles_vision.reject.result"
+          }
+        }
+      ]
+    }
+  ]
+}

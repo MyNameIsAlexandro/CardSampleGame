@@ -1,0 +1,156 @@
+{
+  "version": "1.0.0",
+  "poolId": "pool_swamp",
+  "description": "Swamp region events",
+  "events": [
+    {
+      "id": "event_swamp_witch",
+      "titleKey": "event.swamp_witch.title",
+      "bodyKey": "event.swamp_witch.body",
+      "eventType": "inline",
+      "poolIds": ["pool_swamp"],
+      "availability": {
+        "regionStates": ["borderland", "breach"],
+        "minPressure": 30,
+        "maxPressure": 100
+      },
+      "weight": 12,
+      "isOneTime": true,
+      "choices": [
+        {
+          "id": "bargain",
+          "labelKey": "event.swamp_witch.bargain",
+          "consequences": {
+            "resourceChanges": {"health": -2},
+            "addCards": ["witch_curse", "witch_blessing"],
+            "setFlags": {"made_witch_bargain": true},
+            "messageKey": "event.swamp_witch.bargain.result"
+          }
+        },
+        {
+          "id": "cleanse",
+          "labelKey": "event.swamp_witch.cleanse",
+          "requirements": {
+            "minFaith": 8,
+            "minBalance": 60
+          },
+          "consequences": {
+            "resourceChanges": {"faith": -8},
+            "balanceShift": 10,
+            "anchorIntegrityChange": 15,
+            "setFlags": {"cleansed_swamp": true},
+            "messageKey": "event.swamp_witch.cleanse.result"
+          }
+        },
+        {
+          "id": "flee",
+          "labelKey": "event.swamp_witch.flee",
+          "consequences": {
+            "resourceChanges": {"health": -1},
+            "addCurse": "swamp_sickness",
+            "messageKey": "event.swamp_witch.flee.result"
+          }
+        }
+      ]
+    },
+    {
+      "id": "event_drowned_spirits",
+      "titleKey": "event.drowned_spirits.title",
+      "bodyKey": "event.drowned_spirits.body",
+      "eventType": "combat",
+      "poolIds": ["pool_swamp"],
+      "availability": {
+        "regionStates": ["borderland", "breach"],
+        "minPressure": 40,
+        "maxPressure": 100
+      },
+      "weight": 10,
+      "isOneTime": false,
+      "combatData": {
+        "enemyId": "monster_drowned",
+        "enemyName": "Утопленник",
+        "enemyPower": 3,
+        "enemyDefense": 5,
+        "enemyHealth": 8
+      },
+      "choices": [
+        {
+          "id": "fight",
+          "labelKey": "event.drowned_spirits.fight",
+          "consequences": {
+            "startCombat": true,
+            "messageKey": "event.drowned_spirits.fight.result"
+          }
+        },
+        {
+          "id": "pray",
+          "labelKey": "event.drowned_spirits.pray",
+          "requirements": {
+            "minFaith": 4
+          },
+          "consequences": {
+            "resourceChanges": {"faith": -4},
+            "balanceShift": 5,
+            "messageKey": "event.drowned_spirits.pray.result"
+          }
+        },
+        {
+          "id": "wade_through",
+          "labelKey": "event.drowned_spirits.wade",
+          "consequences": {
+            "resourceChanges": {"health": -2},
+            "messageKey": "event.drowned_spirits.wade.result"
+          }
+        }
+      ]
+    },
+    {
+      "id": "event_corrupted_spring",
+      "titleKey": "event.corrupted_spring.title",
+      "bodyKey": "event.corrupted_spring.body",
+      "eventType": "inline",
+      "poolIds": ["pool_swamp"],
+      "availability": {
+        "regionStates": ["borderland", "breach"],
+        "minPressure": 20,
+        "maxPressure": 80
+      },
+      "weight": 10,
+      "isOneTime": true,
+      "choices": [
+        {
+          "id": "purify",
+          "labelKey": "event.corrupted_spring.purify",
+          "requirements": {
+            "minFaith": 6,
+            "minBalance": 50
+          },
+          "consequences": {
+            "resourceChanges": {"faith": -6},
+            "anchorIntegrityChange": 20,
+            "tensionChange": -5,
+            "setFlags": {"spring_purified": true},
+            "messageKey": "event.corrupted_spring.purify.result"
+          }
+        },
+        {
+          "id": "drink",
+          "labelKey": "event.corrupted_spring.drink",
+          "consequences": {
+            "resourceChanges": {"faith": 5},
+            "balanceShift": -10,
+            "addCurse": "dark_thirst",
+            "messageKey": "event.corrupted_spring.drink.result"
+          }
+        },
+        {
+          "id": "ignore",
+          "labelKey": "event.corrupted_spring.ignore",
+          "consequences": {
+            "messageKey": "event.corrupted_spring.ignore.result"
+          }
+        }
+      ]
+    }
+  ]
+}
