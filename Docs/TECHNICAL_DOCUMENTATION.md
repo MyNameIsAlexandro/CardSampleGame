@@ -108,11 +108,11 @@
 
 ### Миграция на Engine v1.0
 
-> **Статус миграции:** Phase 2 завершён, Phase 3 следующий
+> **Статус миграции:** Phase 1-3 завершены, Phase 4-5 запланированы
 
 | Компонент | Статус | Описание |
 |-----------|--------|----------|
-| Engine/Core/ | ✅ Готово | Протоколы и базовые реализации |
+| Engine/Core/ | ✅ Готово | Протоколы, TwilightGameEngine, TwilightGameAction |
 | Engine/Config/ | ✅ Готово | TwilightMarchesConfig.swift |
 | Engine/Heroes/ | ✅ Готово | HeroClass, HeroDefinition, HeroRegistry |
 | Engine/Cards/ | ✅ Готово | CardDefinition, CardRegistry, CardOwnership |
@@ -120,17 +120,25 @@
 | Engine/Data/Definitions/ | ✅ Готово | Все Definition-структуры созданы |
 | Engine/Runtime/ | ✅ Готово | RuntimeState модели созданы |
 | Engine/Data/Providers/ | ✅ Готово | ContentProvider + CodeContentProvider |
-| GameLoop интеграция | 🔄 Следующий | Phase 3 |
+| Engine/Events/ | ✅ Готово | EventPipeline, MiniGameDispatcher |
+| Engine/Migration/ | ✅ Готово | EngineAdapters (WorldState/Player/GameState) |
+| Engine/Modules/ | ✅ Готово | CombatModule интеграция |
+| ViewModels/ | ✅ Готово | GameViewModel (UI → Engine) |
+| GameLoop интеграция | ✅ Готово | Phase 3 завершён |
 
 **Текущее состояние:**
-- `Engine/Core/` — протоколы и базовые реализации движка
+- `Engine/Core/` — протоколы, TwilightGameEngine (центральный оркестратор), TwilightGameAction
 - `Engine/Heroes/` — модуль героев (HeroClass, HeroRegistry) — [документация](../Engine/Heroes/HEROES_MODULE.md)
 - `Engine/Cards/` — модуль карт (CardDefinition, CardRegistry) — [документация](../Engine/Cards/CARDS_MODULE.md)
 - `Engine/Combat/` — модуль боя (CombatCalculator с детализацией)
+- `Engine/Events/` — EventPipeline (selection + resolution), MiniGameDispatcher
+- `Engine/Migration/` — EngineAdapters для связи с legacy моделями
+- `Engine/Modules/` — CombatModule интеграция
 - `Engine/Data/Definitions/` — иммутабельные Definition-структуры
 - `Engine/Runtime/` — мутабельные RuntimeState-структуры
 - `Engine/Data/Providers/` — ContentProvider абстракция и CodeContentProvider
-- GameLoop интеграция — следующий этап (Phase 3)
+- `ViewModels/` — GameViewModel (единая точка входа UI → Engine)
+- GameLoop интеграция — ✅ Phase 3 завершён
 
 > **Терминология "data-driven":**
 > Cartridge data-driven архитектура (Definitions + ContentProvider) реализована в Phase 2.
@@ -185,7 +193,9 @@ CardSampleGame/
 │   │   ├── PressureEngine.swift    # Система давления/напряжения
 │   │   ├── EconomyManager.swift    # Транзакции ресурсов
 │   │   ├── RequirementsEvaluator.swift # Оценка требований
-│   │   └── GameLoop.swift          # Главный цикл игры
+│   │   ├── GameLoop.swift          # Главный цикл игры
+│   │   ├── TwilightGameAction.swift # Все игровые действия (Phase 3)
+│   │   └── TwilightGameEngine.swift # Центральный оркестратор (Phase 3)
 │   ├── Config/              # Конфигурация игры (Layer 2)
 │   │   ├── TwilightMarchesConfig.swift  # "Картридж" Сумрачных Пределов
 │   │   └── DegradationRules.swift  # Правила деградации
@@ -201,7 +211,16 @@ CardSampleGame/
 │   │   └── CARDS_MODULE.md         # Документация модуля
 │   ├── Combat/              # Модуль боя
 │   │   └── CombatCalculator.swift  # Калькулятор боя с детализацией
-│   └── Modules/             # Опциональные подсистемы
+│   ├── Events/              # Event Module (Phase 3)
+│   │   ├── EventPipeline.swift     # Selection + Resolution pipeline
+│   │   └── MiniGameDispatcher.swift # Роутинг мини-игр
+│   ├── Migration/           # Legacy Adapters (Phase 3)
+│   │   └── EngineAdapters.swift    # WorldState/Player/GameState adapters
+│   └── Modules/             # Подсистемы игры
+│       └── CombatModule.swift      # Combat интеграция с Engine
+│
+├── ViewModels/              # ViewModel слой (Phase 3)
+│   └── GameViewModel.swift  # UI → Engine gateway
 │
 ├── Models/                   # Модели данных (Runtime, Layer 3)
 │   ├── Card.swift           # Модель карты

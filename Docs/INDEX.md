@@ -148,7 +148,7 @@
 |------|-------|--------|
 | ENGINE_ARCHITECTURE.md | ~940 | ✅ Source of Truth |
 | EVENT_MODULE_ARCHITECTURE.md | ~450 | ✅ Active |
-| MIGRATION_PLAN.md | ~350 | 🔄 In Progress |
+| MIGRATION_PLAN.md | ~450 | ✅ Phase 1-3 Done |
 | EXPLORATION_CORE_DESIGN.md | ~3100 | ✅ Active |
 | GAME_DESIGN_DOCUMENT.md | ~1050 | ✅ Active |
 | TECHNICAL_DOCUMENTATION.md | ~1100 | ✅ Active |
