@@ -272,16 +272,7 @@ final class EventResolver {
 }
 
 // MARK: - Supporting Types
-
-/// Context for event filtering
-struct EventContext {
-    let currentLocation: String
-    let locationState: String
-    let pressure: Int
-    let flags: [String: Bool]
-    let resources: [String: Int]
-    let completedEvents: Set<String>
-}
+// Note: EventContext is defined in EngineProtocols.swift
 
 /// Context for event resolution
 struct EventResolutionContext {
@@ -302,8 +293,8 @@ struct EventResolutionResult {
     let narrativeText: String?
 }
 
-/// Event requirements (extended version)
-struct EventRequirements {
+/// Event filter criteria for selection (different from EventRequirements in ExplorationModels)
+struct EventFilterCriteria {
     var location: String?
     var locationState: String?
     var pressureRange: ClosedRange<Int>?
@@ -311,16 +302,16 @@ struct EventRequirements {
     var forbiddenFlags: [String] = []
     var minResources: [String: Int] = [:]
 
-    static let none = EventRequirements()
+    static let none = EventFilterCriteria()
 }
 
 // MARK: - GameEvent Extension
 
 extension GameEvent {
-    /// Event requirements for filtering
-    var requirements: EventRequirements {
-        // Build requirements from event data
-        var reqs = EventRequirements()
+    /// Event filter criteria for engine filtering
+    var filterCriteria: EventFilterCriteria {
+        // Build filter criteria from event data
+        var criteria = EventFilterCriteria()
 
         // Extract from regionTypes if present
         if !regionTypes.isEmpty {
@@ -332,7 +323,7 @@ extension GameEvent {
             // Location state requirement
         }
 
-        return reqs
+        return criteria
     }
 }
 

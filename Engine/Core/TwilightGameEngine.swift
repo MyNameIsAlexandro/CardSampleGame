@@ -38,7 +38,7 @@ final class TwilightGameEngine: ObservableObject {
 
     // MARK: - Internal State
 
-    private var regions: [UUID: RegionRuntimeState] = [:]
+    private var regions: [UUID: EngineRegionState] = [:]
     private var completedEventIds: Set<UUID> = []
     private var worldFlags: [String: Bool] = [:]
     private var questStages: [String: Int] = [:]
@@ -78,7 +78,7 @@ final class TwilightGameEngine: ObservableObject {
 
         // Sync regions
         for region in adapter.worldState.regions {
-            regions[region.id] = RegionRuntimeState(from: region)
+            regions[region.id] = EngineRegionState(from: region)
         }
 
         // Sync flags
@@ -635,14 +635,15 @@ enum EventTrigger {
     case time
 }
 
-// MARK: - Region Runtime State
+// MARK: - Engine Region State (Bridge from Legacy)
 
-struct RegionRuntimeState {
+/// Internal state for engine region tracking (bridges from legacy Region model)
+struct EngineRegionState {
     let id: UUID
     let name: String
     let type: RegionType
     var state: RegionState
-    var anchor: AnchorRuntimeState?
+    var anchor: EngineAnchorState?
     let neighborIds: [UUID]
     var canTrade: Bool
 
@@ -651,15 +652,16 @@ struct RegionRuntimeState {
         self.name = region.name
         self.type = region.type
         self.state = region.state
-        self.anchor = region.anchor.map { AnchorRuntimeState(from: $0) }
+        self.anchor = region.anchor.map { EngineAnchorState(from: $0) }
         self.neighborIds = region.neighborIds
         self.canTrade = region.canTrade
     }
 }
 
-// MARK: - Anchor Runtime State
+// MARK: - Engine Anchor State (Bridge from Legacy)
 
-struct AnchorRuntimeState {
+/// Internal state for engine anchor tracking (bridges from legacy RegionAnchor model)
+struct EngineAnchorState {
     let id: UUID
     let name: String
     var integrity: Int

@@ -98,6 +98,16 @@
 		JJ0002010000000000000001 /* CardRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = JJ0002020000000000000001 /* CardRegistry.swift */; };
 		/* Combat Module */
 		KK0001010000000000000001 /* CombatCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = KK0001020000000000000001 /* CombatCalculator.swift */; };
+		/* Phase 3 - Engine GameLoop Integration */
+		LL0001010000000000000001 /* TwilightGameAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = LL0001020000000000000001 /* TwilightGameAction.swift */; };
+		LL0002010000000000000001 /* TwilightGameEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = LL0002020000000000000001 /* TwilightGameEngine.swift */; };
+		LL0003010000000000000001 /* EventPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = LL0003020000000000000001 /* EventPipeline.swift */; };
+		LL0004010000000000000001 /* MiniGameDispatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = LL0004020000000000000001 /* MiniGameDispatcher.swift */; };
+		LL0005010000000000000001 /* EngineAdapters.swift in Sources */ = {isa = PBXBuildFile; fileRef = LL0005020000000000000001 /* EngineAdapters.swift */; };
+		LL0006010000000000000001 /* CombatModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = LL0006020000000000000001 /* CombatModule.swift */; };
+		LL0007010000000000000001 /* GameViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = LL0007020000000000000001 /* GameViewModel.swift */; };
+		/* Phase 3 Tests */
+		LL0008010000000000000001 /* Phase3ContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = LL0008020000000000000001 /* Phase3ContractTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -207,6 +217,15 @@
 		JJ0002020000000000000001 /* CardRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardRegistry.swift; sourceTree = "<group>"; };
 		/* Combat Module Files */
 		KK0001020000000000000001 /* CombatCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombatCalculator.swift; sourceTree = "<group>"; };
+		/* Phase 3 - Engine GameLoop Integration Files */
+		LL0001020000000000000001 /* TwilightGameAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwilightGameAction.swift; sourceTree = "<group>"; };
+		LL0002020000000000000001 /* TwilightGameEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwilightGameEngine.swift; sourceTree = "<group>"; };
+		LL0003020000000000000001 /* EventPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventPipeline.swift; sourceTree = "<group>"; };
+		LL0004020000000000000001 /* MiniGameDispatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniGameDispatcher.swift; sourceTree = "<group>"; };
+		LL0005020000000000000001 /* EngineAdapters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngineAdapters.swift; sourceTree = "<group>"; };
+		LL0006020000000000000001 /* CombatModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombatModule.swift; sourceTree = "<group>"; };
+		LL0007020000000000000001 /* GameViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewModel.swift; sourceTree = "<group>"; };
+		LL0008020000000000000001 /* Phase3ContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Phase3ContractTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -241,10 +260,19 @@
 			children = (
 				AA0000250000000000000001 /* . */,
 				EE0000000000000000000001 /* Engine */,
+				LL0000030000000000000001 /* ViewModels */,
 				BB0003000000000000000001 /* CardSampleGameTests */,
 				AA0000260000000000000001 /* Products */,
 				E65102638302D3C4A04B78CD /* CardSampleGame */,
 			);
+			sourceTree = "<group>";
+		};
+		LL0000030000000000000001 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				LL0007020000000000000001 /* GameViewModel.swift */,
+			);
+			path = ViewModels;
 			sourceTree = "<group>";
 		};
 		AA0000250000000000000001 /* . */ = {
@@ -352,11 +380,30 @@
 				EE0000030000000000000001 /* Data */,
 				EE0000040000000000000001 /* Runtime */,
 				EE0000050000000000000001 /* Migration */,
+				LL0000010000000000000001 /* Events */,
+				LL0000020000000000000001 /* Modules */,
 				II0000000000000000000001 /* Heroes */,
 				JJ0000000000000000000001 /* Cards */,
 				KK0000000000000000000001 /* Combat */,
 			);
 			path = Engine;
+			sourceTree = "<group>";
+		};
+		LL0000010000000000000001 /* Events */ = {
+			isa = PBXGroup;
+			children = (
+				LL0003020000000000000001 /* EventPipeline.swift */,
+				LL0004020000000000000001 /* MiniGameDispatcher.swift */,
+			);
+			path = Events;
+			sourceTree = "<group>";
+		};
+		LL0000020000000000000001 /* Modules */ = {
+			isa = PBXGroup;
+			children = (
+				LL0006020000000000000001 /* CombatModule.swift */,
+			);
+			path = Modules;
 			sourceTree = "<group>";
 		};
 		EE0000010000000000000001 /* Core */ = {
@@ -368,6 +415,8 @@
 				EE0001080000000000000001 /* PressureEngine.swift */,
 				EE0001100000000000000001 /* EconomyManager.swift */,
 				FF0003020000000000000001 /* RequirementsEvaluator.swift */,
+				LL0001020000000000000001 /* TwilightGameAction.swift */,
+				LL0002020000000000000001 /* TwilightGameEngine.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -429,6 +478,7 @@
 			isa = PBXGroup;
 			children = (
 				EE0006020000000000000001 /* LegacyAdapters.swift */,
+				LL0005020000000000000001 /* EngineAdapters.swift */,
 			);
 			path = Migration;
 			sourceTree = "<group>";
@@ -515,6 +565,7 @@
 				BB0004060000000000000001 /* DataSeparationTests.swift */,
 				BB0004080000000000000001 /* RegressionPlaythroughTests.swift */,
 				BB0004100000000000000001 /* Phase2ContractTests.swift */,
+				LL0008020000000000000001 /* Phase3ContractTests.swift */,
 			);
 			path = Engine;
 			sourceTree = "<group>";
@@ -682,6 +733,14 @@
 				JJ0002010000000000000001 /* CardRegistry.swift in Sources */,
 				/* Combat Module */
 				KK0001010000000000000001 /* CombatCalculator.swift in Sources */,
+				/* Phase 3 - Engine GameLoop Integration */
+				LL0001010000000000000001 /* TwilightGameAction.swift in Sources */,
+				LL0002010000000000000001 /* TwilightGameEngine.swift in Sources */,
+				LL0003010000000000000001 /* EventPipeline.swift in Sources */,
+				LL0004010000000000000001 /* MiniGameDispatcher.swift in Sources */,
+				LL0005010000000000000001 /* EngineAdapters.swift in Sources */,
+				LL0006010000000000000001 /* CombatModule.swift in Sources */,
+				LL0007010000000000000001 /* GameViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -714,6 +773,7 @@
 				BB0004050000000000000001 /* DataSeparationTests.swift in Sources */,
 				BB0004070000000000000001 /* RegressionPlaythroughTests.swift in Sources */,
 				BB0004090000000000000001 /* Phase2ContractTests.swift in Sources */,
+				LL0008010000000000000001 /* Phase3ContractTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
