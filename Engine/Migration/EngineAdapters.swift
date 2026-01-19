@@ -73,7 +73,8 @@ final class WorldStateEngineAdapter {
 
         case .questProgressed(let questId, let newStage):
             // Update quest stage in WorldState's activeQuests
-            if let index = worldState.activeQuests.firstIndex(where: { $0.id == questId }) {
+            // questId is String, Quest.id is UUID - convert for comparison
+            if let index = worldState.activeQuests.firstIndex(where: { $0.id.uuidString == questId }) {
                 worldState.activeQuests[index].stage = newStage
             }
 
@@ -136,7 +137,7 @@ final class WorldStateEngineAdapter {
 
             if let updatedQuest = worldState.activeQuests.first(where: { $0.id == quest.id }),
                updatedQuest.stage != previousStage {
-                changes.append(.questProgressed(questId: quest.id, newStage: updatedQuest.stage))
+                changes.append(.questProgressed(questId: quest.id.uuidString, newStage: updatedQuest.stage))
             }
         }
 
