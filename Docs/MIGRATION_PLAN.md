@@ -438,6 +438,46 @@ func testFixedSeedPlaythroughProducesSameOutcome() {
 
 ---
 
+## AUDIT v1.1 — Transitional Issues
+
+> **Статус:** Документированы для будущей работы. Не блокируют текущий релиз.
+
+### Исправлено в v1.1
+
+| Issue | Описание | Статус |
+|-------|----------|--------|
+| #5 | Seed задаётся после WorldState() в тестах | ✅ Fixed |
+| #7 | tearDown с resetToSystem() во всех тестах с seed | ✅ Already done |
+
+### Transitional (приемлемо на данном этапе)
+
+| Issue | Описание | Что делать | Приоритет |
+|-------|----------|------------|-----------|
+| #1 | **Legacy WorldState Object**: UI (WorldMapView) привязан к WorldState | Перевести UI на GameRuntimeState, удалить WorldStateEngineAdapter | Phase 4 |
+| #2 | **Hardcoded Strings in UI**: RegionCardView использует computed properties вместо локализованных строк из ContentProvider | Добавить локализацию через ContentProvider | Phase 5 |
+| #3 | **Тесты "на двух стульях"**: WorldStateTests тестируют deprecated методы | Убедиться что CI прогоняет integration tests | Phase 4 |
+| #4 | **Phase 3 не завершён полностью**: UI может менять state не только через Engine | Полная миграция UI на Engine actions | Phase 4 |
+| #6 | **Дублирование day-start логики**: WorldState.performDayStartLogic() и Engine имеют parallel implementation | Единый источник формулы (RuleSet/Config) | Phase 4 |
+| #8 | **Legacy Adapters Overhead**: Синхронизация через адаптеры | Перевести UI на прямое чтение из Engine | Phase 4 |
+| #9 | **Дублирование моделей**: Region (Legacy) и RegionDefinition + RegionRuntimeState (Engine) | Удалить legacy модели после миграции | Phase 5 |
+
+### CI Configuration
+
+> **Текущий статус:** CI не настроен.
+
+**TODO для Phase 4:**
+- [ ] Настроить GitHub Actions для iOS
+- [ ] CI должен прогонять `CardSampleGameTests` (включая integration tests)
+- [ ] Добавить badge в README
+
+### Архитектурные принципы v1.1
+
+1. **Seed Order**: `WorldRNG.shared.setSeed(seed)` ВСЕГДА вызывается ДО `WorldState()`
+2. **Test Isolation**: Каждый тест-класс с seed имеет `tearDown { WorldRNG.shared.resetToSystem() }`
+3. **Transitional API**: `advanceDayForUI()` существует пока Views не мигрированы на Engine
+
+---
+
 ## Связанные документы
 
 - [ENGINE_ARCHITECTURE.md](./ENGINE_ARCHITECTURE.md) — архитектура движка
@@ -446,4 +486,4 @@ func testFixedSeedPlaythroughProducesSameOutcome() {
 
 ---
 
-**Последнее обновление:** 19 января 2026
+**Последнее обновление:** 19 января 2026 (Audit v1.1)

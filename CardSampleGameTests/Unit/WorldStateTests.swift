@@ -475,30 +475,24 @@ final class WorldStateTests: XCTestCase {
 
     /// Тест: low-tension recovery детерминирован
     func testLowTensionRecoveryDeterministic() {
-        // Reset RNG to known state before test
-        WorldRNG.shared.resetToSystem()
-
         let seed: UInt64 = 999888
 
-        // Первый прогон - create world BEFORE setting seed to consume any RNG from init
-        let world1 = WorldState()
+        // Первый прогон - CORRECT ORDER: setSeed BEFORE WorldState() per audit v1.1
         WorldRNG.shared.setSeed(seed)
+        let world1 = WorldState()
         world1.worldTension = 15 // Low tension triggers recovery
         world1.advanceTime(by: 3)
         // Sort by name to ensure deterministic comparison (regions come from Dictionary)
         let regions1 = world1.regions.map { "\($0.name):\($0.state)" }.sorted()
 
-        // Второй прогон с тем же seed
-        let world2 = WorldState()
+        // Второй прогон с тем же seed - same correct order
         WorldRNG.shared.setSeed(seed)
+        let world2 = WorldState()
         world2.worldTension = 15
         world2.advanceTime(by: 3)
         let regions2 = world2.regions.map { "\($0.name):\($0.state)" }.sorted()
 
         XCTAssertEqual(regions1, regions2, "Состояния регионов должны совпадать при одном seed")
-
-        // Сброс на системный RNG
-        WorldRNG.shared.resetToSystem()
     }
 
     // MARK: - Time Progression Critical Tests
