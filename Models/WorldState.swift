@@ -183,7 +183,10 @@ class WorldState: ObservableObject, Codable {
         return getRegion(byId: currentId)
     }
 
+    /// - Warning: DEPRECATED для UI. Используйте `TwilightGameEngine.performAction(.travel(toRegionId:))` вместо прямого вызова.
+    /// Этот метод оставлен для совместимости и внутреннего использования Engine.
     func moveToRegion(_ regionId: UUID) {
+        // ⚠️ MIGRATION: После Phase 3 этот метод будет вызываться только из Engine
         // Отметить текущий регион как посещенный
         if let currentId = currentRegionId,
            let index = regions.firstIndex(where: { $0.id == currentId }) {
@@ -221,7 +224,10 @@ class WorldState: ObservableObject, Codable {
 
     /// Канонический алгоритм начала дня (см. EXPLORATION_CORE_DESIGN.md, раздел 18.1)
     /// Вызывается при каждом увеличении daysPassed
+    /// - Warning: DEPRECATED для UI. Time advance должен происходить через `TwilightGameEngine.performAction()`.
+    /// Этот метод вызывается автоматически из `advanceTime(by:)` и Engine.
     func processDayStart() {
+        // ⚠️ MIGRATION: После Phase 3 этот метод будет вызываться только из Engine
         // 1. Каждые 3 дня — автоматическая деградация мира
         guard daysPassed > 0 && daysPassed % 3 == 0 else { return }
 
@@ -371,7 +377,10 @@ class WorldState: ObservableObject, Codable {
     }
 
     /// Метод для ручного продвижения времени (для Rest, StrengthenAnchor и т.д.)
+    /// - Warning: DEPRECATED для UI. Используйте `TwilightGameEngine.performAction()` для действий, требующих время.
+    /// Этот метод оставлен для совместимости и внутреннего использования Engine.
     func advanceTime(by days: Int = 1) {
+        // ⚠️ MIGRATION: После Phase 3 этот метод будет вызываться только из Engine
         for _ in 0..<days {
             daysPassed += 1
             processDayStart()
