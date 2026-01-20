@@ -713,82 +713,87 @@ private func setupInitialWorld() {
 
 ## 8. План Внедрения
 
-### Фаза 1: Подготовка Данных (Data Separation)
+> **Статус:** ✅ Все фазы завершены (20 января 2026)
+>
+> Подробный отчёт о выполнении: [MIGRATION_PLAN.md](./MIGRATION_PLAN.md)
+
+### Фаза 1: Подготовка Данных (Data Separation) ✅
 
 **Цель:** Отделить статичные определения от runtime состояния.
 
-- [ ] Создать `*Definition` структуры рядом с текущими моделями
-- [ ] Создать `ContentProvider` (простой класс для загрузки)
-- [ ] В текущих моделях оставить только динамические данные + ID ссылки
+- [x] Создать `*Definition` структуры рядом с текущими моделями
+- [x] Создать `ContentProvider` (простой класс для загрузки)
+- [x] В текущих моделях оставить только динамические данные + ID ссылки
 
-**Файлы:**
+**Созданные файлы:**
 ```
-Engine/Data/
+Engine/Data/Definitions/
 ├── RegionDefinition.swift
 ├── EventDefinition.swift
 ├── QuestDefinition.swift
 ├── AnchorDefinition.swift
-└── ContentProvider.swift
+├── EnemyDefinition.swift
+└── *Adapter.swift (bridge to legacy models)
 ```
 
-### Фаза 2: Выделение Правил (Rules Extraction)
+### Фаза 2: Выделение Правил (Rules Extraction) ✅
 
 **Цель:** Вынести логику из `WorldState.swift` в конфигурируемые правила.
 
-- [ ] Создать протоколы `*Rules` (`PressureRules`, `DegradationRules`, `TimeRules`)
-- [ ] Реализовать для "Сумрачных Пределов" (`TwilightPressureRules`)
-- [ ] Внедрить через Dependency Injection
+- [x] Создать протоколы `*Rules` (`PressureRules`, `DegradationRules`, `TimeRules`)
+- [x] Реализовать для "Сумрачных Пределов" (`TwilightPressureRules`)
+- [x] Внедрить через Dependency Injection
 
-**Файлы:**
-```
-Engine/Config/
-├── TwilightPressureRules.swift
-├── TwilightDegradationRules.swift
-├── TwilightCombatRules.swift
-└── TwilightMarchesConfig.swift  # Уже создан
-```
-
-### Фаза 3: Внедрение Движка (Engine Core)
+### Фаза 3: Внедрение Движка (Engine Core) ✅
 
 **Цель:** Сделать `GameEngine` единственной точкой изменения состояния.
 
-- [ ] Создать `TwilightMarchesEngine` (наследник `GameLoopBase`)
-- [ ] Перенести логику из View/ViewModel в методы Engine
-- [ ] Заменить прямые мутации на `engine.performAction(...)`
+- [x] Создать `TwilightGameEngine` (центральный оркестратор)
+- [x] Создать `CoreGameEngine` (generic engine для Content Packs)
+- [x] Перенести логику из View/ViewModel в методы Engine
+- [x] Заменить прямые мутации на `engine.performAction(...)`
 
-**Критерий:** UI не содержит `worldState.daysPassed += 1`.
-
-### Фаза 4: Экономика и Резолверы
+### Фаза 4: Экономика и Резолверы ✅
 
 **Цель:** Унифицировать работу с ресурсами и боем.
 
-- [ ] Внедрить `EconomyManager` для всех операций с ресурсами
-- [ ] Обернуть текущую боёвку в `CardCombatResolver`
-- [ ] Убрать прямые изменения `player.faith -= 5` из UI
+- [x] Внедрить `EconomyManager` для всех операций с ресурсами
+- [x] Обернуть текущую боёвку в `CombatCalculator` / `CombatModule`
+- [x] Создать `PackValidator` для валидации контента
 
-### Фаза 5: Миграция контента в Data
+### Фаза 5: Миграция контента в Data ✅
 
 **Цель:** Перенести hardcoded события и квесты в data-файлы.
 
-- [ ] Экспортировать текущие события в JSON
-- [ ] Реализовать `JSONContentProvider`
-- [ ] Убрать `createInitialEvents()` из кода
+- [x] Экспортировать контент в JSON
+- [x] Реализовать Content Pack System (PackManifest, PackLoader, ContentRegistry)
+- [x] Создать `ContentPacks/TwilightMarches/` со всем контентом
+- [x] Написать спецификации: SPEC_CAMPAIGN_PACK.md, SPEC_INVESTIGATOR_PACK.md, SPEC_BALANCE_PACK.md
+- [x] Создать DevTools/PackCompiler для разработки паков
 
 ---
 
 ## 9. Критерии Готовности v1.0
 
-Чтобы честно назвать Engine v1.0 готовым:
+> **Статус:** ✅ Engine v1.0 готов (20 января 2026)
 
 | # | Критерий | Статус |
 |---|----------|--------|
-| 1 | Нет бизнес-правил внутри `WorldState.swift` | ⬜ |
-| 2 | Правила в `RuleSet` (конфиги/формулы) | ⬜ |
-| 3 | Контент в `Definitions` + `ContentProvider` | ⬜ |
-| 4 | UI не мутирует стейт напрямую (только через Engine) | ⬜ |
-| 5 | Resolver заменяем (карты/кубики/сравнение) | ⬜ |
-| 6 | Экономика транзакционная | ⬜ |
-| 7 | Тесты покрывают engine-инварианты | ✅ |
+| 1 | Нет бизнес-правил внутри `WorldState.swift` | ✅ Rules в Config |
+| 2 | Правила в `RuleSet` (конфиги/формулы) | ✅ TwilightPressureRules |
+| 3 | Контент в `Definitions` + `ContentProvider` | ✅ Content Pack System |
+| 4 | UI не мутирует стейт напрямую (только через Engine) | ✅ TwilightGameEngine |
+| 5 | Resolver заменяем (карты/кубики/сравнение) | ✅ CombatCalculator |
+| 6 | Экономика транзакционная | ✅ EconomyManager |
+| 7 | Тесты покрывают engine-инварианты | ✅ ContentPackTests |
+| 8 | Content Pack валидация | ✅ PackValidator |
+| 9 | Модульность: новый пак без изменения Engine | ✅ ContentRegistry |
+
+**Документация системы контентных паков:**
+- [CONTENT_PACK_GUIDE.md](./CONTENT_PACK_GUIDE.md) — гайд по созданию паков
+- [SPEC_CAMPAIGN_PACK.md](./SPEC_CAMPAIGN_PACK.md) — спецификация Campaign паков
+- [SPEC_INVESTIGATOR_PACK.md](./SPEC_INVESTIGATOR_PACK.md) — спецификация Investigator паков
+- [SPEC_BALANCE_PACK.md](./SPEC_BALANCE_PACK.md) — спецификация Balance паков
 
 ---
 
@@ -804,7 +809,16 @@ Engine/
 │   ├── PressureEngine.swift        # Система давления
 │   ├── EconomyManager.swift        # Транзакции ресурсов
 │   ├── RequirementsEvaluator.swift # Оценка требований
-│   └── GameLoop.swift              # Оркестратор
+│   ├── GameLoop.swift              # Оркестратор
+│   ├── TwilightGameAction.swift    # Все игровые действия
+│   ├── TwilightGameEngine.swift    # Центральный оркестратор
+│   └── CoreGameEngine.swift        # Generic engine (Content Pack aware)
+├── ContentPacks/                   # Content Pack инфраструктура
+│   ├── PackManifest.swift          # Pack metadata & versioning
+│   ├── PackLoader.swift            # Load/validate packs
+│   ├── PackValidator.swift         # Cross-reference validation
+│   ├── ContentRegistry.swift       # Runtime content registry
+│   └── PackTypes.swift             # Pack type definitions
 ├── Config/
 │   ├── TwilightMarchesConfig.swift # Конфигурация игры
 │   └── DegradationRules.swift      # Правила деградации
@@ -820,7 +834,31 @@ Engine/
 │   └── CARDS_MODULE.md             # Документация модуля
 ├── Combat/                         # Модуль боя
 │   └── CombatCalculator.swift      # Калькулятор боя
+├── Data/
+│   ├── Definitions/                # Definition structures
+│   │   ├── RegionDefinition.swift
+│   │   ├── EventDefinition.swift
+│   │   ├── QuestDefinition.swift
+│   │   ├── AnchorDefinition.swift
+│   │   ├── EnemyDefinition.swift
+│   │   └── *Adapter.swift          # Bridge to legacy models
+│   └── Providers/
+│       ├── ContentProvider.swift   # Protocol
+│       └── JSONContentProvider.swift
 └── ENGINE_ARCHITECTURE.md          # Этот документ
+
+ContentPacks/
+└── TwilightMarches/                # "Сумрачные Пределы" Pack
+    ├── manifest.json               # Pack metadata
+    ├── Campaign/ActI/              # Regions, events, quests
+    ├── Investigators/              # Heroes, starting decks
+    ├── Cards/                      # Player/enemy cards
+    ├── Balance/                    # Game configuration
+    └── Localization/               # en.json, ru.json
+
+DevTools/
+└── PackCompiler/                   # CLI for pack development
+    └── main.swift
 ```
 
 ### Конфигурация "Сумрачных Пределов"

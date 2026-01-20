@@ -403,25 +403,88 @@ CardSampleGameTests/Engine/
 
 ---
 
-## EPIC D — Phase 5: Content Migration to JSON (позже)
+## EPIC D — Phase 5: Content Pack System ✅ Done
 
-**Цель:** реальный cartridge-data-driven.
+**Цель:** реальный cartridge-data-driven с модульной системой контентных паков.
 
 | Task | Файл | Статус |
 |------|------|--------|
-| Export Act I → JSON | Resources/Content/ActI/ | ⬜ |
-| `JSONContentProvider` полноценно | JSONContentProvider.swift | ⬜ |
-| Test: same seed → same outcome | RegressionTests | ⬜ |
-| **UI icons from data** | Definition + UI | ⬜ |
+| Content Pack Infrastructure | Engine/ContentPacks/ | ✅ Done |
+| PackManifest (version, deps) | PackManifest.swift | ✅ Done |
+| PackLoader (load from URL) | PackLoader.swift | ✅ Done |
+| PackValidator (cross-references) | PackValidator.swift | ✅ Done |
+| ContentRegistry (central registry) | ContentRegistry.swift | ✅ Done |
+| PackTypes (campaign/investigator/balance) | PackTypes.swift | ✅ Done |
+| TwilightMarches Content Pack | ContentPacks/TwilightMarches/ | ✅ Done |
+| JSON Content Files | Campaign/, Cards/, Enemies/ | ✅ Done |
+| Balance Configuration | Balance/balance.json | ✅ Done |
+| Heroes/Investigators | Investigators/heroes.json | ✅ Done |
+| Enemy Definitions | Campaign/Enemies/enemies.json | ✅ Done |
+| Definition Adapters | Migration/EventDefinitionAdapter.swift | ✅ Done |
+| Quest Adapter | Migration/QuestDefinitionAdapter.swift | ✅ Done |
+| Pack Compiler CLI | DevTools/PackCompiler/main.swift | ✅ Done |
+| Content Pack Tests | ContentPackTests/ | ✅ Done |
+| Content Pack Guide | Docs/CONTENT_PACK_GUIDE.md | ✅ Done |
+| Pack Specifications | Docs/SPEC_*_PACK.md | ✅ Done |
 
-### UI Data-Driven Icons
+### Реализованная архитектура
 
-> **Текущее ограничение:** Иконки регионов/якорей определены как computed properties в enum'ах (ExplorationModels.swift). Это не позволяет добавлять новые типы через JSON без перекомпиляции.
+```
+ContentPacks/
+└── TwilightMarches/
+    ├── manifest.json           # Pack metadata, versioning
+    ├── Campaign/
+    │   ├── ActI/
+    │   │   ├── regions.json    # Region definitions
+    │   │   ├── events.json     # Event definitions
+    │   │   ├── quests.json     # Quest definitions
+    │   │   └── anchors.json    # Anchor definitions
+    │   └── Enemies/
+    │       └── enemies.json    # Enemy definitions
+    ├── Investigators/
+    │   └── heroes.json         # Hero definitions
+    ├── Cards/
+    │   └── cards.json          # Card definitions
+    ├── Balance/
+    │   └── balance.json        # Balance configuration
+    └── Localization/
+        ├── en.json             # English strings
+        └── ru.json             # Russian strings
 
-**Что нужно сделать:**
-1. Добавить поле `icon: String` в `RegionDefinition`, `AnchorDefinition`
-2. UI берёт иконку из Definition, не из switch
-3. JSON может определять новые типы регионов с кастомными иконками
+Engine/ContentPacks/
+├── PackManifest.swift          # Pack metadata parsing
+├── PackLoader.swift            # JSON loading
+├── PackValidator.swift         # Validation rules
+├── ContentRegistry.swift       # Central content access
+└── PackTypes.swift             # Type definitions
+```
+
+### Content Provider Protocol Compliance
+
+```swift
+// ContentRegistry implements ContentProvider
+extension ContentRegistry: ContentProvider {
+    func getRegionDefinition(id: String) -> RegionDefinition?
+    func getAllRegionDefinitions() -> [RegionDefinition]
+    func getEventDefinition(id: String) -> EventDefinition?
+    func getEventDefinitions(forRegion: String) -> [EventDefinition]
+    func getAnchorDefinition(id: String) -> AnchorDefinition?
+    func getQuestDefinition(id: String) -> QuestDefinition?
+    func getEnemy(id: String) -> EnemyDefinition?
+    func validate() -> [ContentValidationError]
+}
+```
+
+### UI Data-Driven Integration
+
+> **Реализовано:** UI использует данные из ContentRegistry через адаптеры.
+
+**Что сделано:**
+1. `EventDefinitionAdapter` — конвертирует EventDefinition → GameEvent
+2. `QuestDefinitionAdapter` — конвертирует QuestDefinition → Quest
+3. `EnemyDefinition.toCard()` — конвертирует EnemyDefinition → Card
+4. WorldState.createInitialQuests() использует ContentRegistry
+5. Event resolution использует ContentRegistry для врагов
 
 ---
 

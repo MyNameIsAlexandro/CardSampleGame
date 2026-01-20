@@ -1,10 +1,10 @@
 # Техническая документация проекта
 # Twilight Marches (Сумрачные Пределы)
 
-**Версия:** 0.7.0
-**Последнее обновление:** 18 января 2026
+**Версия:** 0.8.0
+**Последнее обновление:** 20 января 2026
 **Платформа:** iOS (SwiftUI)
-**Статус:** Engine Architecture v1.0 ✅
+**Статус:** Engine Architecture v1.0 + Content Pack System ✅
 
 ---
 
@@ -77,10 +77,12 @@
 
 > **Каноническая архитектура движка:** См. [ENGINE_ARCHITECTURE.md](./ENGINE_ARCHITECTURE.md)
 >
-> Проект использует архитектуру **"Processor + Cartridge"**:
+> Проект использует архитектуру **"Processor + Cartridge"** с модульной системой Content Packs:
 > - **Engine (Layer 1)** — переиспользуемый движок (TimeEngine, PressureEngine, EconomyManager)
-> - **Config (Layer 2)** — конфигурация игры "Сумрачные Пределы" (`TwilightMarchesConfig.swift`)
+> - **ContentPacks (Layer 2)** — модульный контент игры (Campaign, Investigator, Balance пакеты)
 > - **Runtime (Layer 3)** — состояние конкретной партии (GameState, WorldState)
+>
+> **Content Pack System:** См. [CONTENT_PACK_GUIDE.md](./CONTENT_PACK_GUIDE.md)
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -108,43 +110,45 @@
 
 ### Миграция на Engine v1.0
 
-> **Статус миграции:** Phase 1-3 завершены, Phase 4-5 запланированы
+> **Статус миграции:** ✅ Все фазы завершены (Phase 1-5 Done)
 
 | Компонент | Статус | Описание |
 |-----------|--------|----------|
 | Engine/Core/ | ✅ Готово | Протоколы, TwilightGameEngine, TwilightGameAction |
-| Engine/Config/ | ✅ Готово | TwilightMarchesConfig.swift |
+| Engine/ContentPacks/ | ✅ Готово | PackManifest, PackLoader, PackValidator, ContentRegistry |
 | Engine/Heroes/ | ✅ Готово | HeroClass, HeroDefinition, HeroRegistry |
 | Engine/Cards/ | ✅ Готово | CardDefinition, CardRegistry, CardOwnership |
 | Engine/Combat/ | ✅ Готово | CombatCalculator с детализацией |
-| Engine/Data/Definitions/ | ✅ Готово | Все Definition-структуры созданы |
+| Engine/Data/Definitions/ | ✅ Готово | Все Definition-структуры + Adapters |
 | Engine/Runtime/ | ✅ Готово | RuntimeState модели созданы |
-| Engine/Data/Providers/ | ✅ Готово | ContentProvider + CodeContentProvider |
+| Engine/Data/Providers/ | ✅ Готово | ContentProvider + JSONContentProvider |
 | Engine/Events/ | ✅ Готово | EventPipeline, MiniGameDispatcher |
 | Engine/Migration/ | ✅ Готово | EngineAdapters (WorldState/Player/GameState) |
 | Engine/Modules/ | ✅ Готово | CombatModule интеграция |
 | ViewModels/ | ✅ Готово | GameViewModel (UI → Engine) |
-| GameLoop интеграция | ✅ Готово | Phase 3 завершён |
+| ContentPacks/ | ✅ Готово | TwilightMarches pack (Campaign, Investigators, Balance) |
+| DevTools/ | ✅ Готово | PackCompiler CLI |
 
 **Текущее состояние:**
 - `Engine/Core/` — протоколы, TwilightGameEngine (центральный оркестратор), TwilightGameAction
+- `Engine/ContentPacks/` — инфраструктура модульных паков (PackManifest, PackLoader, PackValidator, ContentRegistry)
 - `Engine/Heroes/` — модуль героев (HeroClass, HeroRegistry) — [документация](../Engine/Heroes/HEROES_MODULE.md)
 - `Engine/Cards/` — модуль карт (CardDefinition, CardRegistry) — [документация](../Engine/Cards/CARDS_MODULE.md)
 - `Engine/Combat/` — модуль боя (CombatCalculator с детализацией)
 - `Engine/Events/` — EventPipeline (selection + resolution), MiniGameDispatcher
-- `Engine/Migration/` — EngineAdapters для связи с legacy моделями
-- `Engine/Modules/` — CombatModule интеграция
-- `Engine/Data/Definitions/` — иммутабельные Definition-структуры
-- `Engine/Runtime/` — мутабельные RuntimeState-структуры
-- `Engine/Data/Providers/` — ContentProvider абстракция и CodeContentProvider
-- `ViewModels/` — GameViewModel (единая точка входа UI → Engine)
-- GameLoop интеграция — ✅ Phase 3 завершён
+- `Engine/Data/Definitions/` — иммутабельные Definition-структуры + Adapters
+- `Engine/Data/Providers/` — ContentProvider абстракция и JSONContentProvider
+- `ContentPacks/TwilightMarches/` — контент игры "Сумрачные Пределы"
+- `DevTools/PackCompiler/` — CLI для разработки паков
 
-> **Терминология "data-driven":**
-> Cartridge data-driven архитектура (Definitions + ContentProvider) реализована в Phase 2.
-> Полная миграция на JSON (JSONContentProvider) запланирована в Phase 5.
+> **Content Pack System:**
+> Полностью реализована модульная система контентных паков (Phase 5 Done).
+> См. [CONTENT_PACK_GUIDE.md](./CONTENT_PACK_GUIDE.md) и спецификации:
+> - [SPEC_CAMPAIGN_PACK.md](./SPEC_CAMPAIGN_PACK.md)
+> - [SPEC_INVESTIGATOR_PACK.md](./SPEC_INVESTIGATOR_PACK.md)
+> - [SPEC_BALANCE_PACK.md](./SPEC_BALANCE_PACK.md)
 
-**Подробный план миграции:** См. [ENGINE_ARCHITECTURE.md, раздел 8](./ENGINE_ARCHITECTURE.md)
+**Подробный план миграции:** См. [MIGRATION_PLAN.md](./MIGRATION_PLAN.md)
 
 ### MVVM Pattern
 
@@ -184,7 +188,12 @@ CardSampleGame/
 │   ├── GAME_DESIGN_DOCUMENT.md     # Игровой дизайн
 │   ├── EXPLORATION_CORE_DESIGN.md  # Система исследования
 │   ├── QA_ACT_I_CHECKLIST.md       # QA-чеклист Акта I
-│   └── CAMPAIGN_IMPLEMENTATION_REPORT.md  # Отчёт о реализации
+│   ├── MIGRATION_PLAN.md           # План миграции (Phase 1-5 Done)
+│   ├── CONTENT_PACK_GUIDE.md       # Гайд по Content Pack системе
+│   ├── SPEC_CAMPAIGN_PACK.md       # Спецификация Campaign Pack
+│   ├── SPEC_INVESTIGATOR_PACK.md   # Спецификация Investigator Pack
+│   ├── SPEC_BALANCE_PACK.md        # Спецификация Balance Pack
+│   └── CAMPAIGN_IMPLEMENTATION_REPORT.md  # Отчёт о реализации (frozen)
 │
 ├── Engine/                  # Переиспользуемый игровой движок (v1.0)
 │   ├── Core/                # Ядро движка (Layer 1)
@@ -194,11 +203,15 @@ CardSampleGame/
 │   │   ├── EconomyManager.swift    # Транзакции ресурсов
 │   │   ├── RequirementsEvaluator.swift # Оценка требований
 │   │   ├── GameLoop.swift          # Главный цикл игры
-│   │   ├── TwilightGameAction.swift # Все игровые действия (Phase 3)
-│   │   └── TwilightGameEngine.swift # Центральный оркестратор (Phase 3)
-│   ├── Config/              # Конфигурация игры (Layer 2)
-│   │   ├── TwilightMarchesConfig.swift  # "Картридж" Сумрачных Пределов
-│   │   └── DegradationRules.swift  # Правила деградации
+│   │   ├── TwilightGameAction.swift # Все игровые действия
+│   │   ├── TwilightGameEngine.swift # Центральный оркестратор
+│   │   └── CoreGameEngine.swift    # Generic engine (Content Pack aware)
+│   ├── ContentPacks/        # Content Pack инфраструктура
+│   │   ├── PackManifest.swift      # Pack metadata & versioning
+│   │   ├── PackLoader.swift        # Load/validate packs
+│   │   ├── PackValidator.swift     # Cross-reference validation
+│   │   ├── ContentRegistry.swift   # Runtime content registry
+│   │   └── PackTypes.swift         # Pack type definitions
 │   ├── Heroes/              # Модуль героев
 │   │   ├── HeroClass.swift         # Классы героев (Warrior, Mage, etc.)
 │   │   ├── HeroDefinition.swift    # Протокол определения героя
@@ -211,15 +224,32 @@ CardSampleGame/
 │   │   └── CARDS_MODULE.md         # Документация модуля
 │   ├── Combat/              # Модуль боя
 │   │   └── CombatCalculator.swift  # Калькулятор боя с детализацией
-│   ├── Events/              # Event Module (Phase 3)
+│   ├── Events/              # Event Module
 │   │   ├── EventPipeline.swift     # Selection + Resolution pipeline
 │   │   └── MiniGameDispatcher.swift # Роутинг мини-игр
-│   ├── Migration/           # Legacy Adapters (Phase 3)
+│   ├── Data/
+│   │   ├── Definitions/            # Definition structures + Adapters
+│   │   └── Providers/              # ContentProvider implementations
+│   ├── Migration/           # Legacy Adapters
 │   │   └── EngineAdapters.swift    # WorldState/Player/GameState adapters
 │   └── Modules/             # Подсистемы игры
 │       └── CombatModule.swift      # Combat интеграция с Engine
 │
-├── ViewModels/              # ViewModel слой (Phase 3)
+├── ContentPacks/            # Модульный контент (Layer 2)
+│   └── TwilightMarches/     # "Сумрачные Пределы" Campaign Pack
+│       ├── manifest.json           # Pack metadata
+│       ├── Campaign/               # Regions, events, quests, anchors, enemies
+│       │   └── ActI/
+│       ├── Investigators/          # Heroes, starting decks
+│       ├── Cards/                  # Player/enemy cards
+│       ├── Balance/                # Numbers, weights, rules
+│       └── Localization/           # en.json, ru.json
+│
+├── DevTools/                # Developer Tools
+│   └── PackCompiler/        # CLI for pack development
+│       └── main.swift
+│
+├── ViewModels/              # ViewModel слой
 │   └── GameViewModel.swift  # UI → Engine gateway
 │
 ├── Models/                   # Модели данных (Runtime, Layer 3)
@@ -238,9 +268,6 @@ CardSampleGame/
 │   ├── WorldMapView.swift   # Карта мира (основной экран)
 │   ├── EventView.swift      # События с выборами
 │   └── RulesView.swift      # Правила игры
-│
-├── Data/                    # Игровые данные
-│   └── TwilightMarchesCards.swift  # Все карты, герои, события
 │
 ├── Utilities/               # Утилиты
 │   └── Localization.swift   # Русская локализация
@@ -956,6 +983,52 @@ func initiateCombat(choice: EventChoice) {
 ---
 
 ## История изменений
+
+### v0.8.0 (20.01.2026) - Content Pack System ✅
+
+**Основные изменения:**
+
+**Content Pack System - Модульная архитектура контента**
+- Реализована полная инфраструктура Content Pack системы (Phase 5 Done)
+- Engine теперь полностью отделён от game-specific контента
+
+**Engine/ContentPacks/ - Инфраструктура паков**
+- PackManifest.swift — метаданные пака и версионирование
+- PackLoader.swift — загрузка паков из JSON/Bundle
+- PackValidator.swift — валидация cross-references
+- ContentRegistry.swift — центральный runtime реестр контента
+- PackTypes.swift — определения типов паков
+
+**Engine/Core/CoreGameEngine.swift**
+- Generic engine, использующий ContentRegistry
+- Не содержит game-specific IDs/названий/строк
+
+**ContentPacks/TwilightMarches/**
+- Весь контент игры "Сумрачные Пределы" перенесён в отдельный пак
+- Campaign/ — регионы, события, квесты, якоря, враги
+- Investigators/ — герои и стартовые колоды
+- Cards/ — карты игрока и врагов
+- Balance/ — конфигурация баланса
+- Localization/ — en.json, ru.json
+
+**DevTools/PackCompiler/**
+- CLI инструмент для разработки паков
+- Валидация и компиляция JSON в pack format
+
+**Документация**
+- CONTENT_PACK_GUIDE.md — полный гайд по созданию паков
+- SPEC_CAMPAIGN_PACK.md — спецификация Campaign паков
+- SPEC_INVESTIGATOR_PACK.md — спецификация Investigator паков
+- SPEC_BALANCE_PACK.md — спецификация Balance паков
+- INDEX.md — обновлён с новыми документами
+- MIGRATION_PLAN.md — все фазы отмечены как завершённые
+
+**Статистика:**
+- 5+ новых файлов инфраструктуры
+- 3 спецификации DLC (~1500 строк документации)
+- Полная модульность: добавление нового пака НЕ требует изменения Engine/
+
+---
 
 ### v0.7.0 (18.01.2026) - Engine Architecture v1.0 ✅
 
