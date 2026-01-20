@@ -1354,8 +1354,14 @@ final class TwilightGameEngine: ObservableObject {
             actionsRemaining: combatActionsRemaining,
             bonusDice: combatBonusDice,
             bonusDamage: combatBonusDamage,
-            isFirstAttack: combatIsFirstAttack
+            isFirstAttack: combatIsFirstAttack,
+            playerHand: playerAdapter?.player.hand ?? []
         )
+    }
+
+    /// Access to legacy player for UI compatibility
+    var legacyPlayer: Player? {
+        playerAdapter?.player
     }
 
     // MARK: - Save/Load Support Methods
@@ -1530,6 +1536,7 @@ struct CombatState {
     let bonusDice: Int
     let bonusDamage: Int
     let isFirstAttack: Bool
+    let playerHand: [Card]
 
     var enemyMaxHealth: Int {
         enemy.health ?? 10

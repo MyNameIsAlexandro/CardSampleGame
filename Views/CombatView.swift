@@ -49,9 +49,9 @@ struct CombatView: View {
 
     /// Player from engine or legacy
     private var player: Player? {
-        // In Engine-First mode, we use engine's player adapter
-        // For now, use legacy player if available
-        legacyPlayer
+        // In Engine-First mode, use engine's legacyPlayer
+        // Fall back to stored legacyPlayer for backwards compatibility
+        engine.legacyPlayer ?? legacyPlayer
     }
 
     /// Monster from engine combat state or legacy binding
