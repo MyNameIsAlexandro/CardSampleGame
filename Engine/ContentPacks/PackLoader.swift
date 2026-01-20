@@ -55,6 +55,11 @@ enum PackLoader {
             pack.balanceConfig = try loadBalanceConfig(from: url.appendingPathComponent(balancePath))
         }
 
+        // Load enemies
+        if let enemiesPath = manifest.enemiesPath {
+            pack.enemies = try loadEnemies(from: url.appendingPathComponent(enemiesPath))
+        }
+
         return pack
     }
 
@@ -197,6 +202,28 @@ enum PackLoader {
     /// Load balance configuration
     private static func loadBalanceConfig(from url: URL) throws -> BalanceConfiguration {
         return try loadJSON(BalanceConfiguration.self, from: url)
+    }
+
+    /// Load enemies from path (file or directory)
+    private static func loadEnemies(from url: URL) throws -> [String: EnemyDefinition] {
+        var enemies: [String: EnemyDefinition] = [:]
+
+        if isDirectory(url) {
+            let files = try jsonFiles(in: url)
+            for file in files {
+                let fileEnemies = try loadJSONArray(EnemyDefinition.self, from: file)
+                for enemy in fileEnemies {
+                    enemies[enemy.id] = enemy
+                }
+            }
+        } else {
+            let fileEnemies = try loadJSONArray(EnemyDefinition.self, from: url)
+            for enemy in fileEnemies {
+                enemies[enemy.id] = enemy
+            }
+        }
+
+        return enemies
     }
 
     // MARK: - JSON Helpers

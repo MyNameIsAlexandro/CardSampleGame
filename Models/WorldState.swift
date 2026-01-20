@@ -1277,6 +1277,16 @@ class WorldState: ObservableObject, Codable {
     }
 
     private func createInitialEvents() -> [GameEvent] {
+        // MARK: - Data-Driven Events (ContentRegistry)
+        // First, try to load events from ContentRegistry (new architecture)
+        let registryEvents = ContentRegistry.shared.getAllEvents()
+        if !registryEvents.isEmpty {
+            print("📦 Loading \(registryEvents.count) events from ContentRegistry")
+            return registryEvents.map { $0.toGameEvent() }
+        }
+
+        // MARK: - Legacy Hardcoded Events (fallback)
+        print("⚠️ ContentRegistry empty, using legacy hardcoded events")
         var events: [GameEvent] = []
 
         // 1. COMBAT EVENT: Встреча с лешим (Forest guardian)
@@ -2129,6 +2139,16 @@ class WorldState: ObservableObject, Codable {
     // MARK: - Initial Quests (Act I)
 
     private func createInitialQuests() -> [Quest] {
+        // MARK: - Data-Driven Quests (ContentRegistry)
+        // First, try to load quests from ContentRegistry (new architecture)
+        let registryQuests = ContentRegistry.shared.getAllQuests()
+        if !registryQuests.isEmpty {
+            print("📦 Loading \(registryQuests.count) quests from ContentRegistry")
+            return registryQuests.map { $0.toQuest() }
+        }
+
+        // MARK: - Legacy Hardcoded Quests (fallback)
+        print("⚠️ ContentRegistry empty, using legacy hardcoded quests")
         var quests: [Quest] = []
 
         // MAIN QUEST: Путь Защитника (5 stages)

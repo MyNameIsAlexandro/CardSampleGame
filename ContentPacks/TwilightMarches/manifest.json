@@ -34,6 +34,7 @@
   "anchors_path": "Campaign/ActI/anchors.json",
   "heroes_path": "Investigators",
   "cards_path": "Cards",
+  "enemies_path": "Campaign/Enemies",
   "balance_path": "Balance/balance.json",
   "localization_path": "Localization"
 }

@@ -21,6 +21,7 @@ final class ContentRegistry {
     private var mergedAnchors: [String: AnchorDefinition] = [:]
     private var mergedHeroes: [String: StandardHeroDefinition] = [:]
     private var mergedCards: [String: StandardCardDefinition] = [:]
+    private var mergedEnemies: [String: EnemyDefinition] = [:]
 
     /// Active balance configuration (from highest priority pack)
     private var activeBalanceConfig: BalanceConfiguration?
@@ -159,6 +160,16 @@ final class ContentRegistry {
     /// Get cards by type
     func getCards(ofType type: CardType) -> [StandardCardDefinition] {
         return mergedCards.values.filter { $0.cardType == type }
+    }
+
+    /// Get enemy definition by ID
+    func getEnemy(id: String) -> EnemyDefinition? {
+        return mergedEnemies[id]
+    }
+
+    /// Get all enemy definitions
+    func getAllEnemies() -> [EnemyDefinition] {
+        return Array(mergedEnemies.values)
     }
 
     /// Get the active balance configuration
@@ -344,6 +355,11 @@ final class ContentRegistry {
             mergedCards[id] = card
         }
 
+        // Merge enemies
+        for (id, enemy) in pack.enemies {
+            mergedEnemies[id] = enemy
+        }
+
         // Update balance config if pack provides one
         if let balanceConfig = pack.balanceConfig {
             activeBalanceConfig = balanceConfig
@@ -368,6 +384,7 @@ final class ContentRegistry {
         mergedAnchors.removeAll()
         mergedHeroes.removeAll()
         mergedCards.removeAll()
+        mergedEnemies.removeAll()
         activeBalanceConfig = nil
     }
 
@@ -504,12 +521,14 @@ extension ContentRegistry {
         events: [String: EventDefinition] = [:],
         anchors: [String: AnchorDefinition] = [:],
         heroes: [String: StandardHeroDefinition] = [:],
-        cards: [String: StandardCardDefinition] = [:]
+        cards: [String: StandardCardDefinition] = [:],
+        enemies: [String: EnemyDefinition] = [:]
     ) {
         mergedRegions = regions
         mergedEvents = events
         mergedAnchors = anchors
         mergedHeroes = heroes
         mergedCards = cards
+        mergedEnemies = enemies
     }
 }

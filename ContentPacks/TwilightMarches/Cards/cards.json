@@ -355,5 +355,145 @@
     "defense": null,
     "health": null,
     "realm": "nav"
+  },
+  {
+    "id": "defender_blessing",
+    "name": "Defender's Blessing",
+    "name_ru": "Благословение Защитника",
+    "card_type": "special",
+    "rarity": "rare",
+    "description": "A reward for completing the main quest. Permanently increases defense by 2.",
+    "description_ru": "Награда за выполнение основного квеста. Постоянно увеличивает защиту на 2.",
+    "icon": "shield.checkered",
+    "expansion_set": "twilightMarches",
+    "ownership": "universal",
+    "abilities": [
+      {
+        "id": "permanent_defense",
+        "name": "Sacred Protection",
+        "name_ru": "Священная Защита",
+        "description": "+2 defense permanently",
+        "description_ru": "+2 к защите навсегда",
+        "effect": {"permanent_stat": {"stat": "defense", "amount": 2}}
+      }
+    ],
+    "faith_cost": 0,
+    "balance": "light",
+    "power": null,
+    "defense": 2,
+    "health": null,
+    "realm": "prav"
+  },
+  {
+    "id": "anchor_power",
+    "name": "Anchor's Power",
+    "name_ru": "Сила Якоря",
+    "card_type": "special",
+    "rarity": "rare",
+    "description": "Draw from the anchors' power. Heal 5 and gain 1 faith.",
+    "description_ru": "Черпать силу из якорей. Лечит 5 и даёт 1 веру.",
+    "icon": "anchor",
+    "expansion_set": "twilightMarches",
+    "ownership": "universal",
+    "abilities": [
+      {
+        "id": "anchor_heal",
+        "name": "Anchor's Blessing",
+        "name_ru": "Благословение Якоря",
+        "description": "Heal 5, gain 1 faith",
+        "description_ru": "Лечит 5, даёт 1 веру",
+        "effect": {"heal": 5, "faith": 1}
+      }
+    ],
+    "faith_cost": 0,
+    "balance": "light",
+    "power": null,
+    "defense": null,
+    "health": null,
+    "realm": "prav"
+  },
+  {
+    "id": "forest_blessing",
+    "name": "Forest Blessing",
+    "name_ru": "Благословение Леса",
+    "card_type": "special",
+    "rarity": "uncommon",
+    "description": "Loot from defeating a Leshy. Heal 3 in forest regions.",
+    "description_ru": "Добыча с побеждённого Лешего. Лечит 3 в лесных регионах.",
+    "icon": "leaf",
+    "expansion_set": "twilightMarches",
+    "ownership": "universal",
+    "abilities": [
+      {
+        "id": "forest_heal",
+        "name": "Nature's Gift",
+        "name_ru": "Дар Природы",
+        "description": "Heal 3 in forest",
+        "description_ru": "Лечит 3 в лесу",
+        "effect": {"heal": 3}
+      }
+    ],
+    "faith_cost": 0,
+    "balance": "neutral",
+    "power": null,
+    "defense": null,
+    "health": null,
+    "realm": "yav"
+  },
+  {
+    "id": "mountain_blessing",
+    "name": "Mountain Blessing",
+    "name_ru": "Благословение Гор",
+    "card_type": "special",
+    "rarity": "rare",
+    "description": "Reward from the Mountain Spirit. +3 defense for one battle.",
+    "description_ru": "Награда от Горного Духа. +3 к защите на одну битву.",
+    "icon": "mountain.2",
+    "expansion_set": "twilightMarches",
+    "ownership": "universal",
+    "abilities": [
+      {
+        "id": "mountain_armor",
+        "name": "Stone Skin",
+        "name_ru": "Каменная Кожа",
+        "description": "+3 defense for battle",
+        "description_ru": "+3 к защите на битву",
+        "effect": {"temporary_stat": {"stat": "defense", "amount": 3, "duration": 1}}
+      }
+    ],
+    "faith_cost": 0,
+    "balance": "neutral",
+    "power": null,
+    "defense": 3,
+    "health": null,
+    "realm": "yav"
+  },
+  {
+    "id": "witch_knowledge",
+    "name": "Witch's Knowledge",
+    "name_ru": "Знание Ведьмы",
+    "card_type": "special",
+    "rarity": "uncommon",
+    "description": "Dark wisdom from the swamp witch. Draw 2 cards.",
+    "description_ru": "Тёмная мудрость от болотной ведьмы. Взять 2 карты.",
+    "icon": "book.closed",
+    "expansion_set": "twilightMarches",
+    "ownership": "universal",
+    "abilities": [
+      {
+        "id": "draw_cards",
+        "name": "Ancient Wisdom",
+        "name_ru": "Древняя Мудрость",
+        "description": "Draw 2 cards",
+        "description_ru": "Взять 2 карты",
+        "effect": {"draw_cards": 2}
+      }
+    ],
+    "faith_cost": 1,
+    "balance": "dark",
+    "power": null,
+    "defense": null,
+    "health": null,
+    "realm": "nav"
   }
 ]

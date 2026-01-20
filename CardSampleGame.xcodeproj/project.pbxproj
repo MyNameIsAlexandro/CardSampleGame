@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		EDA00002000000000000001 /* EventDefinitionAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA00001000000000000001 /* EventDefinitionAdapter.swift */; };
+		QDA00002000000000000001 /* QuestDefinitionAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = QDA00001000000000000001 /* QuestDefinitionAdapter.swift */; };
 		CTB0000000000001 /* PackLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CT00000000000001 /* PackLoaderTests.swift */; };
 		CTB0000000000002 /* ContentRegistryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CT00000000000002 /* ContentRegistryTests.swift */; };
 
@@ -19,15 +21,8 @@
 		CB909EFA0DDD5249A581938E /* CoreGameEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = CPC53F48F00545404490B13F /* CoreGameEngine.swift */; };
 
 		01D384D3F190A3976183B126 /* EventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43D4E3FBE4DC34B63B61E061 /* EventView.swift */; };
-		219EC3E8F6FE3FC7EC3961DC /* pool_breach.json in Resources */ = {isa = PBXBuildFile; fileRef = 9EF40FDD4C6146C9E9BF6B68 /* pool_breach.json */; };
-		43B100CAFE2C4FF8EDF97E1F /* quests.json in Resources */ = {isa = PBXBuildFile; fileRef = 4461D0F2D6001B31416B2120 /* quests.json */; };
-		55A62FB04E25BBF7A3E10A05 /* pool_common.json in Resources */ = {isa = PBXBuildFile; fileRef = CAC2051B4BE9F64F1A452D78 /* pool_common.json */; };
-		59487A8762003142896FFA61 /* pool_sacred.json in Resources */ = {isa = PBXBuildFile; fileRef = F8E7FCC31719F383A900B63E /* pool_sacred.json */; };
 		6E48782A1C19C3CCDB7F32BF /* JSONContentProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E78C30B2863C87F7904765D /* JSONContentProviderTests.swift */; };
-		79A3BF244499F486D4A7BAA3 /* regions.json in Resources */ = {isa = PBXBuildFile; fileRef = 70592F5DC94231E63D7184CF /* regions.json */; };
-		86B501B601B7CA61F517B9AC /* pool_mountain.json in Resources */ = {isa = PBXBuildFile; fileRef = B45E6F2331A860071B2E6193 /* pool_mountain.json */; };
 		8F035EDB750B2C0441F077B0 /* WorldMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BEC0AA856AB6706612208E1 /* WorldMapView.swift */; };
-		A094E158FF46FB173B85D3BE /* anchors.json in Resources */ = {isa = PBXBuildFile; fileRef = 848FBFE4B176D83953D32DB8 /* anchors.json */; };
 		A4E4965164ED9C6373D15D1C /* ExplorationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BE0C9930A837029C5CD71A5 /* ExplorationModels.swift */; };
 		A56525B2E101A593EF7BE61A /* WorldState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2263FEB0CBAF703EC97141A7 /* WorldState.swift */; };
 		AA0000010000000000000001 /* CardGameApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000000000001 /* CardGameApp.swift */; };
@@ -39,14 +34,12 @@
 		AA0000130000000000000001 /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000140000000000000001 /* CardView.swift */; };
 		AA0000150000000000000001 /* PlayerHandView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000160000000000000001 /* PlayerHandView.swift */; };
 		AA0000170000000000000001 /* GameBoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000180000000000000001 /* GameBoardView.swift */; };
-		AA0000190000000000000001 /* SampleCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000200000000000000001 /* SampleCards.swift */; };
 		AA0000410000000000000001 /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000420000000000000001 /* Localization.swift */; };
 		AA0000430000000000000001 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = AA0000450000000000000001 /* Localizable.strings */; };
 		AA0000480000000000000001 /* RulesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000490000000000000001 /* RulesView.swift */; };
 		AA0000500000000000000001 /* TwilightMarchesCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000510000000000000001 /* TwilightMarchesCards.swift */; };
 		AA0000520000000000000001 /* GameSave.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000530000000000000001 /* GameSave.swift */; };
 		AA0000540000000000000001 /* StatisticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000550000000000000001 /* StatisticsView.swift */; };
-		B07C765A15319C25F3873475 /* challenges.json in Resources */ = {isa = PBXBuildFile; fileRef = 19A9D12ABBBC60983B504ABF /* challenges.json */; };
 		BB0001010000000000000001 /* WorldStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001020000000000000001 /* WorldStateTests.swift */; };
 		BB0001030000000000000001 /* PlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001040000000000000001 /* PlayerTests.swift */; };
 		BB0001050000000000000001 /* EventSystemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001060000000000000001 /* EventSystemTests.swift */; };
@@ -82,6 +75,7 @@
 		EE0003050000000000000001 /* AnchorDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0003060000000000000001 /* AnchorDefinition.swift */; };
 		EE0003070000000000000001 /* EventDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0003080000000000000001 /* EventDefinition.swift */; };
 		EE0003090000000000000001 /* QuestDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0003100000000000000001 /* QuestDefinition.swift */; };
+		END000200000000000000001 /* EnemyDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = END000100000000000000001 /* EnemyDefinition.swift */; };
 		EE0003110000000000000001 /* MiniGameChallengeDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0003120000000000000001 /* MiniGameChallengeDefinition.swift */; };
 		EE0004010000000000000001 /* ContentProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0004020000000000000001 /* ContentProvider.swift */; };
 		EE0004030000000000000001 /* CodeContentProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0004040000000000000001 /* CodeContentProvider.swift */; };
@@ -92,10 +86,6 @@
 		EE0005070000000000000001 /* PlayerRuntimeState.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0005080000000000000001 /* PlayerRuntimeState.swift */; };
 		EE0005090000000000000001 /* GameRuntimeState.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0005100000000000000001 /* GameRuntimeState.swift */; };
 		EE0006010000000000000001 /* LegacyAdapters.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0006020000000000000001 /* LegacyAdapters.swift */; };
-		EEE3FA0F40959DF8A210C4BD /* pool_boss.json in Resources */ = {isa = PBXBuildFile; fileRef = 6E9BCBDAF3F6EF703D224F2D /* pool_boss.json */; };
-		F847352BD45C9C6A86C3F360 /* pool_village.json in Resources */ = {isa = PBXBuildFile; fileRef = 465B9A04E4E5BC8589C4E5AE /* pool_village.json */; };
-		FB3A65B72D17E8BF5F6AA9D1 /* pool_swamp.json in Resources */ = {isa = PBXBuildFile; fileRef = 61BB67B64A9D57D47078B1EF /* pool_swamp.json */; };
-		FB8CEB6316EA6CCB88DA29C5 /* pool_forest.json in Resources */ = {isa = PBXBuildFile; fileRef = 8C1BC5932168AED516256A40 /* pool_forest.json */; };
 		FF0001010000000000000001 /* WorldRNG.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0001020000000000000001 /* WorldRNG.swift */; };
 		FF0002010000000000000001 /* DegradationRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0002020000000000000001 /* DegradationRules.swift */; };
 		FF0003010000000000000001 /* RequirementsEvaluator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0003020000000000000001 /* RequirementsEvaluator.swift */; };
@@ -130,6 +120,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		EDA00001000000000000001 /* EventDefinitionAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDefinitionAdapter.swift; sourceTree = "<group>"; };
+		QDA00001000000000000001 /* QuestDefinitionAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestDefinitionAdapter.swift; sourceTree = "<group>"; };
 		CT00000000000001 /* PackLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackLoaderTests.swift; sourceTree = "<group>"; };
 		CT00000000000002 /* ContentRegistryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentRegistryTests.swift; sourceTree = "<group>"; };
 
@@ -143,19 +135,10 @@
 
 		0BE0C9930A837029C5CD71A5 /* ExplorationModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExplorationModels.swift; path = Models/ExplorationModels.swift; sourceTree = "<group>"; };
 		180D9390663A50D5E72CF9B2 /* LocalizedString.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalizedString.swift; sourceTree = "<group>"; };
-		19A9D12ABBBC60983B504ABF /* challenges.json */ = {isa = PBXFileReference; includeInIndex = 1; path = challenges.json; sourceTree = "<group>"; };
 		2263FEB0CBAF703EC97141A7 /* WorldState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WorldState.swift; path = Models/WorldState.swift; sourceTree = "<group>"; };
 		43D4E3FBE4DC34B63B61E061 /* EventView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EventView.swift; path = Views/EventView.swift; sourceTree = "<group>"; };
-		4461D0F2D6001B31416B2120 /* quests.json */ = {isa = PBXFileReference; includeInIndex = 1; path = quests.json; sourceTree = "<group>"; };
-		465B9A04E4E5BC8589C4E5AE /* pool_village.json */ = {isa = PBXFileReference; includeInIndex = 1; path = pool_village.json; sourceTree = "<group>"; };
-		61BB67B64A9D57D47078B1EF /* pool_swamp.json */ = {isa = PBXFileReference; includeInIndex = 1; path = pool_swamp.json; sourceTree = "<group>"; };
 		6BEC0AA856AB6706612208E1 /* WorldMapView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WorldMapView.swift; path = Views/WorldMapView.swift; sourceTree = "<group>"; };
 		6E78C30B2863C87F7904765D /* JSONContentProviderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = JSONContentProviderTests.swift; sourceTree = "<group>"; };
-		6E9BCBDAF3F6EF703D224F2D /* pool_boss.json */ = {isa = PBXFileReference; includeInIndex = 1; path = pool_boss.json; sourceTree = "<group>"; };
-		70592F5DC94231E63D7184CF /* regions.json */ = {isa = PBXFileReference; includeInIndex = 1; path = regions.json; sourceTree = "<group>"; };
-		848FBFE4B176D83953D32DB8 /* anchors.json */ = {isa = PBXFileReference; includeInIndex = 1; path = anchors.json; sourceTree = "<group>"; };
-		8C1BC5932168AED516256A40 /* pool_forest.json */ = {isa = PBXFileReference; includeInIndex = 1; path = pool_forest.json; sourceTree = "<group>"; };
-		9EF40FDD4C6146C9E9BF6B68 /* pool_breach.json */ = {isa = PBXFileReference; includeInIndex = 1; path = pool_breach.json; sourceTree = "<group>"; };
 		AA0000020000000000000001 /* CardGameApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardGameApp.swift; sourceTree = "<group>"; };
 		AA0000040000000000000001 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		AA0000060000000000000001 /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
@@ -165,7 +148,6 @@
 		AA0000140000000000000001 /* CardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardView.swift; sourceTree = "<group>"; };
 		AA0000160000000000000001 /* PlayerHandView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerHandView.swift; sourceTree = "<group>"; };
 		AA0000180000000000000001 /* GameBoardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameBoardView.swift; sourceTree = "<group>"; };
-		AA0000200000000000000001 /* SampleCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleCards.swift; sourceTree = "<group>"; };
 		AA0000210000000000000001 /* CardSampleGame.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CardSampleGame.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0000400000000000000001 /* CardSampleGame.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CardSampleGame.entitlements; sourceTree = "<group>"; };
 		AA0000420000000000000001 /* Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Localization.swift; sourceTree = "<group>"; };
@@ -175,7 +157,6 @@
 		AA0000510000000000000001 /* TwilightMarchesCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwilightMarchesCards.swift; sourceTree = "<group>"; };
 		AA0000530000000000000001 /* GameSave.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameSave.swift; sourceTree = "<group>"; };
 		AA0000550000000000000001 /* StatisticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsView.swift; sourceTree = "<group>"; };
-		B45E6F2331A860071B2E6193 /* pool_mountain.json */ = {isa = PBXFileReference; includeInIndex = 1; path = pool_mountain.json; sourceTree = "<group>"; };
 		BB0000010000000000000001 /* CardSampleGameTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CardSampleGameTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB0001020000000000000001 /* WorldStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldStateTests.swift; sourceTree = "<group>"; };
 		BB0001040000000000000001 /* PlayerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerTests.swift; sourceTree = "<group>"; };
@@ -198,7 +179,6 @@
 		BB0004060000000000000001 /* DataSeparationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataSeparationTests.swift; sourceTree = "<group>"; };
 		BB0004080000000000000001 /* RegressionPlaythroughTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegressionPlaythroughTests.swift; sourceTree = "<group>"; };
 		BB0004100000000000000001 /* Phase2ContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Phase2ContractTests.swift; sourceTree = "<group>"; };
-		CAC2051B4BE9F64F1A452D78 /* pool_common.json */ = {isa = PBXFileReference; includeInIndex = 1; path = pool_common.json; sourceTree = "<group>"; };
 		CC0000010000000000000001 /* CombatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CombatView.swift; path = Views/CombatView.swift; sourceTree = "<group>"; };
 		CC0000030000000000000001 /* AccessibilityIdentifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityIdentifiers.swift; sourceTree = "<group>"; };
 		EE0001020000000000000001 /* EngineProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngineProtocols.swift; sourceTree = "<group>"; };
@@ -212,6 +192,7 @@
 		EE0003060000000000000001 /* AnchorDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnchorDefinition.swift; sourceTree = "<group>"; };
 		EE0003080000000000000001 /* EventDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDefinition.swift; sourceTree = "<group>"; };
 		EE0003100000000000000001 /* QuestDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestDefinition.swift; sourceTree = "<group>"; };
+		END000100000000000000001 /* EnemyDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemyDefinition.swift; sourceTree = "<group>"; };
 		EE0003120000000000000001 /* MiniGameChallengeDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniGameChallengeDefinition.swift; sourceTree = "<group>"; };
 		EE0004020000000000000001 /* ContentProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentProvider.swift; sourceTree = "<group>"; };
 		EE0004040000000000000001 /* CodeContentProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeContentProvider.swift; sourceTree = "<group>"; };
@@ -222,7 +203,6 @@
 		EE0005080000000000000001 /* PlayerRuntimeState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerRuntimeState.swift; sourceTree = "<group>"; };
 		EE0005100000000000000001 /* GameRuntimeState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRuntimeState.swift; sourceTree = "<group>"; };
 		EE0006020000000000000001 /* LegacyAdapters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyAdapters.swift; sourceTree = "<group>"; };
-		F8E7FCC31719F383A900B63E /* pool_sacred.json */ = {isa = PBXFileReference; includeInIndex = 1; path = pool_sacred.json; sourceTree = "<group>"; };
 		FF0001020000000000000001 /* WorldRNG.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldRNG.swift; sourceTree = "<group>"; };
 		FF0002020000000000000001 /* DegradationRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DegradationRules.swift; sourceTree = "<group>"; };
 		FF0003020000000000000001 /* RequirementsEvaluator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequirementsEvaluator.swift; sourceTree = "<group>"; };
@@ -290,7 +270,6 @@
 		0EE40F73C4754A16EB24BF83 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				E775D1B154AE9B19A2C1DA66 /* Content */,
 			);
 			name = Resources;
 			path = Resources;
@@ -370,7 +349,6 @@
 		AA0000290000000000000001 /* Data */ = {
 			isa = PBXGroup;
 			children = (
-				AA0000200000000000000001 /* SampleCards.swift */,
 				AA0000510000000000000001 /* TwilightMarchesCards.swift */,
 			);
 			path = Data;
@@ -382,22 +360,6 @@
 				AA0000420000000000000001 /* Localization.swift */,
 			);
 			path = Helpers;
-			sourceTree = "<group>";
-		};
-		B68D73F75C228C6C3A90EC21 /* events */ = {
-			isa = PBXGroup;
-			children = (
-				CAC2051B4BE9F64F1A452D78 /* pool_common.json */,
-				465B9A04E4E5BC8589C4E5AE /* pool_village.json */,
-				8C1BC5932168AED516256A40 /* pool_forest.json */,
-				61BB67B64A9D57D47078B1EF /* pool_swamp.json */,
-				B45E6F2331A860071B2E6193 /* pool_mountain.json */,
-				F8E7FCC31719F383A900B63E /* pool_sacred.json */,
-				9EF40FDD4C6146C9E9BF6B68 /* pool_breach.json */,
-				6E9BCBDAF3F6EF703D224F2D /* pool_boss.json */,
-			);
-			name = events;
-			path = events;
 			sourceTree = "<group>";
 		};
 		BB0003000000000000000001 /* CardSampleGameTests */ = {
@@ -487,19 +449,6 @@
 			name = CardSampleGame;
 			sourceTree = "<group>";
 		};
-		E775D1B154AE9B19A2C1DA66 /* Content */ = {
-			isa = PBXGroup;
-			children = (
-				B68D73F75C228C6C3A90EC21 /* events */,
-				70592F5DC94231E63D7184CF /* regions.json */,
-				848FBFE4B176D83953D32DB8 /* anchors.json */,
-				4461D0F2D6001B31416B2120 /* quests.json */,
-				19A9D12ABBBC60983B504ABF /* challenges.json */,
-			);
-			name = Content;
-			path = Content;
-			sourceTree = "<group>";
-		};
 		EE0000000000000000000001 /* Engine */ = {
 			isa = PBXGroup;
 			children = (
@@ -566,6 +515,8 @@
 		EE0000050000000000000001 /* Migration */ = {
 			isa = PBXGroup;
 			children = (
+				EDA00001000000000000001 /* EventDefinitionAdapter.swift */,
+				QDA00001000000000000001 /* QuestDefinitionAdapter.swift */,
 				EE0006020000000000000001 /* LegacyAdapters.swift */,
 				LL0005020000000000000001 /* EngineAdapters.swift */,
 			);
@@ -580,6 +531,7 @@
 				EE0003060000000000000001 /* AnchorDefinition.swift */,
 				EE0003080000000000000001 /* EventDefinition.swift */,
 				EE0003100000000000000001 /* QuestDefinition.swift */,
+				END000100000000000000001 /* EnemyDefinition.swift */,
 				EE0003120000000000000001 /* MiniGameChallengeDefinition.swift */,
 				180D9390663A50D5E72CF9B2 /* LocalizedString.swift */,
 			);
@@ -732,18 +684,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA0000430000000000000001 /* Localizable.strings in Resources */,
-				79A3BF244499F486D4A7BAA3 /* regions.json in Resources */,
-				A094E158FF46FB173B85D3BE /* anchors.json in Resources */,
-				43B100CAFE2C4FF8EDF97E1F /* quests.json in Resources */,
-				B07C765A15319C25F3873475 /* challenges.json in Resources */,
-				55A62FB04E25BBF7A3E10A05 /* pool_common.json in Resources */,
-				F847352BD45C9C6A86C3F360 /* pool_village.json in Resources */,
-				FB8CEB6316EA6CCB88DA29C5 /* pool_forest.json in Resources */,
-				FB3A65B72D17E8BF5F6AA9D1 /* pool_swamp.json in Resources */,
-				86B501B601B7CA61F517B9AC /* pool_mountain.json in Resources */,
-				59487A8762003142896FFA61 /* pool_sacred.json in Resources */,
-				219EC3E8F6FE3FC7EC3961DC /* pool_breach.json in Resources */,
-				EEE3FA0F40959DF8A210C4BD /* pool_boss.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -761,6 +701,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EDA00002000000000000001 /* EventDefinitionAdapter.swift in Sources */,
+				QDA00002000000000000001 /* QuestDefinitionAdapter.swift in Sources */,
 				AA0000030000000000000001 /* ContentView.swift in Sources */,
 				AA0000010000000000000001 /* CardGameApp.swift in Sources */,
 				AA0000050000000000000001 /* Card.swift in Sources */,
@@ -770,7 +712,6 @@
 				AA0000130000000000000001 /* CardView.swift in Sources */,
 				AA0000150000000000000001 /* PlayerHandView.swift in Sources */,
 				AA0000170000000000000001 /* GameBoardView.swift in Sources */,
-				AA0000190000000000000001 /* SampleCards.swift in Sources */,
 				AA0000500000000000000001 /* TwilightMarchesCards.swift in Sources */,
 				AA0000410000000000000001 /* Localization.swift in Sources */,
 				AA0000480000000000000001 /* RulesView.swift in Sources */,
@@ -798,6 +739,7 @@
 				EE0003050000000000000001 /* AnchorDefinition.swift in Sources */,
 				EE0003070000000000000001 /* EventDefinition.swift in Sources */,
 				EE0003090000000000000001 /* QuestDefinition.swift in Sources */,
+				END000200000000000000001 /* EnemyDefinition.swift in Sources */,
 				EE0003110000000000000001 /* MiniGameChallengeDefinition.swift in Sources */,
 				EE0004010000000000000001 /* ContentProvider.swift in Sources */,
 				EE0004030000000000000001 /* CodeContentProvider.swift in Sources */,

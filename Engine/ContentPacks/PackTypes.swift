@@ -164,6 +164,7 @@ struct LoadedPack {
     var anchors: [String: AnchorDefinition] = [:]
     var heroes: [String: StandardHeroDefinition] = [:]
     var cards: [String: StandardCardDefinition] = [:]
+    var enemies: [String: EnemyDefinition] = [:]
 
     /// Balance configuration (if pack provides one)
     var balanceConfig: BalanceConfiguration?
@@ -177,7 +178,7 @@ struct LoadedPack {
             heroCount: heroes.count,
             cardCount: cards.count,
             anchorCount: anchors.count,
-            enemyCount: 0, // TODO: Add enemy support
+            enemyCount: enemies.count,
             hasBalanceConfig: balanceConfig != nil,
             hasRulesExtension: false, // TODO: Add rules extension support
             hasCampaignContent: !regions.isEmpty || !events.isEmpty || !quests.isEmpty,

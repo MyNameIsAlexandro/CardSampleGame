@@ -1,0 +1,192 @@
+[
+  {
+    "id": "wild_beast",
+    "name": {
+      "en": "Wild Beast",
+      "ru": "Дикий Зверь"
+    },
+    "description": {
+      "en": "A feral creature driven mad by the encroaching Navi.",
+      "ru": "Дикое существо, обезумевшее от наступающей Нави."
+    },
+    "health": 8,
+    "power": 3,
+    "defense": 1,
+    "difficulty": 1,
+    "enemy_type": "beast",
+    "rarity": "common",
+    "abilities": [],
+    "loot_card_ids": ["beast_hide"],
+    "faith_reward": 2,
+    "balance_delta": 0
+  },
+  {
+    "id": "leshy",
+    "name": {
+      "en": "Leshy",
+      "ru": "Леший"
+    },
+    "description": {
+      "en": "Ancient forest guardian whose anger grows with the corruption.",
+      "ru": "Древний страж леса, чей гнев растёт вместе с порчей."
+    },
+    "health": 12,
+    "power": 4,
+    "defense": 2,
+    "difficulty": 2,
+    "enemy_type": "spirit",
+    "rarity": "uncommon",
+    "abilities": [
+      {
+        "id": "forest_rage",
+        "name": {
+          "en": "Forest Rage",
+          "ru": "Ярость Леса"
+        },
+        "description": {
+          "en": "Deals extra damage when below half health.",
+          "ru": "Наносит дополнительный урон при здоровье ниже половины."
+        },
+        "effect": {"bonus_damage": 2}
+      }
+    ],
+    "loot_card_ids": ["forest_blessing"],
+    "faith_reward": 5,
+    "balance_delta": 5
+  },
+  {
+    "id": "mountain_spirit",
+    "name": {
+      "en": "Mountain Spirit",
+      "ru": "Горный Дух"
+    },
+    "description": {
+      "en": "An ancient spirit of the mountain passes, testing travelers.",
+      "ru": "Древний дух горных перевалов, испытывающий путников."
+    },
+    "health": 15,
+    "power": 5,
+    "defense": 3,
+    "difficulty": 3,
+    "enemy_type": "spirit",
+    "rarity": "rare",
+    "abilities": [
+      {
+        "id": "stone_skin",
+        "name": {
+          "en": "Stone Skin",
+          "ru": "Каменная Кожа"
+        },
+        "description": {
+          "en": "Reduces all damage taken.",
+          "ru": "Уменьшает весь получаемый урон."
+        },
+        "effect": {"armor": 2}
+      }
+    ],
+    "loot_card_ids": ["mountain_blessing"],
+    "faith_reward": 8,
+    "balance_delta": 10
+  },
+  {
+    "id": "risen_dead",
+    "name": {
+      "en": "Risen Dead",
+      "ru": "Восставший Мертвец"
+    },
+    "description": {
+      "en": "A corpse animated by Navi energy, mindlessly aggressive.",
+      "ru": "Труп, оживлённый энергией Нави, бездумно агрессивный."
+    },
+    "health": 10,
+    "power": 4,
+    "defense": 1,
+    "difficulty": 2,
+    "enemy_type": "undead",
+    "rarity": "common",
+    "abilities": [],
+    "loot_card_ids": [],
+    "faith_reward": 3,
+    "balance_delta": -5
+  },
+  {
+    "id": "swamp_hag",
+    "name": {
+      "en": "Swamp Hag",
+      "ru": "Болотная Ведьма"
+    },
+    "description": {
+      "en": "A twisted creature of the swamp, wielding dark magic.",
+      "ru": "Искажённое существо болот, владеющее тёмной магией."
+    },
+    "health": 8,
+    "power": 6,
+    "defense": 1,
+    "difficulty": 3,
+    "enemy_type": "demon",
+    "rarity": "uncommon",
+    "abilities": [
+      {
+        "id": "curse_touch",
+        "name": {
+          "en": "Curse Touch",
+          "ru": "Проклятое Касание"
+        },
+        "description": {
+          "en": "Applies weakness curse on hit.",
+          "ru": "Накладывает проклятие слабости при ударе."
+        },
+        "effect": {"apply_curse": "weakness"}
+      }
+    ],
+    "loot_card_ids": ["witch_knowledge"],
+    "faith_reward": 6,
+    "balance_delta": -10
+  },
+  {
+    "id": "leshy_guardian_boss",
+    "name": {
+      "en": "Leshy Guardian",
+      "ru": "Леший-Хранитель"
+    },
+    "description": {
+      "en": "The ancient guardian of the boundary between worlds. A formidable foe.",
+      "ru": "Древний хранитель границы между мирами. Грозный противник."
+    },
+    "health": 25,
+    "power": 7,
+    "defense": 4,
+    "difficulty": 5,
+    "enemy_type": "boss",
+    "rarity": "legendary",
+    "abilities": [
+      {
+        "id": "nature_wrath",
+        "name": {
+          "en": "Nature's Wrath",
+          "ru": "Гнев Природы"
+        },
+        "description": {
+          "en": "Regenerates health each turn.",
+          "ru": "Восстанавливает здоровье каждый ход."
+        },
+        "effect": {"regeneration": 3}
+      },
+      {
+        "id": "ancient_armor",
+        "name": {
+          "en": "Ancient Armor",
+          "ru": "Древняя Броня"
+        },
+        "description": {
+          "en": "Thick bark reduces damage.",
+          "ru": "Толстая кора уменьшает урон."
+        },
+        "effect": {"armor": 2}
+      }
+    ],
+    "loot_card_ids": ["guardian_seal", "ancient_power"],
+    "faith_reward": 20,
+    "balance_delta": 20
+  }
+]
