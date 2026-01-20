@@ -118,10 +118,10 @@ struct EventView: View {
             } message: {
                 Text(resultMessage)
             }
-            .fullScreenCover(item: $combatMonster) { monster in
-                // Engine-First: Setup combat in engine and pass engine to CombatView
+            .fullScreenCover(item: $combatMonster) { _ in
+                // Combat already set up in initiateCombat via engine.setupCombatEnemy
                 CombatView(
-                    engine: engineWithCombatSetup(monster),
+                    engine: engine,
                     onCombatEnd: { outcome in
                         handleCombatEnd(outcome: outcome)
                     }
@@ -361,7 +361,8 @@ struct EventView: View {
             adjustedMonster.defense = combatContext.adjustedEnemyDefense(baseDefense)
         }
 
-        // Set monster - fullScreenCover will show automatically
+        // Setup combat in engine first, then show fullScreenCover
+        engine.setupCombatEnemy(adjustedMonster)
         combatMonster = adjustedMonster
     }
 
@@ -390,14 +391,6 @@ struct EventView: View {
             combatMonster = nil
             showingResult = true
         }
-    }
-
-    // MARK: - Engine-First Helpers
-
-    /// Setup combat in engine and return it for CombatView
-    private func engineWithCombatSetup(_ monster: Card) -> TwilightGameEngine {
-        engine.setupCombatEnemy(monster)
-        return engine
     }
 
     // MARK: - Helpers
