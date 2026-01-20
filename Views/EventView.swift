@@ -180,15 +180,18 @@ struct EventView: View {
 
         return Button {
             guard canChoose else { return }
-            selectedChoice = choice
 
-            // Check if this is a combat choice
-            if isCombatChoice {
-                initiateCombat(choice: choice)
-            } else {
-                // Применяем выбор сразу и закрываем
-                onChoiceSelected(choice)
-                onDismiss()
+            // Defer all state changes to avoid "Publishing changes from within view updates"
+            DispatchQueue.main.async {
+                selectedChoice = choice
+
+                // Check if this is a combat choice
+                if isCombatChoice {
+                    initiateCombat(choice: choice)
+                } else {
+                    onChoiceSelected(choice)
+                    onDismiss()
+                }
             }
         } label: {
             VStack(alignment: .leading, spacing: 8) {
@@ -358,7 +361,7 @@ struct EventView: View {
             adjustedMonster.defense = combatContext.adjustedEnemyDefense(baseDefense)
         }
 
-        // Установить монстра - fullScreenCover покажется автоматически
+        // Set monster - fullScreenCover will show automatically
         combatMonster = adjustedMonster
     }
 
