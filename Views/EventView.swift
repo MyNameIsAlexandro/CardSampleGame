@@ -72,6 +72,10 @@ struct EventView: View {
         NavigationView {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
+                    // Hero Panel (consistent design across all screens)
+                    HeroPanel(engine: engine, compact: true)
+                        .padding(.horizontal)
+
                     // Event header
                     eventHeader
 
@@ -110,9 +114,8 @@ struct EventView: View {
             }
             .alert(L10n.uiResult.localized, isPresented: $showingResult) {
                 Button(L10n.buttonOk.localized) {
-                    if let choice = selectedChoice {
-                        onChoiceSelected(choice)
-                    }
+                    // Note: onChoiceSelected is already called in handleCombatEnd for combat victories
+                    // or in handleNonCombatChoice for non-combat choices
                     onDismiss()
                 }
             } message: {
@@ -159,6 +162,9 @@ struct EventView: View {
         }
         .padding(.horizontal)
     }
+
+    // MARK: - Hero Stats (now uses HeroPanel component)
+    // Old heroStatsBar removed - using unified HeroPanel component instead
 
     var eventTypeColor: Color {
         switch event.eventType {
@@ -367,30 +373,19 @@ struct EventView: View {
     }
 
     func handleCombatEnd(outcome: CombatView.CombatOutcome) {
-        // Определяем результат боя
-        switch outcome {
-        case .victory(let stats):
-            combatVictory = true
-            resultMessage = L10n.eventCombatVictoryMessage.localized + "\n\n📊 " + stats.summary
-        case .defeat(let stats):
-            combatVictory = false
-            resultMessage = L10n.eventCombatDefeatMessage.localized + "\n\n📊 " + stats.summary
-        case .fled:
-            combatVictory = nil
-            resultMessage = L10n.eventCombatFledMessage.localized
-        }
-
         // Apply non-combat consequences from the choice (if victory)
         if outcome.isVictory, let choice = selectedChoice {
             onChoiceSelected(choice)
         }
 
-        // Задержка нужна чтобы fullScreenCover полностью закрылся перед показом alert
-        // (combatMonster = nil закроет fullScreenCover автоматически)
-        // Note: SwiftUI Views are structs, state is managed by SwiftUI
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+        // Combat already shows its own victory/defeat screen, no need for additional alert
+        // Just close combat and dismiss event view
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             combatMonster = nil
-            showingResult = true
+            // Small delay before dismissing to allow animation to complete
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                onDismiss()
+            }
         }
     }
 

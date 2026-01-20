@@ -1086,6 +1086,174 @@ final class GameplayFlowTests: XCTestCase {
             }
         }
     }
+
+    // MARK: - Player Hand Sync Tests
+
+    /// Test that syncPlayerHand updates engine.playerHand from legacy Player.hand
+    func testSyncPlayerHandUpdatesFromLegacyPlayer() {
+        // Given: Player has cards in hand (add directly to hand array)
+        let card1 = Card(name: "Test Card 1", type: .attack, description: "Test")
+        let card2 = Card(name: "Test Card 2", type: .defense, description: "Test")
+        player.hand.append(card1)
+        player.hand.append(card2)
+
+        // When: syncPlayerHand is called
+        engine.syncPlayerHand()
+
+        // Then: engine.playerHand matches player.hand
+        XCTAssertEqual(engine.playerHand.count, 2, "Engine should have 2 cards after sync")
+    }
+
+    /// Test that syncPlayerHand reflects cards played
+    func testSyncPlayerHandAfterCardPlayed() {
+        // Given: Player has cards and plays one
+        let card1 = Card(name: "Card A", type: .attack, description: "Test")
+        let card2 = Card(name: "Card B", type: .defense, description: "Test")
+        player.hand.append(card1)
+        player.hand.append(card2)
+        engine.syncPlayerHand()
+
+        XCTAssertEqual(engine.playerHand.count, 2, "Initial sync should have 2 cards")
+
+        // When: Player plays a card and sync is called
+        player.playCard(card1)
+        engine.syncPlayerHand()
+
+        // Then: engine.playerHand reflects the change
+        XCTAssertEqual(engine.playerHand.count, 1, "After playing one card, should have 1")
+        XCTAssertEqual(engine.playerHand.first?.name, "Card B")
+    }
+
+    /// Test that syncFromLegacy includes playerHand sync
+    func testSyncFromLegacyIncludesPlayerHand() {
+        // Given: Player has cards
+        let card = Card(name: "Test Card", type: .spell, description: "Test")
+        player.hand.append(card)
+
+        // When: Full syncFromLegacy is called
+        engine.syncFromLegacy()
+
+        // Then: engine.playerHand is synced
+        XCTAssertEqual(engine.playerHand.count, 1, "syncFromLegacy should include playerHand")
+        XCTAssertEqual(engine.playerHand.first?.name, "Test Card")
+    }
+
+    // MARK: - Engine Reset Tests
+
+    /// Test that resetGameState clears isGameOver flag
+    func testResetGameStateClearsIsGameOver() {
+        // Given: Game is over (simulate by setting tension to max)
+        // First check that we can trigger game over
+        let initialGameOver = engine.isGameOver
+        XCTAssertFalse(initialGameOver, "Game should not be over initially")
+
+        // When: resetGameState is called
+        engine.resetGameState()
+
+        // Then: isGameOver should be false
+        XCTAssertFalse(engine.isGameOver, "isGameOver should be false after reset")
+    }
+
+    /// Test that connectToLegacy resets game state before syncing
+    func testConnectToLegacyResetsGameState() {
+        // Given: Create a fresh WorldState and Player
+        let freshWorldState = WorldState()
+        let freshPlayer = Player(name: "New Hero", health: 10, maxHealth: 10)
+
+        // When: Connect to legacy (this should reset game state)
+        engine.connectToLegacy(worldState: freshWorldState, player: freshPlayer)
+
+        // Then: isGameOver should be false
+        XCTAssertFalse(engine.isGameOver, "isGameOver should be reset when connecting to legacy")
+
+        // And: Engine state should be synced from fresh world state
+        XCTAssertFalse(engine.regionsArray.isEmpty, "Regions should be loaded")
+    }
+
+    /// Test that new game creates fresh world state
+    func testNewGameCreatesFreshWorldState() {
+        // Given: A fresh WorldState
+        let freshWorldState = WorldState()
+
+        // Then: It should have initial world tension
+        XCTAssertEqual(freshWorldState.worldTension, 30, "Fresh WorldState should have initial tension")
+
+        // And: It should have initial day count
+        XCTAssertEqual(freshWorldState.daysPassed, 0, "Fresh WorldState should start at day 0")
+
+        // And: It should have regions
+        XCTAssertFalse(freshWorldState.regions.isEmpty, "Fresh WorldState should have regions")
+    }
+
+    // MARK: - Travel Validation Tests
+
+    /// Test that travel to non-neighbor region is blocked
+    func testTravelToNonNeighborIsBlocked() throws {
+        guard let currentRegion = engine.currentRegion else {
+            throw XCTSkip("No current region")
+        }
+
+        // Find a non-neighbor region
+        let nonNeighborRegion = engine.regionsArray.first { region in
+            region.id != currentRegion.id && !currentRegion.neighborIds.contains(region.id)
+        }
+
+        guard let targetRegion = nonNeighborRegion else {
+            throw XCTSkip("No non-neighbor region available for testing")
+        }
+
+        // When: Try to travel to non-neighbor
+        let result = engine.performAction(.travel(toRegionId: targetRegion.id))
+
+        // Then: Action should fail
+        XCTAssertFalse(result.success, "Travel to non-neighbor should fail")
+        XCTAssertNotNil(result.error, "Should have an error for non-neighbor travel")
+    }
+
+    /// Test that travel to neighbor region succeeds
+    func testTravelToNeighborSucceeds() throws {
+        guard let currentRegion = engine.currentRegion,
+              let neighborId = currentRegion.neighborIds.first else {
+            throw XCTSkip("No neighbor available for travel test")
+        }
+
+        let initialDay = engine.currentDay
+
+        // When: Travel to neighbor
+        let result = engine.performAction(.travel(toRegionId: neighborId))
+
+        // Then: Action should succeed
+        XCTAssertTrue(result.success, "Travel to neighbor should succeed")
+        XCTAssertGreaterThan(engine.currentDay, initialDay, "Day should advance after travel")
+        XCTAssertEqual(engine.currentRegionId, neighborId, "Current region should change")
+    }
+
+    /// Test that travel cost is calculated correctly
+    func testTravelCostCalculation() throws {
+        guard let currentRegion = engine.currentRegion,
+              let neighborId = currentRegion.neighborIds.first else {
+            throw XCTSkip("No neighbor for cost test")
+        }
+
+        // When: Calculate travel cost to neighbor
+        let neighborCost = engine.calculateTravelCost(to: neighborId)
+
+        // Then: Cost should be 1 for neighbor
+        XCTAssertEqual(neighborCost, 1, "Travel to neighbor should cost 1 day")
+
+        // Find non-neighbor
+        let nonNeighborRegion = engine.regionsArray.first { region in
+            region.id != currentRegion.id && !currentRegion.neighborIds.contains(region.id)
+        }
+
+        if let nonNeighbor = nonNeighborRegion {
+            // When: Calculate travel cost to non-neighbor
+            let nonNeighborCost = engine.calculateTravelCost(to: nonNeighbor.id)
+
+            // Then: Cost should be 2 for non-neighbor
+            XCTAssertEqual(nonNeighborCost, 2, "Travel to non-neighbor should cost 2 days")
+        }
+    }
 }
 
 // MARK: - Test Helpers

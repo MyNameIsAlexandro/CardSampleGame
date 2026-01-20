@@ -72,6 +72,13 @@ struct CombatView: View {
     // Combat end state (for victory/defeat screen)
     @State private var finalCombatStats: CombatStats? = nil
     @State private var isVictory: Bool = false
+    @State private var defeatedMonsterName: String = ""  // Saved before combat ends for UI
+    @State private var savedMonsterCard: Card? = nil     // Saved monster for display after combat ends
+
+    // Dice roll animation state
+    @State private var showDiceRollOverlay: Bool = false
+    @State private var animatingDiceValues: [Int] = []
+    @State private var diceAnimationPhase: Int = 0
 
     // MARK: - Computed Properties (Engine-First)
 
@@ -83,9 +90,14 @@ struct CombatView: View {
     }
 
     /// Monster from engine combat state or legacy binding
+    /// Uses savedMonsterCard when combat is over to avoid "Unknown" display
     private var monster: Card {
         get {
-            engine.combatState?.enemy ?? legacyMonster?.wrappedValue ?? Card(
+            // After combat ends, use saved monster card to display correct info
+            if phase == .combatOver, let saved = savedMonsterCard {
+                return saved
+            }
+            return engine.combatState?.enemy ?? legacyMonster?.wrappedValue ?? savedMonsterCard ?? Card(
                 name: "Unknown",
                 type: .monster,
                 description: "Unknown enemy"
@@ -122,6 +134,11 @@ struct CombatView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            // Hero Panel (persistent, consistent design)
+            HeroPanel(engine: engine, compact: true, showAvatar: true)
+                .padding(.horizontal, 8)
+                .padding(.top, 4)
+
             // Верхняя панель
             combatHeader
 
@@ -161,6 +178,12 @@ struct CombatView: View {
         }
         .background(Color(UIColor.systemBackground))
         .accessibilityIdentifier(AccessibilityIdentifiers.Combat.view)
+        .overlay {
+            // Dice roll animation overlay
+            if showDiceRollOverlay {
+                diceRollOverlay
+            }
+        }
         .alert(L10n.combatTitle.localized, isPresented: $showingMessage) {
             Button(L10n.buttonOk.localized) { }
         } message: {
@@ -547,7 +570,7 @@ struct CombatView: View {
                         .fontWeight(.bold)
                         .foregroundColor(.green)
 
-                    Text("\(monster.name) повержен!")
+                    Text("\(defeatedMonsterName) повержен!")
                         .font(.title3)
                         .foregroundColor(.secondary)
                 }
@@ -819,11 +842,187 @@ struct CombatView: View {
         }
     }
 
-    // MARK: - Player Hand (Engine-First with legacy fallback)
+    // MARK: - Dice Roll Overlay
 
-    /// Player's hand cards
+    /// Prominent dice roll animation overlay
+    var diceRollOverlay: some View {
+        ZStack {
+            // Semi-transparent background
+            Color.black.opacity(0.6)
+                .ignoresSafeArea()
+
+            VStack(spacing: 20) {
+                // Title
+                Text("🎲 БРОСОК КУБИКОВ")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+
+                // Animated dice
+                HStack(spacing: 16) {
+                    ForEach(animatingDiceValues.indices, id: \.self) { index in
+                        animatedDiceView(value: animatingDiceValues[index], index: index)
+                    }
+                }
+                .padding()
+
+                // Result display (after animation completes)
+                if let result = lastCombatResult, diceAnimationPhase >= 3 {
+                    VStack(spacing: 12) {
+                        // Attack total
+                        HStack(spacing: 8) {
+                            Text("💪 \(result.attackRoll.baseStrength)")
+                                .foregroundColor(.cyan)
+                            Text("+")
+                                .foregroundColor(.white)
+                            Text("🎲 \(result.attackRoll.diceTotal)")
+                                .foregroundColor(.yellow)
+                            if result.attackRoll.bonusDamage > 0 {
+                                Text("+")
+                                    .foregroundColor(.white)
+                                Text("⚔️ \(result.attackRoll.bonusDamage)")
+                                    .foregroundColor(.orange)
+                            }
+                            Text("=")
+                                .foregroundColor(.white)
+                            Text("\(result.attackRoll.total)")
+                                .font(.title)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                        }
+                        .font(.headline)
+
+                        // VS Defense
+                        HStack(spacing: 8) {
+                            Text("vs")
+                                .foregroundColor(.gray)
+                            Text("🛡️ Защита: \(result.defenseValue)")
+                                .foregroundColor(.blue)
+                        }
+                        .font(.subheadline)
+
+                        // Hit/Miss result
+                        if result.isHit {
+                            VStack(spacing: 4) {
+                                Text("✅ ПОПАДАНИЕ!")
+                                    .font(.title)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.green)
+
+                                if let damage = result.damageCalculation {
+                                    Text("💥 Урон: \(damage.total)")
+                                        .font(.headline)
+                                        .foregroundColor(.red)
+                                }
+                            }
+                        } else {
+                            Text("❌ ПРОМАХ!")
+                                .font(.title)
+                                .fontWeight(.bold)
+                                .foregroundColor(.red)
+                        }
+                    }
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.black.opacity(0.8))
+                    )
+                    .transition(.scale.combined(with: .opacity))
+                }
+            }
+        }
+        .onTapGesture {
+            // Allow dismissing overlay by tapping
+            withAnimation(.easeOut(duration: 0.2)) {
+                showDiceRollOverlay = false
+            }
+        }
+    }
+
+    /// Single animated dice
+    func animatedDiceView(value: Int, index: Int) -> some View {
+        ZStack {
+            // Dice background
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.white)
+                .frame(width: 60, height: 60)
+                .shadow(color: .black.opacity(0.3), radius: 4, x: 2, y: 2)
+
+            // Dice value
+            Text("\(value)")
+                .font(.system(size: 32, weight: .bold, design: .rounded))
+                .foregroundColor(value >= 5 ? .green : value <= 2 ? .red : .black)
+        }
+        .scaleEffect(diceAnimationPhase >= 2 ? 1.0 : 1.2)
+        .rotationEffect(.degrees(diceAnimationPhase >= 2 ? 0 : Double(index * 30)))
+        .animation(
+            .spring(response: 0.3, dampingFraction: 0.6),
+            value: diceAnimationPhase
+        )
+    }
+
+    /// Trigger dice roll animation
+    func showDiceAnimation(diceRolls: [Int]) {
+        // Start with random values
+        animatingDiceValues = diceRolls.map { _ in Int.random(in: 1...6) }
+        diceAnimationPhase = 0
+
+        withAnimation(.easeIn(duration: 0.1)) {
+            showDiceRollOverlay = true
+        }
+
+        // Animation sequence: roll several times then show final result
+        let rollDuration = 0.1
+
+        // Roll 1
+        DispatchQueue.main.asyncAfter(deadline: .now() + rollDuration) {
+            animatingDiceValues = diceRolls.map { _ in Int.random(in: 1...6) }
+            diceAnimationPhase = 1
+        }
+
+        // Roll 2
+        DispatchQueue.main.asyncAfter(deadline: .now() + rollDuration * 2) {
+            animatingDiceValues = diceRolls.map { _ in Int.random(in: 1...6) }
+        }
+
+        // Roll 3
+        DispatchQueue.main.asyncAfter(deadline: .now() + rollDuration * 3) {
+            animatingDiceValues = diceRolls.map { _ in Int.random(in: 1...6) }
+        }
+
+        // Final result
+        DispatchQueue.main.asyncAfter(deadline: .now() + rollDuration * 4) {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                animatingDiceValues = diceRolls
+                diceAnimationPhase = 2
+            }
+        }
+
+        // Show hit/miss result
+        DispatchQueue.main.asyncAfter(deadline: .now() + rollDuration * 4 + 0.3) {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                diceAnimationPhase = 3
+            }
+        }
+
+        // Auto-dismiss after showing result
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            withAnimation(.easeOut(duration: 0.3)) {
+                showDiceRollOverlay = false
+            }
+        }
+    }
+
+    // MARK: - Player Hand (Engine-First)
+
+    /// Player's hand cards - use engine's published playerHand for proper UI updates
     private var playerHand: [Card] {
-        player?.hand ?? []
+        // Engine-First: prefer engine.playerHand for proper @Published reactivity
+        // Fall back to legacy player.hand if engine doesn't have cards yet
+        if !engine.playerHand.isEmpty {
+            return engine.playerHand
+        }
+        return player?.hand ?? []
     }
 
     var playerHandView: some View {
@@ -864,6 +1063,9 @@ struct CombatView: View {
     // MARK: - Combat Logic (Engine-First: uses engine.performAction())
 
     func startCombat() {
+        // Save monster card for display after combat ends
+        savedMonsterCard = engine.combatState?.enemy ?? legacyMonster?.wrappedValue
+
         combatLog.append("Бой начался! Враг: \(monster.name)")
         combatLog.append("У вас 3 действия за ход")
 
@@ -874,6 +1076,8 @@ struct CombatView: View {
         if let p = player {
             p.shuffleDeck()
             p.drawCards(count: p.maxHandSize)
+            // Sync engine's playerHand after legacy deck operations
+            engine.syncPlayerHand()
         }
 
         actionsRemaining = 3
@@ -903,6 +1107,9 @@ struct CombatView: View {
 
         // Сохраняем результат для отображения
         lastCombatResult = result
+
+        // Show dice roll animation
+        showDiceAnimation(diceRolls: result.attackRoll.diceRolls)
 
         if result.isHit, let damageCalc = result.damageCalculation {
             let damage = damageCalc.total
@@ -978,6 +1185,9 @@ struct CombatView: View {
         // Legacy: play card from hand (remove from hand)
         player?.playCard(card)
 
+        // Sync engine's playerHand with legacy player (for @Published reactivity)
+        engine.syncPlayerHand()
+
         // NEW: Cards are modifiers, not actions
         // Defense cards add to temporary shield
         // Attack cards add to bonus damage/dice
@@ -1035,6 +1245,7 @@ struct CombatView: View {
                 // Engine-First: Draw cards through engine action
                 engine.performAction(.combatApplyEffect(effect: .drawCards(count: count)))
                 player?.drawCards(count: count)  // Legacy sync
+                engine.syncPlayerHand()  // Sync for UI reactivity
                 combatLog.append("   🃏 Взято карт: \(count)")
 
             case .gainFaith(let amount):
@@ -1096,6 +1307,7 @@ struct CombatView: View {
                 } else if benefit.lowercased().contains("карт") || benefit.lowercased().contains("draw") {
                     engine.performAction(.combatApplyEffect(effect: .drawCards(count: cost)))
                     player?.drawCards(count: cost)  // Legacy sync
+                    engine.syncPlayerHand()  // Sync for UI reactivity
                     combatLog.append("   🃏 Взято карт: \(cost)")
                 } else {
                     // Общий бонус - добавить урон
@@ -1229,6 +1441,8 @@ struct CombatView: View {
                     iterations += 1
                 }
                 p.drawCards(count: p.maxHandSize)
+                // Sync engine's playerHand after legacy deck operations
+                engine.syncPlayerHand()
             }
 
             // Способность Мага: +1 вера в конце хода (Медитация)
@@ -1249,6 +1463,9 @@ struct CombatView: View {
     func finishCombat(victory: Bool) {
         phase = .combatOver
 
+        // Save monster name BEFORE engine clears combatEnemy
+        defeatedMonsterName = monster.name
+
         // Engine-First: Finish combat through engine action
         engine.performAction(.combatFinish(victory: victory))
 
@@ -1265,7 +1482,7 @@ struct CombatView: View {
         isVictory = victory
 
         if victory {
-            combatLog.append("🎉 Победа! \(monster.name) повержен!")
+            combatLog.append("🎉 Победа! \(defeatedMonsterName) повержен!")
             combatLog.append("📊 \(stats.summary)")
         } else {
             combatLog.append("💀 Поражение...")

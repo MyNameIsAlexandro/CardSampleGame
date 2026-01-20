@@ -299,6 +299,10 @@ struct ContentView: View {
         player.deck = TwilightMarchesCards.createStartingDeck(for: selectedCharacter.name)
         player.shuffleDeck()
 
+        // IMPORTANT: Create fresh WorldState for new game
+        // This ensures previous game state doesn't persist
+        gameState.worldState = WorldState()
+
         // Initialize game state with Twilight Marches encounters and market
         gameState.players = [player]
         gameState.encounterDeck = TwilightMarchesCards.createEncounterDeck()
@@ -306,6 +310,7 @@ struct ContentView: View {
         gameState.marketCards = TwilightMarchesCards.createMarketCards()
 
         // MARK: - Engine-First: Connect engine to legacy state
+        // connectToLegacy also calls resetGameState() to clear isGameOver flag
         engine.connectToLegacy(worldState: gameState.worldState, player: player)
 
         // Save to selected slot

@@ -688,6 +688,47 @@ func testFixedSeedPlaythroughProducesSameOutcome() {
 
 ---
 
+## AUDIT v1.2 — January 2026 Fixes
+
+> **Статус:** ✅ Все пункты выполнены
+
+### Исправленные проблемы
+
+| Issue | Описание | Файлы | Статус |
+|-------|----------|-------|--------|
+| Combat Unknown Name | Имя врага показывалось как "Unknown" после боя | CombatView.swift | ✅ Fixed (savedMonsterCard) |
+| Travel Navigation | Путешествие открывало exploration вместо region detail | TwilightGameEngine.swift | ✅ Fixed (no auto-exploration) |
+| Region Tap Delay | Задержка при первом нажатии на регион | WorldMapView.swift | ✅ Fixed (loading state) |
+| HeroPanel Consistency | Герой не отображался на всех экранах | Views/Components/HeroPanel.swift | ✅ New component |
+| Enemy JSON Parsing | mini_game_challenge не парсился | EnemyDefinition.swift | ✅ Fixed (CodingKeys) |
+| EnemyAbilityEffect | Способности врагов не парсились | EnemyDefinition.swift | ✅ Fixed (custom Codable) |
+| Race Condition UUID | Потенциальный race condition при выборе региона | WorldMapView.swift | ✅ Already correct (stores full object) |
+
+### Новые компоненты
+
+| Компонент | Описание | Файл |
+|-----------|----------|------|
+| **HeroPanel** | Унифицированная панель героя для всех экранов | Views/Components/HeroPanel.swift |
+
+HeroPanel поддерживает два режима:
+- **Full mode** — для WorldMapView, EngineRegionDetailView
+- **Compact mode** — для EventView, CombatView
+
+### Новые тесты
+
+| Тест-класс | Описание | Кол-во тестов |
+|------------|----------|---------------|
+| HeroPanelTests | Проверка отображения статистики героя | 8 тестов |
+| EnemyDefinitionTests | Проверка JSON декодирования врагов | 9 тестов |
+
+### Архитектурные улучшения
+
+1. **EnemyDefinition CodingKeys** — добавлена поддержка snake_case полей из JSON
+2. **EnemyAbilityEffect Custom Codable** — корректный парсинг `{"bonus_damage": 2}` формата
+3. **HeroPanel Engine-First** — компонент читает данные только из Engine
+
+---
+
 ## Связанные документы
 
 - [ENGINE_ARCHITECTURE.md](./ENGINE_ARCHITECTURE.md) — архитектура движка
@@ -696,4 +737,4 @@ func testFixedSeedPlaythroughProducesSameOutcome() {
 
 ---
 
-**Последнее обновление:** 19 января 2026 (Audit v1.1)
+**Последнее обновление:** 20 января 2026 (Audit v1.2)

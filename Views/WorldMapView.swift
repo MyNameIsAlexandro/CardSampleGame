@@ -41,30 +41,45 @@ struct WorldMapView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
+                // Hero Panel (persistent, consistent design across all screens)
+                HeroPanel(engine: engine)
+                    .padding(.horizontal, 8)
+                    .padding(.top, 4)
+
+                Divider()
+                    .padding(.vertical, 4)
+
                 // Top bar with world info
                 worldInfoBar
 
                 Divider()
 
-                // Player info bar
-                playerInfoBar
-
-                Divider()
-
                 // Regions list (Engine-First: reads from engine.regionsArray)
-                ScrollView {
-                    LazyVStack(spacing: 12) {
-                        ForEach(engine.regionsArray, id: \.id) { region in
-                            EngineRegionCardView(
-                                region: region,
-                                isCurrentLocation: region.id == engine.currentRegionId
-                            )
-                            .onTapGesture {
-                                selectedRegion = region
+                if engine.regionsArray.isEmpty {
+                    // Show loading state if regions aren't loaded yet
+                    VStack(spacing: 16) {
+                        ProgressView()
+                            .scaleEffect(1.5)
+                        Text("Загрузка мира...")
+                            .font(.headline)
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 12) {
+                            ForEach(engine.regionsArray, id: \.id) { region in
+                                EngineRegionCardView(
+                                    region: region,
+                                    isCurrentLocation: region.id == engine.currentRegionId
+                                )
+                                .onTapGesture {
+                                    selectedRegion = region
+                                }
                             }
                         }
+                        .padding()
                     }
-                    .padding()
                 }
             }
             .navigationTitle(L10n.tmGameTitle.localized)
@@ -106,8 +121,8 @@ struct WorldMapView: View {
                 )
             }
             .alert(L10n.uiExit.localized + "?", isPresented: $showingExitConfirmation) {
-                Button(L10n.buttonOk.localized, role: .cancel) { }
-                Button(L10n.uiExit.localized) {
+                Button(L10n.uiCancel.localized, role: .cancel) { }
+                Button(L10n.uiExit.localized, role: .destructive) {
                     onExit?()
                 }
             } message: {
@@ -133,123 +148,8 @@ struct WorldMapView: View {
         }
     }
 
-    // MARK: - Player Info Bar (Engine-First: reads from engine.player*)
-
-    var playerInfoBar: some View {
-        HStack(spacing: 16) {
-            // Player name
-            VStack(alignment: .leading, spacing: 2) {
-                Text(engine.playerName)
-                    .font(.subheadline)
-                    .fontWeight(.bold)
-                Text("Странник")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-            }
-
-            Spacer()
-
-            // Health
-            HStack(spacing: 4) {
-                Image(systemName: "heart.fill")
-                    .font(.caption)
-                    .foregroundColor(.red)
-                Text("\(engine.playerHealth)/\(engine.playerMaxHealth)")
-                    .font(.caption)
-                    .fontWeight(.semibold)
-            }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(Color.red.opacity(0.1))
-            .cornerRadius(6)
-
-            // Faith
-            HStack(spacing: 4) {
-                Image(systemName: "sparkles")
-                    .font(.caption)
-                    .foregroundColor(.yellow)
-                Text("\(engine.playerFaith)")
-                    .font(.caption)
-                    .fontWeight(.semibold)
-            }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(Color.yellow.opacity(0.1))
-            .cornerRadius(6)
-
-            // Balance (0-100 scale)
-            VStack(spacing: 2) {
-                HStack(spacing: 4) {
-                    Image(systemName: getBalanceIcon(engine.playerBalance))
-                        .font(.caption)
-                        .foregroundColor(getPlayerBalanceColor(engine.playerBalance))
-                    Text("\(engine.playerBalance)")
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                    Text(engine.playerBalanceDescription)
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(getPlayerBalanceColor(engine.playerBalance).opacity(0.1))
-                .cornerRadius(6)
-
-                // Balance progress bar (0-100 visualization)
-                GeometryReader { geometry in
-                    ZStack(alignment: .leading) {
-                        // Background with color zones
-                        HStack(spacing: 0) {
-                            Rectangle()
-                                .fill(Color.purple.opacity(0.3))  // Dark zone (0-30)
-                                .frame(width: geometry.size.width * 0.3)
-                            Rectangle()
-                                .fill(Color.gray.opacity(0.2))    // Neutral zone (30-70)
-                                .frame(width: geometry.size.width * 0.4)
-                            Rectangle()
-                                .fill(Color.yellow.opacity(0.3))  // Light zone (70-100)
-                                .frame(width: geometry.size.width * 0.3)
-                        }
-                        .frame(height: 4)
-
-                        // Current balance indicator
-                        Rectangle()
-                            .fill(getPlayerBalanceColor(engine.playerBalance))
-                            .frame(
-                                width: geometry.size.width * CGFloat(engine.playerBalance) / 100,
-                                height: 4
-                            )
-                    }
-                }
-                .frame(height: 4)
-                .padding(.horizontal, 4)
-            }
-            .padding(.horizontal, 4)
-        }
-        .padding(.horizontal)
-        .padding(.vertical, 8)
-        .background(Color(UIColor.secondarySystemBackground))
-    }
-
-    func getBalanceIcon(_ balance: Int) -> String {
-        if balance >= 70 {
-            return "sun.max.fill"      // Light path (70-100)
-        } else if balance <= 30 {
-            return "moon.fill"          // Dark path (0-30)
-        } else {
-            return "circle.lefthalf.filled"  // Neutral (30-70)
-        }
-    }
-
-    func getPlayerBalanceColor(_ balance: Int) -> Color {
-        if balance >= 70 {
-            return .yellow              // Light path (70-100)
-        } else if balance <= 30 {
-            return .purple              // Dark path (0-30)
-        } else {
-            return .gray                // Neutral (30-70)
-        }
-    }
+    // MARK: - Player Info (now uses HeroPanel component)
+    // Old playerInfoBar removed - using unified HeroPanel component instead
 
     // MARK: - World Info Bar (Engine-First: reads from engine.*)
 
@@ -273,9 +173,9 @@ struct WorldMapView: View {
 
                 Spacer()
 
-                // Balance
+                // World Light/Dark Balance (Явь vs Навь)
                 VStack(spacing: 2) {
-                    Text("Баланс")
+                    Text("Мир")
                         .font(.caption2)
                         .foregroundColor(.secondary)
                     Text(engine.worldBalanceDescription)
@@ -468,6 +368,10 @@ struct RegionDetailView: View {
     @State private var eventToShow: GameEvent?
     @State private var showingNoEventsAlert = false
 
+    // Card received notification
+    @State private var showingCardNotification = false
+    @State private var receivedCardNames: [String] = []
+
     enum RegionAction {
         case travel
         case rest
@@ -546,6 +450,79 @@ struct RegionDetailView: View {
             } message: {
                 Text("В этом регионе сейчас нет доступных событий для исследования.")
             }
+            .overlay {
+                // Card received notification overlay
+                if showingCardNotification && !receivedCardNames.isEmpty {
+                    legacyCardReceivedNotificationView
+                }
+            }
+        }
+    }
+
+    // MARK: - Legacy Card Received Notification View
+
+    var legacyCardReceivedNotificationView: some View {
+        ZStack {
+            Color.black.opacity(0.5)
+                .ignoresSafeArea()
+                .onTapGesture {
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        showingCardNotification = false
+                    }
+                }
+
+            VStack(spacing: 20) {
+                VStack(spacing: 8) {
+                    Text("🃏")
+                        .font(.system(size: 48))
+                    Text("Получены карты!")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                    Text("Добавлены в вашу колоду")
+                        .font(.subheadline)
+                        .foregroundColor(.white.opacity(0.8))
+                }
+
+                VStack(spacing: 12) {
+                    ForEach(receivedCardNames, id: \.self) { cardName in
+                        HStack {
+                            Image(systemName: "rectangle.stack.badge.plus")
+                                .foregroundColor(.yellow)
+                            Text(cardName)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.white)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.purple.opacity(0.6))
+                        )
+                    }
+                }
+
+                Button(action: {
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        showingCardNotification = false
+                    }
+                }) {
+                    Text("Отлично!")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(minWidth: 120)
+                        .padding()
+                        .background(Color.blue)
+                        .cornerRadius(12)
+                }
+            }
+            .padding(24)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color(UIColor.systemBackground).opacity(0.95))
+                    .shadow(radius: 20)
+            )
+            .transition(.scale.combined(with: .opacity))
         }
     }
 
@@ -757,25 +734,40 @@ struct RegionDetailView: View {
             VStack(spacing: 8) {
                 // Travel action - только если игрок НЕ здесь
                 if !isPlayerHere {
+                    let travelCost = worldState.calculateTravelCost(to: region.id)
+                    let dayWord = travelCost == 1 ? "день" : "дня"
+                    let canTravel = region.isNeighbor(worldState.currentRegionId ?? UUID())
+
                     actionButton(
-                        title: "Отправиться",
-                        icon: "arrow.right.circle.fill",
-                        color: .blue,
-                        enabled: true
+                        title: canTravel ? "Отправиться (\(travelCost) \(dayWord))" : "Регион далеко",
+                        icon: canTravel ? "arrow.right.circle.fill" : "xmark.circle",
+                        color: canTravel ? .blue : .gray,
+                        enabled: canTravel
                     ) {
                         selectedAction = .travel
                         showingActionConfirmation = true
                     }
 
                     // Сообщение о необходимости переместиться
-                    HStack {
-                        Image(systemName: "info.circle")
-                            .foregroundColor(.secondary)
-                        Text("Переместитесь в регион, чтобы взаимодействовать с ним")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                    if canTravel {
+                        HStack {
+                            Image(systemName: "info.circle")
+                                .foregroundColor(.secondary)
+                            Text("Переместитесь в регион, чтобы взаимодействовать с ним")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.vertical, 8)
+                    } else {
+                        HStack {
+                            Image(systemName: "map")
+                                .foregroundColor(.orange)
+                            Text("Регион недоступен напрямую - сначала идите в соседний регион")
+                                .font(.caption)
+                                .foregroundColor(.orange)
+                        }
+                        .padding(.vertical, 8)
                     }
-                    .padding(.vertical, 8)
                 }
 
                 // Действия доступны ТОЛЬКО если игрок находится в регионе
@@ -815,12 +807,13 @@ struct RegionDetailView: View {
                         }
                     }
 
-                    // Explore
+                    // Explore (only if events available)
+                    let hasEvents = worldState.getAvailableEvents(for: region).count > 0
                     actionButton(
                         title: "Исследовать",
                         icon: "magnifyingglass",
                         color: .cyan,
-                        enabled: true
+                        enabled: hasEvents
                     ) {
                         triggerExploration()
                     }
@@ -967,6 +960,16 @@ struct RegionDetailView: View {
     }
 
     func handleEventChoice(_ choice: EventChoice, event: GameEvent) {
+        // Check for card rewards before processing
+        var cardsToNotify: [String] = []
+        if let cardIDs = choice.consequences.addCards {
+            for cardID in cardIDs {
+                if let card = TwilightMarchesCards.getCardByID(cardID) {
+                    cardsToNotify.append(card.name)
+                }
+            }
+        }
+
         // Apply consequences
         worldState.applyConsequences(
             choice.consequences,
@@ -1000,6 +1003,17 @@ struct RegionDetailView: View {
         // Исследование события тратит день (кроме instant событий)
         if !event.instant {
             worldState.advanceDayForUI()
+        }
+
+        // Show card received notification if cards were gained
+        if !cardsToNotify.isEmpty {
+            receivedCardNames = cardsToNotify
+            // Delay slightly to allow event sheet to dismiss first
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                    showingCardNotification = true
+                }
+            }
         }
     }
 
@@ -1309,6 +1323,10 @@ struct EngineRegionDetailView: View {
     @State private var showingActionError = false
     @State private var actionErrorMessage = ""
 
+    // Card received notification
+    @State private var showingCardNotification = false
+    @State private var receivedCardNames: [String] = []
+
     enum EngineRegionAction {
         case travel
         case rest
@@ -1319,28 +1337,35 @@ struct EngineRegionDetailView: View {
 
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    // Region header
-                    regionHeader
+            VStack(spacing: 0) {
+                // Hero Panel (persistent, consistent design across all screens)
+                HeroPanel(engine: engine)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
 
-                    // Risk display for non-stable regions
-                    if region.state != .stable {
-                        riskInfoSection
-                    }
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 20) {
+                        // Region header
+                        regionHeader
 
-                    Divider()
+                        // Risk display for non-stable regions
+                        if region.state != .stable {
+                            riskInfoSection
+                        }
 
-                    // Anchor section
-                    if let anchor = region.anchor {
-                        anchorSection(anchor: anchor)
                         Divider()
-                    }
 
-                    // Available actions
-                    actionsSection
+                        // Anchor section
+                        if let anchor = region.anchor {
+                            anchorSection(anchor: anchor)
+                            Divider()
+                        }
+
+                        // Available actions
+                        actionsSection
+                    }
+                    .padding()
                 }
-                .padding()
             }
             .navigationTitle(region.name)
             .navigationBarTitleDisplayMode(.inline)
@@ -1392,6 +1417,85 @@ struct EngineRegionDetailView: View {
                     eventToShow = event
                 }
             }
+            .overlay {
+                // Card received notification overlay
+                if showingCardNotification && !receivedCardNames.isEmpty {
+                    cardReceivedNotificationView
+                }
+            }
+        }
+    }
+
+    // MARK: - Card Received Notification View
+
+    var cardReceivedNotificationView: some View {
+        ZStack {
+            // Semi-transparent background
+            Color.black.opacity(0.5)
+                .ignoresSafeArea()
+                .onTapGesture {
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        showingCardNotification = false
+                    }
+                }
+
+            VStack(spacing: 20) {
+                // Header
+                VStack(spacing: 8) {
+                    Text("🃏")
+                        .font(.system(size: 48))
+
+                    Text("Получены карты!")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+
+                    Text("Добавлены в вашу колоду")
+                        .font(.subheadline)
+                        .foregroundColor(.white.opacity(0.8))
+                }
+
+                // Cards list
+                VStack(spacing: 12) {
+                    ForEach(receivedCardNames, id: \.self) { cardName in
+                        HStack {
+                            Image(systemName: "rectangle.stack.badge.plus")
+                                .foregroundColor(.yellow)
+                            Text(cardName)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.white)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.purple.opacity(0.6))
+                        )
+                    }
+                }
+
+                // Dismiss button
+                Button(action: {
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        showingCardNotification = false
+                    }
+                }) {
+                    Text("Отлично!")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(minWidth: 120)
+                        .padding()
+                        .background(Color.blue)
+                        .cornerRadius(12)
+                }
+            }
+            .padding(24)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color(UIColor.systemBackground).opacity(0.95))
+                    .shadow(radius: 20)
+            )
+            .transition(.scale.combined(with: .opacity))
         }
     }
 
@@ -1546,9 +1650,11 @@ struct EngineRegionDetailView: View {
                 if !isPlayerHere {
                     let canTravel = engine.canTravelTo(regionId: region.id)
                     let routingHint = engine.getRoutingHint(to: region.id)
+                    let travelCost = engine.calculateTravelCost(to: region.id)
+                    let dayWord = travelCost == 1 ? "день" : "дня"
 
                     actionButton(
-                        title: canTravel ? "Отправиться (1 день)" : "Регион далеко",
+                        title: canTravel ? "Отправиться (\(travelCost) \(dayWord))" : "Регион далеко",
                         icon: canTravel ? "arrow.right.circle.fill" : "xmark.circle",
                         color: canTravel ? .blue : .gray,
                         enabled: canTravel
@@ -1622,12 +1728,13 @@ struct EngineRegionDetailView: View {
                         }
                     }
 
-                    // Explore
+                    // Explore (only if events available)
+                    let hasEvents = engine.hasAvailableEventsInCurrentRegion()
                     actionButton(
                         title: "Исследовать",
                         icon: "magnifyingglass",
                         color: .cyan,
-                        enabled: true
+                        enabled: hasEvents
                     ) {
                         selectedAction = .explore
                         showingActionConfirmation = true
@@ -1810,6 +1917,16 @@ struct EngineRegionDetailView: View {
     // MARK: - Event Choice Handling
 
     func handleEventChoice(_ choice: EventChoice, event: GameEvent) {
+        // Check for card rewards before processing
+        var cardsToNotify: [String] = []
+        if let cardIDs = choice.consequences.addCards {
+            for cardID in cardIDs {
+                if let card = TwilightMarchesCards.getCardByID(cardID) {
+                    cardsToNotify.append(card.name)
+                }
+            }
+        }
+
         // Execute choice via engine
         if let choiceIndex = event.choices.firstIndex(where: { $0.id == choice.id }) {
             let result = engine.performAction(.chooseEventOption(eventId: event.id, choiceIndex: choiceIndex))
@@ -1831,6 +1948,17 @@ struct EngineRegionDetailView: View {
         // Dismiss event view
         eventToShow = nil
         engine.performAction(.dismissCurrentEvent)
+
+        // Show card received notification if cards were gained
+        if !cardsToNotify.isEmpty {
+            receivedCardNames = cardsToNotify
+            // Delay slightly to allow event sheet to dismiss first
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                    showingCardNotification = true
+                }
+            }
+        }
     }
 }
 

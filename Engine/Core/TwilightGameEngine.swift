@@ -140,6 +140,26 @@ final class TwilightGameEngine: ObservableObject {
         return region.canTrade
     }
 
+    /// Check if exploration can find events in current region
+    func hasAvailableEventsInCurrentRegion() -> Bool {
+        guard let regionId = currentRegionId,
+              let region = publishedRegions[regionId] else { return false }
+
+        // Check via legacy adapter if available
+        if let worldState = worldStateAdapter?.worldState,
+           let legacyRegion = worldState.regions.first(where: { $0.id == regionId }) {
+            let events = worldState.getAvailableEvents(for: legacyRegion)
+            return !events.isEmpty
+        }
+
+        // Fallback: check content registry for events in this region type
+        let events = contentRegistry.getAvailableEvents(
+            forRegion: region.type.rawValue,
+            pressure: worldTension
+        )
+        return !events.isEmpty
+    }
+
     // MARK: - Core Subsystems
 
     private let timeEngine: TimeEngine
@@ -176,7 +196,8 @@ final class TwilightGameEngine: ObservableObject {
 
     /// Player deck (for save/load)
     private var playerDeck: [Card] = []
-    private var playerHand: [Card] = []
+    /// Player's hand cards (Published for UI binding)
+    @Published private(set) var playerHand: [Card] = []
     private var playerDiscard: [Card] = []
 
     // MARK: - Combat State
@@ -231,11 +252,27 @@ final class TwilightGameEngine: ObservableObject {
 
     /// Connect to legacy WorldState for bidirectional sync
     func connectToLegacy(worldState: WorldState, player: Player) {
+        // Reset critical game state flags when connecting (supports new game flow)
+        resetGameState()
+
         self.worldStateAdapter = WorldStateEngineAdapter(worldState: worldState, engine: self)
         self.playerAdapter = PlayerEngineAdapter(player: player, engine: self)
 
         // Initial sync from legacy
         syncFromLegacy()
+    }
+
+    /// Reset critical game state flags (called when starting new game or loading save)
+    func resetGameState() {
+        isGameOver = false
+        gameResult = nil
+        currentEventId = nil
+        currentEvent = nil
+        lastDayEvent = nil
+        isInCombat = false
+        combatEnemy = nil
+        combatEnemyHealth = 0
+        combatTurnNumber = 0
     }
 
     /// Sync engine state from legacy models
@@ -269,6 +306,7 @@ final class TwilightGameEngine: ObservableObject {
             playerMaxHealth = player.maxHealth
             playerFaith = player.faith
             playerBalance = player.balance
+            playerHand = player.hand
         }
 
         // CRITICAL: Sync pressure engine state to prevent duplicate threshold events
@@ -285,6 +323,14 @@ final class TwilightGameEngine: ObservableObject {
         eventLog = adapter.worldState.eventLog
         publishedActiveQuests = activeQuests
         publishedEventLog = eventLog
+    }
+
+    /// Sync player hand from legacy Player model
+    /// Call this after modifying player.hand directly (e.g., in CombatView)
+    func syncPlayerHand() {
+        if let player = playerAdapter?.player {
+            playerHand = player.hand
+        }
     }
 
     // MARK: - Engine-First Initialization
@@ -963,17 +1009,15 @@ final class TwilightGameEngine: ObservableObject {
 
     private func executeTravel(to regionId: UUID) -> ([StateChange], [UUID]) {
         var changes: [StateChange] = []
-        var events: [UUID] = []
+        let events: [UUID] = []
 
         // Update current region
         currentRegionId = regionId
         changes.append(.regionChanged(regionId: regionId))
 
-        // Generate travel event (if any)
-        if let event = generateEvent(for: regionId, trigger: .arrival) {
-            events.append(event)
-            currentEventId = event
-        }
+        // Note: Events are NOT auto-generated on arrival.
+        // Player must explicitly choose to Explore to trigger events.
+        // This allows player to Rest, Trade, or Strengthen Anchor first.
 
         return (changes, events)
     }

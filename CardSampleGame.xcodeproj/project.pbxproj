@@ -7,21 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		EDA00002000000000000001 /* EventDefinitionAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA00001000000000000001 /* EventDefinitionAdapter.swift */; };
-		QDA00002000000000000001 /* QuestDefinitionAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = QDA00001000000000000001 /* QuestDefinitionAdapter.swift */; };
-		CTB0000000000001 /* PackLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CT00000000000001 /* PackLoaderTests.swift */; };
-		CTB0000000000002 /* ContentRegistryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CT00000000000002 /* ContentRegistryTests.swift */; };
-
-		CB00000000000002 /* PackValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CP00000000000002 /* PackValidator.swift */; };
-
-		CB08DBD8123C514251864650 /* PackTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = CP38FEE143B4F44A6FB1ABC6 /* PackTypes.swift */; };
-		CB50EAD25364CF425EAF6DA2 /* PackManifest.swift in Sources */ = {isa = PBXBuildFile; fileRef = CP369CE2F981F64F768313B9 /* PackManifest.swift */; };
-		CBDDB67C77B6B2456B8D6E85 /* ContentRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = CP0AEC59DDE4BB4190A9676D /* ContentRegistry.swift */; };
-		CB1986EB1E630D4643855BEF /* PackLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = CPA7568BA17ABF44F2938D92 /* PackLoader.swift */; };
-		CB909EFA0DDD5249A581938E /* CoreGameEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = CPC53F48F00545404490B13F /* CoreGameEngine.swift */; };
-
 		01D384D3F190A3976183B126 /* EventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43D4E3FBE4DC34B63B61E061 /* EventView.swift */; };
+		6260055FBC8A9E08445B0736 /* HeroPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7DCDDDD67E3B8560CE4360 /* HeroPanel.swift */; };
 		6E48782A1C19C3CCDB7F32BF /* JSONContentProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E78C30B2863C87F7904765D /* JSONContentProviderTests.swift */; };
+		709EDD956E2748D66844361D /* HeroPanelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE472D35F4029DD71DA6E4C1 /* HeroPanelTests.swift */; };
+		774598C85985268254558646 /* EnemyDefinitionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D8A94137FE7B498FBFD4E1A /* EnemyDefinitionTests.swift */; };
 		8F035EDB750B2C0441F077B0 /* WorldMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BEC0AA856AB6706612208E1 /* WorldMapView.swift */; };
 		A4E4965164ED9C6373D15D1C /* ExplorationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BE0C9930A837029C5CD71A5 /* ExplorationModels.swift */; };
 		A56525B2E101A593EF7BE61A /* WorldState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2263FEB0CBAF703EC97141A7 /* WorldState.swift */; };
@@ -61,9 +51,16 @@
 		BB0004050000000000000001 /* DataSeparationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0004060000000000000001 /* DataSeparationTests.swift */; };
 		BB0004070000000000000001 /* RegressionPlaythroughTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0004080000000000000001 /* RegressionPlaythroughTests.swift */; };
 		BB0004090000000000000001 /* Phase2ContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0004100000000000000001 /* Phase2ContractTests.swift */; };
+		CB00000000000002 /* PackValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CP00000000000002 /* PackValidator.swift */; };
+		CB08DBD8123C514251864650 /* PackTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = CP38FEE143B4F44A6FB1ABC6 /* PackTypes.swift */; };
+		CB1986EB1E630D4643855BEF /* PackLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = CPA7568BA17ABF44F2938D92 /* PackLoader.swift */; };
+		CB50EAD25364CF425EAF6DA2 /* PackManifest.swift in Sources */ = {isa = PBXBuildFile; fileRef = CP369CE2F981F64F768313B9 /* PackManifest.swift */; };
+		CB909EFA0DDD5249A581938E /* CoreGameEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = CPC53F48F00545404490B13F /* CoreGameEngine.swift */; };
+		CBDDB67C77B6B2456B8D6E85 /* ContentRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = CP0AEC59DDE4BB4190A9676D /* ContentRegistry.swift */; };
 		CC0000020000000000000001 /* CombatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000010000000000000001 /* CombatView.swift */; };
 		CC0000040000000000000001 /* AccessibilityIdentifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000030000000000000001 /* AccessibilityIdentifiers.swift */; };
 		D7CC2DD5F5409ABC08EAF177 /* LocalizedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180D9390663A50D5E72CF9B2 /* LocalizedString.swift */; };
+		EDA00002000000000000001 /* EventDefinitionAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA00001000000000000001 /* EventDefinitionAdapter.swift */; };
 		EE0001010000000000000001 /* EngineProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0001020000000000000001 /* EngineProtocols.swift */; };
 		EE0001030000000000000001 /* GameLoop.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0001040000000000000001 /* GameLoop.swift */; };
 		EE0001050000000000000001 /* TimeEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0001060000000000000001 /* TimeEngine.swift */; };
@@ -75,7 +72,6 @@
 		EE0003050000000000000001 /* AnchorDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0003060000000000000001 /* AnchorDefinition.swift */; };
 		EE0003070000000000000001 /* EventDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0003080000000000000001 /* EventDefinition.swift */; };
 		EE0003090000000000000001 /* QuestDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0003100000000000000001 /* QuestDefinition.swift */; };
-		END000200000000000000001 /* EnemyDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = END000100000000000000001 /* EnemyDefinition.swift */; };
 		EE0003110000000000000001 /* MiniGameChallengeDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0003120000000000000001 /* MiniGameChallengeDefinition.swift */; };
 		EE0004010000000000000001 /* ContentProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0004020000000000000001 /* ContentProvider.swift */; };
 		EE0004030000000000000001 /* CodeContentProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0004040000000000000001 /* CodeContentProvider.swift */; };
@@ -86,9 +82,11 @@
 		EE0005070000000000000001 /* PlayerRuntimeState.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0005080000000000000001 /* PlayerRuntimeState.swift */; };
 		EE0005090000000000000001 /* GameRuntimeState.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0005100000000000000001 /* GameRuntimeState.swift */; };
 		EE0006010000000000000001 /* LegacyAdapters.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0006020000000000000001 /* LegacyAdapters.swift */; };
+		END000200000000000000001 /* EnemyDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = END000100000000000000001 /* EnemyDefinition.swift */; };
 		FF0001010000000000000001 /* WorldRNG.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0001020000000000000001 /* WorldRNG.swift */; };
 		FF0002010000000000000001 /* DegradationRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0002020000000000000001 /* DegradationRules.swift */; };
 		FF0003010000000000000001 /* RequirementsEvaluator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0003020000000000000001 /* RequirementsEvaluator.swift */; };
+		GF0009010000000000000001 /* GameplayFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = GF0009020000000000000001 /* GameplayFlowTests.swift */; };
 		GG0001010000000000000001 /* HeroClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = GG0001020000000000000001 /* HeroClass.swift */; };
 		GG0002010000000000000001 /* HeroSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = GG0002020000000000000001 /* HeroSelectionView.swift */; };
 		HH0001010000000000000001 /* HeroClassTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = HH0001020000000000000001 /* HeroClassTests.swift */; };
@@ -107,7 +105,7 @@
 		LL0006010000000000000001 /* CombatModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = LL0006020000000000000001 /* CombatModule.swift */; };
 		LL0007010000000000000001 /* GameViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = LL0007020000000000000001 /* GameViewModel.swift */; };
 		LL0008010000000000000001 /* Phase3ContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = LL0008020000000000000001 /* Phase3ContractTests.swift */; };
-		GF0009010000000000000001 /* GameplayFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = GF0009020000000000000001 /* GameplayFlowTests.swift */; };
+		QDA00002000000000000001 /* QuestDefinitionAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = QDA00001000000000000001 /* QuestDefinitionAdapter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -121,23 +119,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		EDA00001000000000000001 /* EventDefinitionAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDefinitionAdapter.swift; sourceTree = "<group>"; };
-		QDA00001000000000000001 /* QuestDefinitionAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestDefinitionAdapter.swift; sourceTree = "<group>"; };
-		CT00000000000001 /* PackLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackLoaderTests.swift; sourceTree = "<group>"; };
-		CT00000000000002 /* ContentRegistryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentRegistryTests.swift; sourceTree = "<group>"; };
-
-		CP00000000000002 /* PackValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PackValidator.swift; path = Engine/ContentPacks/PackValidator.swift; sourceTree = SOURCE_ROOT; };
-
-		CP38FEE143B4F44A6FB1ABC6 /* PackTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PackTypes.swift; path = Engine/ContentPacks/PackTypes.swift; sourceTree = SOURCE_ROOT; };
-		CP369CE2F981F64F768313B9 /* PackManifest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PackManifest.swift; path = Engine/ContentPacks/PackManifest.swift; sourceTree = SOURCE_ROOT; };
-		CP0AEC59DDE4BB4190A9676D /* ContentRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ContentRegistry.swift; path = Engine/ContentPacks/ContentRegistry.swift; sourceTree = SOURCE_ROOT; };
-		CPA7568BA17ABF44F2938D92 /* PackLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PackLoader.swift; path = Engine/ContentPacks/PackLoader.swift; sourceTree = SOURCE_ROOT; };
-		CPC53F48F00545404490B13F /* CoreGameEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CoreGameEngine.swift; path = Engine/Core/CoreGameEngine.swift; sourceTree = SOURCE_ROOT; };
-
 		0BE0C9930A837029C5CD71A5 /* ExplorationModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExplorationModels.swift; sourceTree = "<group>"; };
 		180D9390663A50D5E72CF9B2 /* LocalizedString.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalizedString.swift; sourceTree = "<group>"; };
 		2263FEB0CBAF703EC97141A7 /* WorldState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WorldState.swift; sourceTree = "<group>"; };
 		43D4E3FBE4DC34B63B61E061 /* EventView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventView.swift; sourceTree = "<group>"; };
+		4D8A94137FE7B498FBFD4E1A /* EnemyDefinitionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EnemyDefinitionTests.swift; sourceTree = "<group>"; };
 		6BEC0AA856AB6706612208E1 /* WorldMapView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WorldMapView.swift; sourceTree = "<group>"; };
 		6E78C30B2863C87F7904765D /* JSONContentProviderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = JSONContentProviderTests.swift; sourceTree = "<group>"; };
 		AA0000020000000000000001 /* CardGameApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardGameApp.swift; sourceTree = "<group>"; };
@@ -158,6 +144,8 @@
 		AA0000510000000000000001 /* TwilightMarchesCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwilightMarchesCards.swift; sourceTree = "<group>"; };
 		AA0000530000000000000001 /* GameSave.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameSave.swift; sourceTree = "<group>"; };
 		AA0000550000000000000001 /* StatisticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsView.swift; sourceTree = "<group>"; };
+		AE472D35F4029DD71DA6E4C1 /* HeroPanelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HeroPanelTests.swift; sourceTree = "<group>"; };
+		BA7DCDDDD67E3B8560CE4360 /* HeroPanel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HeroPanel.swift; sourceTree = "<group>"; };
 		BB0000010000000000000001 /* CardSampleGameTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CardSampleGameTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB0001020000000000000001 /* WorldStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldStateTests.swift; sourceTree = "<group>"; };
 		BB0001040000000000000001 /* PlayerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerTests.swift; sourceTree = "<group>"; };
@@ -182,6 +170,15 @@
 		BB0004100000000000000001 /* Phase2ContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Phase2ContractTests.swift; sourceTree = "<group>"; };
 		CC0000010000000000000001 /* CombatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombatView.swift; sourceTree = "<group>"; };
 		CC0000030000000000000001 /* AccessibilityIdentifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityIdentifiers.swift; sourceTree = "<group>"; };
+		CP00000000000002 /* PackValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PackValidator.swift; path = Engine/ContentPacks/PackValidator.swift; sourceTree = SOURCE_ROOT; };
+		CP0AEC59DDE4BB4190A9676D /* ContentRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ContentRegistry.swift; path = Engine/ContentPacks/ContentRegistry.swift; sourceTree = SOURCE_ROOT; };
+		CP369CE2F981F64F768313B9 /* PackManifest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PackManifest.swift; path = Engine/ContentPacks/PackManifest.swift; sourceTree = SOURCE_ROOT; };
+		CP38FEE143B4F44A6FB1ABC6 /* PackTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PackTypes.swift; path = Engine/ContentPacks/PackTypes.swift; sourceTree = SOURCE_ROOT; };
+		CPA7568BA17ABF44F2938D92 /* PackLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PackLoader.swift; path = Engine/ContentPacks/PackLoader.swift; sourceTree = SOURCE_ROOT; };
+		CPC53F48F00545404490B13F /* CoreGameEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CoreGameEngine.swift; path = Engine/Core/CoreGameEngine.swift; sourceTree = SOURCE_ROOT; };
+		CT00000000000001 /* PackLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackLoaderTests.swift; sourceTree = "<group>"; };
+		CT00000000000002 /* ContentRegistryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentRegistryTests.swift; sourceTree = "<group>"; };
+		EDA00001000000000000001 /* EventDefinitionAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDefinitionAdapter.swift; sourceTree = "<group>"; };
 		EE0001020000000000000001 /* EngineProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngineProtocols.swift; sourceTree = "<group>"; };
 		EE0001040000000000000001 /* GameLoop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameLoop.swift; sourceTree = "<group>"; };
 		EE0001060000000000000001 /* TimeEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeEngine.swift; sourceTree = "<group>"; };
@@ -193,7 +190,6 @@
 		EE0003060000000000000001 /* AnchorDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnchorDefinition.swift; sourceTree = "<group>"; };
 		EE0003080000000000000001 /* EventDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDefinition.swift; sourceTree = "<group>"; };
 		EE0003100000000000000001 /* QuestDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestDefinition.swift; sourceTree = "<group>"; };
-		END000100000000000000001 /* EnemyDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemyDefinition.swift; sourceTree = "<group>"; };
 		EE0003120000000000000001 /* MiniGameChallengeDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniGameChallengeDefinition.swift; sourceTree = "<group>"; };
 		EE0004020000000000000001 /* ContentProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentProvider.swift; sourceTree = "<group>"; };
 		EE0004040000000000000001 /* CodeContentProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeContentProvider.swift; sourceTree = "<group>"; };
@@ -204,9 +200,11 @@
 		EE0005080000000000000001 /* PlayerRuntimeState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerRuntimeState.swift; sourceTree = "<group>"; };
 		EE0005100000000000000001 /* GameRuntimeState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRuntimeState.swift; sourceTree = "<group>"; };
 		EE0006020000000000000001 /* LegacyAdapters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyAdapters.swift; sourceTree = "<group>"; };
+		END000100000000000000001 /* EnemyDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemyDefinition.swift; sourceTree = "<group>"; };
 		FF0001020000000000000001 /* WorldRNG.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldRNG.swift; sourceTree = "<group>"; };
 		FF0002020000000000000001 /* DegradationRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DegradationRules.swift; sourceTree = "<group>"; };
 		FF0003020000000000000001 /* RequirementsEvaluator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequirementsEvaluator.swift; sourceTree = "<group>"; };
+		GF0009020000000000000001 /* GameplayFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameplayFlowTests.swift; sourceTree = "<group>"; };
 		GG0001020000000000000001 /* HeroClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroClass.swift; sourceTree = "<group>"; };
 		GG0002020000000000000001 /* HeroSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroSelectionView.swift; sourceTree = "<group>"; };
 		HH0001020000000000000001 /* HeroClassTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroClassTests.swift; sourceTree = "<group>"; };
@@ -225,7 +223,7 @@
 		LL0006020000000000000001 /* CombatModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombatModule.swift; sourceTree = "<group>"; };
 		LL0007020000000000000001 /* GameViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewModel.swift; sourceTree = "<group>"; };
 		LL0008020000000000000001 /* Phase3ContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Phase3ContractTests.swift; sourceTree = "<group>"; };
-		GF0009020000000000000001 /* GameplayFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameplayFlowTests.swift; sourceTree = "<group>"; };
+		QDA00001000000000000001 /* QuestDefinitionAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestDefinitionAdapter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -246,29 +244,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		CT00000000000003 /* ContentPackTests */ = {
+		993414D905F9E85EF9DDF2DE /* Components */ = {
 			isa = PBXGroup;
 			children = (
-				CT00000000000001 /* PackLoaderTests.swift */,
-				CT00000000000002 /* ContentRegistryTests.swift */,
+				BA7DCDDDD67E3B8560CE4360 /* HeroPanel.swift */,
 			);
-			path = ContentPackTests;
+			name = Components;
+			path = Components;
 			sourceTree = "<group>";
 		};
-
-		CP00000000000001 /* ContentPacks */ = {
-			isa = PBXGroup;
-			children = (
-				CP00000000000002 /* PackValidator.swift */,
-				CP38FEE143B4F44A6FB1ABC6 /* PackTypes.swift */,
-				CP369CE2F981F64F768313B9 /* PackManifest.swift */,
-				CP0AEC59DDE4BB4190A9676D /* ContentRegistry.swift */,
-				CPA7568BA17ABF44F2938D92 /* PackLoader.swift */,
-			);
-			path = ContentPacks;
-			sourceTree = "<group>";
-		};
-
 		AA0000240000000000000001 = {
 			isa = PBXGroup;
 			children = (
@@ -331,6 +315,7 @@
 				43D4E3FBE4DC34B63B61E061 /* EventView.swift */,
 				6BEC0AA856AB6706612208E1 /* WorldMapView.swift */,
 				CC0000010000000000000001 /* CombatView.swift */,
+				993414D905F9E85EF9DDF2DE /* Components */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -351,15 +336,6 @@
 			path = Helpers;
 			sourceTree = "<group>";
 		};
-		UT0000000000000000000001 /* Utilities */ = {
-			isa = PBXGroup;
-			children = (
-				CC0000030000000000000001 /* AccessibilityIdentifiers.swift */,
-				FF0001020000000000000001 /* WorldRNG.swift */,
-			);
-			path = Utilities;
-			sourceTree = "<group>";
-		};
 		BB0003000000000000000001 /* CardSampleGameTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -367,6 +343,7 @@
 				BB0003010000000000000001 /* Unit */,
 				BB0003030000000000000001 /* Integration */,
 				BB0003050000000000000001 /* Engine */,
+				C3083209B3AD5D5429C799C8 /* Views */,
 			);
 			path = CardSampleGameTests;
 			sourceTree = "<group>";
@@ -414,8 +391,39 @@
 				LL0008020000000000000001 /* Phase3ContractTests.swift */,
 				6E78C30B2863C87F7904765D /* JSONContentProviderTests.swift */,
 				GF0009020000000000000001 /* GameplayFlowTests.swift */,
+				4D8A94137FE7B498FBFD4E1A /* EnemyDefinitionTests.swift */,
 			);
 			path = Engine;
+			sourceTree = "<group>";
+		};
+		C3083209B3AD5D5429C799C8 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AE472D35F4029DD71DA6E4C1 /* HeroPanelTests.swift */,
+			);
+			name = Views;
+			path = Views;
+			sourceTree = "<group>";
+		};
+		CP00000000000001 /* ContentPacks */ = {
+			isa = PBXGroup;
+			children = (
+				CP00000000000002 /* PackValidator.swift */,
+				CP38FEE143B4F44A6FB1ABC6 /* PackTypes.swift */,
+				CP369CE2F981F64F768313B9 /* PackManifest.swift */,
+				CP0AEC59DDE4BB4190A9676D /* ContentRegistry.swift */,
+				CPA7568BA17ABF44F2938D92 /* PackLoader.swift */,
+			);
+			path = ContentPacks;
+			sourceTree = "<group>";
+		};
+		CT00000000000003 /* ContentPackTests */ = {
+			isa = PBXGroup;
+			children = (
+				CT00000000000001 /* PackLoaderTests.swift */,
+				CT00000000000002 /* ContentRegistryTests.swift */,
+			);
+			path = ContentPackTests;
 			sourceTree = "<group>";
 		};
 		EE0000000000000000000001 /* Engine */ = {
@@ -569,6 +577,15 @@
 				LL0007020000000000000001 /* GameViewModel.swift */,
 			);
 			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		UT0000000000000000000001 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				CC0000030000000000000001 /* AccessibilityIdentifiers.swift */,
+				FF0001020000000000000001 /* WorldRNG.swift */,
+			);
+			path = Utilities;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -740,6 +757,7 @@
 				LL0006010000000000000001 /* CombatModule.swift in Sources */,
 				LL0007010000000000000001 /* GameViewModel.swift in Sources */,
 				D7CC2DD5F5409ABC08EAF177 /* LocalizedString.swift in Sources */,
+				6260055FBC8A9E08445B0736 /* HeroPanel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -773,6 +791,8 @@
 				LL0008010000000000000001 /* Phase3ContractTests.swift in Sources */,
 				6E48782A1C19C3CCDB7F32BF /* JSONContentProviderTests.swift in Sources */,
 				GF0009010000000000000001 /* GameplayFlowTests.swift in Sources */,
+				774598C85985268254558646 /* EnemyDefinitionTests.swift in Sources */,
+				709EDD956E2748D66844361D /* HeroPanelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

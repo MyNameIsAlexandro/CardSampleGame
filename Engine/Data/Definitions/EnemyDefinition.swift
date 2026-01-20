@@ -58,6 +58,24 @@ struct EnemyDefinition: GameDefinition {
     /// Balance change when defeated
     let balanceDelta: Int
 
+    // MARK: - CodingKeys for JSON compatibility
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case name
+        case description
+        case health
+        case power
+        case defense
+        case difficulty
+        case enemyType = "enemy_type"
+        case rarity
+        case abilities
+        case lootCardIds = "loot_card_ids"
+        case faithReward = "faith_reward"
+        case balanceDelta = "balance_delta"
+    }
+
     // MARK: - Initialization
 
     init(
@@ -158,6 +176,62 @@ enum EnemyAbilityEffect: Codable, Hashable {
 
     /// Custom effect by ID
     case custom(String)
+
+    // MARK: - Custom Codable for JSON compatibility
+
+    enum CodingKeys: String, CodingKey {
+        case bonusDamage = "bonus_damage"
+        case regeneration
+        case armor
+        case firstStrike = "first_strike"
+        case spellImmune = "spell_immune"
+        case applyCurse = "apply_curse"
+        case custom
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        if let value = try container.decodeIfPresent(Int.self, forKey: .bonusDamage) {
+            self = .bonusDamage(value)
+        } else if let value = try container.decodeIfPresent(Int.self, forKey: .regeneration) {
+            self = .regeneration(value)
+        } else if let value = try container.decodeIfPresent(Int.self, forKey: .armor) {
+            self = .armor(value)
+        } else if (try? container.decodeIfPresent(Bool.self, forKey: .firstStrike)) == true {
+            self = .firstStrike
+        } else if (try? container.decodeIfPresent(Bool.self, forKey: .spellImmune)) == true {
+            self = .spellImmune
+        } else if let value = try container.decodeIfPresent(String.self, forKey: .applyCurse) {
+            self = .applyCurse(value)
+        } else if let value = try container.decodeIfPresent(String.self, forKey: .custom) {
+            self = .custom(value)
+        } else {
+            // Default to custom with empty string if no recognized key
+            self = .custom("unknown")
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        switch self {
+        case .bonusDamage(let value):
+            try container.encode(value, forKey: .bonusDamage)
+        case .regeneration(let value):
+            try container.encode(value, forKey: .regeneration)
+        case .armor(let value):
+            try container.encode(value, forKey: .armor)
+        case .firstStrike:
+            try container.encode(true, forKey: .firstStrike)
+        case .spellImmune:
+            try container.encode(true, forKey: .spellImmune)
+        case .applyCurse(let value):
+            try container.encode(value, forKey: .applyCurse)
+        case .custom(let value):
+            try container.encode(value, forKey: .custom)
+        }
+    }
 }
 
 // MARK: - String UUID Extension (reuse pattern)
