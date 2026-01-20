@@ -347,18 +347,21 @@ final class TwilightGameEngine: ObservableObject {
         var newRegions: [UUID: EngineRegionState] = [:]
         var stringToUUID: [String: UUID] = [:]  // Map string IDs to UUIDs
 
+        // Determine entry region from manifest (no hardcoded "village")
+        let entryRegionId = contentRegistry.loadedPacks.values.first?.manifest.entryRegionId
+
         // First pass: create regions and map IDs
         for def in regionDefs {
             let regionUUID = UUID()
             stringToUUID[def.id] = regionUUID
 
             let anchor = createEngineAnchor(from: provider.getAnchorDefinition(forRegion: def.id))
-            let regionType = mapRegionType(def.id)
+            let regionType = mapRegionType(fromString: def.regionType)
             let regionState = mapRegionState(def.initialState)
 
             let engineRegion = EngineRegionState(
                 id: regionUUID,
-                name: TwilightMarchesCodeContentProvider.regionName(for: def.id),
+                name: def.title.localized,
                 type: regionType,
                 state: regionState,
                 anchor: anchor,
@@ -367,8 +370,8 @@ final class TwilightGameEngine: ObservableObject {
             )
             newRegions[regionUUID] = engineRegion
 
-            // Set starting region
-            if def.id == "village" {
+            // Set starting region from manifest entryRegionId
+            if def.id == entryRegionId {
                 currentRegionId = regionUUID
             }
         }
@@ -403,8 +406,8 @@ final class TwilightGameEngine: ObservableObject {
         var newRegions: [UUID: EngineRegionState] = [:]
         var stringToUUID: [String: UUID] = [:]  // Map string IDs to UUIDs
 
-        // Determine entry region from loaded pack
-        let entryRegionId = contentRegistry.loadedPacks.values.first?.manifest.entryRegionId ?? "village"
+        // Determine entry region from loaded pack manifest (no hardcoded fallback)
+        let entryRegionId = contentRegistry.loadedPacks.values.first?.manifest.entryRegionId
 
         // First pass: create regions and map IDs
         for def in regionDefs {
@@ -419,7 +422,7 @@ final class TwilightGameEngine: ObservableObject {
                 )
             }
 
-            let regionType = mapRegionType(def.id)
+            let regionType = mapRegionType(fromString: def.regionType)
             let regionState = mapRegionState(def.initialState)
 
             let engineRegion = EngineRegionState(
@@ -485,15 +488,17 @@ final class TwilightGameEngine: ObservableObject {
         return []
     }
 
-    /// Map region ID to RegionType
-    private func mapRegionType(_ id: String) -> RegionType {
-        switch id {
-        case "village", "temple", "fortress": return .settlement
+    /// Map region type string from ContentPack to RegionType enum
+    /// The type comes from JSON/manifest, not hardcoded IDs
+    private func mapRegionType(fromString typeString: String) -> RegionType {
+        switch typeString.lowercased() {
+        case "settlement": return .settlement
         case "forest": return .forest
         case "swamp": return .swamp
-        case "ruins", "wasteland": return .wasteland
-        case "sanctuary": return .sacred
+        case "wasteland": return .wasteland
+        case "sacred": return .sacred
         case "mountain": return .mountain
+        case "water": return .water
         default: return .forest
         }
     }

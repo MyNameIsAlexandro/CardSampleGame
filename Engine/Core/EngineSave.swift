@@ -11,6 +11,14 @@ struct EngineSave: Codable {
     let savedAt: Date
     let gameDuration: TimeInterval
 
+    // MARK: - Pack Compatibility (Audit 2.0 Requirement)
+    /// Core engine version for compatibility checking
+    let coreVersion: String
+    /// Active pack set with versions (packId → version string)
+    let activePackSet: [String: String]
+    /// Save format version for migration
+    let formatVersion: Int
+
     // MARK: - Player State
     let playerName: String
     let playerHealth: Int
@@ -51,6 +59,62 @@ struct EngineSave: Codable {
 
     // MARK: - Current Version
     static let currentVersion = 1
+    static let currentFormatVersion = 1
+    static let currentCoreVersion = "1.2.0"
+
+    // MARK: - Pack Compatibility Validation
+
+    /// Check if save is compatible with current engine and loaded packs
+    func validateCompatibility(with registry: ContentRegistry) -> SaveCompatibilityResult {
+        var warnings: [String] = []
+        var errors: [String] = []
+
+        // Check core version
+        if coreVersion != EngineSave.currentCoreVersion {
+            warnings.append("Save was created with core version \(coreVersion), current is \(EngineSave.currentCoreVersion)")
+        }
+
+        // Check format version
+        if formatVersion > EngineSave.currentFormatVersion {
+            errors.append("Save format version \(formatVersion) is newer than supported \(EngineSave.currentFormatVersion)")
+        }
+
+        // Check pack versions
+        for (packId, savedVersion) in activePackSet {
+            if let loadedPack = registry.loadedPacks[packId] {
+                let loadedVersion = loadedPack.manifest.version.description
+                if loadedVersion != savedVersion {
+                    warnings.append("Pack '\(packId)' version mismatch: save has \(savedVersion), loaded is \(loadedVersion)")
+                }
+            } else {
+                errors.append("Required pack '\(packId)' (version \(savedVersion)) is not loaded")
+            }
+        }
+
+        if !errors.isEmpty {
+            return .incompatible(errors: errors)
+        } else if !warnings.isEmpty {
+            return .compatible(warnings: warnings)
+        } else {
+            return .fullyCompatible
+        }
+    }
+}
+
+/// Result of save compatibility validation
+enum SaveCompatibilityResult {
+    case fullyCompatible
+    case compatible(warnings: [String])
+    case incompatible(errors: [String])
+
+    var isLoadable: Bool {
+        switch self {
+        case .fullyCompatible, .compatible:
+            return true
+        case .incompatible:
+            return false
+        }
+    }
 }
 
 // MARK: - Region Save State
@@ -157,10 +221,19 @@ extension TwilightGameEngine {
 
     /// Create save state from current engine state
     func createSave(gameDuration: TimeInterval = 0) -> EngineSave {
-        EngineSave(
+        // Collect loaded pack versions for compatibility checking
+        var packVersions: [String: String] = [:]
+        for (packId, pack) in contentRegistry.loadedPacks {
+            packVersions[packId] = pack.manifest.version.description
+        }
+
+        return EngineSave(
             version: EngineSave.currentVersion,
             savedAt: Date(),
             gameDuration: gameDuration,
+            coreVersion: EngineSave.currentCoreVersion,
+            activePackSet: packVersions,
+            formatVersion: EngineSave.currentFormatVersion,
             playerName: playerName,
             playerHealth: playerHealth,
             playerMaxHealth: playerMaxHealth,

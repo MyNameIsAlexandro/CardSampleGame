@@ -144,14 +144,22 @@ class JSONContentProvider: ContentProvider {
     }
 
     private func loadEventPools() throws {
-        // Event pool files are at bundle root after Xcode copies them
-        let poolNames = ["pool_common", "pool_village", "pool_forest", "pool_swamp",
-                        "pool_mountain", "pool_sacred", "pool_breach", "pool_boss"]
+        // Events are now in events.json with pool_ids field, not separate pool files
+        // Load events.json which contains all events with their pool associations
+        if let eventsURL = bundle.url(forResource: "events", withExtension: "json") {
+            try loadEvents(from: eventsURL)
+        } else {
+            loadErrors.append("events.json not found")
+        }
+    }
 
-        for poolName in poolNames {
-            if let poolURL = bundle.url(forResource: poolName, withExtension: "json") {
-                try loadEventPool(from: poolURL)
-            }
+    private func loadEvents(from url: URL) throws {
+        let data = try Data(contentsOf: url)
+        // events.json is a direct array, not wrapped in a container
+        let eventArray = try JSONDecoder().decode([JSONEvent].self, from: data)
+        for event in eventArray {
+            let definition = event.toDefinition()
+            events[definition.id] = definition
         }
     }
 
@@ -296,12 +304,19 @@ private struct JSONRegion: Codable {
     let id: String
     let title: LocalizedString
     let description: LocalizedString
+    let regionType: String?
     let neighborIds: [String]
     let initiallyDiscovered: Bool?
     let anchorId: String?
     let eventPoolIds: [String]?
     let initialState: String?
     let degradationWeight: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case id, title, description, neighborIds, initiallyDiscovered, anchorId
+        case eventPoolIds, initialState, degradationWeight
+        case regionType = "region_type"
+    }
 
     func toDefinition() -> RegionDefinition {
         let state: RegionStateType
@@ -316,6 +331,7 @@ private struct JSONRegion: Codable {
             id: id,
             title: title,
             description: description,
+            regionType: regionType ?? "forest",
             neighborIds: neighborIds,
             initiallyDiscovered: initiallyDiscovered ?? false,
             anchorId: anchorId,
@@ -361,26 +377,38 @@ private struct JSONEvent: Codable {
     let id: String
     let title: LocalizedString
     let body: LocalizedString
+    let eventKind: String?
     let eventType: String?
     let poolIds: [String]?
     let availability: JSONAvailability?
     let weight: Int?
     let isOneTime: Bool?
+    let isInstant: Bool?
+    let cooldown: Int?
     let choices: [JSONChoice]?
     let combatData: JSONCombatData?
     let miniGameChallenge: JSONMiniGameChallenge?
 
     enum CodingKeys: String, CodingKey {
-        case id, title, body, eventType, poolIds, availability, weight, isOneTime, choices, combatData
+        case id, title, body, availability, weight, choices, combatData
+        case eventKind = "event_kind"
+        case eventType = "event_type"
+        case poolIds = "pool_ids"
+        case isOneTime = "is_one_time"
+        case isInstant = "is_instant"
+        case cooldown
         case miniGameChallenge = "mini_game_challenge"
     }
 
     func toDefinition() -> EventDefinition {
         let kind: EventKind
-        switch eventType?.lowercased() {
+        // Support both eventKind (new) and eventType (legacy)
+        let kindString = eventKind ?? eventType
+        switch kindString?.lowercased() {
         case "combat": kind = .miniGame(.combat)
         case "ritual": kind = .miniGame(.ritual)
         case "exploration": kind = .miniGame(.exploration)
+        case "inline": kind = .inline
         default: kind = .inline
         }
 
@@ -427,6 +455,17 @@ private struct JSONAvailability: Codable {
     let maxBalance: Int?
     let requiredFlags: [String]?
     let forbiddenFlags: [String]?
+
+    enum CodingKeys: String, CodingKey {
+        case regionStates = "region_states"
+        case regionIds = "region_ids"
+        case minPressure = "min_pressure"
+        case maxPressure = "max_pressure"
+        case minBalance = "min_balance"
+        case maxBalance = "max_balance"
+        case requiredFlags = "required_flags"
+        case forbiddenFlags = "forbidden_flags"
+    }
 
     func toAvailability() -> Availability {
         return Availability(

@@ -43,30 +43,31 @@ class CodeContentProvider: ContentProvider {
     /// Subclass should override to provide actual regions
     func loadRegions() {
         // Default implementation - subclass overrides with actual content
-        // Example region for testing:
-        let forest = RegionDefinition(
-            id: "forest",
-            title: LocalizedString(en: "Dark Forest", ru: "Тёмный Лес"),
-            description: LocalizedString(en: "A mysterious forest", ru: "Таинственный лес"),
-            neighborIds: ["village", "crossroads"],
+        // Example region for testing (uses generic IDs, not game-specific):
+        let testRegion = RegionDefinition(
+            id: "test_region",
+            title: LocalizedString(en: "Test Region", ru: "Тестовый Регион"),
+            description: LocalizedString(en: "A test region", ru: "Тестовый регион"),
+            regionType: "forest",
+            neighborIds: ["test_neighbor"],
             initiallyDiscovered: true,
-            anchorId: "anchor_forest",
-            eventPoolIds: ["pool_forest", "pool_common"],
+            anchorId: "test_anchor",
+            eventPoolIds: ["pool_common"],
             initialState: .stable
         )
-        regions[forest.id] = forest
+        regions[testRegion.id] = testRegion
     }
 
     /// Load anchor definitions
     func loadAnchors() {
-        // Default implementation - subclass overrides
-        let forestAnchor = AnchorDefinition(
-            id: "anchor_forest",
-            title: LocalizedString(en: "Forest Idol", ru: "Лесной Идол"),
-            description: LocalizedString(en: "An ancient idol", ru: "Древний идол"),
-            regionId: "forest"
+        // Default implementation - subclass overrides (uses generic IDs, not game-specific)
+        let testAnchor = AnchorDefinition(
+            id: "test_anchor",
+            title: LocalizedString(en: "Test Anchor", ru: "Тестовый Якорь"),
+            description: LocalizedString(en: "A test anchor", ru: "Тестовый якорь"),
+            regionId: "test_region"
         )
-        anchors[forestAnchor.id] = forestAnchor
+        anchors[testAnchor.id] = testAnchor
     }
 
     /// Load event definitions

@@ -20,6 +20,12 @@ struct RegionDefinition: GameDefinition {
     /// Region description with all language variants
     let description: LocalizedString
 
+    // MARK: - Type
+
+    /// Region type string (e.g., "forest", "settlement", "swamp")
+    /// This determines visual representation and gameplay effects
+    let regionType: String
+
     // MARK: - Connections
 
     /// IDs of neighboring regions (for travel)
@@ -50,6 +56,7 @@ struct RegionDefinition: GameDefinition {
         id: String,
         title: LocalizedString,
         description: LocalizedString,
+        regionType: String = "forest",
         neighborIds: [String],
         initiallyDiscovered: Bool = false,
         anchorId: String? = nil,
@@ -60,6 +67,7 @@ struct RegionDefinition: GameDefinition {
         self.id = id
         self.title = title
         self.description = description
+        self.regionType = regionType
         self.neighborIds = neighborIds
         self.initiallyDiscovered = initiallyDiscovered
         self.anchorId = anchorId

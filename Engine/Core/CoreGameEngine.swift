@@ -339,12 +339,12 @@ final class CoreGameEngine: ObservableObject {
         let degradableRegions = regions.values.filter { $0.state != .breach }
         guard !degradableRegions.isEmpty else { return changes }
 
-        // Random check for degradation
-        let roll = Double.random(in: 0...1)
+        // Deterministic random check using WorldRNG (not Double.random)
+        let roll = WorldRNG.shared.nextDouble()
         if roll < degradationChance {
-            // Pick a random borderland region to degrade
+            // Pick a borderland region to degrade using deterministic selection
             let borderlands = degradableRegions.filter { $0.state == .borderland }
-            if let regionToDemote = borderlands.randomElement() {
+            if let regionToDemote = WorldRNG.shared.randomElement(from: Array(borderlands)) {
                 if var region = regions[regionToDemote.id] {
                     region.state = .breach
                     regions[regionToDemote.id] = region
@@ -505,7 +505,8 @@ final class CoreGameEngine: ObservableObject {
             return true
         }
 
-        return availableEvents.randomElement()
+        // Use deterministic selection via WorldRNG (not randomElement)
+        return WorldRNG.shared.randomElement(from: availableEvents)
     }
 
     // MARK: - Quest Progress

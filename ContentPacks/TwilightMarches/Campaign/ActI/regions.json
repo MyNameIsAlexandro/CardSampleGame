@@ -9,6 +9,7 @@
       "en": "A small village on the edge of the realm",
       "ru": "Небольшая деревня на краю королевства"
     },
+    "region_type": "settlement",
     "neighbor_ids": ["oak", "forest", "swamp"],
     "initially_discovered": true,
     "anchor_id": "anchor_village_chapel",
@@ -26,6 +27,7 @@
       "en": "An ancient oak radiating divine power",
       "ru": "Древний дуб, излучающий божественную силу"
     },
+    "region_type": "sacred",
     "neighbor_ids": ["village", "forest"],
     "initially_discovered": false,
     "anchor_id": "anchor_sacred_oak",
@@ -43,6 +45,7 @@
       "en": "A dense forest shrouded in shadow",
       "ru": "Густой лес, окутанный тенью"
     },
+    "region_type": "forest",
     "neighbor_ids": ["village", "oak", "mountain"],
     "initially_discovered": false,
     "anchor_id": "anchor_forest_idol",
@@ -60,6 +63,7 @@
       "en": "A murky swamp tainted by dark magic",
       "ru": "Мрачное болото, отравленное тёмной магией"
     },
+    "region_type": "swamp",
     "neighbor_ids": ["village", "breach"],
     "initially_discovered": false,
     "anchor_id": "anchor_swamp_spring",
@@ -77,6 +81,7 @@
       "en": "A treacherous pass through the mountains",
       "ru": "Опасный путь через горы"
     },
+    "region_type": "mountain",
     "neighbor_ids": ["forest", "breach"],
     "initially_discovered": false,
     "anchor_id": "anchor_mountain_barrow",
@@ -94,6 +99,7 @@
       "en": "A tear in reality where darkness seeps through",
       "ru": "Разрыв в реальности, откуда сочится тьма"
     },
+    "region_type": "wasteland",
     "neighbor_ids": ["swamp", "mountain", "dark_lowland"],
     "initially_discovered": false,
     "anchor_id": "anchor_breach_shrine",
@@ -111,6 +117,7 @@
       "en": "A forsaken land consumed by darkness",
       "ru": "Проклятая земля, поглощённая тьмой"
     },
+    "region_type": "wasteland",
     "neighbor_ids": ["breach"],
     "initially_discovered": false,
     "anchor_id": null,

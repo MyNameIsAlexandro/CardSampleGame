@@ -91,25 +91,29 @@ extension EventDefinition {
             return [] // Empty = any region type
         }
 
-        // Infer region types from region IDs
+        // Look up region types from ContentRegistry (no hardcoded ID mapping)
         var types = Set<RegionType>()
         for regionId in ids {
-            switch regionId {
-            case "village", "temple", "fortress":
-                types.insert(.settlement)
-            case "forest", "oak":
-                types.insert(.forest)
-            case "swamp":
-                types.insert(.swamp)
-            case "mountain":
-                types.insert(.mountain)
-            case "breach", "dark_lowland":
-                types.insert(.wasteland)
-            default:
-                types.insert(.forest) // Default fallback
+            if let regionDef = ContentRegistry.shared.getRegion(id: regionId) {
+                // Map regionType string from definition to RegionType enum
+                let regionType = mapRegionTypeString(regionDef.regionType)
+                types.insert(regionType)
             }
         }
         return Array(types)
+    }
+
+    private func mapRegionTypeString(_ typeString: String) -> RegionType {
+        switch typeString.lowercased() {
+        case "settlement": return .settlement
+        case "forest": return .forest
+        case "swamp": return .swamp
+        case "wasteland": return .wasteland
+        case "sacred": return .sacred
+        case "mountain": return .mountain
+        case "water": return .water
+        default: return .forest
+        }
     }
 
     private func extractQuestLinks() -> [String] {
