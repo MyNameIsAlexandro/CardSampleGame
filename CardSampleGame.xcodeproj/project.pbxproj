@@ -107,6 +107,7 @@
 		LL0006010000000000000001 /* CombatModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = LL0006020000000000000001 /* CombatModule.swift */; };
 		LL0007010000000000000001 /* GameViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = LL0007020000000000000001 /* GameViewModel.swift */; };
 		LL0008010000000000000001 /* Phase3ContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = LL0008020000000000000001 /* Phase3ContractTests.swift */; };
+		GF0009010000000000000001 /* GameplayFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = GF0009020000000000000001 /* GameplayFlowTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -224,6 +225,7 @@
 		LL0006020000000000000001 /* CombatModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombatModule.swift; sourceTree = "<group>"; };
 		LL0007020000000000000001 /* GameViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewModel.swift; sourceTree = "<group>"; };
 		LL0008020000000000000001 /* Phase3ContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Phase3ContractTests.swift; sourceTree = "<group>"; };
+		GF0009020000000000000001 /* GameplayFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameplayFlowTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -411,6 +413,7 @@
 				BB0004100000000000000001 /* Phase2ContractTests.swift */,
 				LL0008020000000000000001 /* Phase3ContractTests.swift */,
 				6E78C30B2863C87F7904765D /* JSONContentProviderTests.swift */,
+				GF0009020000000000000001 /* GameplayFlowTests.swift */,
 			);
 			path = Engine;
 			sourceTree = "<group>";
@@ -769,6 +772,7 @@
 				BB0004090000000000000001 /* Phase2ContractTests.swift in Sources */,
 				LL0008010000000000000001 /* Phase3ContractTests.swift in Sources */,
 				6E48782A1C19C3CCDB7F32BF /* JSONContentProviderTests.swift in Sources */,
+				GF0009010000000000000001 /* GameplayFlowTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

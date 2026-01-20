@@ -11,8 +11,7 @@ struct WorldMapView: View {
     private var worldState: WorldState?
     private var player: Player?
 
-    @State private var selectedRegionId: UUID?
-    @State private var showingRegionDetails = false
+    @State private var selectedRegion: EngineRegionState?
     @State private var showingExitConfirmation = false
     @State private var showingEventLog = false
     @State private var showingDayEvent = false
@@ -61,8 +60,7 @@ struct WorldMapView: View {
                                 isCurrentLocation: region.id == engine.currentRegionId
                             )
                             .onTapGesture {
-                                selectedRegionId = region.id
-                                showingRegionDetails = true
+                                selectedRegion = region
                             }
                         }
                     }
@@ -95,36 +93,17 @@ struct WorldMapView: View {
             .sheet(isPresented: $showingEventLog) {
                 EngineEventLogView(engine: engine)
             }
-            .sheet(isPresented: $showingRegionDetails) {
-                if let regionId = selectedRegionId,
-                   let region = engine.publishedRegions[regionId] {
-                    EngineRegionDetailView(
-                        region: region,
-                        engine: engine,
-                        onDismiss: {
-                            selectedRegionId = nil
-                            showingRegionDetails = false
-                        }
-                    )
-                } else {
-                    // Fallback: Region not found in publishedRegions
-                    VStack(spacing: 16) {
-                        Image(systemName: "exclamationmark.triangle")
-                            .font(.largeTitle)
-                            .foregroundColor(.orange)
-                        Text("Регион загружается...")
-                            .font(.headline)
-                        Text("Попробуйте закрыть и открыть снова")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                        Button("Закрыть") {
-                            selectedRegionId = nil
-                            showingRegionDetails = false
-                        }
-                        .buttonStyle(.bordered)
+            .sheet(item: $selectedRegion) { region in
+                EngineRegionDetailView(
+                    region: region,
+                    engine: engine,
+                    onDismiss: {
+                        selectedRegion = nil
+                    },
+                    onRegionChange: { newRegion in
+                        selectedRegion = newRegion
                     }
-                    .padding()
-                }
+                )
             }
             .alert(L10n.uiExit.localized + "?", isPresented: $showingExitConfirmation) {
                 Button(L10n.buttonOk.localized, role: .cancel) { }
@@ -1321,6 +1300,7 @@ struct EngineRegionDetailView: View {
     let region: EngineRegionState
     @ObservedObject var engine: TwilightGameEngine
     let onDismiss: () -> Void
+    var onRegionChange: ((EngineRegionState?) -> Void)? = nil
 
     @State private var showingActionConfirmation = false
     @State private var selectedAction: EngineRegionAction?
@@ -1720,7 +1700,12 @@ struct EngineRegionDetailView: View {
                     outcome: "Прибыл в \(region.name)",
                     type: .travel
                 )
-                onDismiss()
+                // После перемещения показываем новый регион (текущую локацию)
+                if let newRegion = engine.regionsArray.first(where: { $0.id == engine.currentRegionId }) {
+                    onRegionChange?(newRegion)
+                } else {
+                    onDismiss()
+                }
             } else {
                 // Show error to user
                 actionErrorMessage = errorMessage(for: result.error)

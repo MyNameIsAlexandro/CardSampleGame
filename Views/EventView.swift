@@ -173,7 +173,7 @@ struct EventView: View {
     // MARK: - Choice Button
 
     func choiceButton(_ choice: EventChoice) -> some View {
-        let canChoose = canMeetRequirements(choice)
+        let canChoose = canMeetRequirementsEngine(choice)
         let isCombatChoice = event.eventType == .combat &&
                              choice.id == event.choices.first?.id &&
                              event.monsterCard != nil
@@ -186,8 +186,9 @@ struct EventView: View {
                 if isCombatChoice {
                     initiateCombat(choice: choice)
                 } else {
-                    resultMessage = choice.consequences.message ?? L10n.eventChoiceMade.localized
-                    showingResult = true
+                    // Применяем выбор сразу и закрываем
+                    onChoiceSelected(choice)
+                    onDismiss()
                 }
             }
         }) {
@@ -404,6 +405,35 @@ struct EventView: View {
             return requirements.canMeet(with: p, worldState: ws)
         }
         // TODO: Implement pure engine-based requirement checking
+        return true
+    }
+
+    /// Engine-based requirement checking
+    func canMeetRequirementsEngine(_ choice: EventChoice) -> Bool {
+        guard let requirements = choice.requirements else { return true }
+
+        // Check minimum faith
+        if let minFaith = requirements.minimumFaith {
+            if engine.playerFaith < minFaith {
+                return false
+            }
+        }
+
+        // Check minimum health
+        if let minHealth = requirements.minimumHealth {
+            if engine.playerHealth < minHealth {
+                return false
+            }
+        }
+
+        // Check balance requirement
+        if let reqBalance = requirements.requiredBalance {
+            let playerBalanceEnum = getBalanceEnum(engine.playerBalance)
+            if playerBalanceEnum != reqBalance {
+                return false
+            }
+        }
+
         return true
     }
 

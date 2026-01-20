@@ -106,6 +106,56 @@ enum EventKind: Codable, Hashable {
         case dialogue
         case puzzle
     }
+
+    // MARK: - Custom Codable
+
+    /// Coding keys for JSON object format: {"mini_game": "combat"}
+    private enum CodingKeys: String, CodingKey {
+        case miniGame = "mini_game"
+    }
+
+    init(from decoder: Decoder) throws {
+        // Try decoding as a simple string first: "inline"
+        if let container = try? decoder.singleValueContainer(),
+           let stringValue = try? container.decode(String.self) {
+            if stringValue == "inline" {
+                self = .inline
+            } else if let miniGameKind = MiniGameKind(rawValue: stringValue) {
+                // Handle direct mini-game string: "combat", "ritual", etc.
+                self = .miniGame(miniGameKind)
+            } else {
+                throw DecodingError.dataCorruptedError(
+                    in: container,
+                    debugDescription: "Unknown event kind: \(stringValue)"
+                )
+            }
+            return
+        }
+
+        // Try decoding as object: {"mini_game": "combat"}
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let miniGameString = try container.decode(String.self, forKey: .miniGame)
+        if let miniGameKind = MiniGameKind(rawValue: miniGameString) {
+            self = .miniGame(miniGameKind)
+        } else {
+            throw DecodingError.dataCorruptedError(
+                forKey: .miniGame,
+                in: container,
+                debugDescription: "Unknown mini-game kind: \(miniGameString)"
+            )
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        switch self {
+        case .inline:
+            var container = encoder.singleValueContainer()
+            try container.encode("inline")
+        case .miniGame(let kind):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(kind.rawValue, forKey: .miniGame)
+        }
+    }
 }
 
 // MARK: - Choice Definition

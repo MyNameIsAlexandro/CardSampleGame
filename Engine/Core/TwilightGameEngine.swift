@@ -1443,7 +1443,7 @@ enum EventTrigger {
 /// - `RegionRuntimeState` - изменяемое состояние (WorldRuntimeState)
 /// - `EngineRegionState` - объединённое для UI (этот struct)
 /// - `Region` (legacy) - persistence и совместимость
-struct EngineRegionState {
+struct EngineRegionState: Identifiable {
     let id: UUID
     let name: String
     let type: RegionType

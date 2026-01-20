@@ -17,7 +17,9 @@
       "Bash(ssh:*)",
       "Bash(xcrun simctl list:*)",
       "Bash(git restore:*)",
-      "Bash(xargs basename:*)"
+      "Bash(xargs basename:*)",
+      "Bash(python3:*)",
+      "Bash(cd /Users/abondarenko/Library/Mobile Documents/com~apple~CloudDocs/XCode/CardSampleGame && swift test:*)"
     ]
   }
 }

@@ -368,6 +368,12 @@ private struct JSONEvent: Codable {
     let isOneTime: Bool?
     let choices: [JSONChoice]?
     let combatData: JSONCombatData?
+    let miniGameChallenge: JSONMiniGameChallenge?
+
+    enum CodingKeys: String, CodingKey {
+        case id, title, body, eventType, poolIds, availability, weight, isOneTime, choices, combatData
+        case miniGameChallenge = "mini_game_challenge"
+    }
 
     func toDefinition() -> EventDefinition {
         let kind: EventKind
@@ -382,6 +388,21 @@ private struct JSONEvent: Codable {
 
         let choiceDefs = choices?.map { $0.toDefinition() } ?? []
 
+        // Create MiniGameChallengeDefinition from JSON mini_game_challenge
+        let challenge: MiniGameChallengeDefinition?
+        if let json = miniGameChallenge, let enemyId = json.enemyId {
+            challenge = MiniGameChallengeDefinition(
+                id: "challenge_\(enemyId)",
+                challengeKind: .combat,
+                difficulty: json.difficulty ?? 1,
+                enemyId: enemyId,
+                victoryConsequences: json.rewards?.toConsequences() ?? .none,
+                defeatConsequences: json.penalties?.toConsequences() ?? .none
+            )
+        } else {
+            challenge = nil
+        }
+
         return EventDefinition(
             id: id,
             title: title,
@@ -391,7 +412,8 @@ private struct JSONEvent: Codable {
             poolIds: poolIds ?? [],
             weight: weight ?? 10,
             isOneTime: isOneTime ?? false,
-            choices: choiceDefs
+            choices: choiceDefs,
+            miniGameChallenge: challenge
         )
     }
 }
@@ -503,6 +525,41 @@ private struct JSONCombatData: Codable {
     let enemyDefense: Int?
     let enemyHealth: Int?
     let isBoss: Bool?
+}
+
+/// JSON representation of mini_game_challenge field in events
+private struct JSONMiniGameChallenge: Codable {
+    let enemyId: String?
+    let difficulty: Int?
+    let rewards: JSONChallengeConsequences?
+    let penalties: JSONChallengeConsequences?
+
+    enum CodingKeys: String, CodingKey {
+        case enemyId = "enemy_id"
+        case difficulty, rewards, penalties
+    }
+}
+
+/// JSON representation of rewards/penalties in mini_game_challenge
+private struct JSONChallengeConsequences: Codable {
+    let resourceChanges: [String: Int]?
+    let setFlags: [String]?
+    let balanceShift: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case resourceChanges = "resource_changes"
+        case setFlags = "set_flags"
+        case balanceShift = "balance_shift"
+    }
+
+    func toConsequences() -> ChoiceConsequences {
+        return ChoiceConsequences(
+            resourceChanges: resourceChanges ?? [:],
+            setFlags: setFlags ?? [],
+            clearFlags: [],
+            balanceDelta: balanceShift ?? 0
+        )
+    }
 }
 
 private struct JSONQuest: Codable {

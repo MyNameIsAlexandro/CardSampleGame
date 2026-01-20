@@ -89,6 +89,95 @@ struct MiniGameChallengeDefinition: Codable, Hashable, Identifiable {
         let scaled = Double(difficulty) + (Double(pressure) * pressureScaling)
         return Int(scaled.rounded())
     }
+
+    // MARK: - Custom Codable
+
+    /// Coding keys for simplified JSON format from events.json
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case challengeKind = "challenge_kind"
+        case difficulty
+        case pressureScaling = "pressure_scaling"
+        case enemyId = "enemy_id"
+        case puzzleId = "puzzle_id"
+        case dialogueId = "dialogue_id"
+        case victoryConsequences = "victory_consequences"
+        case defeatConsequences = "defeat_consequences"
+        case retreatConsequences = "retreat_consequences"
+        case canRetreat = "can_retreat"
+        case turnLimit = "turn_limit"
+        // Simplified format keys
+        case rewards
+        case penalties
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        // Try full format first, then simplified format
+        if let id = try container.decodeIfPresent(String.self, forKey: .id) {
+            self.id = id
+        } else if let enemyId = try container.decodeIfPresent(String.self, forKey: .enemyId) {
+            // Generate ID from enemy ID for simplified format
+            self.id = "challenge_\(enemyId)"
+        } else {
+            self.id = "challenge_unknown"
+        }
+
+        // Challenge kind - default to combat for simplified format
+        self.challengeKind = try container.decodeIfPresent(MiniGameChallengeKind.self, forKey: .challengeKind) ?? .combat
+
+        // Difficulty
+        self.difficulty = try container.decodeIfPresent(Int.self, forKey: .difficulty) ?? 5
+
+        // Pressure scaling
+        self.pressureScaling = try container.decodeIfPresent(Double.self, forKey: .pressureScaling) ?? 0.1
+
+        // Content references
+        self.enemyId = try container.decodeIfPresent(String.self, forKey: .enemyId)
+        self.puzzleId = try container.decodeIfPresent(String.self, forKey: .puzzleId)
+        self.dialogueId = try container.decodeIfPresent(String.self, forKey: .dialogueId)
+
+        // Consequences - try full format first, then simplified
+        if let victory = try container.decodeIfPresent(ChoiceConsequences.self, forKey: .victoryConsequences) {
+            self.victoryConsequences = victory
+        } else if let rewards = try container.decodeIfPresent(ChoiceConsequences.self, forKey: .rewards) {
+            self.victoryConsequences = rewards
+        } else {
+            self.victoryConsequences = .none
+        }
+
+        if let defeat = try container.decodeIfPresent(ChoiceConsequences.self, forKey: .defeatConsequences) {
+            self.defeatConsequences = defeat
+        } else if let penalties = try container.decodeIfPresent(ChoiceConsequences.self, forKey: .penalties) {
+            self.defeatConsequences = penalties
+        } else {
+            self.defeatConsequences = .none
+        }
+
+        self.retreatConsequences = try container.decodeIfPresent(ChoiceConsequences.self, forKey: .retreatConsequences)
+
+        // Options
+        self.canRetreat = try container.decodeIfPresent(Bool.self, forKey: .canRetreat) ?? true
+        self.turnLimit = try container.decodeIfPresent(Int.self, forKey: .turnLimit) ?? 0
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(id, forKey: .id)
+        try container.encode(challengeKind, forKey: .challengeKind)
+        try container.encode(difficulty, forKey: .difficulty)
+        try container.encode(pressureScaling, forKey: .pressureScaling)
+        try container.encodeIfPresent(enemyId, forKey: .enemyId)
+        try container.encodeIfPresent(puzzleId, forKey: .puzzleId)
+        try container.encodeIfPresent(dialogueId, forKey: .dialogueId)
+        try container.encode(victoryConsequences, forKey: .victoryConsequences)
+        try container.encode(defeatConsequences, forKey: .defeatConsequences)
+        try container.encodeIfPresent(retreatConsequences, forKey: .retreatConsequences)
+        try container.encode(canRetreat, forKey: .canRetreat)
+        try container.encode(turnLimit, forKey: .turnLimit)
+    }
 }
 
 // MARK: - Mini-Game Challenge Kind

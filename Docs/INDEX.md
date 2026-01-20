@@ -165,9 +165,12 @@
 | Файл | Описание | Статус |
 |------|----------|--------|
 | CONTENT_PACK_GUIDE.md | Общий гайд по созданию паков | ✅ Active |
-| SPEC_CAMPAIGN_PACK.md | Спецификация Campaign-паков | ✅ Active |
-| SPEC_INVESTIGATOR_PACK.md | Спецификация Investigator-паков | ✅ Active |
-| SPEC_BALANCE_PACK.md | Спецификация Balance-паков | ✅ Active |
+| SPEC_CAMPAIGN_PACK.md | Спецификация Campaign-паков (EN) | ✅ Active |
+| SPEC_CAMPAIGN_PACK_RU.md | Спецификация Campaign-паков (RU) | ✅ Active |
+| SPEC_INVESTIGATOR_PACK.md | Спецификация Investigator-паков (EN) | ✅ Active |
+| SPEC_INVESTIGATOR_PACK_RU.md | Спецификация Investigator-паков (RU) | ✅ Active |
+| SPEC_BALANCE_PACK.md | Спецификация Balance-паков (EN) | ✅ Active |
+| SPEC_BALANCE_PACK_RU.md | Спецификация Balance-паков (RU) | ✅ Active |
 
 ### Модульная документация (Engine)
 
