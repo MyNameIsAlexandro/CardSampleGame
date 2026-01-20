@@ -15,7 +15,9 @@
       "Bash(ssh-add:*)",
       "Bash(git remote set-url:*)",
       "Bash(ssh:*)",
-      "Bash(xcrun simctl list:*)"
+      "Bash(xcrun simctl list:*)",
+      "Bash(git restore:*)",
+      "Bash(xargs basename:*)"
     ]
   }
 }
