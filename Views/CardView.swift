@@ -55,7 +55,7 @@ struct CardView: View {
             if hasStats {
                 HStack(spacing: 16) {
                     if let power = card.power {
-                        CardStatBadge(icon: "sword.fill", value: power, color: .red)
+                        CardStatBadge(icon: "bolt.fill", value: power, color: .red)
                     }
                     if let defense = card.defense {
                         CardStatBadge(icon: "shield.fill", value: defense, color: .blue)
@@ -202,7 +202,7 @@ struct CardView: View {
     var cardIcon: String {
         switch card.type {
         case .character: return "person.fill"
-        case .weapon: return "sword.fill"
+        case .weapon: return "bolt.fill"
         case .spell: return "sparkles"
         case .armor: return "shield.fill"
         case .item: return "bag.fill"
@@ -307,7 +307,7 @@ struct CompactCardView: View {
                     }
                     if let power = card.power {
                         VStack(spacing: 2) {
-                            Image(systemName: "sword.fill")
+                            Image(systemName: "bolt.fill")
                                 .font(.title3)
                                 .foregroundColor(.orange)
                             Text("\(power)")
@@ -382,7 +382,7 @@ struct CompactCardView: View {
     var cardIcon: String {
         switch card.type {
         case .character: return "person.fill"
-        case .weapon: return "sword.fill"
+        case .weapon: return "bolt.fill"
         case .spell: return "sparkles"
         case .armor: return "shield.fill"
         case .item: return "bag.fill"
@@ -487,7 +487,7 @@ struct HandCardView: View {
                 }
                 if let power = card.power {
                     HStack(spacing: 2) {
-                        Image(systemName: "sword.fill")
+                        Image(systemName: "bolt.fill")
                             .font(.system(size: 8))
                             .foregroundColor(.red)
                         Text("\(power)")
@@ -551,7 +551,7 @@ struct HandCardView: View {
     var cardIcon: String {
         switch card.type {
         case .character: return "person.fill"
-        case .weapon: return "sword.fill"
+        case .weapon: return "bolt.fill"
         case .spell: return "sparkles"
         case .armor: return "shield.fill"
         case .item: return "bag.fill"

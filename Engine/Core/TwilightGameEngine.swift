@@ -80,6 +80,36 @@ final class TwilightGameEngine: ObservableObject {
         return current.neighborIds.contains(regionId)
     }
 
+    /// Calculate travel cost to target region (1 = neighbor, 2 = distant)
+    func calculateTravelCost(to targetId: UUID) -> Int {
+        return isNeighbor(regionId: targetId) ? 1 : 2
+    }
+
+    /// Check if travel to region is allowed (only neighbors allowed)
+    func canTravelTo(regionId: UUID) -> Bool {
+        guard regionId != currentRegionId else { return false }
+        return isNeighbor(regionId: regionId)
+    }
+
+    /// Get neighboring region names that connect to target (for routing hints)
+    func getRoutingHint(to targetId: UUID) -> [String] {
+        guard let current = currentRegion else { return [] }
+
+        // If already neighbor, no hint needed
+        if current.neighborIds.contains(targetId) { return [] }
+
+        // Find which neighbors connect to target
+        var connectingNeighbors: [String] = []
+        for neighborId in current.neighborIds {
+            guard let neighbor = regions[neighborId] else { continue }
+            if neighbor.neighborIds.contains(targetId) {
+                connectingNeighbors.append(neighbor.name)
+            }
+        }
+
+        return connectingNeighbors
+    }
+
     /// Player balance description for UI
     var playerBalanceDescription: String {
         switch playerBalance {

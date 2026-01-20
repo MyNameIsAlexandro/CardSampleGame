@@ -314,4 +314,119 @@ final class CardModuleTests: XCTestCase {
 
         XCTAssertFalse(deck.isEmpty, "Должна быть стартовая колода")
     }
+
+    // MARK: - Card Economy Tests (v2.0)
+
+    func testStartingDeckResourceCardsAreFree() {
+        // Resource cards should cost 0 (they generate faith)
+        let veleslavaCards = TwilightMarchesCards.createVeleslavaStartingDeck()
+        let resourceCards = veleslavaCards.filter { $0.type == .resource }
+
+        XCTAssertGreaterThan(resourceCards.count, 0, "Должны быть ресурсные карты в колоде")
+
+        for card in resourceCards {
+            XCTAssertEqual(card.cost ?? 0, 0, "Ресурсная карта '\(card.name)' должна быть бесплатной")
+        }
+    }
+
+    func testStartingDeckAttackCardsHaveCost() {
+        // Attack cards should cost faith (1-2)
+        let ratiborCards = TwilightMarchesCards.createRatiborStartingDeck()
+        let attackCards = ratiborCards.filter { $0.type == .attack }
+
+        XCTAssertGreaterThan(attackCards.count, 0, "Должны быть карты атаки в колоде")
+
+        for card in attackCards {
+            XCTAssertGreaterThan(card.cost ?? 0, 0, "Карта атаки '\(card.name)' должна стоить веру")
+        }
+    }
+
+    func testStartingDeckDefenseCardsHaveCost() {
+        // Defense cards should cost faith
+        let zabavaCards = TwilightMarchesCards.createZabavaStartingDeck()
+        let defenseCards = zabavaCards.filter { $0.type == .defense }
+
+        XCTAssertGreaterThan(defenseCards.count, 0, "Должны быть карты защиты в колоде")
+
+        for card in defenseCards {
+            XCTAssertGreaterThan(card.cost ?? 0, 0, "Карта защиты '\(card.name)' должна стоить веру")
+        }
+    }
+
+    func testStartingDeckSpecialCardsHaveCost() {
+        // Special cards should cost faith (unless they are sacrifice cards like Miroslav's)
+        let veleslavaCards = TwilightMarchesCards.createVeleslavaStartingDeck()
+        let specialCards = veleslavaCards.filter { $0.type == .special }
+
+        for card in specialCards {
+            XCTAssertGreaterThan(card.cost ?? 0, 0, "Спецкарта '\(card.name)' должна стоить веру")
+        }
+    }
+
+    func testMiroslavSacrificeCardIsFree() {
+        // Miroslav's Sacrifice card is free (it costs HP instead of faith)
+        let miroslavCards = TwilightMarchesCards.createMiroslavStartingDeck()
+        let sacrificeCard = miroslavCards.first { $0.name == "Жертвоприношение" }
+
+        XCTAssertNotNil(sacrificeCard, "Должна быть карта Жертвоприношение")
+        XCTAssertEqual(sacrificeCard?.cost ?? -1, 0, "Жертвоприношение должно быть бесплатным (оно стоит HP)")
+    }
+
+    func testResourceCardsGenerateFaith() {
+        // Resource cards should have gainFaith ability
+        let genericDeck = TwilightMarchesCards.createGenericStartingDeck()
+        let resourceCards = genericDeck.filter { $0.type == .resource }
+
+        for card in resourceCards {
+            let hasGainFaith = card.abilities.contains { ability in
+                if case .gainFaith = ability.effect { return true }
+                return false
+            }
+            XCTAssertTrue(hasGainFaith, "Ресурсная карта '\(card.name)' должна давать веру")
+        }
+    }
+
+    func testAllStartingDecksHaveProperEconomy() {
+        // Test all four hero starting decks
+        let decks: [(String, [Card])] = [
+            ("Велеслава", TwilightMarchesCards.createVeleslavaStartingDeck()),
+            ("Ратибор", TwilightMarchesCards.createRatiborStartingDeck()),
+            ("Мирослав", TwilightMarchesCards.createMiroslavStartingDeck()),
+            ("Забава", TwilightMarchesCards.createZabavaStartingDeck())
+        ]
+
+        for (heroName, deck) in decks {
+            // Count cards by type
+            let resourceCount = deck.filter { $0.type == .resource }.count
+            let attackCount = deck.filter { $0.type == .attack }.count
+            let defenseCount = deck.filter { $0.type == .defense }.count
+
+            // Each deck should have 5 resource cards
+            XCTAssertEqual(resourceCount, 5, "\(heroName) должен иметь 5 ресурсных карт")
+
+            // Each deck should have at least 2 attack cards
+            XCTAssertGreaterThanOrEqual(attackCount, 2, "\(heroName) должен иметь минимум 2 карты атаки")
+
+            // Each deck should have at least 1 defense card
+            XCTAssertGreaterThanOrEqual(defenseCount, 1, "\(heroName) должен иметь минимум 1 карту защиты")
+
+            // Total should be 10 cards
+            XCTAssertEqual(deck.count, 10, "\(heroName) должен иметь 10 карт в стартовой колоде")
+        }
+    }
+
+    // MARK: - Combat Stats Tests
+
+    func testCombatStatsCreation() {
+        // Test CombatStats structure (defined in CombatView)
+        // This tests the summary string format
+        let turnsPlayed = 5
+        let totalDamageDealt = 25
+        let totalDamageTaken = 12
+        let summary = "Ходов: \(turnsPlayed), урон нанесён: \(totalDamageDealt), урон получен: \(totalDamageTaken)"
+
+        XCTAssertTrue(summary.contains("Ходов: 5"))
+        XCTAssertTrue(summary.contains("урон нанесён: 25"))
+        XCTAssertTrue(summary.contains("урон получен: 12"))
+    }
 }

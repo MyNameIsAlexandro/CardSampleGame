@@ -15,6 +15,7 @@
 | Phase 3.5 | **Engine-First Architecture** | ✅ Done |
 | Phase 4 | ContentView Engine-First + Adapter Cleanup | ✅ Done |
 | Phase 5 | JSON Content + JSONContentProvider | ✅ Done |
+| Phase 6 | **Card Economy v2.0 + Combat UI v2.0 + Performance** | ✅ Done |
 
 ---
 
@@ -485,6 +486,77 @@ extension ContentRegistry: ContentProvider {
 3. `EnemyDefinition.toCard()` — конвертирует EnemyDefinition → Card
 4. WorldState.createInitialQuests() использует ContentRegistry
 5. Event resolution использует ContentRegistry для врагов
+
+---
+
+## EPIC E — Phase 6: Card Economy v2.0 + Combat UI v2.0 ✅ Done
+
+**Цель:** Улучшить боевую систему — добавить экономику карт и улучшить UX победы/поражения.
+
+### Feature E1 — Card Economy v2.0
+
+> **Принцип:** Карты должны стоить ресурсы (Веру) для создания стратегического выбора.
+
+| Task | Файл | Статус |
+|------|------|--------|
+| Resource cards cost 0 + generate faith | TwilightMarchesCards.swift | ✅ Done |
+| Attack cards cost 1 faith | TwilightMarchesCards.swift | ✅ Done |
+| Defense cards cost 1 faith | TwilightMarchesCards.swift | ✅ Done |
+| Special cards cost 2 faith | TwilightMarchesCards.swift | ✅ Done |
+| All 4 hero decks updated | TwilightMarchesCards.swift | ✅ Done |
+| Generic deck updated | TwilightMarchesCards.swift | ✅ Done |
+| Card economy tests | CardModuleTests.swift | ✅ Done |
+
+**Стратегический цикл:**
+```
+Ресурсные карты (0 стоимость) → Генерируют Веру
+         ↓
+Вера → Тратится на карты атаки/защиты/заклинания
+         ↓
+Выбор: много слабых атак vs мало сильных усиленных атак
+```
+
+### Feature E2 — Combat UI v2.0
+
+> **Принцип:** Игрок должен наслаждаться победой, а не видеть мелькающее окно.
+
+| Task | Файл | Статус |
+|------|------|--------|
+| Remove auto-dismiss (1.5s) | CombatView.swift | ✅ Done |
+| Full-screen victory/defeat view | CombatView.swift | ✅ Done |
+| Combat statistics display | CombatView.swift | ✅ Done |
+| "Continue" button for dismissal | CombatView.swift | ✅ Done |
+| Store finalCombatStats state | CombatView.swift | ✅ Done |
+
+**Компоненты экрана результата:**
+- Большой значок победы/поражения (🎉/💀)
+- Название побеждённого врага
+- Статистика: ходы, урон нанесён, урон получен, карт сыграно
+- Кнопка "Продолжить" — игрок сам решает когда закрыть
+
+### Feature E3 — Performance & Stability Fixes
+
+| Task | Файл | Статус |
+|------|------|--------|
+| Async content pack loading | CardGameApp.swift | ✅ Done |
+| Background thread file I/O | CardGameApp.swift | ✅ Done |
+| Loading screen with progress | CardGameApp.swift | ✅ Done |
+| SemanticVersion Codable fix | PackTypes.swift | ✅ Done |
+| Flexible date decoder | PackManifest.swift | ✅ Done |
+| SF Symbol fixes (sword.fill) | Multiple files | ✅ Done |
+| ForEach duplicate ID fix | CombatView.swift | ✅ Done |
+| Navigation routing hints | TwilightGameEngine.swift | ✅ Done |
+| Travel validation | WorldMapView.swift | ✅ Done |
+
+### Feature E4 — Documentation & Tests
+
+| Task | Файл | Статус |
+|------|------|--------|
+| Card Economy v2.0 docs | GAME_DESIGN_DOCUMENT.md | ✅ Done |
+| Combat UI v2.0 docs | GAME_DESIGN_DOCUMENT.md | ✅ Done |
+| Card economy tests (8 tests) | CardModuleTests.swift | ✅ Done |
+| Navigation tests | GameplayFlowTests.swift | ✅ Done |
+| Performance tests | GameplayFlowTests.swift | ✅ Done |
 
 ---
 

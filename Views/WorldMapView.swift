@@ -1544,24 +1544,45 @@ struct EngineRegionDetailView: View {
             VStack(spacing: 8) {
                 // Travel action - only if player is NOT here
                 if !isPlayerHere {
+                    let canTravel = engine.canTravelTo(regionId: region.id)
+                    let routingHint = engine.getRoutingHint(to: region.id)
+
                     actionButton(
-                        title: "Отправиться",
-                        icon: "arrow.right.circle.fill",
-                        color: .blue,
-                        enabled: true
+                        title: canTravel ? "Отправиться (1 день)" : "Регион далеко",
+                        icon: canTravel ? "arrow.right.circle.fill" : "xmark.circle",
+                        color: canTravel ? .blue : .gray,
+                        enabled: canTravel
                     ) {
                         selectedAction = .travel
                         showingActionConfirmation = true
                     }
 
-                    HStack {
-                        Image(systemName: "info.circle")
-                            .foregroundColor(.secondary)
-                        Text("Переместитесь в регион, чтобы взаимодействовать с ним")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                    if canTravel {
+                        HStack {
+                            Image(systemName: "info.circle")
+                                .foregroundColor(.secondary)
+                            Text("Переместитесь в регион, чтобы взаимодействовать с ним")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.vertical, 8)
+                    } else {
+                        // Show routing hint for distant regions
+                        HStack {
+                            Image(systemName: "map")
+                                .foregroundColor(.orange)
+                            if !routingHint.isEmpty {
+                                Text("Сначала идите через: \(routingHint.joined(separator: ", "))")
+                                    .font(.caption)
+                                    .foregroundColor(.orange)
+                            } else {
+                                Text("Регион недоступен напрямую")
+                                    .font(.caption)
+                                    .foregroundColor(.orange)
+                            }
+                        }
+                        .padding(.vertical, 8)
                     }
-                    .padding(.vertical, 8)
                 }
 
                 // Actions available ONLY if player is in the region
@@ -1674,7 +1695,9 @@ struct EngineRegionDetailView: View {
         guard let action = selectedAction else { return "" }
         switch action {
         case .travel:
-            return "Отправиться в регион '\(region.name)'? Это займёт 1 день пути."
+            let days = engine.calculateTravelCost(to: region.id)
+            let dayWord = days == 1 ? "день" : "дня"
+            return "Отправиться в регион '\(region.name)'? Это займёт \(days) \(dayWord) пути."
         case .rest:
             return "Отдохнуть в этом месте? Вы восстановите 3 здоровья."
         case .trade:

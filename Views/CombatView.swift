@@ -17,10 +17,26 @@ struct CombatView: View {
     private var legacyPlayer: Player?
     private var legacyMonster: Binding<Card>?
 
-    enum CombatOutcome {
-        case victory
-        case defeat
+    enum CombatOutcome: Equatable {
+        case victory(stats: CombatStats)
+        case defeat(stats: CombatStats)
         case fled
+
+        var isVictory: Bool {
+            if case .victory = self { return true }
+            return false
+        }
+    }
+
+    struct CombatStats: Equatable {
+        let turnsPlayed: Int
+        let totalDamageDealt: Int
+        let totalDamageTaken: Int
+        let cardsPlayed: Int
+
+        var summary: String {
+            "Ходов: \(turnsPlayed), урон нанесён: \(totalDamageDealt), урон получен: \(totalDamageTaken)"
+        }
     }
 
     enum CombatPhase {
@@ -37,13 +53,25 @@ struct CombatView: View {
     @State private var lastMessage: String = ""
     @State private var showingMessage = false
 
-    // Боевые бонусы (сбрасываются в конце хода)
+    // Боевые бонусы (сбрасываются в конце хода/после атаки)
     @State private var bonusDice: Int = 0          // Дополнительные кубики от карт
     @State private var bonusDamage: Int = 0        // Бонусный урон
     @State private var canReroll: Bool = false     // Возможность перебросить кубик
     @State private var summonedSpirits: [(power: Int, realm: Realm)] = []  // Призванные духи
     @State private var isFirstAttackThisCombat: Bool = true  // Для способности Следопыта
     @State private var lastCombatResult: CombatResult? = nil  // Последний результат атаки
+
+    // NEW: Temporary Shield (защита от карт, поглощает урон, сбрасывается в конце раунда)
+    @State private var temporaryShield: Int = 0
+
+    // Combat statistics tracking
+    @State private var totalDamageDealt: Int = 0
+    @State private var totalDamageTaken: Int = 0
+    @State private var cardsPlayedCount: Int = 0
+
+    // Combat end state (for victory/defeat screen)
+    @State private var finalCombatStats: CombatStats? = nil
+    @State private var isVictory: Bool = false
 
     // MARK: - Computed Properties (Engine-First)
 
@@ -270,35 +298,81 @@ struct CombatView: View {
     // MARK: - Player Stats (Engine-First: reads from engine.player*)
 
     var playerStats: some View {
-        HStack(spacing: 24) {
-            VStack {
-                Image(systemName: "heart.fill")
-                    .foregroundColor(.red)
-                Text("\(engine.playerHealth)/\(engine.playerMaxHealth)")
-                    .fontWeight(.bold)
-                Text(L10n.combatHP.localized)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+        VStack(spacing: 8) {
+            // Main stats row
+            HStack(spacing: 20) {
+                VStack {
+                    Image(systemName: "heart.fill")
+                        .foregroundColor(.red)
+                    Text("\(engine.playerHealth)/\(engine.playerMaxHealth)")
+                        .fontWeight(.bold)
+                    Text(L10n.combatHP.localized)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                VStack {
+                    Image(systemName: "hand.raised.fill")
+                        .foregroundColor(.orange)
+                    Text("\(player?.strength ?? 1)")
+                        .fontWeight(.bold)
+                    Text(L10n.combatStrength.localized)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                VStack {
+                    Image(systemName: "sparkles")
+                        .foregroundColor(.yellow)
+                    Text("\(engine.playerFaith)")
+                        .fontWeight(.bold)
+                    Text(L10n.tmResourceFaith.localized)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                // NEW: Shield display
+                if temporaryShield > 0 {
+                    VStack {
+                        Image(systemName: "shield.fill")
+                            .foregroundColor(.cyan)
+                        Text("\(temporaryShield)")
+                            .fontWeight(.bold)
+                        Text("Щит")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
             }
 
-            VStack {
-                Image(systemName: "hand.raised.fill")
-                    .foregroundColor(.orange)
-                Text("\(player?.strength ?? 1)")
-                    .fontWeight(.bold)
-                Text(L10n.combatStrength.localized)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-
-            VStack {
-                Image(systemName: "sparkles")
-                    .foregroundColor(.yellow)
-                Text("\(engine.playerFaith)")
-                    .fontWeight(.bold)
-                Text(L10n.tmResourceFaith.localized)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+            // Combat bonuses indicator (if any)
+            if bonusDice > 0 || bonusDamage > 0 {
+                HStack(spacing: 12) {
+                    if bonusDice > 0 {
+                        HStack(spacing: 4) {
+                            Image(systemName: "dice.fill")
+                                .foregroundColor(.purple)
+                            Text("+\(bonusDice)")
+                                .font(.caption)
+                                .fontWeight(.bold)
+                                .foregroundColor(.purple)
+                        }
+                    }
+                    if bonusDamage > 0 {
+                        HStack(spacing: 4) {
+                            Image(systemName: "flame.fill")
+                                .foregroundColor(.orange)
+                            Text("+\(bonusDamage)")
+                                .font(.caption)
+                                .fontWeight(.bold)
+                                .foregroundColor(.orange)
+                        }
+                    }
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color.purple.opacity(0.1))
+                .cornerRadius(8)
             }
         }
         .padding()
@@ -338,8 +412,8 @@ struct CombatView: View {
             .background(Color.green.opacity(0.1))
             .cornerRadius(12)
 
-            // Кнопки действий
-            HStack(spacing: 12) {
+            // Кнопки действий (каждое действие тратит 1 из 3)
+            HStack(spacing: 8) {
                 // Базовая атака
                 Button(action: performBasicAttack) {
                     VStack(spacing: 4) {
@@ -348,9 +422,16 @@ struct CombatView: View {
                         Text(L10n.combatAttackButton.localized)
                             .font(.caption)
                             .fontWeight(.semibold)
-                        Text("(-1)")
-                            .font(.system(size: 9))
-                            .foregroundColor(.white.opacity(0.7))
+                        // Show accumulated bonuses
+                        if bonusDamage > 0 || bonusDice > 0 {
+                            Text("+\(bonusDamage)💥 +\(bonusDice)🎲")
+                                .font(.system(size: 9))
+                                .foregroundColor(.yellow)
+                        } else {
+                            Text("(-1 действие)")
+                                .font(.system(size: 9))
+                                .foregroundColor(.white.opacity(0.7))
+                        }
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
@@ -360,6 +441,26 @@ struct CombatView: View {
                 }
                 .disabled(actionsRemaining <= 0)
                 .accessibilityIdentifier(AccessibilityIdentifiers.Combat.attackButton)
+
+                // NEW: Укрытие (Defend/Take Cover)
+                Button(action: performDefend) {
+                    VStack(spacing: 4) {
+                        Image(systemName: "shield.fill")
+                            .font(.title2)
+                        Text("Укрытие")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                        Text("+3🛡️ (-1)")
+                            .font(.system(size: 9))
+                            .foregroundColor(.white.opacity(0.7))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(actionsRemaining > 0 ? Color.cyan : Color.gray)
+                    .foregroundColor(.white)
+                    .cornerRadius(12)
+                }
+                .disabled(actionsRemaining <= 0)
 
                 // Завершить ход
                 Button(action: endPlayerTurn) {
@@ -428,26 +529,140 @@ struct CombatView: View {
         }
     }
 
-    // MARK: - Combat Over View (Engine-First: reads from engine.combatState)
+    // MARK: - Combat Over View (Full-screen victory/defeat display)
+    // Player must tap "Continue" to dismiss - no auto-dismiss
 
     var combatOverView: some View {
-        VStack(spacing: 12) {
-            if monsterHealth <= 0 {
-                Text("🎉 " + L10n.combatVictory.localized)
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(.green)
+        VStack(spacing: 24) {
+            Spacer()
+
+            // Victory/Defeat Icon and Title
+            if isVictory {
+                VStack(spacing: 12) {
+                    Text("🎉")
+                        .font(.system(size: 72))
+
+                    Text(L10n.combatVictory.localized)
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .foregroundColor(.green)
+
+                    Text("\(monster.name) повержен!")
+                        .font(.title3)
+                        .foregroundColor(.secondary)
+                }
             } else {
-                Text("💀 " + L10n.combatDefeat.localized)
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(.red)
+                VStack(spacing: 12) {
+                    Text("💀")
+                        .font(.system(size: 72))
+
+                    Text(L10n.combatDefeat.localized)
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .foregroundColor(.red)
+
+                    Text("Вы пали в бою...")
+                        .font(.title3)
+                        .foregroundColor(.secondary)
+                }
             }
+
+            // Combat Statistics
+            if let stats = finalCombatStats {
+                VStack(spacing: 16) {
+                    Text("📊 Статистика боя")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+
+                    HStack(spacing: 32) {
+                        // Turns
+                        VStack {
+                            Text("\(stats.turnsPlayed)")
+                                .font(.title)
+                                .fontWeight(.bold)
+                                .foregroundColor(.blue)
+                            Text("Ходов")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+
+                        // Damage dealt
+                        VStack {
+                            Text("\(stats.totalDamageDealt)")
+                                .font(.title)
+                                .fontWeight(.bold)
+                                .foregroundColor(.orange)
+                            Text("Урон нанесён")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+
+                        // Damage taken
+                        VStack {
+                            Text("\(stats.totalDamageTaken)")
+                                .font(.title)
+                                .fontWeight(.bold)
+                                .foregroundColor(.red)
+                            Text("Урон получен")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+
+                        // Cards played
+                        VStack {
+                            Text("\(stats.cardsPlayed)")
+                                .font(.title)
+                                .fontWeight(.bold)
+                                .foregroundColor(.purple)
+                            Text("Карт сыграно")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+                .padding()
+                .background(Color(UIColor.secondarySystemBackground))
+                .cornerRadius(12)
+            }
+
+            Spacer()
+
+            // Continue Button - player controls when to dismiss
+            Button(action: {
+                let stats = finalCombatStats ?? CombatStats(
+                    turnsPlayed: turnNumber,
+                    totalDamageDealt: totalDamageDealt,
+                    totalDamageTaken: totalDamageTaken,
+                    cardsPlayed: cardsPlayedCount
+                )
+                let outcome: CombatOutcome = isVictory ? .victory(stats: stats) : .defeat(stats: stats)
+                onCombatEnd(outcome)
+            }) {
+                HStack {
+                    Image(systemName: isVictory ? "arrow.right.circle.fill" : "arrow.counterclockwise.circle.fill")
+                    Text(isVictory ? "Продолжить" : "Вернуться")
+                }
+                .font(.title2)
+                .fontWeight(.semibold)
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(isVictory ? Color.green : Color.blue)
+                .cornerRadius(12)
+            }
+            .padding(.horizontal)
+            .padding(.bottom, 32)
         }
-        .padding()
-        .frame(maxWidth: .infinity)
-        .background(Color.gray.opacity(0.1))
-        .cornerRadius(12)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(
+            LinearGradient(
+                gradient: Gradient(colors: isVictory
+                    ? [Color.green.opacity(0.1), Color.black.opacity(0.3)]
+                    : [Color.red.opacity(0.1), Color.black.opacity(0.3)]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
     }
 
     // MARK: - Combat Log
@@ -466,7 +681,7 @@ struct CombatView: View {
                     .fontWeight(.bold)
                     .foregroundColor(.secondary)
 
-                ForEach(combatLog.suffix(5), id: \.self) { entry in
+                ForEach(Array(combatLog.suffix(5).enumerated()), id: \.offset) { index, entry in
                     Text("• \(entry)")
                         .font(.caption2)
                         .foregroundColor(.secondary)
@@ -692,13 +907,16 @@ struct CombatView: View {
         if result.isHit, let damageCalc = result.damageCalculation {
             let damage = damageCalc.total
 
+            // Track damage for statistics
+            totalDamageDealt += damage
+
             // Engine-First: Apply damage through engine action
             engine.performAction(.combatApplyEffect(effect: .damageEnemy(amount: damage)))
 
             // Update legacy monster binding if available
             legacyMonster?.wrappedValue.health = monsterHealth
 
-            combatLog.append("⚔️ ПОПАДАНИЕ! Урон: \(damage) (HP врага: \(monsterHealth))")
+            combatLog.append("⚔️ ПОПАДАНИЕ! Бросок: \(result.attackRoll.total) vs \(monsterDef). Урон: \(damage) (HP врага: \(monsterHealth))")
 
             if monsterHealth <= 0 {
                 finishCombat(victory: true)
@@ -713,29 +931,84 @@ struct CombatView: View {
         isFirstAttackThisCombat = false
     }
 
-    func playCard(_ card: Card) {
-        guard actionsRemaining > 0, phase == .playerTurn else { return }
-
-        // Проверяем стоимость веры (Engine-First: check via engine)
-        if let cost = card.cost, cost > 0 {
-            guard engine.playerFaith >= cost else {
-                combatLog.append("❌ Недостаточно веры для \(card.name)")
-                return
-            }
-            // Engine-First: Spend faith through engine action
-            engine.performAction(.combatApplyEffect(effect: .spendFaith(amount: cost)))
-            combatLog.append("💫 Потрачено \(cost) веры")
-        }
+    /// Take Cover / Defend action - adds shield to absorb damage
+    func performDefend() {
+        guard actionsRemaining > 0 else { return }
 
         actionsRemaining -= 1
 
-        // Legacy: play card from hand
+        // Base defend gives +3 shield
+        let baseShield = 3
+
+        // Player strength adds to defense (some classes may have bonus)
+        let strengthBonus = (player?.strength ?? 1) / 2  // Half strength as shield bonus
+
+        let totalShield = baseShield + strengthBonus
+        temporaryShield += totalShield
+
+        combatLog.append("🛡️ Укрытие! +\(totalShield) к щиту (всего: \(temporaryShield))")
+
+        // Log breakdown
+        if strengthBonus > 0 {
+            combatLog.append("   💪 Бонус силы: +\(strengthBonus)")
+        }
+    }
+
+    /// Play a card as a modifier (does NOT consume actions)
+    /// Cards enhance the next action (attack) or add to shield (defense)
+    func playCard(_ card: Card) {
+        guard phase == .playerTurn else { return }
+
+        // Проверяем стоимость веры (Engine-First: check via engine)
+        // Cards cost Faith to play - this limits infinite card usage
+        let faithCost = card.cost ?? 0
+        if faithCost > 0 {
+            guard engine.playerFaith >= faithCost else {
+                combatLog.append("❌ Недостаточно веры для \(card.name) (нужно: \(faithCost), есть: \(engine.playerFaith))")
+                return
+            }
+            // Engine-First: Spend faith through engine action
+            engine.performAction(.combatApplyEffect(effect: .spendFaith(amount: faithCost)))
+            combatLog.append("💫 Потрачено \(faithCost) веры")
+        }
+
+        // Track cards played for statistics
+        cardsPlayedCount += 1
+
+        // Legacy: play card from hand (remove from hand)
         player?.playCard(card)
 
-        combatLog.append("🃏 Сыграна: \(card.name)")
+        // NEW: Cards are modifiers, not actions
+        // Defense cards add to temporary shield
+        // Attack cards add to bonus damage/dice
+        switch card.type {
+        case .defense, .armor:
+            // Defense cards add to temporary shield
+            let shieldValue = card.defense ?? card.power ?? 2
+            temporaryShield += shieldValue
+            combatLog.append("🛡️ \(card.name): +\(shieldValue) к щиту (всего: \(temporaryShield))")
 
-        // Применяем эффекты карты (Engine-First)
-        applyCardEffects(card)
+        case .attack, .weapon:
+            // Attack cards add bonus damage
+            let attackBonus = card.power ?? 2
+            bonusDamage += attackBonus
+            combatLog.append("⚔️ \(card.name): +\(attackBonus) к урону следующей атаки")
+
+        case .spell, .ritual:
+            // Spells apply their effects
+            combatLog.append("✨ Заклинание: \(card.name)")
+            applyCardEffects(card)
+
+        default:
+            // Other cards (items, etc.) apply their effects
+            combatLog.append("🃏 Сыграна: \(card.name)")
+            applyCardEffects(card)
+        }
+
+        // Apply card abilities (on top of type-based effects)
+        if card.type != .spell && card.type != .ritual {
+            applyCardEffects(card)
+        }
 
         // Проверяем победу (Engine-First: read from engine)
         if monsterHealth <= 0 {
@@ -850,21 +1123,53 @@ struct CombatView: View {
     }
 
     func performEnemyAttack() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            guard monsterHealth > 0 else {
+        // Capture engine weakly to prevent retain cycles (engine is a class)
+        // SwiftUI View is a struct, so @State vars are managed by SwiftUI
+        let engineRef = engine
+        let monsterName = monster.name
+        let monsterPowerVal = monster.power ?? 3
+        let currentShield = temporaryShield
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak engineRef] in
+            guard let engine = engineRef else { return }
+            guard engine.combatState?.enemyHealth ?? 0 > 0 else {
                 phase = .endTurn
                 return
             }
 
-            let monsterPower = monster.power ?? 3
-            let healthBefore = engine.playerHealth
+            var rawDamage = monsterPowerVal
+            var shieldAbsorbed = 0
+            var actualDamage = 0
 
-            // Engine-First: Enemy attack through engine action
-            engine.performAction(.combatEnemyAttack(damage: monsterPower))
+            // NEW: Shield absorbs damage first
+            if currentShield > 0 {
+                shieldAbsorbed = min(currentShield, rawDamage)
+                rawDamage -= shieldAbsorbed
+                temporaryShield -= shieldAbsorbed
+            }
 
-            let damage = healthBefore - engine.playerHealth
+            // Remaining damage goes to HP
+            if rawDamage > 0 {
+                let healthBefore = engine.playerHealth
+                engine.performAction(.combatEnemyAttack(damage: rawDamage))
+                actualDamage = healthBefore - engine.playerHealth
+            }
 
-            combatLog.append("👹 \(monster.name) атакует! Урон: \(damage)")
+            // Track damage taken for statistics (only HP damage, not shield)
+            totalDamageTaken += actualDamage
+
+            // Build detailed combat log message
+            var logMessage = "👹 \(monsterName) атакует! Сила: \(monsterPowerVal)"
+            if shieldAbsorbed > 0 {
+                logMessage += " | 🛡️ Щит поглотил: \(shieldAbsorbed)"
+            }
+            if actualDamage > 0 {
+                logMessage += " | 💔 Урон HP: \(actualDamage)"
+            } else if shieldAbsorbed == monsterPowerVal {
+                logMessage += " | ✨ Полностью заблокировано!"
+            }
+            logMessage += " (HP: \(engine.playerHealth)/\(engine.playerMaxHealth), Щит: \(temporaryShield))"
+            combatLog.append(logMessage)
 
             if engine.playerHealth <= 0 {
                 finishCombat(victory: false)
@@ -875,10 +1180,17 @@ struct CombatView: View {
     }
 
     func performEndTurn() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+        // Capture engine weakly to prevent retain cycles
+        let engineRef = engine
+        let currentSpirits = summonedSpirits
+        let currentPlayer = player
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak engineRef] in
+            guard let engine = engineRef else { return }
+
             // Духи атакуют в конце хода (если ещё живы)
-            if !summonedSpirits.isEmpty {
-                for spirit in summonedSpirits {
+            if !currentSpirits.isEmpty {
+                for spirit in currentSpirits {
                     let spiritDamage = spirit.power
                     // Engine-First: Spirit damage through engine action
                     engine.performAction(.combatApplyEffect(effect: .damageEnemy(amount: spiritDamage)))
@@ -891,29 +1203,36 @@ struct CombatView: View {
             }
 
             // Проверяем победу после атак духов (Engine-First: read from engine)
-            if monsterHealth <= 0 {
+            if engine.combatState?.enemyHealth ?? 0 <= 0 {
                 finishCombat(victory: true)
                 return
             }
 
-            // Сбрасываем бонусы на конец хода
+            // Сбрасываем бонусы и щит на конец раунда
+            if temporaryShield > 0 {
+                combatLog.append("🛡️ Временный щит рассеялся (\(temporaryShield) → 0)")
+            }
             bonusDice = 0
             bonusDamage = 0
+            temporaryShield = 0  // Shield resets at end of round
             canReroll = false
 
             // Engine-First: End turn phase through engine action (discard, draw, faith restore)
             engine.performAction(.combatEndTurnPhase)
 
-            // Legacy sync: discard and draw
-            if let p = player {
-                while !p.hand.isEmpty {
+            // Legacy sync: discard and draw (with safety limit to prevent infinite loop)
+            if let p = currentPlayer {
+                let maxIterations = p.hand.count + 1  // Safety limit
+                var iterations = 0
+                while !p.hand.isEmpty && iterations < maxIterations {
                     p.playCard(p.hand[0])
+                    iterations += 1
                 }
                 p.drawCards(count: p.maxHandSize)
             }
 
             // Способность Мага: +1 вера в конце хода (Медитация)
-            if player?.shouldGainFaithEndOfTurn == true {
+            if currentPlayer?.shouldGainFaithEndOfTurn == true {
                 combatLog.append("🔮 Медитация: +1 вера")
             }
 
@@ -933,15 +1252,28 @@ struct CombatView: View {
         // Engine-First: Finish combat through engine action
         engine.performAction(.combatFinish(victory: victory))
 
+        // Create combat statistics
+        let stats = CombatStats(
+            turnsPlayed: turnNumber,
+            totalDamageDealt: totalDamageDealt,
+            totalDamageTaken: totalDamageTaken,
+            cardsPlayed: cardsPlayedCount
+        )
+
+        // Store stats for display in victory/defeat screen
+        finalCombatStats = stats
+        isVictory = victory
+
         if victory {
             combatLog.append("🎉 Победа! \(monster.name) повержен!")
+            combatLog.append("📊 \(stats.summary)")
         } else {
             combatLog.append("💀 Поражение...")
+            combatLog.append("📊 \(stats.summary)")
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            onCombatEnd(victory ? .victory : .defeat)
-        }
+        // NOTE: No auto-dismiss! Player taps "Continue" button in combatOverView
+        // This lets the player enjoy the victory moment and review stats
     }
 
     func flee() {

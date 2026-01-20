@@ -254,6 +254,15 @@ extension PackManifest {
     /// Standard manifest filename
     static let filename = "manifest.json"
 
+    /// Custom date formatter that handles both "2026-01-01" and "2026-01-01T00:00:00Z"
+    private static let flexibleDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        return formatter
+    }()
+
     /// Load manifest from URL
     static func load(from url: URL) throws -> PackManifest {
         let manifestURL = url.appendingPathComponent(filename)
@@ -265,7 +274,26 @@ extension PackManifest {
         do {
             let data = try Data(contentsOf: manifestURL)
             let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
+            // Use custom strategy that handles both date-only and ISO8601 formats
+            decoder.dateDecodingStrategy = .custom { decoder in
+                let container = try decoder.singleValueContainer()
+                let dateString = try container.decode(String.self)
+
+                // Try ISO8601 first
+                if let date = ISO8601DateFormatter().date(from: dateString) {
+                    return date
+                }
+
+                // Fallback to date-only format "yyyy-MM-dd"
+                if let date = flexibleDateFormatter.date(from: dateString) {
+                    return date
+                }
+
+                throw DecodingError.dataCorruptedError(
+                    in: container,
+                    debugDescription: "Invalid date format: \(dateString)"
+                )
+            }
             return try decoder.decode(PackManifest.self, from: data)
         } catch let error as DecodingError {
             throw PackLoadError.invalidManifest(reason: error.localizedDescription)

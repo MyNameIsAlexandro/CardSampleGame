@@ -142,11 +142,14 @@ struct GameBoardView: View {
         .onChange(of: gameState.currentPhase) { newPhase in
             if newPhase == .enemyTurn {
                 // Enemy attacks during their phase
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    if let encounter = gameState.activeEncounter {
+                // Capture game state weakly (it's a class via @ObservedObject)
+                let gameStateRef = gameState
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak gameStateRef] in
+                    guard let gs = gameStateRef else { return }
+                    if let encounter = gs.activeEncounter {
                         let damage = encounter.power ?? 3
                         enemyDamage = damage
-                        gameState.enemyPhaseAction()
+                        gs.enemyPhaseAction()
                         showingEnemyAttack = true
                     }
                 }
@@ -167,9 +170,11 @@ struct GameBoardView: View {
                 showingEventCombatVictory = true
 
                 // После небольшой задержки закрываем экран боя
+                // Capture callback before async to avoid retaining view
+                let exitCallback = onExit
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                     showingEventCombatVictory = false
-                    onExit?()
+                    exitCallback?()
                 }
             }
         }

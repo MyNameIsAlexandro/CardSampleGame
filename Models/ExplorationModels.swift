@@ -301,7 +301,7 @@ enum EventType: String, Codable, Hashable {
 
     var icon: String {
         switch self {
-        case .combat: return "sword.fill"
+        case .combat: return "bolt.fill"
         case .ritual: return "sparkles"
         case .narrative: return "text.bubble.fill"
         case .exploration: return "magnifyingglass"

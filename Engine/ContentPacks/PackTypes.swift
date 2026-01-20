@@ -4,7 +4,7 @@ import Foundation
 
 /// Semantic version for Core and Packs
 /// Format: MAJOR.MINOR.PATCH
-struct SemanticVersion: Codable, Comparable, Hashable, CustomStringConvertible {
+struct SemanticVersion: Comparable, Hashable, CustomStringConvertible {
     let major: Int
     let minor: Int
     let patch: Int
@@ -36,6 +36,30 @@ struct SemanticVersion: Codable, Comparable, Hashable, CustomStringConvertible {
     /// - MINOR can be >= required
     func isCompatible(with required: SemanticVersion) -> Bool {
         return major == required.major && (minor > required.minor || (minor == required.minor && patch >= required.patch))
+    }
+}
+
+// MARK: - SemanticVersion Codable
+
+extension SemanticVersion: Codable {
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let string = try container.decode(String.self)
+        let parts = string.split(separator: ".").compactMap { Int($0) }
+        guard parts.count == 3 else {
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "Invalid version format: \(string). Expected MAJOR.MINOR.PATCH"
+            )
+        }
+        self.major = parts[0]
+        self.minor = parts[1]
+        self.patch = parts[2]
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(description)
     }
 }
 

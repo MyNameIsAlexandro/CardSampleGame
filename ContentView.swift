@@ -133,7 +133,7 @@ struct ContentView: View {
                                         StatDisplay(icon: "heart.fill", label: L10n.statHealth.localized, value: health, color: .red)
                                     }
                                     if let power = character.power {
-                                        StatDisplay(icon: "sword.fill", label: L10n.statPower.localized, value: power, color: .orange)
+                                        StatDisplay(icon: "bolt.fill", label: L10n.statPower.localized, value: power, color: .orange)
                                     }
                                     if let defense = character.defense {
                                         StatDisplay(icon: "shield.fill", label: L10n.statDefense.localized, value: defense, color: .blue)

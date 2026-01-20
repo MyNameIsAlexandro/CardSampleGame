@@ -369,25 +369,26 @@ struct EventView: View {
     func handleCombatEnd(outcome: CombatView.CombatOutcome) {
         // Определяем результат боя
         switch outcome {
-        case .victory:
+        case .victory(let stats):
             combatVictory = true
-            resultMessage = L10n.eventCombatVictoryMessage.localized
-        case .defeat:
+            resultMessage = L10n.eventCombatVictoryMessage.localized + "\n\n📊 " + stats.summary
+        case .defeat(let stats):
             combatVictory = false
-            resultMessage = L10n.eventCombatDefeatMessage.localized
+            resultMessage = L10n.eventCombatDefeatMessage.localized + "\n\n📊 " + stats.summary
         case .fled:
             combatVictory = nil
             resultMessage = L10n.eventCombatFledMessage.localized
         }
 
         // Apply non-combat consequences from the choice (if victory)
-        if outcome == .victory, let choice = selectedChoice {
+        if outcome.isVictory, let choice = selectedChoice {
             onChoiceSelected(choice)
         }
 
         // Задержка нужна чтобы fullScreenCover полностью закрылся перед показом alert
         // (combatMonster = nil закроет fullScreenCover автоматически)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [self] in
+        // Note: SwiftUI Views are structs, state is managed by SwiftUI
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             combatMonster = nil
             showingResult = true
         }

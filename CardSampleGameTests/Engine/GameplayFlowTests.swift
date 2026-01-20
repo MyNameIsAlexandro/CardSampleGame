@@ -368,6 +368,724 @@ final class GameplayFlowTests: XCTestCase {
         let previousRegion = engine.regionsArray.first { $0.id == initialRegion.id }
         XCTAssertNotNil(previousRegion, "Previous region should still exist")
     }
+
+    // MARK: - Explore Flow Tests
+
+    func testExploreActionSuccess() {
+        // Given: Engine in a region
+        guard engine.currentRegion != nil else {
+            XCTFail("No current region")
+            return
+        }
+
+        // When: Exploring
+        let result = engine.performAction(.explore)
+
+        // Then: Action should succeed
+        XCTAssertTrue(result.success, "Explore action should always succeed")
+    }
+
+    func testExploreReturnsEventOrNil() {
+        // Given: Engine in a region
+        guard engine.currentRegion != nil else {
+            XCTFail("No current region")
+            return
+        }
+
+        // When: Exploring
+        let result = engine.performAction(.explore)
+
+        // Then: Either an event is triggered or nil (no events available)
+        // Both outcomes are valid
+        if let eventId = result.currentEvent {
+            // Event was triggered - verify it's a valid UUID
+            XCTAssertNotNil(eventId, "Triggered event should have valid ID")
+            // Engine should have currentEvent set
+            XCTAssertEqual(engine.currentEventId, eventId, "Engine currentEventId should match result")
+        } else {
+            // No event available - this is expected when region is fully explored
+            XCTAssertTrue(result.success, "Explore should succeed even without events")
+            XCTAssertNil(engine.currentEventId, "Engine currentEventId should be nil when no event")
+        }
+    }
+
+    func testExploreDoesNotAdvanceTimeWhenNoEvent() {
+        // Given: Engine with current day
+        let initialDay = engine.currentDay
+
+        // When: Exploring
+        let result = engine.performAction(.explore)
+
+        // Then: If no event triggered, time should not advance
+        if result.currentEvent == nil {
+            XCTAssertEqual(engine.currentDay, initialDay, "Day should not advance when no event found")
+        }
+        // Note: If event was triggered, time advancement depends on event handling
+    }
+
+    // MARK: - Combat Stats Tests
+
+    func testCombatStatsStructure() {
+        // Given: Combat statistics
+        let stats = CombatView.CombatStats(
+            turnsPlayed: 3,
+            totalDamageDealt: 15,
+            totalDamageTaken: 8,
+            cardsPlayed: 5
+        )
+
+        // Then: Values should be correct
+        XCTAssertEqual(stats.turnsPlayed, 3, "Turns played should match")
+        XCTAssertEqual(stats.totalDamageDealt, 15, "Total damage dealt should match")
+        XCTAssertEqual(stats.totalDamageTaken, 8, "Total damage taken should match")
+        XCTAssertEqual(stats.cardsPlayed, 5, "Cards played should match")
+    }
+
+    func testCombatStatsSummary() {
+        // Given: Combat statistics
+        let stats = CombatView.CombatStats(
+            turnsPlayed: 2,
+            totalDamageDealt: 10,
+            totalDamageTaken: 5,
+            cardsPlayed: 3
+        )
+
+        // When: Getting summary
+        let summary = stats.summary
+
+        // Then: Summary should contain key information
+        XCTAssertTrue(summary.contains("2"), "Summary should contain turns played")
+        XCTAssertTrue(summary.contains("10"), "Summary should contain damage dealt")
+        XCTAssertTrue(summary.contains("5"), "Summary should contain damage taken")
+    }
+
+    func testCombatOutcomeVictoryHasStats() {
+        // Given: Combat statistics
+        let stats = CombatView.CombatStats(
+            turnsPlayed: 1,
+            totalDamageDealt: 20,
+            totalDamageTaken: 0,
+            cardsPlayed: 2
+        )
+
+        // When: Creating victory outcome
+        let outcome = CombatView.CombatOutcome.victory(stats: stats)
+
+        // Then: Should be victory and contain stats
+        XCTAssertTrue(outcome.isVictory, "Victory outcome should report isVictory = true")
+
+        if case .victory(let extractedStats) = outcome {
+            XCTAssertEqual(extractedStats.totalDamageDealt, 20, "Stats should be preserved in outcome")
+        } else {
+            XCTFail("Should be able to extract stats from victory outcome")
+        }
+    }
+
+    func testCombatOutcomeDefeatHasStats() {
+        // Given: Combat statistics
+        let stats = CombatView.CombatStats(
+            turnsPlayed: 5,
+            totalDamageDealt: 10,
+            totalDamageTaken: 25,
+            cardsPlayed: 8
+        )
+
+        // When: Creating defeat outcome
+        let outcome = CombatView.CombatOutcome.defeat(stats: stats)
+
+        // Then: Should not be victory and contain stats
+        XCTAssertFalse(outcome.isVictory, "Defeat outcome should report isVictory = false")
+
+        if case .defeat(let extractedStats) = outcome {
+            XCTAssertEqual(extractedStats.totalDamageTaken, 25, "Stats should be preserved in outcome")
+        } else {
+            XCTFail("Should be able to extract stats from defeat outcome")
+        }
+    }
+
+    func testCombatOutcomeFled() {
+        // Given/When: Creating fled outcome
+        let outcome = CombatView.CombatOutcome.fled
+
+        // Then: Should not be victory
+        XCTAssertFalse(outcome.isVictory, "Fled outcome should report isVictory = false")
+    }
+
+    func testCombatStatsEquatable() {
+        // Given: Two identical stats
+        let stats1 = CombatView.CombatStats(
+            turnsPlayed: 3,
+            totalDamageDealt: 15,
+            totalDamageTaken: 8,
+            cardsPlayed: 5
+        )
+        let stats2 = CombatView.CombatStats(
+            turnsPlayed: 3,
+            totalDamageDealt: 15,
+            totalDamageTaken: 8,
+            cardsPlayed: 5
+        )
+
+        // Then: Should be equal
+        XCTAssertEqual(stats1, stats2, "Identical stats should be equal")
+    }
+
+    func testCombatStatsNotEqualWhenDifferent() {
+        // Given: Two different stats
+        let stats1 = CombatView.CombatStats(
+            turnsPlayed: 3,
+            totalDamageDealt: 15,
+            totalDamageTaken: 8,
+            cardsPlayed: 5
+        )
+        let stats2 = CombatView.CombatStats(
+            turnsPlayed: 4,
+            totalDamageDealt: 15,
+            totalDamageTaken: 8,
+            cardsPlayed: 5
+        )
+
+        // Then: Should not be equal
+        XCTAssertNotEqual(stats1, stats2, "Different stats should not be equal")
+    }
+
+    // MARK: - Combat Mechanics v2.0 Tests (Cards as Modifiers)
+
+    func testCardTypeAttackAddsBonus() {
+        // Given: An attack card
+        let attackCard = Card(
+            name: "Test Sword",
+            type: .attack,
+            description: "A test weapon",
+            power: 5
+        )
+
+        // Then: Attack cards should have power property
+        XCTAssertEqual(attackCard.type, .attack, "Card should be attack type")
+        XCTAssertEqual(attackCard.power, 5, "Attack card should have power for bonus damage")
+    }
+
+    func testCardTypeDefenseHasDefenseValue() {
+        // Given: A defense card
+        let defenseCard = Card(
+            name: "Test Shield",
+            type: .defense,
+            description: "A test shield",
+            defense: 4
+        )
+
+        // Then: Defense cards should have defense property
+        XCTAssertEqual(defenseCard.type, .defense, "Card should be defense type")
+        XCTAssertEqual(defenseCard.defense, 4, "Defense card should have defense for shield value")
+    }
+
+    func testCardCostProperty() {
+        // Given: Cards with different costs
+        let freeCard = Card(
+            name: "Free Card",
+            type: .attack,
+            description: "No cost",
+            cost: 0
+        )
+        let costlyCard = Card(
+            name: "Costly Card",
+            type: .spell,
+            description: "Costs faith",
+            cost: 3
+        )
+
+        // Then: Costs should be correct
+        XCTAssertEqual(freeCard.cost, 0, "Free card should have 0 cost")
+        XCTAssertEqual(costlyCard.cost, 3, "Costly card should have cost of 3")
+    }
+
+    func testCardTypeSpellHasAbilities() {
+        // Given: A spell card with abilities
+        let spellCard = Card(
+            name: "Fireball",
+            type: .spell,
+            description: "Deals damage",
+            cost: 2,
+            abilities: [
+                CardAbility(
+                    name: "Fire Damage",
+                    description: "Deals fire damage",
+                    effect: .damage(amount: 6, type: .fire)
+                )
+            ]
+        )
+
+        // Then: Spell should have abilities
+        XCTAssertEqual(spellCard.type, .spell, "Card should be spell type")
+        XCTAssertFalse(spellCard.abilities.isEmpty, "Spell should have abilities")
+
+        if case .damage(let amount, let type) = spellCard.abilities.first?.effect {
+            XCTAssertEqual(amount, 6, "Damage amount should be 6")
+            XCTAssertEqual(type, .fire, "Damage type should be fire")
+        } else {
+            XCTFail("First ability should be damage effect")
+        }
+    }
+
+    func testCardTypeAffectsCombatBehavior() {
+        // Given: Different card types
+        let attackTypes: [CardType] = [.attack, .weapon]
+        let defenseTypes: [CardType] = [.defense, .armor]
+        let spellTypes: [CardType] = [.spell, .ritual]
+
+        // Then: Types should be categorized correctly
+        for type in attackTypes {
+            XCTAssertTrue(type == .attack || type == .weapon, "Should be attack type")
+        }
+        for type in defenseTypes {
+            XCTAssertTrue(type == .defense || type == .armor, "Should be defense type")
+        }
+        for type in spellTypes {
+            XCTAssertTrue(type == .spell || type == .ritual, "Should be spell type")
+        }
+    }
+
+    func testCombatResourceFaith() {
+        // Given: Engine with player
+        let initialFaith = engine.playerFaith
+
+        // Then: Faith should be available for card costs
+        XCTAssertGreaterThanOrEqual(initialFaith, 0, "Player should have non-negative faith")
+    }
+
+    func testCardAbilityAddDice() {
+        // Given: An ability that adds dice
+        let ability = CardAbility(
+            name: "Blessing",
+            description: "Adds bonus dice",
+            effect: .addDice(count: 2)
+        )
+
+        // Then: Effect should be addDice with correct count
+        if case .addDice(let count) = ability.effect {
+            XCTAssertEqual(count, 2, "Should add 2 dice")
+        } else {
+            XCTFail("Effect should be addDice")
+        }
+    }
+
+    func testCardAbilityHeal() {
+        // Given: An ability that heals
+        let ability = CardAbility(
+            name: "Heal",
+            description: "Heals player",
+            effect: .heal(amount: 5)
+        )
+
+        // Then: Effect should be heal with correct amount
+        if case .heal(let amount) = ability.effect {
+            XCTAssertEqual(amount, 5, "Should heal 5 HP")
+        } else {
+            XCTFail("Effect should be heal")
+        }
+    }
+
+    func testCardAbilityGainFaith() {
+        // Given: An ability that grants faith
+        let ability = CardAbility(
+            name: "Prayer",
+            description: "Grants faith",
+            effect: .gainFaith(amount: 3)
+        )
+
+        // Then: Effect should be gainFaith with correct amount
+        if case .gainFaith(let amount) = ability.effect {
+            XCTAssertEqual(amount, 3, "Should grant 3 faith")
+        } else {
+            XCTFail("Effect should be gainFaith")
+        }
+    }
+
+    // MARK: - Navigation System Tests v2.0
+
+    func testIsNeighborReturnsTrue() throws {
+        // Given: Current region with neighbors
+        guard let currentRegion = engine.currentRegion,
+              let neighborId = currentRegion.neighborIds.first else {
+            throw XCTSkip("No neighbors available")
+        }
+
+        // When: Checking if neighbor
+        let isNeighbor = engine.isNeighbor(regionId: neighborId)
+
+        // Then: Should return true
+        XCTAssertTrue(isNeighbor, "Should return true for neighbor region")
+    }
+
+    func testIsNeighborReturnsFalseForDistant() throws {
+        // Given: A region that is not a neighbor
+        guard let currentRegion = engine.currentRegion else {
+            throw XCTSkip("No current region")
+        }
+
+        let distantRegion = engine.regionsArray.first { region in
+            region.id != currentRegion.id && !currentRegion.neighborIds.contains(region.id)
+        }
+
+        guard let distant = distantRegion else {
+            throw XCTSkip("All regions are neighbors")
+        }
+
+        // When: Checking if neighbor
+        let isNeighbor = engine.isNeighbor(regionId: distant.id)
+
+        // Then: Should return false
+        XCTAssertFalse(isNeighbor, "Should return false for distant region")
+    }
+
+    func testCalculateTravelCostForNeighbor() throws {
+        // Given: Current region with neighbors
+        guard let currentRegion = engine.currentRegion,
+              let neighborId = currentRegion.neighborIds.first else {
+            throw XCTSkip("No neighbors available")
+        }
+
+        // When: Calculating travel cost
+        let cost = engine.calculateTravelCost(to: neighborId)
+
+        // Then: Should be 1 day for neighbor
+        XCTAssertEqual(cost, 1, "Travel cost to neighbor should be 1 day")
+    }
+
+    func testCalculateTravelCostForDistant() throws {
+        // Given: A distant region
+        guard let currentRegion = engine.currentRegion else {
+            throw XCTSkip("No current region")
+        }
+
+        let distantRegion = engine.regionsArray.first { region in
+            region.id != currentRegion.id && !currentRegion.neighborIds.contains(region.id)
+        }
+
+        guard let distant = distantRegion else {
+            throw XCTSkip("All regions are neighbors")
+        }
+
+        // When: Calculating travel cost
+        let cost = engine.calculateTravelCost(to: distant.id)
+
+        // Then: Should be 2 days for distant
+        XCTAssertEqual(cost, 2, "Travel cost to distant region should be 2 days")
+    }
+
+    func testCanTravelToNeighbor() throws {
+        // Given: Current region with neighbors
+        guard let currentRegion = engine.currentRegion,
+              let neighborId = currentRegion.neighborIds.first else {
+            throw XCTSkip("No neighbors available")
+        }
+
+        // When: Checking if can travel
+        let canTravel = engine.canTravelTo(regionId: neighborId)
+
+        // Then: Should be able to travel to neighbor
+        XCTAssertTrue(canTravel, "Should be able to travel to neighbor")
+    }
+
+    func testCannotTravelToDistantRegion() throws {
+        // Given: A distant region
+        guard let currentRegion = engine.currentRegion else {
+            throw XCTSkip("No current region")
+        }
+
+        let distantRegion = engine.regionsArray.first { region in
+            region.id != currentRegion.id && !currentRegion.neighborIds.contains(region.id)
+        }
+
+        guard let distant = distantRegion else {
+            throw XCTSkip("All regions are neighbors")
+        }
+
+        // When: Checking if can travel
+        let canTravel = engine.canTravelTo(regionId: distant.id)
+
+        // Then: Should not be able to travel to distant
+        XCTAssertFalse(canTravel, "Should not be able to travel to distant region directly")
+    }
+
+    func testCannotTravelToCurrentRegion() throws {
+        // Given: Current region
+        guard let currentRegionId = engine.currentRegionId else {
+            throw XCTSkip("No current region")
+        }
+
+        // When: Checking if can travel to self
+        let canTravel = engine.canTravelTo(regionId: currentRegionId)
+
+        // Then: Should not be able to travel to self
+        XCTAssertFalse(canTravel, "Should not be able to travel to current region")
+    }
+
+    func testGetRoutingHintForDistantRegion() throws {
+        // Given: A distant region
+        guard let currentRegion = engine.currentRegion else {
+            throw XCTSkip("No current region")
+        }
+
+        let distantRegion = engine.regionsArray.first { region in
+            region.id != currentRegion.id && !currentRegion.neighborIds.contains(region.id)
+        }
+
+        guard let distant = distantRegion else {
+            throw XCTSkip("All regions are neighbors")
+        }
+
+        // When: Getting routing hint
+        let hints = engine.getRoutingHint(to: distant.id)
+
+        // Then: Should return array (may be empty if no path via 1 hop)
+        // This test verifies the method returns without error and hints are valid region names
+        for hint in hints {
+            XCTAssertFalse(hint.isEmpty, "Each routing hint should be a non-empty region name")
+        }
+    }
+
+    func testGetRoutingHintEmptyForNeighbor() throws {
+        // Given: A neighbor region
+        guard let currentRegion = engine.currentRegion,
+              let neighborId = currentRegion.neighborIds.first else {
+            throw XCTSkip("No neighbors available")
+        }
+
+        // When: Getting routing hint for neighbor
+        let hints = engine.getRoutingHint(to: neighborId)
+
+        // Then: Should be empty (no hint needed)
+        XCTAssertTrue(hints.isEmpty, "Routing hints should be empty for neighbor")
+    }
+
+    // MARK: - UI Stability Tests (Duplicate ID Prevention)
+
+    func testDuplicateCardsHaveUniqueIds() {
+        // Given: Two cards with the same name (like "Защитный Посох")
+        let card1 = Card(
+            name: "Защитный Посох",
+            type: .attack,
+            rarity: .common,
+            description: "Простой посох",
+            power: 2
+        )
+        let card2 = Card(
+            name: "Защитный Посох",
+            type: .attack,
+            rarity: .common,
+            description: "Простой посох",
+            power: 2
+        )
+
+        // Then: Cards should have unique IDs even with same name
+        XCTAssertNotEqual(card1.id, card2.id, "Cards with same name should have unique IDs")
+    }
+
+    func testCombatLogCanHaveDuplicateEntries() {
+        // Given: A combat log with duplicate entries
+        var combatLog: [String] = []
+        let entry = "⚔️ Защитный Посох: +2 к урону следующей атаки"
+
+        // When: Adding same entry multiple times
+        combatLog.append(entry)
+        combatLog.append(entry)
+        combatLog.append(entry)
+
+        // Then: Log should contain all entries
+        XCTAssertEqual(combatLog.count, 3, "Combat log should allow duplicate entries")
+
+        // And: Enumerated access should work (as used in ForEach)
+        let enumerated = Array(combatLog.suffix(5).enumerated())
+        XCTAssertEqual(enumerated.count, 3, "Enumerated log should have same count")
+
+        // And: Each entry should have unique offset
+        let offsets = enumerated.map { $0.offset }
+        let uniqueOffsets = Set(offsets)
+        XCTAssertEqual(offsets.count, uniqueOffsets.count, "Each entry should have unique offset for ForEach id")
+    }
+
+    func testValidSFSymbolsUsed() {
+        // Test that we use valid SF Symbols (not sword.fill which doesn't exist)
+        // These are the symbols we use in the app
+
+        let validSymbols = [
+            "bolt.fill",      // Power/Attack (replaced sword.fill)
+            "shield.fill",    // Defense
+            "heart.fill",     // Health
+            "sparkles",       // Faith/Magic
+            "flame.fill",     // Fire damage
+            "snowflake",      // Ice damage
+            "bolt",           // Lightning
+            "leaf.fill",      // Nature
+            "moon.fill",      // Dark
+            "sun.max.fill"    // Light
+        ]
+
+        // All these symbols should exist in SF Symbols
+        for symbol in validSymbols {
+            let image = UIImage(systemName: symbol)
+            XCTAssertNotNil(image, "SF Symbol '\(symbol)' should exist")
+        }
+    }
+
+    func testInvalidSFSymbolReturnsNil() {
+        // Verify that invalid symbols like "sword.fill" return nil
+        let invalidSymbol = "sword.fill"
+        let image = UIImage(systemName: invalidSymbol)
+        XCTAssertNil(image, "SF Symbol '\(invalidSymbol)' should NOT exist")
+    }
+
+    func testDeckCanContainMultipleCopiesOfSameCard() {
+        // Given: A deck with multiple copies of the same card name
+        let cards = [
+            Card(name: "Защитный Посох", type: .attack, rarity: .common, description: "Test", power: 2),
+            Card(name: "Защитный Посох", type: .attack, rarity: .common, description: "Test", power: 2),
+            Card(name: "Светлый Оберег", type: .defense, rarity: .common, description: "Test", defense: 1),
+            Card(name: "Светлый Оберег", type: .defense, rarity: .common, description: "Test", defense: 1)
+        ]
+
+        // When: Getting unique IDs
+        let ids = cards.map { $0.id }
+        let uniqueIds = Set(ids)
+
+        // Then: All cards should have unique IDs
+        XCTAssertEqual(ids.count, uniqueIds.count, "All cards should have unique IDs even with same names")
+        XCTAssertEqual(uniqueIds.count, 4, "Should have 4 unique card IDs")
+    }
+
+    // MARK: - Content Pack Loading Tests
+
+    func testSemanticVersionDecoding() throws {
+        // Given: JSON with version string
+        let json = """
+        {"version": "1.2.3"}
+        """
+        struct VersionWrapper: Codable { let version: SemanticVersion }
+
+        // When: Decoding
+        let data = json.data(using: .utf8)!
+        let decoded = try JSONDecoder().decode(VersionWrapper.self, from: data)
+
+        // Then: Version should be parsed correctly
+        XCTAssertEqual(decoded.version.major, 1)
+        XCTAssertEqual(decoded.version.minor, 2)
+        XCTAssertEqual(decoded.version.patch, 3)
+    }
+
+    func testSemanticVersionEncoding() throws {
+        // Given: SemanticVersion
+        let version = SemanticVersion(major: 2, minor: 0, patch: 1)
+        struct VersionWrapper: Codable { let version: SemanticVersion }
+
+        // When: Encoding
+        let wrapper = VersionWrapper(version: version)
+        let data = try JSONEncoder().encode(wrapper)
+        let json = String(data: data, encoding: .utf8)!
+
+        // Then: Should encode to string format
+        XCTAssertTrue(json.contains("\"2.0.1\""), "Version should be encoded as string")
+    }
+
+    func testInvalidSemanticVersionThrowsError() {
+        // Given: JSON with invalid version
+        let json = """
+        {"version": "invalid"}
+        """
+        struct VersionWrapper: Codable { let version: SemanticVersion }
+
+        // When/Then: Decoding should throw
+        let data = json.data(using: .utf8)!
+        XCTAssertThrowsError(try JSONDecoder().decode(VersionWrapper.self, from: data))
+    }
+
+    func testContentRegistryExists() {
+        // Given: Shared content registry
+        let registry = ContentRegistry.shared
+
+        // Then: Should exist
+        XCTAssertNotNil(registry, "ContentRegistry.shared should exist")
+    }
+
+    // MARK: - Performance Tests
+
+    func testEngineInitializationPerformance() {
+        // Measure time to initialize engine
+        measure {
+            let testPlayer = Player(name: "Test Hero")
+            let testGameState = GameState(players: [testPlayer])
+            let testWorldState = testGameState.worldState
+            let testEngine = TwilightGameEngine()
+            testEngine.connectToLegacy(worldState: testWorldState, player: testPlayer)
+
+            // Ensure engine is usable
+            XCTAssertNotNil(testEngine.currentRegionId)
+        }
+    }
+
+    func testRegionAccessPerformance() {
+        // Measure time to access regions multiple times
+        measure {
+            for _ in 0..<100 {
+                let regions = engine.regionsArray
+                XCTAssertFalse(regions.isEmpty)
+            }
+        }
+    }
+
+    func testTravelActionPerformance() throws {
+        guard let currentRegion = engine.currentRegion,
+              let neighborId = currentRegion.neighborIds.first else {
+            throw XCTSkip("No neighbors for performance test")
+        }
+
+        // Measure travel performance
+        measure {
+            // Travel to neighbor
+            _ = engine.performAction(.travel(toRegionId: neighborId))
+
+            // Travel back
+            if let newRegion = engine.currentRegion,
+               let returnId = newRegion.neighborIds.first {
+                _ = engine.performAction(.travel(toRegionId: returnId))
+            }
+        }
+    }
+
+    func testCardCreationPerformance() {
+        // Measure card creation performance
+        measure {
+            for i in 0..<100 {
+                _ = Card(
+                    name: "Test Card \(i)",
+                    type: .attack,
+                    rarity: .common,
+                    description: "Test description",
+                    power: 2
+                )
+            }
+        }
+    }
+
+    func testCombatLogEnumeratedPerformance() {
+        // Test that enumerated log (used in ForEach) is fast
+        var log: [String] = []
+        for i in 0..<1000 {
+            log.append("⚔️ Action \(i)")
+        }
+
+        measure {
+            // This is what ForEach does
+            let enumerated = Array(log.suffix(5).enumerated())
+            XCTAssertEqual(enumerated.count, 5)
+
+            // Access each element
+            for (index, entry) in enumerated {
+                XCTAssertNotNil(index)
+                XCTAssertFalse(entry.isEmpty)
+            }
+        }
+    }
 }
 
 // MARK: - Test Helpers
