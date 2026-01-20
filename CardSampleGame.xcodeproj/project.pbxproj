@@ -133,11 +133,11 @@
 		CPA7568BA17ABF44F2938D92 /* PackLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PackLoader.swift; path = Engine/ContentPacks/PackLoader.swift; sourceTree = SOURCE_ROOT; };
 		CPC53F48F00545404490B13F /* CoreGameEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CoreGameEngine.swift; path = Engine/Core/CoreGameEngine.swift; sourceTree = SOURCE_ROOT; };
 
-		0BE0C9930A837029C5CD71A5 /* ExplorationModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExplorationModels.swift; path = Models/ExplorationModels.swift; sourceTree = "<group>"; };
+		0BE0C9930A837029C5CD71A5 /* ExplorationModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExplorationModels.swift; sourceTree = "<group>"; };
 		180D9390663A50D5E72CF9B2 /* LocalizedString.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalizedString.swift; sourceTree = "<group>"; };
-		2263FEB0CBAF703EC97141A7 /* WorldState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WorldState.swift; path = Models/WorldState.swift; sourceTree = "<group>"; };
-		43D4E3FBE4DC34B63B61E061 /* EventView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EventView.swift; path = Views/EventView.swift; sourceTree = "<group>"; };
-		6BEC0AA856AB6706612208E1 /* WorldMapView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WorldMapView.swift; path = Views/WorldMapView.swift; sourceTree = "<group>"; };
+		2263FEB0CBAF703EC97141A7 /* WorldState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WorldState.swift; sourceTree = "<group>"; };
+		43D4E3FBE4DC34B63B61E061 /* EventView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventView.swift; sourceTree = "<group>"; };
+		6BEC0AA856AB6706612208E1 /* WorldMapView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WorldMapView.swift; sourceTree = "<group>"; };
 		6E78C30B2863C87F7904765D /* JSONContentProviderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = JSONContentProviderTests.swift; sourceTree = "<group>"; };
 		AA0000020000000000000001 /* CardGameApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardGameApp.swift; sourceTree = "<group>"; };
 		AA0000040000000000000001 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -179,7 +179,7 @@
 		BB0004060000000000000001 /* DataSeparationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataSeparationTests.swift; sourceTree = "<group>"; };
 		BB0004080000000000000001 /* RegressionPlaythroughTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegressionPlaythroughTests.swift; sourceTree = "<group>"; };
 		BB0004100000000000000001 /* Phase2ContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Phase2ContractTests.swift; sourceTree = "<group>"; };
-		CC0000010000000000000001 /* CombatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CombatView.swift; path = Views/CombatView.swift; sourceTree = "<group>"; };
+		CC0000010000000000000001 /* CombatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombatView.swift; sourceTree = "<group>"; };
 		CC0000030000000000000001 /* AccessibilityIdentifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityIdentifiers.swift; sourceTree = "<group>"; };
 		EE0001020000000000000001 /* EngineProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngineProtocols.swift; sourceTree = "<group>"; };
 		EE0001040000000000000001 /* GameLoop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameLoop.swift; sourceTree = "<group>"; };
@@ -267,23 +267,6 @@
 			sourceTree = "<group>";
 		};
 
-		0EE40F73C4754A16EB24BF83 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Resources;
-			path = Resources;
-			sourceTree = "<group>";
-		};
-		400571CAB07A5DD68E7B0107 /* Models */ = {
-			isa = PBXGroup;
-			children = (
-				0BE0C9930A837029C5CD71A5 /* ExplorationModels.swift */,
-				2263FEB0CBAF703EC97141A7 /* WorldState.swift */,
-			);
-			name = Models;
-			sourceTree = "<group>";
-		};
 		AA0000240000000000000001 = {
 			isa = PBXGroup;
 			children = (
@@ -292,8 +275,6 @@
 				LL0000030000000000000001 /* ViewModels */,
 				BB0003000000000000000001 /* CardSampleGameTests */,
 				AA0000260000000000000001 /* Products */,
-				E65102638302D3C4A04B78CD /* CardSampleGame */,
-				0EE40F73C4754A16EB24BF83 /* Resources */,
 			);
 			sourceTree = "<group>";
 		};
@@ -307,6 +288,7 @@
 				AA0000280000000000000001 /* Views */,
 				AA0000290000000000000001 /* Data */,
 				AA0000470000000000000001 /* Helpers */,
+				UT0000000000000000000001 /* Utilities */,
 				AA0000450000000000000001 /* Localizable.strings */,
 			);
 			path = .;
@@ -329,6 +311,8 @@
 				AA0000100000000000000001 /* Player.swift */,
 				AA0000120000000000000001 /* GameState.swift */,
 				AA0000530000000000000001 /* GameSave.swift */,
+				0BE0C9930A837029C5CD71A5 /* ExplorationModels.swift */,
+				2263FEB0CBAF703EC97141A7 /* WorldState.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -342,6 +326,9 @@
 				AA0000490000000000000001 /* RulesView.swift */,
 				AA0000550000000000000001 /* StatisticsView.swift */,
 				GG0002020000000000000001 /* HeroSelectionView.swift */,
+				43D4E3FBE4DC34B63B61E061 /* EventView.swift */,
+				6BEC0AA856AB6706612208E1 /* WorldMapView.swift */,
+				CC0000010000000000000001 /* CombatView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -362,9 +349,19 @@
 			path = Helpers;
 			sourceTree = "<group>";
 		};
+		UT0000000000000000000001 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				CC0000030000000000000001 /* AccessibilityIdentifiers.swift */,
+				FF0001020000000000000001 /* WorldRNG.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
 		BB0003000000000000000001 /* CardSampleGameTests */ = {
 			isa = PBXGroup;
 			children = (
+				CT00000000000003 /* ContentPackTests */,
 				BB0003010000000000000001 /* Unit */,
 				BB0003030000000000000001 /* Integration */,
 				BB0003050000000000000001 /* Engine */,
@@ -375,7 +372,6 @@
 		BB0003010000000000000001 /* Unit */ = {
 			isa = PBXGroup;
 			children = (
-				CT00000000000003 /* ContentPackTests */,
 				BB0001020000000000000001 /* WorldStateTests.swift */,
 				BB0001040000000000000001 /* PlayerTests.swift */,
 				BB0001060000000000000001 /* EventSystemTests.swift */,
@@ -419,41 +415,12 @@
 			path = Engine;
 			sourceTree = "<group>";
 		};
-		CC0000050000000000000001 /* Utilities */ = {
-			isa = PBXGroup;
-			children = (
-				CC0000030000000000000001 /* AccessibilityIdentifiers.swift */,
-				FF0001020000000000000001 /* WorldRNG.swift */,
-			);
-			name = Utilities;
-			path = Utilities;
-			sourceTree = "<group>";
-		};
-		D0A7147A6DE85C304CAD50D7 /* Views */ = {
-			isa = PBXGroup;
-			children = (
-				43D4E3FBE4DC34B63B61E061 /* EventView.swift */,
-				6BEC0AA856AB6706612208E1 /* WorldMapView.swift */,
-				CC0000010000000000000001 /* CombatView.swift */,
-			);
-			name = Views;
-			sourceTree = "<group>";
-		};
-		E65102638302D3C4A04B78CD /* CardSampleGame */ = {
-			isa = PBXGroup;
-			children = (
-				400571CAB07A5DD68E7B0107 /* Models */,
-				D0A7147A6DE85C304CAD50D7 /* Views */,
-				CC0000050000000000000001 /* Utilities */,
-			);
-			name = CardSampleGame;
-			sourceTree = "<group>";
-		};
 		EE0000000000000000000001 /* Engine */ = {
 			isa = PBXGroup;
 			children = (
 				EE0000010000000000000001 /* Core */,
 				EE0000020000000000000001 /* Config */,
+				CP00000000000001 /* ContentPacks */,
 				EE0000030000000000000001 /* Data */,
 				EE0000040000000000000001 /* Runtime */,
 				EE0000050000000000000001 /* Migration */,
