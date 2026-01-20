@@ -178,20 +178,19 @@ struct EventView: View {
                              choice.id == event.choices.first?.id &&
                              event.monsterCard != nil
 
-        return Button(action: {
-            if canChoose {
-                selectedChoice = choice
+        return Button {
+            guard canChoose else { return }
+            selectedChoice = choice
 
-                // Check if this is a combat choice
-                if isCombatChoice {
-                    initiateCombat(choice: choice)
-                } else {
-                    // Применяем выбор сразу и закрываем
-                    onChoiceSelected(choice)
-                    onDismiss()
-                }
+            // Check if this is a combat choice
+            if isCombatChoice {
+                initiateCombat(choice: choice)
+            } else {
+                // Применяем выбор сразу и закрываем
+                onChoiceSelected(choice)
+                onDismiss()
             }
-        }) {
+        } label: {
             VStack(alignment: .leading, spacing: 8) {
                 Text(choice.text)
                     .font(.body)
@@ -216,7 +215,9 @@ struct EventView: View {
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(canChoose ? Color.blue.opacity(0.5) : Color.clear, lineWidth: 2)
             )
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
         .disabled(!canChoose)
     }
 
