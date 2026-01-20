@@ -1,166 +1,166 @@
-# Balance Pack Specification
+# Спецификация Balance Pack
 
-> **Version:** 1.0
-> **Status:** Active
-> **Last Updated:** January 2026
-
----
-
-## 1. Overview
-
-### 1.1 Purpose
-
-A Balance Pack provides game configuration without adding new content. It adjusts numbers, weights, costs, and other tuning parameters to modify game difficulty, pacing, and feel.
-
-### 1.2 Scope
-
-This specification covers:
-- Balance pack structure and manifest
-- Configuration categories (resources, pressure, time, combat, economy)
-- Parameter bounds and validation
-- Difficulty presets
-- Mod compatibility
-
-### 1.3 Terminology
-
-| Term | Definition |
-|------|------------|
-| **Balance** | Numerical configuration affecting gameplay |
-| **Tuning** | Fine-tuning of existing parameters |
-| **Difficulty** | Overall game challenge level |
-| **Parameter** | Individual configurable value |
-| **Override** | Replacement of default values |
+> **Версия:** 1.0
+> **Статус:** Активный
+> **Последнее обновление:** Январь 2026
 
 ---
 
-## 2. Functional Requirements
+## 1. Обзор
 
-### 2.1 Core Functionality
+### 1.1 Назначение
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-BAL-001 | Pack MUST provide balance.json | Required |
-| FR-BAL-002 | Pack MUST NOT introduce new content | Required |
-| FR-BAL-003 | Pack MAY override any parameter | Optional |
-| FR-BAL-004 | Unspecified parameters use defaults | Required |
-| FR-BAL-005 | Pack MAY define difficulty presets | Optional |
+Balance Pack предоставляет конфигурацию игры без добавления нового контента. Он настраивает числа, веса, стоимости и другие параметры тюнинга для изменения сложности игры, темпа и ощущений от игры.
 
-### 2.2 Resource Configuration
+### 1.2 Область применения
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-RES-001 | Pack MAY configure max health | Optional |
-| FR-RES-002 | Pack MAY configure starting resources | Optional |
-| FR-RES-003 | Pack MAY configure regeneration rates | Optional |
-| FR-RES-004 | Resource values MUST be positive | Required |
+Данная спецификация охватывает:
+- Структуру balance pack и манифест
+- Категории конфигурации (ресурсы, pressure, время, бой, экономика)
+- Границы параметров и валидация
+- Пресеты сложности
+- Совместимость модов
 
-### 2.3 Pressure Configuration
+### 1.3 Терминология
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-PRS-001 | Pack MAY configure pressure thresholds | Optional |
-| FR-PRS-002 | Pack MAY configure pressure rates | Optional |
-| FR-PRS-003 | Pressure values MUST be 0-100 | Required |
-| FR-PRS-004 | Thresholds MUST be ordered | Required |
-
-### 2.4 Time Configuration
-
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-TIM-001 | Pack MAY configure action costs | Optional |
-| FR-TIM-002 | Pack MAY configure day length | Optional |
-| FR-TIM-003 | Time values MUST be positive | Required |
-
-### 2.5 Combat Configuration
-
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-CMB-001 | Pack MAY configure damage formulas | Optional |
-| FR-CMB-002 | Pack MAY configure defense mechanics | Optional |
-| FR-CMB-003 | Pack MAY configure card draw rules | Optional |
-
-### 2.6 End Conditions
-
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-END-001 | Pack MAY modify loss conditions | Optional |
-| FR-END-002 | Pack MAY modify victory conditions | Optional |
-| FR-END-003 | At least one victory condition required | Required |
+| Термин | Определение |
+|--------|-------------|
+| **Balance** | Числовая конфигурация, влияющая на геймплей |
+| **Tuning** | Тонкая настройка существующих параметров |
+| **Difficulty** | Общий уровень сложности игры |
+| **Parameter** | Отдельное настраиваемое значение |
+| **Override** | Замена значений по умолчанию |
 
 ---
 
-## 3. Non-Functional Requirements
+## 2. Функциональные требования
 
-### 3.1 Performance
+### 2.1 Базовая функциональность
 
-| ID | Requirement | Target |
-|----|-------------|--------|
-| NFR-PERF-001 | Config load time | < 50ms |
-| NFR-PERF-002 | Maximum file size | 100KB |
-| NFR-PERF-003 | Parameter lookup | O(1) |
+| ID | Требование | Приоритет |
+|----|------------|-----------|
+| FR-BAL-001 | Pack ОБЯЗАН предоставлять balance.json | Обязательно |
+| FR-BAL-002 | Pack НЕ ДОЛЖЕН вводить новый контент | Обязательно |
+| FR-BAL-003 | Pack МОЖЕТ переопределять любой параметр | Опционально |
+| FR-BAL-004 | Неуказанные параметры используют значения по умолчанию | Обязательно |
+| FR-BAL-005 | Pack МОЖЕТ определять пресеты сложности | Опционально |
 
-### 3.2 Compatibility
+### 2.2 Конфигурация ресурсов
 
-| ID | Requirement | Target |
-|----|-------------|--------|
-| NFR-COMP-001 | Core version | Semantic versioning |
-| NFR-COMP-002 | Campaign compatibility | Any campaign |
-| NFR-COMP-003 | Investigator compatibility | Any investigator |
+| ID | Требование | Приоритет |
+|----|------------|-----------|
+| FR-RES-001 | Pack МОЖЕТ настраивать максимальное здоровье | Опционально |
+| FR-RES-002 | Pack МОЖЕТ настраивать стартовые ресурсы | Опционально |
+| FR-RES-003 | Pack МОЖЕТ настраивать скорость регенерации | Опционально |
+| FR-RES-004 | Значения ресурсов ОБЯЗАНЫ быть положительными | Обязательно |
 
-### 3.3 Safety
+### 2.3 Конфигурация Pressure
 
-| ID | Requirement | Target |
-|----|-------------|--------|
-| NFR-SAF-001 | Parameter bounds | Validated |
-| NFR-SAF-002 | Division by zero | Prevented |
-| NFR-SAF-003 | Overflow protection | Enforced |
+| ID | Требование | Приоритет |
+|----|------------|-----------|
+| FR-PRS-001 | Pack МОЖЕТ настраивать пороги pressure | Опционально |
+| FR-PRS-002 | Pack МОЖЕТ настраивать скорость pressure | Опционально |
+| FR-PRS-003 | Значения pressure ОБЯЗАНЫ быть 0-100 | Обязательно |
+| FR-PRS-004 | Пороги ОБЯЗАНЫ быть упорядочены | Обязательно |
 
-### 3.4 Usability
+### 2.4 Конфигурация времени
 
-| ID | Requirement | Target |
-|----|-------------|--------|
-| NFR-USE-001 | Clear parameter names | Self-documenting |
-| NFR-USE-002 | Difficulty presets | User-friendly |
-| NFR-USE-003 | Default values | Always provided |
+| ID | Требование | Приоритет |
+|----|------------|-----------|
+| FR-TIM-001 | Pack МОЖЕТ настраивать стоимость действий | Опционально |
+| FR-TIM-002 | Pack МОЖЕТ настраивать длину дня | Опционально |
+| FR-TIM-003 | Значения времени ОБЯЗАНЫ быть положительными | Обязательно |
+
+### 2.5 Конфигурация боя
+
+| ID | Требование | Приоритет |
+|----|------------|-----------|
+| FR-CMB-001 | Pack МОЖЕТ настраивать формулы урона | Опционально |
+| FR-CMB-002 | Pack МОЖЕТ настраивать механику защиты | Опционально |
+| FR-CMB-003 | Pack МОЖЕТ настраивать правила вытягивания карт | Опционально |
+
+### 2.6 Условия окончания
+
+| ID | Требование | Приоритет |
+|----|------------|-----------|
+| FR-END-001 | Pack МОЖЕТ изменять условия поражения | Опционально |
+| FR-END-002 | Pack МОЖЕТ изменять условия победы | Опционально |
+| FR-END-003 | Требуется минимум одно условие победы | Обязательно |
 
 ---
 
-## 4. Data Schemas
+## 3. Нефункциональные требования
 
-### 4.1 Manifest Schema
+### 3.1 Производительность
+
+| ID | Требование | Цель |
+|----|------------|------|
+| NFR-PERF-001 | Время загрузки конфигурации | < 50мс |
+| NFR-PERF-002 | Максимальный размер файла | 100КБ |
+| NFR-PERF-003 | Поиск параметра | O(1) |
+
+### 3.2 Совместимость
+
+| ID | Требование | Цель |
+|----|------------|------|
+| NFR-COMP-001 | Версия ядра | Семантическое версионирование |
+| NFR-COMP-002 | Совместимость с campaign | Любой campaign |
+| NFR-COMP-003 | Совместимость с investigator | Любой investigator |
+
+### 3.3 Безопасность
+
+| ID | Требование | Цель |
+|----|------------|------|
+| NFR-SAF-001 | Границы параметров | Валидируются |
+| NFR-SAF-002 | Деление на ноль | Предотвращается |
+| NFR-SAF-003 | Защита от переполнения | Обеспечивается |
+
+### 3.4 Удобство использования
+
+| ID | Требование | Цель |
+|----|------------|------|
+| NFR-USE-001 | Понятные имена параметров | Самодокументирующиеся |
+| NFR-USE-002 | Пресеты сложности | Удобные для пользователя |
+| NFR-USE-003 | Значения по умолчанию | Всегда предоставлены |
+
+---
+
+## 4. Схемы данных
+
+### 4.1 Схема манифеста
 
 ```json
 {
   "$schema": "balance-pack-manifest-v1",
-  "id": "string (required, unique)",
-  "name": "LocalizedString (required)",
-  "description": "LocalizedString (required)",
-  "version": "SemanticVersion (required)",
-  "type": "balance (required)",
-  "core_version_min": "SemanticVersion (required)",
+  "id": "string (обязательно, уникальный)",
+  "name": "LocalizedString (обязательно)",
+  "description": "LocalizedString (обязательно)",
+  "version": "SemanticVersion (обязательно)",
+  "type": "balance (обязательно)",
+  "core_version_min": "SemanticVersion (обязательно)",
   "core_version_max": "SemanticVersion | null",
-  "balance_path": "string (required, relative path)",
-  "difficulty_level": "easy | normal | hard | nightmare (optional)",
-  "tags": "string[] (optional, for filtering)"
+  "balance_path": "string (обязательно, относительный путь)",
+  "difficulty_level": "easy | normal | hard | nightmare (опционально)",
+  "tags": "string[] (опционально, для фильтрации)"
 }
 ```
 
-### 4.2 Balance Configuration Schema
+### 4.2 Схема конфигурации баланса
 
 ```json
 {
-  "resources": "ResourceConfiguration (optional)",
-  "pressure": "PressureConfiguration (optional)",
-  "anchor": "AnchorConfiguration (optional)",
-  "time": "TimeConfiguration (optional)",
-  "combat": "CombatConfiguration (optional)",
-  "economy": "EconomyConfiguration (optional)",
-  "end_conditions": "EndConditionConfiguration (optional)",
-  "difficulty_modifiers": "DifficultyModifiers (optional)"
+  "resources": "ResourceConfiguration (опционально)",
+  "pressure": "PressureConfiguration (опционально)",
+  "anchor": "AnchorConfiguration (опционально)",
+  "time": "TimeConfiguration (опционально)",
+  "combat": "CombatConfiguration (опционально)",
+  "economy": "EconomyConfiguration (опционально)",
+  "end_conditions": "EndConditionConfiguration (опционально)",
+  "difficulty_modifiers": "DifficultyModifiers (опционально)"
 }
 ```
 
-### 4.3 Resource Configuration
+### 4.3 Конфигурация ресурсов
 
 ```json
 {
@@ -168,48 +168,48 @@ This specification covers:
     "type": "integer",
     "default": 10,
     "range": [5, 20],
-    "description": "Maximum player health"
+    "description": "Максимальное здоровье игрока"
   },
   "starting_health": {
     "type": "integer",
     "default": 10,
     "range": [1, "max_health"],
-    "description": "Health at game start"
+    "description": "Здоровье в начале игры"
   },
   "max_faith": {
     "type": "integer",
     "default": 10,
     "range": [3, 15],
-    "description": "Maximum faith points"
+    "description": "Максимум очков веры"
   },
   "starting_faith": {
     "type": "integer",
     "default": 3,
     "range": [0, "max_faith"],
-    "description": "Faith at game start"
+    "description": "Вера в начале игры"
   },
   "health_regen_per_rest": {
     "type": "integer",
     "default": 3,
     "range": [1, 10],
-    "description": "Health restored when resting"
+    "description": "Здоровье, восстанавливаемое при отдыхе"
   },
   "faith_per_anchor_visit": {
     "type": "integer",
     "default": 1,
     "range": [0, 5],
-    "description": "Faith gained at anchors"
+    "description": "Вера, получаемая у якорей"
   },
   "faith_per_combat_win": {
     "type": "integer",
     "default": 1,
     "range": [0, 5],
-    "description": "Faith gained from combat"
+    "description": "Вера, получаемая за победу в бою"
   }
 }
 ```
 
-### 4.4 Pressure Configuration
+### 4.4 Конфигурация Pressure
 
 ```json
 {
@@ -217,62 +217,62 @@ This specification covers:
     "type": "integer",
     "default": 30,
     "range": [0, 100],
-    "description": "Initial world pressure"
+    "description": "Начальный pressure мира"
   },
   "max_pressure": {
     "type": "integer",
     "default": 100,
     "range": [50, 100],
-    "description": "Maximum pressure (loss condition)"
+    "description": "Максимальный pressure (условие поражения)"
   },
   "pressure_per_day": {
     "type": "integer",
     "default": 5,
     "range": [0, 20],
-    "description": "Pressure increase per day"
+    "description": "Рост pressure за день"
   },
   "pressure_per_breach": {
     "type": "integer",
     "default": 10,
     "range": [0, 30],
-    "description": "Pressure from region breach"
+    "description": "Pressure от прорыва региона"
   },
   "pressure_reduction_per_strengthen": {
     "type": "integer",
     "default": 5,
     "range": [0, 20],
-    "description": "Pressure reduced when strengthening anchor"
+    "description": "Снижение pressure при укреплении якоря"
   },
   "thresholds": {
     "low": {
       "type": "integer",
       "default": 30,
       "range": [10, 40],
-      "description": "Low pressure threshold"
+      "description": "Порог низкого pressure"
     },
     "medium": {
       "type": "integer",
       "default": 50,
       "range": [30, 60],
-      "description": "Medium pressure threshold"
+      "description": "Порог среднего pressure"
     },
     "high": {
       "type": "integer",
       "default": 70,
       "range": [50, 80],
-      "description": "High pressure threshold"
+      "description": "Порог высокого pressure"
     },
     "critical": {
       "type": "integer",
       "default": 90,
       "range": [70, 95],
-      "description": "Critical pressure threshold"
+      "description": "Порог критического pressure"
     }
   }
 }
 ```
 
-### 4.5 Anchor Configuration
+### 4.5 Конфигурация якорей
 
 ```json
 {
@@ -280,54 +280,54 @@ This specification covers:
     "type": "integer",
     "default": 100,
     "range": [50, 200],
-    "description": "Maximum anchor integrity"
+    "description": "Максимальная целостность якоря"
   },
   "default_strengthen_amount": {
     "type": "integer",
     "default": 20,
     "range": [5, 50],
-    "description": "Integrity restored per strengthen"
+    "description": "Целостность, восстанавливаемая за укрепление"
   },
   "default_strengthen_cost": {
     "type": "integer",
     "default": 5,
     "range": [1, 15],
-    "description": "Faith cost to strengthen"
+    "description": "Стоимость веры для укрепления"
   },
   "stable_threshold": {
     "type": "integer",
     "default": 70,
     "range": [50, 90],
-    "description": "Integrity for stable state"
+    "description": "Целостность для стабильного состояния"
   },
   "borderland_threshold": {
     "type": "integer",
     "default": 30,
     "range": [10, 50],
-    "description": "Integrity for borderland state"
+    "description": "Целостность для состояния пограничья"
   },
   "breach_threshold": {
     "type": "integer",
     "default": 0,
     "range": [0, 20],
-    "description": "Integrity for breach state"
+    "description": "Целостность для состояния прорыва"
   },
   "decay_per_turn": {
     "type": "integer",
     "default": 5,
     "range": [0, 15],
-    "description": "Integrity lost per day"
+    "description": "Потеря целостности за день"
   },
   "decay_in_breach": {
     "type": "integer",
     "default": 10,
     "range": [5, 25],
-    "description": "Extra decay when breached"
+    "description": "Дополнительная потеря при прорыве"
   }
 }
 ```
 
-### 4.6 Time Configuration
+### 4.6 Конфигурация времени
 
 ```json
 {
@@ -335,48 +335,48 @@ This specification covers:
     "type": "integer",
     "default": 24,
     "range": [12, 48],
-    "description": "Time units in one day"
+    "description": "Единицы времени в одном дне"
   },
   "starting_time": {
     "type": "integer",
     "default": 8,
     "range": [0, "units_per_day"],
-    "description": "Starting time of day"
+    "description": "Начальное время дня"
   },
   "travel_cost": {
     "type": "integer",
     "default": 4,
     "range": [1, 12],
-    "description": "Time to travel between regions"
+    "description": "Время на путешествие между регионами"
   },
   "explore_cost": {
     "type": "integer",
     "default": 2,
     "range": [1, 8],
-    "description": "Time to explore current region"
+    "description": "Время на исследование текущего региона"
   },
   "rest_cost": {
     "type": "integer",
     "default": 8,
     "range": [4, 16],
-    "description": "Time to rest"
+    "description": "Время на отдых"
   },
   "combat_cost": {
     "type": "integer",
     "default": 2,
     "range": [1, 6],
-    "description": "Time for combat"
+    "description": "Время на бой"
   },
   "strengthen_cost": {
     "type": "integer",
     "default": 4,
     "range": [2, 8],
-    "description": "Time to strengthen anchor"
+    "description": "Время на укрепление якоря"
   }
 }
 ```
 
-### 4.7 Combat Configuration
+### 4.7 Конфигурация боя
 
 ```json
 {
@@ -384,90 +384,90 @@ This specification covers:
     "type": "float",
     "default": 1.0,
     "range": [0.5, 2.0],
-    "description": "Global damage multiplier"
+    "description": "Глобальный множитель урона"
   },
   "defense_effectiveness": {
     "type": "float",
     "default": 1.0,
     "range": [0.5, 2.0],
-    "description": "Defense reduction multiplier"
+    "description": "Множитель снижения защиты"
   },
   "starting_hand_size": {
     "type": "integer",
     "default": 5,
     "range": [3, 7],
-    "description": "Cards drawn at combat start"
+    "description": "Карты, выдаваемые в начале боя"
   },
   "cards_per_turn": {
     "type": "integer",
     "default": 1,
     "range": [1, 3],
-    "description": "Cards drawn each turn"
+    "description": "Карты, выдаваемые каждый ход"
   },
   "max_hand_size": {
     "type": "integer",
     "default": 10,
     "range": [5, 15],
-    "description": "Maximum cards in hand"
+    "description": "Максимум карт в руке"
   },
   "enemy_damage_scaling": {
     "type": "float",
     "default": 1.0,
     "range": [0.5, 2.0],
-    "description": "Enemy damage multiplier"
+    "description": "Множитель урона врагов"
   },
   "enemy_health_scaling": {
     "type": "float",
     "default": 1.0,
     "range": [0.5, 3.0],
-    "description": "Enemy health multiplier"
+    "description": "Множитель здоровья врагов"
   },
   "critical_hit_chance": {
     "type": "float",
     "default": 0.1,
     "range": [0.0, 0.3],
-    "description": "Base critical hit chance"
+    "description": "Базовый шанс критического удара"
   },
   "critical_hit_multiplier": {
     "type": "float",
     "default": 2.0,
     "range": [1.5, 3.0],
-    "description": "Critical hit damage multiplier"
+    "description": "Множитель урона критического удара"
   }
 }
 ```
 
-### 4.8 Economy Configuration
+### 4.8 Конфигурация экономики
 
 ```json
 {
   "card_acquisition_enabled": {
     "type": "boolean",
     "default": true,
-    "description": "Allow acquiring new cards"
+    "description": "Разрешить получение новых карт"
   },
   "faith_cost_multiplier": {
     "type": "float",
     "default": 1.0,
     "range": [0.5, 2.0],
-    "description": "Card faith cost multiplier"
+    "description": "Множитель стоимости веры карт"
   },
   "event_reward_multiplier": {
     "type": "float",
     "default": 1.0,
     "range": [0.5, 2.0],
-    "description": "Event rewards multiplier"
+    "description": "Множитель наград событий"
   },
   "combat_reward_multiplier": {
     "type": "float",
     "default": 1.0,
     "range": [0.5, 2.0],
-    "description": "Combat rewards multiplier"
+    "description": "Множитель наград за бой"
   }
 }
 ```
 
-### 4.9 End Condition Configuration
+### 4.9 Конфигурация условий окончания
 
 ```json
 {
@@ -475,34 +475,34 @@ This specification covers:
     "type": "integer",
     "default": 0,
     "range": [0, 0],
-    "description": "Health that triggers death (always 0)"
+    "description": "Здоровье, вызывающее смерть (всегда 0)"
   },
   "pressure_loss": {
     "type": "integer",
     "default": 100,
     "range": [80, 100],
-    "description": "Pressure that triggers loss"
+    "description": "Pressure, вызывающий поражение"
   },
   "victory_quests": {
     "type": "string[]",
     "default": [],
-    "description": "Quests required for victory"
+    "description": "Квесты, необходимые для победы"
   },
   "max_days": {
     "type": "integer | null",
     "default": null,
     "range": [10, 100],
-    "description": "Maximum days (null = unlimited)"
+    "description": "Максимум дней (null = без ограничения)"
   },
   "all_anchors_saved": {
     "type": "boolean",
     "default": false,
-    "description": "Win if all anchors stabilized"
+    "description": "Победа, если все якоря стабилизированы"
   }
 }
 ```
 
-### 4.10 Difficulty Modifiers
+### 4.10 Модификаторы сложности
 
 ```json
 {
@@ -539,43 +539,43 @@ This specification covers:
 
 ---
 
-## 5. Validation Rules
+## 5. Правила валидации
 
-### 5.1 Parameter Validation
+### 5.1 Валидация параметров
 
-| Rule | Description | Severity |
-|------|-------------|----------|
-| VAL-PRM-001 | All values must be within defined ranges | Error |
-| VAL-PRM-002 | Starting values cannot exceed maximums | Error |
-| VAL-PRM-003 | Thresholds must be properly ordered | Error |
-| VAL-PRM-004 | Multipliers must be positive | Error |
-| VAL-PRM-005 | Integer values must be integers | Error |
-| VAL-PRM-006 | Float precision max 2 decimals | Warning |
+| Правило | Описание | Серьезность |
+|---------|----------|-------------|
+| VAL-PRM-001 | Все значения должны быть в определенных диапазонах | Ошибка |
+| VAL-PRM-002 | Стартовые значения не могут превышать максимумы | Ошибка |
+| VAL-PRM-003 | Пороги должны быть правильно упорядочены | Ошибка |
+| VAL-PRM-004 | Множители должны быть положительными | Ошибка |
+| VAL-PRM-005 | Целые значения должны быть целыми | Ошибка |
+| VAL-PRM-006 | Точность float максимум 2 десятичных знака | Предупреждение |
 
-### 5.2 Consistency Validation
+### 5.2 Валидация согласованности
 
-| Rule | Description | Severity |
-|------|-------------|----------|
-| VAL-CON-001 | starting_health <= max_health | Error |
-| VAL-CON-002 | starting_faith <= max_faith | Error |
-| VAL-CON-003 | low < medium < high < critical (thresholds) | Error |
-| VAL-CON-004 | breach < borderland < stable (anchor) | Error |
-| VAL-CON-005 | starting_time < units_per_day | Error |
+| Правило | Описание | Серьезность |
+|---------|----------|-------------|
+| VAL-CON-001 | starting_health <= max_health | Ошибка |
+| VAL-CON-002 | starting_faith <= max_faith | Ошибка |
+| VAL-CON-003 | low < medium < high < critical (пороги) | Ошибка |
+| VAL-CON-004 | breach < borderland < stable (якорь) | Ошибка |
+| VAL-CON-005 | starting_time < units_per_day | Ошибка |
 
-### 5.3 Gameplay Validation
+### 5.3 Валидация геймплея
 
-| Rule | Description | Severity |
-|------|-------------|----------|
-| VAL-GAM-001 | Game must be winnable | Warning |
-| VAL-GAM-002 | Pressure growth cannot be negative | Warning |
-| VAL-GAM-003 | Rest must restore some health | Warning |
-| VAL-GAM-004 | At least one victory condition | Error |
+| Правило | Описание | Серьезность |
+|---------|----------|-------------|
+| VAL-GAM-001 | Игра должна быть выигрываемой | Предупреждение |
+| VAL-GAM-002 | Рост pressure не может быть отрицательным | Предупреждение |
+| VAL-GAM-003 | Отдых должен восстанавливать здоровье | Предупреждение |
+| VAL-GAM-004 | Минимум одно условие победы | Ошибка |
 
 ---
 
-## 6. API Contract
+## 6. Контракт API
 
-### 6.1 Configuration Interface
+### 6.1 Интерфейс конфигурации
 
 ```swift
 protocol BalanceConfigurationProvider {
@@ -585,7 +585,7 @@ protocol BalanceConfigurationProvider {
 }
 ```
 
-### 6.2 Balance Configuration Structure
+### 6.2 Структура конфигурации баланса
 
 ```swift
 struct BalanceConfiguration: Codable {
@@ -602,7 +602,7 @@ struct BalanceConfiguration: Codable {
 }
 ```
 
-### 6.3 Registry Integration
+### 6.3 Интеграция с Registry
 
 ```swift
 extension ContentRegistry {
@@ -612,10 +612,10 @@ extension ContentRegistry {
 }
 ```
 
-### 6.4 Runtime Access
+### 6.4 Runtime доступ
 
 ```swift
-// Accessing balance values at runtime
+// Доступ к значениям баланса во время игры
 let maxHealth = BalanceConfig.current.resources.maxHealth
 let pressurePerDay = BalanceConfig.current.pressure.pressurePerDay
 let travelCost = BalanceConfig.current.time.travelCost
@@ -623,11 +623,11 @@ let travelCost = BalanceConfig.current.time.travelCost
 
 ---
 
-## 7. Extension Points
+## 7. Точки расширения
 
-### 7.1 Custom Parameters
+### 7.1 Пользовательские параметры
 
-New parameters can be added to existing sections:
+Новые параметры могут быть добавлены в существующие секции:
 
 ```json
 {
@@ -641,11 +641,11 @@ New parameters can be added to existing sections:
 }
 ```
 
-Unknown parameters are ignored but logged.
+Неизвестные параметры игнорируются, но логируются.
 
-### 7.2 Formula Overrides
+### 7.2 Переопределение формул
 
-Combat damage formulas can be customized:
+Формулы урона в бою могут быть настроены:
 
 ```json
 {
@@ -656,9 +656,9 @@ Combat damage formulas can be customized:
 }
 ```
 
-### 7.3 Conditional Modifiers
+### 7.3 Условные модификаторы
 
-Modifiers can be conditional:
+Модификаторы могут быть условными:
 
 ```json
 {
@@ -673,42 +673,42 @@ Modifiers can be conditional:
 
 ---
 
-## 8. Difficulty Presets
+## 8. Пресеты сложности
 
-### 8.1 Easy Mode
+### 8.1 Легкий режим
 
-- 50% more starting health
-- 25% less damage taken
-- 50% more faith gain
-- 25% slower pressure growth
+- На 50% больше стартового здоровья
+- На 25% меньше получаемого урона
+- На 50% больше получаемой веры
+- На 25% медленнее рост pressure
 
-### 8.2 Normal Mode
+### 8.2 Нормальный режим
 
-- Baseline values
-- Standard progression
-- Balanced challenge
+- Базовые значения
+- Стандартная прогрессия
+- Сбалансированный вызов
 
-### 8.3 Hard Mode
+### 8.3 Сложный режим
 
-- 10% less starting health
-- 25% more damage taken
-- 20% less faith gain
-- 50% faster pressure growth
-- 30% stronger enemies
+- На 10% меньше стартового здоровья
+- На 25% больше получаемого урона
+- На 20% меньше получаемой веры
+- На 50% быстрее рост pressure
+- На 30% сильнее враги
 
-### 8.4 Nightmare Mode
+### 8.4 Кошмарный режим
 
-- 25% less starting health
-- 50% more damage taken
-- 40% less faith gain
-- 100% faster pressure growth
-- 50% stronger enemies
+- На 25% меньше стартового здоровья
+- На 50% больше получаемого урона
+- На 40% меньше получаемой веры
+- На 100% быстрее рост pressure
+- На 50% сильнее враги
 
 ---
 
-## 9. Examples
+## 9. Примеры
 
-### 9.1 Minimal Balance Pack
+### 9.1 Минимальный Balance Pack
 
 ```json
 // manifest.json
@@ -734,7 +734,7 @@ Modifiers can be conditional:
 }
 ```
 
-### 9.2 Full Balance Override
+### 9.2 Полное переопределение баланса
 
 ```json
 {
@@ -783,17 +783,17 @@ Modifiers can be conditional:
 
 ---
 
-## 10. Mod Compatibility
+## 10. Совместимость модов
 
-### 10.1 Load Order
+### 10.1 Порядок загрузки
 
-1. Core defaults load first
-2. Balance packs override in load order
-3. Later packs override earlier packs
+1. Сначала загружаются значения по умолчанию ядра
+2. Balance packs переопределяют в порядке загрузки
+3. Поздние packs переопределяют ранние
 
-### 10.2 Partial Overrides
+### 10.2 Частичные переопределения
 
-Packs only need to specify changed values:
+Packs должны указывать только измененные значения:
 
 ```json
 {
@@ -803,11 +803,11 @@ Packs only need to specify changed values:
 }
 ```
 
-Other values retain defaults.
+Остальные значения сохраняют значения по умолчанию.
 
-### 10.3 Inheritance
+### 10.3 Наследование
 
-Packs can inherit from other balance packs:
+Packs могут наследовать от других balance packs:
 
 ```json
 {
@@ -820,17 +820,17 @@ Packs can inherit from other balance packs:
 
 ---
 
-## 11. Related Documents
+## 11. Связанные документы
 
-- [CONTENT_PACK_GUIDE.md](./CONTENT_PACK_GUIDE.md) - General pack guide
-- [SPEC_CAMPAIGN_PACK.md](./SPEC_CAMPAIGN_PACK.md) - Campaign pack spec
-- [SPEC_INVESTIGATOR_PACK.md](./SPEC_INVESTIGATOR_PACK.md) - Investigator pack spec
-- [ENGINE_ARCHITECTURE.md](./ENGINE_ARCHITECTURE.md) - Engine architecture
+- [CONTENT_PACK_GUIDE.md](./CONTENT_PACK_GUIDE.md) - Общее руководство по pack
+- [SPEC_CAMPAIGN_PACK.md](./SPEC_CAMPAIGN_PACK.md) - Спецификация Campaign pack
+- [SPEC_INVESTIGATOR_PACK.md](./SPEC_INVESTIGATOR_PACK.md) - Спецификация Investigator pack
+- [ENGINE_ARCHITECTURE.md](./ENGINE_ARCHITECTURE.md) - Архитектура Engine
 
 ---
 
-**Document Control**
+**Контроль документа**
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | 2026-01-20 | Claude | Initial specification |
+| Версия | Дата | Автор | Изменения |
+|--------|------|-------|-----------|
+| 1.0 | 2026-01-20 | Claude | Начальная спецификация |

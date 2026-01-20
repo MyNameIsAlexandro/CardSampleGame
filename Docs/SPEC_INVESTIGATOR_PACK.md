@@ -1,164 +1,164 @@
-# Investigator Pack Specification
+# Спецификация Investigator Pack
 
-> **Version:** 1.0
-> **Status:** Active
-> **Last Updated:** January 2026
-
----
-
-## 1. Overview
-
-### 1.1 Purpose
-
-An Investigator Pack provides playable hero characters with their starting decks, abilities, and associated player cards. These packs focus on character customization and deck-building options.
-
-### 1.2 Scope
-
-This specification covers:
-- Investigator pack structure and manifest requirements
-- Hero definition schemas
-- Card definition schemas
-- Starting deck composition rules
-- Functional and non-functional requirements
-
-### 1.3 Terminology
-
-| Term | Definition |
-|------|------------|
-| **Hero** | A playable character with stats and abilities |
-| **Starting Deck** | The initial set of cards a hero begins with |
-| **Hero Class** | The archetype defining hero playstyle |
-| **Ability** | A special power unique to a hero |
-| **Card** | A playable item in combat and events |
+> **Версия:** 1.0
+> **Статус:** Активный
+> **Последнее обновление:** Январь 2026
 
 ---
 
-## 2. Functional Requirements
+## 1. Обзор
 
-### 2.1 Core Functionality
+### 1.1 Назначение
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-INV-001 | Pack MUST define at least one hero | Required |
-| FR-INV-002 | Each hero MUST have a valid starting deck | Required |
-| FR-INV-003 | Pack MAY define additional player cards | Optional |
-| FR-INV-004 | All cards in starting deck MUST exist | Required |
-| FR-INV-005 | Pack MAY depend on other packs for cards | Optional |
+Investigator Pack предоставляет игровых персонажей-героев с их стартовыми колодами, способностями и связанными картами игрока. Эти packs фокусируются на кастомизации персонажа и опциях для построения колоды.
 
-### 2.2 Hero Requirements
+### 1.2 Область применения
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-HRO-001 | Hero MUST have unique ID | Required |
-| FR-HRO-002 | Hero MUST have localized name and description | Required |
-| FR-HRO-003 | Hero MUST belong to a hero class | Required |
-| FR-HRO-004 | Hero MUST have base stats | Required |
-| FR-HRO-005 | Hero MUST have a starting deck (min 6 cards) | Required |
-| FR-HRO-006 | Hero SHOULD have a special ability | Recommended |
-| FR-HRO-007 | Hero MAY have multiple abilities | Optional |
-| FR-HRO-008 | Hero MAY have unlock conditions | Optional |
+Данная спецификация охватывает:
+- Структуру investigator pack и требования к манифесту
+- Схемы определения героев
+- Схемы определения карт
+- Правила составления стартовой колоды
+- Функциональные и нефункциональные требования
 
-### 2.3 Card Requirements
+### 1.3 Терминология
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-CRD-001 | Card MUST have unique ID | Required |
-| FR-CRD-002 | Card MUST have localized name | Required |
-| FR-CRD-003 | Card MUST have a card type | Required |
-| FR-CRD-004 | Card MUST have a rarity | Required |
-| FR-CRD-005 | Card MUST define ownership rules | Required |
-| FR-CRD-006 | Card MAY have special abilities | Optional |
-| FR-CRD-007 | Card MAY have class restrictions | Optional |
-
-### 2.4 Deck Building Rules
-
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-DEC-001 | Starting deck MUST have 6-12 cards | Required |
-| FR-DEC-002 | Starting deck SHOULD match hero's playstyle | Recommended |
-| FR-DEC-003 | Starting deck MAY have duplicate cards | Optional |
-| FR-DEC-004 | Deck MUST respect card ownership rules | Required |
+| Термин | Определение |
+|--------|-------------|
+| **Hero** | Игровой персонаж со статами и способностями |
+| **Starting Deck** | Начальный набор карт, с которым герой начинает игру |
+| **Hero Class** | Архетип, определяющий стиль игры героя |
+| **Ability** | Специальная сила, уникальная для героя |
+| **Card** | Играбельный элемент в бою и событиях |
 
 ---
 
-## 3. Non-Functional Requirements
+## 2. Функциональные требования
 
-### 3.1 Performance
+### 2.1 Базовая функциональность
 
-| ID | Requirement | Target |
-|----|-------------|--------|
-| NFR-PERF-001 | Pack load time | < 200ms |
-| NFR-PERF-002 | Maximum heroes per pack | 20 |
-| NFR-PERF-003 | Maximum cards per pack | 200 |
-| NFR-PERF-004 | Maximum file size | 5MB |
+| ID | Требование | Приоритет |
+|----|------------|-----------|
+| FR-INV-001 | Pack ОБЯЗАН определять минимум одного героя | Обязательно |
+| FR-INV-002 | Каждый герой ОБЯЗАН иметь валидную стартовую колоду | Обязательно |
+| FR-INV-003 | Pack МОЖЕТ определять дополнительные карты игрока | Опционально |
+| FR-INV-004 | Все карты в стартовой колоде ОБЯЗАНЫ существовать | Обязательно |
+| FR-INV-005 | Pack МОЖЕТ зависеть от других packs для получения карт | Опционально |
 
-### 3.2 Compatibility
+### 2.2 Требования к героям
 
-| ID | Requirement | Target |
-|----|-------------|--------|
-| NFR-COMP-001 | Core version compatibility | Semantic versioning |
-| NFR-COMP-002 | Card availability check | Runtime validation |
-| NFR-COMP-003 | Cross-pack card references | Via dependencies |
+| ID | Требование | Приоритет |
+|----|------------|-----------|
+| FR-HRO-001 | Герой ОБЯЗАН иметь уникальный ID | Обязательно |
+| FR-HRO-002 | Герой ОБЯЗАН иметь локализованное имя и описание | Обязательно |
+| FR-HRO-003 | Герой ОБЯЗАН принадлежать к классу героя | Обязательно |
+| FR-HRO-004 | Герой ОБЯЗАН иметь базовые статы | Обязательно |
+| FR-HRO-005 | Герой ОБЯЗАН иметь стартовую колоду (минимум 6 карт) | Обязательно |
+| FR-HRO-006 | Герой ДОЛЖЕН иметь специальную способность | Рекомендовано |
+| FR-HRO-007 | Герой МОЖЕТ иметь несколько способностей | Опционально |
+| FR-HRO-008 | Герой МОЖЕТ иметь условия разблокировки | Опционально |
 
-### 3.3 Balance
+### 2.3 Требования к картам
 
-| ID | Requirement | Target |
-|----|-------------|--------|
-| NFR-BAL-001 | Hero stats must be within bounds | Validated |
-| NFR-BAL-002 | Starting deck power level | Comparable to base heroes |
-| NFR-BAL-003 | Ability cooldowns | Minimum 1 turn |
+| ID | Требование | Приоритет |
+|----|------------|-----------|
+| FR-CRD-001 | Карта ОБЯЗАНА иметь уникальный ID | Обязательно |
+| FR-CRD-002 | Карта ОБЯЗАНА иметь локализованное название | Обязательно |
+| FR-CRD-003 | Карта ОБЯЗАНА иметь тип карты | Обязательно |
+| FR-CRD-004 | Карта ОБЯЗАНА иметь редкость | Обязательно |
+| FR-CRD-005 | Карта ОБЯЗАНА определять правила владения | Обязательно |
+| FR-CRD-006 | Карта МОЖЕТ иметь специальные способности | Опционально |
+| FR-CRD-007 | Карта МОЖЕТ иметь классовые ограничения | Опционально |
 
-### 3.4 Accessibility
+### 2.4 Правила построения колоды
 
-| ID | Requirement | Target |
-|----|-------------|--------|
-| NFR-ACC-001 | Hero descriptions | Clear and informative |
-| NFR-ACC-002 | Ability descriptions | Unambiguous effects |
-| NFR-ACC-003 | Card text | Consistent terminology |
+| ID | Требование | Приоритет |
+|----|------------|-----------|
+| FR-DEC-001 | Стартовая колода ОБЯЗАНА иметь 6-12 карт | Обязательно |
+| FR-DEC-002 | Стартовая колода ДОЛЖНА соответствовать стилю игры героя | Рекомендовано |
+| FR-DEC-003 | Стартовая колода МОЖЕТ иметь дубликаты карт | Опционально |
+| FR-DEC-004 | Колода ОБЯЗАНА соблюдать правила владения картами | Обязательно |
 
 ---
 
-## 4. Data Schemas
+## 3. Нефункциональные требования
 
-### 4.1 Manifest Schema
+### 3.1 Производительность
+
+| ID | Требование | Цель |
+|----|------------|------|
+| NFR-PERF-001 | Время загрузки pack | < 200мс |
+| NFR-PERF-002 | Максимум героев на pack | 20 |
+| NFR-PERF-003 | Максимум карт на pack | 200 |
+| NFR-PERF-004 | Максимальный размер файла | 5МБ |
+
+### 3.2 Совместимость
+
+| ID | Требование | Цель |
+|----|------------|------|
+| NFR-COMP-001 | Совместимость версии ядра | Семантическое версионирование |
+| NFR-COMP-002 | Проверка доступности карт | Runtime валидация |
+| NFR-COMP-003 | Кросс-pack ссылки на карты | Через dependencies |
+
+### 3.3 Баланс
+
+| ID | Требование | Цель |
+|----|------------|------|
+| NFR-BAL-001 | Статы героя должны быть в пределах | Валидируется |
+| NFR-BAL-002 | Уровень силы стартовой колоды | Сравним с базовыми героями |
+| NFR-BAL-003 | Перезарядка способностей | Минимум 1 ход |
+
+### 3.4 Доступность
+
+| ID | Требование | Цель |
+|----|------------|------|
+| NFR-ACC-001 | Описания героев | Понятные и информативные |
+| NFR-ACC-002 | Описания способностей | Однозначные эффекты |
+| NFR-ACC-003 | Текст карт | Согласованная терминология |
+
+---
+
+## 4. Схемы данных
+
+### 4.1 Схема манифеста
 
 ```json
 {
   "$schema": "investigator-pack-manifest-v1",
-  "id": "string (required, unique, lowercase-hyphen)",
-  "name": "LocalizedString (required)",
-  "description": "LocalizedString (required)",
-  "version": "SemanticVersion (required)",
-  "type": "investigator (required)",
-  "core_version_min": "SemanticVersion (required)",
+  "id": "string (обязательно, уникальный, lowercase-hyphen)",
+  "name": "LocalizedString (обязательно)",
+  "description": "LocalizedString (обязательно)",
+  "version": "SemanticVersion (обязательно)",
+  "type": "investigator (обязательно)",
+  "core_version_min": "SemanticVersion (обязательно)",
   "core_version_max": "SemanticVersion | null",
-  "dependencies": "PackDependency[] (optional)",
-  "heroes_path": "string (required, relative path)",
-  "cards_path": "string (optional, relative path)",
-  "locales": "string[] (default: ['en'])",
-  "localization_path": "string (optional)",
-  "recommended_campaigns": "string[] (optional, campaign pack IDs)"
+  "dependencies": "PackDependency[] (опционально)",
+  "heroes_path": "string (обязательно, относительный путь)",
+  "cards_path": "string (опционально, относительный путь)",
+  "locales": "string[] (по умолчанию: ['en'])",
+  "localization_path": "string (опционально)",
+  "recommended_campaigns": "string[] (опционально, ID campaign pack)"
 }
 ```
 
-### 4.2 Hero Schema
+### 4.2 Схема героя
 
 ```json
 {
-  "id": "string (required, unique)",
-  "name": "string (required, display name)",
-  "name_ru": "string (optional, Russian name)",
-  "hero_class": "HeroClass (required)",
-  "description": "string (required)",
-  "description_ru": "string (optional)",
-  "icon": "string (required, SF Symbol name)",
-  "base_stats": "HeroStats (required)",
-  "special_ability": "HeroAbility (required)",
-  "passive_abilities": "HeroAbility[] (optional)",
-  "starting_deck": "string[] (required, card IDs, min: 6)",
-  "availability": "HeroAvailability (required)",
-  "recommended_cards": "string[] (optional)",
-  "lore": "LocalizedString (optional, background story)"
+  "id": "string (обязательно, уникальный)",
+  "name": "string (обязательно, отображаемое имя)",
+  "name_ru": "string (опционально, русское имя)",
+  "hero_class": "HeroClass (обязательно)",
+  "description": "string (обязательно)",
+  "description_ru": "string (опционально)",
+  "icon": "string (обязательно, имя SF Symbol)",
+  "base_stats": "HeroStats (обязательно)",
+  "special_ability": "HeroAbility (обязательно)",
+  "passive_abilities": "HeroAbility[] (опционально)",
+  "starting_deck": "string[] (обязательно, ID карт, min: 6)",
+  "availability": "HeroAvailability (обязательно)",
+  "recommended_cards": "string[] (опционально)",
+  "lore": "LocalizedString (опционально, история персонажа)"
 }
 ```
 
@@ -168,29 +168,29 @@ This specification covers:
 warrior | mage | ranger | priest | shadow | alchemist | bard | monk
 ```
 
-Each class defines a playstyle:
+Каждый класс определяет стиль игры:
 
-| Class | Focus | Typical Stats |
-|-------|-------|---------------|
-| warrior | Melee combat, defense | High strength, health |
-| mage | Spells, area effects | High wisdom |
-| ranger | Ranged, mobility | High agility |
-| priest | Healing, support | High faith, wisdom |
-| shadow | Stealth, critical hits | High agility |
-| alchemist | Items, buffs | Balanced |
-| bard | Buffs, debuffs | High charisma |
-| monk | Balance, combos | Balanced |
+| Класс | Фокус | Типичные статы |
+|-------|-------|----------------|
+| warrior | Ближний бой, защита | Высокая сила, здоровье |
+| mage | Заклинания, массовые эффекты | Высокая мудрость |
+| ranger | Дальний бой, мобильность | Высокая ловкость |
+| priest | Лечение, поддержка | Высокая вера, мудрость |
+| shadow | Скрытность, критические удары | Высокая ловкость |
+| alchemist | Предметы, баффы | Сбалансированный |
+| bard | Баффы, дебаффы | Высокая харизма |
+| monk | Баланс, комбо | Сбалансированный |
 
 #### HeroStats
 
 ```json
 {
-  "health": "integer (required, range: 8-15)",
-  "faith": "integer (required, range: 1-10)",
-  "strength": "integer (optional, range: 1-5)",
-  "agility": "integer (optional, range: 1-5)",
-  "wisdom": "integer (optional, range: 1-5)",
-  "charisma": "integer (optional, range: 1-5)"
+  "health": "integer (обязательно, диапазон: 8-15)",
+  "faith": "integer (обязательно, диапазон: 1-10)",
+  "strength": "integer (опционально, диапазон: 1-5)",
+  "agility": "integer (опционально, диапазон: 1-5)",
+  "wisdom": "integer (опционально, диапазон: 1-5)",
+  "charisma": "integer (опционально, диапазон: 1-5)"
 }
 ```
 
@@ -198,17 +198,17 @@ Each class defines a playstyle:
 
 ```json
 {
-  "id": "string (required)",
-  "name": "string (required)",
-  "name_ru": "string (optional)",
-  "description": "string (required)",
-  "description_ru": "string (optional)",
-  "ability_type": "active | passive | triggered (required)",
-  "cooldown": "integer (optional, turns, min: 1)",
-  "uses_per_combat": "integer | null (null = unlimited)",
-  "faith_cost": "integer (optional, default: 0)",
-  "effect": "AbilityEffect (required)",
-  "icon": "string (optional, SF Symbol)"
+  "id": "string (обязательно)",
+  "name": "string (обязательно)",
+  "name_ru": "string (опционально)",
+  "description": "string (обязательно)",
+  "description_ru": "string (опционально)",
+  "ability_type": "active | passive | triggered (обязательно)",
+  "cooldown": "integer (опционально, ходы, min: 1)",
+  "uses_per_combat": "integer | null (null = неограниченно)",
+  "faith_cost": "integer (опционально, по умолчанию: 0)",
+  "effect": "AbilityEffect (обязательно)",
+  "icon": "string (опционально, SF Symbol)"
 }
 ```
 
@@ -219,9 +219,9 @@ Each class defines a playstyle:
   "effect_type": "damage | heal | buff | debuff | draw | discard | special",
   "target": "self | enemy | all_enemies | ally | all",
   "value": "integer | null",
-  "duration": "integer (turns, optional)",
-  "modifier_type": "string (optional, for buffs/debuffs)",
-  "special_effect": "string (optional, custom effect ID)"
+  "duration": "integer (ходы, опционально)",
+  "modifier_type": "string (опционально, для баффов/дебаффов)",
+  "special_effect": "string (опционально, ID пользовательского эффекта)"
 }
 ```
 
@@ -230,9 +230,9 @@ Each class defines a playstyle:
 ```json
 {
   "type": "always | unlock | purchase | campaign",
-  "unlock_condition": "UnlockCondition | null (if type = unlock)",
-  "campaign_id": "string | null (if type = campaign)",
-  "purchase_cost": "{ currency: integer } | null (if type = purchase)"
+  "unlock_condition": "UnlockCondition | null (если type = unlock)",
+  "campaign_id": "string | null (если type = campaign)",
+  "purchase_cost": "{ currency: integer } | null (если type = purchase)"
 }
 ```
 
@@ -241,32 +241,32 @@ Each class defines a playstyle:
 ```json
 {
   "condition_type": "complete_quest | defeat_boss | reach_day | collect_cards",
-  "target_id": "string (what to complete)",
-  "target_count": "integer (default: 1)"
+  "target_id": "string (что нужно выполнить)",
+  "target_count": "integer (по умолчанию: 1)"
 }
 ```
 
-### 4.3 Card Schema
+### 4.3 Схема карты
 
 ```json
 {
-  "id": "string (required, unique)",
-  "name": "string (required)",
-  "name_ru": "string (optional)",
-  "card_type": "CardType (required)",
-  "rarity": "CardRarity (required)",
-  "description": "string (required)",
-  "description_ru": "string (optional)",
-  "icon": "string (required, SF Symbol)",
-  "expansion_set": "string (required, pack identifier)",
-  "ownership": "CardOwnership (required)",
-  "class_restriction": "HeroClass | null (optional)",
-  "abilities": "CardAbility[] (optional)",
-  "faith_cost": "integer (default: 0)",
-  "balance": "light | dark | neutral (default: neutral)",
-  "power": "integer (optional, for attack cards)",
-  "defense": "integer (optional, for defense cards)",
-  "health_effect": "integer (optional, for healing cards)"
+  "id": "string (обязательно, уникальный)",
+  "name": "string (обязательно)",
+  "name_ru": "string (опционально)",
+  "card_type": "CardType (обязательно)",
+  "rarity": "CardRarity (обязательно)",
+  "description": "string (обязательно)",
+  "description_ru": "string (опционально)",
+  "icon": "string (обязательно, SF Symbol)",
+  "expansion_set": "string (обязательно, идентификатор pack)",
+  "ownership": "CardOwnership (обязательно)",
+  "class_restriction": "HeroClass | null (опционально)",
+  "abilities": "CardAbility[] (опционально)",
+  "faith_cost": "integer (по умолчанию: 0)",
+  "balance": "light | dark | neutral (по умолчанию: neutral)",
+  "power": "integer (опционально, для атакующих карт)",
+  "defense": "integer (опционально, для защитных карт)",
+  "health_effect": "integer (опционально, для лечащих карт)"
 }
 ```
 
@@ -276,16 +276,16 @@ Each class defines a playstyle:
 attack | defense | skill | item | spell | ritual | blessing | curse
 ```
 
-| Type | Description |
-|------|-------------|
-| attack | Deals damage to enemies |
-| defense | Blocks incoming damage |
-| skill | Utility effects |
-| item | Consumable or equipment |
-| spell | Magical effects |
-| ritual | Powerful multi-turn effects |
-| blessing | Positive effects from faith |
-| curse | Negative effects |
+| Тип | Описание |
+|-----|----------|
+| attack | Наносит урон врагам |
+| defense | Блокирует входящий урон |
+| skill | Утилитарные эффекты |
+| item | Расходуемый или экипировка |
+| spell | Магические эффекты |
+| ritual | Мощные многоходовые эффекты |
+| blessing | Положительные эффекты от веры |
+| curse | Негативные эффекты |
 
 #### CardRarity
 
@@ -293,22 +293,22 @@ attack | defense | skill | item | spell | ritual | blessing | curse
 common | uncommon | rare | epic | legendary
 ```
 
-| Rarity | Drop Rate | Starting Deck |
-|--------|-----------|---------------|
-| common | 50% | Allowed |
-| uncommon | 30% | Allowed |
-| rare | 15% | Limited (max 2) |
-| epic | 4% | Limited (max 1) |
-| legendary | 1% | Not allowed |
+| Редкость | Шанс выпадения | Стартовая колода |
+|----------|----------------|------------------|
+| common | 50% | Разрешено |
+| uncommon | 30% | Разрешено |
+| rare | 15% | Ограничено (макс. 2) |
+| epic | 4% | Ограничено (макс. 1) |
+| legendary | 1% | Не разрешено |
 
 #### CardOwnership
 
 ```json
 {
   "type": "universal | class_specific | hero_specific | unlockable",
-  "hero_id": "string | null (if hero_specific)",
-  "hero_class": "HeroClass | null (if class_specific)",
-  "unlock_condition": "UnlockCondition | null (if unlockable)"
+  "hero_id": "string | null (если hero_specific)",
+  "hero_class": "HeroClass | null (если class_specific)",
+  "unlock_condition": "UnlockCondition | null (если unlockable)"
 }
 ```
 
@@ -316,63 +316,63 @@ common | uncommon | rare | epic | legendary
 
 ```json
 {
-  "id": "string (required)",
-  "name": "string (required)",
+  "id": "string (обязательно)",
+  "name": "string (обязательно)",
   "trigger": "on_play | on_discard | on_draw | passive",
-  "effect": "AbilityEffect (required)",
-  "condition": "string | null (optional, when ability triggers)"
+  "effect": "AbilityEffect (обязательно)",
+  "condition": "string | null (опционально, когда срабатывает способность)"
 }
 ```
 
 ---
 
-## 5. Validation Rules
+## 5. Правила валидации
 
-### 5.1 Hero Validation
+### 5.1 Валидация героя
 
-| Rule | Description | Severity |
-|------|-------------|----------|
-| VAL-HRO-001 | Hero ID must be unique | Error |
-| VAL-HRO-002 | Hero class must be valid | Error |
-| VAL-HRO-003 | Base stats must be within bounds | Error |
-| VAL-HRO-004 | Starting deck must have 6-12 cards | Error |
-| VAL-HRO-005 | All starting deck cards must exist | Error |
-| VAL-HRO-006 | Special ability must be defined | Error |
-| VAL-HRO-007 | Icon must be valid SF Symbol | Warning |
+| Правило | Описание | Серьезность |
+|---------|----------|-------------|
+| VAL-HRO-001 | ID героя должен быть уникальным | Ошибка |
+| VAL-HRO-002 | Класс героя должен быть валидным | Ошибка |
+| VAL-HRO-003 | Базовые статы должны быть в пределах | Ошибка |
+| VAL-HRO-004 | Стартовая колода должна иметь 6-12 карт | Ошибка |
+| VAL-HRO-005 | Все карты стартовой колоды должны существовать | Ошибка |
+| VAL-HRO-006 | Специальная способность должна быть определена | Ошибка |
+| VAL-HRO-007 | Иконка должна быть валидным SF Symbol | Предупреждение |
 
-### 5.2 Card Validation
+### 5.2 Валидация карты
 
-| Rule | Description | Severity |
-|------|-------------|----------|
-| VAL-CRD-001 | Card ID must be unique | Error |
-| VAL-CRD-002 | Card type must be valid | Error |
-| VAL-CRD-003 | Rarity must be valid | Error |
-| VAL-CRD-004 | Attack cards must have power | Warning |
-| VAL-CRD-005 | Defense cards must have defense | Warning |
-| VAL-CRD-006 | Faith cost must be non-negative | Error |
+| Правило | Описание | Серьезность |
+|---------|----------|-------------|
+| VAL-CRD-001 | ID карты должен быть уникальным | Ошибка |
+| VAL-CRD-002 | Тип карты должен быть валидным | Ошибка |
+| VAL-CRD-003 | Редкость должна быть валидной | Ошибка |
+| VAL-CRD-004 | Атакующие карты должны иметь power | Предупреждение |
+| VAL-CRD-005 | Защитные карты должны иметь defense | Предупреждение |
+| VAL-CRD-006 | Стоимость веры должна быть неотрицательной | Ошибка |
 
-### 5.3 Deck Validation
+### 5.3 Валидация колоды
 
-| Rule | Description | Severity |
-|------|-------------|----------|
-| VAL-DEC-001 | All cards must be available to hero | Error |
-| VAL-DEC-002 | Legendary cards not in starting deck | Error |
-| VAL-DEC-003 | Max 2 rare cards in starting deck | Warning |
-| VAL-DEC-004 | Max 1 epic card in starting deck | Warning |
+| Правило | Описание | Серьезность |
+|---------|----------|-------------|
+| VAL-DEC-001 | Все карты должны быть доступны герою | Ошибка |
+| VAL-DEC-002 | Legendary карты не в стартовой колоде | Ошибка |
+| VAL-DEC-003 | Максимум 2 rare карты в стартовой колоде | Предупреждение |
+| VAL-DEC-004 | Максимум 1 epic карта в стартовой колоде | Предупреждение |
 
-### 5.4 Localization Validation
+### 5.4 Валидация локализации
 
-| Rule | Description | Severity |
-|------|-------------|----------|
-| VAL-LOC-001 | Name must not be empty | Error |
-| VAL-LOC-002 | Description must not be empty | Error |
-| VAL-LOC-003 | Russian translation recommended | Info |
+| Правило | Описание | Серьезность |
+|---------|----------|-------------|
+| VAL-LOC-001 | Имя не должно быть пустым | Ошибка |
+| VAL-LOC-002 | Описание не должно быть пустым | Ошибка |
+| VAL-LOC-003 | Рекомендуется русский перевод | Информация |
 
 ---
 
-## 6. API Contract
+## 6. Контракт API
 
-### 6.1 Loading Interface
+### 6.1 Интерфейс загрузки
 
 ```swift
 protocol InvestigatorPackLoader {
@@ -386,7 +386,7 @@ struct InvestigatorContent {
 }
 ```
 
-### 6.2 Hero Provider Interface
+### 6.2 Интерфейс Hero Provider
 
 ```swift
 protocol HeroProvider {
@@ -398,7 +398,7 @@ protocol HeroProvider {
 }
 ```
 
-### 6.3 Card Provider Interface
+### 6.3 Интерфейс Card Provider
 
 ```swift
 protocol CardProvider {
@@ -410,7 +410,7 @@ protocol CardProvider {
 }
 ```
 
-### 6.4 Registry Integration
+### 6.4 Интеграция с Registry
 
 ```swift
 extension ContentRegistry {
@@ -423,69 +423,69 @@ extension ContentRegistry {
 
 ---
 
-## 7. Extension Points
+## 7. Точки расширения
 
-### 7.1 Custom Hero Classes
+### 7.1 Пользовательские классы героев
 
-New hero classes can be defined by extending the HeroClass enum. Engine must be updated to support new classes, but packs can prepare hero data for future classes.
+Новые классы героев могут быть определены путем расширения enum HeroClass. Engine должен быть обновлен для поддержки новых классов, но packs могут подготовить данные героя для будущих классов.
 
-### 7.2 Custom Card Types
+### 7.2 Пользовательские типы карт
 
-Card types can be extended. Unknown card types are handled as "skill" type by default.
+Типы карт могут быть расширены. Неизвестные типы карт обрабатываются как тип "skill" по умолчанию.
 
-### 7.3 Custom Abilities
+### 7.3 Пользовательские способности
 
-Custom ability effects can be registered:
+Пользовательские эффекты способностей могут быть зарегистрированы:
 
 ```swift
 AbilityRegistry.register("my_custom_effect") { context in
-    // Custom effect implementation
+    // Реализация пользовательского эффекта
 }
 ```
 
-### 7.4 Card Synergies
+### 7.4 Синергии карт
 
-Cards can reference synergies with other cards:
+Карты могут ссылаться на синергии с другими картами:
 
 ```json
 {
   "synergies": [
-    { "card_id": "flame_strike", "bonus": "+2 damage" }
+    { "card_id": "flame_strike", "bonus": "+2 урона" }
   ]
 }
 ```
 
 ---
 
-## 8. Best Practices
+## 8. Лучшие практики
 
-### 8.1 Hero Design
+### 8.1 Дизайн героя
 
-1. **Clear Identity**: Each hero should have a distinct playstyle
-2. **Balanced Stats**: Total stat points should be similar across heroes
-3. **Thematic Abilities**: Abilities should match hero's lore
-4. **Starting Deck Synergy**: Cards should work well together
+1. **Четкая идентичность**: Каждый герой должен иметь уникальный стиль игры
+2. **Сбалансированные статы**: Общее количество очков статов должно быть похожим у всех героев
+3. **Тематические способности**: Способности должны соответствовать лору героя
+4. **Синергия стартовой колоды**: Карты должны хорошо работать вместе
 
-### 8.2 Card Design
+### 8.2 Дизайн карт
 
-1. **Clear Effects**: Card effects should be unambiguous
-2. **Power Budget**: Higher costs = stronger effects
-3. **Class Identity**: Class-specific cards should reinforce playstyle
-4. **Combo Potential**: Some cards should synergize
+1. **Понятные эффекты**: Эффекты карт должны быть однозначными
+2. **Бюджет силы**: Выше стоимость = сильнее эффекты
+3. **Идентичность класса**: Классовые карты должны усиливать стиль игры
+4. **Потенциал комбо**: Некоторые карты должны синергировать
 
-### 8.3 Naming Conventions
+### 8.3 Конвенции именования
 
 ```
-Heroes:    {class}_{name}         e.g., warrior_ragnar
-Cards:     {type}_{name}          e.g., strike_flame
-Abilities: {hero}_{ability}       e.g., ragnar_battle_cry
+Герои:     {class}_{name}         например, warrior_ragnar
+Карты:     {type}_{name}          например, strike_flame
+Способности: {hero}_{ability}     например, ragnar_battle_cry
 ```
 
 ---
 
-## 9. Examples
+## 9. Примеры
 
-### 9.1 Minimal Investigator Pack
+### 9.1 Минимальный Investigator Pack
 
 ```json
 // manifest.json
@@ -499,7 +499,7 @@ Abilities: {hero}_{ability}       e.g., ragnar_battle_cry
 }
 ```
 
-### 9.2 Complete Hero Definition
+### 9.2 Полное определение героя
 
 ```json
 {
@@ -549,17 +549,17 @@ Abilities: {hero}_{ability}       e.g., ragnar_battle_cry
 
 ---
 
-## 10. Related Documents
+## 10. Связанные документы
 
-- [CONTENT_PACK_GUIDE.md](./CONTENT_PACK_GUIDE.md) - General pack guide
-- [SPEC_CAMPAIGN_PACK.md](./SPEC_CAMPAIGN_PACK.md) - Campaign pack spec
-- [SPEC_BALANCE_PACK.md](./SPEC_BALANCE_PACK.md) - Balance pack spec
-- [ENGINE_ARCHITECTURE.md](./ENGINE_ARCHITECTURE.md) - Engine architecture
+- [CONTENT_PACK_GUIDE.md](./CONTENT_PACK_GUIDE.md) - Общее руководство по pack
+- [SPEC_CAMPAIGN_PACK.md](./SPEC_CAMPAIGN_PACK.md) - Спецификация Campaign pack
+- [SPEC_BALANCE_PACK.md](./SPEC_BALANCE_PACK.md) - Спецификация Balance pack
+- [ENGINE_ARCHITECTURE.md](./ENGINE_ARCHITECTURE.md) - Архитектура Engine
 
 ---
 
-**Document Control**
+**Контроль документа**
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | 2026-01-20 | Claude | Initial specification |
+| Версия | Дата | Автор | Изменения |
+|--------|------|-------|-----------|
+| 1.0 | 2026-01-20 | Claude | Начальная спецификация |

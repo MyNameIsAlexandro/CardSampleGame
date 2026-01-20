@@ -1,203 +1,203 @@
-# Campaign Pack Specification
+# Спецификация Campaign Pack
 
-> **Version:** 1.0
-> **Status:** Active
-> **Last Updated:** January 2026
-
----
-
-## 1. Overview
-
-### 1.1 Purpose
-
-A Campaign Pack provides story-driven content including regions, events, quests, anchors, and enemies. Campaign packs define the game world, its narrative, and progression mechanics.
-
-### 1.2 Scope
-
-This specification covers:
-- Campaign pack structure and manifest requirements
-- Content schemas (regions, events, quests, anchors, enemies)
-- Functional and non-functional requirements
-- Validation rules and error handling
-- Extension points and APIs
-
-### 1.3 Terminology
-
-| Term | Definition |
-|------|------------|
-| **Region** | A location in the game world that can be visited |
-| **Event** | A narrative encounter triggered in a region |
-| **Quest** | A multi-stage objective with rewards |
-| **Anchor** | A sacred point that stabilizes a region |
-| **Enemy** | An adversary for combat encounters |
-| **Pressure** | Global danger level affecting the world |
+> **Версия:** 1.0
+> **Статус:** Активный
+> **Последнее обновление:** Январь 2026
 
 ---
 
-## 2. Functional Requirements
+## 1. Обзор
 
-### 2.1 Core Functionality
+### 1.1 Назначение
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-CAM-001 | Pack MUST define at least one region | Required |
-| FR-CAM-002 | Pack MUST specify an entry region in manifest | Required |
-| FR-CAM-003 | All regions MUST form a connected graph | Required |
-| FR-CAM-004 | Pack MAY define events for any region | Optional |
-| FR-CAM-005 | Pack MAY define quests with multiple stages | Optional |
-| FR-CAM-006 | Pack MAY define anchors for regions | Optional |
-| FR-CAM-007 | Pack MAY define enemies for combat events | Optional |
+Campaign Pack предоставляет сюжетный контент: регионы, события, квесты, якоря и врагов. Campaign pack определяет игровой мир, его нарратив и механику прогрессии.
 
-### 2.2 Region Requirements
+### 1.2 Область применения
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-REG-001 | Region MUST have unique ID within pack | Required |
-| FR-REG-002 | Region MUST have localized title | Required |
-| FR-REG-003 | Region MUST specify neighbor connections | Required |
-| FR-REG-004 | Region MUST have initial state (stable/borderland/breach) | Required |
-| FR-REG-005 | Region MAY reference event pools | Optional |
-| FR-REG-006 | Region MAY reference an anchor | Optional |
+Данная спецификация охватывает:
+- Структуру campaign pack и требования к манифесту
+- Схемы контента (регионы, события, квесты, якоря, враги)
+- Функциональные и нефункциональные требования
+- Правила валидации и обработку ошибок
+- Точки расширения и API
 
-### 2.3 Event Requirements
+### 1.3 Терминология
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-EVT-001 | Event MUST have unique ID | Required |
-| FR-EVT-002 | Event MUST have at least one choice | Required |
-| FR-EVT-003 | Event MUST define availability conditions | Required |
-| FR-EVT-004 | Event choices MUST define consequences | Required |
-| FR-EVT-005 | Combat events MUST reference valid enemy | Required |
-| FR-EVT-006 | Event MAY define required/forbidden flags | Optional |
-| FR-EVT-007 | Event MAY be one-time or repeatable | Optional |
-
-### 2.4 Quest Requirements
-
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-QST-001 | Quest MUST have unique ID | Required |
-| FR-QST-002 | Quest MUST have at least one objective | Required |
-| FR-QST-003 | Quest objectives MUST be completable | Required |
-| FR-QST-004 | Quest MUST define completion rewards | Required |
-| FR-QST-005 | Quest MAY have prerequisites | Optional |
-| FR-QST-006 | Quest MAY be main or side type | Optional |
-
-### 2.5 Anchor Requirements
-
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-ANC-001 | Anchor MUST reference valid region | Required |
-| FR-ANC-002 | Anchor MUST have integrity values | Required |
-| FR-ANC-003 | Anchor MUST define strengthen cost | Required |
-| FR-ANC-004 | One anchor per region maximum | Required |
-
-### 2.6 Enemy Requirements
-
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-ENM-001 | Enemy MUST have unique ID | Required |
-| FR-ENM-002 | Enemy MUST have combat stats (health, power, defense) | Required |
-| FR-ENM-003 | Enemy MUST have difficulty rating | Required |
-| FR-ENM-004 | Enemy MAY have special abilities | Optional |
-| FR-ENM-005 | Enemy MAY drop loot cards | Optional |
+| Термин | Определение |
+|--------|-------------|
+| **Region** | Локация в игровом мире, которую можно посетить |
+| **Event** | Нарративная встреча, происходящая в регионе |
+| **Quest** | Многоэтапная цель с наградами |
+| **Anchor** | Священная точка, стабилизирующая регион |
+| **Enemy** | Противник для боевых столкновений |
+| **Pressure** | Глобальный уровень опасности мира |
 
 ---
 
-## 3. Non-Functional Requirements
+## 2. Функциональные требования
 
-### 3.1 Performance
+### 2.1 Базовая функциональность
 
-| ID | Requirement | Target |
-|----|-------------|--------|
-| NFR-PERF-001 | Pack load time | < 500ms |
-| NFR-PERF-002 | Maximum regions | 100 per pack |
-| NFR-PERF-003 | Maximum events | 500 per pack |
-| NFR-PERF-004 | Maximum file size | 10MB total |
+| ID | Требование | Приоритет |
+|----|------------|-----------|
+| FR-CAM-001 | Pack ОБЯЗАН определять минимум один регион | Обязательно |
+| FR-CAM-002 | Pack ОБЯЗАН указывать entry region в манифесте | Обязательно |
+| FR-CAM-003 | Все регионы ОБЯЗАНЫ формировать связный граф | Обязательно |
+| FR-CAM-004 | Pack МОЖЕТ определять события для любого региона | Опционально |
+| FR-CAM-005 | Pack МОЖЕТ определять квесты с несколькими этапами | Опционально |
+| FR-CAM-006 | Pack МОЖЕТ определять якоря для регионов | Опционально |
+| FR-CAM-007 | Pack МОЖЕТ определять врагов для боевых событий | Опционально |
 
-### 3.2 Compatibility
+### 2.2 Требования к регионам
 
-| ID | Requirement | Target |
-|----|-------------|--------|
-| NFR-COMP-001 | Core version compatibility | Semantic versioning |
-| NFR-COMP-002 | Backward compatibility | MINOR versions |
-| NFR-COMP-003 | Cross-pack references | Via dependencies |
+| ID | Требование | Приоритет |
+|----|------------|-----------|
+| FR-REG-001 | Регион ОБЯЗАН иметь уникальный ID в рамках pack | Обязательно |
+| FR-REG-002 | Регион ОБЯЗАН иметь локализованный заголовок | Обязательно |
+| FR-REG-003 | Регион ОБЯЗАН указывать связи с соседями | Обязательно |
+| FR-REG-004 | Регион ОБЯЗАН иметь начальное состояние (stable/borderland/breach) | Обязательно |
+| FR-REG-005 | Регион МОЖЕТ ссылаться на пулы событий | Опционально |
+| FR-REG-006 | Регион МОЖЕТ ссылаться на якорь | Опционально |
 
-### 3.3 Localization
+### 2.3 Требования к событиям
 
-| ID | Requirement | Target |
-|----|-------------|--------|
-| NFR-LOC-001 | All user-facing text | Localized |
-| NFR-LOC-002 | Fallback language | English (en) |
-| NFR-LOC-003 | Minimum locales | 1 (en) |
+| ID | Требование | Приоритет |
+|----|------------|-----------|
+| FR-EVT-001 | Событие ОБЯЗАНО иметь уникальный ID | Обязательно |
+| FR-EVT-002 | Событие ОБЯЗАНО иметь минимум один выбор | Обязательно |
+| FR-EVT-003 | Событие ОБЯЗАНО определять условия доступности | Обязательно |
+| FR-EVT-004 | Выборы в событии ОБЯЗАНЫ определять последствия | Обязательно |
+| FR-EVT-005 | Боевые события ОБЯЗАНЫ ссылаться на валидного врага | Обязательно |
+| FR-EVT-006 | Событие МОЖЕТ определять required/forbidden флаги | Опционально |
+| FR-EVT-007 | Событие МОЖЕТ быть одноразовым или повторяемым | Опционально |
 
-### 3.4 Validation
+### 2.4 Требования к квестам
 
-| ID | Requirement | Target |
-|----|-------------|--------|
-| NFR-VAL-001 | Pre-load validation | All content |
-| NFR-VAL-002 | Reference validation | All IDs |
-| NFR-VAL-003 | Schema validation | All JSON |
+| ID | Требование | Приоритет |
+|----|------------|-----------|
+| FR-QST-001 | Квест ОБЯЗАН иметь уникальный ID | Обязательно |
+| FR-QST-002 | Квест ОБЯЗАН иметь минимум одну цель | Обязательно |
+| FR-QST-003 | Цели квеста ОБЯЗАНЫ быть выполнимыми | Обязательно |
+| FR-QST-004 | Квест ОБЯЗАН определять награды за выполнение | Обязательно |
+| FR-QST-005 | Квест МОЖЕТ иметь предварительные условия | Опционально |
+| FR-QST-006 | Квест МОЖЕТ быть основным или побочным | Опционально |
+
+### 2.5 Требования к якорям
+
+| ID | Требование | Приоритет |
+|----|------------|-----------|
+| FR-ANC-001 | Якорь ОБЯЗАН ссылаться на валидный регион | Обязательно |
+| FR-ANC-002 | Якорь ОБЯЗАН иметь значения целостности | Обязательно |
+| FR-ANC-003 | Якорь ОБЯЗАН определять стоимость укрепления | Обязательно |
+| FR-ANC-004 | Максимум один якорь на регион | Обязательно |
+
+### 2.6 Требования к врагам
+
+| ID | Требование | Приоритет |
+|----|------------|-----------|
+| FR-ENM-001 | Враг ОБЯЗАН иметь уникальный ID | Обязательно |
+| FR-ENM-002 | Враг ОБЯЗАН иметь боевые характеристики (health, power, defense) | Обязательно |
+| FR-ENM-003 | Враг ОБЯЗАН иметь рейтинг сложности | Обязательно |
+| FR-ENM-004 | Враг МОЖЕТ иметь специальные способности | Опционально |
+| FR-ENM-005 | Враг МОЖЕТ выдавать карты лута | Опционально |
 
 ---
 
-## 4. Data Schemas
+## 3. Нефункциональные требования
 
-### 4.1 Manifest Schema
+### 3.1 Производительность
+
+| ID | Требование | Цель |
+|----|------------|------|
+| NFR-PERF-001 | Время загрузки pack | < 500мс |
+| NFR-PERF-002 | Максимум регионов | 100 на pack |
+| NFR-PERF-003 | Максимум событий | 500 на pack |
+| NFR-PERF-004 | Максимальный размер файла | 10МБ всего |
+
+### 3.2 Совместимость
+
+| ID | Требование | Цель |
+|----|------------|------|
+| NFR-COMP-001 | Совместимость версии ядра | Семантическое версионирование |
+| NFR-COMP-002 | Обратная совместимость | MINOR версии |
+| NFR-COMP-003 | Кросс-pack ссылки | Через dependencies |
+
+### 3.3 Локализация
+
+| ID | Требование | Цель |
+|----|------------|------|
+| NFR-LOC-001 | Весь пользовательский текст | Локализован |
+| NFR-LOC-002 | Резервный язык | Английский (en) |
+| NFR-LOC-003 | Минимум локалей | 1 (en) |
+
+### 3.4 Валидация
+
+| ID | Требование | Цель |
+|----|------------|------|
+| NFR-VAL-001 | Пред-загрузочная валидация | Весь контент |
+| NFR-VAL-002 | Валидация ссылок | Все ID |
+| NFR-VAL-003 | Валидация схемы | Все JSON |
+
+---
+
+## 4. Схемы данных
+
+### 4.1 Схема манифеста
 
 ```json
 {
   "$schema": "campaign-pack-manifest-v1",
-  "id": "string (required, unique, lowercase-hyphen)",
-  "name": "LocalizedString (required)",
-  "description": "LocalizedString (required)",
-  "version": "SemanticVersion (required, format: X.Y.Z)",
-  "type": "campaign (required)",
-  "core_version_min": "SemanticVersion (required)",
+  "id": "string (обязательно, уникальный, lowercase-hyphen)",
+  "name": "LocalizedString (обязательно)",
+  "description": "LocalizedString (обязательно)",
+  "version": "SemanticVersion (обязательно, формат: X.Y.Z)",
+  "type": "campaign (обязательно)",
+  "core_version_min": "SemanticVersion (обязательно)",
   "core_version_max": "SemanticVersion | null",
-  "dependencies": "PackDependency[] (optional, default: [])",
-  "entry_region": "string (required, must reference valid region)",
-  "entry_quest": "string | null (optional, starting quest)",
-  "regions_path": "string (required, relative path)",
-  "events_path": "string (required, relative path)",
-  "quests_path": "string (optional, relative path)",
-  "anchors_path": "string (optional, relative path)",
-  "enemies_path": "string (optional, relative path)",
-  "locales": "string[] (optional, default: ['en'])",
-  "localization_path": "string (optional, relative path)"
+  "dependencies": "PackDependency[] (опционально, по умолчанию: [])",
+  "entry_region": "string (обязательно, должен ссылаться на валидный регион)",
+  "entry_quest": "string | null (опционально, стартовый квест)",
+  "regions_path": "string (обязательно, относительный путь)",
+  "events_path": "string (обязательно, относительный путь)",
+  "quests_path": "string (опционально, относительный путь)",
+  "anchors_path": "string (опционально, относительный путь)",
+  "enemies_path": "string (опционально, относительный путь)",
+  "locales": "string[] (опционально, по умолчанию: ['en'])",
+  "localization_path": "string (опционально, относительный путь)"
 }
 ```
 
-### 4.2 Region Schema
+### 4.2 Схема региона
 
 ```json
 {
-  "id": "string (required, unique)",
-  "title": "LocalizedString (required)",
-  "description": "LocalizedString (required)",
-  "neighbor_ids": "string[] (required, min: 1)",
-  "initial_state": "stable | borderland | breach (required)",
-  "initially_discovered": "boolean (default: false)",
-  "anchor_id": "string | null (optional, reference to anchor)",
-  "event_pool_ids": "string[] (optional)",
-  "region_type": "settlement | forest | swamp | mountain | wasteland (optional)"
+  "id": "string (обязательно, уникальный)",
+  "title": "LocalizedString (обязательно)",
+  "description": "LocalizedString (обязательно)",
+  "neighbor_ids": "string[] (обязательно, min: 1)",
+  "initial_state": "stable | borderland | breach (обязательно)",
+  "initially_discovered": "boolean (по умолчанию: false)",
+  "anchor_id": "string | null (опционально, ссылка на якорь)",
+  "event_pool_ids": "string[] (опционально)",
+  "region_type": "settlement | forest | swamp | mountain | wasteland (опционально)"
 }
 ```
 
-### 4.3 Event Schema
+### 4.3 Схема события
 
 ```json
 {
-  "id": "string (required, unique)",
-  "title": "LocalizedString (required)",
-  "body": "LocalizedString (required, event description)",
-  "event_kind": "EventKind (required)",
-  "availability": "EventAvailability (required)",
-  "choices": "ChoiceDefinition[] (required, min: 1)",
-  "weight": "integer (optional, default: 10)",
-  "is_one_time": "boolean (optional, default: false)",
-  "is_instant": "boolean (optional, default: false)",
-  "pool_ids": "string[] (optional)",
-  "mini_game_challenge": "MiniGameChallenge | null (for combat events)"
+  "id": "string (обязательно, уникальный)",
+  "title": "LocalizedString (обязательно)",
+  "body": "LocalizedString (обязательно, описание события)",
+  "event_kind": "EventKind (обязательно)",
+  "availability": "EventAvailability (обязательно)",
+  "choices": "ChoiceDefinition[] (обязательно, min: 1)",
+  "weight": "integer (опционально, по умолчанию: 10)",
+  "is_one_time": "boolean (опционально, по умолчанию: false)",
+  "is_instant": "boolean (опционально, по умолчанию: false)",
+  "pool_ids": "string[] (опционально)",
+  "mini_game_challenge": "MiniGameChallenge | null (для боевых событий)"
 }
 ```
 
@@ -206,7 +206,7 @@ This specification covers:
 ```json
 {
   "type": "inline | mini_game",
-  "mini_game_kind": "combat | ritual | exploration | dialogue | puzzle (if mini_game)"
+  "mini_game_kind": "combat | ritual | exploration | dialogue | puzzle (если mini_game)"
 }
 ```
 
@@ -214,12 +214,12 @@ This specification covers:
 
 ```json
 {
-  "region_ids": "string[] | null (null = all regions)",
-  "region_states": "string[] | null (stable/borderland/breach, null = all)",
+  "region_ids": "string[] | null (null = все регионы)",
+  "region_states": "string[] | null (stable/borderland/breach, null = все)",
   "min_pressure": "integer | null (0-100)",
   "max_pressure": "integer | null (0-100)",
-  "required_flags": "string[] (default: [])",
-  "forbidden_flags": "string[] (default: [])"
+  "required_flags": "string[] (по умолчанию: [])",
+  "forbidden_flags": "string[] (по умолчанию: [])"
 }
 ```
 
@@ -227,10 +227,10 @@ This specification covers:
 
 ```json
 {
-  "id": "string (required)",
-  "label": "LocalizedString (required)",
+  "id": "string (обязательно)",
+  "label": "LocalizedString (обязательно)",
   "requirements": "ChoiceRequirements | null",
-  "consequences": "ChoiceConsequences (required)"
+  "consequences": "ChoiceConsequences (обязательно)"
 }
 ```
 
@@ -238,11 +238,11 @@ This specification covers:
 
 ```json
 {
-  "min_resources": "{ [resource]: integer } (optional)",
+  "min_resources": "{ [resource]: integer } (опционально)",
   "min_balance": "integer | null (0-100)",
   "max_balance": "integer | null (0-100)",
-  "required_flags": "string[] (optional)",
-  "required_cards": "string[] (optional)"
+  "required_flags": "string[] (опционально)",
+  "required_cards": "string[] (опционально)"
 }
 ```
 
@@ -250,30 +250,30 @@ This specification covers:
 
 ```json
 {
-  "resource_changes": "{ [resource]: integer } (optional)",
-  "balance_delta": "integer (default: 0)",
-  "set_flags": "string[] (optional)",
-  "clear_flags": "string[] (optional)",
+  "resource_changes": "{ [resource]: integer } (опционально)",
+  "balance_delta": "integer (по умолчанию: 0)",
+  "set_flags": "string[] (опционально)",
+  "clear_flags": "string[] (опционально)",
   "quest_progress": "QuestProgressEffect | null",
   "region_state_change": "RegionStateChange | null",
-  "card_rewards": "string[] (optional)",
-  "result_key": "string | null (for localized result message)"
+  "card_rewards": "string[] (опционально)",
+  "result_key": "string | null (для локализованного сообщения о результате)"
 }
 ```
 
-### 4.4 Quest Schema
+### 4.4 Схема квеста
 
 ```json
 {
-  "id": "string (required, unique)",
-  "title": "LocalizedString (required)",
-  "description": "LocalizedString (required)",
-  "quest_kind": "main | side | daily | hidden (required)",
-  "objectives": "QuestObjective[] (required, min: 1)",
-  "completion_rewards": "QuestRewards (required)",
+  "id": "string (обязательно, уникальный)",
+  "title": "LocalizedString (обязательно)",
+  "description": "LocalizedString (обязательно)",
+  "quest_kind": "main | side | daily | hidden (обязательно)",
+  "objectives": "QuestObjective[] (обязательно, min: 1)",
+  "completion_rewards": "QuestRewards (обязательно)",
   "prerequisites": "QuestPrerequisites | null",
-  "region_id": "string | null (optional, quest location)",
-  "time_limit_days": "integer | null (optional)"
+  "region_id": "string | null (опционально, локация квеста)",
+  "time_limit_days": "integer | null (опционально)"
 }
 ```
 
@@ -281,51 +281,51 @@ This specification covers:
 
 ```json
 {
-  "id": "string (required)",
-  "description": "LocalizedString (required)",
+  "id": "string (обязательно)",
+  "description": "LocalizedString (обязательно)",
   "objective_type": "visit_region | complete_event | defeat_enemy | collect_item | reach_state",
-  "target_id": "string (required, what to interact with)",
-  "target_count": "integer (default: 1)",
-  "order": "integer (optional, for sequential objectives)"
+  "target_id": "string (обязательно, с чем взаимодействовать)",
+  "target_count": "integer (по умолчанию: 1)",
+  "order": "integer (опционально, для последовательных целей)"
 }
 ```
 
-### 4.5 Anchor Schema
+### 4.5 Схема якоря
 
 ```json
 {
-  "id": "string (required, unique)",
-  "title": "LocalizedString (required)",
-  "description": "LocalizedString (required)",
-  "region_id": "string (required, reference to region)",
-  "anchor_type": "chapel | shrine | monument | tree | stone (required)",
-  "initial_influence": "light | dark | neutral (required)",
-  "power": "integer (required, 1-10)",
-  "max_integrity": "integer (required, default: 100)",
-  "initial_integrity": "integer (required, 0-max_integrity)",
-  "strengthen_amount": "integer (required)",
-  "strengthen_cost": "{ [resource]: integer } (required)",
-  "abilities": "AnchorAbility[] (optional)"
+  "id": "string (обязательно, уникальный)",
+  "title": "LocalizedString (обязательно)",
+  "description": "LocalizedString (обязательно)",
+  "region_id": "string (обязательно, ссылка на регион)",
+  "anchor_type": "chapel | shrine | monument | tree | stone (обязательно)",
+  "initial_influence": "light | dark | neutral (обязательно)",
+  "power": "integer (обязательно, 1-10)",
+  "max_integrity": "integer (обязательно, по умолчанию: 100)",
+  "initial_integrity": "integer (обязательно, 0-max_integrity)",
+  "strengthen_amount": "integer (обязательно)",
+  "strengthen_cost": "{ [resource]: integer } (обязательно)",
+  "abilities": "AnchorAbility[] (опционально)"
 }
 ```
 
-### 4.6 Enemy Schema
+### 4.6 Схема врага
 
 ```json
 {
-  "id": "string (required, unique)",
-  "name": "LocalizedString (required)",
-  "description": "LocalizedString (required)",
-  "health": "integer (required, min: 1)",
-  "power": "integer (required, min: 0)",
-  "defense": "integer (required, min: 0)",
-  "difficulty": "integer (required, 1-5)",
-  "enemy_type": "beast | spirit | undead | humanoid | boss (required)",
-  "rarity": "common | uncommon | rare | epic | legendary (required)",
-  "abilities": "EnemyAbility[] (optional)",
-  "loot_card_ids": "string[] (optional)",
-  "faith_reward": "integer (default: 0)",
-  "balance_delta": "integer (default: 0)"
+  "id": "string (обязательно, уникальный)",
+  "name": "LocalizedString (обязательно)",
+  "description": "LocalizedString (обязательно)",
+  "health": "integer (обязательно, min: 1)",
+  "power": "integer (обязательно, min: 0)",
+  "defense": "integer (обязательно, min: 0)",
+  "difficulty": "integer (обязательно, 1-5)",
+  "enemy_type": "beast | spirit | undead | humanoid | boss (обязательно)",
+  "rarity": "common | uncommon | rare | epic | legendary (обязательно)",
+  "abilities": "EnemyAbility[] (опционально)",
+  "loot_card_ids": "string[] (опционально)",
+  "faith_reward": "integer (по умолчанию: 0)",
+  "balance_delta": "integer (по умолчанию: 0)"
 }
 ```
 
@@ -333,70 +333,70 @@ This specification covers:
 
 ```json
 {
-  "id": "string (required)",
-  "name": "LocalizedString (required)",
-  "description": "LocalizedString (required)",
+  "id": "string (обязательно)",
+  "name": "LocalizedString (обязательно)",
+  "description": "LocalizedString (обязательно)",
   "trigger": "on_attack | on_defend | on_turn_start | on_turn_end | on_death",
-  "effect": "AbilityEffect (required)",
-  "cooldown": "integer (optional, 0 = always)"
+  "effect": "AbilityEffect (обязательно)",
+  "cooldown": "integer (опционально, 0 = всегда)"
 }
 ```
 
 ---
 
-## 5. Validation Rules
+## 5. Правила валидации
 
-### 5.1 Structural Validation
+### 5.1 Структурная валидация
 
-| Rule | Description | Severity |
-|------|-------------|----------|
-| VAL-STR-001 | manifest.json must exist at pack root | Error |
-| VAL-STR-002 | All referenced paths must exist | Error |
-| VAL-STR-003 | All JSON must be valid syntax | Error |
-| VAL-STR-004 | All required fields must be present | Error |
+| Правило | Описание | Серьезность |
+|---------|----------|-------------|
+| VAL-STR-001 | manifest.json должен существовать в корне pack | Ошибка |
+| VAL-STR-002 | Все указанные пути должны существовать | Ошибка |
+| VAL-STR-003 | Все JSON должны иметь валидный синтаксис | Ошибка |
+| VAL-STR-004 | Все обязательные поля должны присутствовать | Ошибка |
 
-### 5.2 Reference Validation
+### 5.2 Валидация ссылок
 
-| Rule | Description | Severity |
-|------|-------------|----------|
-| VAL-REF-001 | Region neighbor_ids must reference existing regions | Error |
-| VAL-REF-002 | Event region_ids must reference existing regions | Error |
-| VAL-REF-003 | Anchor region_id must reference existing region | Error |
-| VAL-REF-004 | Quest target_id must reference valid target | Warning |
-| VAL-REF-005 | Enemy loot_card_ids should reference existing cards | Warning |
-| VAL-REF-006 | entry_region must reference existing region | Error |
+| Правило | Описание | Серьезность |
+|---------|----------|-------------|
+| VAL-REF-001 | neighbor_ids региона должны ссылаться на существующие регионы | Ошибка |
+| VAL-REF-002 | region_ids события должны ссылаться на существующие регионы | Ошибка |
+| VAL-REF-003 | region_id якоря должен ссылаться на существующий регион | Ошибка |
+| VAL-REF-004 | target_id квеста должен ссылаться на валидную цель | Предупреждение |
+| VAL-REF-005 | loot_card_ids врага должны ссылаться на существующие карты | Предупреждение |
+| VAL-REF-006 | entry_region должен ссылаться на существующий регион | Ошибка |
 
-### 5.3 Semantic Validation
+### 5.3 Семантическая валидация
 
-| Rule | Description | Severity |
-|------|-------------|----------|
-| VAL-SEM-001 | All IDs must be unique within type | Error |
-| VAL-SEM-002 | Region graph must be connected | Warning |
-| VAL-SEM-003 | Combat events must have enemy reference | Error |
-| VAL-SEM-004 | Quest objectives must be achievable | Warning |
-| VAL-SEM-005 | Pressure ranges must be valid (0-100) | Error |
+| Правило | Описание | Серьезность |
+|---------|----------|-------------|
+| VAL-SEM-001 | Все ID должны быть уникальны в рамках типа | Ошибка |
+| VAL-SEM-002 | Граф регионов должен быть связным | Предупреждение |
+| VAL-SEM-003 | Боевые события должны иметь ссылку на врага | Ошибка |
+| VAL-SEM-004 | Цели квеста должны быть достижимы | Предупреждение |
+| VAL-SEM-005 | Диапазоны pressure должны быть валидны (0-100) | Ошибка |
 
-### 5.4 Localization Validation
+### 5.4 Валидация локализации
 
-| Rule | Description | Severity |
-|------|-------------|----------|
-| VAL-LOC-001 | All LocalizedString must have 'en' key | Error |
-| VAL-LOC-002 | All declared locales must have strings | Warning |
-| VAL-LOC-003 | Empty strings are not allowed | Warning |
+| Правило | Описание | Серьезность |
+|---------|----------|-------------|
+| VAL-LOC-001 | Все LocalizedString должны иметь ключ 'en' | Ошибка |
+| VAL-LOC-002 | Все объявленные локали должны иметь строки | Предупреждение |
+| VAL-LOC-003 | Пустые строки не допускаются | Предупреждение |
 
 ---
 
-## 6. API Contract
+## 6. Контракт API
 
-### 6.1 Loading Interface
+### 6.1 Интерфейс загрузки
 
 ```swift
-// PackLoader interface for Campaign packs
+// Интерфейс PackLoader для Campaign packs
 protocol CampaignPackLoader {
-    /// Load campaign content from pack URL
+    /// Загрузить campaign контент из URL pack
     func loadCampaign(from url: URL) throws -> CampaignContent
 
-    /// Validate campaign before loading
+    /// Валидировать campaign перед загрузкой
     func validate(at url: URL) -> ValidationResult
 }
 
@@ -409,7 +409,7 @@ struct CampaignContent {
 }
 ```
 
-### 6.2 Content Provider Interface
+### 6.2 Интерфейс Content Provider
 
 ```swift
 protocol CampaignContentProvider {
@@ -424,10 +424,10 @@ protocol CampaignContentProvider {
 }
 ```
 
-### 6.3 Runtime Integration
+### 6.3 Runtime интеграция
 
 ```swift
-// ContentRegistry integration
+// Интеграция с ContentRegistry
 extension ContentRegistry {
     func loadCampaignPack(from url: URL) throws -> LoadedPack
     func getAvailableEvents(forRegion: String, pressure: Int) -> [EventDefinition]
@@ -437,19 +437,19 @@ extension ContentRegistry {
 
 ---
 
-## 7. Extension Points
+## 7. Точки расширения
 
-### 7.1 Custom Event Types
+### 7.1 Пользовательские типы событий
 
-Packs can define custom event kinds by using `event_kind.type = "mini_game"` with a custom `mini_game_kind`. The engine will attempt to route to appropriate handler.
+Packs могут определять пользовательские типы событий, используя `event_kind.type = "mini_game"` с пользовательским `mini_game_kind`. Engine попытается маршрутизировать к соответствующему обработчику.
 
-### 7.2 Custom Abilities
+### 7.2 Пользовательские способности
 
-Enemy abilities can define custom `effect` types that will be handled by ability processors registered with the engine.
+Способности врагов могут определять пользовательские типы `effect`, которые будут обрабатываться процессорами способностей, зарегистрированными в engine.
 
-### 7.3 Event Pools
+### 7.3 Пулы событий
 
-Custom event pools can be defined and referenced by regions:
+Пользовательские пулы событий могут быть определены и использованы регионами:
 
 ```json
 {
@@ -459,26 +459,26 @@ Custom event pools can be defined and referenced by regions:
 
 ---
 
-## 8. Migration & Versioning
+## 8. Миграция и версионирование
 
-### 8.1 Version Compatibility
+### 8.1 Совместимость версий
 
-| Pack Version | Core Version | Compatibility |
-|--------------|--------------|---------------|
-| 1.x.x | 1.x.x | Full |
-| 1.x.x | 2.x.x | Upgrade required |
+| Версия Pack | Версия Core | Совместимость |
+|-------------|-------------|---------------|
+| 1.x.x | 1.x.x | Полная |
+| 1.x.x | 2.x.x | Требуется обновление |
 
-### 8.2 Schema Evolution
+### 8.2 Эволюция схемы
 
-- **Adding fields**: Always optional with defaults
-- **Removing fields**: Deprecated in MINOR, removed in MAJOR
-- **Changing types**: Never allowed, new field required
+- **Добавление полей**: Всегда опциональные со значениями по умолчанию
+- **Удаление полей**: Deprecated в MINOR, удаление в MAJOR
+- **Изменение типов**: Никогда не допускается, требуется новое поле
 
 ---
 
-## 9. Examples
+## 9. Примеры
 
-### 9.1 Minimal Campaign Pack
+### 9.1 Минимальный Campaign Pack
 
 ```
 MyCampaign/
@@ -489,7 +489,7 @@ MyCampaign/
         └── events.json
 ```
 
-### 9.2 Full Campaign Pack
+### 9.2 Полный Campaign Pack
 
 ```
 TwilightMarches/
@@ -513,17 +513,17 @@ TwilightMarches/
 
 ---
 
-## 10. Related Documents
+## 10. Связанные документы
 
-- [CONTENT_PACK_GUIDE.md](./CONTENT_PACK_GUIDE.md) - General pack guide
-- [SPEC_INVESTIGATOR_PACK.md](./SPEC_INVESTIGATOR_PACK.md) - Investigator pack spec
-- [SPEC_BALANCE_PACK.md](./SPEC_BALANCE_PACK.md) - Balance pack spec
-- [ENGINE_ARCHITECTURE.md](./ENGINE_ARCHITECTURE.md) - Engine architecture
+- [CONTENT_PACK_GUIDE.md](./CONTENT_PACK_GUIDE.md) - Общее руководство по pack
+- [SPEC_INVESTIGATOR_PACK.md](./SPEC_INVESTIGATOR_PACK.md) - Спецификация Investigator pack
+- [SPEC_BALANCE_PACK.md](./SPEC_BALANCE_PACK.md) - Спецификация Balance pack
+- [ENGINE_ARCHITECTURE.md](./ENGINE_ARCHITECTURE.md) - Архитектура Engine
 
 ---
 
-**Document Control**
+**Контроль документа**
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | 2026-01-20 | Claude | Initial specification |
+| Версия | Дата | Автор | Изменения |
+|--------|------|-------|-----------|
+| 1.0 | 2026-01-20 | Claude | Начальная спецификация |

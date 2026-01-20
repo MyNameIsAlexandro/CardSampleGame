@@ -373,11 +373,68 @@ private struct JSONAnchor: Codable {
     }
 }
 
+/// Represents event_kind which can be either a string "inline" or object {"mini_game": "combat"}
+private enum JSONEventKind: Codable {
+    case inline
+    case miniGame(String)
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+
+        // Try string first (e.g., "inline")
+        if let stringValue = try? container.decode(String.self) {
+            if stringValue == "inline" {
+                self = .inline
+            } else {
+                // Treat other strings as mini_game type
+                self = .miniGame(stringValue)
+            }
+            return
+        }
+
+        // Try object (e.g., {"mini_game": "combat"})
+        if let dictValue = try? container.decode([String: String].self),
+           let miniGameType = dictValue["mini_game"] {
+            self = .miniGame(miniGameType)
+            return
+        }
+
+        // Default to inline
+        self = .inline
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self {
+        case .inline:
+            try container.encode("inline")
+        case .miniGame(let type):
+            try container.encode(["mini_game": type])
+        }
+    }
+
+    func toEventKind() -> EventKind {
+        switch self {
+        case .inline:
+            return .inline
+        case .miniGame(let type):
+            switch type.lowercased() {
+            case "combat": return .miniGame(.combat)
+            case "ritual": return .miniGame(.ritual)
+            case "exploration": return .miniGame(.exploration)
+            case "dialogue": return .miniGame(.dialogue)
+            case "puzzle": return .miniGame(.puzzle)
+            default: return .miniGame(.combat)
+            }
+        }
+    }
+}
+
 private struct JSONEvent: Codable {
     let id: String
     let title: LocalizedString
     let body: LocalizedString
-    let eventKind: String?
+    let eventKind: JSONEventKind?
     let eventType: String?
     let poolIds: [String]?
     let availability: JSONAvailability?
@@ -402,14 +459,18 @@ private struct JSONEvent: Codable {
 
     func toDefinition() -> EventDefinition {
         let kind: EventKind
-        // Support both eventKind (new) and eventType (legacy)
-        let kindString = eventKind ?? eventType
-        switch kindString?.lowercased() {
-        case "combat": kind = .miniGame(.combat)
-        case "ritual": kind = .miniGame(.ritual)
-        case "exploration": kind = .miniGame(.exploration)
-        case "inline": kind = .inline
-        default: kind = .inline
+        // Prefer eventKind (can be string or object), fall back to eventType (legacy string)
+        if let ek = eventKind {
+            kind = ek.toEventKind()
+        } else if let et = eventType {
+            switch et.lowercased() {
+            case "combat": kind = .miniGame(.combat)
+            case "ritual": kind = .miniGame(.ritual)
+            case "exploration": kind = .miniGame(.exploration)
+            default: kind = .inline
+            }
+        } else {
+            kind = .inline
         }
 
         let avail = availability?.toAvailability() ?? .always
