@@ -114,13 +114,13 @@ enum CurseType: String, Codable, Hashable {
     /// Localized name
     var displayName: String {
         switch self {
-        case .weakness: return "Слабость"
-        case .fear: return "Страх"
-        case .exhaustion: return "Истощение"
-        case .greed: return "Жадность"
-        case .shadowOfNav: return "Тень Нави"
-        case .bloodCurse: return "Проклятие крови"
-        case .sealOfNav: return "Печать Нави"
+        case .weakness: return L10n.curseWeakness.localized
+        case .fear: return L10n.curseFear.localized
+        case .exhaustion: return L10n.curseExhaustion.localized
+        case .greed: return L10n.curseGreed.localized
+        case .shadowOfNav: return L10n.curseShadowOfNav.localized
+        case .bloodCurse: return L10n.curseBloodCurse.localized
+        case .sealOfNav: return L10n.curseSealOfNav.localized
         }
     }
 }

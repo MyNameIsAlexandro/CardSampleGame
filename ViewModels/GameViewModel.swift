@@ -54,7 +54,7 @@ final class GameViewModel: ObservableObject {
     }
 
     /// Convenience initializer for new game
-    convenience init(playerName: String = "Герой") {
+    convenience init(playerName: String = L10n.defaultPlayerName.localized) {
         let player = Player(name: playerName)
         let gameState = GameState(players: [player])
         self.init(gameState: gameState)
@@ -109,8 +109,8 @@ final class GameViewModel: ObservableObject {
 
         // Log travel in legacy
         if result.success {
-            let fromRegion = worldState.getCurrentRegion()?.name ?? "Неизвестно"
-            let toRegion = worldState.getRegion(byId: regionId)?.name ?? "Неизвестно"
+            let fromRegion = worldState.getCurrentRegion()?.name ?? L10n.regionUnknown.localized
+            let toRegion = worldState.getRegion(byId: regionId)?.name ?? L10n.regionUnknown.localized
             let cost = worldState.calculateTravelCost(to: regionId)
             worldState.logTravel(from: fromRegion, to: toRegion, days: cost)
         }
@@ -125,9 +125,9 @@ final class GameViewModel: ObservableObject {
         if result.success, let region = worldState.getCurrentRegion() {
             worldState.logEvent(
                 regionName: region.name,
-                eventTitle: "Отдых",
-                choiceMade: "Решил отдохнуть",
-                outcome: "Здоровье восстановлено",
+                eventTitle: L10n.journalRestTitle.localized,
+                choiceMade: L10n.journalRestChoice.localized,
+                outcome: L10n.journalRestOutcome.localized,
                 type: .exploration
             )
         }
@@ -160,9 +160,9 @@ final class GameViewModel: ObservableObject {
         if result.success, let region = worldState.getCurrentRegion() {
             worldState.logEvent(
                 regionName: region.name,
-                eventTitle: "Укрепление якоря",
-                choiceMade: "Потрачено веры",
-                outcome: "Якорь укреплён",
+                eventTitle: L10n.journalAnchorTitle.localized,
+                choiceMade: L10n.journalAnchorChoice.localized,
+                outcome: L10n.journalAnchorOutcome.localized,
                 type: .worldChange
             )
         }
@@ -186,7 +186,7 @@ final class GameViewModel: ObservableObject {
                     regionName: region.name,
                     eventTitle: event.title,
                     choiceMade: choice.text,
-                    outcome: choice.consequences.message ?? "Выбор сделан",
+                    outcome: choice.consequences.message ?? L10n.journalChoiceMade.localized,
                     type: .exploration
                 )
             }

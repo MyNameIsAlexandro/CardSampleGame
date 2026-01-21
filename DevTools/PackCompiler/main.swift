@@ -528,7 +528,19 @@ struct SimpleDependency: Decodable {
 }
 
 enum PackType: String, Decodable {
-    case campaign, investigator, balance, rulesExtension, full
+    case campaign, character, balance, rulesExtension, full
+    // Support legacy "investigator" type for backwards compatibility
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let rawValue = try container.decode(String.self)
+        if rawValue == "investigator" {
+            self = .character
+        } else if let type = PackType(rawValue: rawValue) {
+            self = type
+        } else {
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Unknown pack type: \(rawValue)")
+        }
+    }
 }
 
 struct SimplePack {

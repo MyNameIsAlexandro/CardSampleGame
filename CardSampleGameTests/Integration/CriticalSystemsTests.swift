@@ -50,6 +50,9 @@ final class CriticalSystemsTests: XCTestCase {
         // Breach регионы должны деградировать чаще чем Borderland
         // Устанавливаем один Borderland и один Breach с одинаковым низким integrity
 
+        // Устанавливаем seed для детерминированного теста
+        WorldRNG.shared.setSeed(12345)
+
         // Find borderland with anchor
         guard let borderlandIndex = worldState.regions.firstIndex(where: {
             $0.state == .borderland && $0.anchor != nil
@@ -92,7 +95,7 @@ final class CriticalSystemsTests: XCTestCase {
         let breachDrop = initialBreachIntegrity - finalBreachIntegrity
 
         // Breach должен потерять больше integrity (или равно, если оба достигли минимума)
-        // Примечание: вероятностный тест, но при 30 днях разница должна быть видна
+        // Тест детерминирован через seed - оба региона должны деградировать
         XCTAssertGreaterThanOrEqual(breachDrop, borderlandDrop - 10,
             "Breach должен деградировать не меньше чем Borderland (с погрешностью)")
     }

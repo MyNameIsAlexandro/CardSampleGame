@@ -129,9 +129,18 @@ class JSONContentProvider: ContentProvider {
 
     private func loadQuests(from url: URL) throws {
         let data = try Data(contentsOf: url)
-        let container = try JSONDecoder().decode(QuestsContainer.self, from: data)
-        for quest in container.quests {
-            quests[quest.id] = quest.toDefinition()
+        // quests.json can be either a container with "quests" array or a direct array
+        do {
+            let container = try JSONDecoder().decode(QuestsContainer.self, from: data)
+            for quest in container.quests {
+                quests[quest.id] = quest.toDefinition()
+            }
+        } catch {
+            // Try direct array format (like events.json)
+            let questArray = try JSONDecoder().decode([JSONQuest].self, from: data)
+            for quest in questArray {
+                quests[quest.id] = quest.toDefinition()
+            }
         }
     }
 
@@ -666,19 +675,47 @@ private struct JSONQuest: Codable {
     let id: String
     let title: LocalizedString
     let description: LocalizedString
-    let questType: String?
-    let initialStatus: String?
+    let questKind: String?
+    let availability: JSONQuestAvailability?
+    let autoStart: Bool?
     let objectives: [JSONObjective]?
-    let rewards: JSONQuestRewards?
+    let completionRewards: JSONQuestCompletionRewards?
+    let failurePenalties: JSONQuestCompletionRewards?
+
+    enum CodingKeys: String, CodingKey {
+        case id, title, description, objectives, availability
+        case questKind = "quest_kind"
+        case autoStart = "auto_start"
+        case completionRewards = "completion_rewards"
+        case failurePenalties = "failure_penalties"
+    }
 
     func toDefinition() -> QuestDefinition {
         let objDefs = objectives?.map { $0.toDefinition() } ?? []
+
+        let kind: QuestKind
+        switch questKind?.lowercased() {
+        case "main": kind = .main
+        case "side": kind = .side
+        case "exploration": kind = .exploration
+        case "challenge": kind = .challenge
+        default: kind = .side
+        }
+
+        let avail = availability?.toAvailability() ?? .always
+        let rewards = completionRewards?.toRewards() ?? .none
+        let penalties = failurePenalties?.toRewards() ?? .none
 
         return QuestDefinition(
             id: id,
             title: title,
             description: description,
-            objectives: objDefs
+            objectives: objDefs,
+            questKind: kind,
+            availability: avail,
+            autoStart: autoStart ?? false,
+            completionRewards: rewards,
+            failurePenalties: penalties
         )
     }
 }
@@ -688,7 +725,19 @@ private struct JSONObjective: Codable {
     let description: LocalizedString
     let hint: LocalizedString?
     let completionCondition: JSONCompletionCondition?
+    let targetValue: Int?
+    let isOptional: Bool?
     let nextObjectiveId: String?
+    let alternativeNextIds: [String]?
+
+    enum CodingKeys: String, CodingKey {
+        case id, description, hint
+        case completionCondition = "completion_condition"
+        case targetValue = "target_value"
+        case isOptional = "is_optional"
+        case nextObjectiveId = "next_objective_id"
+        case alternativeNextIds = "alternative_next_ids"
+    }
 
     func toDefinition() -> ObjectiveDefinition {
         let condition = completionCondition?.toCondition() ?? .manual
@@ -698,30 +747,164 @@ private struct JSONObjective: Codable {
             description: description,
             hint: hint,
             completionCondition: condition,
-            nextObjectiveId: nextObjectiveId
+            targetValue: targetValue ?? 1,
+            isOptional: isOptional ?? false,
+            nextObjectiveId: nextObjectiveId,
+            alternativeNextIds: alternativeNextIds ?? []
         )
     }
 }
 
+/// Completion condition that can be either:
+/// - Direct format: {"flag_set": "flag_name"} or {"visit_region": "region_id"}
+/// - Object format: {"type": "flagset", "flag": "flag_name"}
 private struct JSONCompletionCondition: Codable {
+    // Direct format keys
+    let flagSet: String?
+    let visitRegion: String?
+    let eventCompleted: String?
+    let defeatEnemy: String?
+    let collectItem: String?
+
+    // Choice made format: {"choice_made": {"event_id": "...", "choice_id": "..."}}
+    let choiceMade: JSONChoiceMadeCondition?
+
+    // Resource threshold format: {"resource_threshold": {"resource_id": "...", "min_value": 10}}
+    let resourceThreshold: JSONResourceThresholdCondition?
+
+    // Legacy object format fields
     let type: String?
     let regionId: String?
     let eventId: String?
     let flag: String?
-    let anchorIds: [String]?
     let threshold: Int?
 
+    enum CodingKeys: String, CodingKey {
+        case flagSet = "flag_set"
+        case visitRegion = "visit_region"
+        case eventCompleted = "event_completed"
+        case defeatEnemy = "defeat_enemy"
+        case collectItem = "collect_item"
+        case choiceMade = "choice_made"
+        case resourceThreshold = "resource_threshold"
+        case type, regionId, eventId, flag, threshold
+    }
+
     func toCondition() -> CompletionCondition {
+        // Check direct format keys first
+        if let flag = flagSet {
+            return .flagSet(flag)
+        }
+        if let region = visitRegion {
+            return .visitRegion(region)
+        }
+        if let event = eventCompleted {
+            return .eventCompleted(event)
+        }
+        if let enemy = defeatEnemy {
+            return .defeatEnemy(enemy)
+        }
+        if let item = collectItem {
+            return .collectItem(item)
+        }
+        if let choice = choiceMade {
+            return .choiceMade(eventId: choice.eventId ?? "", choiceId: choice.choiceId ?? "")
+        }
+        if let resource = resourceThreshold {
+            return .resourceThreshold(resourceId: resource.resourceId ?? "", minValue: resource.minValue ?? 0)
+        }
+
+        // Fall back to legacy object format
         switch type?.lowercased() {
-        case "visitregion":
+        case "visitregion", "visit_region":
             return .visitRegion(regionId ?? "")
-        case "eventcompleted":
+        case "eventcompleted", "event_completed":
             return .eventCompleted(eventId ?? "")
-        case "flagset":
+        case "flagset", "flag_set":
             return .flagSet(flag ?? "")
+        case "defeatenemy", "defeat_enemy":
+            return .defeatEnemy(eventId ?? "")
         default:
             return .manual
         }
+    }
+}
+
+private struct JSONChoiceMadeCondition: Codable {
+    let eventId: String?
+    let choiceId: String?
+
+    enum CodingKeys: String, CodingKey {
+        case eventId = "event_id"
+        case choiceId = "choice_id"
+    }
+}
+
+private struct JSONResourceThresholdCondition: Codable {
+    let resourceId: String?
+    let minValue: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case resourceId = "resource_id"
+        case minValue = "min_value"
+    }
+}
+
+private struct JSONQuestAvailability: Codable {
+    let requiredFlags: [String]?
+    let forbiddenFlags: [String]?
+    let minPressure: Int?
+    let maxPressure: Int?
+    let minBalance: Int?
+    let maxBalance: Int?
+    let regionStates: [String]?
+    let regionIds: [String]?
+
+    enum CodingKeys: String, CodingKey {
+        case requiredFlags = "required_flags"
+        case forbiddenFlags = "forbidden_flags"
+        case minPressure = "min_pressure"
+        case maxPressure = "max_pressure"
+        case minBalance = "min_balance"
+        case maxBalance = "max_balance"
+        case regionStates = "region_states"
+        case regionIds = "region_ids"
+    }
+
+    func toAvailability() -> Availability {
+        return Availability(
+            requiredFlags: requiredFlags ?? [],
+            forbiddenFlags: forbiddenFlags ?? [],
+            minPressure: minPressure,
+            maxPressure: maxPressure,
+            minBalance: minBalance,
+            maxBalance: maxBalance,
+            regionStates: regionStates,
+            regionIds: regionIds
+        )
+    }
+}
+
+private struct JSONQuestCompletionRewards: Codable {
+    let resourceChanges: [String: Int]?
+    let setFlags: [String]?
+    let cardIds: [String]?
+    let balanceDelta: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case resourceChanges = "resource_changes"
+        case setFlags = "set_flags"
+        case cardIds = "card_ids"
+        case balanceDelta = "balance_delta"
+    }
+
+    func toRewards() -> QuestCompletionRewards {
+        return QuestCompletionRewards(
+            resourceChanges: resourceChanges ?? [:],
+            setFlags: setFlags ?? [],
+            cardIds: cardIds ?? [],
+            balanceDelta: balanceDelta ?? 0
+        )
     }
 }
 

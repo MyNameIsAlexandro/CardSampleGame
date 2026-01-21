@@ -165,6 +165,7 @@ final class TwilightGameEngine: ObservableObject {
     private let timeEngine: TimeEngine
     private let pressureEngine: PressureEngine
     private let economyManager: EconomyManager
+    private let questTriggerEngine: QuestTriggerEngine
 
     // MARK: - State Adapters
 
@@ -231,10 +232,10 @@ final class TwilightGameEngine: ObservableObject {
     /// Balance configuration from content pack
     private var balanceConfig: BalanceConfiguration
 
-    // MARK: - Configuration Constants (Legacy - migrate to balanceConfig)
+    // MARK: - Configuration Constants (from BalanceConfiguration)
 
-    private var tensionTickInterval: Int { 3 }  // Could come from balanceConfig.pressure
-    private var restHealAmount: Int { 3 }  // Could come from balanceConfig
+    private var tensionTickInterval: Int { balanceConfig.pressure.tensionTickInterval }
+    private var restHealAmount: Int { balanceConfig.resources.restHealAmount }
     private var anchorStrengthenCost: Int { balanceConfig.anchor.strengthenCost }
     private var anchorStrengthenAmount: Int { balanceConfig.anchor.strengthenAmount }
 
@@ -246,6 +247,7 @@ final class TwilightGameEngine: ObservableObject {
         self.timeEngine = TimeEngine(thresholdInterval: 3)
         self.pressureEngine = PressureEngine(rules: TwilightPressureRules())
         self.economyManager = EconomyManager()
+        self.questTriggerEngine = QuestTriggerEngine(contentRegistry: registry)
     }
 
     // MARK: - Setup
@@ -522,7 +524,7 @@ final class TwilightGameEngine: ObservableObject {
         guard let def = def else { return nil }
         return EngineAnchorState(
             id: UUID(),
-            name: TwilightMarchesCodeContentProvider.anchorName(for: def.id),
+            name: def.title.localized,
             integrity: def.initialIntegrity
         )
     }
@@ -558,16 +560,14 @@ final class TwilightGameEngine: ObservableObject {
         }
     }
 
-    /// Create initial events (simplified - would load from ContentProvider)
+    /// Create initial events from ContentRegistry
     private func createInitialEvents() -> [GameEvent] {
-        // Phase 5: Load from ContentProvider/JSON
-        return []
+        return contentRegistry.getAllEvents().map { $0.toGameEvent() }
     }
 
-    /// Create initial quests (simplified - would load from ContentProvider)
+    /// Create initial quests from ContentRegistry
     private func createInitialQuests() -> [Quest] {
-        // Phase 5: Load from ContentProvider/JSON
-        return []
+        return contentRegistry.getAllQuests().map { $0.toQuest() }
     }
 
     // MARK: - Main Action Entry Point
@@ -1183,8 +1183,122 @@ final class TwilightGameEngine: ObservableObject {
     // MARK: - Quest Progress
 
     private func checkQuestProgress() -> [StateChange] {
-        // Delegate to WorldState adapter
+        // Use new QuestTriggerEngine if available, fall back to legacy adapter
+        // During migration, both systems may be active
         return worldStateAdapter?.checkQuestProgress() ?? []
+    }
+
+    /// Process a quest trigger action through the new data-driven QuestTriggerEngine
+    private func processQuestTriggerAction(_ action: QuestTriggerAction) -> [StateChange] {
+        var changes: [StateChange] = []
+
+        // Build context from current state
+        let context = buildQuestTriggerContext()
+
+        // Process through quest trigger engine
+        let updates = questTriggerEngine.processAction(action, context: context)
+
+        // Apply updates
+        for update in updates {
+            switch update.type {
+            case .questStarted:
+                // Start new quest
+                if let questDef = contentRegistry.getQuest(id: update.questId) {
+                    let quest = questDef.toQuest()
+                    activeQuests.append(quest)
+                    publishedActiveQuests = activeQuests
+                    changes.append(.questStarted(questId: update.questId))
+                }
+
+            case .objectiveCompleted:
+                // Update quest progress
+                if let index = activeQuests.firstIndex(where: { $0.id.uuidString == update.questId || String(describing: $0.id) == update.questId }),
+                   let objectiveId = update.objectiveId {
+                    // Mark objective as completed
+                    changes.append(.objectiveCompleted(questId: update.questId, objectiveId: objectiveId))
+
+                    // Set flags
+                    for flag in update.flagsToSet {
+                        worldFlags[flag] = true
+                        publishedWorldFlags = worldFlags
+                        changes.append(.flagSet(key: flag, value: true))
+                    }
+
+                    // Check if quest completed (no next objective)
+                    if update.nextObjectiveId == nil {
+                        activeQuests[index].completed = true
+                        completedQuestIds.insert(update.questId)
+                        changes.append(.questCompleted(questId: update.questId))
+                    }
+                }
+
+            case .questCompleted:
+                // Quest fully completed
+                completedQuestIds.insert(update.questId)
+                changes.append(.questCompleted(questId: update.questId))
+
+            case .questFailed:
+                // Quest failed
+                changes.append(.questFailed(questId: update.questId))
+            }
+        }
+
+        return changes
+    }
+
+    /// Build QuestTriggerContext from current engine state
+    private func buildQuestTriggerContext() -> QuestTriggerContext {
+        // Build active quest states
+        let questStates = activeQuests.compactMap { quest -> QuestState? in
+            guard let questDef = contentRegistry.getQuest(id: quest.definitionId ?? quest.id.uuidString) else {
+                return nil
+            }
+
+            // Determine current objective (simplified - uses stage)
+            let currentObjectiveId = questDef.objectives.indices.contains(quest.stage - 1)
+                ? questDef.objectives[quest.stage - 1].id
+                : questDef.objectives.first?.id
+
+            // Completed objectives are those before current stage
+            let completedIds = Set(questDef.objectives.prefix(max(0, quest.stage - 1)).map { $0.id })
+
+            return QuestState(
+                definitionId: questDef.id,
+                currentObjectiveId: currentObjectiveId,
+                completedObjectiveIds: completedIds
+            )
+        }
+
+        // Build resources dictionary
+        let resources: [String: Int] = [
+            "health": playerHealth,
+            "faith": playerFaith,
+            "balance": playerBalance,
+            "tension": worldTension
+        ]
+
+        // Get current region ID as string
+        let currentRegionStringId: String
+        if let regionId = currentRegionId,
+           let region = regions[regionId] {
+            // Try to find matching definition by name
+            if let def = contentRegistry.getAllRegions().first(where: { $0.title.localized == region.name }) {
+                currentRegionStringId = def.id
+            } else {
+                currentRegionStringId = regionId.uuidString
+            }
+        } else {
+            currentRegionStringId = ""
+        }
+
+        return QuestTriggerContext(
+            activeQuests: questStates,
+            completedQuestIds: completedQuestIds,
+            worldFlags: worldFlags,
+            resources: resources,
+            currentDay: currentDay,
+            currentRegionId: currentRegionStringId
+        )
     }
 
     // MARK: - End Conditions

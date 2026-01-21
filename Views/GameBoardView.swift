@@ -117,11 +117,11 @@ struct GameBoardView: View {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 60))
                             .foregroundColor(.green)
-                        Text("Враг побеждён!")
+                        Text(L10n.enemyDefeated.localized)
                             .font(.title)
                             .fontWeight(.bold)
                             .foregroundColor(.white)
-                        Text("Возвращаемся к событию...")
+                        Text(L10n.returningToEvent.localized)
                             .font(.subheadline)
                             .foregroundColor(.white.opacity(0.8))
                     }
@@ -184,16 +184,16 @@ struct GameBoardView: View {
         .sheet(isPresented: $showingWorldMap) {
             WorldMapView(worldState: gameState.worldState, player: gameState.currentPlayer)
         }
-        .alert(combatResult?.success == true ? "Успех!" : "Провал", isPresented: $showingDiceRoll) {
+        .alert(combatResult?.success == true ? L10n.combatAlertSuccess.localized : L10n.combatAlertFail.localized, isPresented: $showingDiceRoll) {
             Button(L10n.buttonOk.localized, role: .cancel) {
                 combatResult = nil
             }
         } message: {
             if let result = combatResult {
                 if result.success {
-                    Text("Бросок: \(result.diceRoll) + Сила: \(result.total - result.diceRoll) = \(result.total)\nЗащита врага: \(result.defense)\nУрон: \(result.damage)")
+                    Text(L10n.combatRollResultSuccess.localized(with: result.diceRoll, result.total - result.diceRoll, result.total, result.defense, result.damage))
                 } else {
-                    Text("Бросок: \(result.diceRoll) + Сила: \(result.total - result.diceRoll) = \(result.total)\nЗащита врага: \(result.defense)\nВраг атакует вас!")
+                    Text(L10n.combatRollResultFail.localized(with: result.diceRoll, result.total - result.diceRoll, result.total, result.defense))
                 }
             }
         }
@@ -202,10 +202,10 @@ struct GameBoardView: View {
         } message: {
             Text(L10n.uiProgressSaved.localized)
         }
-        .alert("Атака врага!", isPresented: $showingEnemyAttack) {
+        .alert(L10n.combatEnemyAttackTitle.localized, isPresented: $showingEnemyAttack) {
             Button(L10n.buttonOk.localized, role: .cancel) { }
         } message: {
-            Text("Враг атакует вас и наносит \(enemyDamage) урона!\nВаше здоровье: \(gameState.currentPlayer.health)")
+            Text(L10n.combatEnemyAttackMessage.localized(with: enemyDamage, gameState.currentPlayer.health))
         }
     }
 
@@ -375,7 +375,7 @@ struct GameBoardView: View {
                 Image(systemName: "cart.fill")
                     .font(.title3)
                     .foregroundColor(.orange)
-                Text("Рынок")
+                Text(L10n.marketplace.localized)
                     .font(.title3)
                     .fontWeight(.bold)
                 Spacer()
@@ -390,7 +390,7 @@ struct GameBoardView: View {
             }
 
             if gameState.marketCards.isEmpty {
-                Text("Нет карт для покупки")
+                Text(L10n.noCardsForPurchase.localized)
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity)
@@ -485,7 +485,7 @@ struct GameBoardView: View {
                     showingWorldMap = true
                     showingPauseMenu = false
                 }) {
-                    Label("Карта Мира", systemImage: "map.fill")
+                    Label(L10n.worldMap.localized, systemImage: "map.fill")
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color.cyan)
@@ -730,14 +730,14 @@ struct VictoryView: View {
                 .font(.largeTitle)
                 .fontWeight(.bold)
 
-            Text("Вы защитили земли от тьмы!")
+            Text(L10n.victoryMessage.localized)
                 .font(.title3)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
 
             VStack(spacing: 12) {
-                StatRow(label: "Побеждено столкновений", value: "\(encountersDefeated)")
-                StatRow(label: "Ходов сделано", value: "\(turnsTaken)")
+                StatRow(label: L10n.statsEncountersDefeated.localized, value: "\(encountersDefeated)")
+                StatRow(label: L10n.statsTurnsMade.localized, value: "\(turnsTaken)")
             }
             .padding()
             .background(Color(UIColor.secondarySystemBackground))
@@ -775,14 +775,14 @@ struct DefeatView: View {
                 .font(.largeTitle)
                 .fontWeight(.bold)
 
-            Text("Тьма одержала победу...")
+            Text(L10n.defeatMessage.localized)
                 .font(.title3)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
 
             VStack(spacing: 12) {
-                StatRow(label: "Побеждено столкновений", value: "\(encountersDefeated)")
-                StatRow(label: "Ходов выжито", value: "\(turnsTaken)")
+                StatRow(label: L10n.statsEncountersDefeated.localized, value: "\(encountersDefeated)")
+                StatRow(label: L10n.statsTurnsSurvived.localized, value: "\(turnsTaken)")
             }
             .padding()
             .background(Color(UIColor.secondarySystemBackground))
@@ -918,7 +918,7 @@ struct MarketCardView: View {
 
             // Purchase button
             Button(action: onPurchase) {
-                Text("Купить")
+                Text(L10n.buttonBuy.localized)
                     .font(.caption)
                     .fontWeight(.semibold)
                     .foregroundColor(.white)
@@ -943,10 +943,10 @@ struct MarketCardView: View {
 
     var cardTypeText: String {
         switch card.type {
-        case .resource: return "Ресурс"
-        case .attack: return "Атака"
-        case .defense: return "Защита"
-        case .special: return "Особая"
+        case .resource: return L10n.cardTypeResource.localized
+        case .attack: return L10n.cardTypeAttack.localized
+        case .defense: return L10n.cardTypeDefense.localized
+        case .special: return L10n.cardTypeSpecial.localized
         default: return card.type.rawValue
         }
     }
@@ -964,11 +964,11 @@ struct MarketCardView: View {
 
     var rarityText: String {
         switch card.rarity {
-        case .common: return "Обычная"
-        case .uncommon: return "Необычная"
-        case .rare: return "Редкая"
-        case .epic: return "Эпическая"
-        case .legendary: return "Легендарная"
+        case .common: return L10n.rarityCommon.localized
+        case .uncommon: return L10n.rarityUncommon.localized
+        case .rare: return L10n.rarityRare.localized
+        case .epic: return L10n.rarityEpic.localized
+        case .legendary: return L10n.rarityLegendary.localized
         }
     }
 
@@ -998,13 +998,15 @@ struct MarketCardView: View {
 struct PhaseProgressBar: View {
     let currentPhase: GamePhase
 
-    let phases: [(phase: GamePhase, name: String, color: Color)] = [
-        (.exploration, "Исследование", .blue),
-        (.encounter, "Встреча", .orange),
-        (.playerTurn, "Ход игрока", .green),
-        (.enemyTurn, "Ход врага", .red),
-        (.endTurn, "Конец хода", .purple)
-    ]
+    var phases: [(phase: GamePhase, name: String, color: Color)] {
+        [
+            (.exploration, L10n.phaseProgressExploration.localized, .blue),
+            (.encounter, L10n.phaseProgressEncounter.localized, .orange),
+            (.playerTurn, L10n.phaseProgressPlayerTurn.localized, .green),
+            (.enemyTurn, L10n.phaseProgressEnemyTurn.localized, .red),
+            (.endTurn, L10n.phaseProgressEndTurn.localized, .purple)
+        ]
+    }
 
     var body: some View {
         VStack(spacing: 4) {

@@ -23,6 +23,7 @@ extension QuestDefinition {
 
         return Quest(
             id: questUUID,
+            definitionId: id,  // Content Pack ID for QuestTriggerEngine
             title: title.localized,
             description: description.localized,
             questType: questType,

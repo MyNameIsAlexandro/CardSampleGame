@@ -353,6 +353,9 @@ struct ResourceBalanceConfig: Codable {
     /// Maximum gold
     let maxGold: Int
 
+    /// Health restored when resting
+    let restHealAmount: Int
+
     static let `default` = ResourceBalanceConfig(
         startingHealth: 20,
         maxHealth: 30,
@@ -361,7 +364,8 @@ struct ResourceBalanceConfig: Codable {
         startingSupplies: 5,
         maxSupplies: 10,
         startingGold: 0,
-        maxGold: 100
+        maxGold: 100,
+        restHealAmount: 3
     )
 }
 
@@ -379,6 +383,9 @@ struct PressureBalanceConfig: Codable {
     /// Pressure gain per turn
     let pressurePerTurn: Int
 
+    /// Days between tension ticks (when tension increases automatically)
+    let tensionTickInterval: Int
+
     /// Pressure thresholds for escalation
     let thresholds: PressureThresholds
 
@@ -390,6 +397,7 @@ struct PressureBalanceConfig: Codable {
         minPressure: 0,
         maxPressure: 100,
         pressurePerTurn: 5,
+        tensionTickInterval: 3,
         thresholds: .default,
         degradation: .default
     )

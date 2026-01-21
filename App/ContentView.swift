@@ -17,8 +17,10 @@ struct ContentView: View {
     // Legacy support for save/load during transition
     @StateObject private var gameState = GameState(players: [])
 
-    // Using Twilight Marches characters
-    let characters = TwilightMarchesCards.createGuardians()
+    // MARK: - Content Pack System
+    // Characters are loaded from Content Packs via CardFactory
+    // DO NOT use TwilightMarchesCards at runtime
+    let characters = CardFactory.shared.createGuardians()
 
     // Check if there are any saves
     var hasSaves: Bool {
@@ -295,19 +297,19 @@ struct ContentView: View {
             charisma: 0
         )
 
-        // Build player's starting deck (10 unique cards per hero)
-        player.deck = TwilightMarchesCards.createStartingDeck(for: selectedCharacter.name)
+        // Build player's starting deck from Content Packs
+        player.deck = CardFactory.shared.createStartingDeck(forHeroName: selectedCharacter.name)
         player.shuffleDeck()
 
         // IMPORTANT: Create fresh WorldState for new game
         // This ensures previous game state doesn't persist
         gameState.worldState = WorldState()
 
-        // Initialize game state with Twilight Marches encounters and market
+        // Initialize game state with encounters and market from Content Packs
         gameState.players = [player]
-        gameState.encounterDeck = TwilightMarchesCards.createEncounterDeck()
+        gameState.encounterDeck = CardFactory.shared.createEncounterDeck()
         gameState.encounterDeck.shuffle()
-        gameState.marketCards = TwilightMarchesCards.createMarketCards()
+        gameState.marketCards = CardFactory.shared.createMarketCards()
 
         // MARK: - Engine-First: Connect engine to legacy state
         // connectToLegacy also calls resetGameState() to clear isGameOver flag
@@ -354,16 +356,16 @@ struct ContentView: View {
             player.discard = saveData.playerDiscard
             player.buried = saveData.playerBuried
         } else {
-            // Fallback: create starting deck
-            player.deck = TwilightMarchesCards.createStartingDeck(for: saveData.characterName)
+            // Fallback: create starting deck from Content Packs
+            player.deck = CardFactory.shared.createStartingDeck(forHeroName: saveData.characterName)
             player.shuffleDeck()
         }
 
-        // Initialize game state with market
+        // Initialize game state with market from Content Packs
         gameState.players = [player]
-        gameState.encounterDeck = TwilightMarchesCards.createEncounterDeck()
+        gameState.encounterDeck = CardFactory.shared.createEncounterDeck()
         gameState.encounterDeck.shuffle()
-        gameState.marketCards = TwilightMarchesCards.createMarketCards()
+        gameState.marketCards = CardFactory.shared.createMarketCards()
         gameState.turnNumber = saveData.turnNumber
         gameState.encountersDefeated = saveData.encountersDefeated
 

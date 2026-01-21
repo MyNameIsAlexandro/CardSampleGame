@@ -269,13 +269,13 @@ class Player: ObservableObject, Identifiable {
     var balanceDescription: String {
         switch balance {
         case 0..<30:
-            return "Путь Тьмы"
+            return L10n.balancePathDark.localized
         case 30..<70:
-            return "Нейтральный"
+            return L10n.balancePathNeutral.localized
         case 70...100:
-            return "Путь Света"
+            return L10n.balancePathLight.localized
         default:
-            return "Неизвестно"
+            return L10n.balancePathUnknown.localized
         }
     }
 

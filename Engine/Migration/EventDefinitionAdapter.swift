@@ -30,6 +30,7 @@ extension EventDefinition {
 
         return GameEvent(
             id: eventUUID,
+            definitionId: id,  // Content Pack ID (e.g., "village_elder_request")
             eventType: eventType,
             title: title.localized,
             description: body.localized,
@@ -141,6 +142,7 @@ extension EventDefinition {
 
         return Card(
             id: UUID(),
+            definitionId: enemyId,  // Content Pack ID for tracking
             name: enemyId.replacingOccurrences(of: "_", with: " ").capitalized,
             type: .monster,
             rarity: difficultyToRarity(challenge.difficulty),

@@ -67,8 +67,8 @@ struct DayEvent: Identifiable {
     static func tensionIncrease(day: Int, newTension: Int) -> DayEvent {
         DayEvent(
             day: day,
-            title: "Напряжение растёт",
-            description: "Влияние Нави усиливается. Напряжение мира: \(newTension)%",
+            title: L10n.dayEventTensionTitle.localized,
+            description: L10n.dayEventTensionDescription.localized(with: newTension),
             isNegative: true
         )
     }
@@ -76,8 +76,8 @@ struct DayEvent: Identifiable {
     static func regionDegraded(day: Int, regionName: String, newState: RegionState) -> DayEvent {
         DayEvent(
             day: day,
-            title: "Регион деградирует",
-            description: "\(regionName) переходит в состояние: \(newState.displayName)",
+            title: L10n.dayEventRegionDegradedTitle.localized,
+            description: L10n.dayEventRegionDegradedDescription.localized(with: regionName, newState.displayName),
             isNegative: true
         )
     }
@@ -85,8 +85,8 @@ struct DayEvent: Identifiable {
     static func worldImproving(day: Int) -> DayEvent {
         DayEvent(
             day: day,
-            title: "Мир восстанавливается",
-            description: "Влияние Яви укрепляется, напряжение спадает",
+            title: L10n.dayEventWorldImprovingTitle.localized,
+            description: L10n.dayEventWorldImprovingDescription.localized,
             isNegative: false
         )
     }
@@ -140,31 +140,34 @@ class WorldState: ObservableObject, Codable {
     // MARK: - World Setup
 
     private func setupInitialWorld() {
-        // DATA-DRIVEN: Load regions from ContentProvider
+        // DATA-DRIVEN: Load all content from ContentProvider
         // Reference: ENGINE_ARCHITECTURE.md, Section 5
-        // Use CodeContentProvider with Twilight Marches content
         let provider = TwilightMarchesCodeContentProvider()
+
+        // Load regions from ContentProvider
         regions = createRegionsFromProvider(provider)
 
-        // Создаем начальные события
-        allEvents = createInitialEvents()
+        // Load events from ContentProvider (using adapters)
+        allEvents = provider.getAllEventDefinitions().map { $0.toGameEvent() }
 
-        // Создаем начальные квесты (Act I)
-        let initialQuests = createInitialQuests()
+        // Load quests from ContentProvider (using adapters)
+        let initialQuests = provider.getAllQuestDefinitions().map { $0.toQuest() }
         // Main quest starts automatically
         if let mainQuest = initialQuests.first(where: { $0.questType == .main }) {
             startQuest(mainQuest)
         }
 
-        // Устанавливаем начальные параметры
+        // Set initial world parameters
         worldTension = 30
         lightDarkBalance = 50
         mainQuestStage = 1
         daysPassed = 0
 
-        // Стартовый регион - "Деревня у тракта" (village)
-        // Canonical starting region is the Village per game design
-        if let villageRegion = regions.first(where: { $0.name == "Деревня у тракта" }) {
+        // Set starting region by ID (village)
+        // Canonical starting region is "village" per game design
+        // Find by matching the localized name from ContentProvider
+        if let villageDef = provider.getAllRegionDefinitions().first(where: { $0.id == "village" }),
+           let villageRegion = regions.first(where: { $0.name == villageDef.title.localized }) {
             currentRegionId = villageRegion.id
         } else if let firstStable = regions.first(where: { $0.state == .stable }) {
             // Fallback to any stable region if village not found
@@ -181,11 +184,12 @@ class WorldState: ObservableObject, Codable {
         // First pass: create regions without neighbor links
         for def in regionDefs {
             let anchor = createAnchorFromDefinition(provider.getAnchorDefinition(forRegion: def.id))
-            let regionType = mapRegionType(def.id)
+            let regionType = mapRegionTypeFromString(def.regionType)
             let regionState = mapRegionState(def.initialState)
 
             var region = Region(
-                name: TwilightMarchesCodeContentProvider.regionName(for: def.id),
+                definitionId: def.id,
+                name: def.title.localized,
                 type: regionType,
                 state: regionState,
                 anchor: anchor,
@@ -214,7 +218,7 @@ class WorldState: ObservableObject, Codable {
         let influence = mapInfluence(def.initialInfluence)
 
         return Anchor(
-            name: TwilightMarchesCodeContentProvider.anchorName(for: def.id),
+            name: def.title.localized,
             type: anchorType,
             integrity: def.initialIntegrity,
             influence: influence,
@@ -255,17 +259,18 @@ class WorldState: ObservableObject, Codable {
         }
     }
 
-    /// Map region ID to RegionType (game-specific mapping)
-    private func mapRegionType(_ regionId: String) -> RegionType {
-        switch regionId {
-        case "village": return .settlement
-        case "oak": return .sacred
+    /// Map region type string to RegionType enum
+    /// Type string comes from RegionDefinition.regionType (data-driven)
+    private func mapRegionTypeFromString(_ typeString: String) -> RegionType {
+        switch typeString.lowercased() {
+        case "settlement": return .settlement
+        case "sacred": return .sacred
         case "forest": return .forest
         case "swamp": return .swamp
         case "mountain": return .mountain
-        case "breach": return .wasteland
-        case "dark_lowland": return .swamp
-        default: return .forest // Default to forest for unknown regions
+        case "wasteland": return .wasteland
+        case "water": return .water
+        default: return .forest
         }
     }
 
@@ -367,7 +372,7 @@ class WorldState: ObservableObject, Codable {
 
         // Уведомить о росте напряжения
         lastDayEvent = .tensionIncrease(day: daysPassed, newTension: worldTension)
-        logWorldChange(description: "Напряжение мира выросло до \(worldTension)% (+\(totalIncrement))")
+        logWorldChange(description: L10n.logTensionIncreased.localized(with: worldTension, totalIncrement))
 
         // 3. Проверить деградацию региона с вероятностью (Tension/100)
         // Используем WorldRNG для детерминизма при тестировании
@@ -410,7 +415,7 @@ class WorldState: ObservableObject, Codable {
             let resistProb = rules.resistanceProbability(anchorIntegrity: anchor.integrity)
             if WorldRNG.shared.checkProbability(resistProb) {
                 // Якорь сопротивляется — деградация не происходит
-                logWorldChange(description: "Якорь в \(selectedRegion.name) сопротивляется влиянию Нави (\(anchor.integrity)% integrity)")
+                logWorldChange(description: L10n.logAnchorResists.localized(with: selectedRegion.name, anchor.integrity))
                 return
             }
         }
@@ -422,7 +427,7 @@ class WorldState: ObservableObject, Codable {
         // Получить новое состояние после деградации
         if let updatedRegion = getRegion(byId: selectedRegion.id), updatedRegion.state != oldState {
             lastDayEvent = .regionDegraded(day: daysPassed, regionName: updatedRegion.name, newState: updatedRegion.state)
-            logWorldChange(description: "\(updatedRegion.name) деградировал до \(updatedRegion.state.displayName)")
+            logWorldChange(description: L10n.logRegionDegraded.localized(with: updatedRegion.name, updatedRegion.state.displayName))
         }
     }
 
@@ -714,13 +719,13 @@ class WorldState: ObservableObject, Codable {
     var balanceDescription: String {
         switch lightDarkBalance {
         case 0..<30:
-            return "Путь Тьмы"
+            return L10n.balancePathDark.localized
         case 30..<70:
-            return "Нейтральный"
+            return L10n.balancePathNeutral.localized
         case 70...100:
-            return "Путь Света"
+            return L10n.balancePathLight.localized
         default:
-            return "Неизвестно"
+            return L10n.balancePathUnknown.localized
         }
     }
 
@@ -792,21 +797,22 @@ class WorldState: ObservableObject, Codable {
 
     /// Добавить запись о путешествии
     func logTravel(from: String, to: String, days: Int) {
+        let outcomeKey = days == 1 ? L10n.logTravelOutcomeDay : L10n.logTravelOutcomeDays
         logEvent(
             regionName: to,
-            eventTitle: "Путешествие",
-            choiceMade: "Отправился в \(to)",
-            outcome: "Добрался за \(days) \(days == 1 ? "день" : "дня")",
+            eventTitle: L10n.logTravelTitle.localized,
+            choiceMade: L10n.logTravelChoice.localized(with: to),
+            outcome: outcomeKey.localized(with: days),
             type: .travel
         )
     }
 
     /// Добавить запись об изменении мира
     func logWorldChange(description: String) {
-        let regionName = getCurrentRegion()?.name ?? "Мир"
+        let regionName = getCurrentRegion()?.name ?? L10n.logWorld.localized
         logEvent(
             regionName: regionName,
-            eventTitle: "Изменение мира",
+            eventTitle: L10n.logWorldChange.localized,
             choiceMade: "-",
             outcome: description,
             type: .worldChange
@@ -937,23 +943,17 @@ class WorldState: ObservableObject, Codable {
 
         // Установка флагов (ключевая механика — события не меняют мир напрямую, а через флаги)
         // См. EXPLORATION_CORE_DESIGN.md, раздел 18.7
-        var flagsChanged = false
+        // Quest progress now handled by QuestTriggerEngine via flagSet action
         if let flags = consequences.setFlags {
             for (key, value) in flags {
                 setFlag(key, value: value)
-                flagsChanged = true
             }
-        }
-
-        // Если флаги изменились — проверить прогресс квестов
-        if flagsChanged {
-            checkQuestObjectivesByFlags(player)
         }
 
         // Добавление карт в колоду игрока
         if let cardIDs = consequences.addCards {
             for cardID in cardIDs {
-                if let card = TwilightMarchesCards.getCardByID(cardID) {
+                if let card = CardFactory.shared.getCard(id: cardID) {
                     // Add card to player's discard pile (standard deck-building mechanic)
                     player.discard.append(card)
                 }
@@ -998,7 +998,7 @@ class WorldState: ObservableObject, Codable {
         // Card rewards
         if let cardIDs = rewards.cards {
             for cardID in cardIDs {
-                if let card = TwilightMarchesCards.getCardByID(cardID) {
+                if let card = CardFactory.shared.getCard(id: cardID) {
                     // Add card to player's discard pile
                     player.discard.append(card)
                 }
@@ -1012,9 +1012,14 @@ class WorldState: ObservableObject, Codable {
         // if let experience = rewards.experience { ... }
     }
 
-    // MARK: - Quest Trigger System
+    // MARK: - Quest Trigger System (LEGACY)
+    // NOTE: These methods are DEPRECATED. Use QuestTriggerEngine for data-driven quest progression.
+    // QuestTriggerEngine reads CompletionCondition from QuestDefinition and processes actions automatically.
+    // These legacy methods remain for backward compatibility during migration.
 
     /// Check and update quest objectives based on world flags
+    /// - Note: DEPRECATED - Use QuestTriggerEngine.processAction() instead
+    @available(*, deprecated, message: "Use QuestTriggerEngine for data-driven quest progression")
     func checkQuestObjectivesByFlags(_ player: Player) {
         for i in 0..<activeQuests.count {
             var quest = activeQuests[i]
@@ -1080,45 +1085,50 @@ class WorldState: ObservableObject, Codable {
     }
 
     /// Check quest objectives when visiting a region
+    /// - Note: DEPRECATED - Use QuestTriggerEngine.processAction(.visitedRegion) instead
+    @available(*, deprecated, message: "Use QuestTriggerEngine for data-driven quest progression")
     func checkQuestObjectivesByRegion(regionId: UUID, player: Player) {
         guard let region = getRegion(byId: regionId) else { return }
 
         // Main Quest - Objective 2: Find Sacred Oak
-        if region.name == "Священный Дуб" {
+        if region.definitionId == "sacred_oak" {
             worldFlags["found_sacred_oak"] = true
             checkQuestObjectivesByFlags(player)
         }
 
         // Main Quest - Objective 4: Explore Black Lowlands
-        if region.name == "Чёрная Низина" {
+        if region.definitionId == "dark_lowland" {
             worldFlags["explored_black_lowlands"] = true
             checkQuestObjectivesByFlags(player)
         }
     }
 
     /// Check quest objectives when an event is completed
-    func checkQuestObjectivesByEvent(eventTitle: String, choiceText: String, player: Player) {
+    /// Uses event definitionId and choice.id for data-driven matching
+    /// - Note: DEPRECATED - Use QuestTriggerEngine.processAction(.completedEvent) instead
+    @available(*, deprecated, message: "Use QuestTriggerEngine for data-driven quest progression")
+    func checkQuestObjectivesByEvent(eventId: String, choiceId: String, player: Player) {
         // Main Quest - Objective 1: Talk to elder
-        if eventTitle == "Просьба Старосты" && choiceText.contains("Согласиться") {
+        if eventId == "village_elder_request" && choiceId == "accept" {
             worldFlags["main_quest_started"] = true
             checkQuestObjectivesByFlags(player)
         }
 
         // Main Quest - Objective 3: Strengthen Oak
-        if eventTitle == "Мудрость Священного Дуба" && choiceText.contains("укрепить") {
+        if eventId == "sacred_oak_wisdom" && choiceId == "strengthen" {
             worldFlags["oak_strengthened"] = true
             checkQuestObjectivesByFlags(player)
         }
 
         // Main Quest - Objective 5: Boss defeated
-        if eventTitle == "Леший-Хранитель" {
-            if choiceText.contains("бой") {
+        if eventId == "leshy_guardian_boss" {
+            if choiceId == "fight" {
                 // Combat will set the flag via combat victory
                 // This is handled in GameState after combat
-            } else if choiceText.contains("договориться") {
+            } else if choiceId == "negotiate" {
                 worldFlags["leshy_guardian_peaceful"] = true
                 checkQuestObjectivesByFlags(player)
-            } else if choiceText.contains("тьмы") {
+            } else if choiceId == "corrupt" {
                 worldFlags["leshy_guardian_corrupted"] = true
                 checkQuestObjectivesByFlags(player)
             }
@@ -1126,1253 +1136,15 @@ class WorldState: ObservableObject, Codable {
     }
 
     /// Mark boss as defeated after combat victory
-    func markBossDefeated(bossName: String, player: Player) {
-        if bossName == "Леший-Хранитель" {
+    /// Uses enemy definitionId for data-driven matching
+    /// - Note: Quest progress is now handled by QuestTriggerEngine via flag triggers
+    func markBossDefeated(enemyId: String) {
+        if enemyId == "leshy_guardian" {
             worldFlags["leshy_guardian_defeated"] = true
-            checkQuestObjectivesByFlags(player)
+            // Quest progress handled by QuestTriggerEngine when it processes flagSet action
         }
     }
 
-    // MARK: - Data Creation (LEGACY - Replaced by ContentProvider)
-
-    /// DEPRECATED: This method is no longer used.
-    /// Region creation now uses `createRegionsFromProvider()` with `TwilightMarchesCodeContentProvider`.
-    /// This code is kept as reference only and will be removed in a future version.
-    /// See: ENGINE_ARCHITECTURE.md, Section 5 (Data-Driven Architecture)
-    @available(*, deprecated, message: "Use createRegionsFromProvider(TwilightMarchesCodeContentProvider.shared) instead")
-    private func createInitialRegions() -> [Region] {
-        // АКТ I - 7 регионов (2 Stable, 3 Borderland, 2 Breach)
-        // LEGACY CODE - Now handled by TwilightMarchesCodeContentProvider
-
-        // 1. Деревня у тракта (Stable) - стартовая точка
-        let villageAnchor = Anchor(
-            name: "Часовня Света",
-            type: .chapel,
-            integrity: 85,
-            influence: .light,
-            power: 6
-        )
-        var village = Region(
-            name: "Деревня у тракта",
-            type: .settlement,
-            state: .stable,
-            anchor: villageAnchor,
-            reputation: 30
-        )
-        village.updateStateFromAnchor()
-
-        // 2. Священный Дуб (Stable) - точка силы
-        let oakAnchor = Anchor(
-            name: "Священный Дуб Велеса",
-            type: .sacredTree,
-            integrity: 90,
-            influence: .light,
-            power: 8
-        )
-        var oak = Region(
-            name: "Священный Дуб",
-            type: .sacred,
-            state: .stable,
-            anchor: oakAnchor,
-            reputation: 25
-        )
-        oak.updateStateFromAnchor()
-
-        // 3. Дремучий Лес (Borderland) - первая опасная зона
-        let forestAnchor = Anchor(
-            name: "Каменный Идол",
-            type: .stoneIdol,
-            integrity: 55,
-            influence: .neutral,
-            power: 5
-        )
-        var forest = Region(
-            name: "Дремучий Лес",
-            type: .forest,
-            state: .borderland,
-            anchor: forestAnchor,
-            reputation: 0
-        )
-        forest.updateStateFromAnchor()
-
-        // 4. Болото Нави (Borderland) - зона искажения
-        let swampAnchor = Anchor(
-            name: "Осквернённый Родник",
-            type: .spring,
-            integrity: 45,
-            influence: .dark,
-            power: 4
-        )
-        var swamp = Region(
-            name: "Болото Нави",
-            type: .swamp,
-            state: .borderland,
-            anchor: swampAnchor,
-            reputation: -15
-        )
-        swamp.updateStateFromAnchor()
-
-        // 5. Горный Перевал (Borderland) - путь к узлу
-        let mountainAnchor = Anchor(
-            name: "Курган Предков",
-            type: .barrow,
-            integrity: 50,
-            influence: .neutral,
-            power: 5
-        )
-        var mountain = Region(
-            name: "Горный Перевал",
-            type: .mountain,
-            state: .borderland,
-            anchor: mountainAnchor,
-            reputation: 5
-        )
-        mountain.updateStateFromAnchor()
-
-        // 6. Разлом Курганов (Breach) - первый узел вторжения
-        let breachAnchor = Anchor(
-            name: "Разрушенное Капище",
-            type: .shrine,
-            integrity: 15,
-            influence: .dark,
-            power: 3
-        )
-        var breach = Region(
-            name: "Разлом Курганов",
-            type: .wasteland,
-            state: .breach,
-            anchor: breachAnchor,
-            reputation: -40
-        )
-        breach.updateStateFromAnchor()
-
-        // 7. Чёрная Низина (Breach) - финал Акта I
-        // Нет якоря - полностью разрушен
-        var darkLowland = Region(
-            name: "Чёрная Низина",
-            type: .swamp,
-            state: .breach,
-            anchor: nil,
-            reputation: -60
-        )
-        darkLowland.updateStateFromAnchor()
-
-        // Настроить связи между регионами (соседи)
-        // Карта Акта I:
-        //     Oak ─── Forest ─── Mountain
-        //      │        │            │
-        //   Village ─────┼─────── Breach ─── Dark Lowland
-        //      │                    │
-        //    Swamp ─────────────────┘
-
-        village.neighborIds = [oak.id, forest.id, swamp.id]
-        oak.neighborIds = [village.id, forest.id]
-        forest.neighborIds = [village.id, oak.id, mountain.id]
-        swamp.neighborIds = [village.id, breach.id]
-        mountain.neighborIds = [forest.id, breach.id]
-        breach.neighborIds = [swamp.id, mountain.id, darkLowland.id]
-        darkLowland.neighborIds = [breach.id]
-
-        return [village, oak, forest, swamp, mountain, breach, darkLowland]
-    }
-
-    private func createInitialEvents() -> [GameEvent] {
-        // MARK: - Data-Driven Events (ContentRegistry)
-        // First, try to load events from ContentRegistry (new architecture)
-        let registryEvents = ContentRegistry.shared.getAllEvents()
-        if !registryEvents.isEmpty {
-            print("📦 Loading \(registryEvents.count) events from ContentRegistry")
-            return registryEvents.map { $0.toGameEvent() }
-        }
-
-        // MARK: - Legacy Hardcoded Events (fallback)
-        print("⚠️ ContentRegistry empty, using legacy hardcoded events")
-        var events: [GameEvent] = []
-
-        // 1. COMBAT EVENT: Встреча с лешим (Forest guardian)
-        let leshyMonster = Card(
-            id: UUID(),
-            name: "Леший",
-            type: .monster,
-            rarity: .uncommon,
-            description: "Древний страж леса, чья сила растет от гнева.",
-            power: 4,
-            defense: 8,
-            health: 12,
-            cost: nil,
-            abilities: [],
-            balance: .neutral
-        )
-
-        let leshyEvent = GameEvent(
-            eventType: .combat,
-            title: "Встреча с Лешим",
-            description: "Из чащи появляется древний страж леса. Его глаза горят зеленым огнем, а ветви скрипят угрожающе. Леший преграждает путь.",
-            regionTypes: [.forest, .swamp],
-            regionStates: [.borderland, .breach],
-            choices: [
-                EventChoice(
-                    text: "Вступить в бой с духом леса",
-                    requirements: EventRequirements(minimumHealth: 3),
-                    consequences: EventConsequences(
-                        faithChange: 1,
-                        message: "Приготовьтесь к бою!"
-                    )
-                ),
-                EventChoice(
-                    text: "Попытаться задобрить дарами (стоит 5 ✨)",
-                    requirements: EventRequirements(minimumFaith: 5),
-                    consequences: EventConsequences(
-                        faithChange: -5,
-                        balanceChange: 5,
-                        tensionChange: -5,
-                        message: "Леший принял дары и пропустил вас. Лес стал спокойнее."
-                    )
-                ),
-                EventChoice(
-                    text: "Отступить и обойти стороной",
-                    consequences: EventConsequences(
-                        faithChange: nil,
-                        healthChange: nil,
-                        balanceChange: nil,
-                        tensionChange: nil,
-                        reputationChange: -5,
-                        message: "Вы отступили, избежав конфликта, но потеряли уважение местных духов."
-                    )
-                )
-            ],
-            oneTime: false,
-            monsterCard: leshyMonster
-        )
-        events.append(leshyEvent)
-
-        // 2. RITUAL/CHOICE EVENT: Древний ритуал
-        let ritualEvent = GameEvent(
-            eventType: .ritual,
-            title: "Древний Ритуал",
-            description: "Вы находите место силы - старинное капище с угасающим пламенем. Вы чувствуете, что можете либо возродить святилище Света, либо осквернить его силой Тьмы для получения власти.",
-            regionTypes: [.forest, .sacred, .mountain],
-            regionStates: [.stable, .borderland],
-            choices: [
-                EventChoice(
-                    text: "Возродить святилище Света (10 ✨)",
-                    requirements: EventRequirements(minimumFaith: 10, minimumHealth: nil, requiredBalance: .light),
-                    consequences: EventConsequences(
-                        faithChange: -10,
-                        balanceChange: 15,
-                        tensionChange: -10,
-                        anchorIntegrityChange: 20,
-                        message: "Святилище возрождено! Свет Яви становится сильнее в этом регионе."
-                    )
-                ),
-                EventChoice(
-                    text: "Осквернить ритуал для получения силы",
-                    requirements: EventRequirements(requiredBalance: .dark),
-                    consequences: EventConsequences(
-                        faithChange: 15,
-                        balanceChange: -20,
-                        tensionChange: 15,
-                        addCards: ["dark_power_card"],
-                        anchorIntegrityChange: -30,
-                        message: "Вы получили темную силу, но Навь усилилась в этом месте."
-                    )
-                ),
-                EventChoice(
-                    text: "Не вмешиваться и уйти",
-                    consequences: EventConsequences(
-                        message: "Вы оставили место силы нетронутым."
-                    )
-                )
-            ],
-            oneTime: true
-        )
-        events.append(ritualEvent)
-
-        // 3. NARRATIVE EVENT: Странник на развилке
-        let wandererEvent = GameEvent(
-            eventType: .narrative,
-            title: "Странник на Развилке",
-            description: "Старый путник сидит у костра. Он предлагает поделиться знаниями о мире в обмен на помощь.",
-            regionTypes: [.forest, .settlement, .mountain],
-            regionStates: [.stable, .borderland],
-            choices: [
-                EventChoice(
-                    text: "Выслушать рассказы странника (3 ✨)",
-                    requirements: EventRequirements(minimumFaith: 3),
-                    consequences: EventConsequences(
-                        faithChange: -3,
-                        healthChange: nil,
-                        balanceChange: nil,
-                        tensionChange: nil,
-                        reputationChange: nil,
-                        addCards: nil,
-                        addCurse: nil,
-                        giveArtifact: nil,
-                        setFlags: ["met_wanderer": true],
-                        anchorIntegrityChange: nil,
-                        message: "Странник рассказал вам о древних путях и тайнах мира."
-                    )
-                ),
-                EventChoice(
-                    text: "Помочь ему припасами",
-                    consequences: EventConsequences(
-                        faithChange: -2,
-                        healthChange: nil,
-                        balanceChange: 5,
-                        tensionChange: nil,
-                        reputationChange: 10,
-                        addCards: nil,
-                        addCurse: nil,
-                        giveArtifact: nil,
-                        setFlags: nil,
-                        anchorIntegrityChange: nil,
-                        message: "Странник благодарен за помощь и благословляет ваш путь."
-                    )
-                ),
-                EventChoice(
-                    text: "Пройти мимо",
-                    consequences: EventConsequences(
-                        message: "Вы продолжили свой путь."
-                    )
-                )
-            ],
-            oneTime: true
-        )
-        events.append(wandererEvent)
-
-        // 4. EXPLORATION EVENT: Заброшенный храм
-        let templeEvent = GameEvent(
-            eventType: .exploration,
-            title: "Заброшенный Храм",
-            description: "Вы находите руины древнего храма. Внутри чувствуется присутствие силы, но и опасность.",
-            regionTypes: [.settlement, .wasteland, .sacred],
-            regionStates: [.borderland, .breach],
-            choices: [
-                EventChoice(
-                    text: "Тщательно исследовать храм",
-                    requirements: EventRequirements(minimumHealth: 5),
-                    consequences: EventConsequences(
-                        faithChange: 8,
-                        healthChange: -3,
-                        balanceChange: nil,
-                        tensionChange: nil,
-                        reputationChange: nil,
-                        addCards: ["ancient_blessing"],
-                        addCurse: nil,
-                        giveArtifact: nil,
-                        setFlags: nil,
-                        anchorIntegrityChange: nil,
-                        message: "Вы нашли древнюю реликвию, но исследование было опасным."
-                    )
-                ),
-                EventChoice(
-                    text: "Быстро осмотреть и уйти",
-                    consequences: EventConsequences(
-                        faithChange: 3,
-                        message: "Вы нашли немного ценностей и быстро покинули опасное место."
-                    )
-                ),
-                EventChoice(
-                    text: "Обойти храм стороной",
-                    consequences: EventConsequences(
-                        message: "Вы решили не рисковать."
-                    )
-                )
-            ],
-            oneTime: false
-        )
-        events.append(templeEvent)
-
-        // 5. WORLD SHIFT EVENT: Усиление Нави
-        let breachEvent = GameEvent(
-            eventType: .worldShift,
-            title: "Прорыв Нави",
-            description: "Граница между мирами истончается. Темные силы пытаются прорваться в Явь через слабый якорь.",
-            regionTypes: [.forest, .swamp, .settlement, .wasteland],
-            regionStates: [.breach],
-            choices: [
-                EventChoice(
-                    text: "Укрепить якорь своей верой (15 ✨)",
-                    requirements: EventRequirements(minimumFaith: 15),
-                    consequences: EventConsequences(
-                        faithChange: -15,
-                        balanceChange: 10,
-                        tensionChange: -20,
-                        anchorIntegrityChange: 30,
-                        message: "Вы закрыли прорыв! Регион стабилизировался."
-                    )
-                ),
-                EventChoice(
-                    text: "Отступить и предупредить других",
-                    consequences: EventConsequences(
-                        faithChange: nil,
-                        healthChange: nil,
-                        balanceChange: nil,
-                        tensionChange: 10,
-                        reputationChange: 5,
-                        addCards: nil,
-                        addCurse: nil,
-                        giveArtifact: nil,
-                        setFlags: nil,
-                        anchorIntegrityChange: -10,
-                        message: "Вы предупредили о прорыве, но Навь усилилась."
-                    )
-                ),
-                EventChoice(
-                    text: "Попытаться использовать силу прорыва",
-                    requirements: EventRequirements(requiredBalance: .dark),
-                    consequences: EventConsequences(
-                        faithChange: 10,
-                        healthChange: -5,
-                        balanceChange: -15,
-                        tensionChange: 5,
-                        addCurse: "breach_corruption",
-                        message: "Вы получили силу Нави, но она оставила след на вашей душе."
-                    )
-                )
-            ],
-            oneTime: false
-        )
-        events.append(breachEvent)
-
-        // 6. UNIVERSAL EVENT: Дикий зверь (works in all regions)
-        let beastMonster = Card(
-            id: UUID(),
-            name: "Дикий Зверь",
-            type: .monster,
-            rarity: .common,
-            description: "Озверевшее создание, искаженное влиянием Нави.",
-            power: 3,
-            defense: 6,
-            health: 8,
-            cost: nil,
-            abilities: [],
-            balance: .dark
-        )
-
-        let beastEvent = GameEvent(
-            eventType: .combat,
-            title: "Дикий Зверь",
-            description: "Из-за деревьев выскакивает озверевшее существо с горящими красными глазами. Оно рычит и готовится к атаке!",
-            regionTypes: [], // Empty = all region types
-            regionStates: [.stable, .borderland, .breach], // All states
-            choices: [
-                EventChoice(
-                    text: "Сразиться со зверем",
-                    requirements: EventRequirements(minimumHealth: 2),
-                    consequences: EventConsequences(
-                        message: "Вы вступаете в бой!"
-                    )
-                ),
-                EventChoice(
-                    text: "Попытаться испугать зверя (5 ✨)",
-                    requirements: EventRequirements(minimumFaith: 5),
-                    consequences: EventConsequences(
-                        faithChange: -5,
-                        message: "Вы используете силу веры, чтобы отпугнуть зверя."
-                    )
-                ),
-                EventChoice(
-                    text: "Убежать",
-                    consequences: EventConsequences(
-                        faithChange: nil,
-                        healthChange: -1,
-                        message: "Вы убегаете, но зверь успевает ранить вас."
-                    )
-                )
-            ],
-            oneTime: false,
-            monsterCard: beastMonster
-        )
-        events.append(beastEvent)
-
-        // 7. SETTLEMENT EVENT: Торговец на тракте
-        let merchantEvent = GameEvent(
-            eventType: .narrative,
-            title: "Торговец на Тракте",
-            description: "Вы встречаете странствующего торговца. У него есть интересные товары, но цены высоки.",
-            regionTypes: [.settlement],
-            regionStates: [.stable, .borderland],
-            choices: [
-                EventChoice(
-                    text: "Купить благословение (8 ✨)",
-                    requirements: EventRequirements(minimumFaith: 8),
-                    consequences: EventConsequences(
-                        faithChange: -8,
-                        healthChange: 3,
-                        balanceChange: 5,
-                        tensionChange: nil,
-                        reputationChange: nil,
-                        addCards: ["merchant_blessing"],
-                        addCurse: nil,
-                        giveArtifact: nil,
-                        setFlags: nil,
-                        anchorIntegrityChange: nil,
-                        message: "Вы приобрели благословение. Ваши силы восстановлены."
-                    )
-                ),
-                EventChoice(
-                    text: "Поторговаться за информацию (4 ✨)",
-                    requirements: EventRequirements(minimumFaith: 4),
-                    consequences: EventConsequences(
-                        faithChange: -4,
-                        healthChange: nil,
-                        balanceChange: nil,
-                        tensionChange: nil,
-                        reputationChange: 5,
-                        addCards: nil,
-                        addCurse: nil,
-                        giveArtifact: nil,
-                        setFlags: ["merchant_info": true],
-                        anchorIntegrityChange: nil,
-                        message: "Торговец рассказал о путях и опасностях впереди."
-                    )
-                ),
-                EventChoice(
-                    text: "Просто поговорить и идти дальше",
-                    consequences: EventConsequences(
-                        message: "Вы обменялись новостями и продолжили путь."
-                    )
-                )
-            ],
-            oneTime: false
-        )
-        events.append(merchantEvent)
-
-        // 8. MOUNTAIN EVENT: Перевал и горный дух
-        let mountainSpiritMonster = Card(
-            id: UUID(),
-            name: "Горный Дух",
-            type: .monster,
-            rarity: .uncommon,
-            description: "Древний страж горных троп, испытывающий путников.",
-            power: 5,
-            defense: 10,
-            health: 14,
-            cost: nil,
-            abilities: [],
-            balance: .neutral
-        )
-
-        let mountainEvent = GameEvent(
-            eventType: .combat,
-            title: "Испытание Перевала",
-            description: "На горном перевале появляется каменный дух. Он говорит: 'Докажи свою силу или вернись назад, смертный!'",
-            regionTypes: [.mountain],
-            regionStates: [.stable, .borderland, .breach],
-            choices: [
-                EventChoice(
-                    text: "Принять вызов духа",
-                    requirements: EventRequirements(minimumHealth: 4),
-                    consequences: EventConsequences(
-                        faithChange: 2,
-                        message: "Вы принимаете вызов горного духа!"
-                    )
-                ),
-                EventChoice(
-                    text: "Предложить дар горам (10 ✨)",
-                    requirements: EventRequirements(minimumFaith: 10),
-                    consequences: EventConsequences(
-                        faithChange: -10,
-                        healthChange: nil,
-                        balanceChange: 8,
-                        tensionChange: nil,
-                        reputationChange: 15,
-                        addCards: nil,
-                        addCurse: nil,
-                        giveArtifact: nil,
-                        setFlags: ["mountain_blessing": true],
-                        anchorIntegrityChange: nil,
-                        message: "Горный дух принял дар. Он благословил ваш путь через перевал."
-                    )
-                ),
-                EventChoice(
-                    text: "Отступить с перевала",
-                    consequences: EventConsequences(
-                        message: "Вы спускаетесь вниз, не приняв вызов."
-                    )
-                )
-            ],
-            oneTime: true,
-            monsterCard: mountainSpiritMonster
-        )
-        events.append(mountainEvent)
-
-        // 9. SACRED EVENT: Священный Дуб
-        let oakEvent = GameEvent(
-            eventType: .ritual,
-            title: "Мудрость Священного Дуба",
-            description: "Древний дуб шепчет вам на языке ветра. Вы чувствуете его древнюю силу и мудрость веков.",
-            regionTypes: [.sacred, .forest],
-            regionStates: [.stable, .borderland],
-            choices: [
-                EventChoice(
-                    text: "Медитировать под дубом (6 ✨)",
-                    requirements: EventRequirements(minimumFaith: 6),
-                    consequences: EventConsequences(
-                        faithChange: -6,
-                        healthChange: 5,
-                        balanceChange: 10,
-                        tensionChange: nil,
-                        reputationChange: nil,
-                        addCards: nil,
-                        addCurse: nil,
-                        giveArtifact: nil,
-                        setFlags: ["oak_wisdom": true],
-                        anchorIntegrityChange: nil,
-                        message: "Дуб поделился древней мудростью. Вы чувствуете прилив сил и ясность разума."
-                    )
-                ),
-                EventChoice(
-                    text: "Укрепить связь дуба с землей (12 ✨)",
-                    requirements: EventRequirements(minimumFaith: 12, minimumHealth: nil, requiredBalance: .light),
-                    consequences: EventConsequences(
-                        faithChange: -12,
-                        healthChange: nil,
-                        balanceChange: 15,
-                        tensionChange: -15,
-                        reputationChange: nil,
-                        addCards: nil,
-                        addCurse: nil,
-                        giveArtifact: nil,
-                        setFlags: ["oak_strengthened": true],
-                        anchorIntegrityChange: 25,
-                        message: "Вы усилили якорь! Священный Дуб сияет обновленной силой."
-                    )
-                ),
-                EventChoice(
-                    text: "Просто отдохнуть в тени дуба",
-                    consequences: EventConsequences(
-                        faithChange: nil,
-                        healthChange: 2,
-                        message: "Вы отдохнули под защитой древнего дуба."
-                    )
-                )
-            ],
-            oneTime: false
-        )
-        events.append(oakEvent)
-
-        // 10. SWAMP EVENT: Болотная ведьма
-        let swampWitchEvent = GameEvent(
-            eventType: .narrative,
-            title: "Болотная Ведьма",
-            description: "Среди болотных туманов появляется старая ведьма. Она предлагает сделку: знания в обмен на часть вашей сущности.",
-            regionTypes: [.swamp],
-            regionStates: [.borderland, .breach],
-            choices: [
-                EventChoice(
-                    text: "Принять сделку ведьмы",
-                    requirements: EventRequirements(minimumHealth: 4),
-                    consequences: EventConsequences(
-                        faithChange: 5,
-                        healthChange: -3,
-                        balanceChange: -10,
-                        addCards: ["witch_knowledge", "dark_pact"],
-                        addCurse: "witch_mark",
-                        setFlags: ["witch_pact": true],
-                        message: "Ведьма дала вам темные знания, но вы чувствуете проклятие на своей душе."
-                    )
-                ),
-                EventChoice(
-                    text: "Отказаться и попросить о помощи (7 ✨)",
-                    requirements: EventRequirements(minimumFaith: 7),
-                    consequences: EventConsequences(
-                        faithChange: -7,
-                        healthChange: 2,
-                        balanceChange: nil,
-                        tensionChange: nil,
-                        reputationChange: nil,
-                        addCards: nil,
-                        addCurse: nil,
-                        giveArtifact: nil,
-                        setFlags: ["witch_refused": true],
-                        anchorIntegrityChange: nil,
-                        message: "Ведьма уважает вашу стойкость и дает небольшую помощь без платы."
-                    )
-                ),
-                EventChoice(
-                    text: "Уйти, не связываясь с ведьмой",
-                    consequences: EventConsequences(
-                        message: "Вы обходите ведьму стороной и продолжаете путь через болото."
-                    )
-                )
-            ],
-            oneTime: true
-        )
-        events.append(swampWitchEvent)
-
-        // 11. WASTELAND EVENT: Разлом Курганов
-        let barrowWraithMonster = Card(
-            id: UUID(),
-            name: "Курганный Призрак",
-            type: .monster,
-            rarity: .rare,
-            description: "Древний воин, восставший из кургана под влиянием Нави.",
-            power: 6,
-            defense: 8,
-            health: 16,
-            cost: nil,
-            abilities: [],
-            balance: .dark
-        )
-
-        let barrowEvent = GameEvent(
-            eventType: .combat,
-            title: "Стражи Курганов",
-            description: "Древние курганы вскрываются, и из них поднимаются призрачные воины. Они защищают сокровища предков.",
-            regionTypes: [.wasteland],
-            regionStates: [.breach],
-            choices: [
-                EventChoice(
-                    text: "Сразиться с призраками",
-                    requirements: EventRequirements(minimumHealth: 5),
-                    consequences: EventConsequences(
-                        message: "Вы вступаете в бой с древними стражами!"
-                    )
-                ),
-                EventChoice(
-                    text: "Провести ритуал упокоения (15 ✨)",
-                    requirements: EventRequirements(minimumFaith: 15, minimumHealth: nil, requiredBalance: .light),
-                    consequences: EventConsequences(
-                        faithChange: -15,
-                        healthChange: nil,
-                        balanceChange: 20,
-                        tensionChange: -10,
-                        reputationChange: nil,
-                        addCards: ["ancestral_blessing"],
-                        addCurse: nil,
-                        giveArtifact: nil,
-                        setFlags: ["barrow_cleansed": true],
-                        anchorIntegrityChange: nil,
-                        message: "Вы упокоили древних воинов. Они благословляют вас перед уходом."
-                    )
-                ),
-                EventChoice(
-                    text: "Разграбить курган и бежать",
-                    consequences: EventConsequences(
-                        faithChange: 5,
-                        healthChange: -4,
-                        balanceChange: -15,
-                        tensionChange: nil,
-                        reputationChange: nil,
-                        addCards: nil,
-                        addCurse: "ancestral_wrath",
-                        giveArtifact: nil,
-                        setFlags: nil,
-                        anchorIntegrityChange: nil,
-                        message: "Вы захватили сокровища, но навлекли гнев предков."
-                    )
-                )
-            ],
-            oneTime: false,
-            monsterCard: barrowWraithMonster
-        )
-        events.append(barrowEvent)
-
-        // 11. BOSS EVENT: Леший-Хранитель (Final Boss of Act I)
-        let leshyGuardianBoss = TwilightMarchesCards.createLeshyGuardianBoss()
-        let bossEvent = GameEvent(
-            eventType: .combat,
-            title: "Леший-Хранитель",
-            description: "Перед вами возвышается древний страж Сумрачных Пределов. Леший-Хранитель - существо невиданной силы, чьи корни уходят в самые основы мира. Зелёное пламя в его глазах горит вечностью. Это финальное испытание Акта I.",
-            regionTypes: [.swamp],
-            regionStates: [.breach],
-            choices: [
-                EventChoice(
-                    text: "Вступить в решающий бой",
-                    requirements: EventRequirements(minimumFaith: 10, minimumHealth: 8),
-                    consequences: EventConsequences(
-                        message: "Последняя битва начинается! Судьба Сумрачных Пределов решается здесь!"
-                    )
-                ),
-                EventChoice(
-                    text: "Попытаться договориться (20 ✨)",
-                    requirements: EventRequirements(minimumFaith: 20, minimumHealth: nil, requiredBalance: .light),
-                    consequences: EventConsequences(
-                        faithChange: -20,
-                        healthChange: nil,
-                        balanceChange: 15,
-                        tensionChange: -20,
-                        reputationChange: nil,
-                        addCards: ["guardian_seal"],
-                        addCurse: nil,
-                        giveArtifact: nil,
-                        setFlags: ["leshy_guardian_peaceful": true],
-                        anchorIntegrityChange: nil,
-                        message: "Хранитель видит свет в вашей душе и соглашается помочь вам. Он вручает вам печать защитника."
-                    )
-                ),
-                EventChoice(
-                    text: "Использовать силу тьмы (15 ✨)",
-                    requirements: EventRequirements(minimumFaith: 15, minimumHealth: nil, requiredBalance: .dark),
-                    consequences: EventConsequences(
-                        faithChange: -15,
-                        healthChange: -5,
-                        balanceChange: -20,
-                        tensionChange: nil,
-                        reputationChange: nil,
-                        addCards: ["corrupted_power"],
-                        addCurse: nil,
-                        giveArtifact: nil,
-                        setFlags: ["leshy_guardian_corrupted": true],
-                        anchorIntegrityChange: nil,
-                        message: "Вы обрушиваете на хранителя силу тьмы. Он ослабевает, но часть его сущности входит в вас..."
-                    )
-                )
-            ],
-            questLinks: [], // Will be linked to main quest ID dynamically
-            oneTime: true,
-            monsterCard: leshyGuardianBoss
-        )
-        events.append(bossEvent)
-
-        // 12. QUEST EVENT: Деревенский староста (Main Quest trigger)
-        let elderEvent = GameEvent(
-            eventType: .narrative,
-            title: "Просьба Старосты",
-            description: "Деревенский староста просит о помощи. Навь усиливается, и деревне нужен защитник, способный укрепить якоря и противостоять тьме.",
-            regionTypes: [.settlement],
-            regionStates: [.stable, .borderland],
-            choices: [
-                EventChoice(
-                    text: "Согласиться помочь деревне",
-                    consequences: EventConsequences(
-                        faithChange: 3,
-                        reputationChange: 20,
-                        setFlags: ["main_quest_started": true, "helped_village": true],
-                        message: "Староста благодарен. Он рассказывает о трех главных якорях, которые нужно укрепить."
-                    )
-                ),
-                EventChoice(
-                    text: "Попросить награду (10 ✨)",
-                    consequences: EventConsequences(
-                        faithChange: 10,
-                        reputationChange: 5,
-                        setFlags: ["main_quest_started": true, "mercenary_path": true],
-                        message: "Староста соглашается заплатить. Вы берете задание как наемник."
-                    )
-                ),
-                EventChoice(
-                    text: "Отказать и идти своим путем",
-                    consequences: EventConsequences(
-                        faithChange: nil,
-                        healthChange: nil,
-                        balanceChange: nil,
-                        tensionChange: nil,
-                        reputationChange: -10,
-                        setFlags: ["refused_main_quest": true],
-                        message: "Староста разочарован вашим отказом."
-                    )
-                )
-            ],
-            questLinks: ["main_quest_act1"],
-            oneTime: true
-        )
-        events.append(elderEvent)
-
-        // 13. SIDE QUEST: Потерянный ребенок
-        let lostChildEvent = GameEvent(
-            eventType: .narrative,
-            title: "Плач в Лесу",
-            description: "Вы слышите детский плач в чаще. Местные говорят, что ребенок пропал три дня назад.",
-            regionTypes: [.forest, .swamp],
-            regionStates: [.borderland, .breach],
-            choices: [
-                EventChoice(
-                    text: "Отправиться на поиски ребенка",
-                    requirements: EventRequirements(minimumHealth: 4),
-                    consequences: EventConsequences(
-                        faithChange: -5,
-                        healthChange: -2,
-                        balanceChange: nil,
-                        tensionChange: nil,
-                        reputationChange: nil,
-                        addCards: nil,
-                        addCurse: nil,
-                        giveArtifact: nil,
-                        setFlags: ["child_quest_started": true],
-                        anchorIntegrityChange: nil,
-                        message: "Вы уходите вглубь леса на поиски пропавшего ребенка."
-                    )
-                ),
-                EventChoice(
-                    text: "Использовать веру для поиска (8 ✨)",
-                    requirements: EventRequirements(minimumFaith: 8),
-                    consequences: EventConsequences(
-                        faithChange: -8,
-                        healthChange: nil,
-                        balanceChange: 15,
-                        tensionChange: nil,
-                        reputationChange: 25,
-                        addCards: nil,
-                        addCurse: nil,
-                        giveArtifact: nil,
-                        setFlags: ["child_saved": true],
-                        anchorIntegrityChange: nil,
-                        message: "Ваша вера помогла найти ребенка быстро. Деревня очень благодарна!"
-                    )
-                ),
-                EventChoice(
-                    text: "Это слишком опасно, вернуться",
-                    consequences: EventConsequences(
-                        faithChange: nil,
-                        healthChange: nil,
-                        balanceChange: nil,
-                        tensionChange: nil,
-                        reputationChange: -15,
-                        addCards: nil,
-                        addCurse: nil,
-                        giveArtifact: nil,
-                        setFlags: nil,
-                        anchorIntegrityChange: nil,
-                        message: "Вы решаете не рисковать. Судьба ребенка остается неизвестной."
-                    )
-                )
-            ],
-            questLinks: ["side_quest_lost_child"],
-            oneTime: true
-        )
-        events.append(lostChildEvent)
-
-        // 14. REST EVENT: Привал у костра
-        let campEvent = GameEvent(
-            eventType: .narrative,
-            title: "Безопасное Место для Привала",
-            description: "Вы находите укрытое место, подходящее для отдыха. Можно развести костер и восстановить силы.",
-            regionTypes: [.forest, .mountain, .settlement],
-            regionStates: [.stable, .borderland],
-            choices: [
-                EventChoice(
-                    text: "Отдохнуть и восстановиться",
-                    consequences: EventConsequences(
-                        faithChange: 2,
-                        healthChange: 4,
-                        message: "Вы отдохнули у костра. Силы восстановлены."
-                    )
-                ),
-                EventChoice(
-                    text: "Провести ритуал очищения (5 ✨)",
-                    requirements: EventRequirements(minimumFaith: 5),
-                    consequences: EventConsequences(
-                        faithChange: -5,
-                        healthChange: 3,
-                        balanceChange: 5,
-                        message: "Ритуал очищения освежил тело и дух."
-                    )
-                ),
-                EventChoice(
-                    text: "Быстро перекусить и идти дальше",
-                    consequences: EventConsequences(
-                        faithChange: nil,
-                        healthChange: 1,
-                        message: "Вы немного отдохнули и продолжили путь."
-                    )
-                )
-            ],
-            oneTime: false
-        )
-        events.append(campEvent)
-
-        // 15. WORLD SHIFT: Сдвиг границ (Act I critical event)
-        let realmShiftEvent = GameEvent(
-            eventType: .worldShift,
-            title: "Сдвиг Границ Миров",
-            description: "Граница между Явью и Навью содрогается. Вы чувствуете, как реальность искажается вокруг вас. Это критический момент.",
-            regionTypes: [], // All regions
-            regionStates: [.breach],
-            choices: [
-                EventChoice(
-                    text: "Стабилизировать границу верой (20 ✨)",
-                    requirements: EventRequirements(minimumFaith: 20, minimumHealth: nil, requiredBalance: .light),
-                    consequences: EventConsequences(
-                        faithChange: -20,
-                        healthChange: nil,
-                        balanceChange: 25,
-                        tensionChange: -25,
-                        reputationChange: nil,
-                        addCards: nil,
-                        addCurse: nil,
-                        giveArtifact: nil,
-                        setFlags: ["realm_stabilized": true],
-                        anchorIntegrityChange: 40,
-                        message: "Вы закрыли прорыв! Граница миров укреплена вашей верой."
-                    )
-                ),
-                EventChoice(
-                    text: "Использовать момент для получения силы",
-                    requirements: EventRequirements(minimumFaith: 10, minimumHealth: nil, requiredBalance: .dark),
-                    consequences: EventConsequences(
-                        faithChange: 15,
-                        healthChange: -5,
-                        balanceChange: -20,
-                        tensionChange: 15,
-                        reputationChange: nil,
-                        addCards: ["realm_power", "nav_essence"],
-                        addCurse: "realm_corruption",
-                        giveArtifact: nil,
-                        setFlags: nil,
-                        anchorIntegrityChange: nil,
-                        message: "Вы вытянули силу из прорыва, но Навь пометила вас."
-                    )
-                ),
-                EventChoice(
-                    text: "Бежать от сдвига",
-                    consequences: EventConsequences(
-                        faithChange: nil,
-                        healthChange: -3,
-                        balanceChange: nil,
-                        tensionChange: 20,
-                        anchorIntegrityChange: -20,
-                        message: "Вы бежите, но сдвиг усиливается. Мир становится опаснее."
-                    )
-                )
-            ],
-            questLinks: ["main_quest_act1"],
-            oneTime: false
-        )
-        events.append(realmShiftEvent)
-
-        return events
-    }
-
-    // MARK: - Initial Quests (Act I)
-
-    private func createInitialQuests() -> [Quest] {
-        // MARK: - Data-Driven Quests (ContentRegistry)
-        // First, try to load quests from ContentRegistry (new architecture)
-        let registryQuests = ContentRegistry.shared.getAllQuests()
-        if !registryQuests.isEmpty {
-            print("📦 Loading \(registryQuests.count) quests from ContentRegistry")
-            return registryQuests.map { $0.toQuest() }
-        }
-
-        // MARK: - Legacy Hardcoded Quests (fallback)
-        print("⚠️ ContentRegistry empty, using legacy hardcoded quests")
-        var quests: [Quest] = []
-
-        // MAIN QUEST: Путь Защитника (5 stages)
-        let mainQuest = Quest(
-            id: UUID(),
-            title: "Путь Защитника",
-            description: "Деревня в опасности. Навь усиливается с каждым днем. Вы должны укрепить три главных якоря и защитить границу между мирами.",
-            questType: .main,
-            stage: 0,
-            objectives: [
-                QuestObjective(
-                    description: "Узнать о трех главных якорях от старосты",
-                    completed: false
-                ),
-                QuestObjective(
-                    description: "Найти Священный Дуб",
-                    completed: false
-                ),
-                QuestObjective(
-                    description: "Укрепить Дуб или найти союзника",
-                    completed: false
-                ),
-                QuestObjective(
-                    description: "Исследовать прорыв Нави в Чёрной Низине",
-                    completed: false
-                ),
-                QuestObjective(
-                    description: "Победить Лешего-Хранителя",
-                    completed: false
-                )
-            ],
-            rewards: QuestRewards(
-                faith: 20,
-                cards: ["defender_blessing", "anchor_power"],
-                artifact: "guardian_seal",
-                experience: 100
-            ),
-            completed: false
-        )
-        quests.append(mainQuest)
-
-        // SIDE QUEST 1: Потерянный ребенок
-        let lostChildQuest = Quest(
-            id: UUID(),
-            title: "Потерянный Ребенок",
-            description: "Маленький ребенок пропал в лесу три дня назад. Его родители в отчаянии. Лес становится все опаснее с каждым часом.",
-            questType: .side,
-            stage: 0,
-            objectives: [
-                QuestObjective(
-                    description: "Найти следы ребенка в лесу",
-                    completed: false
-                ),
-                QuestObjective(
-                    description: "Спасти ребенка от лесных духов",
-                    completed: false
-                ),
-                QuestObjective(
-                    description: "Вернуть ребенка в деревню",
-                    completed: false
-                )
-            ],
-            rewards: QuestRewards(
-                faith: 8,
-                cards: ["village_gratitude"],
-                experience: 30
-            ),
-            completed: false
-        )
-        quests.append(lostChildQuest)
-
-        // SIDE QUEST 2: Торговые пути
-        let tradeRoutesQuest = Quest(
-            id: UUID(),
-            title: "Безопасность Торговых Путей",
-            description: "Торговцы жалуются на участившиеся нападения на дорогах. Нужно очистить три ключевых участка пути.",
-            questType: .side,
-            stage: 0,
-            objectives: [
-                QuestObjective(
-                    description: "Очистить лесную дорогу от тварей",
-                    completed: false
-                ),
-                QuestObjective(
-                    description: "Защитить караван через горный перевал",
-                    completed: false
-                ),
-                QuestObjective(
-                    description: "Договориться с лешим о безопасном проходе",
-                    completed: false
-                )
-            ],
-            rewards: QuestRewards(
-                faith: 12,
-                cards: ["merchant_discount", "trade_blessing"],
-                experience: 40
-            ),
-            completed: false
-        )
-        quests.append(tradeRoutesQuest)
-
-        // SIDE QUEST 3: Сделка с ведьмой
-        let witchQuestLight = Quest(
-            id: UUID(),
-            title: "Тайна Болотной Ведьмы",
-            description: "Болотная ведьма знает древние секреты. Она может помочь в борьбе с Навью, но за какую цену?",
-            questType: .side,
-            stage: 0,
-            objectives: [
-                QuestObjective(
-                    description: "Найти ведьму в болоте",
-                    completed: false
-                ),
-                QuestObjective(
-                    description: "Выслушать её предложение",
-                    completed: false
-                ),
-                QuestObjective(
-                    description: "Сделать выбор: принять сделку или найти другой путь",
-                    completed: false
-                )
-            ],
-            rewards: QuestRewards(
-                faith: 10,
-                cards: ["witch_knowledge"],
-                experience: 35
-            ),
-            completed: false
-        )
-        quests.append(witchQuestLight)
-
-        // SIDE QUEST 4: Курганы предков
-        let barrowQuest = Quest(
-            id: UUID(),
-            title: "Проклятие Курганов",
-            description: "Древние курганы вскрылись, и мертвые восстали. Нужно упокоить духов предков или победить их.",
-            questType: .side,
-            stage: 0,
-            objectives: [
-                QuestObjective(
-                    description: "Исследовать Разлом Курганов",
-                    completed: false
-                ),
-                QuestObjective(
-                    description: "Найти причину пробуждения мертвых",
-                    completed: false
-                ),
-                QuestObjective(
-                    description: "Упокоить духов или победить призраков",
-                    completed: false
-                )
-            ],
-            rewards: QuestRewards(
-                faith: 15,
-                cards: ["ancestral_blessing", "warrior_spirit"],
-                artifact: "ancient_relic",
-                experience: 50
-            ),
-            completed: false
-        )
-        quests.append(barrowQuest)
-
-        // SIDE QUEST 5: Странствующий монах
-        let monkQuest = Quest(
-            id: UUID(),
-            title: "Испытание Монаха",
-            description: "Странствующий монах предлагает испытание духа. Пройдя его, вы обретете мудрость и силу.",
-            questType: .side,
-            stage: 0,
-            objectives: [
-                QuestObjective(
-                    description: "Найти монаха в священном месте",
-                    completed: false
-                ),
-                QuestObjective(
-                    description: "Пройти три испытания: тела, разума и духа",
-                    completed: false
-                ),
-                QuestObjective(
-                    description: "Доказать свою чистоту намерений",
-                    completed: false
-                )
-            ],
-            rewards: QuestRewards(
-                faith: 18,
-                cards: ["inner_peace", "spiritual_armor"],
-                experience: 45
-            ),
-            completed: false
-        )
-        quests.append(monkQuest)
-
-        // SIDE QUEST 6: Дух горного перевала
-        let mountainSpiritQuest = Quest(
-            id: UUID(),
-            title: "Благословение Гор",
-            description: "Горный дух испытывает путников. Докажите свою силу или мудрость, чтобы получить благословение перевала.",
-            questType: .side,
-            stage: 0,
-            objectives: [
-                QuestObjective(
-                    description: "Добраться до горного перевала",
-                    completed: false
-                ),
-                QuestObjective(
-                    description: "Встретить горного духа",
-                    completed: false
-                ),
-                QuestObjective(
-                    description: "Пройти испытание или принести достойный дар",
-                    completed: false
-                )
-            ],
-            rewards: QuestRewards(
-                faith: 10,
-                cards: ["mountain_blessing", "stone_armor"],
-                experience: 35
-            ),
-            completed: false
-        )
-        quests.append(mountainSpiritQuest)
-
-        return quests
-    }
 
     // MARK: - Narrative System (Endings & Deck Path)
     // See EXPLORATION_CORE_DESIGN.md, sections 28-34
@@ -2487,12 +1259,13 @@ class WorldState: ObservableObject, Codable {
         let stableCount = regions.filter { $0.state == .stable }.count
         let breachCount = regions.filter { $0.state == .breach }.count
 
+        // Internal debug format - uses English keys for consistency
         return """
-        Напряжение: \(worldTension)/100
-        Баланс: \(balanceDescription) (\(lightDarkBalance))
-        Путь колоды: \(deckPath.rawValue)
-        Якоря: \(stableCount) stable, \(breachCount) breach
-        Активные флаги: \(worldFlags.filter { $0.value }.count)
+        Tension: \(worldTension)/100
+        Balance: \(balanceDescription) (\(lightDarkBalance))
+        Deck Path: \(deckPath.rawValue)
+        Anchors: \(stableCount) stable, \(breachCount) breach
+        Active Flags: \(worldFlags.filter { $0.value }.count)
         """
     }
 
@@ -2615,7 +1388,7 @@ final class TwilightMarchesCodeContentProvider: CodeContentProvider {
         // 1. Village (Stable) - starting point
         let village = RegionDefinition(
             id: "village",
-            title: LocalizedString(en: "Border Village", ru: "Пограничная Деревня"),
+            title: LocalizedString(en: "Village by the Road", ru: "Деревня у тракта"),
             description: LocalizedString(en: "A small village on the edge of the realm", ru: "Небольшая деревня на краю королевства"),
             neighborIds: ["oak", "forest", "swamp"],
             initiallyDiscovered: true,
@@ -2793,32 +1566,107 @@ final class TwilightMarchesCodeContentProvider: CodeContentProvider {
         registerAnchor(breachShrine)
     }
 
-    // MARK: - Localization Helpers
+    // MARK: - Event Loading
 
-    /// Get localized region name
-    static func regionName(for id: String) -> String {
-        switch id {
-        case "village": return "Деревня у тракта"
-        case "oak": return "Священный Дуб"
-        case "forest": return "Дремучий Лес"
-        case "swamp": return "Болото Нави"
-        case "mountain": return "Горный Перевал"
-        case "breach": return "Разлом Курганов"
-        case "dark_lowland": return "Чёрная Низина"
-        default: return id
+    override func loadEvents() {
+        // Load events from JSON file - ContentPacks/TwilightMarches/Campaign/ActI/events.json
+        // The file is copied to bundle during build via Xcode "Copy Bundle Resources"
+        if let eventsURL = Bundle.main.url(forResource: "events", withExtension: "json") {
+            do {
+                try loadEventsFromJSON(url: eventsURL)
+                print("[TwilightMarches] Loaded events from JSON: \(eventsURL.lastPathComponent)")
+            } catch {
+                print("[TwilightMarches] Failed to load events from JSON: \(error)")
+                // Fall back to test event from parent class
+                super.loadEvents()
+            }
+        } else {
+            print("[TwilightMarches] events.json not found in bundle, using fallback events")
+            super.loadEvents()
         }
     }
 
-    /// Get localized anchor name
-    static func anchorName(for id: String) -> String {
-        switch id {
-        case "anchor_village_chapel": return "Часовня Света"
-        case "anchor_sacred_oak": return "Священный Дуб Велеса"
-        case "anchor_forest_idol": return "Каменный Идол"
-        case "anchor_swamp_spring": return "Осквернённый Родник"
-        case "anchor_mountain_barrow": return "Курган Предков"
-        case "anchor_breach_shrine": return "Разрушенное Капище"
-        default: return id
-        }
+    // MARK: - Quest Loading
+
+    override func loadQuests() {
+        // Main Quest: Путь Защитника (Path of the Defender)
+        let mainQuest = QuestDefinition(
+            id: "quest_main_act1",
+            title: LocalizedString(en: "Path of the Defender", ru: "Путь Защитника"),
+            description: LocalizedString(
+                en: "Protect the realm from the encroaching darkness of Navi",
+                ru: "Защитите королевство от наступающей тьмы Нави"
+            ),
+            objectives: [
+                ObjectiveDefinition(
+                    id: "obj_visit_elder",
+                    description: LocalizedString(
+                        en: "Speak with the village elder",
+                        ru: "Поговорить со старостой деревни"
+                    ),
+                    completionCondition: .eventCompleted("event_village_elder"),
+                    nextObjectiveId: "obj_find_oak"
+                ),
+                ObjectiveDefinition(
+                    id: "obj_find_oak",
+                    description: LocalizedString(
+                        en: "Find the Sacred Oak",
+                        ru: "Найти Священный Дуб"
+                    ),
+                    completionCondition: .visitRegion("oak"),
+                    nextObjectiveId: "obj_learn_truth"
+                ),
+                ObjectiveDefinition(
+                    id: "obj_learn_truth",
+                    description: LocalizedString(
+                        en: "Learn the truth about the Breach",
+                        ru: "Узнать правду о Разломе"
+                    ),
+                    completionCondition: .flagSet("breach_truth_revealed"),
+                    nextObjectiveId: "obj_defeat_leshy"
+                ),
+                ObjectiveDefinition(
+                    id: "obj_defeat_leshy",
+                    description: LocalizedString(
+                        en: "Defeat the Leshy Guardian",
+                        ru: "Победить Лешего-Хранителя"
+                    ),
+                    completionCondition: .defeatEnemy("leshy_guardian")
+                )
+            ],
+            questKind: .main,
+            autoStart: true,
+            completionRewards: QuestCompletionRewards(
+                resourceChanges: ["faith": 5],
+                setFlags: ["act1_completed"]
+            )
+        )
+        registerQuest(mainQuest)
+
+        // Side Quest: Trader's Favor
+        let sideQuestTrader = QuestDefinition(
+            id: "quest_side_trader",
+            title: LocalizedString(en: "Trader's Favor", ru: "Услуга Торговцу"),
+            description: LocalizedString(
+                en: "Help the traveling merchant with a dangerous task",
+                ru: "Помогите странствующему торговцу с опасным заданием"
+            ),
+            objectives: [
+                ObjectiveDefinition(
+                    id: "obj_find_goods",
+                    description: LocalizedString(
+                        en: "Find the lost merchant goods",
+                        ru: "Найти потерянный товар торговца"
+                    ),
+                    completionCondition: .flagSet("merchant_goods_found")
+                )
+            ],
+            questKind: .side,
+            availability: Availability(requiredFlags: ["met_merchant"]),
+            completionRewards: QuestCompletionRewards(
+                resourceChanges: ["faith": 2]
+            )
+        )
+        registerQuest(sideQuestTrader)
     }
 }

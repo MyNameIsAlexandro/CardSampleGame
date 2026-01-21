@@ -127,6 +127,7 @@ struct StandardCardDefinition: CardDefinition, Codable {
     func toCard() -> Card {
         return Card(
             id: UUID(),
+            definitionId: id,  // Content Pack ID
             name: name,
             type: cardType,
             rarity: rarity,

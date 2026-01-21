@@ -364,6 +364,10 @@ enum StateChange: Equatable {
     case flagSet(key: String, value: Bool)
     case questProgressed(questId: String, newStage: Int)
     case eventCompleted(eventId: UUID)
+    case questStarted(questId: String)
+    case objectiveCompleted(questId: String, objectiveId: String)
+    case questCompleted(questId: String)
+    case questFailed(questId: String)
 
     // Cards and deck
     case cardAdded(cardId: UUID, zone: String)

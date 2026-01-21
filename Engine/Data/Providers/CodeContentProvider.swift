@@ -150,6 +150,20 @@ class CodeContentProvider: ContentProvider {
         }
     }
 
+    // MARK: - JSON Event Loading Utility
+
+    /// Load events from a JSON file URL
+    /// - Parameter url: URL to the events.json file
+    /// - Throws: Decoding errors
+    func loadEventsFromJSON(url: URL) throws {
+        let data = try Data(contentsOf: url)
+        let jsonEvents = try JSONDecoder().decode([JSONEventForLoading].self, from: data)
+        for jsonEvent in jsonEvents {
+            events[jsonEvent.id] = jsonEvent.toDefinition()
+        }
+        buildEventIndices()
+    }
+
     // MARK: - Registration (for building content)
 
     func registerRegion(_ region: RegionDefinition) {
@@ -246,5 +260,328 @@ class CodeContentProvider: ContentProvider {
     func validate() -> [ContentValidationError] {
         let validator = ContentValidator(provider: self)
         return validator.validate()
+    }
+}
+
+// MARK: - JSON Event Loading Structures
+
+/// Simplified event_kind that can be either "inline" string or {"mini_game": "combat"} object
+enum JSONEventKindForLoading: Codable {
+    case inline
+    case miniGame(String)
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let stringValue = try? container.decode(String.self) {
+            self = stringValue == "inline" ? .inline : .miniGame(stringValue)
+            return
+        }
+        if let dictValue = try? container.decode([String: String].self),
+           let miniGameType = dictValue["mini_game"] {
+            self = .miniGame(miniGameType)
+            return
+        }
+        self = .inline
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self {
+        case .inline: try container.encode("inline")
+        case .miniGame(let type): try container.encode(["mini_game": type])
+        }
+    }
+
+    func toEventKind() -> EventKind {
+        switch self {
+        case .inline: return .inline
+        case .miniGame(let type):
+            switch type.lowercased() {
+            case "combat": return .miniGame(.combat)
+            case "ritual": return .miniGame(.ritual)
+            case "exploration": return .miniGame(.exploration)
+            case "dialogue": return .miniGame(.dialogue)
+            case "puzzle": return .miniGame(.puzzle)
+            default: return .miniGame(.combat)
+            }
+        }
+    }
+}
+
+/// JSON structure for loading events from file
+struct JSONEventForLoading: Codable {
+    let id: String
+    let title: LocalizedString
+    let body: LocalizedString
+    let eventKind: JSONEventKindForLoading?
+    let eventType: String?
+    let poolIds: [String]?
+    let availability: JSONAvailabilityForLoading?
+    let weight: Int?
+    let isOneTime: Bool?
+    let isInstant: Bool?
+    let cooldown: Int?
+    let choices: [JSONChoiceForLoading]?
+    let miniGameChallenge: JSONMiniGameChallengeForLoading?
+
+    enum CodingKeys: String, CodingKey {
+        case id, title, body, availability, weight, choices
+        case eventKind = "event_kind"
+        case eventType = "event_type"
+        case poolIds = "pool_ids"
+        case isOneTime = "is_one_time"
+        case isInstant = "is_instant"
+        case cooldown
+        case miniGameChallenge = "mini_game_challenge"
+    }
+
+    func toDefinition() -> EventDefinition {
+        let kind: EventKind
+        if let ek = eventKind { kind = ek.toEventKind() }
+        else if let et = eventType {
+            switch et.lowercased() {
+            case "combat": kind = .miniGame(.combat)
+            case "ritual": kind = .miniGame(.ritual)
+            case "exploration": kind = .miniGame(.exploration)
+            default: kind = .inline
+            }
+        } else { kind = .inline }
+
+        let avail = availability?.toAvailability() ?? .always
+        let choiceDefs = choices?.map { $0.toDefinition() } ?? []
+
+        let challenge: MiniGameChallengeDefinition?
+        if let json = miniGameChallenge, let enemyId = json.enemyId {
+            challenge = MiniGameChallengeDefinition(
+                id: "challenge_\(enemyId)",
+                challengeKind: .combat,
+                difficulty: json.difficulty ?? 1,
+                enemyId: enemyId,
+                victoryConsequences: json.rewards?.toConsequences() ?? .none,
+                defeatConsequences: json.penalties?.toConsequences() ?? .none
+            )
+        } else { challenge = nil }
+
+        return EventDefinition(
+            id: id,
+            title: title,
+            body: body,
+            eventKind: kind,
+            availability: avail,
+            poolIds: poolIds ?? [],
+            weight: weight ?? 10,
+            isOneTime: isOneTime ?? false,
+            choices: choiceDefs,
+            miniGameChallenge: challenge
+        )
+    }
+}
+
+struct JSONAvailabilityForLoading: Codable {
+    let regionStates: [String]?
+    let regionIds: [String]?
+    let minPressure: Int?
+    let maxPressure: Int?
+    let minBalance: Int?
+    let maxBalance: Int?
+    let requiredFlags: [String]?
+    let forbiddenFlags: [String]?
+
+    enum CodingKeys: String, CodingKey {
+        case regionStates = "region_states"
+        case regionIds = "region_ids"
+        case minPressure = "min_pressure"
+        case maxPressure = "max_pressure"
+        case minBalance = "min_balance"
+        case maxBalance = "max_balance"
+        case requiredFlags = "required_flags"
+        case forbiddenFlags = "forbidden_flags"
+    }
+
+    func toAvailability() -> Availability {
+        Availability(
+            requiredFlags: requiredFlags ?? [],
+            forbiddenFlags: forbiddenFlags ?? [],
+            minPressure: minPressure,
+            maxPressure: maxPressure,
+            minBalance: minBalance,
+            maxBalance: maxBalance,
+            regionStates: regionStates,
+            regionIds: regionIds
+        )
+    }
+}
+
+struct JSONChoiceForLoading: Codable {
+    let id: String
+    let label: LocalizedString
+    let tooltip: LocalizedString?
+    let requirements: JSONChoiceRequirementsForLoading?
+    let consequences: JSONChoiceConsequencesForLoading?
+
+    func toDefinition() -> ChoiceDefinition {
+        ChoiceDefinition(
+            id: id,
+            label: label,
+            tooltip: tooltip,
+            requirements: requirements?.toRequirements(),
+            consequences: consequences?.toConsequences() ?? .none
+        )
+    }
+}
+
+struct JSONChoiceRequirementsForLoading: Codable {
+    let minResources: [String: Int]?
+    let minFaith: Int?
+    let minHealth: Int?
+    let minBalance: Int?
+    let maxBalance: Int?
+    let requiredFlags: [String]?
+    let forbiddenFlags: [String]?
+
+    enum CodingKeys: String, CodingKey {
+        case minResources = "min_resources"
+        case minFaith = "min_faith"
+        case minHealth = "min_health"
+        case minBalance = "min_balance"
+        case maxBalance = "max_balance"
+        case requiredFlags = "required_flags"
+        case forbiddenFlags = "forbidden_flags"
+    }
+
+    func toRequirements() -> ChoiceRequirements {
+        var resources = minResources ?? [:]
+        if let faith = minFaith { resources["faith"] = faith }
+        if let health = minHealth { resources["health"] = health }
+        return ChoiceRequirements(
+            minResources: resources,
+            requiredFlags: requiredFlags ?? [],
+            forbiddenFlags: forbiddenFlags ?? [],
+            minBalance: minBalance,
+            maxBalance: maxBalance
+        )
+    }
+}
+
+struct JSONChoiceConsequencesForLoading: Codable {
+    let resourceChanges: [String: Int]?
+    let setFlags: [String]?
+    let clearFlags: [String]?
+    let balanceDelta: Int?
+    let regionStateChange: JSONRegionStateChangeForLoading?
+    let questProgress: JSONQuestProgressForLoading?
+    let triggerEventId: String?
+    let resultKey: String?
+
+    enum CodingKeys: String, CodingKey {
+        case resourceChanges = "resource_changes"
+        case setFlags = "set_flags"
+        case clearFlags = "clear_flags"
+        case balanceDelta = "balance_delta"
+        case regionStateChange = "region_state_change"
+        case questProgress = "quest_progress"
+        case triggerEventId = "trigger_event_id"
+        case resultKey = "result_key"
+    }
+
+    func toConsequences() -> ChoiceConsequences {
+        let stateChange: RegionStateChange?
+        if let rsc = regionStateChange {
+            let transition: RegionStateChange.StateTransition?
+            switch rsc.transition?.lowercased() {
+            case "restore": transition = .restore
+            case "degrade": transition = .degrade
+            default: transition = nil
+            }
+            stateChange = RegionStateChange(
+                regionId: rsc.regionId,
+                newState: nil,
+                transition: transition
+            )
+        } else { stateChange = nil }
+
+        let questProg: QuestProgressTrigger?
+        if let qp = questProgress {
+            let action: QuestProgressTrigger.QuestAction
+            switch qp.action?.lowercased() {
+            case "complete": action = .complete
+            case "unlock": action = .unlock
+            case "fail": action = .fail
+            case "advance": action = .advance
+            default: action = .complete
+            }
+            questProg = QuestProgressTrigger(
+                questId: qp.questId ?? "",
+                objectiveId: qp.objectiveId,
+                action: action
+            )
+        } else { questProg = nil }
+
+        return ChoiceConsequences(
+            resourceChanges: resourceChanges ?? [:],
+            setFlags: setFlags ?? [],
+            clearFlags: clearFlags ?? [],
+            balanceDelta: balanceDelta ?? 0,
+            regionStateChange: stateChange,
+            questProgress: questProg,
+            resultKey: resultKey
+        )
+    }
+}
+
+struct JSONRegionStateChangeForLoading: Codable {
+    let regionId: String?
+    let newState: String?
+    let transition: String?
+
+    enum CodingKeys: String, CodingKey {
+        case regionId = "region_id"
+        case newState = "new_state"
+        case transition
+    }
+}
+
+struct JSONQuestProgressForLoading: Codable {
+    let questId: String?
+    let objectiveId: String?
+    let action: String?
+
+    enum CodingKeys: String, CodingKey {
+        case questId = "quest_id"
+        case objectiveId = "objective_id"
+        case action
+    }
+}
+
+struct JSONMiniGameChallengeForLoading: Codable {
+    let enemyId: String?
+    let difficulty: Int?
+    let rewards: JSONChallengeConsequencesForLoading?
+    let penalties: JSONChallengeConsequencesForLoading?
+
+    enum CodingKeys: String, CodingKey {
+        case enemyId = "enemy_id"
+        case difficulty, rewards, penalties
+    }
+}
+
+struct JSONChallengeConsequencesForLoading: Codable {
+    let resourceChanges: [String: Int]?
+    let setFlags: [String]?
+    let balanceShift: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case resourceChanges = "resource_changes"
+        case setFlags = "set_flags"
+        case balanceShift = "balance_shift"
+    }
+
+    func toConsequences() -> ChoiceConsequences {
+        ChoiceConsequences(
+            resourceChanges: resourceChanges ?? [:],
+            setFlags: setFlags ?? [],
+            clearFlags: [],
+            balanceDelta: balanceShift ?? 0
+        )
     }
 }

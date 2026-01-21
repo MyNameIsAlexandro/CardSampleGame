@@ -61,19 +61,21 @@ final class WorldStateTests: XCTestCase {
     }
 
     func testStartingRegion() {
-        // Игрок должен начинать в первом регионе (Деревня у тракта)
+        // Игрок должен начинать в стартовом регионе (village)
         XCTAssertNotNil(worldState.currentRegionId, "currentRegionId должен быть установлен")
 
         if let currentRegion = worldState.getCurrentRegion() {
-            XCTAssertEqual(currentRegion.name, "Деревня у тракта", "Стартовый регион должен быть Деревня у тракта")
+            // Проверяем по definitionId (Content Pack ID), не по локализованному имени
+            XCTAssertEqual(currentRegion.definitionId, "village", "Стартовый регион должен быть village")
             XCTAssertEqual(currentRegion.state, .stable, "Стартовый регион должен быть Stable")
         }
     }
 
     func testMainQuestActive() {
         // Главный квест должен быть активен при старте
-        let mainQuest = worldState.activeQuests.first { $0.title == "Путь Защитника" }
-        XCTAssertNotNil(mainQuest, "Главный квест 'Путь Защитника' должен быть активен")
+        // Проверяем по questType, не по локализованному названию
+        let mainQuest = worldState.activeQuests.first { $0.questType == .main }
+        XCTAssertNotNil(mainQuest, "Главный квест должен быть активен")
     }
 
     // MARK: - TEST-002: Стоимость действий (время)

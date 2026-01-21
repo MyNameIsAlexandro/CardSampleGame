@@ -155,10 +155,10 @@ struct CardView: View {
         case .spirit: return L10n.tmCardTypeSpirit.localized
         case .artifact: return L10n.tmCardTypeArtifact.localized
         case .ritual: return L10n.tmCardTypeRitual.localized
-        case .resource: return "Ресурс"
-        case .attack: return "Атака"
-        case .defense: return "Защита"
-        case .special: return "Особая"
+        case .resource: return L10n.cardTypeResource.localized
+        case .attack: return L10n.cardTypeAttack.localized
+        case .defense: return L10n.cardTypeDefense.localized
+        case .special: return L10n.cardTypeSpecial.localized
         }
     }
 
@@ -300,7 +300,7 @@ struct CompactCardView: View {
                             Text("\(health)")
                                 .font(.headline)
                                 .fontWeight(.bold)
-                            Text("Здоровье")
+                            Text(L10n.cardStatHealth.localized)
                                 .font(.system(size: 9))
                                 .foregroundColor(.secondary)
                         }
@@ -313,7 +313,7 @@ struct CompactCardView: View {
                             Text("\(power)")
                                 .font(.headline)
                                 .fontWeight(.bold)
-                            Text("Сила")
+                            Text(L10n.cardStatStrength.localized)
                                 .font(.system(size: 9))
                                 .foregroundColor(.secondary)
                         }
@@ -326,7 +326,7 @@ struct CompactCardView: View {
                             Text("\(defense)")
                                 .font(.headline)
                                 .fontWeight(.bold)
-                            Text("Защита")
+                            Text(L10n.cardStatDefense.localized)
                                 .font(.system(size: 9))
                                 .foregroundColor(.secondary)
                         }
@@ -418,10 +418,10 @@ struct CompactCardView: View {
         case .spirit: return L10n.tmCardTypeSpirit.localized
         case .artifact: return L10n.tmCardTypeArtifact.localized
         case .ritual: return L10n.tmCardTypeRitual.localized
-        case .resource: return "Ресурс"
-        case .attack: return "Атака"
-        case .defense: return "Защита"
-        case .special: return "Особая"
+        case .resource: return L10n.cardTypeResource.localized
+        case .attack: return L10n.cardTypeAttack.localized
+        case .defense: return L10n.cardTypeDefense.localized
+        case .special: return L10n.cardTypeSpecial.localized
         }
     }
 

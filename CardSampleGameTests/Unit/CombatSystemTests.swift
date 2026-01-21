@@ -287,8 +287,9 @@ final class CombatSystemTests: XCTestCase {
     }
 
     func testDefeatEncounterMarksBossDefeated() {
-        // Используем имя босса которое обрабатывается в markBossDefeated
-        let boss = Card(name: "Леший-Хранитель", type: .monster, description: "Boss")
+        // Используем definitionId босса, который обрабатывается в markBossDefeated
+        // Content Pack ID используется для идентификации врагов, не локализованное имя
+        let boss = Card(definitionId: "leshy_guardian", name: "Leshy Guardian", type: .monster, description: "Boss")
         gameState.activeEncounter = boss
 
         // Проверяем что флаг ещё не установлен

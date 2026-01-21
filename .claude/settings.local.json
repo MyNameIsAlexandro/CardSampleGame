@@ -19,7 +19,12 @@
       "Bash(git restore:*)",
       "Bash(xargs basename:*)",
       "Bash(python3:*)",
-      "Bash(cd /Users/abondarenko/Library/Mobile Documents/com~apple~CloudDocs/XCode/CardSampleGame && swift test:*)"
+      "Bash(cd /Users/abondarenko/Library/Mobile Documents/com~apple~CloudDocs/XCode/CardSampleGame && swift test:*)",
+      "Bash(pkill:*)",
+      "Bash(while read key)",
+      "Bash(do if ! grep -q \"\"\"$key\"\"\" en.lproj/Localizable.strings)",
+      "Bash(then echo \"Missing in en: $key\")",
+      "Bash(xcrun simctl boot:*)"
     ]
   }
 }

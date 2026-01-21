@@ -35,7 +35,7 @@ struct CombatView: View {
         let cardsPlayed: Int
 
         var summary: String {
-            "Ходов: \(turnsPlayed), урон нанесён: \(totalDamageDealt), урон получен: \(totalDamageTaken)"
+            L10n.combatTurnsStats.localized(with: turnsPlayed, totalDamageDealt, totalDamageTaken)
         }
     }
 
@@ -361,7 +361,7 @@ struct CombatView: View {
                             .foregroundColor(.cyan)
                         Text("\(temporaryShield)")
                             .fontWeight(.bold)
-                        Text("Щит")
+                        Text(L10n.combatShield.localized)
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -451,7 +451,7 @@ struct CombatView: View {
                                 .font(.system(size: 9))
                                 .foregroundColor(.yellow)
                         } else {
-                            Text("(-1 действие)")
+                            Text(L10n.combatActionCost.localized)
                                 .font(.system(size: 9))
                                 .foregroundColor(.white.opacity(0.7))
                         }
@@ -470,7 +470,7 @@ struct CombatView: View {
                     VStack(spacing: 4) {
                         Image(systemName: "shield.fill")
                             .font(.title2)
-                        Text("Укрытие")
+                        Text(L10n.combatDefend.localized)
                             .font(.caption)
                             .fontWeight(.semibold)
                         Text("+3🛡️ (-1)")
@@ -570,7 +570,7 @@ struct CombatView: View {
                         .fontWeight(.bold)
                         .foregroundColor(.green)
 
-                    Text("\(defeatedMonsterName) повержен!")
+                    Text(L10n.combatMonsterDefeated.localized(with: defeatedMonsterName))
                         .font(.title3)
                         .foregroundColor(.secondary)
                 }
@@ -584,7 +584,7 @@ struct CombatView: View {
                         .fontWeight(.bold)
                         .foregroundColor(.red)
 
-                    Text("Вы пали в бою...")
+                    Text(L10n.combatFallen.localized)
                         .font(.title3)
                         .foregroundColor(.secondary)
                 }
@@ -593,7 +593,7 @@ struct CombatView: View {
             // Combat Statistics
             if let stats = finalCombatStats {
                 VStack(spacing: 16) {
-                    Text("📊 Статистика боя")
+                    Text("📊 " + L10n.combatLogTitle.localized)
                         .font(.headline)
                         .foregroundColor(.primary)
 
@@ -604,7 +604,7 @@ struct CombatView: View {
                                 .font(.title)
                                 .fontWeight(.bold)
                                 .foregroundColor(.blue)
-                            Text("Ходов")
+                            Text(L10n.combatStatsTurns.localized)
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
@@ -615,7 +615,7 @@ struct CombatView: View {
                                 .font(.title)
                                 .fontWeight(.bold)
                                 .foregroundColor(.orange)
-                            Text("Урон нанесён")
+                            Text(L10n.combatStatsDamageDealt.localized)
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
@@ -626,7 +626,7 @@ struct CombatView: View {
                                 .font(.title)
                                 .fontWeight(.bold)
                                 .foregroundColor(.red)
-                            Text("Урон получен")
+                            Text(L10n.combatStatsDamageTaken.localized)
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
@@ -637,7 +637,7 @@ struct CombatView: View {
                                 .font(.title)
                                 .fontWeight(.bold)
                                 .foregroundColor(.purple)
-                            Text("Карт сыграно")
+                            Text(L10n.combatStatsCardsPlayed.localized)
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
@@ -663,7 +663,7 @@ struct CombatView: View {
             }) {
                 HStack {
                     Image(systemName: isVictory ? "arrow.right.circle.fill" : "arrow.counterclockwise.circle.fill")
-                    Text(isVictory ? "Продолжить" : "Вернуться")
+                    Text(isVictory ? L10n.combatContinue.localized : L10n.combatReturn.localized)
                 }
                 .font(.title2)
                 .fontWeight(.semibold)
@@ -722,7 +722,7 @@ struct CombatView: View {
         VStack(alignment: .leading, spacing: 6) {
             // Заголовок попадание/промах
             HStack {
-                Text(result.isHit ? "✅ ПОПАДАНИЕ!" : "❌ ПРОМАХ!")
+                Text(result.isHit ? L10n.combatHitResult.localized : L10n.combatMissResult.localized)
                     .font(.headline)
                     .fontWeight(.bold)
                     .foregroundColor(result.isHit ? .green : .red)
@@ -730,7 +730,7 @@ struct CombatView: View {
                 Spacer()
 
                 // Общий результат
-                Text("Атака \(result.attackRoll.total) vs Защита \(result.defenseValue)")
+                Text(L10n.combatAttackVsDefense.localized(with: result.attackRoll.total, result.defenseValue))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -739,7 +739,7 @@ struct CombatView: View {
 
             // Разбивка броска атаки
             VStack(alignment: .leading, spacing: 2) {
-                Text("Бросок атаки:")
+                Text(L10n.combatAttackRollTitle.localized)
                     .font(.caption)
                     .fontWeight(.semibold)
 
@@ -781,12 +781,12 @@ struct CombatView: View {
                 Divider()
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Расчёт урона:")
+                    Text(L10n.combatDamageCalcTitle.localized)
                         .font(.caption)
                         .fontWeight(.semibold)
 
                     HStack {
-                        Text("Базовый: \(damage.base)")
+                        Text(L10n.combatBaseValue.localized(with: damage.base))
                             .font(.caption2)
 
                         ForEach(damage.modifiers.indices, id: \.self) { index in
@@ -853,7 +853,7 @@ struct CombatView: View {
 
             VStack(spacing: 20) {
                 // Title
-                Text("🎲 БРОСОК КУБИКОВ")
+                Text(L10n.combatDiceRoll.localized)
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(.white)
@@ -896,7 +896,7 @@ struct CombatView: View {
                         HStack(spacing: 8) {
                             Text("vs")
                                 .foregroundColor(.gray)
-                            Text("🛡️ Защита: \(result.defenseValue)")
+                            Text(L10n.combatDefenseValue.localized(with: result.defenseValue))
                                 .foregroundColor(.blue)
                         }
                         .font(.subheadline)
@@ -904,19 +904,19 @@ struct CombatView: View {
                         // Hit/Miss result
                         if result.isHit {
                             VStack(spacing: 4) {
-                                Text("✅ ПОПАДАНИЕ!")
+                                Text(L10n.combatHitResult.localized)
                                     .font(.title)
                                     .fontWeight(.bold)
                                     .foregroundColor(.green)
 
                                 if let damage = result.damageCalculation {
-                                    Text("💥 Урон: \(damage.total)")
+                                    Text(L10n.combatDamageValue.localized(with: damage.total))
                                         .font(.headline)
                                         .foregroundColor(.red)
                                 }
                             }
                         } else {
-                            Text("❌ ПРОМАХ!")
+                            Text(L10n.combatMissResult.localized)
                                 .font(.title)
                                 .fontWeight(.bold)
                                 .foregroundColor(.red)
@@ -1066,8 +1066,8 @@ struct CombatView: View {
         // Save monster card for display after combat ends
         savedMonsterCard = engine.combatState?.enemy ?? legacyMonster?.wrappedValue
 
-        combatLog.append("Бой начался! Враг: \(monster.name)")
-        combatLog.append("У вас 3 действия за ход")
+        combatLog.append(L10n.combatLogBattleStartEnemy.localized(with: monster.name))
+        combatLog.append(L10n.combatLogActionsInfo.localized(with: 3))
 
         // Engine-First: Initialize combat through engine
         engine.performAction(.combatInitialize)
@@ -1123,13 +1123,13 @@ struct CombatView: View {
             // Update legacy monster binding if available
             legacyMonster?.wrappedValue.health = monsterHealth
 
-            combatLog.append("⚔️ ПОПАДАНИЕ! Бросок: \(result.attackRoll.total) vs \(monsterDef). Урон: \(damage) (HP врага: \(monsterHealth))")
+            combatLog.append(L10n.combatLogHit.localized(with: result.attackRoll.total, monsterDef, damage, monsterHealth))
 
             if monsterHealth <= 0 {
                 finishCombat(victory: true)
             }
         } else {
-            combatLog.append("⚔️ ПРОМАХ! (\(result.attackRoll.total) vs \(monsterDef))")
+            combatLog.append(L10n.combatLogMissed.localized(with: result.attackRoll.total, monsterDef))
         }
 
         // Сбросить бонусы после атаки
@@ -1153,11 +1153,11 @@ struct CombatView: View {
         let totalShield = baseShield + strengthBonus
         temporaryShield += totalShield
 
-        combatLog.append("🛡️ Укрытие! +\(totalShield) к щиту (всего: \(temporaryShield))")
+        combatLog.append(L10n.combatLogCover.localized(with: totalShield, temporaryShield))
 
         // Log breakdown
         if strengthBonus > 0 {
-            combatLog.append("   💪 Бонус силы: +\(strengthBonus)")
+            combatLog.append(L10n.combatLogStrengthBonus.localized(with: strengthBonus))
         }
     }
 
@@ -1171,12 +1171,12 @@ struct CombatView: View {
         let faithCost = card.cost ?? 0
         if faithCost > 0 {
             guard engine.playerFaith >= faithCost else {
-                combatLog.append("❌ Недостаточно веры для \(card.name) (нужно: \(faithCost), есть: \(engine.playerFaith))")
+                combatLog.append(L10n.combatLogInsufficientFaith.localized(with: card.name, faithCost, engine.playerFaith))
                 return
             }
             // Engine-First: Spend faith through engine action
             engine.performAction(.combatApplyEffect(effect: .spendFaith(amount: faithCost)))
-            combatLog.append("💫 Потрачено \(faithCost) веры")
+            combatLog.append(L10n.combatLogFaithSpent.localized(with: faithCost))
         }
 
         // Track cards played for statistics
@@ -1196,22 +1196,22 @@ struct CombatView: View {
             // Defense cards add to temporary shield
             let shieldValue = card.defense ?? card.power ?? 2
             temporaryShield += shieldValue
-            combatLog.append("🛡️ \(card.name): +\(shieldValue) к щиту (всего: \(temporaryShield))")
+            combatLog.append(L10n.combatLogShieldCard.localized(with: card.name, shieldValue, temporaryShield))
 
         case .attack, .weapon:
             // Attack cards add bonus damage
             let attackBonus = card.power ?? 2
             bonusDamage += attackBonus
-            combatLog.append("⚔️ \(card.name): +\(attackBonus) к урону следующей атаки")
+            combatLog.append(L10n.combatLogAttackBonus.localized(with: card.name, attackBonus))
 
         case .spell, .ritual:
             // Spells apply their effects
-            combatLog.append("✨ Заклинание: \(card.name)")
+            combatLog.append(L10n.combatLogSpellCast.localized(with: card.name))
             applyCardEffects(card)
 
         default:
             // Other cards (items, etc.) apply their effects
-            combatLog.append("🃏 Сыграна: \(card.name)")
+            combatLog.append(L10n.combatLogCardPlayed.localized(with: card.name))
             applyCardEffects(card)
         }
 
@@ -1232,50 +1232,50 @@ struct CombatView: View {
             case .heal(let amount):
                 // Engine-First: Heal through engine action
                 engine.performAction(.combatApplyEffect(effect: .heal(amount: amount)))
-                combatLog.append("   💚 Исцеление +\(amount) HP")
+                combatLog.append(L10n.combatLogHealEffect.localized(with: amount))
 
             case .damage(let amount, _):
                 let actualDamage = player?.calculateDamageDealt(amount) ?? amount
                 // Engine-First: Damage enemy through engine action
                 engine.performAction(.combatApplyEffect(effect: .damageEnemy(amount: actualDamage)))
                 legacyMonster?.wrappedValue.health = monsterHealth
-                combatLog.append("   💥 Урон \(actualDamage) (HP врага: \(monsterHealth))")
+                combatLog.append(L10n.combatLogDamageEffect.localized(with: actualDamage, monsterHealth))
 
             case .drawCards(let count):
                 // Engine-First: Draw cards through engine action
                 engine.performAction(.combatApplyEffect(effect: .drawCards(count: count)))
                 player?.drawCards(count: count)  // Legacy sync
                 engine.syncPlayerHand()  // Sync for UI reactivity
-                combatLog.append("   🃏 Взято карт: \(count)")
+                combatLog.append(L10n.combatLogDrawCards.localized(with: count))
 
             case .gainFaith(let amount):
                 // Engine-First: Gain faith through engine action
                 engine.performAction(.combatApplyEffect(effect: .gainFaith(amount: amount)))
-                combatLog.append("   ✨ Вера +\(amount)")
+                combatLog.append(L10n.combatLogFaithGained.localized(with: amount))
 
             case .removeCurse(let type):
                 // Engine-First: Remove curse through engine action (convert CurseType to String)
                 engine.performAction(.combatApplyEffect(effect: .removeCurse(type: type?.rawValue)))
-                combatLog.append("   🌟 Снято проклятие")
+                combatLog.append(L10n.combatLogCurseRemoved.localized)
 
             case .addDice(let count):
                 // Engine-First: Add bonus dice through engine action
                 engine.performAction(.combatApplyEffect(effect: .addBonusDice(count: count)))
                 bonusDice += count  // Local tracking for UI
-                combatLog.append("   🎲 +\(count) кубик(ов) к следующей атаке")
+                combatLog.append(L10n.combatLogBonusDice.localized(with: count))
 
             case .reroll:
                 // Reroll даёт +1 кубик (выбирается лучший результат)
                 engine.performAction(.combatApplyEffect(effect: .addBonusDice(count: 1)))
                 bonusDice += 1
-                combatLog.append("   🔄 Перебросок: +1 кубик (лучший результат)")
+                combatLog.append(L10n.combatLogReroll.localized)
 
             case .shiftBalance(let towards, let amount):
                 // Engine-First: Shift balance through engine action
                 let directionString = towards == .light ? "light" : towards == .dark ? "dark" : "equilibrium"
                 engine.performAction(.combatApplyEffect(effect: .shiftBalance(towards: directionString, amount: amount)))
-                let directionText = towards == .light ? "Свету" : towards == .dark ? "Тьме" : "Равновесию"
-                combatLog.append("   ⚖️ Баланс сдвинут к \(directionText) на \(amount)")
+                let directionText = towards == .light ? L10n.balanceLight.localized : towards == .dark ? L10n.balanceDark.localized : L10n.balanceNeutral.localized
+                combatLog.append(L10n.combatLogBalanceShift.localized(with: directionText, amount))
 
             case .applyCurse(let curseType, let duration):
                 // В бою проклятие наносит урон монстру (тёмная магия)
@@ -1283,17 +1283,17 @@ struct CombatView: View {
                 // Engine-First: Damage enemy through engine action
                 engine.performAction(.combatApplyEffect(effect: .damageEnemy(amount: curseDamage)))
                 legacyMonster?.wrappedValue.health = monsterHealth
-                combatLog.append("   💀 Проклятие \(curseType): \(curseDamage) урона врагу")
+                combatLog.append(L10n.combatLogCurseDamage.localized(with: curseType.rawValue, curseDamage))
 
             case .summonSpirit(let power, let realm):
                 summonedSpirits.append((power: power, realm: realm))
-                let realmName = realm == .yav ? "Явь" : realm == .nav ? "Навь" : "Правь"
+                let realmName = realm == .yav ? L10n.realmYav.localized : realm == .nav ? L10n.realmNav.localized : L10n.realmPrav.localized
                 let realmString = realm == .yav ? "yav" : realm == .nav ? "nav" : "prav"
-                combatLog.append("   👻 Призван дух из \(realmName) (сила: \(power))")
+                combatLog.append(L10n.combatLogSpiritSummoned.localized(with: realmName, power))
                 // Engine-First: Spirit attacks enemy immediately through engine action
                 engine.performAction(.combatApplyEffect(effect: .summonSpirit(power: power, realm: realmString)))
                 legacyMonster?.wrappedValue.health = monsterHealth
-                combatLog.append("   👻 Дух атакует! Урон: \(power)")
+                combatLog.append(L10n.combatLogSpiritAttack.localized(with: power))
 
             case .sacrifice(let cost, let benefit):
                 // Engine-First: Take damage through engine action

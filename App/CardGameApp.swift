@@ -22,7 +22,7 @@ struct CardGameApp: App {
 class ContentLoader: ObservableObject {
     @Published var isLoaded = false
     @Published var loadingProgress: Double = 0
-    @Published var loadingMessage = "Загрузка..."
+    @Published var loadingMessage = L10n.loadingDefault.localized
 
     init() {
         Task {
@@ -31,7 +31,7 @@ class ContentLoader: ObservableObject {
     }
 
     private func loadContentPacks() async {
-        loadingMessage = "Поиск контент-паков..."
+        loadingMessage = L10n.loadingSearchPacks.localized
         loadingProgress = 0.1
 
         // Run file operations on background thread
@@ -65,15 +65,15 @@ class ContentLoader: ObservableObject {
         loadingProgress = 0.3
 
         if let url = packURL {
-            loadingMessage = "Загрузка контента..."
+            loadingMessage = L10n.loadingContent.localized
             await loadPack(at: url)
         } else {
-            loadingMessage = "Контент не найден"
+            loadingMessage = L10n.loadingContentNotFound.localized
             print("⚠️ ContentPacks not found - using fallback content")
         }
 
         loadingProgress = 1.0
-        loadingMessage = "Готово!"
+        loadingMessage = L10n.loadingReady.localized
 
         // Small delay to show completion
         try? await Task.sleep(nanoseconds: 200_000_000)
@@ -96,7 +96,7 @@ class ContentLoader: ObservableObject {
         switch result {
         case .success(let pack):
             loadingProgress = 0.9
-            loadingMessage = "Контент загружен"
+            loadingMessage = L10n.loadingContentLoaded.localized
             print("✅ Loaded pack: \(pack.manifest.packId) v\(pack.manifest.version)")
             print("   - \(pack.regions.count) regions")
             print("   - \(pack.events.count) events")
@@ -105,7 +105,7 @@ class ContentLoader: ObservableObject {
             print("   - \(pack.heroes.count) heroes")
             print("   - \(pack.cards.count) cards")
         case .failure(let error):
-            loadingMessage = "Ошибка загрузки"
+            loadingMessage = L10n.loadingError.localized
             print("❌ Failed to load pack from \(url.path): \(error)")
         }
     }
@@ -119,7 +119,7 @@ struct LoadingView: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            Text("Сумрачные Пределы")
+            Text(L10n.appTitle.localized)
                 .font(.largeTitle)
                 .fontWeight(.bold)
 

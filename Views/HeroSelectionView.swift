@@ -11,11 +11,11 @@ struct HeroSelectionView: View {
             VStack(spacing: 0) {
                 // Заголовок
                 VStack(spacing: 8) {
-                    Text("Выберите героя")
+                    Text(L10n.heroSelectTitle.localized)
                         .font(.largeTitle)
                         .fontWeight(.bold)
 
-                    Text("Каждый класс имеет уникальные характеристики и способности")
+                    Text(L10n.heroSelectSubtitle.localized)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
@@ -52,7 +52,7 @@ struct HeroSelectionView: View {
                         }) {
                             HStack {
                                 Text(selected.icon)
-                                Text("Начать игру за \(selected.rawValue)")
+                                Text(L10n.heroStartGame.localized(with: selected.rawValue))
                                     .fontWeight(.semibold)
                             }
                             .frame(maxWidth: .infinity)
@@ -63,7 +63,7 @@ struct HeroSelectionView: View {
                         }
                         .padding(.horizontal)
                     } else {
-                        Text("Выберите класс героя")
+                        Text(L10n.heroSelectClass.localized)
                             .foregroundColor(.secondary)
                             .padding()
                     }
@@ -116,9 +116,9 @@ struct HeroClassCard: View {
             let stats = heroClass.baseStats
             HStack(spacing: 16) {
                 StatBadge(icon: "heart.fill", value: stats.health, label: "HP", color: .red)
-                StatBadge(icon: "hand.raised.fill", value: stats.strength, label: "Сила", color: .orange)
-                StatBadge(icon: "sparkles", value: stats.faith, label: "Вера", color: .yellow)
-                StatBadge(icon: "brain.head.profile", value: stats.intelligence, label: "Инт", color: .purple)
+                StatBadge(icon: "hand.raised.fill", value: stats.strength, label: L10n.cardStatStrength.localized, color: .orange)
+                StatBadge(icon: "sparkles", value: stats.faith, label: L10n.tmResourceFaith.localized, color: .yellow)
+                StatBadge(icon: "brain.head.profile", value: stats.intelligence, label: L10n.statIntelligence.localized, color: .purple)
             }
 
             // Особая способность
@@ -141,7 +141,7 @@ struct HeroClassCard: View {
                     .foregroundColor(deckPathColor(heroClass.startingDeckType))
                     .font(.caption)
 
-                Text("Путь: \(deckPathName(heroClass.startingDeckType))")
+                Text(L10n.heroPath.localized(with: deckPathName(heroClass.startingDeckType)))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -162,9 +162,9 @@ struct HeroClassCard: View {
 
     func deckPathName(_ path: DeckPath) -> String {
         switch path {
-        case .light: return "Свет"
-        case .dark: return "Тьма"
-        case .balance: return "Равновесие"
+        case .light: return L10n.pathLight.localized
+        case .dark: return L10n.pathDark.localized
+        case .balance: return L10n.pathBalance.localized
         }
     }
 

@@ -70,8 +70,10 @@ enum PackType: String, Codable {
     /// Campaign content: regions, events, quests, enemies, story
     case campaign
 
-    /// Investigator/Hero content: heroes, starting decks, player cards
-    case investigator
+    /// Character/Hero content: heroes, starting decks, player cards
+    /// Note: Called "Character Pack" (not "Investigator Pack" as in Arkham Horror)
+    /// to match Twilight Marches theme
+    case character
 
     /// Balance tuning: numbers, weights, costs (no new content)
     case balance

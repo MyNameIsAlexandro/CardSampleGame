@@ -112,6 +112,7 @@ struct EnemyDefinition: GameDefinition {
     func toCard() -> Card {
         return Card(
             id: UUID(uuidString: id.md5UUID) ?? UUID(),
+            definitionId: id,  // Content Pack ID for tracking
             name: name.localized,
             type: .monster,
             rarity: rarity,

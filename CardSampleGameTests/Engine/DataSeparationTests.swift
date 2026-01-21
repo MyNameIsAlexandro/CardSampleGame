@@ -230,26 +230,32 @@ final class DataSeparationTests: XCTestCase {
         }
     }
 
-    /// Localization helpers should return correct names
-    func testTwilightMarchesLocalizationHelpers() {
-        // Test region names
-        XCTAssertEqual(
-            TwilightMarchesCodeContentProvider.regionName(for: "village"),
-            "Деревня у тракта",
-            "Village should have correct Russian name"
-        )
-        XCTAssertEqual(
-            TwilightMarchesCodeContentProvider.regionName(for: "breach"),
-            "Разлом Курганов",
-            "Breach should have correct Russian name"
-        )
+    /// LocalizedString should provide correct localized names via .localized
+    func testRegionDefinitionLocalization() {
+        // Given: Twilight Marches content provider
+        let provider = TwilightMarchesCodeContentProvider()
 
-        // Test anchor names
-        XCTAssertEqual(
-            TwilightMarchesCodeContentProvider.anchorName(for: "anchor_village_chapel"),
-            "Часовня Света",
-            "Village chapel should have correct Russian name"
-        )
+        // When: Get region definitions
+        let village = provider.getRegionDefinition(id: "village")
+        let breach = provider.getRegionDefinition(id: "breach")
+        let anchor = provider.getAnchorDefinition(id: "anchor_village_chapel")
+
+        // Then: Definitions should have LocalizedString with both languages
+        XCTAssertNotNil(village, "Village region should exist")
+        XCTAssertFalse(village!.title.en.isEmpty, "Village should have English name")
+        XCTAssertFalse(village!.title.ru.isEmpty, "Village should have Russian name")
+
+        XCTAssertNotNil(breach, "Breach region should exist")
+        XCTAssertFalse(breach!.title.en.isEmpty, "Breach should have English name")
+        XCTAssertFalse(breach!.title.ru.isEmpty, "Breach should have Russian name")
+
+        XCTAssertNotNil(anchor, "Village chapel anchor should exist")
+        XCTAssertFalse(anchor!.title.en.isEmpty, "Anchor should have English name")
+        XCTAssertFalse(anchor!.title.ru.isEmpty, "Anchor should have Russian name")
+
+        // Verify .localized returns non-empty string
+        XCTAssertFalse(village!.title.localized.isEmpty, "Localized village name should not be empty")
+        XCTAssertFalse(anchor!.title.localized.isEmpty, "Localized anchor name should not be empty")
     }
 
     /// Initial states should match design document

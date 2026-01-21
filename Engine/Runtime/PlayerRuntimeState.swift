@@ -169,10 +169,11 @@ struct PlayerRuntimeState: Codable, Equatable {
     }
 
     /// Shuffle discard into draw pile
+    /// Uses deterministic RNG for reproducibility
     mutating func shuffleDiscardIntoDraw() {
         drawPile.append(contentsOf: discardPile)
         discardPile.removeAll()
-        drawPile.shuffle()
+        WorldRNG.shared.shuffle(&drawPile)
     }
 
     // MARK: - Curse Operations

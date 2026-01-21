@@ -60,7 +60,7 @@ struct WorldMapView: View {
                     VStack(spacing: 16) {
                         ProgressView()
                             .scaleEffect(1.5)
-                        Text("Загрузка мира...")
+                        Text(L10n.worldLoading.localized)
                             .font(.headline)
                             .foregroundColor(.secondary)
                     }
@@ -128,13 +128,13 @@ struct WorldMapView: View {
             } message: {
                 Text(L10n.uiProgressSaved.localized)
             }
-            .alert(currentDayEvent?.title ?? "Событие мира", isPresented: $showingDayEvent) {
-                Button("Понятно", role: .cancel) {
+            .alert(currentDayEvent?.title ?? L10n.worldEvent.localized, isPresented: $showingDayEvent) {
+                Button(L10n.buttonUnderstood.localized, role: .cancel) {
                     currentDayEvent = nil
                 }
             } message: {
                 if let event = currentDayEvent {
-                    Text("День \(event.day)\n\n\(event.description)")
+                    Text(L10n.dayNumber.localized(with: event.day) + "\n\n\(event.description)")
                 }
             }
             .onChange(of: engine.lastDayEvent?.id) { _ in
@@ -175,7 +175,7 @@ struct WorldMapView: View {
 
                 // World Light/Dark Balance (Явь vs Навь)
                 VStack(spacing: 2) {
-                    Text("Мир")
+                    Text(L10n.worldLabel.localized)
                         .font(.caption2)
                         .foregroundColor(.secondary)
                     Text(engine.worldBalanceDescription)
@@ -188,7 +188,7 @@ struct WorldMapView: View {
 
                 // Days passed
                 VStack(alignment: .trailing, spacing: 2) {
-                    Text("Дней в пути")
+                    Text(L10n.daysInJourney.localized)
                         .font(.caption2)
                         .foregroundColor(.secondary)
                     Text("\(engine.currentDay)")
@@ -312,7 +312,7 @@ struct RegionCardView: View {
                         Image(systemName: region.reputation > 0 ? "hand.thumbsup.fill" : "hand.thumbsdown.fill")
                             .font(.caption2)
                             .foregroundColor(region.reputation > 0 ? .green : .red)
-                        Text("Репутация: \(region.reputation > 0 ? "+" : "")\(region.reputation)")
+                        Text(L10n.regionReputation.localized + ": \(region.reputation > 0 ? "+" : "")\(region.reputation)")
                             .font(.caption2)
                             .foregroundColor(.secondary)
                     }
@@ -416,7 +416,7 @@ struct RegionDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Закрыть") {
+                    Button(L10n.uiClose.localized) {
                         onDismiss()
                     }
                 }
@@ -436,19 +436,19 @@ struct RegionDetailView: View {
                 )
             }
             .alert(actionConfirmationTitle, isPresented: $showingActionConfirmation) {
-                Button("Подтвердить") {
+                Button(L10n.buttonConfirm.localized) {
                     if let action = selectedAction {
                         performAction(action)
                     }
                 }
-                Button("Отмена", role: .cancel) { }
+                Button(L10n.uiCancel.localized, role: .cancel) { }
             } message: {
                 Text(actionConfirmationMessage)
             }
-            .alert("Ничего не найдено", isPresented: $showingNoEventsAlert) {
-                Button("OK", role: .cancel) { }
+            .alert(L10n.nothingFound.localized, isPresented: $showingNoEventsAlert) {
+                Button(L10n.buttonOk.localized, role: .cancel) { }
             } message: {
-                Text("В этом регионе сейчас нет доступных событий для исследования.")
+                Text(L10n.noEventsInRegion.localized)
             }
             .overlay {
                 // Card received notification overlay
@@ -475,11 +475,11 @@ struct RegionDetailView: View {
                 VStack(spacing: 8) {
                     Text("🃏")
                         .font(.system(size: 48))
-                    Text("Получены карты!")
+                    Text(L10n.cardsReceived.localized)
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(.white)
-                    Text("Добавлены в вашу колоду")
+                    Text(L10n.addedToDeck.localized)
                         .font(.subheadline)
                         .foregroundColor(.white.opacity(0.8))
                 }
@@ -507,7 +507,7 @@ struct RegionDetailView: View {
                         showingCardNotification = false
                     }
                 }) {
-                    Text("Отлично!")
+                    Text(L10n.buttonGreat.localized)
                         .font(.headline)
                         .foregroundColor(.white)
                         .frame(minWidth: 120)
@@ -555,7 +555,7 @@ struct RegionDetailView: View {
                 if isPlayerHere {
                     HStack(spacing: 4) {
                         Image(systemName: "person.fill")
-                        Text("Вы здесь")
+                        Text(L10n.youAreHere.localized)
                     }
                     .font(.caption)
                     .fontWeight(.bold)
@@ -576,11 +576,11 @@ struct RegionDetailView: View {
     var regionDescription: String {
         switch region.state {
         case .stable:
-            return "Регион спокоен. Влияние Нави минимально. Здесь безопасно отдыхать и торговать."
+            return L10n.regionDescStable.localized
         case .borderland:
-            return "Регион балансирует между Явью и Навью. Повышенная опасность, но и больше возможностей."
+            return L10n.regionDescBorderland.localized
         case .breach:
-            return "Навь активно проникает в регион. Очень опасно. Требуется восстановление якоря."
+            return L10n.regionDescBreach.localized
         }
     }
 
@@ -591,14 +591,14 @@ struct RegionDetailView: View {
             HStack {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .foregroundColor(region.state == .breach ? .red : .orange)
-                Text("Модификаторы боя")
+                Text(L10n.combatModifiers.localized)
                     .font(.caption)
                     .fontWeight(.bold)
             }
 
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
-                    Text("Сила врагов:")
+                    Text(L10n.enemyStrength.localized + ":")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     Text("+\(region.state.enemyPowerBonus)")
@@ -608,7 +608,7 @@ struct RegionDetailView: View {
                 }
 
                 HStack {
-                    Text("Защита врагов:")
+                    Text(L10n.enemyDefense.localized + ":")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     Text("+\(region.state.enemyDefenseBonus)")
@@ -618,7 +618,7 @@ struct RegionDetailView: View {
                 }
 
                 HStack {
-                    Text("Здоровье врагов:")
+                    Text(L10n.enemyHealth.localized + ":")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     Text("+\(region.state.enemyHealthBonus)")
@@ -639,7 +639,7 @@ struct RegionDetailView: View {
 
     func anchorSection(anchor: Anchor) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Якорь Яви")
+            Text(L10n.anchorOfYav.localized)
                 .font(.headline)
 
             HStack(spacing: 12) {
@@ -660,7 +660,7 @@ struct RegionDetailView: View {
 
                     // Integrity bar
                     HStack(spacing: 4) {
-                        Text("Целостность:")
+                        Text(L10n.anchorIntegrity.localized + ":")
                             .font(.caption2)
                         GeometryReader { geometry in
                             ZStack(alignment: .leading) {
@@ -686,7 +686,7 @@ struct RegionDetailView: View {
 
                     // Influence
                     HStack(spacing: 4) {
-                        Text("Влияние:")
+                        Text(L10n.anchorInfluence.localized + ":")
                             .font(.caption2)
                         Text(influenceText(anchor.influence))
                             .font(.caption2)
@@ -705,9 +705,9 @@ struct RegionDetailView: View {
 
     func influenceText(_ influence: CardBalance) -> String {
         switch influence {
-        case .light: return "Свет"
-        case .neutral: return "Нейтрально"
-        case .dark: return "Тьма"
+        case .light: return L10n.balanceLight.localized
+        case .neutral: return L10n.balanceNeutral.localized
+        case .dark: return L10n.balanceDark.localized
         }
     }
 
@@ -728,18 +728,18 @@ struct RegionDetailView: View {
 
     var actionsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Доступные действия")
+            Text(L10n.availableActions.localized)
                 .font(.headline)
 
             VStack(spacing: 8) {
                 // Travel action - только если игрок НЕ здесь
                 if !isPlayerHere {
                     let travelCost = worldState.calculateTravelCost(to: region.id)
-                    let dayWord = travelCost == 1 ? "день" : "дня"
+                    let dayWord = travelCost == 1 ? L10n.dayWord1.localized : L10n.dayWord234.localized
                     let canTravel = region.isNeighbor(worldState.currentRegionId ?? UUID())
 
                     actionButton(
-                        title: canTravel ? "Отправиться (\(travelCost) \(dayWord))" : "Регион далеко",
+                        title: canTravel ? L10n.actionTravelTo.localized(with: travelCost, dayWord) : L10n.actionRegionFar.localized,
                         icon: canTravel ? "arrow.right.circle.fill" : "xmark.circle",
                         color: canTravel ? .blue : .gray,
                         enabled: canTravel
@@ -753,7 +753,7 @@ struct RegionDetailView: View {
                         HStack {
                             Image(systemName: "info.circle")
                                 .foregroundColor(.secondary)
-                            Text("Переместитесь в регион, чтобы взаимодействовать с ним")
+                            Text(L10n.actionMoveToRegionHint.localized)
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
@@ -762,7 +762,7 @@ struct RegionDetailView: View {
                         HStack {
                             Image(systemName: "map")
                                 .foregroundColor(.orange)
-                            Text("Регион недоступен напрямую - сначала идите в соседний регион")
+                            Text(L10n.actionRegionNotDirectlyAccessible.localized)
                                 .font(.caption)
                                 .foregroundColor(.orange)
                         }
@@ -774,7 +774,7 @@ struct RegionDetailView: View {
                 if isPlayerHere {
                     // Rest action
                     actionButton(
-                        title: "Отдохнуть (+5 ❤️)",
+                        title: L10n.actionRestHeal.localized(with: 5),
                         icon: "bed.double.fill",
                         color: .green,
                         enabled: region.canRest
@@ -785,7 +785,7 @@ struct RegionDetailView: View {
 
                     // Trade action
                     actionButton(
-                        title: "Торговать",
+                        title: L10n.actionTradeName.localized,
                         icon: "cart.fill",
                         color: .orange,
                         enabled: region.canTrade
@@ -797,7 +797,7 @@ struct RegionDetailView: View {
                     // Strengthen anchor
                     if region.anchor != nil {
                         actionButton(
-                            title: "Укрепить якорь (-10 ✨, +20%)",
+                            title: L10n.actionAnchorCost.localized(with: 10, 20),
                             icon: "hammer.fill",
                             color: .purple,
                             enabled: player.faith >= 10
@@ -810,7 +810,7 @@ struct RegionDetailView: View {
                     // Explore (only if events available)
                     let hasEvents = worldState.getAvailableEvents(for: region).count > 0
                     actionButton(
-                        title: "Исследовать",
+                        title: L10n.actionExploreName.localized,
                         icon: "magnifyingglass",
                         color: .cyan,
                         enabled: hasEvents
@@ -849,7 +849,7 @@ struct RegionDetailView: View {
 
     var questsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Активные квесты в регионе")
+            Text(L10n.activeQuestsInRegion.localized)
                 .font(.headline)
 
             ForEach(region.activeQuests, id: \.self) { questId in
@@ -898,7 +898,7 @@ struct RegionDetailView: View {
             let totalCount = quest.objectives.count
             if totalCount > 0 {
                 HStack(spacing: 4) {
-                    Text("Прогресс:")
+                    Text(L10n.questProgress.localized + ":")
                         .font(.caption2)
                         .foregroundColor(.secondary)
                     Text("\(completedCount)/\(totalCount)")
@@ -964,7 +964,7 @@ struct RegionDetailView: View {
         var cardsToNotify: [String] = []
         if let cardIDs = choice.consequences.addCards {
             for cardID in cardIDs {
-                if let card = TwilightMarchesCards.getCardByID(cardID) {
+                if let card = CardFactory.shared.getCard(id: cardID) {
                     cardsToNotify.append(card.name)
                 }
             }
@@ -977,12 +977,7 @@ struct RegionDetailView: View {
             in: region.id
         )
 
-        // Check quest objectives based on event completion
-        worldState.checkQuestObjectivesByEvent(
-            eventTitle: event.title,
-            choiceText: choice.text,
-            player: player
-        )
+        // Quest progress now handled by QuestTriggerEngine via completedEvent action
 
         // Mark event as completed if it's one-time
         if event.oneTime {
@@ -991,7 +986,7 @@ struct RegionDetailView: View {
 
         // Записать событие в журнал
         let logType: EventLogType = event.eventType == .combat ? .combat : .exploration
-        let outcomeMessage = choice.consequences.message ?? "Выбор сделан"
+        let outcomeMessage = choice.consequences.message ?? L10n.journalChoiceMade.localized
         worldState.logEvent(
             regionName: region.name,
             eventTitle: event.title,
@@ -1020,13 +1015,13 @@ struct RegionDetailView: View {
     // MARK: - Action Handling
 
     var actionConfirmationTitle: String {
-        guard let action = selectedAction else { return "Подтверждение" }
+        guard let action = selectedAction else { return L10n.confirmationTitle.localized }
         switch action {
-        case .travel: return "Отправиться в регион"
-        case .rest: return "Отдохнуть"
-        case .trade: return "Торговать"
-        case .strengthenAnchor: return "Укрепить якорь"
-        case .explore: return "Исследовать"
+        case .travel: return L10n.actionTravel.localized
+        case .rest: return L10n.actionRest.localized
+        case .trade: return L10n.actionTrade.localized
+        case .strengthenAnchor: return L10n.actionStrengthenAnchor.localized
+        case .explore: return L10n.actionExploreRegion.localized
         }
     }
 
@@ -1035,16 +1030,16 @@ struct RegionDetailView: View {
         switch action {
         case .travel:
             let cost = worldState.calculateTravelCost(to: region.id)
-            let dayWord = cost == 1 ? "день" : "дня"
-            return "Отправиться в регион '\(region.name)'? Это займёт \(cost) \(dayWord) пути."
+            let dayWord = cost == 1 ? L10n.dayWord1.localized : L10n.dayWord234.localized
+            return L10n.confirmTravel.localized(with: region.name, cost, dayWord)
         case .rest:
-            return "Отдохнуть в этом месте? Вы восстановите 5 здоровья."
+            return L10n.confirmRest.localized(with: 5)
         case .trade:
-            return "Торговая система пока не реализована."
+            return L10n.confirmTrade.localized
         case .strengthenAnchor:
-            return "Укрепить якорь? Это стоит 10 веры и добавит 20% целостности."
+            return L10n.confirmStrengthenAnchor.localized(with: 10, 20)
         case .explore:
-            return "Исследовать регион? Это займёт день."
+            return L10n.confirmExplore.localized
         }
     }
 
@@ -1054,14 +1049,14 @@ struct RegionDetailView: View {
         switch action {
         case .travel:
             // Use Engine for travel (Audit v1.1)
-            let fromRegion = worldState.getCurrentRegion()?.name ?? "Неизвестно"
+            let fromRegion = worldState.getCurrentRegion()?.name ?? L10n.regionUnknown.localized
             let result = engine.performAction(.travel(toRegionId: region.id))
 
             if result.success {
                 // Log travel (legacy logging still supported)
                 let cost = worldState.calculateTravelCost(to: region.id)
                 worldState.logTravel(from: fromRegion, to: region.name, days: cost)
-                worldState.checkQuestObjectivesByRegion(regionId: region.id, player: player)
+                // Quest progress now handled by QuestTriggerEngine via visitedRegion action
             }
             onDismiss()
 
@@ -1072,9 +1067,9 @@ struct RegionDetailView: View {
             if result.success {
                 worldState.logEvent(
                     regionName: region.name,
-                    eventTitle: "Отдых",
-                    choiceMade: "Решил отдохнуть",
-                    outcome: "Восстановлено здоровье",
+                    eventTitle: L10n.journalRestTitle.localized,
+                    choiceMade: L10n.journalRestChoice.localized,
+                    outcome: L10n.journalRestOutcome.localized,
                     type: .exploration
                 )
             }
@@ -1090,9 +1085,9 @@ struct RegionDetailView: View {
             if result.success {
                 worldState.logEvent(
                     regionName: region.name,
-                    eventTitle: "Укрепление якоря",
-                    choiceMade: "Потрачено вера",
-                    outcome: "Якорь укреплён",
+                    eventTitle: L10n.journalAnchorTitle.localized,
+                    choiceMade: L10n.journalAnchorChoice.localized,
+                    outcome: L10n.journalAnchorOutcome.localized,
                     type: .worldChange
                 )
             }
@@ -1114,7 +1109,7 @@ struct EventLogView: View {
         NavigationView {
             List {
                 if worldState.eventLog.isEmpty {
-                    Text("Журнал пуст. Ваши приключения ещё впереди...")
+                    Text(L10n.journalEmpty.localized)
                         .foregroundColor(.secondary)
                         .padding()
                 } else {
@@ -1123,11 +1118,11 @@ struct EventLogView: View {
                     }
                 }
             }
-            .navigationTitle("Журнал")
+            .navigationTitle(L10n.journalTitle.localized)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Закрыть") {
+                    Button(L10n.uiClose.localized) {
                         dismiss()
                     }
                 }
@@ -1146,7 +1141,7 @@ struct EventLogEntryView: View {
                 Image(systemName: entry.type.icon)
                     .foregroundColor(typeColor)
 
-                Text("День \(entry.dayNumber)")
+                Text(L10n.dayNumber.localized(with: entry.dayNumber))
                     .font(.caption)
                     .fontWeight(.bold)
 
@@ -1265,7 +1260,7 @@ struct EngineRegionCardView: View {
                         Image(systemName: region.reputation > 0 ? "hand.thumbsup.fill" : "hand.thumbsdown.fill")
                             .font(.caption2)
                             .foregroundColor(region.reputation > 0 ? .green : .red)
-                        Text("Репутация: \(region.reputation > 0 ? "+" : "")\(region.reputation)")
+                        Text(L10n.regionReputation.localized + ": \(region.reputation > 0 ? "+" : "")\(region.reputation)")
                             .font(.caption2)
                             .foregroundColor(.secondary)
                     }
@@ -1371,28 +1366,28 @@ struct EngineRegionDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Закрыть") {
+                    Button(L10n.uiClose.localized) {
                         onDismiss()
                     }
                 }
             }
             .alert(actionConfirmationTitle, isPresented: $showingActionConfirmation) {
-                Button("Подтвердить") {
+                Button(L10n.buttonConfirm.localized) {
                     if let action = selectedAction {
                         performAction(action)
                     }
                 }
-                Button("Отмена", role: .cancel) { }
+                Button(L10n.uiCancel.localized, role: .cancel) { }
             } message: {
                 Text(actionConfirmationMessage)
             }
-            .alert("Ничего не найдено", isPresented: $showingNoEventsAlert) {
-                Button("Понятно", role: .cancel) { }
+            .alert(L10n.nothingFound.localized, isPresented: $showingNoEventsAlert) {
+                Button(L10n.buttonUnderstood.localized, role: .cancel) { }
             } message: {
-                Text("В этом регионе сейчас нечего исследовать. Попробуйте позже или посетите другой регион.")
+                Text(L10n.noEventsInRegion.localized)
             }
-            .alert("Действие невозможно", isPresented: $showingActionError) {
-                Button("Понятно", role: .cancel) { }
+            .alert(L10n.actionImpossible.localized, isPresented: $showingActionError) {
+                Button(L10n.buttonUnderstood.localized, role: .cancel) { }
             } message: {
                 Text(actionErrorMessage)
             }
@@ -1445,12 +1440,12 @@ struct EngineRegionDetailView: View {
                     Text("🃏")
                         .font(.system(size: 48))
 
-                    Text("Получены карты!")
+                    Text(L10n.cardsReceived.localized)
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(.white)
 
-                    Text("Добавлены в вашу колоду")
+                    Text(L10n.addedToDeck.localized)
                         .font(.subheadline)
                         .foregroundColor(.white.opacity(0.8))
                 }
@@ -1480,7 +1475,7 @@ struct EngineRegionDetailView: View {
                         showingCardNotification = false
                     }
                 }) {
-                    Text("Отлично!")
+                    Text(L10n.buttonGreat.localized)
                         .font(.headline)
                         .foregroundColor(.white)
                         .frame(minWidth: 120)
@@ -1528,7 +1523,7 @@ struct EngineRegionDetailView: View {
                 if isPlayerHere {
                     HStack(spacing: 4) {
                         Image(systemName: "person.fill")
-                        Text("Вы здесь")
+                        Text(L10n.youAreHere.localized)
                     }
                     .font(.caption)
                     .fontWeight(.bold)
@@ -1549,11 +1544,11 @@ struct EngineRegionDetailView: View {
     var regionDescription: String {
         switch region.state {
         case .stable:
-            return "Регион спокоен. Влияние Нави минимально. Здесь безопасно отдыхать и торговать."
+            return L10n.regionDescStable.localized
         case .borderland:
-            return "Регион балансирует между Явью и Навью. Повышенная опасность, но и больше возможностей."
+            return L10n.regionDescBorderland.localized
         case .breach:
-            return "Навь активно проникает в регион. Очень опасно. Требуется восстановление якоря."
+            return L10n.regionDescBreach.localized
         }
     }
 
@@ -1564,12 +1559,12 @@ struct EngineRegionDetailView: View {
             HStack {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .foregroundColor(region.state == .breach ? .red : .orange)
-                Text("Предупреждение")
+                Text(L10n.warningTitle.localized)
                     .font(.caption)
                     .fontWeight(.bold)
             }
 
-            Text("В этом регионе повышенная опасность. Будьте осторожны!")
+            Text(L10n.warningHighDanger.localized)
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
@@ -1584,7 +1579,7 @@ struct EngineRegionDetailView: View {
 
     func anchorSection(anchor: EngineAnchorState) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Якорь Яви")
+            Text(L10n.anchorOfYav.localized)
                 .font(.headline)
 
             HStack(spacing: 12) {
@@ -1601,7 +1596,7 @@ struct EngineRegionDetailView: View {
 
                     // Integrity bar
                     HStack(spacing: 4) {
-                        Text("Целостность:")
+                        Text(L10n.anchorIntegrity.localized + ":")
                             .font(.caption2)
                         GeometryReader { geometry in
                             ZStack(alignment: .leading) {
@@ -1642,7 +1637,7 @@ struct EngineRegionDetailView: View {
 
     var actionsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Доступные действия")
+            Text(L10n.availableActions.localized)
                 .font(.headline)
 
             VStack(spacing: 8) {
@@ -1651,10 +1646,10 @@ struct EngineRegionDetailView: View {
                     let canTravel = engine.canTravelTo(regionId: region.id)
                     let routingHint = engine.getRoutingHint(to: region.id)
                     let travelCost = engine.calculateTravelCost(to: region.id)
-                    let dayWord = travelCost == 1 ? "день" : "дня"
+                    let dayWord = travelCost == 1 ? L10n.dayWord1.localized : L10n.dayWord234.localized
 
                     actionButton(
-                        title: canTravel ? "Отправиться (\(travelCost) \(dayWord))" : "Регион далеко",
+                        title: canTravel ? L10n.actionTravelTo.localized(with: travelCost, dayWord) : L10n.actionRegionFar.localized,
                         icon: canTravel ? "arrow.right.circle.fill" : "xmark.circle",
                         color: canTravel ? .blue : .gray,
                         enabled: canTravel
@@ -1667,7 +1662,7 @@ struct EngineRegionDetailView: View {
                         HStack {
                             Image(systemName: "info.circle")
                                 .foregroundColor(.secondary)
-                            Text("Переместитесь в регион, чтобы взаимодействовать с ним")
+                            Text(L10n.actionMoveToRegionHint.localized)
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
@@ -1678,11 +1673,11 @@ struct EngineRegionDetailView: View {
                             Image(systemName: "map")
                                 .foregroundColor(.orange)
                             if !routingHint.isEmpty {
-                                Text("Сначала идите через: \(routingHint.joined(separator: ", "))")
+                                Text(L10n.goThroughFirst.localized(with: routingHint.joined(separator: ", ")))
                                     .font(.caption)
                                     .foregroundColor(.orange)
                             } else {
-                                Text("Регион недоступен напрямую")
+                                Text(L10n.actionRegionNotDirectlyAccessible.localized)
                                     .font(.caption)
                                     .foregroundColor(.orange)
                             }
@@ -1695,7 +1690,7 @@ struct EngineRegionDetailView: View {
                 if isPlayerHere {
                     // Rest action
                     actionButton(
-                        title: "Отдохнуть (+3 ❤️)",
+                        title: L10n.actionRestHeal.localized(with: 3),
                         icon: "bed.double.fill",
                         color: .green,
                         enabled: region.canRest
@@ -1706,7 +1701,7 @@ struct EngineRegionDetailView: View {
 
                     // Trade action
                     actionButton(
-                        title: "Торговать",
+                        title: L10n.actionTradeName.localized,
                         icon: "cart.fill",
                         color: .orange,
                         enabled: region.canTrade
@@ -1718,7 +1713,7 @@ struct EngineRegionDetailView: View {
                     // Strengthen anchor
                     if region.anchor != nil {
                         actionButton(
-                            title: "Укрепить якорь (-5 ✨, +20%)",
+                            title: L10n.actionAnchorCost.localized(with: 5, 20),
                             icon: "hammer.fill",
                             color: .purple,
                             enabled: engine.canAffordFaith(5)
@@ -1731,7 +1726,7 @@ struct EngineRegionDetailView: View {
                     // Explore (only if events available)
                     let hasEvents = engine.hasAvailableEventsInCurrentRegion()
                     actionButton(
-                        title: "Исследовать",
+                        title: L10n.actionExploreName.localized,
                         icon: "magnifyingglass",
                         color: .cyan,
                         enabled: hasEvents
@@ -1788,13 +1783,13 @@ struct EngineRegionDetailView: View {
     // MARK: - Action Handling
 
     var actionConfirmationTitle: String {
-        guard let action = selectedAction else { return "Подтверждение" }
+        guard let action = selectedAction else { return L10n.confirmationTitle.localized }
         switch action {
-        case .travel: return "Отправиться в регион"
-        case .rest: return "Отдохнуть"
-        case .trade: return "Торговать"
-        case .strengthenAnchor: return "Укрепить якорь"
-        case .explore: return "Исследовать"
+        case .travel: return L10n.actionTravel.localized
+        case .rest: return L10n.actionRest.localized
+        case .trade: return L10n.actionTrade.localized
+        case .strengthenAnchor: return L10n.actionStrengthenAnchor.localized
+        case .explore: return L10n.actionExploreRegion.localized
         }
     }
 
@@ -1803,16 +1798,16 @@ struct EngineRegionDetailView: View {
         switch action {
         case .travel:
             let days = engine.calculateTravelCost(to: region.id)
-            let dayWord = days == 1 ? "день" : "дня"
-            return "Отправиться в регион '\(region.name)'? Это займёт \(days) \(dayWord) пути."
+            let dayWord = days == 1 ? L10n.dayWord1.localized : L10n.dayWord234.localized
+            return L10n.confirmTravel.localized(with: region.name, days, dayWord)
         case .rest:
-            return "Отдохнуть в этом месте? Вы восстановите 3 здоровья."
+            return L10n.confirmRest.localized(with: 3)
         case .trade:
-            return "Торговая система пока не реализована."
+            return L10n.confirmTrade.localized
         case .strengthenAnchor:
-            return "Укрепить якорь? Это стоит 5 веры и добавит 20% целостности."
+            return L10n.confirmStrengthenAnchor.localized(with: 5, 20)
         case .explore:
-            return "Исследовать регион? Это займёт день."
+            return L10n.confirmExplore.localized
         }
     }
 
@@ -1825,9 +1820,9 @@ struct EngineRegionDetailView: View {
             if result.success {
                 engine.addLogEntry(
                     regionName: region.name,
-                    eventTitle: "Путешествие",
-                    choiceMade: "Отправился в путь",
-                    outcome: "Прибыл в \(region.name)",
+                    eventTitle: L10n.journalEntryTravel.localized,
+                    choiceMade: L10n.journalEntryTravelChoice.localized,
+                    outcome: L10n.journalEntryTravelOutcome.localized(with: region.name),
                     type: .travel
                 )
                 // После перемещения показываем новый регион (текущую локацию)
@@ -1847,9 +1842,9 @@ struct EngineRegionDetailView: View {
             if result.success {
                 engine.addLogEntry(
                     regionName: region.name,
-                    eventTitle: "Отдых",
-                    choiceMade: "Решил отдохнуть",
-                    outcome: "Восстановлено здоровье",
+                    eventTitle: L10n.journalRestTitle.localized,
+                    choiceMade: L10n.journalRestChoice.localized,
+                    outcome: L10n.journalRestOutcome.localized,
                     type: .exploration
                 )
             }
@@ -1863,9 +1858,9 @@ struct EngineRegionDetailView: View {
             if result.success {
                 engine.addLogEntry(
                     regionName: region.name,
-                    eventTitle: "Укрепление якоря",
-                    choiceMade: "Потрачена вера",
-                    outcome: "Якорь укреплён",
+                    eventTitle: L10n.journalAnchorTitle.localized,
+                    choiceMade: L10n.journalAnchorChoice.localized,
+                    outcome: L10n.journalAnchorOutcome.localized,
                     type: .worldChange
                 )
             }
@@ -1879,9 +1874,9 @@ struct EngineRegionDetailView: View {
                     showingNoEventsAlert = true
                     engine.addLogEntry(
                         regionName: region.name,
-                        eventTitle: "Исследование",
-                        choiceMade: "Исследовал регион",
-                        outcome: "Ничего интересного не найдено",
+                        eventTitle: L10n.journalEntryExplore.localized,
+                        choiceMade: L10n.journalEntryExploreChoice.localized,
+                        outcome: L10n.journalEntryExploreNothing.localized,
                         type: .exploration
                     )
                 }
@@ -1893,24 +1888,24 @@ struct EngineRegionDetailView: View {
     // MARK: - Error Messages
 
     func errorMessage(for error: ActionError?) -> String {
-        guard let error = error else { return "Неизвестная ошибка" }
+        guard let error = error else { return L10n.errorUnknown.localized }
         switch error {
         case .regionNotNeighbor:
-            return "Этот регион слишком далеко. Сначала переместитесь в соседний регион."
+            return L10n.errorRegionFar.localized
         case .regionNotAccessible:
-            return "Этот регион недоступен."
+            return L10n.errorRegionInaccessible.localized
         case .healthTooLow:
-            return "У вас слишком мало здоровья для этого действия."
+            return L10n.errorHealthLow.localized
         case .insufficientResources(let resource, let required, let available):
-            return "Недостаточно \(resource): нужно \(required), есть \(available)."
+            return L10n.errorInsufficientResource.localized(with: resource, required, available)
         case .invalidAction(let reason):
             return reason
         case .combatInProgress:
-            return "Невозможно во время боя."
+            return L10n.errorInCombat.localized
         case .eventInProgress:
-            return "Сначала завершите текущее событие."
+            return L10n.errorFinishEvent.localized
         default:
-            return "Действие невозможно: \(error)"
+            return L10n.errorActionFailed.localized(with: "\(error)")
         }
     }
 
@@ -1921,7 +1916,7 @@ struct EngineRegionDetailView: View {
         var cardsToNotify: [String] = []
         if let cardIDs = choice.consequences.addCards {
             for cardID in cardIDs {
-                if let card = TwilightMarchesCards.getCardByID(cardID) {
+                if let card = CardFactory.shared.getCard(id: cardID) {
                     cardsToNotify.append(card.name)
                 }
             }
@@ -1934,7 +1929,7 @@ struct EngineRegionDetailView: View {
             if result.success {
                 // Log the event
                 let logType: EventLogType = event.eventType == .combat ? .combat : .exploration
-                let outcomeMessage = choice.consequences.message ?? "Выбор сделан"
+                let outcomeMessage = choice.consequences.message ?? L10n.journalChoiceMade.localized
                 engine.addLogEntry(
                     regionName: region.name,
                     eventTitle: event.title,
@@ -1972,7 +1967,7 @@ struct EngineEventLogView: View {
         NavigationView {
             List {
                 if engine.publishedEventLog.isEmpty {
-                    Text("Журнал пуст. Ваши приключения ещё впереди...")
+                    Text(L10n.journalEmpty.localized)
                         .foregroundColor(.secondary)
                         .padding()
                 } else {
@@ -1981,11 +1976,11 @@ struct EngineEventLogView: View {
                     }
                 }
             }
-            .navigationTitle("Журнал")
+            .navigationTitle(L10n.journalTitle.localized)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Закрыть") {
+                    Button(L10n.uiClose.localized) {
                         dismiss()
                     }
                 }

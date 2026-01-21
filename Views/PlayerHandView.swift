@@ -14,7 +14,7 @@ struct PlayerHandView: View {
                         onCardPlay?(selected)
                         selectedCard = nil
                     }) {
-                        Label("Сыграть карту", systemImage: "play.fill")
+                        Label(L10n.combatPlayCard.localized, systemImage: "play.fill")
                             .font(.headline)
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
@@ -68,7 +68,7 @@ struct PlayerHandView: View {
 
             // Hand of cards
             if player.hand.isEmpty {
-                Text("Нет карт в руке")
+                Text(L10n.noCardsInHand.localized)
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .padding()

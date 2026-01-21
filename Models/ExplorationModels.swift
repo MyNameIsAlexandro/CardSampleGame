@@ -9,9 +9,9 @@ enum RegionState: String, Codable, Hashable {
 
     var displayName: String {
         switch self {
-        case .stable: return "Стабильная"
-        case .borderland: return "Пограничье"
-        case .breach: return "Прорыв Нави"
+        case .stable: return L10n.regionStateStable.localized
+        case .borderland: return L10n.regionStateBorderland.localized
+        case .breach: return L10n.regionStateBreach.localized
         }
     }
 
@@ -81,9 +81,9 @@ struct CombatContext {
         case .stable:
             return nil
         case .borderland:
-            return "Пограничье: враги +1 сила, +1 защита"
+            return L10n.combatModifierBorderland.localized
         case .breach:
-            return "Прорыв Нави: враги +2 сила, +2 защита"
+            return L10n.combatModifierBreach.localized
         }
     }
 }
@@ -101,13 +101,13 @@ enum RegionType: String, Codable, Hashable {
 
     var displayName: String {
         switch self {
-        case .forest: return "Лес"
-        case .swamp: return "Болото"
-        case .mountain: return "Горы"
-        case .settlement: return "Поселение"
-        case .water: return "Водная зона"
-        case .wasteland: return "Пустошь"
-        case .sacred: return "Священное место"
+        case .forest: return L10n.regionTypeForest.localized
+        case .swamp: return L10n.regionTypeSwamp.localized
+        case .mountain: return L10n.regionTypeMountain.localized
+        case .settlement: return L10n.regionTypeSettlement.localized
+        case .water: return L10n.regionTypeWater.localized
+        case .wasteland: return L10n.regionTypeWasteland.localized
+        case .sacred: return L10n.regionTypeSacred.localized
         }
     }
 
@@ -138,14 +138,14 @@ enum AnchorType: String, Codable {
 
     var displayName: String {
         switch self {
-        case .shrine: return "Капище"
-        case .barrow: return "Курган"
-        case .sacredTree: return "Священный Дуб"
-        case .stoneIdol: return "Каменная Баба"
-        case .spring: return "Родник"
-        case .chapel: return "Часовня"
-        case .temple: return "Храм"
-        case .cross: return "Обетный Крест"
+        case .shrine: return L10n.anchorTypeShrine.localized
+        case .barrow: return L10n.anchorTypeBarrow.localized
+        case .sacredTree: return L10n.anchorTypeSacredTree.localized
+        case .stoneIdol: return L10n.anchorTypeStoneIdol.localized
+        case .spring: return L10n.anchorTypeSpring.localized
+        case .chapel: return L10n.anchorTypeChapel.localized
+        case .temple: return L10n.anchorTypeTemple.localized
+        case .cross: return L10n.anchorTypeCross.localized
         }
     }
 
@@ -220,6 +220,7 @@ struct Anchor: Identifiable, Codable {
 /// - После полной миграции UI на Engine эта модель станет internal для persistence
 struct Region: Identifiable, Codable {
     let id: UUID
+    let definitionId: String        // Content Pack ID (e.g., "village", "sacred_oak")
     let name: String
     let type: RegionType
     var state: RegionState
@@ -232,6 +233,7 @@ struct Region: Identifiable, Codable {
 
     init(
         id: UUID = UUID(),
+        definitionId: String = "",
         name: String,
         type: RegionType,
         state: RegionState = .stable,
@@ -243,6 +245,7 @@ struct Region: Identifiable, Codable {
         neighborIds: [UUID] = []
     ) {
         self.id = id
+        self.definitionId = definitionId
         self.name = name
         self.type = type
         self.state = state
@@ -291,11 +294,11 @@ enum EventType: String, Codable, Hashable {
 
     var displayName: String {
         switch self {
-        case .combat: return "Бой"
-        case .ritual: return "Ритуал"
-        case .narrative: return "Встреча"
-        case .exploration: return "Исследование"
-        case .worldShift: return "Сдвиг Мира"
+        case .combat: return L10n.eventTypeCombat.localized
+        case .ritual: return L10n.eventTypeRitual.localized
+        case .narrative: return L10n.eventTypeNarrative.localized
+        case .exploration: return L10n.eventTypeExploration.localized
+        case .worldShift: return L10n.eventTypeWorldShift.localized
         }
     }
 
@@ -392,6 +395,7 @@ struct EventConsequences: Codable, Hashable {
 
 struct GameEvent: Identifiable, Codable, Hashable {
     let id: UUID
+    let definitionId: String            // Content Pack ID (e.g., "village_elder_request")
     let eventType: EventType
     let title: String
     let description: String
@@ -413,6 +417,7 @@ struct GameEvent: Identifiable, Codable, Hashable {
 
     init(
         id: UUID = UUID(),
+        definitionId: String = "",
         eventType: EventType,
         title: String,
         description: String,
@@ -431,6 +436,7 @@ struct GameEvent: Identifiable, Codable, Hashable {
         forbiddenFlags: [String]? = nil
     ) {
         self.id = id
+        self.definitionId = definitionId
         self.eventType = eventType
         self.title = title
         self.description = description
@@ -540,6 +546,7 @@ struct QuestRewards: Codable {
 /// См. EXPLORATION_CORE_DESIGN.md, раздел 30 (Side-квесты как "зеркала мира")
 struct Quest: Identifiable, Codable {
     let id: UUID
+    let definitionId: String?           // Content Pack ID (e.g., "quest_main_act1")
     let title: String
     let description: String
     let questType: QuestType
@@ -554,6 +561,7 @@ struct Quest: Identifiable, Codable {
 
     init(
         id: UUID = UUID(),
+        definitionId: String? = nil,
         title: String,
         description: String,
         questType: QuestType,
@@ -565,6 +573,7 @@ struct Quest: Identifiable, Codable {
         mirrorFlag: String? = nil
     ) {
         self.id = id
+        self.definitionId = definitionId
         self.title = title
         self.description = description
         self.questType = questType

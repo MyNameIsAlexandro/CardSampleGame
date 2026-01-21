@@ -191,7 +191,7 @@ class GameState: ObservableObject {
 
         // Check if a boss was defeated (for quest objectives)
         if let encounter = activeEncounter {
-            worldState.markBossDefeated(bossName: encounter.name, player: currentPlayer)
+            worldState.markBossDefeated(enemyId: encounter.definitionId)
         }
 
         // Проклятие крови: при убийстве +2 HP и баланс смещается к тьме

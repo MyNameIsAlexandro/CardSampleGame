@@ -226,7 +226,7 @@ struct HeroPanel: View {
         if let heroClass = engine.legacyPlayer?.heroClass {
             return heroClass.rawValue
         }
-        return "Странник"
+        return L10n.heroClassDefault.localized
     }
 
     var heroInitials: String {
@@ -274,11 +274,11 @@ struct HeroPanel: View {
     var balanceText: String {
         let balance = engine.playerBalance
         if balance >= 70 {
-            return "Свет"
+            return L10n.balanceLight.localized
         } else if balance <= 30 {
-            return "Тьма"
+            return L10n.balanceDark.localized
         } else {
-            return "Равновесие"
+            return L10n.balanceNeutral.localized
         }
     }
 

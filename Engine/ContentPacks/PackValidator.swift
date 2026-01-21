@@ -215,7 +215,7 @@ final class PackValidator {
             checkDirectory("Campaign content", manifest.regionsPath)
             checkDirectory("Events", manifest.eventsPath)
 
-        case .investigator:
+        case .character:
             checkDirectory("Heroes", manifest.heroesPath)
             checkDirectory("Cards", manifest.cardsPath)
 

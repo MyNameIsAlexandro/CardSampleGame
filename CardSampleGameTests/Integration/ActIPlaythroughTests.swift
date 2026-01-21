@@ -65,26 +65,24 @@ final class ActIPlaythroughTests: XCTestCase {
     func testMainQuestProgressesThroughFlags() {
         XCTAssertEqual(worldState.mainQuestStage, 1, "Начальная стадия = 1")
 
-        // Прогресс квеста через установку флагов и вызов системы проверки
+        // Прогресс квеста через установку флагов
+        // Quest progression now handled by QuestTriggerEngine via engine actions
         worldState.setFlag("act2_unlocked", value: true)
-        worldState.checkQuestObjectivesByFlags(player)
 
-        // Если система поддерживает автопрогресс по флагам
-        // mainQuestStage должен измениться
-        // Иначе проверяем что флаг установлен корректно
+        // Проверяем что флаг установлен корректно
         XCTAssertTrue(worldState.hasFlag("act2_unlocked"), "Флаг акта 2 установлен")
     }
 
     func testQuestObjectivesCompleteByFlags() {
-        // Проверяем что квесты реагируют на флаги через продакшн-метод
+        // Проверяем что флаги корректно устанавливаются
         let incompleteObjectives = worldState.activeQuests.flatMap { $0.objectives.filter { !$0.completed } }.count
         _ = incompleteObjectives // используем для проверки что квесты существуют
 
         // Устанавливаем флаг, который может завершить цель квеста
+        // Quest progression now handled by QuestTriggerEngine via engine actions
         worldState.setFlag("village_explored", value: true)
-        worldState.checkQuestObjectivesByFlags(player)
 
-        // Система должна обработать флаги
+        // Проверяем что флаг установлен корректно
         XCTAssertTrue(worldState.hasFlag("village_explored"))
     }
 

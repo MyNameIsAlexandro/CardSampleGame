@@ -120,8 +120,9 @@ final class AuditGateTests: XCTestCase {
 
     // MARK: - EPIC 3: Pack Compatibility
 
-    /// Gate test: Can load multiple packs (campaign + investigator)
-    func testLoadTwoPacks_CampaignPlusInvestigator() throws {
+    /// Gate test: Can load multiple packs (campaign + character)
+    /// Note: "Character Pack" replaces "Investigator Pack" for Twilight Marches theme
+    func testLoadTwoPacks_CampaignPlusCharacter() throws {
         // This test would require having multiple pack files
         // For now, verify the API supports this
         let registry = ContentRegistry.shared
@@ -129,7 +130,7 @@ final class AuditGateTests: XCTestCase {
         // Verify registry can hold multiple packs
         XCTAssertNotNil(registry.loadedPacks, "Registry should support multiple packs")
 
-        // Note: Full test requires campaign + investigator pack files
+        // Note: Full test requires campaign + character pack files
     }
 
     /// Gate test: Save stores pack versions and validates on load
@@ -194,27 +195,34 @@ final class AuditGateTests: XCTestCase {
 extension AuditGateTests {
 
     /// Supplementary: Verify no hardcoded region IDs in key files
-    /// This is a documentation test - actual enforcement is via code review
+    /// See ArchitectureComplianceTests for full static analysis
     func testDocumentHardcodedIdRemoval() {
         // Document the changes made to remove hardcoded IDs:
         //
         // 1. TwilightGameEngine.swift:
         //    - mapRegionType(fromString:) now takes regionType string, not ID
         //    - entryRegionId comes from manifest, no "village" fallback
+        //    - tensionTickInterval and restHealAmount now from BalanceConfiguration
         //
         // 2. JSONContentProvider.swift:
         //    - Events loaded from events.json, not hardcoded pool_* files
         //    - RegionDefinition includes regionType field
         //
-        // 3. EventDefinitionAdapter.swift:
-        //    - mapRegionTypes uses ContentRegistry lookup, not ID switch
+        // 3. ContentView.swift, WorldMapView.swift, WorldState.swift:
+        //    - All TwilightMarchesCards usage replaced with CardFactory
         //
-        // 4. CodeContentProvider.swift:
-        //    - Example region uses generic IDs (test_region, test_anchor)
+        // 4. PlayerRuntimeState.swift:
+        //    - shuffle() replaced with WorldRNG.shared.shuffle()
         //
-        // 5. regions.json:
-        //    - Added region_type field to all regions
+        // 5. BalanceConfiguration:
+        //    - Added restHealAmount and tensionTickInterval
 
-        XCTAssertTrue(true, "Hardcoded ID removal documented")
+        // Verify architectural principles are enforced
+        // Full static analysis in ArchitectureComplianceTests
+        let factory = CardFactory.shared
+        XCTAssertNotNil(factory, "CardFactory must be the single source of cards")
+
+        let guardians = factory.createGuardians()
+        XCTAssertFalse(guardians.isEmpty, "CardFactory must provide cards without TwilightMarchesCards")
     }
 }

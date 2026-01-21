@@ -8,15 +8,20 @@
 
 /* Begin PBXBuildFile section */
 		01D384D3F190A3976183B126 /* EventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43D4E3FBE4DC34B63B61E061 /* EventView.swift */; };
+		07A42D78B28FD7B5AC6D72CC /* CardGameApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 833BD2DACC735181C7176112 /* CardGameApp.swift */; };
+		0BA05712A2F4F279D334F414 /* ArchitectureComplianceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4688878441E64CD46674548 /* ArchitectureComplianceTests.swift */; };
+		22F3FCBBF046BA11301DF527 /* CardFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20215EFB82596E6A12EEA851 /* CardFactory.swift */; };
+		2B116195224CF7156FE8F921 /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F555A127C2B3BAEB4CB15A7 /* Localization.swift */; };
+		2B1184DC7C57D43C5CAB86D3 /* TwilightMarchesCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BB1DBF0066F6EACA1426563 /* TwilightMarchesCards.swift */; };
+		48401F89913306D59DF04560 /* QuestTriggerEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E50166DAA1C287DF3A68AFD /* QuestTriggerEngine.swift */; };
 		6260055FBC8A9E08445B0736 /* HeroPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7DCDDDD67E3B8560CE4360 /* HeroPanel.swift */; };
 		6E48782A1C19C3CCDB7F32BF /* JSONContentProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E78C30B2863C87F7904765D /* JSONContentProviderTests.swift */; };
 		709EDD956E2748D66844361D /* HeroPanelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE472D35F4029DD71DA6E4C1 /* HeroPanelTests.swift */; };
 		774598C85985268254558646 /* EnemyDefinitionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D8A94137FE7B498FBFD4E1A /* EnemyDefinitionTests.swift */; };
+		7B2795C8A3A04289DD872A4A /* StoryDirector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C437956A1234A048D59F59D /* StoryDirector.swift */; };
 		8F035EDB750B2C0441F077B0 /* WorldMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BEC0AA856AB6706612208E1 /* WorldMapView.swift */; };
 		A4E4965164ED9C6373D15D1C /* ExplorationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BE0C9930A837029C5CD71A5 /* ExplorationModels.swift */; };
 		A56525B2E101A593EF7BE61A /* WorldState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2263FEB0CBAF703EC97141A7 /* WorldState.swift */; };
-		AA0000010000000000000001 /* CardGameApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000000000001 /* CardGameApp.swift */; };
-		AA0000030000000000000001 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000040000000000000001 /* ContentView.swift */; };
 		AA0000050000000000000001 /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000060000000000000001 /* Card.swift */; };
 		AA0000070000000000000001 /* CardType.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000080000000000000001 /* CardType.swift */; };
 		AA0000090000000000000001 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000100000000000000001 /* Player.swift */; };
@@ -24,10 +29,8 @@
 		AA0000130000000000000001 /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000140000000000000001 /* CardView.swift */; };
 		AA0000150000000000000001 /* PlayerHandView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000160000000000000001 /* PlayerHandView.swift */; };
 		AA0000170000000000000001 /* GameBoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000180000000000000001 /* GameBoardView.swift */; };
-		AA0000410000000000000001 /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000420000000000000001 /* Localization.swift */; };
 		AA0000430000000000000001 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = AA0000450000000000000001 /* Localizable.strings */; };
 		AA0000480000000000000001 /* RulesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000490000000000000001 /* RulesView.swift */; };
-		AA0000500000000000000001 /* TwilightMarchesCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000510000000000000001 /* TwilightMarchesCards.swift */; };
 		AA0000520000000000000001 /* GameSave.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000530000000000000001 /* GameSave.swift */; };
 		AA0000540000000000000001 /* StatisticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000550000000000000001 /* StatisticsView.swift */; };
 		BB0001010000000000000001 /* WorldStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001020000000000000001 /* WorldStateTests.swift */; };
@@ -59,7 +62,9 @@
 		CBDDB67C77B6B2456B8D6E85 /* ContentRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = CP0AEC59DDE4BB4190A9676D /* ContentRegistry.swift */; };
 		CC0000020000000000000001 /* CombatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000010000000000000001 /* CombatView.swift */; };
 		CC0000040000000000000001 /* AccessibilityIdentifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000030000000000000001 /* AccessibilityIdentifiers.swift */; };
+		D3154154A78F04B29955EC80 /* SafeImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B9B819A05F721884CC0411F /* SafeImage.swift */; };
 		D7CC2DD5F5409ABC08EAF177 /* LocalizedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180D9390663A50D5E72CF9B2 /* LocalizedString.swift */; };
+		EB1A1A39385A9185DC1F9F5E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33B29CABFC32C14A483932AF /* ContentView.swift */; };
 		EDA00002000000000000001 /* EventDefinitionAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDA00001000000000000001 /* EventDefinitionAdapter.swift */; };
 		EE0001010000000000000001 /* EngineProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0001020000000000000001 /* EngineProtocols.swift */; };
 		EE0001030000000000000001 /* GameLoop.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0001040000000000000001 /* GameLoop.swift */; };
@@ -120,14 +125,20 @@
 
 /* Begin PBXFileReference section */
 		0BE0C9930A837029C5CD71A5 /* ExplorationModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExplorationModels.swift; sourceTree = "<group>"; };
+		0E50166DAA1C287DF3A68AFD /* QuestTriggerEngine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QuestTriggerEngine.swift; sourceTree = "<group>"; };
 		180D9390663A50D5E72CF9B2 /* LocalizedString.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalizedString.swift; sourceTree = "<group>"; };
+		20215EFB82596E6A12EEA851 /* CardFactory.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CardFactory.swift; sourceTree = "<group>"; };
 		2263FEB0CBAF703EC97141A7 /* WorldState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WorldState.swift; sourceTree = "<group>"; };
+		33B29CABFC32C14A483932AF /* ContentView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		43D4E3FBE4DC34B63B61E061 /* EventView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventView.swift; sourceTree = "<group>"; };
+		4BB1DBF0066F6EACA1426563 /* TwilightMarchesCards.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TwilightMarchesCards.swift; sourceTree = "<group>"; };
 		4D8A94137FE7B498FBFD4E1A /* EnemyDefinitionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EnemyDefinitionTests.swift; sourceTree = "<group>"; };
+		5F555A127C2B3BAEB4CB15A7 /* Localization.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Localization.swift; sourceTree = "<group>"; };
 		6BEC0AA856AB6706612208E1 /* WorldMapView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WorldMapView.swift; sourceTree = "<group>"; };
+		6C437956A1234A048D59F59D /* StoryDirector.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StoryDirector.swift; sourceTree = "<group>"; };
 		6E78C30B2863C87F7904765D /* JSONContentProviderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = JSONContentProviderTests.swift; sourceTree = "<group>"; };
-		AA0000020000000000000001 /* CardGameApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardGameApp.swift; sourceTree = "<group>"; };
-		AA0000040000000000000001 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		833BD2DACC735181C7176112 /* CardGameApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CardGameApp.swift; sourceTree = "<group>"; };
+		9B9B819A05F721884CC0411F /* SafeImage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SafeImage.swift; sourceTree = "<group>"; };
 		AA0000060000000000000001 /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
 		AA0000080000000000000001 /* CardType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardType.swift; sourceTree = "<group>"; };
 		AA0000100000000000000001 /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
@@ -137,11 +148,9 @@
 		AA0000180000000000000001 /* GameBoardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameBoardView.swift; sourceTree = "<group>"; };
 		AA0000210000000000000001 /* CardSampleGame.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CardSampleGame.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0000400000000000000001 /* CardSampleGame.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CardSampleGame.entitlements; sourceTree = "<group>"; };
-		AA0000420000000000000001 /* Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Localization.swift; sourceTree = "<group>"; };
 		AA0000440000000000000001 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		AA0000460000000000000001 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
 		AA0000490000000000000001 /* RulesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RulesView.swift; sourceTree = "<group>"; };
-		AA0000510000000000000001 /* TwilightMarchesCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwilightMarchesCards.swift; sourceTree = "<group>"; };
 		AA0000530000000000000001 /* GameSave.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameSave.swift; sourceTree = "<group>"; };
 		AA0000550000000000000001 /* StatisticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsView.swift; sourceTree = "<group>"; };
 		AE472D35F4029DD71DA6E4C1 /* HeroPanelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HeroPanelTests.swift; sourceTree = "<group>"; };
@@ -201,6 +210,7 @@
 		EE0005100000000000000001 /* GameRuntimeState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRuntimeState.swift; sourceTree = "<group>"; };
 		EE0006020000000000000001 /* LegacyAdapters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyAdapters.swift; sourceTree = "<group>"; };
 		END000100000000000000001 /* EnemyDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemyDefinition.swift; sourceTree = "<group>"; };
+		F4688878441E64CD46674548 /* ArchitectureComplianceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ArchitectureComplianceTests.swift; sourceTree = "<group>"; };
 		FF0001020000000000000001 /* WorldRNG.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldRNG.swift; sourceTree = "<group>"; };
 		FF0002020000000000000001 /* DegradationRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DegradationRules.swift; sourceTree = "<group>"; };
 		FF0003020000000000000001 /* RequirementsEvaluator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequirementsEvaluator.swift; sourceTree = "<group>"; };
@@ -244,6 +254,25 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1606CAE24F97550D8B70D0D9 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				833BD2DACC735181C7176112 /* CardGameApp.swift */,
+				33B29CABFC32C14A483932AF /* ContentView.swift */,
+			);
+			name = App;
+			path = App;
+			sourceTree = SOURCE_ROOT;
+		};
+		4122FD9B7158FACFCFEB6F37 /* Quest */ = {
+			isa = PBXGroup;
+			children = (
+				0E50166DAA1C287DF3A68AFD /* QuestTriggerEngine.swift */,
+			);
+			name = Quest;
+			path = Engine/Quest;
+			sourceTree = SOURCE_ROOT;
+		};
 		993414D905F9E85EF9DDF2DE /* Components */ = {
 			isa = PBXGroup;
 			children = (
@@ -256,28 +285,17 @@
 		AA0000240000000000000001 = {
 			isa = PBXGroup;
 			children = (
-				AA0000250000000000000001 /* . */,
-				EE0000000000000000000001 /* Engine */,
+				1606CAE24F97550D8B70D0D9 /* App */,
 				LL0000030000000000000001 /* ViewModels */,
+				EE0000000000000000000001 /* Engine */,
 				BB0003000000000000000001 /* CardSampleGameTests */,
 				AA0000260000000000000001 /* Products */,
-			);
-			sourceTree = "<group>";
-		};
-		AA0000250000000000000001 /* . */ = {
-			isa = PBXGroup;
-			children = (
-				AA0000400000000000000001 /* CardSampleGame.entitlements */,
-				AA0000020000000000000001 /* CardGameApp.swift */,
-				AA0000040000000000000001 /* ContentView.swift */,
 				AA0000270000000000000001 /* Models */,
 				AA0000280000000000000001 /* Views */,
-				AA0000290000000000000001 /* Data */,
-				AA0000470000000000000001 /* Helpers */,
 				UT0000000000000000000001 /* Utilities */,
 				AA0000450000000000000001 /* Localizable.strings */,
+				AA0000400000000000000001 /* CardSampleGame.entitlements */,
 			);
-			path = .;
 			sourceTree = "<group>";
 		};
 		AA0000260000000000000001 /* Products */ = {
@@ -318,22 +336,6 @@
 				993414D905F9E85EF9DDF2DE /* Components */,
 			);
 			path = Views;
-			sourceTree = "<group>";
-		};
-		AA0000290000000000000001 /* Data */ = {
-			isa = PBXGroup;
-			children = (
-				AA0000510000000000000001 /* TwilightMarchesCards.swift */,
-			);
-			path = Data;
-			sourceTree = "<group>";
-		};
-		AA0000470000000000000001 /* Helpers */ = {
-			isa = PBXGroup;
-			children = (
-				AA0000420000000000000001 /* Localization.swift */,
-			);
-			path = Helpers;
 			sourceTree = "<group>";
 		};
 		BB0003000000000000000001 /* CardSampleGameTests */ = {
@@ -392,6 +394,7 @@
 				6E78C30B2863C87F7904765D /* JSONContentProviderTests.swift */,
 				GF0009020000000000000001 /* GameplayFlowTests.swift */,
 				4D8A94137FE7B498FBFD4E1A /* EnemyDefinitionTests.swift */,
+				F4688878441E64CD46674548 /* ArchitectureComplianceTests.swift */,
 			);
 			path = Engine;
 			sourceTree = "<group>";
@@ -404,6 +407,15 @@
 			name = Views;
 			path = Views;
 			sourceTree = "<group>";
+		};
+		CE0C1EF93B014DBBC9875332 /* Story */ = {
+			isa = PBXGroup;
+			children = (
+				6C437956A1234A048D59F59D /* StoryDirector.swift */,
+			);
+			name = Story;
+			path = Engine/Story;
+			sourceTree = SOURCE_ROOT;
 		};
 		CP00000000000001 /* ContentPacks */ = {
 			isa = PBXGroup;
@@ -440,6 +452,8 @@
 				II0000000000000000000001 /* Heroes */,
 				JJ0000000000000000000001 /* Cards */,
 				KK0000000000000000000001 /* Combat */,
+				4122FD9B7158FACFCFEB6F37 /* Quest */,
+				CE0C1EF93B014DBBC9875332 /* Story */,
 			);
 			path = Engine;
 			sourceTree = "<group>";
@@ -542,6 +556,8 @@
 			children = (
 				JJ0001020000000000000001 /* CardDefinition.swift */,
 				JJ0002020000000000000001 /* CardRegistry.swift */,
+				20215EFB82596E6A12EEA851 /* CardFactory.swift */,
+				4BB1DBF0066F6EACA1426563 /* TwilightMarchesCards.swift */,
 			);
 			path = Cards;
 			sourceTree = "<group>";
@@ -584,9 +600,11 @@
 			children = (
 				CC0000030000000000000001 /* AccessibilityIdentifiers.swift */,
 				FF0001020000000000000001 /* WorldRNG.swift */,
+				5F555A127C2B3BAEB4CB15A7 /* Localization.swift */,
+				9B9B819A05F721884CC0411F /* SafeImage.swift */,
 			);
 			path = Utilities;
-			sourceTree = "<group>";
+			sourceTree = SOURCE_ROOT;
 		};
 /* End PBXGroup section */
 
@@ -690,8 +708,6 @@
 			files = (
 				EDA00002000000000000001 /* EventDefinitionAdapter.swift in Sources */,
 				QDA00002000000000000001 /* QuestDefinitionAdapter.swift in Sources */,
-				AA0000030000000000000001 /* ContentView.swift in Sources */,
-				AA0000010000000000000001 /* CardGameApp.swift in Sources */,
 				AA0000050000000000000001 /* Card.swift in Sources */,
 				AA0000070000000000000001 /* CardType.swift in Sources */,
 				AA0000090000000000000001 /* Player.swift in Sources */,
@@ -699,8 +715,6 @@
 				AA0000130000000000000001 /* CardView.swift in Sources */,
 				AA0000150000000000000001 /* PlayerHandView.swift in Sources */,
 				AA0000170000000000000001 /* GameBoardView.swift in Sources */,
-				AA0000500000000000000001 /* TwilightMarchesCards.swift in Sources */,
-				AA0000410000000000000001 /* Localization.swift in Sources */,
 				AA0000480000000000000001 /* RulesView.swift in Sources */,
 				AA0000520000000000000001 /* GameSave.swift in Sources */,
 				AA0000540000000000000001 /* StatisticsView.swift in Sources */,
@@ -758,6 +772,14 @@
 				LL0007010000000000000001 /* GameViewModel.swift in Sources */,
 				D7CC2DD5F5409ABC08EAF177 /* LocalizedString.swift in Sources */,
 				6260055FBC8A9E08445B0736 /* HeroPanel.swift in Sources */,
+				22F3FCBBF046BA11301DF527 /* CardFactory.swift in Sources */,
+				48401F89913306D59DF04560 /* QuestTriggerEngine.swift in Sources */,
+				7B2795C8A3A04289DD872A4A /* StoryDirector.swift in Sources */,
+				D3154154A78F04B29955EC80 /* SafeImage.swift in Sources */,
+				2B1184DC7C57D43C5CAB86D3 /* TwilightMarchesCards.swift in Sources */,
+				07A42D78B28FD7B5AC6D72CC /* CardGameApp.swift in Sources */,
+				EB1A1A39385A9185DC1F9F5E /* ContentView.swift in Sources */,
+				2B116195224CF7156FE8F921 /* Localization.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -793,6 +815,7 @@
 				GF0009010000000000000001 /* GameplayFlowTests.swift in Sources */,
 				774598C85985268254558646 /* EnemyDefinitionTests.swift in Sources */,
 				709EDD956E2748D66844361D /* HeroPanelTests.swift in Sources */,
+				0BA05712A2F4F279D334F414 /* ArchitectureComplianceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

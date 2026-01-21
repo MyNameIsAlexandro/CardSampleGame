@@ -26,9 +26,10 @@ final class QuestSystemTests: XCTestCase {
         XCTAssertNotNil(mainQuest, "Главный квест должен быть активен при старте")
     }
 
-    func testMainQuestTitle() {
+    func testMainQuestDefinitionId() {
+        // Проверяем по definitionId (Content Pack ID), не по локализованному названию
         let mainQuest = worldState.activeQuests.first { $0.questType == .main }
-        XCTAssertEqual(mainQuest?.title, "Путь Защитника", "Название главного квеста")
+        XCTAssertEqual(mainQuest?.definitionId, "quest_main_act1", "ID главного квеста должен быть quest_main_act1")
     }
 
     func testMainQuestInitialStage() {

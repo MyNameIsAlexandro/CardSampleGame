@@ -2,6 +2,7 @@ import Foundation
 
 struct Card: Identifiable, Codable, Hashable {
     let id: UUID
+    let definitionId: String  // Content Pack ID (e.g., "leshy_guardian" for enemies)
     let name: String
     let type: CardType
     let rarity: CardRarity
@@ -33,6 +34,7 @@ struct Card: Identifiable, Codable, Hashable {
 
     init(
         id: UUID = UUID(),
+        definitionId: String = "",
         name: String,
         type: CardType,
         rarity: CardRarity = .common,
@@ -55,6 +57,7 @@ struct Card: Identifiable, Codable, Hashable {
         faithCost: Int = 3
     ) {
         self.id = id
+        self.definitionId = definitionId
         self.name = name
         self.type = type
         self.rarity = rarity
