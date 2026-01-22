@@ -24,7 +24,8 @@
       "Bash(while read key)",
       "Bash(do if ! grep -q \"\"\"$key\"\"\" en.lproj/Localizable.strings)",
       "Bash(then echo \"Missing in en: $key\")",
-      "Bash(xcrun simctl boot:*)"
+      "Bash(xcrun simctl boot:*)",
+      "Bash(git merge:*)"
     ]
   }
 }
