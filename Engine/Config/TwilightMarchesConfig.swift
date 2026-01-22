@@ -202,8 +202,8 @@ struct TwilightCurseDefinition {
     static let definitions: [TwilightCurseType: TwilightCurseDefinition] = [
         .weakness: TwilightCurseDefinition(
             type: .weakness,
-            name: "Слабость",
-            description: "Уменьшает наносимый урон",
+            name: L10n.curseWeaknessName.localized,
+            description: L10n.curseWeaknessDescription.localized,
             removalCost: 2,
             damageModifier: -1,
             damageTakenModifier: 0,
@@ -212,8 +212,8 @@ struct TwilightCurseDefinition {
         ),
         .fear: TwilightCurseDefinition(
             type: .fear,
-            name: "Страх",
-            description: "Увеличивает получаемый урон",
+            name: L10n.curseFearName.localized,
+            description: L10n.curseFearDescription.localized,
             removalCost: 2,
             damageModifier: 0,
             damageTakenModifier: 1,
@@ -222,8 +222,8 @@ struct TwilightCurseDefinition {
         ),
         .exhaustion: TwilightCurseDefinition(
             type: .exhaustion,
-            name: "Истощение",
-            description: "Уменьшает количество действий",
+            name: L10n.curseExhaustionName.localized,
+            description: L10n.curseExhaustionDescription.localized,
             removalCost: 3,
             damageModifier: 0,
             damageTakenModifier: 0,
@@ -232,8 +232,8 @@ struct TwilightCurseDefinition {
         ),
         .greed: TwilightCurseDefinition(
             type: .greed,
-            name: "Алчность",
-            description: "Тянет к тьме",
+            name: L10n.curseGreedName.localized,
+            description: L10n.curseGreedDescription.localized,
             removalCost: 4,
             damageModifier: 0,
             damageTakenModifier: 0,
@@ -242,8 +242,8 @@ struct TwilightCurseDefinition {
         ),
         .shadowOfNav: TwilightCurseDefinition(
             type: .shadowOfNav,
-            name: "Тень Нави",
-            description: "Увеличивает урон, но сдвигает к тьме",
+            name: L10n.curseShadowOfNavName.localized,
+            description: L10n.curseShadowOfNavDescription.localized,
             removalCost: 5,
             damageModifier: 3,
             damageTakenModifier: 0,
@@ -252,8 +252,8 @@ struct TwilightCurseDefinition {
         ),
         .bloodCurse: TwilightCurseDefinition(
             type: .bloodCurse,
-            name: "Кровавое проклятие",
-            description: "Лечит при убийстве, но сдвигает к тьме",
+            name: L10n.curseBloodCurseName.localized,
+            description: L10n.curseBloodCurseDescription.localized,
             removalCost: 6,
             damageModifier: 0,
             damageTakenModifier: 0,
@@ -262,8 +262,8 @@ struct TwilightCurseDefinition {
         ),
         .sealOfNav: TwilightCurseDefinition(
             type: .sealOfNav,
-            name: "Печать Нави",
-            description: "Блокирует Sustain карты",
+            name: L10n.curseSealOfNavName.localized,
+            description: L10n.curseSealOfNavDescription.localized,
             removalCost: 8,
             damageModifier: 0,
             damageTakenModifier: 0,

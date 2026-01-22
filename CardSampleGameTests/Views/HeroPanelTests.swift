@@ -19,30 +19,36 @@ final class HeroPanelTests: XCTestCase {
         super.tearDown()
     }
 
-    // MARK: - Hero Class Display Tests
+    // MARK: - Hero Display Tests
 
-    func testHeroClassDisplaysCorrectly() {
-        // Given: Engine connected to legacy player with specific class
-        let player = Player(name: "Тест Воин", heroClass: .warrior)
+    func testHeroDisplaysCorrectly() throws {
+        // Given: Get first available hero from registry
+        let registry = HeroRegistry.shared
+        guard let hero = registry.firstHero else {
+            throw XCTSkip("No heroes in registry")
+        }
+
+        let player = Player(name: "Тест Герой", heroId: hero.id)
         let worldState = WorldState()
 
         engine.connectToLegacy(worldState: worldState, player: player)
 
-        // When: Getting hero class from engine
-        let heroClass = engine.legacyPlayer?.heroClass
-
-        // Then: Class should be warrior
-        XCTAssertEqual(heroClass, .warrior)
-        XCTAssertEqual(heroClass?.rawValue, "Воин")
+        // Then: Hero ID should be set
+        XCTAssertEqual(engine.legacyPlayer?.heroId, hero.id)
+        // heroDefinition should be accessible
+        XCTAssertNotNil(engine.legacyPlayer?.heroDefinition)
     }
 
-    func testHeroClassRawValueIsRussian() {
-        // Verify all hero classes have Russian raw values
-        XCTAssertEqual(HeroClass.warrior.rawValue, "Воин")
-        XCTAssertEqual(HeroClass.mage.rawValue, "Маг")
-        XCTAssertEqual(HeroClass.ranger.rawValue, "Следопыт")
-        XCTAssertEqual(HeroClass.priest.rawValue, "Жрец")
-        XCTAssertEqual(HeroClass.shadow.rawValue, "Тень")
+    func testAllHeroesHaveValidData() {
+        // Verify all heroes have valid data for display
+        let registry = HeroRegistry.shared
+
+        for hero in registry.allHeroes {
+            XCTAssertFalse(hero.id.isEmpty, "Hero should have ID")
+            XCTAssertFalse(hero.name.isEmpty, "Hero \(hero.id) should have a name")
+            XCTAssertFalse(hero.icon.isEmpty, "Hero \(hero.id) should have an icon")
+            XCTAssertFalse(hero.description.isEmpty, "Hero \(hero.id) should have a description")
+        }
     }
 
     // MARK: - Player Stats Tests

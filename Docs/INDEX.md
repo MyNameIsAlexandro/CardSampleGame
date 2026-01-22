@@ -23,11 +23,9 @@
 | "Где сейчас лежит этот класс? Какой статус у фичи?" | [TECHNICAL_DOCUMENTATION.md](./TECHNICAL_DOCUMENTATION.md) | **КАРТА КОДА** (Map) |
 | "Готова ли фича? Как её проверить?" | [QA_ACT_I_CHECKLIST.md](./QA_ACT_I_CHECKLIST.md) | **СУДЬЯ** (Judge) |
 | "Какой план миграции к Engine v1.0?" | [MIGRATION_PLAN.md](./MIGRATION_PLAN.md) | **ПЛАН** (Roadmap) |
+| "Как создать Content Pack?" | [CONTENT_PACK_GUIDE.md](./CONTENT_PACK_GUIDE.md) | **РУКОВОДСТВО** (Guide) |
 | "Что мы уже сделали и зафиксировали?" | [CAMPAIGN_IMPLEMENTATION_REPORT.md](./CAMPAIGN_IMPLEMENTATION_REPORT.md) | **ИСТОРИЯ** (History) 🔒 |
-| "Как создать контентный пак?" | [CONTENT_PACK_GUIDE.md](./CONTENT_PACK_GUIDE.md) | **ГАЙД** (Guide) |
-| "Какая спецификация Campaign-пака?" | [SPEC_CAMPAIGN_PACK.md](./SPEC_CAMPAIGN_PACK.md) | **СПЕЦИФИКАЦИЯ** (Spec) |
-| "Какая спецификация Investigator-пака?" | [SPEC_INVESTIGATOR_PACK.md](./SPEC_INVESTIGATOR_PACK.md) | **СПЕЦИФИКАЦИЯ** (Spec) |
-| "Какая спецификация Balance-пака?" | [SPEC_BALANCE_PACK.md](./SPEC_BALANCE_PACK.md) | **СПЕЦИФИКАЦИЯ** (Spec) |
+| "Что изменилось с последнего аудита?" | [CHANGELOG.md](../CHANGELOG.md) | **ИЗМЕНЕНИЯ** (Changelog) |
 
 ---
 
@@ -154,32 +152,22 @@
 | EVENT_MODULE_ARCHITECTURE.md | ~450 | ✅ Active |
 | MIGRATION_PLAN.md | ~450 | ✅ Phase 1-5 Done |
 | EXPLORATION_CORE_DESIGN.md | ~3100 | ✅ Active |
-| GAME_DESIGN_DOCUMENT.md | ~1050 | ✅ Active |
+| GAME_DESIGN_DOCUMENT.md | ~950 | ✅ Active |
 | TECHNICAL_DOCUMENTATION.md | ~1100 | ✅ Active |
 | QA_ACT_I_CHECKLIST.md | ~700 | ✅ Active |
+| CONTENT_PACK_GUIDE.md | ~420 | ✅ Active (RU) |
 | CAMPAIGN_IMPLEMENTATION_REPORT.md | ~500 | 🔒 Frozen v0.6.0 |
+| CHANGELOG.md | ~100 | ✅ Active |
 | **INDEX.md** | — | 📍 Вы здесь |
-
-### Content Pack документация
-
-| Файл | Описание | Статус |
-|------|----------|--------|
-| CONTENT_PACK_GUIDE.md | Общий гайд по созданию паков | ✅ Active |
-| SPEC_CAMPAIGN_PACK.md | Спецификация Campaign-паков (EN) | ✅ Active |
-| SPEC_CAMPAIGN_PACK_RU.md | Спецификация Campaign-паков (RU) | ✅ Active |
-| SPEC_INVESTIGATOR_PACK.md | Спецификация Investigator-паков (EN) | ✅ Active |
-| SPEC_INVESTIGATOR_PACK_RU.md | Спецификация Investigator-паков (RU) | ✅ Active |
-| SPEC_BALANCE_PACK.md | Спецификация Balance-паков (EN) | ✅ Active |
-| SPEC_BALANCE_PACK_RU.md | Спецификация Balance-паков (RU) | ✅ Active |
 
 ### Модульная документация (Engine)
 
 | Файл | Путь | Статус |
 |------|------|--------|
-| HEROES_MODULE.md | Engine/Heroes/ | ✅ Active |
+| HEROES_MODULE.md | Engine/Heroes/ | ✅ Active (v2.0 data-driven) |
 | CARDS_MODULE.md | Engine/Cards/ | ✅ Active |
 | COMBAT_MODULE.md | Engine/Combat/ | ✅ Active |
 
 ---
 
-**Последнее обновление:** 20 января 2026
+**Последнее обновление:** 22 января 2026

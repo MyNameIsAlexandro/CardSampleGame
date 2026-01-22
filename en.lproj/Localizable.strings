@@ -942,3 +942,69 @@
 "balance.light" = "Light";
 "balance.dark" = "Dark";
 "balance.neutral" = "Balance";
+
+// MARK: - Hero Classes
+"hero.class.warrior" = "Warrior";
+"hero.class.mage" = "Mage";
+"hero.class.ranger" = "Ranger";
+"hero.class.priest" = "Priest";
+"hero.class.shadow" = "Shadow";
+
+"hero.class.warrior.desc" = "Master of melee combat. High strength and survivability.";
+"hero.class.mage.desc" = "Wields magic. Powerful spells, but fragile.";
+"hero.class.ranger.desc" = "Scout and hunter. Balanced characteristics.";
+"hero.class.priest.desc" = "Servant of Light. Healing and protection from darkness.";
+"hero.class.shadow.desc" = "Agent of Nav. Dark magic and stealth.";
+
+"hero.ability.warrior" = "Rage: +2 damage when HP below 50%";
+"hero.ability.mage" = "Meditation: +1 faith at end of turn";
+"hero.ability.ranger" = "Tracking: +1 die on first attack";
+"hero.ability.priest" = "Blessing: -1 damage from darkness";
+"hero.ability.shadow" = "Ambush: +3 damage vs full HP enemies";
+
+// MARK: - Hero Ability Definitions
+"ability.warrior.rage.name" = "Rage";
+"ability.warrior.rage.desc" = "+2 damage when HP below 50%";
+"ability.mage.meditation.name" = "Meditation";
+"ability.mage.meditation.desc" = "+1 faith at end of each turn";
+"ability.ranger.tracking.name" = "Tracking";
+"ability.ranger.tracking.desc" = "+1 attack die on first attack in combat";
+"ability.priest.blessing.name" = "Blessing";
+"ability.priest.blessing.desc" = "-1 damage from dark sources";
+"ability.shadow.ambush.name" = "Ambush";
+"ability.shadow.ambush.desc" = "+3 damage vs enemies with full health";
+
+// MARK: - Curse Definitions (Config)
+"curse.weakness.name" = "Weakness";
+"curse.weakness.description" = "Reduces damage dealt";
+"curse.fear.name" = "Fear";
+"curse.fear.description" = "Increases damage taken";
+"curse.exhaustion.name" = "Exhaustion";
+"curse.exhaustion.description" = "Reduces actions per turn";
+"curse.greed.name" = "Greed";
+"curse.greed.description" = "Pulls towards darkness";
+"curse.shadow.of.nav.name" = "Shadow of Nav";
+"curse.shadow.of.nav.description" = "Increases damage, but shifts towards dark";
+"curse.blood.curse.name" = "Blood Curse";
+"curse.blood.curse.description" = "Heals on kill, but shifts towards dark";
+"curse.seal.of.nav.name" = "Seal of Nav";
+"curse.seal.of.nav.description" = "Blocks Sustain cards";
+
+// MARK: - Action Errors
+"error.invalid.action" = "Invalid action: %@";
+"error.region.not.accessible" = "Region %@ is not accessible";
+"error.region.not.neighbor" = "Region %@ is not a neighbor";
+"error.action.not.available" = "%@ not available in %@ region";
+"error.insufficient.resources" = "Need %2$d %1$@, have %3$d";
+"error.health.too.low" = "Health too low for this action";
+"error.game.not.in.progress" = "Game is not in progress";
+"error.combat.in.progress" = "Cannot do this during combat";
+"error.event.in.progress" = "Must resolve current event first";
+"error.no.active.event" = "No active event";
+"error.no.active.combat" = "No active combat";
+"error.event.not.found" = "Event %@ not found";
+"error.invalid.choice.index" = "Choice %d invalid (max: %d)";
+"error.choice.requirements.not.met" = "Cannot choose: %@";
+"error.card.not.in.hand" = "Card %@ not in hand";
+"error.not.enough.actions" = "Not enough actions remaining";
+"error.invalid.target" = "Invalid target";

@@ -216,8 +216,8 @@ extension HeroAbility {
     /// Ярость Воина: +2 урона при HP < 50%
     static let warriorRage = HeroAbility(
         id: "warrior_rage",
-        name: "Ярость",
-        description: "+2 к урону при HP ниже 50%",
+        name: L10n.abilityWarriorRageName.localized,
+        description: L10n.abilityWarriorRageDesc.localized,
         icon: "🔥",
         type: .passive,
         trigger: .onDamageDealt,
@@ -230,8 +230,8 @@ extension HeroAbility {
     /// Медитация Мага: +1 вера в конце хода
     static let mageMeditation = HeroAbility(
         id: "mage_meditation",
-        name: "Медитация",
-        description: "+1 вера в конце каждого хода",
+        name: L10n.abilityMageMeditationName.localized,
+        description: L10n.abilityMageMeditationDesc.localized,
         icon: "🧘",
         type: .passive,
         trigger: .turnEnd,
@@ -244,8 +244,8 @@ extension HeroAbility {
     /// Выслеживание Следопыта: +1 кубик при первой атаке
     static let rangerTracking = HeroAbility(
         id: "ranger_tracking",
-        name: "Выслеживание",
-        description: "+1 кубик атаки при первой атаке в бою",
+        name: L10n.abilityRangerTrackingName.localized,
+        description: L10n.abilityRangerTrackingDesc.localized,
         icon: "🎯",
         type: .passive,
         trigger: .onAttack,
@@ -258,8 +258,8 @@ extension HeroAbility {
     /// Благословение Жреца: -1 урон от тёмных источников
     static let priestBlessing = HeroAbility(
         id: "priest_blessing",
-        name: "Благословение",
-        description: "-1 урон от тёмных источников",
+        name: L10n.abilityPriestBlessingName.localized,
+        description: L10n.abilityPriestBlessingDesc.localized,
         icon: "✨",
         type: .passive,
         trigger: .onDamageReceived,
@@ -272,8 +272,8 @@ extension HeroAbility {
     /// Засада Тени: +3 урона по целям с полным HP
     static let shadowAmbush = HeroAbility(
         id: "shadow_ambush",
-        name: "Засада",
-        description: "+3 урона по врагам с полным здоровьем",
+        name: L10n.abilityShadowAmbushName.localized,
+        description: L10n.abilityShadowAmbushDesc.localized,
         icon: "🗡️",
         type: .passive,
         trigger: .onDamageDealt,
@@ -283,14 +283,15 @@ extension HeroAbility {
         cost: nil
     )
 
-    /// Получить способность по классу героя
-    static func forHeroClass(_ heroClass: HeroClass) -> HeroAbility {
-        switch heroClass {
-        case .warrior: return .warriorRage
-        case .mage: return .mageMeditation
-        case .ranger: return .rangerTracking
-        case .priest: return .priestBlessing
-        case .shadow: return .shadowAmbush
+    /// Получить способность по ID (для загрузки из JSON)
+    static func forAbilityId(_ id: String) -> HeroAbility? {
+        switch id {
+        case "warrior_rage": return .warriorRage
+        case "mage_meditation": return .mageMeditation
+        case "ranger_tracking": return .rangerTracking
+        case "priest_blessing": return .priestBlessing
+        case "shadow_ambush": return .shadowAmbush
+        default: return nil
         }
     }
 }

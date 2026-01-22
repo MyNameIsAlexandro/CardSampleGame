@@ -828,10 +828,9 @@ Engine/
 │   ├── TwilightMarchesConfig.swift # Конфигурация игры
 │   └── DegradationRules.swift      # Правила деградации
 ├── Heroes/                         # Модуль героев
-│   ├── HeroClass.swift             # Классы героев
-│   ├── HeroDefinition.swift        # Протоколы определения
+│   ├── HeroDefinition.swift        # Протоколы определения героев
 │   ├── HeroAbility.swift           # Система способностей
-│   ├── HeroRegistry.swift          # Реестр героев
+│   ├── HeroRegistry.swift          # Реестр героев (загрузка из JSON)
 │   └── HEROES_MODULE.md            # Документация модуля
 ├── Cards/                          # Модуль карт
 │   ├── CardDefinition.swift        # Протоколы определения
@@ -885,39 +884,39 @@ DevTools/
 
 ---
 
-## Приложение B: Система классов героев (HeroClass)
+## Приложение B: Система героев (Data-Driven)
 
-### B.1 Структура HeroClass
+### B.1 Архитектура
+
+Герои загружаются из Content Pack (`heroes.json`) через `HeroRegistry`:
 
 ```swift
-enum HeroClass: String, CaseIterable, Codable {
-    case warrior = "Воин"
-    case mage = "Маг"
-    case ranger = "Следопыт"
-    case priest = "Жрец"
-    case shadow = "Тень"
-}
+// Получение героя по ID
+let hero = HeroRegistry.shared.hero(id: "warrior_ragnar")
+
+// Создание игрока с героем
+let player = Player(name: hero.name, maxHandSize: 5, heroId: "warrior_ragnar")
 ```
 
-### B.2 Базовые характеристики классов
+### B.2 Герои (из heroes.json)
 
-| Класс | HP | Сила | Вера | MaxFaith | Balance |
-|-------|-----|------|------|----------|---------|
-| Воин | 12 | 7 | 2 | 8 | 50 |
-| Маг | 7 | 2 | 5 | 15 | 50 |
-| Следопыт | 10 | 4 | 3 | 10 | 50 |
-| Жрец | 9 | 3 | 5 | 12 | 70 |
-| Тень | 8 | 4 | 4 | 10 | 30 |
+| ID | Имя | HP | Сила | Вера | MaxFaith | Balance |
+|----|-----|-----|------|------|----------|---------|
+| warrior_ragnar | Рагнар | 12 | 7 | 2 | 8 | 50 |
+| mage_elvira | Эльвира | 7 | 2 | 5 | 15 | 50 |
+| ranger_thorin | Торин | 10 | 4 | 3 | 10 | 50 |
+| priest_aurelius | Аврелий | 9 | 3 | 5 | 12 | 70 |
+| shadow_umbra | Умбра | 8 | 4 | 4 | 10 | 30 |
 
-### B.3 Особые способности классов
+### B.3 Особые способности героев
 
-| Класс | Способность | Реализация |
+| Герой | Способность | ability_id |
 |-------|-------------|------------|
-| **Воин** | Ярость: +2 урон при HP < 50% | `getHeroClassDamageBonus()` |
-| **Маг** | Медитация: +1 вера в конце хода | `shouldGainFaithEndOfTurn` |
-| **Следопыт** | Выслеживание: +1 кубик при первой атаке | `getHeroClassBonusDice()` |
-| **Жрец** | Благословение: -1 урон от тёмных источников | `getHeroClassDamageReduction()` |
-| **Тень** | Засада: +3 урона по целям с полным HP | `getHeroClassDamageBonus()` |
+| **Рагнар** | Ярость: +2 урон при HP < 50% | `warrior_rage` |
+| **Эльвира** | Медитация: +1 вера в конце хода | `mage_meditation` |
+| **Торин** | Выслеживание: +1 кубик при первой атаке | `ranger_tracking` |
+| **Аврелий** | Благословение: -1 урон от тёмных источников | `priest_blessing` |
+| **Умбра** | Засада: +3 урона по целям с полным HP | `shadow_ambush` |
 
 ---
 
@@ -979,7 +978,9 @@ enum HeroClass: String, CaseIterable, Codable {
 **Документация:** [HEROES_MODULE.md](../Engine/Heroes/HEROES_MODULE.md)
 
 Компоненты:
-- `HeroClass` — классы героев (Warrior, Mage, Ranger, Priest, Shadow)
+- `HeroDefinition` — протокол определения героя
+- `HeroRegistry` — реестр героев (загрузка из heroes.json)
+- `HeroAbility` — система способностей героев
 - `HeroDefinition` — протокол определения героя
 - `HeroAbility` — система способностей
 - `HeroRegistry` — централизованный реестр героев
@@ -1062,11 +1063,10 @@ let result = CombatCalculator.calculatePlayerAttack(
 
 ### E.6 Расширение модулей
 
-**Добавление нового класса героя:**
-1. Добавить case в `HeroClass`
-2. Реализовать `baseStats`, `specialAbility`
-3. Создать `HeroAbility.xxxAbility`
-4. Зарегистрировать героя в `HeroRegistry`
+**Добавление нового героя:**
+1. Добавить запись в `heroes.json`
+2. Добавить способность в `HeroAbility.forAbilityId()` (если новая)
+3. Добавить стартовую колоду в `CardRegistry` (если особая)
 
 **Добавление DLC пакета:**
 ```swift

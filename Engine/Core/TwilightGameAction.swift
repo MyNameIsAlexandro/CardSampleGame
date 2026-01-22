@@ -306,39 +306,39 @@ enum ActionError: Error, Equatable {
     var localizedDescription: String {
         switch self {
         case .invalidAction(let reason):
-            return "Invalid action: \(reason)"
+            return L10n.errorInvalidAction.localized(with: reason)
         case .regionNotAccessible(let id):
-            return "Region \(id) is not accessible"
+            return L10n.errorRegionNotAccessible.localized(with: String(id.uuidString.prefix(8)))
         case .regionNotNeighbor(let id):
-            return "Region \(id) is not a neighbor"
+            return L10n.errorRegionNotNeighbor.localized(with: String(id.uuidString.prefix(8)))
         case .actionNotAvailableInRegion(let action, let type):
-            return "\(action) not available in \(type) region"
+            return L10n.errorActionNotAvailable.localized(with: action, type)
         case .insufficientResources(let resource, let required, let available):
-            return "Need \(required) \(resource), have \(available)"
+            return L10n.errorInsufficientResources.localized(with: resource, required, available)
         case .healthTooLow:
-            return "Health too low for this action"
+            return L10n.errorHealthTooLow.localized
         case .gameNotInProgress:
-            return "Game is not in progress"
+            return L10n.errorGameNotInProgress.localized
         case .combatInProgress:
-            return "Cannot perform this action during combat"
+            return L10n.errorCombatInProgress.localized
         case .eventInProgress:
-            return "Must resolve current event first"
+            return L10n.errorEventInProgress.localized
         case .noActiveEvent:
-            return "No active event"
+            return L10n.errorNoActiveEvent.localized
         case .noActiveCombat:
-            return "No active combat"
+            return L10n.errorNoActiveCombat.localized
         case .eventNotFound(let id):
-            return "Event \(id) not found"
+            return L10n.errorEventNotFound.localized(with: String(id.uuidString.prefix(8)))
         case .invalidChoiceIndex(let index, let max):
-            return "Choice \(index) invalid (max: \(max))"
+            return L10n.errorInvalidChoiceIndex.localized(with: index, max)
         case .choiceRequirementsNotMet(let reason):
-            return "Cannot choose: \(reason)"
+            return L10n.errorChoiceRequirementsNotMet.localized(with: reason)
         case .cardNotInHand(let id):
-            return "Card \(id) not in hand"
+            return L10n.errorCardNotInHand.localized(with: String(id.uuidString.prefix(8)))
         case .notEnoughActions:
-            return "Not enough actions remaining"
+            return L10n.errorNotEnoughActions.localized
         case .invalidTarget:
-            return "Invalid target"
+            return L10n.errorInvalidTarget.localized
         }
     }
 }

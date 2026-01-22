@@ -247,10 +247,9 @@ final class CombatModule {
         if hit {
             var damage = max(1, encounter.strength - 2)
 
-            // Priest reduces dark damage
-            if player.heroClass == .priest {
-                damage = max(1, damage - 1)
-            }
+            // Hero ability may reduce damage (e.g., Priest vs dark sources)
+            let heroReduction = player.getHeroDamageReduction(fromDarkSource: true)
+            damage = max(1, damage - heroReduction)
 
             healthChange = -damage
             stateChanges.append(.healthChanged(delta: -damage, newValue: player.health - damage))

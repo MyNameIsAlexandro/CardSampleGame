@@ -36,8 +36,8 @@ class Player: ObservableObject, Identifiable {
     // Hand size management
     let maxHandSize: Int
 
-    // Hero class system
-    let heroClass: HeroClass?
+    // Hero ID (загружается из Content Pack)
+    let heroId: String?
 
     // Twilight Marches mechanics
     @Published var faith: Int  // Вера - resource for powerful abilities
@@ -63,11 +63,11 @@ class Player: ObservableObject, Identifiable {
         maxFaith: Int = 10,
         balance: Int = 50,
         currentRealm: Realm = .yav,
-        heroClass: HeroClass? = nil
+        heroId: String? = nil
     ) {
         self.id = id
         self.name = name
-        self.heroClass = heroClass
+        self.heroId = heroId
         self.maxHandSize = maxHandSize
         self.hand = []
         self.deck = []
@@ -77,9 +77,10 @@ class Player: ObservableObject, Identifiable {
         self.currentRealm = currentRealm
         self.spirits = []
 
-        // Если указан класс героя, применяем его характеристики
-        if let heroClass = heroClass {
-            let stats = heroClass.baseStats
+        // Если указан героя, получаем характеристики из HeroRegistry
+        if let heroId = heroId,
+           let heroDefinition = HeroRegistry.shared.hero(id: heroId) {
+            let stats = heroDefinition.baseStats
             self.health = stats.health
             self.maxHealth = stats.maxHealth
             self.strength = stats.strength
@@ -279,81 +280,97 @@ class Player: ObservableObject, Identifiable {
         }
     }
 
-    // MARK: - Hero Class Abilities
+    // MARK: - Hero Abilities (Data-Driven)
 
-    /// Бонус урона от способности класса
-    /// - Warrior: +2 при HP ниже 50%
-    /// - Shadow: +3 если цель на полном HP (targetFullHP = true)
-    func getHeroClassDamageBonus(targetFullHP: Bool = false) -> Int {
-        guard let heroClass = heroClass else { return 0 }
-
-        switch heroClass {
-        case .warrior:
-            // Ярость: +2 к урону при HP ниже 50%
-            if health < maxHealth / 2 {
-                return 2
-            }
-        case .shadow:
-            // Засада: +3 урона по полным HP
-            if targetFullHP {
-                return 3
-            }
-        default:
-            break
-        }
-        return 0
+    /// Получить определение героя из реестра
+    var heroDefinition: HeroDefinition? {
+        guard let heroId = heroId else { return nil }
+        return HeroRegistry.shared.hero(id: heroId)
     }
 
-    /// Снижение получаемого урона от способности класса
-    /// - Priest: -1 от тёмных источников
-    func getHeroClassDamageReduction(fromDarkSource: Bool = false) -> Int {
-        guard let heroClass = heroClass else { return 0 }
-
-        switch heroClass {
-        case .priest:
-            // Благословение: -1 урон от тёмных источников
-            if fromDarkSource {
-                return 1
-            }
-        default:
-            break
-        }
-        return 0
+    /// Получить способность героя
+    private var heroAbility: HeroAbility? {
+        return heroDefinition?.specialAbility
     }
 
-    /// Бонусные кубики от способности класса (для первой атаки)
-    /// - Ranger: +1 кубик при первой атаке
-    func getHeroClassBonusDice(isFirstAttack: Bool) -> Int {
-        guard let heroClass = heroClass else { return 0 }
+    /// Бонус урона от способности героя (читается из данных способности)
+    func getHeroDamageBonus(targetFullHP: Bool = false) -> Int {
+        guard let ability = heroAbility,
+              ability.trigger == .onDamageDealt else { return 0 }
 
-        switch heroClass {
-        case .ranger:
-            // Выслеживание: +1 кубик при первой атаке
-            if isFirstAttack {
-                return 1
+        // Проверяем условие способности
+        if let condition = ability.condition {
+            switch condition.type {
+            case .hpBelowPercent:
+                let threshold = condition.value ?? 50
+                guard health < maxHealth * threshold / 100 else { return 0 }
+            case .targetFullHP:
+                guard targetFullHP else { return 0 }
+            default:
+                break
             }
-        default:
-            break
         }
-        return 0
+
+        // Возвращаем значение эффекта bonusDamage
+        return ability.effects.first { $0.type == .bonusDamage }?.value ?? 0
     }
 
-    /// Проверка способности Мага: +1 вера в конце хода
+    /// Снижение получаемого урона от способности героя (читается из данных)
+    func getHeroDamageReduction(fromDarkSource: Bool = false) -> Int {
+        guard let ability = heroAbility,
+              ability.trigger == .onDamageReceived else { return 0 }
+
+        // Проверяем условие способности
+        if let condition = ability.condition {
+            switch condition.type {
+            case .damageSourceDark:
+                guard fromDarkSource else { return 0 }
+            default:
+                break
+            }
+        }
+
+        // Возвращаем значение эффекта damageReduction
+        return ability.effects.first { $0.type == .damageReduction }?.value ?? 0
+    }
+
+    /// Бонусные кубики от способности героя (читается из данных)
+    func getHeroBonusDice(isFirstAttack: Bool) -> Int {
+        guard let ability = heroAbility,
+              ability.trigger == .onAttack else { return 0 }
+
+        // Проверяем условие способности
+        if let condition = ability.condition {
+            switch condition.type {
+            case .firstAttack:
+                guard isFirstAttack else { return 0 }
+            default:
+                break
+            }
+        }
+
+        // Возвращаем значение эффекта bonusDice
+        return ability.effects.first { $0.type == .bonusDice }?.value ?? 0
+    }
+
+    /// Проверка способности: получение веры в конце хода (читается из данных)
     var shouldGainFaithEndOfTurn: Bool {
-        return heroClass == .mage
+        guard let ability = heroAbility,
+              ability.trigger == .turnEnd else { return false }
+        return ability.effects.contains { $0.type == .gainFaith }
     }
 
-    /// Полный расчёт урона с учётом проклятий и классовых способностей
+    /// Полный расчёт урона с учётом проклятий и способностей героя
     func calculateTotalDamageDealt(_ baseDamage: Int, targetFullHP: Bool = false) -> Int {
         let curseModifier = getDamageDealtModifier()
-        let heroBonus = getHeroClassDamageBonus(targetFullHP: targetFullHP)
+        let heroBonus = getHeroDamageBonus(targetFullHP: targetFullHP)
         return max(0, baseDamage + curseModifier + heroBonus)
     }
 
-    /// Полный расчёт получаемого урона с учётом проклятий и классовых способностей
+    /// Полный расчёт получаемого урона с учётом проклятий и способностей героя
     func takeDamageWithAllModifiers(_ baseDamage: Int, fromDarkSource: Bool = false) {
         let curseModifier = getDamageTakenModifier()
-        let heroReduction = getHeroClassDamageReduction(fromDarkSource: fromDarkSource)
+        let heroReduction = getHeroDamageReduction(fromDarkSource: fromDarkSource)
         let actualDamage = max(0, baseDamage + curseModifier - heroReduction)
         takeDamage(actualDamage)
     }

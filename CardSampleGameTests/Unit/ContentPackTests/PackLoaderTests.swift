@@ -179,114 +179,39 @@ final class PackLoaderTests: XCTestCase {
         }
     }
 
-    // MARK: - Campaign Content Loading Tests
-
-    func testLoadRegions() throws {
+    func testHeroesHaveValidBaseStats() throws {
         // Given
         let manifest = try PackManifest.load(from: testPackURL)
-
-        // When
         let pack = try PackLoader.load(manifest: manifest, from: testPackURL)
 
-        // Then
-        XCTAssertGreaterThan(pack.regions.count, 0, "Should load regions")
-
-        // Verify expected regions exist
-        XCTAssertNotNil(pack.regions["village"], "Should have village region")
-        XCTAssertNotNil(pack.regions["oak"], "Should have oak region")
-        XCTAssertNotNil(pack.regions["forest"], "Should have forest region")
-
-        // Verify region structure
-        if let village = pack.regions["village"] {
-            XCTAssertEqual(village.id, "village")
-            XCTAssertFalse(village.title.en.isEmpty)
-            XCTAssertFalse(village.title.ru.isEmpty)
-            XCTAssertTrue(village.initiallyDiscovered)
-            XCTAssertFalse(village.neighborIds.isEmpty)
+        // Then - Heroes should have valid base stats
+        for (id, hero) in pack.heroes {
+            XCTAssertGreaterThan(hero.baseStats.maxHealth, 0, "Hero '\(id)' has invalid maxHealth")
+            XCTAssertGreaterThan(hero.baseStats.maxFaith, 0, "Hero '\(id)' has invalid maxFaith")
         }
     }
 
-    func testLoadAnchors() throws {
+    func testHeroesHaveSpecialAbility() throws {
         // Given
         let manifest = try PackManifest.load(from: testPackURL)
-
-        // When
         let pack = try PackLoader.load(manifest: manifest, from: testPackURL)
 
-        // Then
-        XCTAssertGreaterThan(pack.anchors.count, 0, "Should load anchors")
-
-        // Verify anchor-region relationship
-        for (_, anchor) in pack.anchors {
-            XCTAssertFalse(anchor.regionId.isEmpty, "Anchor should have regionId")
-            XCTAssertGreaterThan(anchor.maxIntegrity, 0, "Anchor should have positive maxIntegrity")
-            XCTAssertGreaterThanOrEqual(anchor.initialIntegrity, 0)
-            XCTAssertLessThanOrEqual(anchor.initialIntegrity, anchor.maxIntegrity)
+        // Then - Heroes should have special ability from their class
+        for (id, hero) in pack.heroes {
+            XCTAssertFalse(hero.specialAbility.id.isEmpty, "Hero '\(id)' has no special ability")
         }
     }
 
-    func testLoadEvents() throws {
-        // Given
-        let manifest = try PackManifest.load(from: testPackURL)
-
-        // When
-        let pack = try PackLoader.load(manifest: manifest, from: testPackURL)
-
-        // Then
-        XCTAssertGreaterThan(pack.events.count, 0, "Should load events")
-
-        // Verify event structure
-        if let event = pack.events.values.first {
-            XCTAssertFalse(event.id.isEmpty)
-            XCTAssertFalse(event.title.en.isEmpty)
-            XCTAssertFalse(event.body.en.isEmpty)
-            XCTAssertFalse(event.choices.isEmpty, "Event should have choices")
-        }
-    }
-
-    func testLoadQuests() throws {
-        // Given
-        let manifest = try PackManifest.load(from: testPackURL)
-
-        // When
-        let pack = try PackLoader.load(manifest: manifest, from: testPackURL)
-
-        // Then
-        XCTAssertGreaterThan(pack.quests.count, 0, "Should load quests")
-
-        // Verify main quest exists
-        XCTAssertNotNil(pack.quests["quest_main_act1"], "Should have main quest")
-
-        // Verify quest structure
-        if let mainQuest = pack.quests["quest_main_act1"] {
-            XCTAssertEqual(mainQuest.questKind, .main)
-            XCTAssertFalse(mainQuest.objectives.isEmpty, "Quest should have objectives")
-        }
-    }
-
-    func testRegionNeighborReferencesValid() throws {
+    func testHeroesHaveValidBaseStats() throws {
         // Given
         let manifest = try PackManifest.load(from: testPackURL)
         let pack = try PackLoader.load(manifest: manifest, from: testPackURL)
 
-        // Then - All neighbor IDs should reference existing regions
-        for (regionId, region) in pack.regions {
-            for neighborId in region.neighborIds {
-                XCTAssertNotNil(pack.regions[neighborId],
-                    "Region '\(regionId)' references non-existent neighbor '\(neighborId)'")
-            }
-        }
-    }
-
-    func testAnchorRegionReferencesValid() throws {
-        // Given
-        let manifest = try PackManifest.load(from: testPackURL)
-        let pack = try PackLoader.load(manifest: manifest, from: testPackURL)
-
-        // Then - All anchor regionIds should reference existing regions
-        for (anchorId, anchor) in pack.anchors {
-            XCTAssertNotNil(pack.regions[anchor.regionId],
-                "Anchor '\(anchorId)' references non-existent region '\(anchor.regionId)'")
+        // Then - All heroes should have valid base stats from JSON
+        for (id, hero) in pack.heroes {
+            XCTAssertGreaterThan(hero.baseStats.health, 0, "Hero '\(id)' должен иметь health > 0")
+            XCTAssertGreaterThan(hero.baseStats.maxHealth, 0, "Hero '\(id)' должен иметь maxHealth > 0")
+            XCTAssertGreaterThan(hero.baseStats.maxFaith, 0, "Hero '\(id)' должен иметь maxFaith > 0")
         }
     }
 

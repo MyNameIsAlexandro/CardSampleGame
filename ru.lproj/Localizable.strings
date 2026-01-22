@@ -439,8 +439,7 @@
 // Подсказки для иконок
 "tooltip.health" = "Здоровье";
 "tooltip.faith" = "Вера - ресурс для игры карт";
-"tooltip.balance" = "Вторжение Нави";
-"tooltip.heroBalance" = "Баланс героя (Свет/Тьма)";
+"tooltip.balance" = "Баланс между Светом и Тьмой";
 "tooltip.next.phase" = "Следующая фаза хода";
 
 // MARK: - Регионы (Audit v1.1 Issue #2)
@@ -948,3 +947,69 @@
 "balance.light" = "Свету";
 "balance.dark" = "Тьме";
 "balance.neutral" = "Равновесию";
+
+// MARK: - Hero Classes
+"hero.class.warrior" = "Воин";
+"hero.class.mage" = "Маг";
+"hero.class.ranger" = "Следопыт";
+"hero.class.priest" = "Жрец";
+"hero.class.shadow" = "Тень";
+
+"hero.class.warrior.desc" = "Мастер ближнего боя. Высокая сила и живучесть.";
+"hero.class.mage.desc" = "Владеет магией. Сильные заклинания, но хрупок.";
+"hero.class.ranger.desc" = "Следопыт и охотник. Сбалансированные характеристики.";
+"hero.class.priest.desc" = "Служитель Света. Исцеление и защита от тьмы.";
+"hero.class.shadow.desc" = "Агент Нави. Тёмная магия и скрытность.";
+
+"hero.ability.warrior" = "Ярость: +2 к урону при HP ниже 50%";
+"hero.ability.mage" = "Медитация: +1 вера в конце хода";
+"hero.ability.ranger" = "Выслеживание: +1 кубик при первой атаке";
+"hero.ability.priest" = "Благословение: -1 урон от тьмы";
+"hero.ability.shadow" = "Засада: +3 урона по полным HP";
+
+// MARK: - Hero Ability Definitions
+"ability.warrior.rage.name" = "Ярость";
+"ability.warrior.rage.desc" = "+2 к урону при HP ниже 50%";
+"ability.mage.meditation.name" = "Медитация";
+"ability.mage.meditation.desc" = "+1 вера в конце каждого хода";
+"ability.ranger.tracking.name" = "Выслеживание";
+"ability.ranger.tracking.desc" = "+1 кубик атаки при первой атаке в бою";
+"ability.priest.blessing.name" = "Благословение";
+"ability.priest.blessing.desc" = "-1 урон от тёмных источников";
+"ability.shadow.ambush.name" = "Засада";
+"ability.shadow.ambush.desc" = "+3 урона по врагам с полным здоровьем";
+
+// MARK: - Curse Definitions (Config)
+"curse.weakness.name" = "Слабость";
+"curse.weakness.description" = "Уменьшает наносимый урон";
+"curse.fear.name" = "Страх";
+"curse.fear.description" = "Увеличивает получаемый урон";
+"curse.exhaustion.name" = "Истощение";
+"curse.exhaustion.description" = "Уменьшает количество действий";
+"curse.greed.name" = "Алчность";
+"curse.greed.description" = "Тянет к тьме";
+"curse.shadow.of.nav.name" = "Тень Нави";
+"curse.shadow.of.nav.description" = "Увеличивает урон, но сдвигает к тьме";
+"curse.blood.curse.name" = "Кровавое проклятие";
+"curse.blood.curse.description" = "Лечит при убийстве, но сдвигает к тьме";
+"curse.seal.of.nav.name" = "Печать Нави";
+"curse.seal.of.nav.description" = "Блокирует Sustain карты";
+
+// MARK: - Action Errors
+"error.invalid.action" = "Недопустимое действие: %@";
+"error.region.not.accessible" = "Регион %@ недоступен";
+"error.region.not.neighbor" = "Регион %@ не является соседним";
+"error.action.not.available" = "%@ недоступно в регионе типа %@";
+"error.insufficient.resources" = "Нужно %2$d %1$@, есть %3$d";
+"error.health.too.low" = "Слишком мало здоровья для этого действия";
+"error.game.not.in.progress" = "Игра не запущена";
+"error.combat.in.progress" = "Невозможно во время боя";
+"error.event.in.progress" = "Сначала завершите текущее событие";
+"error.no.active.event" = "Нет активного события";
+"error.no.active.combat" = "Нет активного боя";
+"error.event.not.found" = "Событие %@ не найдено";
+"error.invalid.choice.index" = "Выбор %d недействителен (максимум: %d)";
+"error.choice.requirements.not.met" = "Невозможно выбрать: %@";
+"error.card.not.in.hand" = "Карта %@ не в руке";
+"error.not.enough.actions" = "Недостаточно действий";
+"error.invalid.target" = "Недопустимая цель";

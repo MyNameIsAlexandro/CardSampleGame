@@ -17,7 +17,7 @@ IGNORE_DIRS_CODE = {
 # Файлы из корня, которые нужно добавить в DOCS_DUMP
 ROOT_DOCS_TO_INCLUDE = [
     "AUDIT_ENGINE_FIRST_v1_1.md",
-    "CHANGELOG_ENGINE_FIRST.md"
+    "HANDOFF.md"
 ]
 
 # Папки с документацией (сканируем их содержимое для DOCS_DUMP)

@@ -1,8 +1,7 @@
 import Foundation
 
 /// Реестр героев - централизованное хранилище всех определений героев
-/// Позволяет легко добавлять, удалять и модифицировать героев
-/// без изменения основного кода игры
+/// Герои загружаются из Content Pack (JSON) - без хардкода классов
 final class HeroRegistry {
 
     // MARK: - Singleton
@@ -89,14 +88,14 @@ final class HeroRegistry {
         return definitions[id]
     }
 
-    /// Получить героя по классу
-    func hero(forClass heroClass: HeroClass) -> HeroDefinition? {
-        return definitions.values.first { $0.heroClass == heroClass }
-    }
-
     /// Все доступные герои
     var allHeroes: [HeroDefinition] {
         return displayOrder.compactMap { definitions[$0] }
+    }
+
+    /// Первый доступный герой (для дефолта)
+    var firstHero: HeroDefinition? {
+        return allHeroes.first
     }
 
     /// Доступные герои (не заблокированные)
@@ -113,11 +112,6 @@ final class HeroRegistry {
         }
     }
 
-    /// Герои определённого класса
-    func heroes(ofClass heroClass: HeroClass) -> [HeroDefinition] {
-        return allHeroes.filter { $0.heroClass == heroClass }
-    }
-
     /// Количество зарегистрированных героев
     var count: Int {
         return definitions.count
@@ -125,72 +119,19 @@ final class HeroRegistry {
 
     // MARK: - Built-in Heroes
 
-    /// Регистрация встроенных героев
+    /// Загрузка героев из JSON файла в бандле
     private func registerBuiltInHeroes() {
-        // Воин - Рагнар
-        register(StandardHeroDefinition(
-            id: "warrior_ragnar",
-            name: "Рагнар",
-            heroClass: .warrior,
-            description: "Бывший командир королевской гвардии. Его ярость в бою легендарна.",
-            icon: "⚔️",
-            baseStats: HeroClass.warrior.baseStats,
-            specialAbility: .warriorRage,
-            startingDeckCardIDs: ["strike_basic", "strike_basic", "defend_basic", "rage_strike"],
-            availability: .alwaysAvailable
-        ))
-
-        // Маг - Эльвира
-        register(StandardHeroDefinition(
-            id: "mage_elvira",
-            name: "Эльвира",
-            heroClass: .mage,
-            description: "Мастер арканных искусств. Черпает силу из обоих источников.",
-            icon: "🔮",
-            baseStats: HeroClass.mage.baseStats,
-            specialAbility: .mageMeditation,
-            startingDeckCardIDs: ["arcane_bolt", "arcane_bolt", "shield_spell", "meditation"],
-            availability: .alwaysAvailable
-        ))
-
-        // Следопыт - Торин
-        register(StandardHeroDefinition(
-            id: "ranger_thorin",
-            name: "Торин",
-            heroClass: .ranger,
-            description: "Охотник на чудовищ из северных лесов. Никогда не промахивается.",
-            icon: "🏹",
-            baseStats: HeroClass.ranger.baseStats,
-            specialAbility: .rangerTracking,
-            startingDeckCardIDs: ["precise_shot", "precise_shot", "trap", "tracking"],
-            availability: .alwaysAvailable
-        ))
-
-        // Жрец - Аврелий
-        register(StandardHeroDefinition(
-            id: "priest_aurelius",
-            name: "Аврелий",
-            heroClass: .priest,
-            description: "Преданный служитель Света. Его благословения защищают союзников.",
-            icon: "✝️",
-            baseStats: HeroClass.priest.baseStats,
-            specialAbility: .priestBlessing,
-            startingDeckCardIDs: ["holy_light", "holy_light", "blessing", "smite"],
-            availability: .alwaysAvailable
-        ))
-
-        // Тень - Умбра
-        register(StandardHeroDefinition(
-            id: "shadow_umbra",
-            name: "Умбра",
-            heroClass: .shadow,
-            description: "Агент Нави. Наносит удар из тени, когда враг не ожидает.",
-            icon: "🗡️",
-            baseStats: HeroClass.shadow.baseStats,
-            specialAbility: .shadowAmbush,
-            startingDeckCardIDs: ["backstab", "backstab", "shadow_step", "poison_blade"],
-            availability: .alwaysAvailable
-        ))
+        // Загружаем из heroes.json в бандле
+        if let heroesURL = Bundle.main.url(forResource: "heroes", withExtension: "json") {
+            let dataSource = JSONHeroDataSource(
+                id: "bundle_heroes",
+                name: "Bundle Heroes",
+                fileURL: heroesURL
+            )
+            registerAll(dataSource.loadHeroes())
+        } else {
+            print("HeroRegistry: ERROR - heroes.json not found in bundle!")
+        }
     }
 }
 
@@ -224,7 +165,9 @@ struct JSONHeroDataSource: HeroDataSource {
         }
 
         do {
-            let decoded = try JSONDecoder().decode([JSONHeroDefinition].self, from: data)
+            let decoder = JSONDecoder()
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+            let decoded = try decoder.decode([JSONHeroDefinition].self, from: data)
             return decoded.map { $0.toStandard() }
         } catch {
             print("HeroRegistry: Failed to decode heroes: \(error)")
@@ -233,27 +176,86 @@ struct JSONHeroDataSource: HeroDataSource {
     }
 }
 
-/// JSON-совместимое определение героя
+/// JSON структура для stats
+struct JSONHeroStats: Codable {
+    let health: Int
+    let maxHealth: Int
+    let strength: Int
+    let dexterity: Int
+    let constitution: Int
+    let intelligence: Int
+    let wisdom: Int
+    let charisma: Int
+    let faith: Int
+    let maxFaith: Int
+    let startingBalance: Int
+
+    func toHeroStats() -> HeroStats {
+        HeroStats(
+            health: health,
+            maxHealth: maxHealth,
+            strength: strength,
+            dexterity: dexterity,
+            constitution: constitution,
+            intelligence: intelligence,
+            wisdom: wisdom,
+            charisma: charisma,
+            faith: faith,
+            maxFaith: maxFaith,
+            startingBalance: startingBalance
+        )
+    }
+}
+
+/// JSON-совместимое определение героя (data-driven)
 struct JSONHeroDefinition: Codable {
     let id: String
     let name: String
-    let heroClass: HeroClass
+    let nameRu: String?
     let description: String
+    let descriptionRu: String?
     let icon: String
-    let startingDeckCardIDs: [String]
-    let availability: HeroAvailability?
+    let baseStats: JSONHeroStats
+    let abilityId: String
+    let startingDeckCardIds: [String]
+    let availability: String?
 
     func toStandard() -> StandardHeroDefinition {
+        // Локализация
+        let isRussian = Locale.current.language.languageCode?.identifier == "ru"
+        let localizedName = isRussian ? (nameRu ?? name) : name
+        let localizedDescription = isRussian ? (descriptionRu ?? description) : description
+
+        // Определяем доступность
+        let heroAvailability: HeroAvailability
+        switch availability?.lowercased() {
+        case "always_available", nil:
+            heroAvailability = .alwaysAvailable
+        case let str where str?.hasPrefix("requires_unlock:") == true:
+            let condition = String(str!.dropFirst("requires_unlock:".count))
+            heroAvailability = .requiresUnlock(condition: condition)
+        case let str where str?.hasPrefix("dlc:") == true:
+            let packId = String(str!.dropFirst("dlc:".count))
+            heroAvailability = .dlc(packID: packId)
+        default:
+            heroAvailability = .alwaysAvailable
+        }
+
+        // Получаем способность по ID
+        guard let ability = HeroAbility.forAbilityId(abilityId) else {
+            print("HeroRegistry: ERROR - Unknown ability ID '\(abilityId)' for hero '\(id)'")
+            fatalError("Missing ability definition for '\(abilityId)'. Add it to HeroAbility.forAbilityId() or hero_abilities.json")
+        }
+
         return StandardHeroDefinition(
             id: id,
-            name: name,
-            heroClass: heroClass,
-            description: description,
+            name: localizedName,
+            description: localizedDescription,
             icon: icon,
-            baseStats: heroClass.baseStats,
-            specialAbility: .forHeroClass(heroClass),
-            startingDeckCardIDs: startingDeckCardIDs,
-            availability: availability ?? .alwaysAvailable
+            baseStats: baseStats.toHeroStats(),
+            specialAbility: ability,
+            startingDeckCardIDs: startingDeckCardIds,
+            availability: heroAvailability
         )
     }
 }

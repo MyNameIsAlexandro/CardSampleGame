@@ -6,38 +6,53 @@
 
 ```
 Engine/Heroes/
-├── HeroClass.swift      # Классы героев и базовые характеристики
-├── HeroDefinition.swift # Протоколы определения героев
+├── HeroDefinition.swift # Протоколы и структуры определения героев
 ├── HeroAbility.swift    # Система способностей
-├── HeroRegistry.swift   # Реестр и загрузка героев
+├── HeroRegistry.swift   # Реестр и загрузка героев из JSON
 └── HEROES_MODULE.md     # Документация (этот файл)
 ```
 
 ## Архитектура
 
-### Слои абстракции
+### Data-Driven подход
 
-1. **HeroClass** - Enum классов (Warrior, Mage, Ranger, Priest, Shadow)
-2. **HeroDefinition** - Протокол определения героя (данные)
-3. **HeroAbility** - Система способностей героя
-4. **HeroRegistry** - Централизованный реестр всех героев
+Герои загружаются из Content Pack (JSON файл `heroes.json`), без хардкода в Swift коде.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                       ENGINE LEVEL                           │
+├─────────────────────────────────────────────────────────────┤
+│  HeroDefinition      - Протокол определения героя            │
+│  StandardHeroDefinition - Стандартная реализация            │
+│  HeroRegistry        - Runtime реестр героев                │
+│  HeroAbility         - Способности героев                   │
+└─────────────────────────────────────────────────────────────┘
+                              ↑
+                         загрузка
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    CONTENT PACK LEVEL                        │
+├─────────────────────────────────────────────────────────────┤
+│  heroes.json         - Определения героев (статы, способности)│
+└─────────────────────────────────────────────────────────────┘
+```
 
 ### Принципы
 
-- **Data-Driven**: Герои определяются данными, а не кодом
-- **Extensible**: Легко добавлять новых героев через JSON или код
-- **Modular**: Модуль можно подключать/отключать от основной игры
+- **Data-Driven**: Герои определяются в JSON, не в коде
+- **Extensible**: Легко добавлять новых героев через JSON
+- **Localized**: Поддержка локализации (name_ru, description_ru)
 - **Testable**: Полное покрытие тестами
 
-## Классы героев
+## Герои (из heroes.json)
 
-| Класс | HP | Сила | Вера | Особенность |
-|-------|-----|------|------|-------------|
-| Warrior | 12 | 7 | 2 | Ярость: +2 урон при HP < 50% |
-| Mage | 7 | 2 | 5 | Медитация: +1 вера в конце хода |
-| Ranger | 10 | 4 | 3 | Выслеживание: +1 кубик первая атака |
-| Priest | 9 | 3 | 5 | Благословение: -1 урон от тьмы |
-| Shadow | 8 | 4 | 4 | Засада: +3 урон по полным HP |
+| ID | Имя | HP | Сила | Вера | Способность |
+|----|-----|-----|------|------|-------------|
+| warrior_ragnar | Рагнар | 12 | 7 | 2 | Ярость: +2 урон при HP < 50% |
+| mage_elvira | Эльвира | 7 | 2 | 5 | Медитация: +1 вера в конце хода |
+| ranger_thorin | Торин | 10 | 4 | 3 | Выслеживание: +1 кубик первая атака |
+| priest_aurelius | Аврелий | 9 | 3 | 5 | Благословение: -1 урон от тьмы |
+| shadow_umbra | Умбра | 8 | 4 | 4 | Засада: +3 урон по полным HP |
 
 ## API
 
@@ -47,11 +62,11 @@ Engine/Heroes/
 // По ID
 let hero = HeroRegistry.shared.hero(id: "warrior_ragnar")
 
-// По классу
-let warrior = HeroRegistry.shared.hero(forClass: .warrior)
-
 // Все герои
 let allHeroes = HeroRegistry.shared.allHeroes
+
+// Первый доступный герой
+let firstHero = HeroRegistry.shared.firstHero
 
 // Доступные герои (с учётом разблокировок)
 let available = HeroRegistry.shared.availableHeroes(
@@ -60,46 +75,45 @@ let available = HeroRegistry.shared.availableHeroes(
 )
 ```
 
-### Регистрация нового героя
+### Создание игрока с героем
 
 ```swift
-// Программно
-HeroRegistry.shared.register(StandardHeroDefinition(
-    id: "warrior_custom",
-    name: "Мой Воин",
-    heroClass: .warrior,
-    description: "Кастомный воин",
-    icon: "⚔️",
-    baseStats: HeroClass.warrior.baseStats,
-    specialAbility: .warriorRage,
-    startingDeckCardIDs: ["strike", "strike", "defend"],
-    availability: .alwaysAvailable
-))
+// Player автоматически загружает статы из HeroRegistry
+let player = Player(name: hero.name, maxHandSize: 5, heroId: "warrior_ragnar")
 
-// Из JSON файла
-let jsonSource = JSONHeroDataSource(
-    id: "custom_heroes",
-    name: "Custom Heroes",
-    fileURL: Bundle.main.url(forResource: "custom_heroes", withExtension: "json")!
-)
-HeroRegistry.shared.addDataSource(jsonSource)
+// Стартовая колода из CardRegistry
+player.deck = CardRegistry.shared.startingDeck(forHeroID: "warrior_ragnar")
 ```
 
-### Формат JSON
+### Формат heroes.json
 
 ```json
 [
-    {
-        "id": "warrior_custom",
-        "name": "Кастомный Воин",
-        "heroClass": "warrior",
-        "description": "Описание героя",
-        "icon": "⚔️",
-        "startingDeckCardIDs": ["strike", "strike", "defend"],
-        "availability": {
-            "alwaysAvailable": {}
-        }
-    }
+  {
+    "id": "warrior_ragnar",
+    "name": "Ragnar",
+    "name_ru": "Рагнар",
+    "hero_class": "warrior",
+    "description": "Former commander of the royal guard.",
+    "description_ru": "Бывший командир королевской гвардии.",
+    "icon": "figure.fencing",
+    "base_stats": {
+      "health": 12,
+      "max_health": 12,
+      "strength": 7,
+      "dexterity": 3,
+      "constitution": 5,
+      "intelligence": 1,
+      "wisdom": 2,
+      "charisma": 2,
+      "faith": 2,
+      "max_faith": 8,
+      "starting_balance": 50
+    },
+    "ability_id": "warrior_rage",
+    "starting_deck_card_ids": ["strike_basic", "strike_basic", "defend_basic", "rage_strike"],
+    "availability": "always_available"
+  }
 ]
 ```
 
@@ -118,27 +132,15 @@ HeroRegistry.shared.addDataSource(jsonSource)
 - `turnStart` / `turnEnd` - Начало/конец хода
 - `onAttack` / `onDamageDealt` - При атаке
 - `onDamageReceived` - При получении урона
-- `onCardPlayed` - При розыгрыше карты
 - `onCombatStart` / `onCombatEnd` - Вход/выход из боя
 - `manual` - Ручная активация
-
-### Условия
-
-- `hpBelowPercent` / `hpAbovePercent` - HP героя
-- `targetFullHP` - Цель на полном HP
-- `firstAttack` - Первая атака в бою
-- `damageSourceDark` / `damageSourceLight` - Источник урона
-- `hasCurse` - Наличие проклятия
-- `balanceAbove` / `balanceBelow` - Баланс Свет/Тьма
 
 ### Эффекты
 
 - `bonusDamage` / `damageReduction` - Модификаторы урона
 - `bonusDice` / `rerollDice` - Кубики
 - `heal` / `gainFaith` / `loseFaith` - Ресурсы
-- `shiftLight` / `shiftDark` - Баланс
 - `drawCard` / `discardCard` - Карты
-- `applyCurseToEnemy` / `removeCurse` - Проклятия
 
 ## Доступность героев
 
@@ -150,66 +152,44 @@ enum HeroAvailability {
 }
 ```
 
-## Расширение модуля
+## Добавление нового героя
 
-### Добавление нового класса
+1. Добавить запись в `heroes.json`
+2. Добавить способность в `HeroAbility.forAbilityId()` (если новая)
+3. Добавить стартовую колоду в `CardRegistry` (если нужна особая)
 
-1. Добавить case в `HeroClass`
-2. Реализовать `baseStats`, `specialAbility`, etc.
-3. Создать `HeroAbility.xxxAbility`
-4. Зарегистрировать базового героя в `HeroRegistry`
-
-### Создание DLC пакета
-
-```swift
-let dlcSource = DLCHeroDataSource(
-    id: "dark_expansion",
-    name: "Dark Expansion",
-    packID: "dark_expansion",
-    heroes: [
-        StandardHeroDefinition(
-            id: "necromancer_dark",
-            name: "Некромант",
-            // ...
-            availability: .dlc(packID: "dark_expansion")
-        )
-    ]
-)
-HeroRegistry.shared.addDataSource(dlcSource)
+Пример добавления героя:
+```json
+{
+  "id": "necromancer_dark",
+  "name": "Necromancer",
+  "name_ru": "Некромант",
+  "hero_class": "shadow",
+  "description": "Master of dark arts",
+  "description_ru": "Мастер тёмных искусств",
+  "icon": "moon.stars.fill",
+  "base_stats": { ... },
+  "ability_id": "necromancer_drain",
+  "starting_deck_card_ids": ["dark_bolt", "soul_drain"],
+  "availability": "dlc:dark_expansion"
+}
 ```
 
 ## Тестирование
 
-Тесты находятся в `CardSampleGameTests/Unit/HeroClassTests.swift`.
-
-Основные тест-кейсы:
-- Базовые характеристики всех классов
-- Создание Player с HeroClass
-- Особые способности каждого класса
-- Расчёт урона с модификаторами
-- Стартовые пути колод
-
-```swift
-func testWarriorRageAbility() {
-    let player = Player(name: "Воин", heroClass: .warrior)
-
-    // При полном HP нет бонуса
-    XCTAssertEqual(player.getHeroClassDamageBonus(), 0)
-
-    // При HP < 50% бонус +2
-    player.health = 5  // 5/12 < 50%
-    XCTAssertEqual(player.getHeroClassDamageBonus(), 2)
-}
-```
+Тесты находятся в:
+- `CardSampleGameTests/Unit/HeroClassTests.swift` - Базовые тесты героев
+- `CardSampleGameTests/Unit/HeroRegistryTests.swift` - Тесты реестра
 
 ## Зависимости
 
 - `Foundation` - Базовые типы
 - `Models/Player.swift` - Интеграция с игроком
-- `Engine/Cards` - Стартовые колоды (по ID карт)
+- `Engine/Cards/CardRegistry.swift` - Стартовые колоды
 
 ## История изменений
 
-- **v1.0** - Начальная реализация (5 классов)
+- **v1.0** - Начальная реализация с HeroClass enum
 - **v1.1** - Добавлена система способностей HeroAbility
 - **v1.2** - Добавлен HeroRegistry с поддержкой JSON/DLC
+- **v2.0** - Data-driven система: удалён HeroClass enum, герои загружаются из heroes.json

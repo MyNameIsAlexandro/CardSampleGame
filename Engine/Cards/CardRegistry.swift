@@ -3,8 +3,7 @@ import Foundation
 /// Реестр карт - централизованное хранилище всех определений карт
 /// Поддерживает:
 /// - Универсальные карты (доступны всем)
-/// - Класс-специфичные карты (только для определённого класса героя)
-/// - Сигнатурные карты героя (уникальные карты конкретного персонажа)
+/// - Сигнатурные карты героя (уникальные карты конкретного персонажа по heroID)
 /// - DLC/Expansion карты
 final class CardRegistry {
 
@@ -17,8 +16,8 @@ final class CardRegistry {
     /// Все зарегистрированные карты
     private var definitions: [String: CardDefinition] = [:]
 
-    /// Пулы карт классов
-    private var classPools: [HeroClass: ClassCardPool] = [:]
+    /// Пулы карт героев (по heroID)
+    private var heroPools: [String: HeroCardPool] = [:]
 
     /// Сигнатурные карты героев
     private var signatureCards: [String: HeroSignatureCards] = [:]
@@ -46,9 +45,9 @@ final class CardRegistry {
         }
     }
 
-    /// Зарегистрировать пул карт класса
-    func registerClassPool(_ pool: ClassCardPool) {
-        classPools[pool.heroClass] = pool
+    /// Зарегистрировать пул карт героя
+    func registerHeroPool(_ pool: HeroCardPool) {
+        heroPools[pool.heroID] = pool
         registerAll(pool.startingCards)
         registerAll(pool.purchasableCards)
         registerAll(pool.upgradeCards)
@@ -72,7 +71,7 @@ final class CardRegistry {
     /// Очистить реестр
     func clear() {
         definitions.removeAll()
-        classPools.removeAll()
+        heroPools.removeAll()
         signatureCards.removeAll()
     }
 
@@ -118,14 +117,12 @@ final class CardRegistry {
     /// Карты доступные для героя
     func availableCards(
         forHeroID heroID: String?,
-        heroClass: HeroClass?,
         ownedExpansions: Set<String> = [],
         unlockedConditions: Set<String> = []
     ) -> [CardDefinition] {
         return allCards.filter { card in
             card.ownership.isAvailable(
                 forHeroID: heroID,
-                heroClass: heroClass,
                 ownedExpansions: ownedExpansions,
                 unlockedConditions: unlockedConditions
             )
@@ -140,28 +137,18 @@ final class CardRegistry {
         }
     }
 
-    /// Карты определённого класса
-    func cards(forClass heroClass: HeroClass) -> [CardDefinition] {
-        return allCards.filter { card in
-            if case .classSpecific(let requiredClass) = card.ownership {
-                return requiredClass == heroClass
-            }
-            return false
-        }
-    }
-
     /// Сигнатурные карты героя
-    func cards(forHeroID heroID: String) -> HeroSignatureCards? {
+    func signatureCards(forHeroID heroID: String) -> HeroSignatureCards? {
         return signatureCards[heroID]
     }
 
-    /// Пул карт класса
-    func classPool(for heroClass: HeroClass) -> ClassCardPool? {
-        return classPools[heroClass]
+    /// Пул карт героя
+    func heroPool(for heroID: String) -> HeroCardPool? {
+        return heroPools[heroID]
     }
 
     /// Стартовая колода для героя
-    func startingDeck(forHeroID heroID: String, heroClass: HeroClass) -> [Card] {
+    func startingDeck(forHeroID heroID: String) -> [Card] {
         var deck: [Card] = []
 
         // 1. Базовые универсальные карты
@@ -172,8 +159,8 @@ final class CardRegistry {
             }
         }
 
-        // 2. Карты класса
-        if let pool = classPools[heroClass] {
+        // 2. Карты героя (из пула)
+        if let pool = heroPools[heroID] {
             for cardDef in pool.startingCards {
                 if let def = cardDef as? StandardCardDefinition {
                     deck.append(def.toCard())
@@ -200,14 +187,12 @@ final class CardRegistry {
     /// Карты для магазина (с учётом доступности)
     func shopCards(
         forHeroID heroID: String?,
-        heroClass: HeroClass?,
         ownedExpansions: Set<String> = [],
         unlockedConditions: Set<String> = [],
         maxRarity: CardRarity = .epic
     ) -> [CardDefinition] {
         return availableCards(
             forHeroID: heroID,
-            heroClass: heroClass,
             ownedExpansions: ownedExpansions,
             unlockedConditions: unlockedConditions
         ).filter { card in
@@ -227,15 +212,8 @@ final class CardRegistry {
     // MARK: - Built-in Cards
 
     private func registerBuiltInCards() {
-        // Базовые универсальные карты
+        // Базовые универсальные карты (доступны всем)
         registerBaseCards()
-
-        // Карты классов
-        registerWarriorCards()
-        registerMageCards()
-        registerRangerCards()
-        registerPriestCards()
-        registerShadowCards()
 
         // Сигнатурные карты героев
         registerSignatureCardsForBuiltInHeroes()
@@ -307,233 +285,6 @@ final class CardRegistry {
             faithCost: 2,
             balance: .neutral,
             role: .utility
-        ))
-    }
-
-    private func registerWarriorCards() {
-        let classCards: [CardDefinition] = [
-            StandardCardDefinition(
-                id: "warrior_rage_strike",
-                name: "Яростный удар",
-                cardType: .attack,
-                rarity: .uncommon,
-                description: "Нанести 5 урона. +2 если HP < 50%",
-                icon: "🔥",
-                ownership: .classSpecific(heroClass: .warrior),
-                abilities: [CardAbility(
-                    name: "Ярость",
-                    description: "Нанести 5 урона. +2 если HP < 50%",
-                    effect: .damage(amount: 5, type: .physical)
-                )],
-                faithCost: 3,
-                balance: .neutral,
-                power: 5
-            ),
-            StandardCardDefinition(
-                id: "warrior_battlecry",
-                name: "Боевой клич",
-                cardType: .special,
-                rarity: .rare,
-                description: "+1 кубик атаки на 2 хода",
-                icon: "📢",
-                ownership: .classSpecific(heroClass: .warrior),
-                abilities: [CardAbility(
-                    name: "Боевой клич",
-                    description: "+1 кубик атаки",
-                    effect: .addDice(count: 1)
-                )],
-                faithCost: 4,
-                balance: .neutral,
-                role: .power
-            )
-        ]
-
-        registerClassPool(ClassCardPool(
-            heroClass: .warrior,
-            startingCards: [classCards[0]],
-            purchasableCards: classCards,
-            upgradeCards: []
-        ))
-    }
-
-    private func registerMageCards() {
-        let classCards: [CardDefinition] = [
-            StandardCardDefinition(
-                id: "mage_arcane_bolt",
-                name: "Арканный снаряд",
-                cardType: .spell,
-                rarity: .common,
-                description: "Нанести 4 магического урона",
-                icon: "✨",
-                ownership: .classSpecific(heroClass: .mage),
-                abilities: [CardAbility(
-                    name: "Арканный снаряд",
-                    description: "Нанести 4 магического урона",
-                    effect: .damage(amount: 4, type: .arcane)
-                )],
-                faithCost: 2,
-                balance: .neutral,
-                power: 4
-            ),
-            StandardCardDefinition(
-                id: "mage_meditation",
-                name: "Глубокая медитация",
-                cardType: .special,
-                rarity: .uncommon,
-                description: "Получить 3 веры",
-                icon: "🧘",
-                ownership: .classSpecific(heroClass: .mage),
-                abilities: [CardAbility(
-                    name: "Медитация",
-                    description: "Получить 3 веры",
-                    effect: .gainFaith(amount: 3)
-                )],
-                faithCost: 2,
-                balance: .neutral,
-                role: .utility
-            )
-        ]
-
-        registerClassPool(ClassCardPool(
-            heroClass: .mage,
-            startingCards: [classCards[0]],
-            purchasableCards: classCards,
-            upgradeCards: []
-        ))
-    }
-
-    private func registerRangerCards() {
-        let classCards: [CardDefinition] = [
-            StandardCardDefinition(
-                id: "ranger_precise_shot",
-                name: "Точный выстрел",
-                cardType: .attack,
-                rarity: .common,
-                description: "Нанести 3 урона. Можно перебросить 1 кубик",
-                icon: "🎯",
-                ownership: .classSpecific(heroClass: .ranger),
-                abilities: [CardAbility(
-                    name: "Точный выстрел",
-                    description: "Нанести урон с перебросом",
-                    effect: .reroll
-                )],
-                faithCost: 2,
-                balance: .neutral,
-                power: 3
-            ),
-            StandardCardDefinition(
-                id: "ranger_trap",
-                name: "Ловушка",
-                cardType: .special,
-                rarity: .uncommon,
-                description: "Следующий враг получает -2 к защите",
-                icon: "🪤",
-                ownership: .classSpecific(heroClass: .ranger),
-                abilities: [],
-                faithCost: 3,
-                balance: .neutral,
-                role: .control
-            )
-        ]
-
-        registerClassPool(ClassCardPool(
-            heroClass: .ranger,
-            startingCards: [classCards[0]],
-            purchasableCards: classCards,
-            upgradeCards: []
-        ))
-    }
-
-    private func registerPriestCards() {
-        let classCards: [CardDefinition] = [
-            StandardCardDefinition(
-                id: "priest_holy_light",
-                name: "Святой свет",
-                cardType: .spell,
-                rarity: .common,
-                description: "Восстановить 4 HP или нанести 4 урона нежити",
-                icon: "☀️",
-                ownership: .classSpecific(heroClass: .priest),
-                abilities: [CardAbility(
-                    name: "Святой свет",
-                    description: "Исцеление или урон нежити",
-                    effect: .heal(amount: 4)
-                )],
-                faithCost: 3,
-                balance: .light,
-                role: .sustain
-            ),
-            StandardCardDefinition(
-                id: "priest_blessing",
-                name: "Благословение",
-                cardType: .spell,
-                rarity: .uncommon,
-                description: "Снять проклятие или +2 к защите",
-                icon: "🙏",
-                ownership: .classSpecific(heroClass: .priest),
-                abilities: [CardAbility(
-                    name: "Благословение",
-                    description: "Снять проклятие",
-                    effect: .removeCurse(type: nil)
-                )],
-                faithCost: 4,
-                balance: .light,
-                role: .sustain
-            )
-        ]
-
-        registerClassPool(ClassCardPool(
-            heroClass: .priest,
-            startingCards: [classCards[0]],
-            purchasableCards: classCards,
-            upgradeCards: []
-        ))
-    }
-
-    private func registerShadowCards() {
-        let classCards: [CardDefinition] = [
-            StandardCardDefinition(
-                id: "shadow_backstab",
-                name: "Удар в спину",
-                cardType: .attack,
-                rarity: .common,
-                description: "Нанести 2 урона. +4 если цель на полном HP",
-                icon: "🗡️",
-                ownership: .classSpecific(heroClass: .shadow),
-                abilities: [CardAbility(
-                    name: "Засада",
-                    description: "Урон с бонусом по полному HP",
-                    effect: .damage(amount: 2, type: .physical)
-                )],
-                faithCost: 2,
-                balance: .dark,
-                power: 2
-            ),
-            StandardCardDefinition(
-                id: "shadow_poison_blade",
-                name: "Отравленный клинок",
-                cardType: .attack,
-                rarity: .uncommon,
-                description: "Нанести 3 урона. Наложить Слабость",
-                icon: "🐍",
-                ownership: .classSpecific(heroClass: .shadow),
-                abilities: [CardAbility(
-                    name: "Яд",
-                    description: "Наложить Слабость",
-                    effect: .applyCurse(type: .weakness, duration: 2)
-                )],
-                faithCost: 4,
-                balance: .dark,
-                role: .control,
-                power: 3
-            )
-        ]
-
-        registerClassPool(ClassCardPool(
-            heroClass: .shadow,
-            startingCards: [classCards[0]],
-            purchasableCards: classCards,
-            upgradeCards: []
         ))
     }
 
@@ -664,20 +415,13 @@ struct JSONCardDefinition: Codable {
     let defense: Int?
     let health: Int?
     // Simplified ownership for JSON
-    let ownershipType: String?  // "universal", "class:warrior", "hero:warrior_ragnar"
+    let ownershipType: String?  // "universal", "hero:warrior_ragnar"
 
     func toStandard() -> StandardCardDefinition {
         let ownership: CardOwnership
         if let ownershipType = ownershipType {
             if ownershipType == "universal" {
                 ownership = .universal
-            } else if ownershipType.hasPrefix("class:") {
-                let className = String(ownershipType.dropFirst(6))
-                if let heroClass = HeroClass(rawValue: className) {
-                    ownership = .classSpecific(heroClass: heroClass)
-                } else {
-                    ownership = .universal
-                }
             } else if ownershipType.hasPrefix("hero:") {
                 let heroID = String(ownershipType.dropFirst(5))
                 ownership = .heroSignature(heroID: heroID)
