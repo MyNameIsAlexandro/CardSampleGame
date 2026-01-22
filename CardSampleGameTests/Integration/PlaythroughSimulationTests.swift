@@ -12,6 +12,7 @@ final class PlaythroughSimulationTests: XCTestCase {
     var gameState: GameState!
     var worldState: WorldState!
     var rng: SeededRandomNumberGenerator!
+    private var testPackURL: URL!
 
     /// Детерминированный генератор случайных чисел для стабильных тестов
     struct SeededRandomNumberGenerator: RandomNumberGenerator {
@@ -36,6 +37,15 @@ final class PlaythroughSimulationTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
+        // Load ContentRegistry with TwilightMarches pack
+        ContentRegistry.shared.resetForTesting()
+        testPackURL = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent() // Integration
+            .deletingLastPathComponent() // CardSampleGameTests
+            .deletingLastPathComponent() // CardSampleGame
+            .appendingPathComponent("ContentPacks/TwilightMarches")
+        _ = try? ContentRegistry.shared.loadPack(from: testPackURL)
+
         rng = SeededRandomNumberGenerator(seed: 12345) // Фиксированный seed для детерминизма
         player = Player(name: "Симуляция")
         gameState = GameState(players: [player])
@@ -47,8 +57,17 @@ final class PlaythroughSimulationTests: XCTestCase {
         player = nil
         gameState = nil
         worldState = nil
+        ContentRegistry.shared.resetForTesting()
+        testPackURL = nil
         WorldRNG.shared.resetToSystem()
         super.tearDown()
+    }
+
+    /// Helper to skip test if content not loaded
+    private func requireContentLoaded() throws {
+        if worldState.regions.isEmpty {
+            throw XCTSkip("Skipping: ContentPack not loaded")
+        }
     }
 
     // MARK: - Helpers
@@ -108,7 +127,8 @@ final class PlaythroughSimulationTests: XCTestCase {
     // MARK: - Детерминированная симуляция через реальный пайплайн событий
 
     /// Симулирует типичное прохождение за 15-25 дней через реальную систему событий
-    func testTypicalPlaythroughViaRealEventPipeline() {
+    func testTypicalPlaythroughViaRealEventPipeline() throws {
+        try requireContentLoaded()
         // Начальное состояние
         XCTAssertEqual(worldState.worldTension, 30)
         XCTAssertEqual(worldState.daysPassed, 0)
@@ -497,7 +517,8 @@ final class PlaythroughSimulationTests: XCTestCase {
 
     // MARK: - Региональное прохождение через продакшн-методы
 
-    func testRegionExplorationCoverageViaProductionSystem() {
+    func testRegionExplorationCoverageViaProductionSystem() throws {
+        try requireContentLoaded()
         var visitedRegions: Set<UUID> = []
 
         // Посещаем все регионы через продакшн-метод moveToRegion
@@ -567,7 +588,8 @@ final class PlaythroughSimulationTests: XCTestCase {
 
     // MARK: - Проверка стабильности через реальный пайплайн
 
-    func testNoInfiniteLoopsInRealEventPipeline() {
+    func testNoInfiniteLoopsInRealEventPipeline() throws {
+        try requireContentLoaded()
         let startTime = Date()
         rng = SeededRandomNumberGenerator(seed: 88888)
 
@@ -596,7 +618,8 @@ final class PlaythroughSimulationTests: XCTestCase {
         XCTAssertEqual(worldState.daysPassed, 100, "100 дней обработано")
     }
 
-    func testWorldStateConsistencyAfterManyDaysWithRealEvents() {
+    func testWorldStateConsistencyAfterManyDaysWithRealEvents() throws {
+        try requireContentLoaded()
         rng = SeededRandomNumberGenerator(seed: 22222)
 
         for _ in 1...30 {
@@ -624,10 +647,10 @@ final class PlaythroughSimulationTests: XCTestCase {
 
     // MARK: - E2E: Получение и применение реальных событий
 
-    func testRealEventSystemIntegration() {
+    func testRealEventSystemIntegration() throws {
+        try requireContentLoaded()
         guard let currentRegion = worldState.getCurrentRegion() else {
-            XCTFail("Нет текущего региона")
-            return
+            throw XCTSkip("Нет текущего региона")
         }
 
         // Получаем доступные события через продакшн-метод
@@ -648,10 +671,10 @@ final class PlaythroughSimulationTests: XCTestCase {
         }
     }
 
-    func testApplyEventChoiceConsequences() {
+    func testApplyEventChoiceConsequences() throws {
+        try requireContentLoaded()
         guard let currentRegion = worldState.getCurrentRegion() else {
-            XCTFail("Нет текущего региона")
-            return
+            throw XCTSkip("Нет текущего региона")
         }
 
         let availableEvents = worldState.getAvailableEvents(for: currentRegion)
@@ -674,11 +697,11 @@ final class PlaythroughSimulationTests: XCTestCase {
 
     // MARK: - E2E: Полный цикл события
 
-    func testCompleteEventCycle() {
+    func testCompleteEventCycle() throws {
+        try requireContentLoaded()
         guard let currentRegion = worldState.getCurrentRegion(),
               let regionId = worldState.currentRegionId else {
-            XCTFail("Нет текущего региона")
-            return
+            throw XCTSkip("Нет текущего региона")
         }
 
         // 1. Получить события

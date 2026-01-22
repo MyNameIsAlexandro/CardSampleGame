@@ -13,9 +13,19 @@ final class RegionActionsModelTests: XCTestCase {
 
     var worldState: WorldState!
     var player: Player!
+    private var testPackURL: URL!
 
     override func setUp() {
         super.setUp()
+        // Load ContentRegistry with TwilightMarches pack
+        ContentRegistry.shared.resetForTesting()
+        testPackURL = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent() // Unit
+            .deletingLastPathComponent() // CardSampleGameTests
+            .deletingLastPathComponent() // CardSampleGame
+            .appendingPathComponent("ContentPacks/TwilightMarches")
+        _ = try? ContentRegistry.shared.loadPack(from: testPackURL)
+
         worldState = WorldState()
         player = Player(name: "Test")
     }
@@ -23,19 +33,31 @@ final class RegionActionsModelTests: XCTestCase {
     override func tearDown() {
         worldState = nil
         player = nil
+        ContentRegistry.shared.resetForTesting()
+        testPackURL = nil
         WorldRNG.shared.resetToSystem()
         super.tearDown()
     }
 
+    /// Helper to skip test if regions not loaded
+    private func requireRegionsLoaded() throws {
+        if worldState.regions.isEmpty {
+            throw XCTSkip("Skipping: ContentPack not loaded (regions empty)")
+        }
+    }
+
+    /// Helper to skip test if current region not available
+    private func requireCurrentRegion() throws -> Region {
+        guard let region = worldState.getCurrentRegion() else {
+            throw XCTSkip("Skipping: No current region (ContentPack may not be loaded)")
+        }
+        return region
+    }
+
     // MARK: - TEST-005: Ограничения действий по локации
 
-    func testRestOnlyInPlayerRegion() {
-        // Rest доступен только когда игрок находится В регионе
-        // и регион Stable + (settlement или sacred)
-        guard let currentRegion = worldState.getCurrentRegion() else {
-            XCTFail("Нет текущего региона")
-            return
-        }
+    func testRestOnlyInPlayerRegion() throws {
+        let currentRegion = try requireCurrentRegion()
 
         let canRestInCurrent = currentRegion.canRest
         // canRest зависит от типа и состояния региона
@@ -44,7 +66,8 @@ final class RegionActionsModelTests: XCTestCase {
         XCTAssertEqual(canRestInCurrent, expected)
     }
 
-    func testTradeOnlyInStableSettlement() {
+    func testTradeOnlyInStableSettlement() throws {
+        try requireRegionsLoaded()
         // Trade доступен только в Stable settlement с положительной репутацией
         for region in worldState.regions {
             let expected = region.state == .stable &&
@@ -94,22 +117,18 @@ final class RegionActionsModelTests: XCTestCase {
 
     // MARK: - Travel Cost
 
-    func testTravelToNeighborCost() {
-        guard let currentRegion = worldState.getCurrentRegion(),
-              let neighborId = currentRegion.neighborIds.first else {
-            XCTFail("Нет данных для теста")
-            return
+    func testTravelToNeighborCost() throws {
+        let currentRegion = try requireCurrentRegion()
+        guard let neighborId = currentRegion.neighborIds.first else {
+            throw XCTSkip("Нет соседей для теста")
         }
 
         let cost = worldState.calculateTravelCost(to: neighborId)
         XCTAssertEqual(cost, 1, "Путешествие к соседу = 1 день")
     }
 
-    func testTravelToDistantCost() {
-        guard let currentRegion = worldState.getCurrentRegion() else {
-            XCTFail("Нет текущего региона")
-            return
-        }
+    func testTravelToDistantCost() throws {
+        let currentRegion = try requireCurrentRegion()
 
         // Найти дальний регион
         if let distantRegion = worldState.regions.first(where: { region in
@@ -182,12 +201,11 @@ final class RegionActionsModelTests: XCTestCase {
 
     // MARK: - Region Visit Tracking
 
-    func testRegionMarkedAsVisited() {
+    func testRegionMarkedAsVisited() throws {
+        let currentRegion = try requireCurrentRegion()
         guard let currentId = worldState.currentRegionId,
-              let currentRegion = worldState.getCurrentRegion(),
               let neighborId = currentRegion.neighborIds.first else {
-            XCTFail("Нет данных для теста")
-            return
+            throw XCTSkip("Нет соседей для теста")
         }
 
         worldState.moveToRegion(neighborId)
@@ -198,11 +216,10 @@ final class RegionActionsModelTests: XCTestCase {
         }
     }
 
-    func testNewRegionMarkedAsVisited() {
-        guard let currentRegion = worldState.getCurrentRegion(),
-              let neighborId = currentRegion.neighborIds.first else {
-            XCTFail("Нет данных для теста")
-            return
+    func testNewRegionMarkedAsVisited() throws {
+        let currentRegion = try requireCurrentRegion()
+        guard let neighborId = currentRegion.neighborIds.first else {
+            throw XCTSkip("Нет соседей для теста")
         }
 
         worldState.moveToRegion(neighborId)

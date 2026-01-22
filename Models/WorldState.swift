@@ -140,18 +140,19 @@ class WorldState: ObservableObject, Codable {
     // MARK: - World Setup
 
     private func setupInitialWorld() {
-        // DATA-DRIVEN: Load all content from ContentProvider
+        // DATA-DRIVEN: Load all content from ContentRegistry (JSON files)
         // Reference: ENGINE_ARCHITECTURE.md, Section 5
-        let provider = TwilightMarchesCodeContentProvider()
+        // ContentRegistry is loaded at app startup via CardGameApp.ContentLoader
+        let registry = ContentRegistry.shared
 
-        // Load regions from ContentProvider
-        regions = createRegionsFromProvider(provider)
+        // Load regions from ContentRegistry (JSON)
+        regions = createRegionsFromRegistry(registry)
 
-        // Load events from ContentProvider (using adapters)
-        allEvents = provider.getAllEventDefinitions().map { $0.toGameEvent() }
+        // Load events from ContentRegistry (using adapters)
+        allEvents = registry.getAllEventDefinitions().map { $0.toGameEvent() }
 
-        // Load quests from ContentProvider (using adapters)
-        let initialQuests = provider.getAllQuestDefinitions().map { $0.toQuest() }
+        // Load quests from ContentRegistry (using adapters)
+        let initialQuests = registry.getAllQuestDefinitions().map { $0.toQuest() }
         // Main quest starts automatically
         if let mainQuest = initialQuests.first(where: { $0.questType == .main }) {
             startQuest(mainQuest)
@@ -165,8 +166,7 @@ class WorldState: ObservableObject, Codable {
 
         // Set starting region by ID (village)
         // Canonical starting region is "village" per game design
-        // Find by matching the localized name from ContentProvider
-        if let villageDef = provider.getAllRegionDefinitions().first(where: { $0.id == "village" }),
+        if let villageDef = registry.getRegion(id: "village"),
            let villageRegion = regions.first(where: { $0.name == villageDef.title.localized }) {
             currentRegionId = villageRegion.id
         } else if let firstStable = regions.first(where: { $0.state == .stable }) {
@@ -175,17 +175,17 @@ class WorldState: ObservableObject, Codable {
         }
     }
 
-    /// Convert RegionDefinitions from ContentProvider to legacy Region models
-    /// This bridges the new Data-Driven architecture with existing runtime models
-    private func createRegionsFromProvider(_ provider: ContentProvider) -> [Region] {
-        let regionDefs = provider.getAllRegionDefinitions()
+    /// Convert RegionDefinitions from ContentRegistry to legacy Region models
+    /// This bridges the Data-Driven architecture (JSON) with existing runtime models
+    private func createRegionsFromRegistry(_ registry: ContentRegistry) -> [Region] {
+        let regionDefs = registry.getAllRegionDefinitions()
         var regionMap: [String: Region] = [:]
 
         // First pass: create regions without neighbor links
         for def in regionDefs {
-            let anchor = createAnchorFromDefinition(provider.getAnchorDefinition(forRegion: def.id))
-            let regionType = mapRegionTypeFromString(def.regionType)
-            let regionState = mapRegionState(def.initialState)
+            let anchor = createAnchorFromDefinition(registry.getAnchorDefinition(forRegion: def.id))
+            let regionType = RegionType(rawValue: def.regionType) ?? .forest
+            let regionState = RegionState(from: def.initialState)
 
             var region = Region(
                 definitionId: def.id,
@@ -214,8 +214,8 @@ class WorldState: ObservableObject, Codable {
     private func createAnchorFromDefinition(_ def: AnchorDefinition?) -> Anchor? {
         guard let def = def else { return nil }
 
-        let anchorType = mapAnchorType(def.anchorType)
-        let influence = mapInfluence(def.initialInfluence)
+        let anchorType = AnchorType(fromJSON: def.anchorType) ?? .shrine
+        let influence = CardBalance(from: def.initialInfluence)
 
         return Anchor(
             name: def.title.localized,
@@ -224,54 +224,6 @@ class WorldState: ObservableObject, Codable {
             influence: influence,
             power: def.power
         )
-    }
-
-    /// Map string anchor type to AnchorType enum
-    private func mapAnchorType(_ typeString: String) -> AnchorType {
-        switch typeString {
-        case "chapel": return .chapel
-        case "shrine": return .shrine
-        case "sacred_tree": return .sacredTree
-        case "stone_idol": return .stoneIdol
-        case "spring": return .spring
-        case "barrow": return .barrow
-        case "temple": return .temple
-        case "cross": return .cross
-        default: return .shrine
-        }
-    }
-
-    /// Map AnchorInfluence to CardBalance
-    private func mapInfluence(_ influence: AnchorInfluence) -> CardBalance {
-        switch influence {
-        case .light: return .light
-        case .neutral: return .neutral
-        case .dark: return .dark
-        }
-    }
-
-    /// Map RegionStateType to RegionState
-    private func mapRegionState(_ state: RegionStateType) -> RegionState {
-        switch state {
-        case .stable: return .stable
-        case .borderland: return .borderland
-        case .breach: return .breach
-        }
-    }
-
-    /// Map region type string to RegionType enum
-    /// Type string comes from RegionDefinition.regionType (data-driven)
-    private func mapRegionTypeFromString(_ typeString: String) -> RegionType {
-        switch typeString.lowercased() {
-        case "settlement": return .settlement
-        case "sacred": return .sacred
-        case "forest": return .forest
-        case "swamp": return .swamp
-        case "mountain": return .mountain
-        case "wasteland": return .wasteland
-        case "water": return .water
-        default: return .forest
-        }
     }
 
     // MARK: - Region Management
@@ -292,10 +244,9 @@ class WorldState: ObservableObject, Codable {
         return getRegion(byId: currentId)
     }
 
-    /// - Warning: DEPRECATED для UI. Используйте `TwilightGameEngine.performAction(.travel(toRegionId:))` вместо прямого вызова.
-    /// Этот метод оставлен для совместимости и внутреннего использования Engine.
+    /// - Warning: Internal method. UI code should use `TwilightGameEngine.performAction(.travel(toRegionId:))`.
+    /// Called by Engine for state synchronization.
     func moveToRegion(_ regionId: UUID) {
-        // ⚠️ MIGRATION: После Phase 3 этот метод будет вызываться только из Engine
         // Отметить текущий регион как посещенный
         if let currentId = currentRegionId,
            let index = regions.firstIndex(where: { $0.id == currentId }) {
@@ -336,22 +287,13 @@ class WorldState: ObservableObject, Codable {
     ///
     /// ## DEPRECATED
     /// - **UI Code**: Use `TwilightGameEngine.performAction()` instead
-    /// - **Tests**: This method is retained for testing the canonical day algorithm
-    /// - **Internal**: Called automatically from `advanceTime(by:)`
-    ///
-    /// Duplicate logic exists in `TwilightGameEngine.advanceTime(by:)`.
-    /// After full migration, this method will be removed.
-    ///
-    /// - Warning: Do not call directly from UI/ViewModel code. Use Engine actions.
+    /// Process day start effects (tension increase, degradation checks).
+    /// Called by Engine and internally by advanceTime methods.
     func processDayStart() {
         performDayStartLogic()
     }
 
     /// Advance day and process day start logic.
-    ///
-    /// **TRANSITIONAL API**: This method exists for Views that don't yet have access to TwilightGameEngine.
-    /// Once full migration to Engine is complete, this will be deprecated in favor of Engine actions.
-    ///
     /// - Note: Increments `daysPassed` by 1 and processes day start logic (tension, degradation, etc.)
     func advanceDayForUI() {
         daysPassed += 1
@@ -359,8 +301,8 @@ class WorldState: ObservableObject, Codable {
     }
 
     /// Internal day start logic - shared by processDayStart() and advanceDayForUI()
+    /// Uses TwilightPressureRules as single source of truth
     private func performDayStartLogic() {
-        // ⚠️ MIGRATION: This method uses TwilightPressureRules as single source of truth (Audit v1.1 Issue #6)
         // 1. Каждые 3 дня — автоматическая деградация мира
         guard daysPassed > 0 && daysPassed % 3 == 0 else { return }
 
@@ -391,13 +333,6 @@ class WorldState: ObservableObject, Codable {
 
         // 6. Проверить глобальные триггеры мира
         checkWorldShiftTriggers()
-    }
-
-    /// Проверка автоматической деградации мира (legacy alias)
-    /// - Warning: DEPRECATED. Use `processDayStart()` or `TwilightGameEngine.performAction()`
-    @available(*, deprecated, renamed: "processDayStart()")
-    func checkTimeDegradation() {
-        processDayStart()
     }
 
     /// Проверка деградации региона по весовому алгоритму
@@ -512,17 +447,14 @@ class WorldState: ObservableObject, Codable {
     ///
     /// ## DEPRECATED
     /// - **UI Code**: Use `TwilightGameEngine.performAction()` instead
-    /// - **Tests**: This method is retained for testing time mechanics
-    /// - **Internal**: Used by `moveToRegion` and similar legacy methods
-    ///
-    /// - Warning: Do not call directly from UI/ViewModel code. Use Engine actions.
+    /// Advance time by specified number of days.
+    /// Each day processes day start logic (tension, degradation, etc.)
     func advanceTime(by days: Int = 1) {
         advanceTimeInternal(by: days)
     }
 
-    /// Internal time advancement - used by travelToRegion and other internal methods
+    /// Internal time advancement - used by moveToRegion and other internal methods
     private func advanceTimeInternal(by days: Int) {
-        // ⚠️ MIGRATION: This method contains canonical time logic used by tests
         for _ in 0..<days {
             daysPassed += 1
             performDayStartLogic()
@@ -1012,129 +944,6 @@ class WorldState: ObservableObject, Codable {
         // if let experience = rewards.experience { ... }
     }
 
-    // MARK: - Quest Trigger System (LEGACY)
-    // NOTE: These methods are DEPRECATED. Use QuestTriggerEngine for data-driven quest progression.
-    // QuestTriggerEngine reads CompletionCondition from QuestDefinition and processes actions automatically.
-    // These legacy methods remain for backward compatibility during migration.
-
-    /// Check and update quest objectives based on world flags
-    /// - Note: DEPRECATED - Use QuestTriggerEngine.processAction() instead
-    @available(*, deprecated, message: "Use QuestTriggerEngine for data-driven quest progression")
-    func checkQuestObjectivesByFlags(_ player: Player) {
-        for i in 0..<activeQuests.count {
-            var quest = activeQuests[i]
-            var questUpdated = false
-
-            // Main Quest - Objective 0: Learn about anchors from elder
-            if quest.questType == .main && quest.objectives.count > 0 && !quest.objectives[0].completed {
-                if worldFlags["main_quest_started"] == true {
-                    quest.objectives[0].completed = true
-                    questUpdated = true
-                    print("Quest objective completed: \(quest.objectives[0].description)")
-                }
-            }
-
-            // Main Quest - Objective 2: Find Sacred Oak
-            if quest.questType == .main && quest.objectives.count > 2 && !quest.objectives[1].completed {
-                if worldFlags["found_sacred_oak"] == true {
-                    quest.objectives[1].completed = true
-                    questUpdated = true
-                    print("Quest objective completed: \(quest.objectives[1].description)")
-                }
-            }
-
-            // Main Quest - Objective 3: Strengthen Oak or find ally
-            if quest.questType == .main && quest.objectives.count > 3 && !quest.objectives[2].completed {
-                if worldFlags["oak_strengthened"] == true || worldFlags["found_ally"] == true {
-                    quest.objectives[2].completed = true
-                    questUpdated = true
-                    print("Quest objective completed: \(quest.objectives[2].description)")
-                }
-            }
-
-            // Main Quest - Objective 4: Explore breach in Black Lowlands
-            if quest.questType == .main && quest.objectives.count > 4 && !quest.objectives[3].completed {
-                if worldFlags["explored_black_lowlands"] == true {
-                    quest.objectives[3].completed = true
-                    questUpdated = true
-                    print("Quest objective completed: \(quest.objectives[3].description)")
-                }
-            }
-
-            // Main Quest - Objective 5: Defeat Leshy-Guardian
-            if quest.questType == .main && quest.objectives.count > 5 && !quest.objectives[4].completed {
-                if worldFlags["leshy_guardian_defeated"] == true ||
-                   worldFlags["leshy_guardian_peaceful"] == true ||
-                   worldFlags["leshy_guardian_corrupted"] == true {
-                    quest.objectives[4].completed = true
-                    questUpdated = true
-                    print("Quest objective completed: \(quest.objectives[4].description)")
-                }
-            }
-
-            // Check if all objectives are completed
-            if questUpdated {
-                let allCompleted = quest.objectives.allSatisfy { $0.completed }
-                if allCompleted {
-                    completeQuest(quest.id, player: player)
-                } else {
-                    activeQuests[i] = quest
-                }
-            }
-        }
-    }
-
-    /// Check quest objectives when visiting a region
-    /// - Note: DEPRECATED - Use QuestTriggerEngine.processAction(.visitedRegion) instead
-    @available(*, deprecated, message: "Use QuestTriggerEngine for data-driven quest progression")
-    func checkQuestObjectivesByRegion(regionId: UUID, player: Player) {
-        guard let region = getRegion(byId: regionId) else { return }
-
-        // Main Quest - Objective 2: Find Sacred Oak
-        if region.definitionId == "sacred_oak" {
-            worldFlags["found_sacred_oak"] = true
-            checkQuestObjectivesByFlags(player)
-        }
-
-        // Main Quest - Objective 4: Explore Black Lowlands
-        if region.definitionId == "dark_lowland" {
-            worldFlags["explored_black_lowlands"] = true
-            checkQuestObjectivesByFlags(player)
-        }
-    }
-
-    /// Check quest objectives when an event is completed
-    /// Uses event definitionId and choice.id for data-driven matching
-    /// - Note: DEPRECATED - Use QuestTriggerEngine.processAction(.completedEvent) instead
-    @available(*, deprecated, message: "Use QuestTriggerEngine for data-driven quest progression")
-    func checkQuestObjectivesByEvent(eventId: String, choiceId: String, player: Player) {
-        // Main Quest - Objective 1: Talk to elder
-        if eventId == "village_elder_request" && choiceId == "accept" {
-            worldFlags["main_quest_started"] = true
-            checkQuestObjectivesByFlags(player)
-        }
-
-        // Main Quest - Objective 3: Strengthen Oak
-        if eventId == "sacred_oak_wisdom" && choiceId == "strengthen" {
-            worldFlags["oak_strengthened"] = true
-            checkQuestObjectivesByFlags(player)
-        }
-
-        // Main Quest - Objective 5: Boss defeated
-        if eventId == "leshy_guardian_boss" {
-            if choiceId == "fight" {
-                // Combat will set the flag via combat victory
-                // This is handled in GameState after combat
-            } else if choiceId == "negotiate" {
-                worldFlags["leshy_guardian_peaceful"] = true
-                checkQuestObjectivesByFlags(player)
-            } else if choiceId == "corrupt" {
-                worldFlags["leshy_guardian_corrupted"] = true
-                checkQuestObjectivesByFlags(player)
-            }
-        }
-    }
-
     /// Mark boss as defeated after combat victory
     /// Uses enemy definitionId for data-driven matching
     /// - Note: Quest progress is now handled by QuestTriggerEngine via flag triggers
@@ -1369,304 +1178,5 @@ class WorldState: ObservableObject, Codable {
         try container.encodeIfPresent(currentRegionId, forKey: .currentRegionId)
         try container.encode(daysPassed, forKey: .daysPassed)
         try container.encode(eventLog, forKey: .eventLog)
-    }
-}
-
-// MARK: - Twilight Marches Content Provider
-// Reference: Docs/ENGINE_ARCHITECTURE.md, Section 5 (Data-Driven Architecture)
-// This provider defines all game content for Twilight Marches
-
-/// Content provider with Twilight Marches game definitions.
-/// Separates content (Data) from runtime state (WorldState).
-final class TwilightMarchesCodeContentProvider: CodeContentProvider {
-
-    // MARK: - Region Loading
-
-    override func loadRegions() {
-        // ACT I - 7 regions (2 Stable, 3 Borderland, 2 Breach)
-
-        // 1. Village (Stable) - starting point
-        let village = RegionDefinition(
-            id: "village",
-            title: LocalizedString(en: "Village by the Road", ru: "Деревня у тракта"),
-            description: LocalizedString(en: "A small village on the edge of the realm", ru: "Небольшая деревня на краю королевства"),
-            neighborIds: ["oak", "forest", "swamp"],
-            initiallyDiscovered: true,
-            anchorId: "anchor_village_chapel",
-            eventPoolIds: ["pool_village", "pool_common"],
-            initialState: .stable
-        )
-        registerRegion(village)
-
-        // 2. Sacred Oak (Stable) - point of power
-        let oak = RegionDefinition(
-            id: "oak",
-            title: LocalizedString(en: "Sacred Oak", ru: "Священный Дуб"),
-            description: LocalizedString(en: "An ancient oak radiating divine power", ru: "Древний дуб, излучающий божественную силу"),
-            neighborIds: ["village", "forest"],
-            initiallyDiscovered: false,
-            anchorId: "anchor_sacred_oak",
-            eventPoolIds: ["pool_sacred", "pool_common"],
-            initialState: .stable
-        )
-        registerRegion(oak)
-
-        // 3. Dense Forest (Borderland)
-        let forest = RegionDefinition(
-            id: "forest",
-            title: LocalizedString(en: "Dark Forest", ru: "Тёмный Лес"),
-            description: LocalizedString(en: "A dense forest shrouded in shadow", ru: "Густой лес, окутанный тенью"),
-            neighborIds: ["village", "oak", "mountain"],
-            initiallyDiscovered: false,
-            anchorId: "anchor_forest_idol",
-            eventPoolIds: ["pool_forest", "pool_common"],
-            initialState: .borderland,
-            degradationWeight: 1
-        )
-        registerRegion(forest)
-
-        // 4. Navi Swamp (Borderland)
-        let swamp = RegionDefinition(
-            id: "swamp",
-            title: LocalizedString(en: "Cursed Swamp", ru: "Проклятое Болото"),
-            description: LocalizedString(en: "A murky swamp tainted by dark magic", ru: "Мрачное болото, отравленное тёмной магией"),
-            neighborIds: ["village", "breach"],
-            initiallyDiscovered: false,
-            anchorId: "anchor_swamp_spring",
-            eventPoolIds: ["pool_swamp", "pool_common"],
-            initialState: .borderland,
-            degradationWeight: 1
-        )
-        registerRegion(swamp)
-
-        // 5. Mountain Pass (Borderland)
-        let mountain = RegionDefinition(
-            id: "mountain",
-            title: LocalizedString(en: "Mountain Pass", ru: "Горный Перевал"),
-            description: LocalizedString(en: "A treacherous pass through the mountains", ru: "Опасный путь через горы"),
-            neighborIds: ["forest", "breach"],
-            initiallyDiscovered: false,
-            anchorId: "anchor_mountain_barrow",
-            eventPoolIds: ["pool_mountain", "pool_common"],
-            initialState: .borderland,
-            degradationWeight: 1
-        )
-        registerRegion(mountain)
-
-        // 6. Barrow Breach (Breach)
-        let breach = RegionDefinition(
-            id: "breach",
-            title: LocalizedString(en: "The Breach", ru: "Разлом"),
-            description: LocalizedString(en: "A tear in reality where darkness seeps through", ru: "Разрыв в реальности, откуда сочится тьма"),
-            neighborIds: ["swamp", "mountain", "dark_lowland"],
-            initiallyDiscovered: false,
-            anchorId: "anchor_breach_shrine",
-            eventPoolIds: ["pool_breach", "pool_common"],
-            initialState: .breach,
-            degradationWeight: 2
-        )
-        registerRegion(breach)
-
-        // 7. Dark Lowlands (Breach) - Act I finale
-        let darkLowland = RegionDefinition(
-            id: "dark_lowland",
-            title: LocalizedString(en: "Dark Lowland", ru: "Тёмная Низина"),
-            description: LocalizedString(en: "A forsaken land consumed by darkness", ru: "Проклятая земля, поглощённая тьмой"),
-            neighborIds: ["breach"],
-            initiallyDiscovered: false,
-            anchorId: nil, // No anchor - fully destroyed
-            eventPoolIds: ["pool_boss", "pool_breach"],
-            initialState: .breach,
-            degradationWeight: 2
-        )
-        registerRegion(darkLowland)
-
-        rebuildIndices()
-    }
-
-    // MARK: - Anchor Loading
-
-    override func loadAnchors() {
-        // Village anchor
-        let villageChapel = AnchorDefinition(
-            id: "anchor_village_chapel",
-            title: LocalizedString(en: "Village Chapel", ru: "Деревенская Часовня"),
-            description: LocalizedString(en: "A small chapel offering protection to the village", ru: "Небольшая часовня, защищающая деревню"),
-            regionId: "village",
-            anchorType: "chapel",
-            initialInfluence: .light,
-            power: 6,
-            initialIntegrity: 85
-        )
-        registerAnchor(villageChapel)
-
-        // Sacred Oak anchor
-        let sacredOak = AnchorDefinition(
-            id: "anchor_sacred_oak",
-            title: LocalizedString(en: "Sacred Oak", ru: "Священный Дуб"),
-            description: LocalizedString(en: "An ancient tree imbued with divine essence", ru: "Древнее дерево, наполненное божественной сущностью"),
-            regionId: "oak",
-            anchorType: "sacred_tree",
-            initialInfluence: .light,
-            power: 8,
-            initialIntegrity: 90
-        )
-        registerAnchor(sacredOak)
-
-        // Forest idol anchor
-        let forestIdol = AnchorDefinition(
-            id: "anchor_forest_idol",
-            title: LocalizedString(en: "Forest Stone Idol", ru: "Лесной Каменный Идол"),
-            description: LocalizedString(en: "A weathered stone idol of forgotten gods", ru: "Обветшалый каменный идол забытых богов"),
-            regionId: "forest",
-            anchorType: "stone_idol",
-            initialInfluence: .neutral,
-            power: 5,
-            initialIntegrity: 55
-        )
-        registerAnchor(forestIdol)
-
-        // Swamp spring anchor
-        let swampSpring = AnchorDefinition(
-            id: "anchor_swamp_spring",
-            title: LocalizedString(en: "Corrupted Spring", ru: "Осквернённый Источник"),
-            description: LocalizedString(en: "A once-pure spring now tainted by darkness", ru: "Некогда чистый источник, осквернённый тьмой"),
-            regionId: "swamp",
-            anchorType: "spring",
-            initialInfluence: .dark,
-            power: 4,
-            initialIntegrity: 45
-        )
-        registerAnchor(swampSpring)
-
-        // Mountain barrow anchor
-        let mountainBarrow = AnchorDefinition(
-            id: "anchor_mountain_barrow",
-            title: LocalizedString(en: "Ancestor Barrow", ru: "Курган Предков"),
-            description: LocalizedString(en: "An ancient burial mound of revered ancestors", ru: "Древний курган почитаемых предков"),
-            regionId: "mountain",
-            anchorType: "barrow",
-            initialInfluence: .neutral,
-            power: 5,
-            initialIntegrity: 50
-        )
-        registerAnchor(mountainBarrow)
-
-        // Breach shrine anchor
-        let breachShrine = AnchorDefinition(
-            id: "anchor_breach_shrine",
-            title: LocalizedString(en: "Breach Ward Shrine", ru: "Святилище у Разлома"),
-            description: LocalizedString(en: "A crumbling shrine that wards against the breach", ru: "Разрушающееся святилище, защищающее от разлома"),
-            regionId: "breach",
-            anchorType: "shrine",
-            initialInfluence: .dark,
-            power: 3,
-            initialIntegrity: 15
-        )
-        registerAnchor(breachShrine)
-    }
-
-    // MARK: - Event Loading
-
-    override func loadEvents() {
-        // Load events from JSON file - ContentPacks/TwilightMarches/Campaign/ActI/events.json
-        // The file is copied to bundle during build via Xcode "Copy Bundle Resources"
-        if let eventsURL = Bundle.main.url(forResource: "events", withExtension: "json") {
-            do {
-                try loadEventsFromJSON(url: eventsURL)
-                print("[TwilightMarches] Loaded events from JSON: \(eventsURL.lastPathComponent)")
-            } catch {
-                print("[TwilightMarches] Failed to load events from JSON: \(error)")
-                // Fall back to test event from parent class
-                super.loadEvents()
-            }
-        } else {
-            print("[TwilightMarches] events.json not found in bundle, using fallback events")
-            super.loadEvents()
-        }
-    }
-
-    // MARK: - Quest Loading
-
-    override func loadQuests() {
-        // Main Quest: Путь Защитника (Path of the Defender)
-        let mainQuest = QuestDefinition(
-            id: "quest_main_act1",
-            title: LocalizedString(en: "Path of the Defender", ru: "Путь Защитника"),
-            description: LocalizedString(
-                en: "Protect the realm from the encroaching darkness of Navi",
-                ru: "Защитите королевство от наступающей тьмы Нави"
-            ),
-            objectives: [
-                ObjectiveDefinition(
-                    id: "obj_visit_elder",
-                    description: LocalizedString(
-                        en: "Speak with the village elder",
-                        ru: "Поговорить со старостой деревни"
-                    ),
-                    completionCondition: .eventCompleted("event_village_elder"),
-                    nextObjectiveId: "obj_find_oak"
-                ),
-                ObjectiveDefinition(
-                    id: "obj_find_oak",
-                    description: LocalizedString(
-                        en: "Find the Sacred Oak",
-                        ru: "Найти Священный Дуб"
-                    ),
-                    completionCondition: .visitRegion("oak"),
-                    nextObjectiveId: "obj_learn_truth"
-                ),
-                ObjectiveDefinition(
-                    id: "obj_learn_truth",
-                    description: LocalizedString(
-                        en: "Learn the truth about the Breach",
-                        ru: "Узнать правду о Разломе"
-                    ),
-                    completionCondition: .flagSet("breach_truth_revealed"),
-                    nextObjectiveId: "obj_defeat_leshy"
-                ),
-                ObjectiveDefinition(
-                    id: "obj_defeat_leshy",
-                    description: LocalizedString(
-                        en: "Defeat the Leshy Guardian",
-                        ru: "Победить Лешего-Хранителя"
-                    ),
-                    completionCondition: .defeatEnemy("leshy_guardian")
-                )
-            ],
-            questKind: .main,
-            autoStart: true,
-            completionRewards: QuestCompletionRewards(
-                resourceChanges: ["faith": 5],
-                setFlags: ["act1_completed"]
-            )
-        )
-        registerQuest(mainQuest)
-
-        // Side Quest: Trader's Favor
-        let sideQuestTrader = QuestDefinition(
-            id: "quest_side_trader",
-            title: LocalizedString(en: "Trader's Favor", ru: "Услуга Торговцу"),
-            description: LocalizedString(
-                en: "Help the traveling merchant with a dangerous task",
-                ru: "Помогите странствующему торговцу с опасным заданием"
-            ),
-            objectives: [
-                ObjectiveDefinition(
-                    id: "obj_find_goods",
-                    description: LocalizedString(
-                        en: "Find the lost merchant goods",
-                        ru: "Найти потерянный товар торговца"
-                    ),
-                    completionCondition: .flagSet("merchant_goods_found")
-                )
-            ],
-            questKind: .side,
-            availability: Availability(requiredFlags: ["met_merchant"]),
-            completionRewards: QuestCompletionRewards(
-                resourceChanges: ["faith": 2]
-            )
-        )
-        registerQuest(sideQuestTrader)
     }
 }

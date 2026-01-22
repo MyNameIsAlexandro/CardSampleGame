@@ -57,13 +57,15 @@ final class CombatModifiersTests: XCTestCase {
     func testCombatContextBorderlandDescription() {
         let context = CombatContext(regionState: .borderland, playerCurses: [])
         XCTAssertNotNil(context.regionModifierDescription, "Borderland должен иметь описание")
-        XCTAssertTrue(context.regionModifierDescription?.contains("Пограничье") ?? false)
+        // Localized - just verify it's not empty
+        XCTAssertFalse(context.regionModifierDescription?.isEmpty ?? true, "Borderland description should not be empty")
     }
 
     func testCombatContextBreachDescription() {
         let context = CombatContext(regionState: .breach, playerCurses: [])
         XCTAssertNotNil(context.regionModifierDescription, "Breach должен иметь описание")
-        XCTAssertTrue(context.regionModifierDescription?.contains("Прорыв Нави") ?? false)
+        // Localized - just verify it's not empty
+        XCTAssertFalse(context.regionModifierDescription?.isEmpty ?? true, "Breach description should not be empty")
     }
 
     // MARK: - Проклятия в бою
@@ -195,9 +197,18 @@ final class CombatModifiersTests: XCTestCase {
     // MARK: - Region State Display
 
     func testRegionStateDisplayName() {
-        XCTAssertEqual(RegionState.stable.displayName, "Стабильная")
-        XCTAssertEqual(RegionState.borderland.displayName, "Пограничье")
-        XCTAssertEqual(RegionState.breach.displayName, "Прорыв Нави")
+        // Localized names vary by locale - verify they are not empty and unique
+        XCTAssertFalse(RegionState.stable.displayName.isEmpty, "Stable should have display name")
+        XCTAssertFalse(RegionState.borderland.displayName.isEmpty, "Borderland should have display name")
+        XCTAssertFalse(RegionState.breach.displayName.isEmpty, "Breach should have display name")
+
+        // Verify each display name is different
+        let displayNames: Set<String> = [
+            RegionState.stable.displayName,
+            RegionState.borderland.displayName,
+            RegionState.breach.displayName
+        ]
+        XCTAssertEqual(displayNames.count, 3, "All region states should have unique display names")
     }
 
     func testRegionStateEmoji() {
@@ -209,13 +220,26 @@ final class CombatModifiersTests: XCTestCase {
     // MARK: - Curse Display Names
 
     func testCurseDisplayNames() {
-        XCTAssertEqual(CurseType.weakness.displayName, "Слабость")
-        XCTAssertEqual(CurseType.fear.displayName, "Страх")
-        XCTAssertEqual(CurseType.exhaustion.displayName, "Истощение")
-        XCTAssertEqual(CurseType.greed.displayName, "Жадность")
-        XCTAssertEqual(CurseType.shadowOfNav.displayName, "Тень Нави")
-        XCTAssertEqual(CurseType.bloodCurse.displayName, "Проклятие крови")
-        XCTAssertEqual(CurseType.sealOfNav.displayName, "Печать Нави")
+        // Localized names vary by locale - verify they are not empty and unique
+        XCTAssertFalse(CurseType.weakness.displayName.isEmpty, "Weakness should have display name")
+        XCTAssertFalse(CurseType.fear.displayName.isEmpty, "Fear should have display name")
+        XCTAssertFalse(CurseType.exhaustion.displayName.isEmpty, "Exhaustion should have display name")
+        XCTAssertFalse(CurseType.greed.displayName.isEmpty, "Greed should have display name")
+        XCTAssertFalse(CurseType.shadowOfNav.displayName.isEmpty, "ShadowOfNav should have display name")
+        XCTAssertFalse(CurseType.bloodCurse.displayName.isEmpty, "BloodCurse should have display name")
+        XCTAssertFalse(CurseType.sealOfNav.displayName.isEmpty, "SealOfNav should have display name")
+
+        // Verify each display name is different
+        let displayNames: Set<String> = [
+            CurseType.weakness.displayName,
+            CurseType.fear.displayName,
+            CurseType.exhaustion.displayName,
+            CurseType.greed.displayName,
+            CurseType.shadowOfNav.displayName,
+            CurseType.bloodCurse.displayName,
+            CurseType.sealOfNav.displayName
+        ]
+        XCTAssertEqual(displayNames.count, 7, "All curse types should have unique display names")
     }
 
     // MARK: - GameState Combat Integration

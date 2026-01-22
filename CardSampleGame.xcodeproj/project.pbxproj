@@ -86,7 +86,6 @@
 		EE0005050000000000000001 /* QuestRuntimeState.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0005060000000000000001 /* QuestRuntimeState.swift */; };
 		EE0005070000000000000001 /* PlayerRuntimeState.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0005080000000000000001 /* PlayerRuntimeState.swift */; };
 		EE0005090000000000000001 /* GameRuntimeState.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0005100000000000000001 /* GameRuntimeState.swift */; };
-		EE0006010000000000000001 /* LegacyAdapters.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0006020000000000000001 /* LegacyAdapters.swift */; };
 		END000200000000000000001 /* EnemyDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = END000100000000000000001 /* EnemyDefinition.swift */; };
 		FF0001010000000000000001 /* WorldRNG.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0001020000000000000001 /* WorldRNG.swift */; };
 		FF0002010000000000000001 /* DegradationRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0002020000000000000001 /* DegradationRules.swift */; };
@@ -208,7 +207,6 @@
 		EE0005060000000000000001 /* QuestRuntimeState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestRuntimeState.swift; sourceTree = "<group>"; };
 		EE0005080000000000000001 /* PlayerRuntimeState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerRuntimeState.swift; sourceTree = "<group>"; };
 		EE0005100000000000000001 /* GameRuntimeState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRuntimeState.swift; sourceTree = "<group>"; };
-		EE0006020000000000000001 /* LegacyAdapters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyAdapters.swift; sourceTree = "<group>"; };
 		END000100000000000000001 /* EnemyDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemyDefinition.swift; sourceTree = "<group>"; };
 		F4688878441E64CD46674548 /* ArchitectureComplianceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ArchitectureComplianceTests.swift; sourceTree = "<group>"; };
 		FF0001020000000000000001 /* WorldRNG.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldRNG.swift; sourceTree = "<group>"; };
@@ -509,7 +507,6 @@
 			children = (
 				EDA00001000000000000001 /* EventDefinitionAdapter.swift */,
 				QDA00001000000000000001 /* QuestDefinitionAdapter.swift */,
-				EE0006020000000000000001 /* LegacyAdapters.swift */,
 				LL0005020000000000000001 /* EngineAdapters.swift */,
 			);
 			path = Migration;
@@ -750,7 +747,6 @@
 				EE0005050000000000000001 /* QuestRuntimeState.swift in Sources */,
 				EE0005070000000000000001 /* PlayerRuntimeState.swift in Sources */,
 				EE0005090000000000000001 /* GameRuntimeState.swift in Sources */,
-				EE0006010000000000000001 /* LegacyAdapters.swift in Sources */,
 				II0001010000000000000001 /* HeroDefinition.swift in Sources */,
 				II0002010000000000000001 /* HeroAbility.swift in Sources */,
 				II0003010000000000000001 /* HeroRegistry.swift in Sources */,

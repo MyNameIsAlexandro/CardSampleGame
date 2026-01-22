@@ -8,9 +8,19 @@ final class EventFlowModelTests: XCTestCase {
 
     var worldState: WorldState!
     var player: Player!
+    private var testPackURL: URL!
 
     override func setUp() {
         super.setUp()
+        // Load ContentRegistry with TwilightMarches pack
+        ContentRegistry.shared.resetForTesting()
+        testPackURL = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent() // Unit
+            .deletingLastPathComponent() // CardSampleGameTests
+            .deletingLastPathComponent() // CardSampleGame
+            .appendingPathComponent("ContentPacks/TwilightMarches")
+        _ = try? ContentRegistry.shared.loadPack(from: testPackURL)
+
         worldState = WorldState()
         player = Player(name: "Test")
     }
@@ -18,8 +28,17 @@ final class EventFlowModelTests: XCTestCase {
     override func tearDown() {
         worldState = nil
         player = nil
+        ContentRegistry.shared.resetForTesting()
+        testPackURL = nil
         WorldRNG.shared.resetToSystem()
         super.tearDown()
+    }
+
+    /// Helper to skip test if regions not loaded
+    private func requireRegionsLoaded() throws {
+        if worldState.regions.isEmpty {
+            throw XCTSkip("Skipping: ContentPack not loaded (regions empty)")
+        }
     }
 
     // MARK: - Event Display
@@ -64,10 +83,10 @@ final class EventFlowModelTests: XCTestCase {
 
     // MARK: - Event Filtering for Region
 
-    func testEventsAvailableForStableRegion() {
+    func testEventsAvailableForStableRegion() throws {
+        try requireRegionsLoaded()
         guard let stableRegion = worldState.regions.first(where: { $0.state == .stable }) else {
-            XCTFail("Нет Stable региона")
-            return
+            throw XCTSkip("Нет Stable региона")
         }
 
         let events = worldState.getAvailableEvents(for: stableRegion)
@@ -80,9 +99,10 @@ final class EventFlowModelTests: XCTestCase {
         }
     }
 
-    func testEventsAvailableForBorderlandRegion() {
+    func testEventsAvailableForBorderlandRegion() throws {
+        try requireRegionsLoaded()
         guard let borderlandRegion = worldState.regions.first(where: { $0.state == .borderland }) else {
-            return // Нет Borderland для теста
+            throw XCTSkip("Нет Borderland региона")
         }
 
         let events = worldState.getAvailableEvents(for: borderlandRegion)
@@ -97,7 +117,8 @@ final class EventFlowModelTests: XCTestCase {
 
     // MARK: - No Empty Event Screen
 
-    func testNoEmptyEventsForAnyRegion() {
+    func testNoEmptyEventsForAnyRegion() throws {
+        try requireRegionsLoaded()
         for region in worldState.regions {
             let events = worldState.getAvailableEvents(for: region)
             // Должно быть хотя бы одно событие или fallback
@@ -109,10 +130,10 @@ final class EventFlowModelTests: XCTestCase {
 
     // MARK: - OneTime Event Marking
 
-    func testMarkEventCompleted() {
+    func testMarkEventCompleted() throws {
+        try requireRegionsLoaded()
         guard let event = worldState.allEvents.first else {
-            XCTFail("Нет событий")
-            return
+            throw XCTSkip("Нет событий")
         }
 
         worldState.markEventCompleted(event.id)

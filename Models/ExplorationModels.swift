@@ -7,6 +7,16 @@ enum RegionState: String, Codable, Hashable {
     case borderland     // Пограничье - повышенный риск
     case breach         // Прорыв Нави - опасно
 
+    /// Initialize from Engine's RegionStateType
+    /// Used by data-driven content loading
+    init(from engineState: RegionStateType) {
+        switch engineState {
+        case .stable: self = .stable
+        case .borderland: self = .borderland
+        case .breach: self = .breach
+        }
+    }
+
     var displayName: String {
         switch self {
         case .stable: return L10n.regionStateStable.localized
@@ -135,6 +145,22 @@ enum AnchorType: String, Codable {
     case chapel         // Часовня
     case temple         // Храм
     case cross          // Обетный крест
+
+    /// Initialize from JSON string (snake_case format)
+    /// Used by data-driven content loading
+    init?(fromJSON string: String) {
+        switch string {
+        case "shrine": self = .shrine
+        case "barrow": self = .barrow
+        case "sacred_tree": self = .sacredTree
+        case "stone_idol": self = .stoneIdol
+        case "spring": self = .spring
+        case "chapel": self = .chapel
+        case "temple": self = .temple
+        case "cross": self = .cross
+        default: return nil
+        }
+    }
 
     var displayName: String {
         switch self {

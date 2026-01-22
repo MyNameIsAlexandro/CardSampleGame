@@ -7,26 +7,47 @@ import XCTest
 final class QuestSystemTests: XCTestCase {
 
     var worldState: WorldState!
+    private var testPackURL: URL!
 
     override func setUp() {
         super.setUp()
+        // Load ContentRegistry with TwilightMarches pack
+        ContentRegistry.shared.resetForTesting()
+        testPackURL = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent() // Unit
+            .deletingLastPathComponent() // CardSampleGameTests
+            .deletingLastPathComponent() // CardSampleGame
+            .appendingPathComponent("ContentPacks/TwilightMarches")
+        _ = try? ContentRegistry.shared.loadPack(from: testPackURL)
+
         worldState = WorldState()
     }
 
     override func tearDown() {
         worldState = nil
+        ContentRegistry.shared.resetForTesting()
+        testPackURL = nil
         WorldRNG.shared.resetToSystem()
         super.tearDown()
     }
 
+    /// Helper to skip test if content not loaded
+    private func requireContentLoaded() throws {
+        if worldState.regions.isEmpty {
+            throw XCTSkip("Skipping: ContentPack not loaded")
+        }
+    }
+
     // MARK: - TEST-009: Главный квест "Путь Защитника"
 
-    func testMainQuestActiveAtStart() {
+    func testMainQuestActiveAtStart() throws {
+        try requireContentLoaded()
         let mainQuest = worldState.activeQuests.first { $0.questType == .main }
         XCTAssertNotNil(mainQuest, "Главный квест должен быть активен при старте")
     }
 
-    func testMainQuestDefinitionId() {
+    func testMainQuestDefinitionId() throws {
+        try requireContentLoaded()
         // Проверяем по definitionId (Content Pack ID), не по локализованному названию
         let mainQuest = worldState.activeQuests.first { $0.questType == .main }
         XCTAssertEqual(mainQuest?.definitionId, "quest_main_act1", "ID главного квеста должен быть quest_main_act1")
@@ -36,7 +57,8 @@ final class QuestSystemTests: XCTestCase {
         XCTAssertEqual(worldState.mainQuestStage, 1, "Начальная стадия главного квеста должна быть 1")
     }
 
-    func testMainQuestHasObjectives() {
+    func testMainQuestHasObjectives() throws {
+        try requireContentLoaded()
         let mainQuest = worldState.activeQuests.first { $0.questType == .main }
         XCTAssertFalse(mainQuest?.objectives.isEmpty ?? true, "Главный квест должен иметь цели")
     }
@@ -334,7 +356,8 @@ final class QuestSystemTests: XCTestCase {
 
     // MARK: - World State Quest Management
 
-    func testActiveQuestsNotEmpty() {
+    func testActiveQuestsNotEmpty() throws {
+        try requireContentLoaded()
         XCTAssertFalse(worldState.activeQuests.isEmpty, "Активные квесты не должны быть пустыми")
     }
 

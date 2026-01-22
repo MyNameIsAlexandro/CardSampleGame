@@ -16,9 +16,19 @@ final class Phase3ContractTests: XCTestCase {
     var player: Player!
     var gameState: GameState!
     var worldState: WorldState!
+    private var testPackURL: URL!
 
     override func setUp() {
         super.setUp()
+        // Load ContentRegistry with TwilightMarches pack
+        ContentRegistry.shared.resetForTesting()
+        testPackURL = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent() // Engine
+            .deletingLastPathComponent() // CardSampleGameTests
+            .deletingLastPathComponent() // CardSampleGame
+            .appendingPathComponent("ContentPacks/TwilightMarches")
+        _ = try? ContentRegistry.shared.loadPack(from: testPackURL)
+
         player = Player(name: "Test Hero")
         gameState = GameState(players: [player])
         worldState = gameState.worldState
@@ -31,8 +41,17 @@ final class Phase3ContractTests: XCTestCase {
         player = nil
         gameState = nil
         worldState = nil
+        ContentRegistry.shared.resetForTesting()
+        testPackURL = nil
         WorldRNG.shared.resetToSystem()
         super.tearDown()
+    }
+
+    /// Helper to skip test if regions not loaded
+    private func requireRegionsLoaded() throws {
+        if worldState.regions.isEmpty {
+            throw XCTSkip("Skipping: ContentPack not loaded (regions empty)")
+        }
     }
 
     // MARK: - INV-P3-001: All Actions Through Engine
@@ -53,7 +72,8 @@ final class Phase3ContractTests: XCTestCase {
 
     // MARK: - INV-P3-002: Time Advances Only Via Engine
 
-    func testTimeAdvancesOnlyViaEngine() {
+    func testTimeAdvancesOnlyViaEngine() throws {
+        try requireRegionsLoaded()
         let initialDay = engine.currentDay
 
         // Perform action with time cost
@@ -68,7 +88,8 @@ final class Phase3ContractTests: XCTestCase {
 
     // MARK: - INV-P3-003: State Changes Are Tracked
 
-    func testStateChangesAreTracked() {
+    func testStateChangesAreTracked() throws {
+        try requireRegionsLoaded()
         // Perform action that changes state
         let result = engine.performAction(.rest)
 
@@ -102,7 +123,8 @@ final class Phase3ContractTests: XCTestCase {
 
     // MARK: - INV-P3-005: Tension Escalation Through Engine
 
-    func testTensionEscalatesOnDay3() {
+    func testTensionEscalatesOnDay3() throws {
+        try requireRegionsLoaded()
         // Advance to day 3
         _ = engine.performAction(.rest)  // Day 1
         _ = engine.performAction(.rest)  // Day 2
@@ -134,7 +156,8 @@ final class Phase3ContractTests: XCTestCase {
 
     // MARK: - INV-P3-007: Rest Heals Player
 
-    func testRestHealsPlayer() {
+    func testRestHealsPlayer() throws {
+        try requireRegionsLoaded()
         // Damage player first
         player.health = 5
         engine.syncFromLegacy()

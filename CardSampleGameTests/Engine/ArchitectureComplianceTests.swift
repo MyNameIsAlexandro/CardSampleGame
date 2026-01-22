@@ -515,16 +515,16 @@ final class ArchitectureComplianceTests: XCTestCase {
 
         let content = try String(contentsOfFile: worldStatePath, encoding: .utf8)
 
-        // Check that setupInitialWorld uses ContentProvider
+        // Check that setupInitialWorld uses ContentRegistry (JSON-based content loading)
         XCTAssertTrue(
-            content.contains("ContentProvider") || content.contains("TwilightMarchesCodeContentProvider"),
-            "WorldState.setupInitialWorld should use ContentProvider for loading content"
+            content.contains("ContentRegistry"),
+            "WorldState.setupInitialWorld should use ContentRegistry for loading content from JSON"
         )
 
-        // Check that regions are created from provider
+        // Check that regions are created from registry
         XCTAssertTrue(
-            content.contains("createRegionsFromProvider"),
-            "WorldState should use createRegionsFromProvider for region creation"
+            content.contains("createRegionsFromRegistry"),
+            "WorldState should use createRegionsFromRegistry for region creation"
         )
     }
 

@@ -49,6 +49,16 @@ enum CardBalance: String, Codable, Hashable {
     case light      // Cards from Prav, protective/healing
     case neutral    // Balanced cards
     case dark       // Cards from Nav, aggressive/cursing
+
+    /// Initialize from Engine's AnchorInfluence
+    /// Used by data-driven content loading
+    init(from influence: AnchorInfluence) {
+        switch influence {
+        case .light: self = .light
+        case .neutral: self = .neutral
+        case .dark: self = .dark
+        }
+    }
 }
 
 // Twilight Marches: Three Realms system
