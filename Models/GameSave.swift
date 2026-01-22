@@ -5,6 +5,7 @@ struct GameSave: Codable, Identifiable {
     let id: UUID
     let slotNumber: Int
     let characterName: String
+    let heroId: String?  // Hero ID for data-driven system
     let turnNumber: Int
 
     // Basic player stats
@@ -71,6 +72,7 @@ class SaveManager: ObservableObject {
             id: UUID(),
             slotNumber: slot,
             characterName: player.name,
+            heroId: player.heroId,
             turnNumber: gameState.turnNumber,
             health: player.health,
             maxHealth: player.maxHealth,
@@ -113,7 +115,7 @@ class SaveManager: ObservableObject {
 
     // Restore full game state from save (Campaign v2.0)
     func restoreGameState(from save: GameSave) -> GameState {
-        // Restore player with full state
+        // Restore player with full state and heroId
         let player = Player(
             name: save.characterName,
             health: save.health,
@@ -127,7 +129,8 @@ class SaveManager: ObservableObject {
             faith: save.faith,
             maxFaith: save.maxFaith,
             balance: save.balance,
-            currentRealm: save.currentRealm
+            currentRealm: save.currentRealm,
+            heroId: save.heroId
         )
 
         // Restore deck composition (CRITICAL for deck-building)

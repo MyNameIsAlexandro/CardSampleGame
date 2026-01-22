@@ -1,10 +1,16 @@
 import SwiftUI
 
-/// Экран выбора класса героя при начале новой игры
+/// Экран выбора героя при начале новой игры
+/// Герои загружаются из HeroRegistry (data-driven)
 struct HeroSelectionView: View {
-    let onHeroSelected: (HeroClass) -> Void
+    let onHeroSelected: (String) -> Void  // Возвращает heroId
 
-    @State private var selectedClass: HeroClass?
+    @State private var selectedHeroId: String?
+
+    /// Все доступные герои из реестра
+    private var availableHeroes: [HeroDefinition] {
+        HeroRegistry.shared.availableHeroes()
+    }
 
     var body: some View {
         NavigationView {
@@ -15,7 +21,7 @@ struct HeroSelectionView: View {
                         .font(.largeTitle)
                         .fontWeight(.bold)
 
-                    Text("Каждый класс имеет уникальные характеристики и способности")
+                    Text("Каждый герой имеет уникальные характеристики и способности")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
@@ -27,13 +33,13 @@ struct HeroSelectionView: View {
                 // Список героев
                 ScrollView {
                     VStack(spacing: 12) {
-                        ForEach(HeroClass.allCases, id: \.self) { heroClass in
-                            HeroClassCard(
-                                heroClass: heroClass,
-                                isSelected: selectedClass == heroClass
+                        ForEach(availableHeroes, id: \.id) { hero in
+                            HeroCard(
+                                hero: hero,
+                                isSelected: selectedHeroId == hero.id
                             ) {
                                 withAnimation(.easeInOut(duration: 0.2)) {
-                                    selectedClass = heroClass
+                                    selectedHeroId = hero.id
                                 }
                             }
                         }
@@ -46,13 +52,14 @@ struct HeroSelectionView: View {
 
                 // Кнопка подтверждения
                 VStack(spacing: 8) {
-                    if let selected = selectedClass {
+                    if let heroId = selectedHeroId,
+                       let hero = HeroRegistry.shared.hero(id: heroId) {
                         Button(action: {
-                            onHeroSelected(selected)
+                            onHeroSelected(heroId)
                         }) {
                             HStack {
-                                Text(selected.icon)
-                                Text("Начать игру за \(selected.rawValue)")
+                                Text(hero.icon)
+                                Text("Начать игру за \(hero.name)")
                                     .fontWeight(.semibold)
                             }
                             .frame(maxWidth: .infinity)
@@ -63,7 +70,7 @@ struct HeroSelectionView: View {
                         }
                         .padding(.horizontal)
                     } else {
-                        Text("Выберите класс героя")
+                        Text("Выберите героя")
                             .foregroundColor(.secondary)
                             .padding()
                     }
@@ -80,9 +87,9 @@ struct HeroSelectionView: View {
     }
 }
 
-/// Карточка класса героя
-struct HeroClassCard: View {
-    let heroClass: HeroClass
+/// Карточка героя
+struct HeroCard: View {
+    let hero: HeroDefinition
     let isSelected: Bool
     let onTap: () -> Void
 
@@ -90,15 +97,15 @@ struct HeroClassCard: View {
         VStack(alignment: .leading, spacing: 12) {
             // Заголовок
             HStack {
-                Text(heroClass.icon)
+                Text(hero.icon)
                     .font(.title)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(heroClass.rawValue)
+                    Text(hero.name)
                         .font(.title2)
                         .fontWeight(.bold)
 
-                    Text(heroClass.description)
+                    Text(hero.description)
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -113,7 +120,7 @@ struct HeroClassCard: View {
             }
 
             // Характеристики
-            let stats = heroClass.baseStats
+            let stats = hero.baseStats
             HStack(spacing: 16) {
                 StatBadge(icon: "heart.fill", value: stats.health, label: "HP", color: .red)
                 StatBadge(icon: "hand.raised.fill", value: stats.strength, label: "Сила", color: .orange)
@@ -127,24 +134,13 @@ struct HeroClassCard: View {
                     .foregroundColor(.yellow)
                     .font(.caption)
 
-                Text(heroClass.specialAbility)
+                Text(hero.specialAbility.description)
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
             .padding(8)
             .background(Color.yellow.opacity(0.1))
             .cornerRadius(8)
-
-            // Стартовый путь
-            HStack(spacing: 8) {
-                Image(systemName: "rectangle.stack.fill")
-                    .foregroundColor(deckPathColor(heroClass.startingDeckType))
-                    .font(.caption)
-
-                Text("Путь: \(deckPathName(heroClass.startingDeckType))")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
         }
         .padding()
         .background(
@@ -157,22 +153,6 @@ struct HeroClassCard: View {
         )
         .onTapGesture {
             onTap()
-        }
-    }
-
-    func deckPathName(_ path: DeckPath) -> String {
-        switch path {
-        case .light: return "Свет"
-        case .dark: return "Тьма"
-        case .balance: return "Равновесие"
-        }
-    }
-
-    func deckPathColor(_ path: DeckPath) -> Color {
-        switch path {
-        case .light: return .yellow
-        case .dark: return .purple
-        case .balance: return .gray
         }
     }
 }
@@ -203,7 +183,7 @@ struct StatBadge: View {
 }
 
 #Preview {
-    HeroSelectionView { heroClass in
-        print("Selected: \(heroClass.rawValue)")
+    HeroSelectionView { heroId in
+        print("Selected: \(heroId)")
     }
 }

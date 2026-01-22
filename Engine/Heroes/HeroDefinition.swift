@@ -1,16 +1,29 @@
 import Foundation
 
+/// Структура с характеристиками героя
+struct HeroStats: Codable, Equatable {
+    let health: Int
+    let maxHealth: Int
+    let strength: Int
+    let dexterity: Int
+    let constitution: Int
+    let intelligence: Int
+    let wisdom: Int
+    let charisma: Int
+    let faith: Int
+    let maxFaith: Int
+    let startingBalance: Int
+}
+
 /// Протокол определения героя (Data Layer)
 /// Описывает статические данные героя, которые не меняются во время игры
+/// Герои загружаются из Content Pack - без хардкода классов
 protocol HeroDefinition {
-    /// Уникальный идентификатор
+    /// Уникальный идентификатор (из JSON)
     var id: String { get }
 
     /// Локализованное имя
     var name: String { get }
-
-    /// Класс героя
-    var heroClass: HeroClass { get }
 
     /// Описание героя для UI
     var description: String { get }
@@ -38,11 +51,10 @@ enum HeroAvailability: Codable, Equatable {
     case dlc(packID: String)
 }
 
-/// Дефолтная реализация для базовых героев
+/// Стандартная реализация определения героя
 struct StandardHeroDefinition: HeroDefinition, Codable {
     let id: String
     let name: String
-    let heroClass: HeroClass
     let description: String
     let icon: String
     let baseStats: HeroStats
@@ -53,7 +65,6 @@ struct StandardHeroDefinition: HeroDefinition, Codable {
     init(
         id: String,
         name: String,
-        heroClass: HeroClass,
         description: String,
         icon: String,
         baseStats: HeroStats,
@@ -63,7 +74,6 @@ struct StandardHeroDefinition: HeroDefinition, Codable {
     ) {
         self.id = id
         self.name = name
-        self.heroClass = heroClass
         self.description = description
         self.icon = icon
         self.baseStats = baseStats

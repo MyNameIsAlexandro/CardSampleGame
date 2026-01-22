@@ -6,7 +6,7 @@ struct ContentView: View {
     @State private var showingSaveSlots = false
     @State private var showingLoadSlots = false  // New: for "Continue" flow
     @State private var showingStatistics = false
-    @State private var selectedCharacterIndex = 0
+    @State private var selectedHeroId: String?
     @State private var selectedSaveSlot: Int?
 
     // MARK: - Engine-First Architecture
@@ -17,8 +17,10 @@ struct ContentView: View {
     // Legacy support for save/load during transition
     @StateObject private var gameState = GameState(players: [])
 
-    // Using Twilight Marches characters
-    let characters = TwilightMarchesCards.createGuardians()
+    // Heroes loaded from Content Pack (data-driven)
+    private var availableHeroes: [HeroDefinition] {
+        HeroRegistry.shared.availableHeroes()
+    }
 
     // Check if there are any saves
     var hasSaves: Bool {
@@ -97,15 +99,15 @@ struct ContentView: View {
                             .font(.title2)
                             .foregroundColor(.secondary)
 
-                        // Character cards scroll
+                        // Hero cards scroll (data-driven from HeroRegistry)
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 20) {
-                                ForEach(Array(characters.enumerated()), id: \.element.id) { index, character in
-                                    CompactCardView(
-                                        card: character,
-                                        isSelected: selectedCharacterIndex == index,
+                                ForEach(availableHeroes, id: \.id) { hero in
+                                    HeroSelectionCard(
+                                        hero: hero,
+                                        isSelected: selectedHeroId == hero.id,
                                         onTap: {
-                                            selectedCharacterIndex = index
+                                            selectedHeroId = hero.id
                                         }
                                     )
                                     .frame(width: min(geometry.size.width * 0.65, 240), height: 280)
@@ -116,49 +118,43 @@ struct ContentView: View {
                         }
                         .frame(height: 320)
 
-                        // Character stats
-                        if selectedCharacterIndex < characters.count {
-                            let character = characters[selectedCharacterIndex]
+                        // Hero stats (data-driven from HeroRegistry)
+                        if let heroId = selectedHeroId,
+                           let hero = HeroRegistry.shared.hero(id: heroId) {
                             VStack(alignment: .leading, spacing: 16) {
                                 Text(L10n.characterStats.localized)
                                     .font(.headline)
 
-                                Text(character.description)
+                                Text(hero.description)
                                     .font(.body)
                                     .foregroundColor(.secondary)
                                     .fixedSize(horizontal: false, vertical: true)
 
                                 HStack(spacing: 24) {
-                                    if let health = character.health {
-                                        StatDisplay(icon: "heart.fill", label: L10n.statHealth.localized, value: health, color: .red)
-                                    }
-                                    if let power = character.power {
-                                        StatDisplay(icon: "sword.fill", label: L10n.statPower.localized, value: power, color: .orange)
-                                    }
-                                    if let defense = character.defense {
-                                        StatDisplay(icon: "shield.fill", label: L10n.statDefense.localized, value: defense, color: .blue)
-                                    }
+                                    StatDisplay(icon: "heart.fill", label: L10n.statHealth.localized, value: hero.baseStats.health, color: .red)
+                                    StatDisplay(icon: "bolt.fill", label: L10n.statPower.localized, value: hero.baseStats.strength, color: .orange)
+                                    StatDisplay(icon: "shield.fill", label: L10n.statDefense.localized, value: hero.baseStats.constitution, color: .blue)
                                 }
 
-                                if !character.abilities.isEmpty {
-                                    Divider()
-                                    Text(L10n.characterAbilities.localized)
-                                        .font(.headline)
+                                // Hero special ability
+                                Divider()
+                                Text(L10n.characterAbilities.localized)
+                                    .font(.headline)
 
-                                    ForEach(character.abilities) { ability in
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            Text(ability.name)
-                                                .font(.subheadline)
-                                                .fontWeight(.bold)
-                                                .foregroundColor(.orange)
-                                            Text(ability.description)
-                                                .font(.caption)
-                                                .foregroundColor(.secondary)
-                                                .fixedSize(horizontal: false, vertical: true)
-                                        }
-                                        .padding(.vertical, 4)
+                                VStack(alignment: .leading, spacing: 4) {
+                                    HStack {
+                                        Text(hero.specialAbility.icon)
+                                        Text(hero.specialAbility.name)
+                                            .font(.subheadline)
+                                            .fontWeight(.bold)
+                                            .foregroundColor(.orange)
                                     }
+                                    Text(hero.specialAbility.description)
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                        .fixedSize(horizontal: false, vertical: true)
                                 }
+                                .padding(.vertical, 4)
                             }
                             .padding()
                             .background(Color(UIColor.secondarySystemBackground))
@@ -248,8 +244,9 @@ struct ContentView: View {
                     Text(L10n.uiSlotSelection.localized)
                         .font(.title2)
                         .fontWeight(.bold)
-                    if selectedCharacterIndex < characters.count {
-                        Text(characters[selectedCharacterIndex].name)
+                    if let heroId = selectedHeroId,
+                       let hero = HeroRegistry.shared.hero(id: heroId) {
+                        Text(hero.name)
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
@@ -279,24 +276,20 @@ struct ContentView: View {
     }
 
     func startGame(in slot: Int) {
-        let selectedCharacter = characters[selectedCharacterIndex]
+        guard let heroId = selectedHeroId,
+              let hero = HeroRegistry.shared.hero(id: heroId) else {
+            return
+        }
 
-        // Create player with selected character
+        // Create player with heroId - stats are loaded from HeroRegistry automatically
         let player = Player(
-            name: selectedCharacter.name,
-            health: selectedCharacter.health ?? 10,
-            maxHealth: selectedCharacter.health ?? 10,
-            maxHandSize: 5,  // Changed from 7 to 5 for deck-building mechanics
-            strength: selectedCharacter.power ?? 0,
-            dexterity: 0,
-            constitution: 0,
-            intelligence: 0,
-            wisdom: 0,
-            charisma: 0
+            name: hero.name,
+            maxHandSize: 5,
+            heroId: heroId
         )
 
-        // Build player's starting deck (10 unique cards per hero)
-        player.deck = TwilightMarchesCards.createStartingDeck(for: selectedCharacter.name)
+        // Build player's starting deck from CardRegistry (data-driven)
+        player.deck = CardRegistry.shared.startingDeck(forHeroID: heroId)
         player.shuffleDeck()
 
         // Initialize game state with Twilight Marches encounters and market
@@ -319,23 +312,20 @@ struct ContentView: View {
     func loadGame(from slot: Int) {
         guard let saveData = saveManager.loadGame(from: slot) else { return }
 
-        // Find the character
-        if let characterIndex = characters.firstIndex(where: { $0.name == saveData.characterName }) {
-            selectedCharacterIndex = characterIndex
+        // Find the hero by name (for backward compatibility with old saves)
+        let heroId = saveData.heroId ?? availableHeroes.first { $0.name == saveData.characterName }?.id
+
+        if let heroId = heroId {
+            selectedHeroId = heroId
         }
 
-        // Create player from save data
+        // Create player from save data with heroId
         let player = Player(
             name: saveData.characterName,
             health: saveData.health,
             maxHealth: saveData.maxHealth,
-            maxHandSize: 5,  // Changed from 7 to 5 for deck-building mechanics
-            strength: 0,
-            dexterity: 0,
-            constitution: 0,
-            intelligence: 0,
-            wisdom: 0,
-            charisma: 0
+            maxHandSize: 5,
+            heroId: heroId
         )
 
         // Set player resources
@@ -348,9 +338,9 @@ struct ContentView: View {
             player.hand = saveData.playerHand
             player.discard = saveData.playerDiscard
             player.buried = saveData.playerBuried
-        } else {
-            // Fallback: create starting deck
-            player.deck = TwilightMarchesCards.createStartingDeck(for: saveData.characterName)
+        } else if let heroId = heroId {
+            // Fallback: create starting deck from CardRegistry
+            player.deck = CardRegistry.shared.startingDeck(forHeroID: heroId)
             player.shuffleDeck()
         }
 
@@ -622,6 +612,74 @@ struct LoadSlotCard: View {
         .cornerRadius(12)
         .onTapGesture {
             onLoad()
+        }
+    }
+}
+
+// MARK: - Hero Selection Card (data-driven)
+
+struct HeroSelectionCard: View {
+    let hero: HeroDefinition
+    let isSelected: Bool
+    let onTap: () -> Void
+
+    var body: some View {
+        VStack(spacing: 8) {
+            // Hero icon/name header
+            VStack(spacing: 4) {
+                Image(systemName: hero.icon)
+                    .font(.system(size: 40))
+
+                Text(hero.name)
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .lineLimit(1)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(Color.purple.opacity(0.8))
+            .foregroundColor(.white)
+
+            // Stats
+            Text(L10n.cardTypeCharacter.localized)
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            HStack(spacing: 12) {
+                StatMini(icon: "heart.fill", value: hero.baseStats.health, color: .red)
+                StatMini(icon: "bolt.fill", value: hero.baseStats.strength, color: .orange)
+                StatMini(icon: "shield.fill", value: hero.baseStats.constitution, color: .blue)
+            }
+            .padding(.bottom, 8)
+        }
+        .background(Color(UIColor.systemBackground))
+        .cornerRadius(16)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(isSelected ? Color.blue : Color.gray.opacity(0.3), lineWidth: isSelected ? 3 : 1)
+        )
+        .shadow(radius: isSelected ? 8 : 2)
+        .scaleEffect(isSelected ? 1.02 : 1.0)
+        .animation(.easeInOut(duration: 0.2), value: isSelected)
+        .onTapGesture {
+            onTap()
+        }
+    }
+}
+
+struct StatMini: View {
+    let icon: String
+    let value: Int
+    let color: Color
+
+    var body: some View {
+        HStack(spacing: 2) {
+            Image(systemName: icon)
+                .font(.caption2)
+                .foregroundColor(color)
+            Text("\(value)")
+                .font(.caption)
+                .fontWeight(.bold)
         }
     }
 }

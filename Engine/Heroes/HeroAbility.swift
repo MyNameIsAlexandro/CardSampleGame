@@ -283,14 +283,15 @@ extension HeroAbility {
         cost: nil
     )
 
-    /// Получить способность по классу героя
-    static func forHeroClass(_ heroClass: HeroClass) -> HeroAbility {
-        switch heroClass {
-        case .warrior: return .warriorRage
-        case .mage: return .mageMeditation
-        case .ranger: return .rangerTracking
-        case .priest: return .priestBlessing
-        case .shadow: return .shadowAmbush
+    /// Получить способность по ID (для загрузки из JSON)
+    static func forAbilityId(_ id: String) -> HeroAbility? {
+        switch id {
+        case "warrior_rage": return .warriorRage
+        case "mage_meditation": return .mageMeditation
+        case "ranger_tracking": return .rangerTracking
+        case "priest_blessing": return .priestBlessing
+        case "shadow_ambush": return .shadowAmbush
+        default: return nil
         }
     }
 }

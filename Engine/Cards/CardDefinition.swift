@@ -46,10 +46,7 @@ enum CardOwnership: Codable, Equatable {
     /// Базовая карта - доступна всем
     case universal
 
-    /// Карта класса - доступна только герою определённого класса
-    case classSpecific(heroClass: HeroClass)
-
-    /// Сигнатурная карта героя - привязана к конкретному герою
+    /// Сигнатурная карта героя - привязана к конкретному герою по ID
     /// Как в Arkham Horror LCG, где у каждого следователя есть свои уникальные карты
     case heroSignature(heroID: String)
 
@@ -151,16 +148,12 @@ extension CardOwnership {
     /// Проверить, доступна ли карта для героя
     func isAvailable(
         forHeroID heroID: String?,
-        heroClass: HeroClass?,
         ownedExpansions: Set<String> = [],
         unlockedConditions: Set<String> = []
     ) -> Bool {
         switch self {
         case .universal:
             return true
-
-        case .classSpecific(let requiredClass):
-            return heroClass == requiredClass
 
         case .heroSignature(let requiredHeroID):
             return heroID == requiredHeroID
@@ -175,7 +168,6 @@ extension CardOwnership {
             return requirements.allSatisfy { requirement in
                 requirement.isAvailable(
                     forHeroID: heroID,
-                    heroClass: heroClass,
                     ownedExpansions: ownedExpansions,
                     unlockedConditions: unlockedConditions
                 )
@@ -188,9 +180,6 @@ extension CardOwnership {
         switch self {
         case .universal:
             return "Доступна всем"
-
-        case .classSpecific(let heroClass):
-            return "Только для класса: \(heroClass.rawValue)"
 
         case .heroSignature(let heroID):
             return "Сигнатурная карта героя: \(heroID)"
@@ -238,18 +227,18 @@ struct HeroSignatureCards {
     }
 }
 
-// MARK: - Class Card Pool
+// MARK: - Hero Card Pool
 
-/// Пул карт класса героя
-/// Карты, доступные всем героям определённого класса
-struct ClassCardPool {
-    /// Класс героя
-    let heroClass: HeroClass
+/// Пул карт героя
+/// Карты, доступные конкретному герою
+struct HeroCardPool {
+    /// ID героя
+    let heroID: String
 
-    /// Стартовые карты класса (добавляются в начальную колоду)
+    /// Стартовые карты (добавляются в начальную колоду)
     let startingCards: [CardDefinition]
 
-    /// Карты для покупки (доступны в магазине только этому классу)
+    /// Карты для покупки (доступны в магазине только этому герою)
     let purchasableCards: [CardDefinition]
 
     /// Карты улучшения (замена базовых карт на улучшенные)

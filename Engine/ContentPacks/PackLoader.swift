@@ -157,15 +157,17 @@ enum PackLoader {
         if isDirectory(url) {
             let files = try jsonFiles(in: url)
             for file in files {
-                let fileHeroes = try loadJSONArray(StandardHeroDefinition.self, from: file)
+                let fileHeroes = try loadJSONArray(PackHeroDefinition.self, from: file)
                 for hero in fileHeroes {
-                    heroes[hero.id] = hero
+                    let standard = hero.toStandard()
+                    heroes[standard.id] = standard
                 }
             }
         } else {
-            let fileHeroes = try loadJSONArray(StandardHeroDefinition.self, from: url)
+            let fileHeroes = try loadJSONArray(PackHeroDefinition.self, from: url)
             for hero in fileHeroes {
-                heroes[hero.id] = hero
+                let standard = hero.toStandard()
+                heroes[standard.id] = standard
             }
         }
 
@@ -502,4 +504,91 @@ struct AnchorBalanceConfig: Codable {
         breachThreshold: 0,
         decayPerTurn: 5
     )
+}
+
+// MARK: - Pack Hero Definition
+
+/// JSON структура для stats героя
+private struct PackHeroStats: Codable {
+    let health: Int
+    let maxHealth: Int
+    let strength: Int
+    let dexterity: Int
+    let constitution: Int
+    let intelligence: Int
+    let wisdom: Int
+    let charisma: Int
+    let faith: Int
+    let maxFaith: Int
+    let startingBalance: Int
+
+    func toHeroStats() -> HeroStats {
+        HeroStats(
+            health: health,
+            maxHealth: maxHealth,
+            strength: strength,
+            dexterity: dexterity,
+            constitution: constitution,
+            intelligence: intelligence,
+            wisdom: wisdom,
+            charisma: charisma,
+            faith: faith,
+            maxFaith: maxFaith,
+            startingBalance: startingBalance
+        )
+    }
+}
+
+/// JSON-совместимое определение героя для загрузки из Content Pack
+/// Статы загружаются из JSON (data-driven)
+private struct PackHeroDefinition: Codable {
+    let id: String
+    let name: String
+    let nameRu: String?
+    let description: String
+    let descriptionRu: String?
+    let icon: String
+    let baseStats: PackHeroStats
+    let abilityId: String
+    let startingDeckCardIds: [String]
+    let availability: String?
+
+    /// Конвертация в StandardHeroDefinition
+    func toStandard() -> StandardHeroDefinition {
+        // Определяем доступность
+        let heroAvailability: HeroAvailability
+        switch availability?.lowercased() {
+        case "always_available", nil:
+            heroAvailability = .alwaysAvailable
+        case let str where str?.hasPrefix("requires_unlock:") == true:
+            let condition = String(str!.dropFirst("requires_unlock:".count))
+            heroAvailability = .requiresUnlock(condition: condition)
+        case let str where str?.hasPrefix("dlc:") == true:
+            let packId = String(str!.dropFirst("dlc:".count))
+            heroAvailability = .dlc(packID: packId)
+        default:
+            heroAvailability = .alwaysAvailable
+        }
+
+        // Локализованное имя и описание
+        let localizedName = Locale.current.language.languageCode?.identifier == "ru" ? (nameRu ?? name) : name
+        let localizedDescription = Locale.current.language.languageCode?.identifier == "ru" ? (descriptionRu ?? description) : description
+
+        // Получаем способность по ID
+        guard let ability = HeroAbility.forAbilityId(abilityId) else {
+            print("PackLoader: ERROR - Unknown ability ID '\(abilityId)' for hero '\(id)'")
+            fatalError("Missing ability definition for '\(abilityId)'. Add it to HeroAbility.forAbilityId() or hero_abilities.json")
+        }
+
+        return StandardHeroDefinition(
+            id: id,
+            name: localizedName,
+            description: localizedDescription,
+            icon: icon,
+            baseStats: baseStats.toHeroStats(),
+            specialAbility: ability,
+            startingDeckCardIDs: startingDeckCardIds,
+            availability: heroAvailability
+        )
+    }
 }

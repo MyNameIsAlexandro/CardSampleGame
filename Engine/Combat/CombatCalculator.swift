@@ -165,14 +165,14 @@ struct CombatCalculator {
         // Бросок кубиков
         var totalDice = 1 + bonusDice
 
-        // Способность Следопыта: +1 кубик при первой атаке
-        let rangerBonus = player.getHeroClassBonusDice(isFirstAttack: isFirstAttack)
-        if rangerBonus > 0 {
-            totalDice += rangerBonus
+        // Способность героя: бонус кубиков (например, Следопыт при первой атаке)
+        let heroBonusDice = player.getHeroBonusDice(isFirstAttack: isFirstAttack)
+        if heroBonusDice > 0 {
+            totalDice += heroBonusDice
             modifiers.append(CombatModifier(
                 source: .heroAbility,
                 value: 0,  // Не добавляет к атаке напрямую, только кубик
-                description: "Выслеживание (+\(rangerBonus) кубик)"
+                description: "Способность героя (+\(heroBonusDice) кубик)"
             ))
         }
 
@@ -214,23 +214,13 @@ struct CombatCalculator {
                 ))
             }
 
-            // Способность Воина: +2 при HP < 50%
-            let warriorBonus = player.heroClass == .warrior && player.health < player.maxHealth / 2
-            if warriorBonus {
+            // Бонус урона от способности героя (учитывает условия типа HP < 50% или цель на полном HP)
+            let heroDamageBonus = player.getHeroDamageBonus(targetFullHP: isTargetFullHP)
+            if heroDamageBonus > 0 {
                 damageModifiers.append(CombatModifier(
                     source: .heroAbility,
-                    value: +2,
-                    description: "Ярость (HP < 50%)"
-                ))
-            }
-
-            // Способность Тени: +3 по полным HP
-            let shadowBonus = player.heroClass == .shadow && isTargetFullHP
-            if shadowBonus {
-                damageModifiers.append(CombatModifier(
-                    source: .heroAbility,
-                    value: +3,
-                    description: "Засада (враг на полном HP)"
+                    value: heroDamageBonus,
+                    description: "Способность героя"
                 ))
             }
 

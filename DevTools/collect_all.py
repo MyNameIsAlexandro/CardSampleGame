@@ -17,7 +17,7 @@ IGNORE_DIRS = {
 # Дополнительные файлы из корня для включения в документацию
 ROOT_DOCS_TO_INCLUDE = [
     "AUDIT_ENGINE_FIRST_v1_1.md",
-    "CHANGELOG_ENGINE_FIRST.md"
+    "HANDOFF.md"
 ]
 
 # --- ФУНКЦИИ ---

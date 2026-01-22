@@ -179,6 +179,42 @@ final class PackLoaderTests: XCTestCase {
         }
     }
 
+    func testHeroesHaveValidBaseStats() throws {
+        // Given
+        let manifest = try PackManifest.load(from: testPackURL)
+        let pack = try PackLoader.load(manifest: manifest, from: testPackURL)
+
+        // Then - Heroes should have valid base stats
+        for (id, hero) in pack.heroes {
+            XCTAssertGreaterThan(hero.baseStats.maxHealth, 0, "Hero '\(id)' has invalid maxHealth")
+            XCTAssertGreaterThan(hero.baseStats.maxFaith, 0, "Hero '\(id)' has invalid maxFaith")
+        }
+    }
+
+    func testHeroesHaveSpecialAbility() throws {
+        // Given
+        let manifest = try PackManifest.load(from: testPackURL)
+        let pack = try PackLoader.load(manifest: manifest, from: testPackURL)
+
+        // Then - Heroes should have special ability from their class
+        for (id, hero) in pack.heroes {
+            XCTAssertFalse(hero.specialAbility.id.isEmpty, "Hero '\(id)' has no special ability")
+        }
+    }
+
+    func testHeroesHaveValidBaseStats() throws {
+        // Given
+        let manifest = try PackManifest.load(from: testPackURL)
+        let pack = try PackLoader.load(manifest: manifest, from: testPackURL)
+
+        // Then - All heroes should have valid base stats from JSON
+        for (id, hero) in pack.heroes {
+            XCTAssertGreaterThan(hero.baseStats.health, 0, "Hero '\(id)' должен иметь health > 0")
+            XCTAssertGreaterThan(hero.baseStats.maxHealth, 0, "Hero '\(id)' должен иметь maxHealth > 0")
+            XCTAssertGreaterThan(hero.baseStats.maxFaith, 0, "Hero '\(id)' должен иметь maxFaith > 0")
+        }
+    }
+
     // MARK: - Error Handling Tests
 
     func testLoadManifestFromInvalidPath() {
