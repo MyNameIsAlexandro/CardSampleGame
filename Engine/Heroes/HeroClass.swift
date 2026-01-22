@@ -3,25 +3,31 @@ import Foundation
 /// Класс героя определяет начальные характеристики и стиль игры
 /// Документация: GAME_DESIGN_DOCUMENT.md
 enum HeroClass: String, CaseIterable, Codable {
-    case warrior = "Воин"           // Высокая сила, много HP
-    case mage = "Маг"               // Высокий интеллект, много веры
-    case ranger = "Следопыт"        // Высокая ловкость, сбалансирован
-    case priest = "Жрец"            // Высокая мудрость, исцеление
-    case shadow = "Тень"            // Скрытность, тёмная магия
+    case warrior        // Высокая сила, много HP
+    case mage           // Высокий интеллект, много веры
+    case ranger         // Высокая ловкость, сбалансирован
+    case priest         // Высокая мудрость, исцеление
+    case shadow         // Скрытность, тёмная магия
+
+    /// Локализованное имя класса для UI
+    var displayName: String {
+        switch self {
+        case .warrior: return L10n.heroClassWarrior.localized
+        case .mage: return L10n.heroClassMage.localized
+        case .ranger: return L10n.heroClassRanger.localized
+        case .priest: return L10n.heroClassPriest.localized
+        case .shadow: return L10n.heroClassShadow.localized
+        }
+    }
 
     /// Описание класса для UI
     var description: String {
         switch self {
-        case .warrior:
-            return "Мастер ближнего боя. Высокая сила и живучесть."
-        case .mage:
-            return "Владеет магией. Сильные заклинания, но хрупок."
-        case .ranger:
-            return "Следопыт и охотник. Сбалансированные характеристики."
-        case .priest:
-            return "Служитель Света. Исцеление и защита от тьмы."
-        case .shadow:
-            return "Агент Нави. Тёмная магия и скрытность."
+        case .warrior: return L10n.heroClassWarriorDesc.localized
+        case .mage: return L10n.heroClassMageDesc.localized
+        case .ranger: return L10n.heroClassRangerDesc.localized
+        case .priest: return L10n.heroClassPriestDesc.localized
+        case .shadow: return L10n.heroClassShadowDesc.localized
         }
     }
 
@@ -115,16 +121,11 @@ enum HeroClass: String, CaseIterable, Codable {
     /// Особая способность класса
     var specialAbility: String {
         switch self {
-        case .warrior:
-            return "Ярость: +2 к урону при HP ниже 50%"
-        case .mage:
-            return "Медитация: +1 вера в конце хода"
-        case .ranger:
-            return "Выслеживание: +1 кубик при первой атаке"
-        case .priest:
-            return "Благословение: -1 урон от тьмы"
-        case .shadow:
-            return "Засада: +3 урона по полным HP"
+        case .warrior: return L10n.heroAbilityWarrior.localized
+        case .mage: return L10n.heroAbilityMage.localized
+        case .ranger: return L10n.heroAbilityRanger.localized
+        case .priest: return L10n.heroAbilityPriest.localized
+        case .shadow: return L10n.heroAbilityShadow.localized
         }
     }
 

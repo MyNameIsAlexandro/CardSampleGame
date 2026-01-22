@@ -600,3 +600,416 @@
 "combat.damage.calc.title" = "Расчёт урона:";
 "combat.base.value" = "Базовый: %d";
 "combat.total.damage" = "= %d";
+
+// Combat UI labels (Audit v2.1 Item 5)
+"combat.shield" = "Щит";
+"combat.defend" = "Укрытие";
+"combat.fallen" = "Вы пали в бою...";
+"combat.stats.turns" = "Ходов";
+"combat.stats.damage.dealt" = "Урон нанесён";
+"combat.stats.damage.taken" = "Урон получен";
+"combat.stats.cards.played" = "Карт сыграно";
+"combat.attack.vs.defense" = "Атака %d vs Защита %d";
+
+// MARK: - WorldMapView (Full localization - Audit v2.1)
+
+// Loading & Alerts
+"world.loading" = "Загрузка мира...";
+"world.event" = "Событие мира";
+"button.understood" = "Понятно";
+"day.number" = "День %d";
+"world.label" = "Мир";
+"days.in.journey" = "Дней в пути";
+"button.confirm" = "Подтвердить";
+"nothing.found" = "Ничего не найдено";
+"no.events.in.region" = "В этом регионе сейчас нет доступных событий для исследования.";
+"cards.received" = "Получены карты!";
+"added.to.deck" = "Добавлены в вашу колоду";
+"button.great" = "Отлично!";
+"you.are.here" = "Вы здесь";
+
+// Region descriptions
+"region.desc.stable" = "Регион спокоен. Влияние Нави минимально. Здесь безопасно отдыхать и торговать.";
+"region.desc.borderland" = "Регион балансирует между Явью и Навью. Повышенная опасность, но и больше возможностей.";
+"region.desc.breach" = "Навь активно проникает в регион. Очень опасно. Требуется восстановление якоря.";
+
+// Combat modifiers
+"combat.modifiers" = "Модификаторы боя";
+"enemy.strength" = "Сила врагов:";
+"enemy.defense" = "Защита врагов:";
+"enemy.health" = "Здоровье врагов:";
+
+// Anchor
+"anchor.of.yav" = "Якорь Яви";
+"anchor.integrity" = "Целостность:";
+"anchor.influence" = "Влияние:";
+
+// Balance names
+"balance.light" = "Свет";
+"balance.neutral" = "Нейтрально";
+"balance.dark" = "Тьма";
+
+// Actions
+"available.actions" = "Доступные действия";
+"day.word.1" = "день";
+"day.word.234" = "дня";
+"action.travel.to" = "Отправиться (%d %@)";
+"action.region.far" = "Регион далеко";
+"action.move.to.region.hint" = "Переместитесь в регион, чтобы взаимодействовать с ним";
+"action.region.not.directly.accessible" = "Регион недоступен напрямую - сначала идите в соседний регион";
+"action.rest.with.health" = "Отдохнуть (+%d ❤️)";
+"action.strengthen.anchor.cost" = "Укрепить якорь (-%d ✨, +%d%%)";
+
+// Quest
+"active.quests.in.region" = "Активные квесты в регионе";
+"quest.progress" = "Прогресс:";
+
+// Journal
+"journal.empty" = "Журнал пуст. Ваши приключения ещё впереди...";
+"journal.title" = "Журнал";
+
+// Confirmations
+"confirmation.title" = "Подтверждение";
+"confirm.travel.to" = "Отправиться в регион '%@'? Это займёт %d %@.";
+"confirm.rest" = "Отдохнуть в этом месте? Вы восстановите %d здоровья.";
+"confirm.trade" = "Торговая система пока не реализована.";
+"confirm.strengthen.anchor" = "Укрепить якорь? Это стоит %d веры и добавит %d%% целостности.";
+"confirm.explore" = "Исследовать регион? Это займёт день.";
+"location.unknown" = "Неизвестно";
+
+// Log entries
+"log.event.rest" = "Отдых";
+"log.choice.rest" = "Решил отдохнуть";
+"log.outcome.health.restored" = "Восстановлено здоровье";
+"log.event.strengthen.anchor" = "Укрепление якоря";
+"log.choice.faith.spent" = "Потрачена вера";
+"log.outcome.anchor.strengthened" = "Якорь укреплён";
+
+// Warnings
+"warning.title" = "Предупреждение";
+"warning.high.danger" = "В этом регионе повышенная опасность. Будьте осторожны!";
+"action.impossible" = "Действие невозможно";
+"go.through.first" = "Сначала идите через: %@";
+
+// MARK: - HeroSelectionView / HeroPanel
+
+"hero.class.default" = "Странник";
+"hero.select.title" = "Выберите героя";
+"hero.select.subtitle" = "Каждый класс имеет уникальные характеристики и способности";
+"hero.start.game" = "Начать игру за %@";
+"hero.select.class" = "Выберите класс героя";
+"hero.path" = "Путь: %@";
+"path.light" = "Свет";
+"path.dark" = "Тьма";
+"path.balance" = "Равновесие";
+
+// MARK: - GameBoardView
+
+"enemy.defeated" = "Враг побеждён!";
+"returning.to.event" = "Возвращаемся к событию...";
+"roll.result" = "Бросок: %d + Сила: %d = %d\nЗащита врага: %d\nУрон: %d";
+"enemy.attacks.you" = "Враг атакует вас и наносит %d урона!\nВаше здоровье: %d";
+"marketplace" = "Рынок";
+"no.cards.for.purchase" = "Нет карт для покупки";
+"victory.message" = "Вы защитили земли от тьмы!";
+"defeat.message" = "Тьма одержала победу...";
+"button.buy" = "Купить";
+
+// MARK: - CardView
+
+"card.stat.health" = "Здоровье";
+"card.stat.strength" = "Сила";
+"card.stat.defense" = "Защита";
+
+// MARK: - PlayerHandView
+
+"no.cards.in.hand" = "Нет карт в руке";
+
+// MARK: - GameBoardView (Full localization - Audit v2.1)
+
+// Combat alerts
+"combat.alert.success" = "Успех!";
+"combat.alert.fail" = "Провал";
+"combat.roll.result.success" = "Бросок: %d + Сила: %d = %d\nЗащита врага: %d\nУрон: %d";
+"combat.roll.result.fail" = "Бросок: %d + Сила: %d = %d\nЗащита врага: %d\nВраг атакует вас!";
+"combat.enemy.attack.title" = "Атака врага!";
+"combat.enemy.attack.message" = "Враг атакует вас и наносит %d урона!\nВаше здоровье: %d";
+
+// Pause menu
+"world.map" = "Карта Мира";
+
+// Stats display
+"stats.encounters.defeated" = "Побеждено столкновений";
+"stats.turns.made" = "Ходов сделано";
+"stats.turns.survived" = "Ходов выжито";
+
+// Card types for market
+"card.type.resource" = "Ресурс";
+"card.type.attack" = "Атака";
+"card.type.defense" = "Защита";
+"card.type.special" = "Особая";
+
+// Phase progress bar labels
+"phase.progress.exploration" = "Исследование";
+"phase.progress.encounter" = "Встреча";
+"phase.progress.player.turn" = "Ход игрока";
+"phase.progress.enemy.turn" = "Ход врага";
+"phase.progress.end.turn" = "Конец хода";
+
+// MARK: - Models/ExplorationModels - RegionState
+"region.state.stable" = "Стабильная";
+"region.state.borderland" = "Пограничье";
+"region.state.breach" = "Прорыв Нави";
+"combat.modifier.borderland" = "Пограничье: враги +1 сила, +1 защита";
+"combat.modifier.breach" = "Прорыв Нави: враги +2 сила, +2 защита";
+
+// MARK: - Models/ExplorationModels - RegionType
+"region.type.forest" = "Лес";
+"region.type.swamp" = "Болото";
+"region.type.mountain" = "Горы";
+"region.type.settlement" = "Поселение";
+"region.type.water" = "Водная зона";
+"region.type.wasteland" = "Пустошь";
+"region.type.sacred" = "Священное место";
+
+// MARK: - Models/ExplorationModels - AnchorType
+"anchor.type.shrine" = "Капище";
+"anchor.type.barrow" = "Курган";
+"anchor.type.sacred.tree" = "Священный Дуб";
+"anchor.type.stone.idol" = "Каменная Баба";
+"anchor.type.spring" = "Родник";
+"anchor.type.chapel" = "Часовня";
+"anchor.type.temple" = "Храм";
+"anchor.type.cross" = "Обетный Крест";
+
+// MARK: - Models/ExplorationModels - EventType
+"event.type.combat" = "Бой";
+"event.type.ritual" = "Ритуал";
+"event.type.narrative" = "Встреча";
+"event.type.exploration" = "Исследование";
+"event.type.world.shift" = "Сдвиг Мира";
+
+// MARK: - Models/Player - Balance path
+"balance.path.dark" = "Путь Тьмы";
+"balance.path.neutral" = "Нейтральный";
+"balance.path.light" = "Путь Света";
+"balance.path.unknown" = "Неизвестно";
+
+// MARK: - CardGameApp - Loading messages
+"loading.default" = "Загрузка...";
+"loading.search.packs" = "Поиск контент-паков...";
+"loading.content" = "Загрузка контента...";
+"loading.content.not.found" = "Контент не найден";
+"loading.ready" = "Готово!";
+"loading.content.loaded" = "Контент загружен";
+"loading.error" = "Ошибка загрузки";
+"app.title" = "Сумрачные Пределы";
+
+// MARK: - ViewModels/GameViewModel
+"default.player.name" = "Герой";
+"region.unknown" = "Неизвестно";
+"journal.entry.rest" = "Отдых";
+"journal.entry.rest.choice" = "Решил отдохнуть";
+"journal.entry.rest.outcome" = "Здоровье восстановлено";
+"journal.entry.anchor" = "Укрепление якоря";
+"journal.entry.anchor.choice" = "Потрачено веры";
+"journal.entry.anchor.outcome" = "Якорь укреплён";
+"choice.made" = "Выбор сделан";
+
+// MARK: - WorldMapView - Region descriptions
+"region.desc.stable" = "Регион спокоен. Влияние Нави минимально. Здесь безопасно отдыхать и торговать.";
+"region.desc.borderland" = "Регион балансирует между Явью и Навью. Повышенная опасность, но и больше возможностей.";
+"region.desc.breach" = "Навь активно проникает в регион. Очень опасно. Требуется восстановление якоря.";
+
+// MARK: - WorldMapView - Actions
+"action.travel" = "Отправиться (%d %@)";
+"action.travel.far" = "Регион далеко";
+"action.rest" = "Отдохнуть (+%d ❤️)";
+"action.trade" = "Торговать";
+"action.strengthen.anchor" = "Укрепить якорь (-%d ✨, +20%%)";
+"action.explore" = "Исследовать";
+"day.word.1" = "день";
+"day.word.234" = "дня";
+
+// MARK: - WorldMapView - Confirmations
+"confirm.travel" = "Отправиться в регион '%@'? Это займёт %d %@ пути.";
+"confirm.rest" = "Отдохнуть в этом месте? Вы восстановите %d здоровья.";
+"confirm.trade" = "Торговая система пока не реализована.";
+"confirm.strengthen.anchor" = "Укрепить якорь? Это стоит %d веры и добавит 20%% целостности.";
+"confirm.explore" = "Исследовать регион? Это займёт день.";
+"confirmation.title" = "Подтверждение";
+
+// MARK: - WorldMapView - Journal
+"journal.title" = "Журнал";
+"journal.entry.travel" = "Путешествие";
+"journal.entry.travel.choice" = "Отправился в путь";
+"journal.entry.travel.outcome" = "Прибыл в %@";
+"journal.entry.explore" = "Исследование";
+"journal.entry.explore.choice" = "Исследовал регион";
+"journal.entry.explore.nothing" = "Ничего интересного не найдено";
+
+// MARK: - WorldMapView - Error messages
+"error.unknown" = "Неизвестная ошибка";
+"error.region.far" = "Этот регион слишком далеко. Сначала переместитесь в соседний регион.";
+"error.region.inaccessible" = "Этот регион недоступен.";
+"error.health.low" = "У вас слишком мало здоровья для этого действия.";
+"error.insufficient.resource" = "Недостаточно %@: нужно %d, есть %d.";
+"error.in.combat" = "Невозможно во время боя.";
+"error.finish.event" = "Сначала завершите текущее событие.";
+"error.action.failed" = "Действие невозможно: %@";
+
+// MARK: - GameViewModel Journal entries (used in GameViewModel.swift)
+"journal.rest.title" = "Отдых";
+"journal.rest.choice" = "Решил отдохнуть";
+"journal.rest.outcome" = "Здоровье восстановлено";
+"journal.anchor.title" = "Укрепление якоря";
+"journal.anchor.choice" = "Потрачено веры";
+"journal.anchor.outcome" = "Якорь укреплён";
+"journal.choice.made" = "Выбор сделан";
+
+// MARK: - WorldMapView - Action buttons (localized titles)
+"action.rest.heal" = "Отдохнуть (+%d ❤️)";
+"action.trade.name" = "Торговать";
+"action.explore.name" = "Исследовать";
+"action.anchor.cost" = "Укрепить якорь (-%d ✨, +%d%%)";
+
+// MARK: - CurseType display names
+"curse.weakness" = "Слабость";
+"curse.fear" = "Страх";
+"curse.exhaustion" = "Истощение";
+"curse.greed" = "Жадность";
+"curse.shadow.of.nav" = "Тень Нави";
+"curse.blood.curse" = "Проклятие крови";
+"curse.seal.of.nav" = "Печать Нави";
+
+// MARK: - DayEvent notifications
+"dayevent.tension.title" = "Напряжение растёт";
+"dayevent.tension.description" = "Влияние Нави усиливается. Напряжение мира: %d%%";
+"dayevent.region.degraded.title" = "Регион деградирует";
+"dayevent.region.degraded.description" = "%@ переходит в состояние: %@";
+"dayevent.world.improving.title" = "Мир восстанавливается";
+"dayevent.world.improving.description" = "Влияние Яви укрепляется, напряжение спадает";
+
+// MARK: - World log messages
+"log.tension.increased" = "Напряжение мира выросло до %d%% (+%d)";
+"log.anchor.resists" = "Якорь в %@ сопротивляется влиянию Нави (%d%% целостности)";
+"log.region.degraded" = "%@ деградировал до %@";
+"log.world.change" = "Изменение мира";
+"log.world" = "Мир";
+
+// MARK: - Travel log messages
+"log.travel.title" = "Путешествие";
+"log.travel.choice" = "Отправился в %@";
+"log.travel.outcome.day" = "Добрался за %d день";
+"log.travel.outcome.days" = "Добрался за %d дня";
+
+// MARK: - Combat UI strings
+"combat.turns.stats" = "Ходов: %d, урон нанесён: %d, урон получен: %d";
+"combat.action.cost" = "(-1 действие)";
+"combat.monster.defeated" = "%@ повержен!";
+"combat.continue" = "Продолжить";
+"combat.return" = "Вернуться";
+"combat.hit.result" = "✅ ПОПАДАНИЕ!";
+"combat.miss.result" = "❌ ПРОМАХ!";
+"combat.dice.roll" = "🎲 БРОСОК КУБИКОВ";
+"combat.defense.value" = "🛡️ Защита: %d";
+"combat.damage.value" = "💥 Урон: %d";
+
+// MARK: - Combat log messages
+"combat.log.battle.start.enemy" = "Бой начался! Враг: %@";
+"combat.log.actions.info" = "У вас %d действия за ход";
+"combat.log.hit" = "⚔️ ПОПАДАНИЕ! Бросок: %d vs %d. Урон: %d (HP врага: %d)";
+"combat.log.miss" = "⚔️ ПРОМАХ! (%d vs %d)";
+"combat.log.cover" = "🛡️ Укрытие! +%d к щиту (всего: %d)";
+"combat.log.strength.bonus" = "   💪 Бонус силы: +%d";
+"combat.log.insufficient.faith" = "❌ Недостаточно веры для %@ (нужно: %d, есть: %d)";
+"combat.log.faith.spent" = "💫 Потрачено %d веры";
+"combat.log.shield.card" = "🛡️ %@: +%d к щиту (всего: %d)";
+"combat.log.attack.bonus" = "⚔️ %@: +%d к урону следующей атаки";
+"combat.log.spell.cast" = "✨ Заклинание: %@";
+"combat.log.card.played" = "🃏 Сыграна: %@";
+"combat.log.heal.effect" = "   💚 Исцеление +%d HP";
+"combat.log.damage.effect" = "   💥 Урон %d (HP врага: %d)";
+"combat.log.draw.cards" = "   🃏 Взято карт: %d";
+"combat.log.faith.gained" = "   ✨ Вера +%d";
+"combat.log.curse.removed" = "   🌟 Снято проклятие";
+"combat.log.bonus.dice" = "   🎲 +%d кубик(ов) к следующей атаке";
+"combat.log.reroll" = "   🔄 Перебросок: +1 кубик (лучший результат)";
+"combat.log.balance.shift" = "   ⚖️ Баланс сдвинут к %@ на %d";
+"combat.log.curse.damage" = "   💀 Проклятие %@: %d урона врагу";
+"combat.log.spirit.summoned" = "   👻 Призван дух из %@ (сила: %d)";
+"combat.log.spirit.attack" = "   👻 Дух атакует! Урон: %d";
+
+// MARK: - Realm names
+"realm.yav" = "Явь";
+"realm.nav" = "Навь";
+"realm.prav" = "Правь";
+"balance.light" = "Свету";
+"balance.dark" = "Тьме";
+"balance.neutral" = "Равновесию";
+
+// MARK: - Hero Classes
+"hero.class.warrior" = "Воин";
+"hero.class.mage" = "Маг";
+"hero.class.ranger" = "Следопыт";
+"hero.class.priest" = "Жрец";
+"hero.class.shadow" = "Тень";
+
+"hero.class.warrior.desc" = "Мастер ближнего боя. Высокая сила и живучесть.";
+"hero.class.mage.desc" = "Владеет магией. Сильные заклинания, но хрупок.";
+"hero.class.ranger.desc" = "Следопыт и охотник. Сбалансированные характеристики.";
+"hero.class.priest.desc" = "Служитель Света. Исцеление и защита от тьмы.";
+"hero.class.shadow.desc" = "Агент Нави. Тёмная магия и скрытность.";
+
+"hero.ability.warrior" = "Ярость: +2 к урону при HP ниже 50%";
+"hero.ability.mage" = "Медитация: +1 вера в конце хода";
+"hero.ability.ranger" = "Выслеживание: +1 кубик при первой атаке";
+"hero.ability.priest" = "Благословение: -1 урон от тьмы";
+"hero.ability.shadow" = "Засада: +3 урона по полным HP";
+
+// MARK: - Hero Ability Definitions
+"ability.warrior.rage.name" = "Ярость";
+"ability.warrior.rage.desc" = "+2 к урону при HP ниже 50%";
+"ability.mage.meditation.name" = "Медитация";
+"ability.mage.meditation.desc" = "+1 вера в конце каждого хода";
+"ability.ranger.tracking.name" = "Выслеживание";
+"ability.ranger.tracking.desc" = "+1 кубик атаки при первой атаке в бою";
+"ability.priest.blessing.name" = "Благословение";
+"ability.priest.blessing.desc" = "-1 урон от тёмных источников";
+"ability.shadow.ambush.name" = "Засада";
+"ability.shadow.ambush.desc" = "+3 урона по врагам с полным здоровьем";
+
+// MARK: - Curse Definitions (Config)
+"curse.weakness.name" = "Слабость";
+"curse.weakness.description" = "Уменьшает наносимый урон";
+"curse.fear.name" = "Страх";
+"curse.fear.description" = "Увеличивает получаемый урон";
+"curse.exhaustion.name" = "Истощение";
+"curse.exhaustion.description" = "Уменьшает количество действий";
+"curse.greed.name" = "Алчность";
+"curse.greed.description" = "Тянет к тьме";
+"curse.shadow.of.nav.name" = "Тень Нави";
+"curse.shadow.of.nav.description" = "Увеличивает урон, но сдвигает к тьме";
+"curse.blood.curse.name" = "Кровавое проклятие";
+"curse.blood.curse.description" = "Лечит при убийстве, но сдвигает к тьме";
+"curse.seal.of.nav.name" = "Печать Нави";
+"curse.seal.of.nav.description" = "Блокирует Sustain карты";
+
+// MARK: - Action Errors
+"error.invalid.action" = "Недопустимое действие: %@";
+"error.region.not.accessible" = "Регион %@ недоступен";
+"error.region.not.neighbor" = "Регион %@ не является соседним";
+"error.action.not.available" = "%@ недоступно в регионе типа %@";
+"error.insufficient.resources" = "Нужно %2$d %1$@, есть %3$d";
+"error.health.too.low" = "Слишком мало здоровья для этого действия";
+"error.game.not.in.progress" = "Игра не запущена";
+"error.combat.in.progress" = "Невозможно во время боя";
+"error.event.in.progress" = "Сначала завершите текущее событие";
+"error.no.active.event" = "Нет активного события";
+"error.no.active.combat" = "Нет активного боя";
+"error.event.not.found" = "Событие %@ не найдено";
+"error.invalid.choice.index" = "Выбор %d недействителен (максимум: %d)";
+"error.choice.requirements.not.met" = "Невозможно выбрать: %@";
+"error.card.not.in.hand" = "Карта %@ не в руке";
+"error.not.enough.actions" = "Недостаточно действий";
+"error.invalid.target" = "Недопустимая цель";
