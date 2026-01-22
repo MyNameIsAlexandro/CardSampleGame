@@ -114,7 +114,7 @@
 |-----------|--------|----------|
 | Engine/Core/ | ✅ Готово | Протоколы, TwilightGameEngine, TwilightGameAction |
 | Engine/Config/ | ✅ Готово | TwilightMarchesConfig.swift |
-| Engine/Heroes/ | ✅ Готово | HeroClass, HeroDefinition, HeroRegistry |
+| Engine/Heroes/ | ✅ Готово | HeroDefinition, HeroRegistry (data-driven из heroes.json) |
 | Engine/Cards/ | ✅ Готово | CardDefinition, CardRegistry, CardOwnership |
 | Engine/Combat/ | ✅ Готово | CombatCalculator с детализацией |
 | Engine/Data/Definitions/ | ✅ Готово | Все Definition-структуры созданы |
@@ -128,7 +128,7 @@
 
 **Текущее состояние:**
 - `Engine/Core/` — протоколы, TwilightGameEngine (центральный оркестратор), TwilightGameAction
-- `Engine/Heroes/` — модуль героев (HeroClass, HeroRegistry) — [документация](../Engine/Heroes/HEROES_MODULE.md)
+- `Engine/Heroes/` — модуль героев (HeroDefinition, HeroRegistry) — [документация](../Engine/Heroes/HEROES_MODULE.md)
 - `Engine/Cards/` — модуль карт (CardDefinition, CardRegistry) — [документация](../Engine/Cards/CARDS_MODULE.md)
 - `Engine/Combat/` — модуль боя (CombatCalculator с детализацией)
 - `Engine/Events/` — EventPipeline (selection + resolution), MiniGameDispatcher
@@ -199,11 +199,10 @@ CardSampleGame/
 │   ├── Config/              # Конфигурация игры (Layer 2)
 │   │   ├── TwilightMarchesConfig.swift  # "Картридж" Сумрачных Пределов
 │   │   └── DegradationRules.swift  # Правила деградации
-│   ├── Heroes/              # Модуль героев
-│   │   ├── HeroClass.swift         # Классы героев (Warrior, Mage, etc.)
+│   ├── Heroes/              # Модуль героев (data-driven)
 │   │   ├── HeroDefinition.swift    # Протокол определения героя
 │   │   ├── HeroAbility.swift       # Система способностей
-│   │   ├── HeroRegistry.swift      # Реестр героев
+│   │   ├── HeroRegistry.swift      # Реестр героев (загрузка из JSON)
 │   │   └── HEROES_MODULE.md        # Документация модуля
 │   ├── Cards/               # Модуль карт
 │   │   ├── CardDefinition.swift    # Протокол определения карты

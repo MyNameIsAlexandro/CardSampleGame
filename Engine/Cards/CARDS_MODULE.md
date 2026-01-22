@@ -253,17 +253,13 @@ CardRegistry.shared.registerSignatureCards(HeroSignatureCards(
 ## Интеграция с Heroes Module
 
 ```swift
-// Получить полную стартовую колоду героя
-func getFullStartingDeck(heroID: String, heroClass: HeroClass) -> [Card] {
-    // 1. Базовые карты из HeroRegistry
-    let heroDefinition = HeroRegistry.shared.hero(id: heroID)
-    let cardIDs = heroDefinition?.startingDeckCardIDs ?? []
+// Получить стартовую колоду героя по ID
+let startingDeck = CardRegistry.shared.startingDeck(forHeroID: "warrior_ragnar")
 
-    // 2. Карты из CardRegistry
-    return CardRegistry.shared.startingDeck(
-        forHeroID: heroID,
-        heroClass: heroClass
-    )
+// Или через HeroDefinition
+if let hero = HeroRegistry.shared.hero(id: "warrior_ragnar") {
+    let cardIDs = hero.startingDeckCardIDs // ["strike_basic", "strike_basic", ...]
+    let deck = CardRegistry.shared.startingDeck(forHeroID: hero.id)
 }
 ```
 
