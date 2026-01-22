@@ -23,7 +23,9 @@
 | "Где сейчас лежит этот класс? Какой статус у фичи?" | [TECHNICAL_DOCUMENTATION.md](./TECHNICAL_DOCUMENTATION.md) | **КАРТА КОДА** (Map) |
 | "Готова ли фича? Как её проверить?" | [QA_ACT_I_CHECKLIST.md](./QA_ACT_I_CHECKLIST.md) | **СУДЬЯ** (Judge) |
 | "Какой план миграции к Engine v1.0?" | [MIGRATION_PLAN.md](./MIGRATION_PLAN.md) | **ПЛАН** (Roadmap) |
+| "Как создать Content Pack?" | [CONTENT_PACK_GUIDE.md](./CONTENT_PACK_GUIDE.md) | **РУКОВОДСТВО** (Guide) |
 | "Что мы уже сделали и зафиксировали?" | [CAMPAIGN_IMPLEMENTATION_REPORT.md](./CAMPAIGN_IMPLEMENTATION_REPORT.md) | **ИСТОРИЯ** (History) 🔒 |
+| "Что изменилось с последнего аудита?" | [CHANGELOG.md](../CHANGELOG.md) | **ИЗМЕНЕНИЯ** (Changelog) |
 
 ---
 
@@ -148,22 +150,24 @@
 |------|-------|--------|
 | ENGINE_ARCHITECTURE.md | ~760 | ✅ Source of Truth |
 | EVENT_MODULE_ARCHITECTURE.md | ~450 | ✅ Active |
-| MIGRATION_PLAN.md | ~450 | ✅ Phase 1-3 Done |
+| MIGRATION_PLAN.md | ~450 | ✅ Phase 1-5 Done |
 | EXPLORATION_CORE_DESIGN.md | ~3100 | ✅ Active |
-| GAME_DESIGN_DOCUMENT.md | ~1050 | ✅ Active |
+| GAME_DESIGN_DOCUMENT.md | ~950 | ✅ Active |
 | TECHNICAL_DOCUMENTATION.md | ~1100 | ✅ Active |
 | QA_ACT_I_CHECKLIST.md | ~700 | ✅ Active |
+| CONTENT_PACK_GUIDE.md | ~420 | ✅ Active (RU) |
 | CAMPAIGN_IMPLEMENTATION_REPORT.md | ~500 | 🔒 Frozen v0.6.0 |
+| CHANGELOG.md | ~100 | ✅ Active |
 | **INDEX.md** | — | 📍 Вы здесь |
 
 ### Модульная документация (Engine)
 
 | Файл | Путь | Статус |
 |------|------|--------|
-| HEROES_MODULE.md | Engine/Heroes/ | ✅ Active |
+| HEROES_MODULE.md | Engine/Heroes/ | ✅ Active (v2.0 data-driven) |
 | CARDS_MODULE.md | Engine/Cards/ | ✅ Active |
 | COMBAT_MODULE.md | Engine/Combat/ | ✅ Active |
 
 ---
 
-**Последнее обновление:** 19 января 2026
+**Последнее обновление:** 22 января 2026
