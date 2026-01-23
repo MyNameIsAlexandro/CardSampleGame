@@ -132,7 +132,7 @@ class Player: ObservableObject, Identifiable {
     }
 
     func shuffleDeck() {
-        deck.shuffle()
+        WorldRNG.shared.shuffle(&deck)
     }
 
     func reshuffleDiscard() {
