@@ -298,4 +298,84 @@ final class CombatEngineFirstTests: XCTestCase {
         // Then
         XCTAssertEqual(engine.playerBalance, max(0, initialBalance - 10))
     }
+
+    // MARK: - Gate Test: Combat Determinism
+
+    /// Gate test: Combat with same seed produces identical results
+    /// Requirement: "бой с одинаковым seed даёт одинаковый результат"
+    func testCombatDeterminismWithSeed() {
+        let testSeed: UInt64 = 54321
+
+        // First combat simulation
+        WorldRNG.shared.setSeed(testSeed)
+        let results1 = simulateCombatSequence()
+
+        // Second combat simulation with same seed
+        WorldRNG.shared.setSeed(testSeed)
+        let results2 = simulateCombatSequence()
+
+        // Results must be identical
+        XCTAssertEqual(results1.finalEnemyHealth, results2.finalEnemyHealth,
+                       "Enemy health must be identical with same seed")
+        XCTAssertEqual(results1.finalPlayerHealth, results2.finalPlayerHealth,
+                       "Player health must be identical with same seed")
+        XCTAssertEqual(results1.cardsDrawn, results2.cardsDrawn,
+                       "Cards drawn must be identical with same seed")
+        XCTAssertEqual(results1.damageDealt, results2.damageDealt,
+                       "Damage dealt must be identical with same seed")
+    }
+
+    /// Helper: Simulate a combat sequence and return results
+    private func simulateCombatSequence() -> CombatSimulationResult {
+        let engine = TwilightGameEngine()
+
+        // Initialize with known deck
+        let startingDeck = [
+            Card(name: "Strike", type: .attack, description: "Basic attack", power: 3),
+            Card(name: "Strike", type: .attack, description: "Basic attack", power: 3),
+            Card(name: "Defend", type: .defense, description: "Basic defense", defense: 2),
+            Card(name: "Heal", type: .spell, description: "Heal 2 HP"),
+            Card(name: "Power", type: .attack, description: "Strong attack", power: 5)
+        ]
+        engine.initializeNewGame(playerName: "Test", heroId: nil, startingDeck: startingDeck)
+
+        // Setup combat
+        let enemy = Card(name: "Test Enemy", type: .monster, description: "Test", health: 20, power: 4)
+        engine.setupCombatEnemy(enemy)
+        engine.performAction(.combatInitialize)
+
+        // Record initial state
+        let cardsDrawn = engine.playerHand.map { $0.name }
+        var totalDamage = 0
+
+        // Simulate combat turns
+        for _ in 0..<3 {
+            // Play attack cards
+            for card in engine.playerHand where card.type == .attack {
+                engine.performAction(.playCard(cardId: card.id, targetId: nil))
+                totalDamage += card.power ?? 0
+            }
+
+            // Apply damage to enemy
+            engine.performAction(.combatApplyEffect(effect: .damageEnemy(amount: 5)))
+
+            // End turn
+            engine.performAction(.combatEndTurnPhase)
+        }
+
+        return CombatSimulationResult(
+            finalEnemyHealth: engine.combatEnemyHealth,
+            finalPlayerHealth: engine.playerHealth,
+            cardsDrawn: cardsDrawn,
+            damageDealt: totalDamage
+        )
+    }
+}
+
+/// Result of combat simulation for determinism testing
+private struct CombatSimulationResult {
+    let finalEnemyHealth: Int
+    let finalPlayerHealth: Int
+    let cardsDrawn: [String]
+    let damageDealt: Int
 }

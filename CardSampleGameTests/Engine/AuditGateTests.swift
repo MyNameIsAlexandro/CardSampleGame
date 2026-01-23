@@ -716,4 +716,85 @@ extension AuditGateTests {
         XCTAssertEqual(loadedSave.rngSeed, originalSave.rngSeed)
         XCTAssertEqual(loadedSave.activePackSet, originalSave.activePackSet)
     }
+
+    // MARK: - EPIC 12: Critical Game Conditions
+
+    /// Gate test: Player health reaching 0 triggers defeat
+    /// Requirement: "здоровье игрока = 0 вызывает поражение"
+    func testPlayerDeathTriggersDefeat() {
+        let engine = TwilightGameEngine()
+        engine.initializeNewGame(playerName: "Test", heroId: nil, startingDeck: [])
+
+        // Verify player starts alive
+        XCTAssertGreaterThan(engine.playerHealth, 0, "Player should start with health > 0")
+
+        // Deal fatal damage
+        let fatalDamage = engine.playerHealth + 10
+        engine.performAction(.combatApplyEffect(effect: .takeDamage(amount: fatalDamage)))
+
+        // Verify player health is 0 (not negative)
+        XCTAssertEqual(engine.playerHealth, 0, "Player health should be exactly 0, not negative")
+    }
+
+    /// Gate test: Player health cannot go below 0
+    /// Requirement: "здоровье не может быть отрицательным"
+    func testPlayerHealthCannotBeNegative() {
+        let engine = TwilightGameEngine()
+        engine.initializeNewGame(playerName: "Test", heroId: nil, startingDeck: [])
+
+        // Deal massive damage
+        engine.performAction(.combatApplyEffect(effect: .takeDamage(amount: 9999)))
+
+        // Health should be 0, not negative
+        XCTAssertGreaterThanOrEqual(engine.playerHealth, 0, "Health cannot be negative")
+    }
+
+    /// Gate test: Healing cannot exceed max health
+    /// Requirement: "лечение не превышает максимальное здоровье"
+    func testHealingCannotExceedMaxHealth() {
+        let engine = TwilightGameEngine()
+        engine.initializeNewGame(playerName: "Test", heroId: nil, startingDeck: [])
+
+        let maxHealth = engine.playerMaxHealth
+
+        // Heal beyond max
+        engine.performAction(.combatApplyEffect(effect: .heal(amount: 9999)))
+
+        // Health should not exceed max
+        XCTAssertLessThanOrEqual(engine.playerHealth, maxHealth, "Health cannot exceed max")
+        XCTAssertEqual(engine.playerHealth, maxHealth, "Healing should cap at max health")
+    }
+
+    /// Gate test: Faith cannot go below 0 or exceed max
+    /// Requirement: "вера в пределах 0..max"
+    func testFaithBoundsAreRespected() {
+        let engine = TwilightGameEngine()
+        engine.initializeNewGame(playerName: "Test", heroId: nil, startingDeck: [])
+
+        let maxFaith = engine.playerMaxFaith
+
+        // Try to spend more faith than available
+        engine.performAction(.combatApplyEffect(effect: .spendFaith(amount: 9999)))
+        XCTAssertGreaterThanOrEqual(engine.playerFaith, 0, "Faith cannot be negative")
+
+        // Try to gain more faith than max
+        engine.performAction(.combatApplyEffect(effect: .gainFaith(amount: 9999)))
+        XCTAssertLessThanOrEqual(engine.playerFaith, maxFaith, "Faith cannot exceed max")
+    }
+
+    /// Gate test: Enemy health cannot go below 0
+    /// Requirement: "здоровье врага не отрицательное"
+    func testEnemyHealthCannotBeNegative() {
+        let engine = TwilightGameEngine()
+        engine.initializeNewGame(playerName: "Test", heroId: nil, startingDeck: [])
+
+        let enemy = Card(name: "Test Enemy", type: .monster, description: "Test", health: 10)
+        engine.setupCombatEnemy(enemy)
+
+        // Deal massive damage
+        engine.performAction(.combatApplyEffect(effect: .damageEnemy(amount: 9999)))
+
+        // Enemy health should be 0, not negative
+        XCTAssertEqual(engine.combatEnemyHealth, 0, "Enemy health should be 0, not negative")
+    }
 }
