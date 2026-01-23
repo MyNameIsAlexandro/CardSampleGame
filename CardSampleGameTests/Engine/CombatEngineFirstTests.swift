@@ -31,7 +31,7 @@ final class CombatEngineFirstTests: XCTestCase {
 
     func testSetupCombatEnemy() {
         // Given
-        let enemy = Card(name: "Wild Beast", type: .monster, description: "A wild beast", health: 10, power: 3, defense: 2)
+        let enemy = Card(name: "Wild Beast", type: .monster, description: "A wild beast", power: 3, defense: 2, health: 10)
 
         // When
         engine.setupCombatEnemy(enemy)
@@ -340,7 +340,7 @@ final class CombatEngineFirstTests: XCTestCase {
         engine.initializeNewGame(playerName: "Test", heroId: nil, startingDeck: startingDeck)
 
         // Setup combat
-        let enemy = Card(name: "Test Enemy", type: .monster, description: "Test", health: 20, power: 4)
+        let enemy = Card(name: "Test Enemy", type: .monster, description: "Test", power: 4, health: 20)
         engine.setupCombatEnemy(enemy)
         engine.performAction(.combatInitialize)
 
