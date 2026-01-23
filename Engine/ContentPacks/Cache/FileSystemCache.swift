@@ -86,7 +86,6 @@ final class FileSystemCache: ContentCache {
         let data = try Data(contentsOf: contentURL)
         let cached = try decoder.decode(CachedPackData.self, from: data)
 
-        print("📦 Loaded pack from cache: \(packId)")
         return cached
     }
 

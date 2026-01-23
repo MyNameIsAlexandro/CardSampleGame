@@ -143,13 +143,12 @@ class ContentLoader: ObservableObject {
         switch result {
         case .success(let cached):
             loadingProgress = 0.8
-            let pack = ContentRegistry.shared.loadPackFromCache(cached)
+            _ = ContentRegistry.shared.loadPackFromCache(cached)
             loadingProgress = 0.9
             loadingMessage = L10n.loadingContentLoaded.localized
-            printPackInfo(pack, source: "cache")
 
-        case .failure(let error):
-            print("⚠️ Cache load failed, falling back to JSON: \(error)")
+        case .failure:
+            // Cache corrupted or invalid, fall back to JSON
             // Cache corrupted, need to reload from JSON
             // This shouldn't happen normally but handle gracefully
             loadingStage = .loadingFromJSON
@@ -172,7 +171,6 @@ class ContentLoader: ObservableObject {
         switch result {
         case .success(let pack):
             loadingProgress = 0.7
-            printPackInfo(pack, source: "JSON")
 
             // Stage 4: Save to cache
             if let hash = contentHash {
@@ -186,19 +184,14 @@ class ContentLoader: ObservableObject {
             loadingProgress = 0.9
             loadingMessage = L10n.loadingContentLoaded.localized
 
-        case .failure(let error):
+        case .failure:
             loadingMessage = L10n.loadingError.localized
-            print("❌ Failed to load pack from \(url.path): \(error)")
         }
     }
 
     private func saveToCache(pack: LoadedPack, contentHash: String) {
         Task.detached(priority: .background) { [cache] in
-            do {
-                try cache.savePack(pack, contentHash: contentHash)
-            } catch {
-                print("⚠️ Failed to save pack to cache: \(error)")
-            }
+            try? cache.savePack(pack, contentHash: contentHash)
         }
     }
 
@@ -252,17 +245,6 @@ class ContentLoader: ObservableObject {
             try? await Task.sleep(nanoseconds: 200_000_000)
             isLoaded = true
         }
-    }
-
-    private func printPackInfo(_ pack: LoadedPack, source: String) {
-        print("✅ Loaded pack from \(source): \(pack.manifest.packId) v\(pack.manifest.version)")
-        print("   - \(pack.regions.count) regions")
-        print("   - \(pack.events.count) events")
-        print("   - \(pack.quests.count) quests")
-        print("   - \(pack.anchors.count) anchors")
-        print("   - \(pack.heroes.count) heroes")
-        print("   - \(pack.cards.count) cards")
-        print("   - \(pack.enemies.count) enemies")
     }
 }
 

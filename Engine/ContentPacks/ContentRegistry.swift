@@ -100,7 +100,6 @@ final class ContentRegistry {
         // IMPORTANT: Restore abilities to AbilityRegistry BEFORE creating pack
         // Abilities are needed for hero definition conversion
         AbilityRegistry.shared.registerAll(cached.abilities)
-        print("📦 Restored \(cached.abilities.count) abilities from cache")
 
         let pack = cached.toLoadedPack()
 
@@ -110,8 +109,6 @@ final class ContentRegistry {
 
         // Merge content
         mergeContent(from: pack)
-
-        print("📦 Registered pack from cache: \(cached.manifest.packId)")
         return pack
     }
 
