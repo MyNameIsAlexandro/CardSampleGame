@@ -360,8 +360,9 @@ final class GameplayFlowTests: XCTestCase {
         }
         """.data(using: .utf8)!
 
-        // When: Decoding
+        // When: Decoding (using same decoder config as PackLoader)
         let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
         let challenge = try decoder.decode(MiniGameChallengeDefinition.self, from: json)
 
         // Then: Should have correct values

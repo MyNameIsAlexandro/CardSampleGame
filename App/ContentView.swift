@@ -10,21 +10,18 @@ struct ContentView: View {
     @State private var selectedSaveSlot: Int?
 
     // MARK: - Engine-First Architecture
-    // Engine is the single source of truth - replaces GameState
+    // Engine is the single source of truth (no legacy GameState)
     @StateObject private var engine = TwilightGameEngine()
     @StateObject private var saveManager = SaveManager.shared
-
-    // Legacy support for save/load during transition
-    @StateObject private var gameState = GameState(players: [])
 
     // Heroes loaded from Content Pack (data-driven)
     private var availableHeroes: [HeroDefinition] {
         HeroRegistry.shared.availableHeroes()
     }
 
-    // Check if there are any saves
+    // Check if there are any saves (engine-first + legacy fallback)
     var hasSaves: Bool {
-        !saveManager.allSaves.isEmpty
+        saveManager.hasEngineSaves || !saveManager.allSaves.isEmpty
     }
 
     var body: some View {
@@ -34,9 +31,9 @@ struct ContentView: View {
                 WorldMapView(
                     engine: engine,
                     onExit: {
-                        // Save game before exiting (using legacy save system)
+                        // MARK: - Engine-First: Save using engine state
                         if let slot = selectedSaveSlot {
-                            saveManager.saveGame(to: slot, gameState: gameState)
+                            saveManager.saveGameFromEngine(to: slot, engine: engine)
                         }
                         showingWorldMap = false
                         showingSaveSlots = false
@@ -198,20 +195,23 @@ struct ContentView: View {
                             }
                         }
 
-                        // New game button
+                        // New game button - requires hero selection
                         Button(action: { showingSaveSlots = true }) {
                             HStack {
                                 Image(systemName: hasSaves ? "plus.circle.fill" : "play.fill")
-                                Text(L10n.buttonStartAdventure.localized)
+                                Text(selectedHeroId == nil
+                                    ? L10n.buttonSelectHeroFirst.localized
+                                    : L10n.buttonStartAdventure.localized)
                             }
                             .font(.title3)
                             .fontWeight(.bold)
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.blue)
+                            .background(selectedHeroId == nil ? Color.gray : Color.blue)
                             .cornerRadius(12)
                         }
+                        .disabled(selectedHeroId == nil)
                     }
                     .padding(.horizontal)
                     .padding(.bottom, 12)
@@ -281,86 +281,54 @@ struct ContentView: View {
             return
         }
 
-        // Create player with heroId - stats are loaded from HeroRegistry automatically
-        let player = Player(
-            name: hero.name,
-            maxHandSize: 5,
-            heroId: heroId
+        // MARK: - Engine-First: Get starting deck from hero's card IDs via ContentRegistry
+        // Hero comes from HeroRegistry, but cards are in ContentRegistry
+        let startingDeckDefs = hero.startingDeckCardIDs.compactMap { ContentRegistry.shared.getCard(id: $0) }
+        let startingDeck = startingDeckDefs.map { $0.toCard() }
+
+        // MARK: - Engine-First: Initialize new game directly in engine
+        engine.initializeNewGame(
+            playerName: hero.name,
+            heroId: heroId,
+            startingDeck: startingDeck
         )
 
-        // Build player's starting deck from CardRegistry (data-driven)
-        player.deck = CardRegistry.shared.startingDeck(forHeroID: heroId)
-        player.shuffleDeck()
-
-        // Initialize game state with Twilight Marches encounters and market
-        gameState.players = [player]
-        gameState.encounterDeck = TwilightMarchesCards.createEncounterDeck()
-        gameState.encounterDeck.shuffle()
-        gameState.marketCards = TwilightMarchesCards.createMarketCards()
-
-        // MARK: - Engine-First: Connect engine to legacy state
-        engine.connectToLegacy(worldState: gameState.worldState, player: player)
-
-        // Save to selected slot
+        // Save to selected slot using Engine-first save
         selectedSaveSlot = slot
-        saveManager.saveGame(to: slot, gameState: gameState)
+        saveManager.saveGameFromEngine(to: slot, engine: engine)
 
         showingWorldMap = true
         showingSaveSlots = false
     }
 
     func loadGame(from slot: Int) {
+        // MARK: - Engine-First: Try to load engine save first
+        if saveManager.loadGameToEngine(from: slot, engine: engine) {
+            // Successfully loaded from engine save
+            selectedHeroId = engine.heroId
+            selectedSaveSlot = slot
+            showingWorldMap = true
+            showingSaveSlots = false
+            showingLoadSlots = false
+            return
+        }
+
+        // MARK: - Legacy fallback: Migrate from old GameSave format
         guard let saveData = saveManager.loadGame(from: slot) else { return }
 
-        // Find the hero by name (for backward compatibility with old saves)
-        let heroId = saveData.heroId ?? availableHeroes.first { $0.name == saveData.characterName }?.id
+        // Migrate legacy save to engine
+        engine.migrateFromLegacySave(saveData)
 
-        if let heroId = heroId {
-            selectedHeroId = heroId
-        }
+        // Update UI state
+        selectedHeroId = saveData.heroId ?? availableHeroes.first { $0.name == saveData.characterName }?.id
 
-        // Create player from save data with heroId
-        let player = Player(
-            name: saveData.characterName,
-            health: saveData.health,
-            maxHealth: saveData.maxHealth,
-            maxHandSize: 5,
-            heroId: heroId
-        )
-
-        // Set player resources
-        player.faith = saveData.faith
-        player.balance = saveData.balance
-
-        // Restore deck composition if saved
-        if !saveData.playerDeck.isEmpty {
-            player.deck = saveData.playerDeck
-            player.hand = saveData.playerHand
-            player.discard = saveData.playerDiscard
-            player.buried = saveData.playerBuried
-        } else if let heroId = heroId {
-            // Fallback: create starting deck from CardRegistry
-            player.deck = CardRegistry.shared.startingDeck(forHeroID: heroId)
-            player.shuffleDeck()
-        }
-
-        // Initialize game state with market
-        gameState.players = [player]
-        gameState.encounterDeck = TwilightMarchesCards.createEncounterDeck()
-        gameState.encounterDeck.shuffle()
-        gameState.marketCards = TwilightMarchesCards.createMarketCards()
-        gameState.turnNumber = saveData.turnNumber
-        gameState.encountersDefeated = saveData.encountersDefeated
-
-        // Restore world state from save
-        gameState.worldState = saveData.worldState
-
-        // MARK: - Engine-First: Connect engine to loaded state
-        engine.connectToLegacy(worldState: gameState.worldState, player: player)
+        // Save as engine save for future loads (auto-migration)
+        saveManager.saveGameFromEngine(to: slot, engine: engine)
 
         selectedSaveSlot = slot
         showingWorldMap = true
         showingSaveSlots = false
+        showingLoadSlots = false
     }
 
     // MARK: - Continue Game

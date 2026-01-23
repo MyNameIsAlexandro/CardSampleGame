@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 
 // MARK: - Pack Loader
 
@@ -14,6 +15,11 @@ enum PackLoader {
     /// - Returns: Fully loaded pack
     /// - Throws: PackLoadError if loading fails
     static func load(manifest: PackManifest, from url: URL) throws -> LoadedPack {
+        // Verify checksums before loading content (Epic 0.3)
+        if let checksums = manifest.checksums {
+            try verifyChecksums(checksums, in: url)
+        }
+
         var pack = LoadedPack(
             manifest: manifest,
             sourceURL: url,
@@ -38,6 +44,11 @@ enum PackLoader {
         // Load anchors
         if let anchorsPath = manifest.anchorsPath {
             pack.anchors = try loadAnchors(from: url.appendingPathComponent(anchorsPath))
+        }
+
+        // Load hero abilities (before heroes, so abilities are available)
+        if let abilitiesPath = manifest.abilitiesPath {
+            loadAbilities(from: url.appendingPathComponent(abilitiesPath))
         }
 
         // Load heroes
@@ -155,6 +166,12 @@ enum PackLoader {
         return anchors
     }
 
+    /// Load abilities from JSON file (registers in AbilityRegistry)
+    private static func loadAbilities(from url: URL) {
+        // Abilities are registered globally in AbilityRegistry
+        AbilityRegistry.shared.loadFromJSON(at: url)
+    }
+
     /// Load heroes from path (file or directory)
     private static func loadHeroes(from url: URL) throws -> [String: StandardHeroDefinition] {
         var heroes: [String: StandardHeroDefinition] = [:]
@@ -179,22 +196,24 @@ enum PackLoader {
         return heroes
     }
 
-    /// Load cards from path (file or directory)
+    /// Load cards from path (file or directory) with localization
     private static func loadCards(from url: URL) throws -> [String: StandardCardDefinition] {
         var cards: [String: StandardCardDefinition] = [:]
 
         if isDirectory(url) {
             let files = try jsonFiles(in: url)
             for file in files {
-                let fileCards = try loadJSONArray(StandardCardDefinition.self, from: file)
+                let fileCards = try loadJSONArray(PackCardDefinition.self, from: file)
                 for card in fileCards {
-                    cards[card.id] = card
+                    let standard = card.toStandard()
+                    cards[standard.id] = standard
                 }
             }
         } else {
-            let fileCards = try loadJSONArray(StandardCardDefinition.self, from: url)
+            let fileCards = try loadJSONArray(PackCardDefinition.self, from: url)
             for card in fileCards {
-                cards[card.id] = card
+                let standard = card.toStandard()
+                cards[standard.id] = standard
             }
         }
 
@@ -245,22 +264,53 @@ enum PackLoader {
 
     /// Load a JSON array (or single object as array)
     private static func loadJSONArray<T: Decodable>(_ type: T.Type, from url: URL) throws -> [T] {
+        let data: Data
         do {
-            let data = try Data(contentsOf: url)
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
-
-            // Try array first
-            if let array = try? decoder.decode([T].self, from: data) {
-                return array
-            }
-
-            // Try single object
-            let single = try decoder.decode(T.self, from: data)
-            return [single]
+            data = try Data(contentsOf: url)
         } catch {
             throw PackLoadError.contentLoadFailed(file: url.lastPathComponent, underlyingError: error)
+        }
+
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+
+        // Try array first
+        do {
+            return try decoder.decode([T].self, from: data)
+        } catch let arrayError {
+            #if DEBUG
+            // Detailed error diagnostics
+            print("PackLoader: Failed to decode \(url.lastPathComponent) as [\(T.self)]")
+            if let decodingError = arrayError as? DecodingError {
+                switch decodingError {
+                case .typeMismatch(let type, let context):
+                    print("  → typeMismatch: expected \(type)")
+                    print("  → path: \(context.codingPath.map { $0.stringValue }.joined(separator: "."))")
+                    print("  → description: \(context.debugDescription)")
+                case .valueNotFound(let type, let context):
+                    print("  → valueNotFound: \(type)")
+                    print("  → path: \(context.codingPath.map { $0.stringValue }.joined(separator: "."))")
+                case .keyNotFound(let key, let context):
+                    print("  → keyNotFound: \(key.stringValue)")
+                    print("  → path: \(context.codingPath.map { $0.stringValue }.joined(separator: "."))")
+                case .dataCorrupted(let context):
+                    print("  → dataCorrupted: \(context.debugDescription)")
+                    print("  → path: \(context.codingPath.map { $0.stringValue }.joined(separator: "."))")
+                @unknown default:
+                    print("  → unknown error: \(decodingError)")
+                }
+            }
+            #endif
+
+            // Try single object as fallback
+            do {
+                let single = try decoder.decode(T.self, from: data)
+                return [single]
+            } catch {
+                // Report the array error since that's what we expected
+                throw PackLoadError.contentLoadFailed(file: url.lastPathComponent, underlyingError: arrayError)
+            }
         }
     }
 
@@ -279,6 +329,42 @@ enum PackLoader {
             includingPropertiesForKeys: nil
         )
         return contents.filter { $0.pathExtension.lowercased() == "json" }
+    }
+
+    // MARK: - Checksum Verification (Epic 0.3)
+
+    /// Verify file checksums against manifest
+    /// - Parameters:
+    ///   - checksums: Dictionary of relative paths to expected SHA256 hashes
+    ///   - packURL: Root URL of the pack
+    /// - Throws: PackLoadError.checksumMismatch if verification fails
+    private static func verifyChecksums(_ checksums: [String: String], in packURL: URL) throws {
+        for (relativePath, expectedHash) in checksums {
+            let fileURL = packURL.appendingPathComponent(relativePath)
+
+            guard FileManager.default.fileExists(atPath: fileURL.path) else {
+                throw PackLoadError.fileNotFound(relativePath)
+            }
+
+            let actualHash = try computeSHA256(of: fileURL)
+
+            if actualHash.lowercased() != expectedHash.lowercased() {
+                throw PackLoadError.checksumMismatch(
+                    file: relativePath,
+                    expected: expectedHash,
+                    actual: actualHash
+                )
+            }
+        }
+    }
+
+    /// Compute SHA256 hash of a file
+    /// - Parameter url: File URL
+    /// - Returns: Hex-encoded SHA256 hash string
+    static func computeSHA256(of url: URL) throws -> String {
+        let data = try Data(contentsOf: url)
+        let hash = SHA256.hash(data: data)
+        return hash.map { String(format: "%02x", $0) }.joined()
     }
 }
 
@@ -317,6 +403,11 @@ struct BalanceConfiguration: Codable {
     /// Game end conditions
     let endConditions: EndConditionConfig
 
+    // MARK: - Balance System (optional)
+
+    /// Light/Dark balance system configuration
+    let balanceSystem: BalanceSystemConfig?
+
     // MARK: - Defaults
 
     static let `default` = BalanceConfiguration(
@@ -325,7 +416,8 @@ struct BalanceConfiguration: Codable {
         combat: nil,
         time: .default,
         anchor: .default,
-        endConditions: .default
+        endConditions: .default,
+        balanceSystem: nil
     )
 }
 
@@ -355,8 +447,11 @@ struct ResourceBalanceConfig: Codable {
     /// Maximum gold
     let maxGold: Int
 
-    /// Health restored when resting
-    let restHealAmount: Int
+    /// Health restored when resting (optional, default 3)
+    let restHealAmount: Int?
+
+    /// Starting balance value (optional)
+    let startingBalance: Int?
 
     static let `default` = ResourceBalanceConfig(
         startingHealth: 20,
@@ -367,7 +462,8 @@ struct ResourceBalanceConfig: Codable {
         maxSupplies: 10,
         startingGold: 0,
         maxGold: 100,
-        restHealAmount: 3
+        restHealAmount: 3,
+        startingBalance: 50
     )
 }
 
@@ -386,7 +482,11 @@ struct PressureBalanceConfig: Codable {
     let pressurePerTurn: Int
 
     /// Days between tension ticks (when tension increases automatically)
-    let tensionTickInterval: Int
+    /// Also accepts escalation_interval from JSON
+    let tensionTickInterval: Int?
+
+    /// Escalation interval (alias for tensionTickInterval)
+    let escalationInterval: Int?
 
     /// Pressure thresholds for escalation
     let thresholds: PressureThresholds
@@ -394,12 +494,18 @@ struct PressureBalanceConfig: Codable {
     /// Degradation settings
     let degradation: DegradationConfig
 
+    /// Get the effective tick interval
+    var effectiveTickInterval: Int {
+        tensionTickInterval ?? escalationInterval ?? 3
+    }
+
     static let `default` = PressureBalanceConfig(
         startingPressure: 0,
         minPressure: 0,
         maxPressure: 100,
         pressurePerTurn: 5,
         tensionTickInterval: 3,
+        escalationInterval: nil,
         thresholds: .default,
         degradation: .default
     )
@@ -431,12 +537,16 @@ struct DegradationConfig: Codable {
     /// Chance at critical level
     let criticalChance: Double
 
+    /// Chance at catastrophic level (optional)
+    let catastrophicChance: Double?
+
     /// Base chance for anchor integrity loss per turn
     let anchorDecayChance: Double
 
     static let `default` = DegradationConfig(
         warningChance: 0.1,
         criticalChance: 0.25,
+        catastrophicChance: nil,
         anchorDecayChance: 0.05
     )
 }
@@ -452,10 +562,26 @@ struct CombatBalanceConfig: Codable {
     /// Defense damage reduction
     let defenseReduction: Double
 
+    /// Maximum dice value (optional)
+    let diceMax: Int?
+
+    /// Actions per turn (optional)
+    let actionsPerTurn: Int?
+
+    /// Cards drawn per turn (optional)
+    let cardsDrawnPerTurn: Int?
+
+    /// Maximum hand size (optional)
+    let maxHandSize: Int?
+
     static let `default` = CombatBalanceConfig(
         baseDamage: 3,
         powerModifier: 1.0,
-        defenseReduction: 0.5
+        defenseReduction: 0.5,
+        diceMax: 6,
+        actionsPerTurn: 3,
+        cardsDrawnPerTurn: 5,
+        maxHandSize: 7
     )
 }
 
@@ -479,13 +605,21 @@ struct TimeBalanceConfig: Codable {
     /// Time cost for rest
     let restCost: Int
 
+    /// Time cost for strengthening anchor (optional)
+    let strengthenAnchorCost: Int?
+
+    /// Time cost for instant actions (optional)
+    let instantCost: Int?
+
     static let `default` = TimeBalanceConfig(
         unitsPerDay: 24,
         startingTime: 8,
         maxDays: nil,
         travelCost: 2,
         exploreCost: 1,
-        restCost: 4
+        restCost: 4,
+        strengthenAnchorCost: 1,
+        instantCost: 0
     )
 }
 
@@ -503,11 +637,19 @@ struct EndConditionConfig: Codable {
     /// Victory conditions (quest IDs)
     let victoryQuests: [String]
 
+    /// Flag set when main quest completes (optional)
+    let mainQuestCompleteFlag: String?
+
+    /// Flag set when critical anchor destroyed (optional)
+    let criticalAnchorDestroyedFlag: String?
+
     static let `default` = EndConditionConfig(
         deathHealth: 0,
         pressureLoss: 100,
         breachLoss: nil,
-        victoryQuests: []
+        victoryQuests: [],
+        mainQuestCompleteFlag: nil,
+        criticalAnchorDestroyedFlag: nil
     )
 }
 
@@ -538,6 +680,32 @@ struct AnchorBalanceConfig: Codable {
         stableThreshold: 70,
         breachThreshold: 0,
         decayPerTurn: 5
+    )
+}
+
+/// Balance system configuration for Light/Dark alignment
+struct BalanceSystemConfig: Codable {
+    /// Minimum balance value
+    let min: Int
+
+    /// Maximum balance value
+    let max: Int
+
+    /// Initial balance value
+    let initial: Int
+
+    /// Threshold for light alignment
+    let lightThreshold: Int
+
+    /// Threshold for dark alignment
+    let darkThreshold: Int
+
+    static let `default` = BalanceSystemConfig(
+        min: 0,
+        max: 100,
+        initial: 50,
+        lightThreshold: 70,
+        darkThreshold: 30
     )
 }
 
@@ -606,12 +774,27 @@ private struct PackHeroDefinition: Codable {
         }
 
         // Локализованное имя и описание
-        let localizedName = Locale.current.language.languageCode?.identifier == "ru" ? (nameRu ?? name) : name
-        let localizedDescription = Locale.current.language.languageCode?.identifier == "ru" ? (descriptionRu ?? description) : description
+        // Determine language: check Bundle localizations, then Locale.preferredLanguages, then Locale.current
+        let isRussian: Bool = {
+            if let bundleLang = Bundle.main.preferredLocalizations.first, bundleLang.hasPrefix("ru") {
+                return true
+            }
+            if let systemLang = Locale.preferredLanguages.first, systemLang.hasPrefix("ru") {
+                return true
+            }
+            if Locale.current.language.languageCode?.identifier == "ru" {
+                return true
+            }
+            return false
+        }()
+        let localizedName = isRussian ? (nameRu ?? name) : name
+        let localizedDescription = isRussian ? (descriptionRu ?? description) : description
 
         // Получаем способность по ID
         guard let ability = HeroAbility.forAbilityId(abilityId) else {
+            #if DEBUG
             print("PackLoader: ERROR - Unknown ability ID '\(abilityId)' for hero '\(id)'")
+            #endif
             fatalError("Missing ability definition for '\(abilityId)'. Add it to HeroAbility.forAbilityId() or hero_abilities.json")
         }
 
@@ -624,6 +807,73 @@ private struct PackHeroDefinition: Codable {
             specialAbility: ability,
             startingDeckCardIDs: startingDeckCardIds,
             availability: heroAvailability
+        )
+    }
+}
+
+// MARK: - Pack Card Definition
+
+/// JSON-совместимое определение карты для загрузки из Content Pack с локализацией
+private struct PackCardDefinition: Codable {
+    let id: String
+    let name: String
+    let nameRu: String?
+    let cardType: CardType
+    let rarity: CardRarity
+    let description: String
+    let descriptionRu: String?
+    let icon: String
+    let expansionSet: ExpansionSet
+    let ownership: CardOwnership
+    let abilities: [CardAbility]
+    let faithCost: Int
+    let balance: CardBalance?
+    let role: CardRole?
+    let power: Int?
+    let defense: Int?
+    let health: Int?
+    let realm: Realm?
+    let curseType: CurseType?
+
+    /// Конвертация в StandardCardDefinition с локализацией
+    func toStandard() -> StandardCardDefinition {
+        // Determine language: check Bundle localizations, then Locale.preferredLanguages, then Locale.current
+        let isRussian: Bool = {
+            // First try Bundle preferred localizations (best for app UI consistency)
+            if let bundleLang = Bundle.main.preferredLocalizations.first, bundleLang.hasPrefix("ru") {
+                return true
+            }
+            // Fallback to system preferred languages
+            if let systemLang = Locale.preferredLanguages.first, systemLang.hasPrefix("ru") {
+                return true
+            }
+            // Final fallback to current locale
+            if Locale.current.language.languageCode?.identifier == "ru" {
+                return true
+            }
+            return false
+        }()
+        let localizedName = isRussian ? (nameRu ?? name) : name
+        let localizedDescription = isRussian ? (descriptionRu ?? description) : description
+
+        return StandardCardDefinition(
+            id: id,
+            name: localizedName,
+            cardType: cardType,
+            rarity: rarity,
+            description: localizedDescription,
+            icon: icon,
+            expansionSet: expansionSet,
+            ownership: ownership,
+            abilities: abilities,
+            faithCost: faithCost,
+            balance: balance,
+            role: role,
+            power: power,
+            defense: defense,
+            health: health,
+            realm: realm,
+            curseType: curseType
         )
     }
 }

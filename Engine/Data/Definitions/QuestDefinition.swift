@@ -165,6 +165,113 @@ enum CompletionCondition: Codable, Hashable {
 
     /// Complete manually (via quest progress trigger)
     case manual
+
+    // MARK: - Custom Codable
+
+    /// Coding keys for JSON format: {"flag_set": "value"} or {"visit_region": "value"}
+    private enum CodingKeys: String, CodingKey {
+        case flagSet
+        case visitRegion
+        case eventCompleted
+        case choiceMade
+        case resourceThreshold
+        case defeatEnemy
+        case collectItem
+        case manual
+        // For choiceMade sub-keys
+        case eventId
+        case choiceId
+        // For resourceThreshold sub-keys
+        case resourceId
+        case minValue
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        // Try each case - JSON format is {"key": "value"} or {"key": {...}}
+        if let value = try container.decodeIfPresent(String.self, forKey: .flagSet) {
+            self = .flagSet(value)
+            return
+        }
+
+        if let value = try container.decodeIfPresent(String.self, forKey: .visitRegion) {
+            self = .visitRegion(value)
+            return
+        }
+
+        if let value = try container.decodeIfPresent(String.self, forKey: .eventCompleted) {
+            self = .eventCompleted(value)
+            return
+        }
+
+        if let value = try container.decodeIfPresent(String.self, forKey: .defeatEnemy) {
+            self = .defeatEnemy(value)
+            return
+        }
+
+        if let value = try container.decodeIfPresent(String.self, forKey: .collectItem) {
+            self = .collectItem(value)
+            return
+        }
+
+        if container.contains(.manual) {
+            self = .manual
+            return
+        }
+
+        // Try nested container for choiceMade: {"choice_made": {"event_id": "...", "choice_id": "..."}}
+        if container.contains(.choiceMade) {
+            let nested = try container.nestedContainer(keyedBy: CodingKeys.self, forKey: .choiceMade)
+            let eventId = try nested.decode(String.self, forKey: .eventId)
+            let choiceId = try nested.decode(String.self, forKey: .choiceId)
+            self = .choiceMade(eventId: eventId, choiceId: choiceId)
+            return
+        }
+
+        // Try nested container for resourceThreshold: {"resource_threshold": {"resource_id": "...", "min_value": 10}}
+        if container.contains(.resourceThreshold) {
+            let nested = try container.nestedContainer(keyedBy: CodingKeys.self, forKey: .resourceThreshold)
+            let resourceId = try nested.decode(String.self, forKey: .resourceId)
+            let minValue = try nested.decode(Int.self, forKey: .minValue)
+            self = .resourceThreshold(resourceId: resourceId, minValue: minValue)
+            return
+        }
+
+        throw DecodingError.dataCorrupted(
+            DecodingError.Context(
+                codingPath: container.codingPath,
+                debugDescription: "Unknown completion condition type"
+            )
+        )
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        switch self {
+        case .flagSet(let value):
+            try container.encode(value, forKey: .flagSet)
+        case .visitRegion(let value):
+            try container.encode(value, forKey: .visitRegion)
+        case .eventCompleted(let value):
+            try container.encode(value, forKey: .eventCompleted)
+        case .choiceMade(let eventId, let choiceId):
+            var nested = container.nestedContainer(keyedBy: CodingKeys.self, forKey: .choiceMade)
+            try nested.encode(eventId, forKey: .eventId)
+            try nested.encode(choiceId, forKey: .choiceId)
+        case .resourceThreshold(let resourceId, let minValue):
+            var nested = container.nestedContainer(keyedBy: CodingKeys.self, forKey: .resourceThreshold)
+            try nested.encode(resourceId, forKey: .resourceId)
+            try nested.encode(minValue, forKey: .minValue)
+        case .defeatEnemy(let value):
+            try container.encode(value, forKey: .defeatEnemy)
+        case .collectItem(let value):
+            try container.encode(value, forKey: .collectItem)
+        case .manual:
+            try container.encode(true, forKey: .manual)
+        }
+    }
 }
 
 // MARK: - Quest Completion Rewards

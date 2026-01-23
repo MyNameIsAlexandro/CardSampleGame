@@ -105,9 +105,23 @@ struct CombatView: View {
         }
     }
 
-    /// Monster health from engine
+    /// Monster health from engine (reads @Published property directly for SwiftUI reactivity)
     private var monsterHealth: Int {
-        engine.combatState?.enemyHealth ?? monster.health ?? 10
+        // After combat ends with victory, show 0 HP
+        if phase == .combatOver {
+            // Check if it was a victory (enemy defeated)
+            if engine.combatEnemyHealth <= 0 {
+                return 0
+            }
+            // Otherwise return last known value or monster's base health
+            return engine.combatEnemyHealth > 0 ? engine.combatEnemyHealth : (monster.health ?? 10)
+        }
+        // During active combat, use engine value directly
+        if engine.isInCombat {
+            return engine.combatEnemyHealth
+        }
+        // Fallback for when combat hasn't started yet
+        return monster.health ?? 10
     }
 
     // MARK: - Initialization (Engine-First)
@@ -337,7 +351,7 @@ struct CombatView: View {
                 VStack {
                     Image(systemName: "hand.raised.fill")
                         .foregroundColor(.orange)
-                    Text("\(player?.strength ?? 1)")
+                    Text("\(engine.playerStrength)")
                         .fontWeight(.bold)
                     Text(L10n.combatStrength.localized)
                         .font(.caption)
@@ -1070,15 +1084,8 @@ struct CombatView: View {
         combatLog.append(L10n.combatLogActionsInfo.localized(with: 3))
 
         // Engine-First: Initialize combat through engine
+        // This handles: shuffle deck, draw initial hand
         engine.performAction(.combatInitialize)
-
-        // Legacy fallback for deck operations
-        if let p = player {
-            p.shuffleDeck()
-            p.drawCards(count: p.maxHandSize)
-            // Sync engine's playerHand after legacy deck operations
-            engine.syncPlayerHand()
-        }
 
         actionsRemaining = 3
         phase = .playerTurn
@@ -1093,10 +1100,9 @@ struct CombatView: View {
         let monsterCurrentHP = monsterHealth
         let monsterMaxHP = monster.health ?? 10
 
-        // Используем CombatCalculator для расчёта атаки
-        guard let p = player else { return }
-        let result = CombatCalculator.calculatePlayerAttack(
-            player: p,
+        // Engine-First: Use Engine-based calculator (no Player dependency)
+        let result = CombatCalculator.calculateAttackEngineFirst(
+            engine: engine,
             monsterDefense: monsterDef,
             monsterCurrentHP: monsterCurrentHP,
             monsterMaxHP: monsterMaxHP,
@@ -1121,7 +1127,7 @@ struct CombatView: View {
             engine.performAction(.combatApplyEffect(effect: .damageEnemy(amount: damage)))
 
             // Update legacy monster binding if available
-            legacyMonster?.wrappedValue.health = monsterHealth
+            // Monster health updated via engine.performAction() - no legacy sync needed
 
             combatLog.append(L10n.combatLogHit.localized(with: result.attackRoll.total, monsterDef, damage, monsterHealth))
 
@@ -1147,8 +1153,8 @@ struct CombatView: View {
         // Base defend gives +3 shield
         let baseShield = 3
 
-        // Player strength adds to defense (some classes may have bonus)
-        let strengthBonus = (player?.strength ?? 1) / 2  // Half strength as shield bonus
+        // Engine-First: use engine strength (no Player dependency)
+        let strengthBonus = engine.playerStrength / 2  // Half strength as shield bonus
 
         let totalShield = baseShield + strengthBonus
         temporaryShield += totalShield
@@ -1182,11 +1188,8 @@ struct CombatView: View {
         // Track cards played for statistics
         cardsPlayedCount += 1
 
-        // Legacy: play card from hand (remove from hand)
-        player?.playCard(card)
-
-        // Sync engine's playerHand with legacy player (for @Published reactivity)
-        engine.syncPlayerHand()
+        // Engine-First: Use engine action to play card (moves from hand to discard)
+        engine.performAction(.playCard(cardId: card.id, targetId: nil))
 
         // NEW: Cards are modifiers, not actions
         // Defense cards add to temporary shield
@@ -1235,17 +1238,16 @@ struct CombatView: View {
                 combatLog.append(L10n.combatLogHealEffect.localized(with: amount))
 
             case .damage(let amount, _):
-                let actualDamage = player?.calculateDamageDealt(amount) ?? amount
+                // Engine-First: Use engine's calculateDamageDealt (no Player dependency)
+                let actualDamage = engine.calculateDamageDealt(amount)
                 // Engine-First: Damage enemy through engine action
                 engine.performAction(.combatApplyEffect(effect: .damageEnemy(amount: actualDamage)))
-                legacyMonster?.wrappedValue.health = monsterHealth
+                // Monster health updated via engine.performAction() - no legacy sync needed
                 combatLog.append(L10n.combatLogDamageEffect.localized(with: actualDamage, monsterHealth))
 
             case .drawCards(let count):
-                // Engine-First: Draw cards through engine action
+                // Engine-First: Draw cards through engine action (handles deck recycling)
                 engine.performAction(.combatApplyEffect(effect: .drawCards(count: count)))
-                player?.drawCards(count: count)  // Legacy sync
-                engine.syncPlayerHand()  // Sync for UI reactivity
                 combatLog.append(L10n.combatLogDrawCards.localized(with: count))
 
             case .gainFaith(let amount):
@@ -1282,7 +1284,7 @@ struct CombatView: View {
                 let curseDamage = duration * 2
                 // Engine-First: Damage enemy through engine action
                 engine.performAction(.combatApplyEffect(effect: .damageEnemy(amount: curseDamage)))
-                legacyMonster?.wrappedValue.health = monsterHealth
+                // Monster health updated via engine.performAction() - no legacy sync needed
                 combatLog.append(L10n.combatLogCurseDamage.localized(with: curseType.rawValue, curseDamage))
 
             case .summonSpirit(let power, let realm):
@@ -1292,7 +1294,7 @@ struct CombatView: View {
                 combatLog.append(L10n.combatLogSpiritSummoned.localized(with: realmName, power))
                 // Engine-First: Spirit attacks enemy immediately through engine action
                 engine.performAction(.combatApplyEffect(effect: .summonSpirit(power: power, realm: realmString)))
-                legacyMonster?.wrappedValue.health = monsterHealth
+                // Monster health updated via engine.performAction() - no legacy sync needed
                 combatLog.append(L10n.combatLogSpiritAttack.localized(with: power))
 
             case .sacrifice(let cost, let benefit):
@@ -1305,9 +1307,8 @@ struct CombatView: View {
                     bonusDamage += cost * 2
                     combatLog.append("   🔥 +\(cost * 2) к урону следующей атаки")
                 } else if benefit.lowercased().contains("карт") || benefit.lowercased().contains("draw") {
+                    // Engine-First: Draw cards through engine action
                     engine.performAction(.combatApplyEffect(effect: .drawCards(count: cost)))
-                    player?.drawCards(count: cost)  // Legacy sync
-                    engine.syncPlayerHand()  // Sync for UI reactivity
                     combatLog.append("   🃏 Взято карт: \(cost)")
                 } else {
                     // Общий бонус - добавить урон
@@ -1324,6 +1325,20 @@ struct CombatView: View {
                 // Путешествие между мирами не применимо в бою
                 combatLog.append("   🌀 Путешествие недоступно в бою")
 
+            case .permanentStat(let stat, let amount):
+                // Постоянный бонус к характеристике
+                combatLog.append("   ⬆️ Постоянный бонус: +\(amount) к \(stat)")
+
+            case .temporaryStat(let stat, let amount, let duration):
+                // Временный бонус к характеристике
+                if stat == "defense" {
+                    temporaryShield += amount
+                    combatLog.append("   🛡️ +\(amount) к защите на \(duration) ход(а)")
+                } else {
+                    bonusDamage += amount
+                    combatLog.append("   ⬆️ +\(amount) к \(stat) на \(duration) ход(а)")
+                }
+
             case .custom(let description):
                 combatLog.append("   📜 \(description)")
             }
@@ -1336,7 +1351,6 @@ struct CombatView: View {
 
     func performEnemyAttack() {
         // Capture engine weakly to prevent retain cycles (engine is a class)
-        // SwiftUI View is a struct, so @State vars are managed by SwiftUI
         let engineRef = engine
         let monsterName = monster.name
         let monsterPowerVal = monster.power ?? 3
@@ -1353,17 +1367,18 @@ struct CombatView: View {
             var shieldAbsorbed = 0
             var actualDamage = 0
 
-            // NEW: Shield absorbs damage first
+            // Shield absorbs damage first
             if currentShield > 0 {
                 shieldAbsorbed = min(currentShield, rawDamage)
                 rawDamage -= shieldAbsorbed
                 temporaryShield -= shieldAbsorbed
             }
 
-            // Remaining damage goes to HP
+            // Remaining damage goes to HP (Engine-First: uses takeDamageWithModifiers)
             if rawDamage > 0 {
                 let healthBefore = engine.playerHealth
-                engine.performAction(.combatEnemyAttack(damage: rawDamage))
+                // Engine handles curse modifiers and hero damage reduction
+                engine.takeDamageWithModifiers(rawDamage, fromDarkSource: true)
                 actualDamage = healthBefore - engine.playerHealth
             }
 
@@ -1395,7 +1410,6 @@ struct CombatView: View {
         // Capture engine weakly to prevent retain cycles
         let engineRef = engine
         let currentSpirits = summonedSpirits
-        let currentPlayer = player
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak engineRef] in
             guard let engine = engineRef else { return }
@@ -1406,7 +1420,6 @@ struct CombatView: View {
                     let spiritDamage = spirit.power
                     // Engine-First: Spirit damage through engine action
                     engine.performAction(.combatApplyEffect(effect: .damageEnemy(amount: spiritDamage)))
-                    legacyMonster?.wrappedValue.health = monsterHealth
                     let realmName = spirit.realm == .yav ? "Явь" : spirit.realm == .nav ? "Навь" : "Правь"
                     combatLog.append("👻 Дух \(realmName) атакует: \(spiritDamage) урона")
                 }
@@ -1430,23 +1443,11 @@ struct CombatView: View {
             canReroll = false
 
             // Engine-First: End turn phase through engine action (discard, draw, faith restore)
+            // This handles: discard hand, recycle deck, draw new hand, restore faith
             engine.performAction(.combatEndTurnPhase)
 
-            // Legacy sync: discard and draw (with safety limit to prevent infinite loop)
-            if let p = currentPlayer {
-                let maxIterations = p.hand.count + 1  // Safety limit
-                var iterations = 0
-                while !p.hand.isEmpty && iterations < maxIterations {
-                    p.playCard(p.hand[0])
-                    iterations += 1
-                }
-                p.drawCards(count: p.maxHandSize)
-                // Sync engine's playerHand after legacy deck operations
-                engine.syncPlayerHand()
-            }
-
-            // Способность Мага: +1 вера в конце хода (Медитация)
-            if currentPlayer?.shouldGainFaithEndOfTurn == true {
+            // Способность Мага: +1 вера в конце хода (Медитация) - now handled by Engine
+            if engine.shouldGainFaithEndOfTurn {
                 combatLog.append("🔮 Медитация: +1 вера")
             }
 
@@ -1643,6 +1644,8 @@ struct CombatCardView: View {
         case .travelRealm(let realm):
             let realmName = realm == .yav ? "Явь" : realm == .nav ? "Навь" : "Правь"
             return "→ \(realmName)"
+        case .permanentStat(let stat, let amount): return "+\(amount) \(stat)"
+        case .temporaryStat(let stat, let amount, let duration): return "+\(amount) \(stat) (\(duration))"
         case .custom: return ability.description
         }
     }

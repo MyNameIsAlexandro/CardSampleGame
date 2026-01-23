@@ -81,6 +81,9 @@ struct PackManifest: Codable {
     /// Path to heroes content
     let heroesPath: String?
 
+    /// Path to hero abilities content
+    let abilitiesPath: String?
+
     /// Path to cards content
     let cardsPath: String?
 
@@ -118,6 +121,7 @@ struct PackManifest: Codable {
         case questsPath = "quests_path"
         case anchorsPath = "anchors_path"
         case heroesPath = "heroes_path"
+        case abilitiesPath = "abilities_path"
         case cardsPath = "cards_path"
         case enemiesPath = "enemies_path"
         case balancePath = "balance_path"
@@ -149,6 +153,7 @@ struct PackManifest: Codable {
         questsPath: String? = nil,
         anchorsPath: String? = nil,
         heroesPath: String? = nil,
+        abilitiesPath: String? = nil,
         cardsPath: String? = nil,
         enemiesPath: String? = nil,
         balancePath: String? = nil,
@@ -176,6 +181,7 @@ struct PackManifest: Codable {
         self.questsPath = questsPath
         self.anchorsPath = anchorsPath
         self.heroesPath = heroesPath
+        self.abilitiesPath = abilitiesPath
         self.cardsPath = cardsPath
         self.enemiesPath = enemiesPath
         self.balancePath = balancePath

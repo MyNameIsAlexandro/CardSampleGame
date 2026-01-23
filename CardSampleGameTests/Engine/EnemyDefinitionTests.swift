@@ -5,6 +5,15 @@ import XCTest
 /// Verifies that enemies load correctly from JSON content packs
 final class EnemyDefinitionTests: XCTestCase {
 
+    // MARK: - Helper
+
+    /// Creates a decoder configured the same way as PackLoader
+    private func makeDecoder() -> JSONDecoder {
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        return decoder
+    }
+
     // MARK: - Basic Decoding Tests
 
     func testDecodeBasicEnemy() throws {
@@ -28,8 +37,7 @@ final class EnemyDefinitionTests: XCTestCase {
         """.data(using: .utf8)!
 
         // When: Decoding
-        let decoder = JSONDecoder()
-        let enemy = try decoder.decode(EnemyDefinition.self, from: json)
+        let enemy = try makeDecoder().decode(EnemyDefinition.self, from: json)
 
         // Then: Fields should match
         XCTAssertEqual(enemy.id, "test_enemy")
@@ -67,7 +75,7 @@ final class EnemyDefinitionTests: XCTestCase {
         """.data(using: .utf8)!
 
         // When: Decoding
-        let enemy = try JSONDecoder().decode(EnemyDefinition.self, from: json)
+        let enemy = try makeDecoder().decode(EnemyDefinition.self, from: json)
 
         // Then: Snake case fields should be mapped correctly
         XCTAssertEqual(enemy.enemyType, .spirit)
@@ -101,7 +109,7 @@ final class EnemyDefinitionTests: XCTestCase {
             }
             """.data(using: .utf8)!
 
-            let enemy = try JSONDecoder().decode(EnemyDefinition.self, from: json)
+            let enemy = try makeDecoder().decode(EnemyDefinition.self, from: json)
             XCTAssertEqual(enemy.enemyType, expectedType, "Failed for type: \(jsonType)")
         }
     }
@@ -136,7 +144,7 @@ final class EnemyDefinitionTests: XCTestCase {
         """.data(using: .utf8)!
 
         // When: Decoding
-        let enemy = try JSONDecoder().decode(EnemyDefinition.self, from: json)
+        let enemy = try makeDecoder().decode(EnemyDefinition.self, from: json)
 
         // Then: Ability should be decoded correctly
         XCTAssertEqual(enemy.abilities.count, 1)
@@ -177,7 +185,7 @@ final class EnemyDefinitionTests: XCTestCase {
         """.data(using: .utf8)!
 
         // When: Decoding
-        let enemy = try JSONDecoder().decode(EnemyDefinition.self, from: json)
+        let enemy = try makeDecoder().decode(EnemyDefinition.self, from: json)
 
         // Then: Regeneration ability should be decoded
         XCTAssertEqual(enemy.abilities.count, 1)
@@ -216,7 +224,7 @@ final class EnemyDefinitionTests: XCTestCase {
         """.data(using: .utf8)!
 
         // When: Decoding
-        let enemy = try JSONDecoder().decode(EnemyDefinition.self, from: json)
+        let enemy = try makeDecoder().decode(EnemyDefinition.self, from: json)
 
         // Then: Armor ability should be decoded
         if case .armor(let amount) = enemy.abilities[0].effect {
@@ -254,7 +262,7 @@ final class EnemyDefinitionTests: XCTestCase {
         """.data(using: .utf8)!
 
         // When: Decoding
-        let enemy = try JSONDecoder().decode(EnemyDefinition.self, from: json)
+        let enemy = try makeDecoder().decode(EnemyDefinition.self, from: json)
 
         // Then: Apply curse ability should be decoded
         if case .applyCurse(let curseId) = enemy.abilities[0].effect {
@@ -286,7 +294,7 @@ final class EnemyDefinitionTests: XCTestCase {
         }
         """.data(using: .utf8)!
 
-        let enemy = try JSONDecoder().decode(EnemyDefinition.self, from: json)
+        let enemy = try makeDecoder().decode(EnemyDefinition.self, from: json)
 
         // When: Converting to card
         let card = enemy.toCard()
@@ -337,7 +345,7 @@ final class EnemyDefinitionTests: XCTestCase {
         """.data(using: .utf8)!
 
         // When: Decoding
-        let enemy = try JSONDecoder().decode(EnemyDefinition.self, from: json)
+        let enemy = try makeDecoder().decode(EnemyDefinition.self, from: json)
 
         // Then: Should have two abilities
         XCTAssertEqual(enemy.abilities.count, 2)

@@ -62,6 +62,7 @@ class SaveManager: ObservableObject {
 
     init() {
         loadAllSaves()
+        loadEngineSaves()  // Engine-First: Load engine saves
     }
 
     // Save game to slot (Campaign v2.0 - full save)
@@ -193,6 +194,71 @@ class SaveManager: ObservableObject {
         if let data = UserDefaults.standard.data(forKey: savesKey),
            let decoded = try? JSONDecoder().decode([Int: GameSave].self, from: data) {
             saveSlots = decoded
+        }
+    }
+
+    // MARK: - Engine-First Save/Load (Replaces legacy GameState-based saves)
+
+    private let engineSavesKey = "twilight_marches_engine_saves"
+    @Published var engineSaveSlots: [Int: EngineSave] = [:]
+
+    /// Save game directly from Engine (Engine-First Architecture)
+    func saveGameFromEngine(to slot: Int, engine: TwilightGameEngine) {
+        let save = engine.createEngineSave()
+        engineSaveSlots[slot] = save
+        persistEngineSaves()
+    }
+
+    /// Load game into Engine (Engine-First Architecture)
+    func loadGameToEngine(from slot: Int, engine: TwilightGameEngine) -> Bool {
+        guard let save = engineSaveSlots[slot] else {
+            // Legacy save exists - caller should use migrateFromLegacySave()
+            if saveSlots[slot] != nil {
+                print("ℹ️ Legacy save found in slot \(slot) - use migrateFromLegacySave()")
+            }
+            return false
+        }
+
+        engine.restoreFromEngineSave(save)
+        return true
+    }
+
+    /// Get engine save from slot
+    func getEngineSave(from slot: Int) -> EngineSave? {
+        return engineSaveSlots[slot]
+    }
+
+    /// Delete engine save from slot
+    func deleteEngineSave(from slot: Int) {
+        engineSaveSlots.removeValue(forKey: slot)
+        persistEngineSaves()
+    }
+
+    /// Check if engine save slot is empty
+    func isEngineSlotEmpty(_ slot: Int) -> Bool {
+        return engineSaveSlots[slot] == nil
+    }
+
+    /// Get all engine saves
+    var allEngineSaves: [EngineSave] {
+        return engineSaveSlots.values.sorted { $0.savedAt > $1.savedAt }
+    }
+
+    /// Check if any engine saves exist
+    var hasEngineSaves: Bool {
+        return !engineSaveSlots.isEmpty
+    }
+
+    private func persistEngineSaves() {
+        if let encoded = try? JSONEncoder().encode(engineSaveSlots) {
+            UserDefaults.standard.set(encoded, forKey: engineSavesKey)
+        }
+    }
+
+    private func loadEngineSaves() {
+        if let data = UserDefaults.standard.data(forKey: engineSavesKey),
+           let decoded = try? JSONDecoder().decode([Int: EngineSave].self, from: data) {
+            engineSaveSlots = decoded
         }
     }
 }

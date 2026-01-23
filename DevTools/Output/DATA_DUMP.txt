@@ -1,0 +1,2800 @@
+=== DUMP GENERATED ===
+Source: /Users/abondarenko/Library/Mobile Documents/com~apple~CloudDocs/XCode/CardSampleGame
+
+=== FILE STRUCTURE (Relevant Files) ===
+ViewModels/
+en.lproj/
+App/
+.claude/
+    settings.local.json
+ContentPacks/
+    TwilightMarches/
+        manifest.json
+        Cards/
+            cards.json
+        Balance/
+            balance.json
+        Campaign/
+            ActI/
+                anchors.json
+                events.json
+                quests.json
+                regions.json
+            Enemies/
+                enemies.json
+        Characters/
+            hero_abilities.json
+            heroes.json
+        Localization/
+            en.json
+            ru.json
+Models/
+Docs/
+    Archive/
+Utilities/
+.github/
+    workflows/
+ru.lproj/
+Data/
+Views/
+    Components/
+Engine/
+    Core/
+    Combat/
+    Config/
+    Heroes/
+    Cards/
+    Runtime/
+    ContentPacks/
+    Quest/
+    Events/
+    Modules/
+    Data/
+        Providers/
+        Definitions/
+    Migration/
+    Story/
+Helpers/
+CardSampleGameTests/
+    Unit/
+        ContentPackTests/
+    Integration/
+    Views/
+    Engine/
+
+=== FILE CONTENTS ===
+
+// ==========================================
+// FILE: .claude/settings.local.json
+// ==========================================
+
+{
+  "permissions": {
+    "allow": [
+      "Bash(textutil:*)",
+      "Bash(xcodebuild:*)",
+      "Bash(ruby -e '\nrequire \"\"xcodeproj\"\"\n\nproject_path = \"\"CardSampleGame.xcodeproj\"\"\nproject = Xcodeproj::Project.open\\(project_path\\)\n\n# Find the main target\ntarget = project.targets.find { |t| t.name == \"\"CardSampleGame\"\" }\n\n# Find the Engine/Data/Providers group\nproviders_group = project.main_group.find_subpath\\(\"\"Engine/Data/Providers\"\", true\\)\n\n# Add the new file\nfile_path = \"\"Engine/Data/Providers/TwilightMarchesContentProvider.swift\"\"\nfile_ref = providers_group.new_reference\\(file_path.split\\(\"\"/\"\"\\).last\\)\nfile_ref.set_source_tree\\(\"\"<group>\"\"\\)\n\n# Add to target\ntarget.add_file_references\\([file_ref]\\)\n\nproject.save\nputs \"\"Added TwilightMarchesContentProvider.swift to project\"\"\n')",
+      "Bash(xcrun xcresulttool:*)",
+      "Bash(grep:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(gh auth:*)",
+      "Bash(brew install:*)",
+      "Bash(ssh-keygen:*)",
+      "Bash(ssh-add:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(ssh:*)",
+      "Bash(xcrun simctl list:*)",
+      "Bash(git restore:*)",
+      "Bash(xargs basename:*)",
+      "Bash(python3:*)",
+      "Bash(cd /Users/abondarenko/Library/Mobile Documents/com~apple~CloudDocs/XCode/CardSampleGame && swift test:*)",
+      "Bash(pkill:*)",
+      "Bash(while read key)",
+      "Bash(do if ! grep -q \"\"\"$key\"\"\" en.lproj/Localizable.strings)",
+      "Bash(then echo \"Missing in en: $key\")",
+      "Bash(xcrun simctl boot:*)",
+      "Bash(git merge:*)",
+      "Bash(find:*)",
+      "Bash(for f in \"Resources/Content/regions.json\" \"Resources/Content/quests.json\" \"Resources/Content/challenges.json\" \"Resources/Content/anchors.json\" \"Resources/Content/events/pool_common.json\" \"Resources/Content/events/pool_village.json\" \"Engine/Migration/LegacyAdapters.swift\" \"Helpers/Localization.swift\" \"Data/TwilightMarchesCards.swift\" \"Data/SampleCards.swift\" \"CardGameApp.swift\" \"ContentView.swift\")",
+      "Bash(do)",
+      "Bash(if [ ! -f \"$f\" ])",
+      "Bash(then echo \"MISSING: $f\")",
+      "Bash(else echo \"EXISTS: $f\")",
+      "Bash(fi)",
+      "Bash(done)",
+      "Bash(__NEW_LINE_28e51315d305b980__ grep -c \"isa = PBXNativeTarget\" CardSampleGame.xcodeproj/project.pbxproj)",
+      "Bash(ruby -e:*)"
+    ]
+  }
+}
+
+
+// ==========================================
+// FILE: ContentPacks/TwilightMarches/manifest.json
+// ==========================================
+
+{
+  "id": "twilight-marches-act1",
+  "name": {
+    "en": "Twilight Marches - Act I",
+    "ru": "Сумрачные Пределы - Акт I"
+  },
+  "description": {
+    "en": "The first act of Twilight Marches campaign. Explore the borderlands between worlds and protect the sacred anchors.",
+    "ru": "Первый акт кампании Сумрачных Пределов. Исследуйте порубежье между мирами и защитите священные якоря."
+  },
+  "version": "1.0.0",
+  "type": "campaign",
+  "core_version_min": "1.0.0",
+  "core_version_max": null,
+  "dependencies": [],
+  "required_capabilities": [],
+  "entry_region": "village",
+  "entry_quest": "quest_main_act1",
+  "recommended_heroes": [
+    "warrior_ragnar",
+    "mage_elvira",
+    "ranger_thorin",
+    "priest_aurelius",
+    "shadow_umbra"
+  ],
+  "author": "CardSampleGame Team",
+  "license": "proprietary",
+  "release_date": "2026-01-01",
+  "locales": ["en", "ru"],
+  "checksums": null,
+  "regions_path": "Campaign/ActI/regions.json",
+  "events_path": "Campaign/ActI/events.json",
+  "quests_path": "Campaign/ActI/quests.json",
+  "anchors_path": "Campaign/ActI/anchors.json",
+  "heroes_path": "Characters/heroes.json",
+  "abilities_path": "Characters/hero_abilities.json",
+  "cards_path": "Cards",
+  "enemies_path": "Campaign/Enemies",
+  "balance_path": "Balance/balance.json",
+  "localization_path": "Localization"
+}
+
+
+// ==========================================
+// FILE: ContentPacks/TwilightMarches/Cards/cards.json
+// ==========================================
+
+[
+  {
+    "id": "strike_basic",
+    "name": "Strike",
+    "name_ru": "Удар Мечом",
+    "card_type": "attack",
+    "rarity": "common",
+    "description": "A basic attack. Deals 3 damage.",
+    "description_ru": "Удар воеводы. Наносит 3 урона.",
+    "icon": "sword",
+    "expansion_set": "baseSet",
+    "ownership": "universal",
+    "abilities": [],
+    "faith_cost": 0,
+    "balance": "neutral",
+    "power": 3,
+    "defense": null,
+    "health": null,
+    "realm": "yav"
+  },
+  {
+    "id": "defend_basic",
+    "name": "Defend",
+    "name_ru": "Защита",
+    "card_type": "defense",
+    "rarity": "common",
+    "description": "Basic defense. Blocks 2 damage.",
+    "description_ru": "Базовая защита. Блокирует 2 урона.",
+    "icon": "shield",
+    "expansion_set": "baseSet",
+    "ownership": "universal",
+    "abilities": [],
+    "faith_cost": 0,
+    "balance": "neutral",
+    "power": null,
+    "defense": 2,
+    "health": null,
+    "realm": "yav"
+  },
+  {
+    "id": "rage_strike",
+    "name": "Rage Strike",
+    "name_ru": "Удар Ярости",
+    "card_type": "attack",
+    "rarity": "uncommon",
+    "description": "A powerful strike fueled by rage. Deals 5 damage.",
+    "description_ru": "Мощный удар, питаемый яростью. Наносит 5 урона.",
+    "icon": "flame",
+    "expansion_set": "baseSet",
+    "ownership": {"class_specific": "warrior"},
+    "abilities": [
+      {
+        "id": "rage_damage",
+        "name": "Rage",
+        "name_ru": "Ярость",
+        "description": "Deals 5 damage",
+        "description_ru": "Наносит 5 урона",
+        "effect": {"damage": {"amount": 5, "type": "physical"}}
+      }
+    ],
+    "faith_cost": 2,
+    "balance": "neutral",
+    "power": 5,
+    "defense": null,
+    "health": null,
+    "realm": "yav"
+  },
+  {
+    "id": "arcane_bolt",
+    "name": "Arcane Bolt",
+    "name_ru": "Волшебный Снаряд",
+    "card_type": "attack",
+    "rarity": "common",
+    "description": "A bolt of arcane energy. Deals 3 damage.",
+    "description_ru": "Снаряд магической энергии. Наносит 3 урона.",
+    "icon": "wand.and.stars",
+    "expansion_set": "baseSet",
+    "ownership": {"class_specific": "mage"},
+    "abilities": [],
+    "faith_cost": 1,
+    "balance": "neutral",
+    "power": 3,
+    "defense": null,
+    "health": null,
+    "realm": "yav"
+  },
+  {
+    "id": "shield_spell",
+    "name": "Shield Spell",
+    "name_ru": "Щит",
+    "card_type": "defense",
+    "rarity": "common",
+    "description": "A magical shield. Blocks 3 damage.",
+    "description_ru": "Магический щит. Блокирует 3 урона.",
+    "icon": "sparkles",
+    "expansion_set": "baseSet",
+    "ownership": {"class_specific": "mage"},
+    "abilities": [],
+    "faith_cost": 1,
+    "balance": "light",
+    "power": null,
+    "defense": 3,
+    "health": null,
+    "realm": "yav"
+  },
+  {
+    "id": "meditation",
+    "name": "Meditation",
+    "name_ru": "Медитация",
+    "card_type": "special",
+    "rarity": "uncommon",
+    "description": "Center yourself. Gain 2 faith.",
+    "description_ru": "Сосредоточься. Получи 2 веры.",
+    "icon": "figure.mind.and.body",
+    "expansion_set": "baseSet",
+    "ownership": {"class_specific": "mage"},
+    "abilities": [
+      {
+        "id": "gain_faith",
+        "name": "Meditation",
+        "name_ru": "Медитация",
+        "description": "Gain 2 faith",
+        "description_ru": "Получить 2 веры",
+        "effect": {"gain_faith": 2}
+      }
+    ],
+    "faith_cost": 0,
+    "balance": "light",
+    "power": null,
+    "defense": null,
+    "health": null,
+    "realm": "prav"
+  },
+  {
+    "id": "precise_shot",
+    "name": "Precise Shot",
+    "name_ru": "Точный Выстрел",
+    "card_type": "attack",
+    "rarity": "common",
+    "description": "A precisely aimed arrow. Deals 2 damage at range.",
+    "description_ru": "Точно нацеленная стрела. Наносит 2 урона на расстоянии.",
+    "icon": "target",
+    "expansion_set": "baseSet",
+    "ownership": {"class_specific": "ranger"},
+    "abilities": [],
+    "faith_cost": 0,
+    "balance": "neutral",
+    "power": 2,
+    "defense": null,
+    "health": null,
+    "realm": "yav"
+  },
+  {
+    "id": "trap",
+    "name": "Trap",
+    "name_ru": "Ловушка",
+    "card_type": "special",
+    "rarity": "uncommon",
+    "description": "Set a trap. Enemy takes 3 damage next turn.",
+    "description_ru": "Установить ловушку. Враг получает 3 урона в следующем ходу.",
+    "icon": "exclamationmark.triangle",
+    "expansion_set": "baseSet",
+    "ownership": {"class_specific": "ranger"},
+    "abilities": [
+      {
+        "id": "trap_damage",
+        "name": "Trap",
+        "name_ru": "Ловушка",
+        "description": "Deal 3 damage next turn",
+        "description_ru": "Нанести 3 урона в следующем ходу",
+        "effect": {"damage": {"amount": 3, "type": "physical"}}
+      }
+    ],
+    "faith_cost": 1,
+    "balance": "neutral",
+    "power": null,
+    "defense": null,
+    "health": null,
+    "realm": "yav"
+  },
+  {
+    "id": "tracking",
+    "name": "Tracking",
+    "name_ru": "Выслеживание",
+    "card_type": "special",
+    "rarity": "uncommon",
+    "description": "Track your prey. Draw 2 cards.",
+    "description_ru": "Выследить добычу. Возьми 2 карты.",
+    "icon": "pawprint",
+    "expansion_set": "baseSet",
+    "ownership": {"class_specific": "ranger"},
+    "abilities": [
+      {
+        "id": "draw_cards",
+        "name": "Tracking",
+        "name_ru": "Выслеживание",
+        "description": "Draw 2 cards",
+        "description_ru": "Взять 2 карты",
+        "effect": {"draw_cards": 2}
+      }
+    ],
+    "faith_cost": 1,
+    "balance": "neutral",
+    "power": null,
+    "defense": null,
+    "health": null,
+    "realm": "yav"
+  },
+  {
+    "id": "holy_light",
+    "name": "Holy Light",
+    "name_ru": "Святой Свет",
+    "card_type": "attack",
+    "rarity": "common",
+    "description": "A beam of holy light. Deals 2 damage, heals 1.",
+    "description_ru": "Луч святого света. Наносит 2 урона, лечит 1.",
+    "icon": "sun.max",
+    "expansion_set": "baseSet",
+    "ownership": {"class_specific": "priest"},
+    "abilities": [
+      {
+        "id": "heal",
+        "name": "Light",
+        "name_ru": "Свет",
+        "description": "Heal 1",
+        "description_ru": "Лечит 1",
+        "effect": {"heal": 1}
+      }
+    ],
+    "faith_cost": 1,
+    "balance": "light",
+    "power": 2,
+    "defense": null,
+    "health": null,
+    "realm": "prav"
+  },
+  {
+    "id": "blessing",
+    "name": "Blessing",
+    "name_ru": "Благословение",
+    "card_type": "special",
+    "rarity": "uncommon",
+    "description": "Bestow a blessing. Heal 3 health.",
+    "description_ru": "Даровать благословение. Восстановить 3 здоровья.",
+    "icon": "hands.sparkles",
+    "expansion_set": "baseSet",
+    "ownership": {"class_specific": "priest"},
+    "abilities": [
+      {
+        "id": "heal",
+        "name": "Blessing",
+        "name_ru": "Благословение",
+        "description": "Heal 3 health",
+        "description_ru": "Восстановить 3 здоровья",
+        "effect": {"heal": 3}
+      }
+    ],
+    "faith_cost": 2,
+    "balance": "light",
+    "power": null,
+    "defense": null,
+    "health": null,
+    "realm": "prav"
+  },
+  {
+    "id": "smite",
+    "name": "Smite",
+    "name_ru": "Кара",
+    "card_type": "attack",
+    "rarity": "uncommon",
+    "description": "Divine punishment. Deals 4 damage to dark enemies.",
+    "description_ru": "Божественная кара. Наносит 4 урона тёмным врагам.",
+    "icon": "bolt",
+    "expansion_set": "baseSet",
+    "ownership": {"class_specific": "priest"},
+    "abilities": [],
+    "faith_cost": 2,
+    "balance": "light",
+    "power": 4,
+    "defense": null,
+    "health": null,
+    "realm": "prav"
+  },
+  {
+    "id": "backstab",
+    "name": "Backstab",
+    "name_ru": "Удар в Спину",
+    "card_type": "attack",
+    "rarity": "common",
+    "description": "Attack from the shadows. Deals 3 damage, +2 if enemy at full health.",
+    "description_ru": "Атака из тени. Наносит 3 урона, +2 если враг на полном здоровье.",
+    "icon": "arrow.down.right",
+    "expansion_set": "baseSet",
+    "ownership": {"class_specific": "shadow"},
+    "abilities": [],
+    "faith_cost": 0,
+    "balance": "dark",
+    "power": 3,
+    "defense": null,
+    "health": null,
+    "realm": "nav"
+  },
+  {
+    "id": "shadow_step",
+    "name": "Shadow Step",
+    "name_ru": "Шаг Сквозь Тень",
+    "card_type": "special",
+    "rarity": "uncommon",
+    "description": "Move through shadows. Draw a card and gain 1 defense.",
+    "description_ru": "Переместиться сквозь тени. Взять карту и получить 1 защиту.",
+    "icon": "figure.walk",
+    "expansion_set": "baseSet",
+    "ownership": {"class_specific": "shadow"},
+    "abilities": [
+      {
+        "id": "draw",
+        "name": "Shadow",
+        "name_ru": "Тень",
+        "description": "Draw 1 card",
+        "description_ru": "Взять 1 карту",
+        "effect": {"draw_cards": 1}
+      }
+    ],
+    "faith_cost": 1,
+    "balance": "dark",
+    "power": null,
+    "defense": 1,
+    "health": null,
+    "realm": "nav"
+  },
+  {
+    "id": "poison_blade",
+    "name": "Poison Blade",
+    "name_ru": "Отравленный Клинок",
+    "card_type": "attack",
+    "rarity": "uncommon",
+    "description": "A poisoned weapon. Deals 2 damage and applies weakness.",
+    "description_ru": "Отравленное оружие. Наносит 2 урона и накладывает слабость.",
+    "icon": "drop.triangle",
+    "expansion_set": "baseSet",
+    "ownership": {"class_specific": "shadow"},
+    "abilities": [
+      {
+        "id": "poison",
+        "name": "Poison",
+        "name_ru": "Яд",
+        "description": "Apply weakness",
+        "description_ru": "Наложить слабость",
+        "effect": {"apply_curse": {"type": "weakness", "duration": 2}}
+      }
+    ],
+    "faith_cost": 2,
+    "balance": "dark",
+    "power": 2,
+    "defense": null,
+    "health": null,
+    "realm": "nav"
+  },
+  {
+    "id": "defender_blessing",
+    "name": "Defender's Blessing",
+    "name_ru": "Благословение Защитника",
+    "card_type": "special",
+    "rarity": "rare",
+    "description": "A reward for completing the main quest. Permanently increases defense by 2.",
+    "description_ru": "Награда за выполнение основного квеста. Постоянно увеличивает защиту на 2.",
+    "icon": "shield.checkered",
+    "expansion_set": "twilightMarches",
+    "ownership": "universal",
+    "abilities": [
+      {
+        "id": "permanent_defense",
+        "name": "Sacred Protection",
+        "name_ru": "Священная Защита",
+        "description": "+2 defense permanently",
+        "description_ru": "+2 к защите навсегда",
+        "effect": {"permanent_stat": {"stat": "defense", "amount": 2}}
+      }
+    ],
+    "faith_cost": 0,
+    "balance": "light",
+    "power": null,
+    "defense": 2,
+    "health": null,
+    "realm": "prav"
+  },
+  {
+    "id": "anchor_power",
+    "name": "Anchor's Power",
+    "name_ru": "Сила Якоря",
+    "card_type": "special",
+    "rarity": "rare",
+    "description": "Draw from the anchors' power. Heal 5 and gain 1 faith.",
+    "description_ru": "Черпать силу из якорей. Лечит 5 и даёт 1 веру.",
+    "icon": "anchor",
+    "expansion_set": "twilightMarches",
+    "ownership": "universal",
+    "abilities": [
+      {
+        "id": "anchor_heal",
+        "name": "Anchor's Blessing",
+        "name_ru": "Благословение Якоря",
+        "description": "Heal 5, gain 1 faith",
+        "description_ru": "Лечит 5, даёт 1 веру",
+        "effect": {"heal": 5, "faith": 1}
+      }
+    ],
+    "faith_cost": 0,
+    "balance": "light",
+    "power": null,
+    "defense": null,
+    "health": null,
+    "realm": "prav"
+  },
+  {
+    "id": "forest_blessing",
+    "name": "Forest Blessing",
+    "name_ru": "Благословение Леса",
+    "card_type": "special",
+    "rarity": "uncommon",
+    "description": "Loot from defeating a Leshy. Heal 3 in forest regions.",
+    "description_ru": "Добыча с побеждённого Лешего. Лечит 3 в лесных регионах.",
+    "icon": "leaf",
+    "expansion_set": "twilightMarches",
+    "ownership": "universal",
+    "abilities": [
+      {
+        "id": "forest_heal",
+        "name": "Nature's Gift",
+        "name_ru": "Дар Природы",
+        "description": "Heal 3 in forest",
+        "description_ru": "Лечит 3 в лесу",
+        "effect": {"heal": 3}
+      }
+    ],
+    "faith_cost": 0,
+    "balance": "neutral",
+    "power": null,
+    "defense": null,
+    "health": null,
+    "realm": "yav"
+  },
+  {
+    "id": "mountain_blessing",
+    "name": "Mountain Blessing",
+    "name_ru": "Благословение Гор",
+    "card_type": "special",
+    "rarity": "rare",
+    "description": "Reward from the Mountain Spirit. +3 defense for one battle.",
+    "description_ru": "Награда от Горного Духа. +3 к защите на одну битву.",
+    "icon": "mountain.2",
+    "expansion_set": "twilightMarches",
+    "ownership": "universal",
+    "abilities": [
+      {
+        "id": "mountain_armor",
+        "name": "Stone Skin",
+        "name_ru": "Каменная Кожа",
+        "description": "+3 defense for battle",
+        "description_ru": "+3 к защите на битву",
+        "effect": {"temporary_stat": {"stat": "defense", "amount": 3, "duration": 1}}
+      }
+    ],
+    "faith_cost": 0,
+    "balance": "neutral",
+    "power": null,
+    "defense": 3,
+    "health": null,
+    "realm": "yav"
+  },
+  {
+    "id": "witch_knowledge",
+    "name": "Witch's Knowledge",
+    "name_ru": "Знание Ведьмы",
+    "card_type": "special",
+    "rarity": "uncommon",
+    "description": "Dark wisdom from the swamp witch. Draw 2 cards.",
+    "description_ru": "Тёмная мудрость от болотной ведьмы. Взять 2 карты.",
+    "icon": "book.closed",
+    "expansion_set": "twilightMarches",
+    "ownership": "universal",
+    "abilities": [
+      {
+        "id": "draw_cards",
+        "name": "Ancient Wisdom",
+        "name_ru": "Древняя Мудрость",
+        "description": "Draw 2 cards",
+        "description_ru": "Взять 2 карты",
+        "effect": {"draw_cards": 2}
+      }
+    ],
+    "faith_cost": 1,
+    "balance": "dark",
+    "power": null,
+    "defense": null,
+    "health": null,
+    "realm": "nav"
+  }
+]
+
+
+// ==========================================
+// FILE: ContentPacks/TwilightMarches/Balance/balance.json
+// ==========================================
+
+{
+  "resources": {
+    "starting_health": 10,
+    "max_health": 10,
+    "starting_faith": 3,
+    "max_faith": 10,
+    "starting_supplies": 5,
+    "max_supplies": 10,
+    "starting_gold": 0,
+    "max_gold": 100,
+    "starting_balance": 50
+  },
+  "pressure": {
+    "starting_pressure": 30,
+    "min_pressure": 0,
+    "max_pressure": 100,
+    "pressure_per_turn": 3,
+    "escalation_interval": 3,
+    "thresholds": {
+      "warning": 50,
+      "critical": 75,
+      "catastrophic": 100
+    },
+    "degradation": {
+      "warning_chance": 0.3,
+      "critical_chance": 0.5,
+      "catastrophic_chance": 0.7,
+      "anchor_decay_chance": 0.05
+    }
+  },
+  "combat": {
+    "base_damage": 2,
+    "power_modifier": 1.0,
+    "defense_reduction": 1.0,
+    "dice_max": 6,
+    "actions_per_turn": 3,
+    "cards_drawn_per_turn": 5,
+    "max_hand_size": 7
+  },
+  "time": {
+    "units_per_day": 24,
+    "starting_time": 8,
+    "max_days": null,
+    "travel_cost": 1,
+    "explore_cost": 1,
+    "rest_cost": 1,
+    "strengthen_anchor_cost": 1,
+    "instant_cost": 0
+  },
+  "end_conditions": {
+    "death_health": 0,
+    "pressure_loss": 100,
+    "breach_loss": null,
+    "victory_quests": ["main_quest_act5"],
+    "main_quest_complete_flag": "act5_completed",
+    "critical_anchor_destroyed_flag": "critical_anchor_destroyed"
+  },
+  "balance_system": {
+    "min": 0,
+    "max": 100,
+    "initial": 50,
+    "light_threshold": 70,
+    "dark_threshold": 30
+  },
+  "anchor": {
+    "max_integrity": 100,
+    "strengthen_amount": 20,
+    "strengthen_cost": 5,
+    "stable_threshold": 70,
+    "breach_threshold": 0,
+    "decay_per_turn": 5
+  }
+}
+
+
+// ==========================================
+// FILE: ContentPacks/TwilightMarches/Campaign/ActI/anchors.json
+// ==========================================
+
+[
+  {
+    "id": "anchor_village_chapel",
+    "title": {
+      "en": "Village Chapel",
+      "ru": "Деревенская Часовня"
+    },
+    "description": {
+      "en": "A small chapel offering protection to the village",
+      "ru": "Небольшая часовня, защищающая деревню"
+    },
+    "region_id": "village",
+    "anchor_type": "chapel",
+    "initial_influence": "light",
+    "power": 6,
+    "max_integrity": 100,
+    "initial_integrity": 85,
+    "strengthen_amount": 15,
+    "strengthen_cost": {
+      "changes": [
+        {"resource_id": "faith", "amount": -5}
+      ]
+    },
+    "resistance_divisor": 100
+  },
+  {
+    "id": "anchor_sacred_oak",
+    "title": {
+      "en": "Sacred Oak",
+      "ru": "Священный Дуб"
+    },
+    "description": {
+      "en": "An ancient tree imbued with divine essence",
+      "ru": "Древнее дерево, наполненное божественной сущностью"
+    },
+    "region_id": "oak",
+    "anchor_type": "sacred_tree",
+    "initial_influence": "light",
+    "power": 8,
+    "max_integrity": 100,
+    "initial_integrity": 90,
+    "strengthen_amount": 20,
+    "strengthen_cost": {
+      "changes": [
+        {"resource_id": "faith", "amount": -8}
+      ]
+    },
+    "resistance_divisor": 100
+  },
+  {
+    "id": "anchor_forest_idol",
+    "title": {
+      "en": "Forest Stone Idol",
+      "ru": "Лесной Каменный Идол"
+    },
+    "description": {
+      "en": "A weathered stone idol of forgotten gods",
+      "ru": "Обветшалый каменный идол забытых богов"
+    },
+    "region_id": "forest",
+    "anchor_type": "stone_idol",
+    "initial_influence": "neutral",
+    "power": 5,
+    "max_integrity": 100,
+    "initial_integrity": 55,
+    "strengthen_amount": 15,
+    "strengthen_cost": {
+      "changes": [
+        {"resource_id": "faith", "amount": -5}
+      ]
+    },
+    "resistance_divisor": 100
+  },
+  {
+    "id": "anchor_swamp_spring",
+    "title": {
+      "en": "Corrupted Spring",
+      "ru": "Осквернённый Источник"
+    },
+    "description": {
+      "en": "A once-pure spring now tainted by darkness",
+      "ru": "Некогда чистый источник, осквернённый тьмой"
+    },
+    "region_id": "swamp",
+    "anchor_type": "spring",
+    "initial_influence": "dark",
+    "power": 4,
+    "max_integrity": 100,
+    "initial_integrity": 45,
+    "strengthen_amount": 15,
+    "strengthen_cost": {
+      "changes": [
+        {"resource_id": "faith", "amount": -6}
+      ]
+    },
+    "resistance_divisor": 100
+  },
+  {
+    "id": "anchor_mountain_barrow",
+    "title": {
+      "en": "Ancestor Barrow",
+      "ru": "Курган Предков"
+    },
+    "description": {
+      "en": "An ancient burial mound of revered ancestors",
+      "ru": "Древний курган почитаемых предков"
+    },
+    "region_id": "mountain",
+    "anchor_type": "barrow",
+    "initial_influence": "neutral",
+    "power": 5,
+    "max_integrity": 100,
+    "initial_integrity": 50,
+    "strengthen_amount": 15,
+    "strengthen_cost": {
+      "changes": [
+        {"resource_id": "faith", "amount": -5}
+      ]
+    },
+    "resistance_divisor": 100
+  },
+  {
+    "id": "anchor_breach_shrine",
+    "title": {
+      "en": "Breach Ward Shrine",
+      "ru": "Святилище у Разлома"
+    },
+    "description": {
+      "en": "A crumbling shrine that wards against the breach",
+      "ru": "Разрушающееся святилище, защищающее от разлома"
+    },
+    "region_id": "breach",
+    "anchor_type": "shrine",
+    "initial_influence": "dark",
+    "power": 3,
+    "max_integrity": 100,
+    "initial_integrity": 15,
+    "strengthen_amount": 10,
+    "strengthen_cost": {
+      "changes": [
+        {"resource_id": "faith", "amount": -10}
+      ]
+    },
+    "resistance_divisor": 100
+  }
+]
+
+
+// ==========================================
+// FILE: ContentPacks/TwilightMarches/Campaign/ActI/events.json
+// ==========================================
+
+[
+  {
+    "id": "event_elder_quest",
+    "title": {
+      "en": "Village Elder's Request",
+      "ru": "Просьба Старосты"
+    },
+    "body": {
+      "en": "The village elder asks for help. The Navi grows stronger, and the village needs a defender who can strengthen the anchors and resist the darkness.",
+      "ru": "Деревенский староста просит о помощи. Навь усиливается, и деревне нужен защитник, способный укрепить якоря и противостоять тьме."
+    },
+    "event_kind": "inline",
+    "availability": {
+      "required_flags": [],
+      "forbidden_flags": ["main_quest_started"],
+      "min_pressure": null,
+      "max_pressure": null,
+      "min_balance": null,
+      "max_balance": null,
+      "region_states": ["stable", "borderland"],
+      "region_ids": ["village"]
+    },
+    "pool_ids": ["pool_village"],
+    "weight": 100,
+    "is_one_time": true,
+    "is_instant": false,
+    "cooldown": 0,
+    "choices": [
+      {
+        "id": "accept_quest",
+        "label": {
+          "en": "Agree to help the village",
+          "ru": "Согласиться помочь деревне"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {"faith": 3},
+          "set_flags": ["main_quest_started", "helped_village"],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": {
+            "quest_id": "quest_main_act1",
+            "objective_id": "obj_learn_anchors",
+            "action": "unlock"
+          },
+          "trigger_event_id": null,
+          "result_key": "quest_accepted"
+        }
+      },
+      {
+        "id": "request_payment",
+        "label": {
+          "en": "Request payment (10 Faith)",
+          "ru": "Попросить награду (10 ✨)"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {"faith": 10},
+          "set_flags": ["main_quest_started", "mercenary_path"],
+          "clear_flags": [],
+          "balance_delta": -5,
+          "region_state_change": null,
+          "quest_progress": {
+            "quest_id": "quest_main_act1",
+            "objective_id": "obj_learn_anchors",
+            "action": "unlock"
+          },
+          "trigger_event_id": null,
+          "result_key": "mercenary_accepted"
+        }
+      },
+      {
+        "id": "refuse",
+        "label": {
+          "en": "Refuse and go your own way",
+          "ru": "Отказать и идти своим путем"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {},
+          "set_flags": ["refused_main_quest"],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "quest_refused"
+        }
+      }
+    ],
+    "mini_game_challenge": null
+  },
+  {
+    "id": "event_sacred_oak_wisdom",
+    "title": {
+      "en": "Wisdom of the Sacred Oak",
+      "ru": "Мудрость Священного Дуба"
+    },
+    "body": {
+      "en": "The ancient oak whispers to you in the language of the wind. You feel its ancient power and the wisdom of ages.",
+      "ru": "Древний дуб шепчет вам на языке ветра. Вы чувствуете его древнюю силу и мудрость веков."
+    },
+    "event_kind": "inline",
+    "availability": {
+      "required_flags": [],
+      "forbidden_flags": [],
+      "min_pressure": null,
+      "max_pressure": null,
+      "min_balance": null,
+      "max_balance": null,
+      "region_states": ["stable", "borderland"],
+      "region_ids": ["oak"]
+    },
+    "pool_ids": ["pool_sacred"],
+    "weight": 20,
+    "is_one_time": false,
+    "is_instant": false,
+    "cooldown": 3,
+    "choices": [
+      {
+        "id": "meditate",
+        "label": {
+          "en": "Meditate under the oak (6 Faith)",
+          "ru": "Медитировать под дубом (6 ✨)"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"faith": 6},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": -6, "health": 5},
+          "set_flags": ["oak_wisdom"],
+          "clear_flags": [],
+          "balance_delta": 10,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "wisdom_gained"
+        }
+      },
+      {
+        "id": "strengthen_oak",
+        "label": {
+          "en": "Strengthen the oak's bond with the earth (12 Faith)",
+          "ru": "Укрепить связь дуба с землей (12 ✨)"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"faith": 12},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": 60,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": -12},
+          "set_flags": ["oak_strengthened"],
+          "clear_flags": [],
+          "balance_delta": 15,
+          "region_state_change": null,
+          "quest_progress": {
+            "quest_id": "quest_main_act1",
+            "objective_id": "obj_strengthen_oak",
+            "action": "complete"
+          },
+          "trigger_event_id": null,
+          "result_key": "oak_strengthened"
+        }
+      },
+      {
+        "id": "rest",
+        "label": {
+          "en": "Simply rest in the oak's shade",
+          "ru": "Просто отдохнуть в тени дуба"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {"health": 2},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "rested"
+        }
+      }
+    ],
+    "mini_game_challenge": null
+  },
+  {
+    "id": "event_wanderer",
+    "title": {
+      "en": "Wanderer at the Crossroads",
+      "ru": "Странник на Развилке"
+    },
+    "body": {
+      "en": "An old traveler sits by a campfire. He offers to share knowledge about the world in exchange for help.",
+      "ru": "Старый путник сидит у костра. Он предлагает поделиться знаниями о мире в обмен на помощь."
+    },
+    "event_kind": "inline",
+    "availability": {
+      "required_flags": [],
+      "forbidden_flags": ["met_wanderer"],
+      "min_pressure": null,
+      "max_pressure": null,
+      "min_balance": null,
+      "max_balance": null,
+      "region_states": ["stable", "borderland"],
+      "region_ids": null
+    },
+    "pool_ids": ["pool_common"],
+    "weight": 15,
+    "is_one_time": true,
+    "is_instant": false,
+    "cooldown": 0,
+    "choices": [
+      {
+        "id": "listen",
+        "label": {
+          "en": "Listen to the wanderer's tales (3 Faith)",
+          "ru": "Выслушать рассказы странника (3 ✨)"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"faith": 3},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": -3},
+          "set_flags": ["met_wanderer"],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "wanderer_tales"
+        }
+      },
+      {
+        "id": "help",
+        "label": {
+          "en": "Help him with supplies",
+          "ru": "Помочь ему припасами"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {"faith": -2},
+          "set_flags": ["met_wanderer"],
+          "clear_flags": [],
+          "balance_delta": 5,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "wanderer_helped"
+        }
+      },
+      {
+        "id": "pass",
+        "label": {
+          "en": "Pass by",
+          "ru": "Пройти мимо"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "passed_by"
+        }
+      }
+    ],
+    "mini_game_challenge": null
+  },
+  {
+    "id": "event_wild_beast",
+    "title": {
+      "en": "Wild Beast",
+      "ru": "Дикий Зверь"
+    },
+    "body": {
+      "en": "A maddened creature leaps from the bushes with glowing red eyes. It growls and prepares to attack!",
+      "ru": "Из-за деревьев выскакивает озверевшее существо с горящими красными глазами. Оно рычит и готовится к атаке!"
+    },
+    "event_kind": {"mini_game": "combat"},
+    "availability": {
+      "required_flags": [],
+      "forbidden_flags": [],
+      "min_pressure": null,
+      "max_pressure": null,
+      "min_balance": null,
+      "max_balance": null,
+      "region_states": ["stable", "borderland", "breach"],
+      "region_ids": null
+    },
+    "pool_ids": ["pool_common"],
+    "weight": 20,
+    "is_one_time": false,
+    "is_instant": false,
+    "cooldown": 2,
+    "choices": [
+      {
+        "id": "fight",
+        "label": {
+          "en": "Fight the beast",
+          "ru": "Сразиться со зверем"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"health": 2},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "combat_start"
+        }
+      },
+      {
+        "id": "scare",
+        "label": {
+          "en": "Try to scare the beast (5 Faith)",
+          "ru": "Попытаться испугать зверя (5 ✨)"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"faith": 5},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": -5},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "beast_scared"
+        }
+      },
+      {
+        "id": "flee",
+        "label": {
+          "en": "Run away",
+          "ru": "Убежать"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {"health": -1},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "fled_injured"
+        }
+      }
+    ],
+    "mini_game_challenge": {
+      "enemy_id": "wild_beast",
+      "difficulty": 1,
+      "rewards": {
+        "resource_changes": {"faith": 3},
+        "set_flags": [],
+        "clear_flags": [],
+        "balance_delta": 0,
+        "region_state_change": null,
+        "quest_progress": null,
+        "trigger_event_id": null,
+        "result_key": null
+      }
+    }
+  },
+  {
+    "id": "event_swamp_witch",
+    "title": {
+      "en": "Swamp Witch",
+      "ru": "Болотная Ведьма"
+    },
+    "body": {
+      "en": "An old witch appears from the swamp mists. She offers a deal: knowledge in exchange for a part of your essence.",
+      "ru": "Среди болотных туманов появляется старая ведьма. Она предлагает сделку: знания в обмен на часть вашей сущности."
+    },
+    "event_kind": "inline",
+    "availability": {
+      "required_flags": [],
+      "forbidden_flags": ["witch_pact", "witch_refused"],
+      "min_pressure": null,
+      "max_pressure": null,
+      "min_balance": null,
+      "max_balance": null,
+      "region_states": ["borderland", "breach"],
+      "region_ids": ["swamp"]
+    },
+    "pool_ids": ["pool_swamp"],
+    "weight": 25,
+    "is_one_time": true,
+    "is_instant": false,
+    "cooldown": 0,
+    "choices": [
+      {
+        "id": "accept_deal",
+        "label": {
+          "en": "Accept the witch's deal",
+          "ru": "Принять сделку ведьмы"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"health": 4},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": 5, "health": -3},
+          "set_flags": ["witch_pact", "witch_mark"],
+          "clear_flags": [],
+          "balance_delta": -10,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "deal_accepted"
+        }
+      },
+      {
+        "id": "refuse_politely",
+        "label": {
+          "en": "Refuse and ask for help (7 Faith)",
+          "ru": "Отказаться и попросить о помощи (7 ✨)"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"faith": 7},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": -7, "health": 2},
+          "set_flags": ["witch_refused"],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "witch_respected"
+        }
+      },
+      {
+        "id": "leave",
+        "label": {
+          "en": "Leave without dealing with the witch",
+          "ru": "Уйти, не связываясь с ведьмой"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "avoided_witch"
+        }
+      }
+    ],
+    "mini_game_challenge": null
+  },
+  {
+    "id": "event_camp_rest",
+    "title": {
+      "en": "Safe Camping Spot",
+      "ru": "Безопасное Место для Привала"
+    },
+    "body": {
+      "en": "You find a sheltered spot suitable for rest. You can make a fire and restore your strength.",
+      "ru": "Вы находите укрытое место, подходящее для отдыха. Можно развести костер и восстановить силы."
+    },
+    "event_kind": "inline",
+    "availability": {
+      "required_flags": [],
+      "forbidden_flags": [],
+      "min_pressure": null,
+      "max_pressure": 60,
+      "min_balance": null,
+      "max_balance": null,
+      "region_states": ["stable", "borderland"],
+      "region_ids": null
+    },
+    "pool_ids": ["pool_common"],
+    "weight": 15,
+    "is_one_time": false,
+    "is_instant": false,
+    "cooldown": 5,
+    "choices": [
+      {
+        "id": "full_rest",
+        "label": {
+          "en": "Rest and recover",
+          "ru": "Отдохнуть и восстановиться"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {"faith": 2, "health": 4},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "fully_rested"
+        }
+      },
+      {
+        "id": "purification_ritual",
+        "label": {
+          "en": "Perform a purification ritual (5 Faith)",
+          "ru": "Провести ритуал очищения (5 ✨)"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"faith": 5},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": -5, "health": 3},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 5,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "purified"
+        }
+      },
+      {
+        "id": "quick_rest",
+        "label": {
+          "en": "Quick snack and move on",
+          "ru": "Быстро перекусить и идти дальше"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {"health": 1},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "quick_rest"
+        }
+      }
+    ],
+    "mini_game_challenge": null
+  },
+  {
+    "id": "event_breach_surge",
+    "title": {
+      "en": "Navi Breakthrough",
+      "ru": "Прорыв Нави"
+    },
+    "body": {
+      "en": "The boundary between worlds thins. Dark forces try to break through into Yav through a weak anchor.",
+      "ru": "Граница между мирами истончается. Темные силы пытаются прорваться в Явь через слабый якорь."
+    },
+    "event_kind": "inline",
+    "availability": {
+      "required_flags": [],
+      "forbidden_flags": [],
+      "min_pressure": 50,
+      "max_pressure": null,
+      "min_balance": null,
+      "max_balance": null,
+      "region_states": ["breach"],
+      "region_ids": null
+    },
+    "pool_ids": ["pool_breach"],
+    "weight": 30,
+    "is_one_time": false,
+    "is_instant": false,
+    "cooldown": 3,
+    "choices": [
+      {
+        "id": "strengthen_anchor",
+        "label": {
+          "en": "Strengthen the anchor with faith (15 Faith)",
+          "ru": "Укрепить якорь своей верой (15 ✨)"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"faith": 15},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": -15},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 10,
+          "region_state_change": {
+            "region_id": null,
+            "new_state": null,
+            "transition": "restore"
+          },
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "anchor_strengthened"
+        }
+      },
+      {
+        "id": "retreat_warn",
+        "label": {
+          "en": "Retreat and warn others",
+          "ru": "Отступить и предупредить других"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "warned_others"
+        }
+      },
+      {
+        "id": "use_breach_power",
+        "label": {
+          "en": "Try to use breach power",
+          "ru": "Попытаться использовать силу прорыва"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": 40
+        },
+        "consequences": {
+          "resource_changes": {"faith": 10, "health": -5},
+          "set_flags": ["breach_corruption"],
+          "clear_flags": [],
+          "balance_delta": -15,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "power_gained"
+        }
+      }
+    ],
+    "mini_game_challenge": null
+  },
+  {
+    "id": "event_mountain_spirit",
+    "title": {
+      "en": "Trial of the Pass",
+      "ru": "Испытание Перевала"
+    },
+    "body": {
+      "en": "A stone spirit appears at the mountain pass. It speaks: 'Prove your strength or turn back, mortal!'",
+      "ru": "На горном перевале появляется каменный дух. Он говорит: 'Докажи свою силу или вернись назад, смертный!'"
+    },
+    "event_kind": {"mini_game": "combat"},
+    "availability": {
+      "required_flags": [],
+      "forbidden_flags": ["mountain_blessing"],
+      "min_pressure": null,
+      "max_pressure": null,
+      "min_balance": null,
+      "max_balance": null,
+      "region_states": ["stable", "borderland", "breach"],
+      "region_ids": ["mountain"]
+    },
+    "pool_ids": ["pool_mountain"],
+    "weight": 25,
+    "is_one_time": true,
+    "is_instant": false,
+    "cooldown": 0,
+    "choices": [
+      {
+        "id": "accept_challenge",
+        "label": {
+          "en": "Accept the spirit's challenge",
+          "ru": "Принять вызов духа"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"health": 4},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": 2},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "combat_start"
+        }
+      },
+      {
+        "id": "offer_gift",
+        "label": {
+          "en": "Offer a gift to the mountains (10 Faith)",
+          "ru": "Предложить дар горам (10 ✨)"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"faith": 10},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": -10},
+          "set_flags": ["mountain_blessing"],
+          "clear_flags": [],
+          "balance_delta": 8,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "mountain_blessed"
+        }
+      },
+      {
+        "id": "retreat_pass",
+        "label": {
+          "en": "Retreat from the pass",
+          "ru": "Отступить с перевала"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "retreated"
+        }
+      }
+    ],
+    "mini_game_challenge": {
+      "enemy_id": "mountain_spirit",
+      "difficulty": 2,
+      "rewards": {
+        "resource_changes": {"faith": 5},
+        "set_flags": ["mountain_blessing"],
+        "clear_flags": [],
+        "balance_delta": 10,
+        "region_state_change": null,
+        "quest_progress": null,
+        "trigger_event_id": null,
+        "result_key": null
+      }
+    }
+  },
+  {
+    "id": "event_leshy_encounter",
+    "title": {
+      "en": "Encounter with Leshy",
+      "ru": "Встреча с Лешим"
+    },
+    "body": {
+      "en": "The ancient forest guardian emerges from the thicket. His eyes burn with green fire, and branches creak menacingly. The Leshy blocks your path.",
+      "ru": "Из чащи появляется древний страж леса. Его глаза горят зеленым огнем, а ветви скрипят угрожающе. Леший преграждает путь."
+    },
+    "event_kind": {"mini_game": "combat"},
+    "availability": {
+      "required_flags": [],
+      "forbidden_flags": [],
+      "min_pressure": null,
+      "max_pressure": null,
+      "min_balance": null,
+      "max_balance": null,
+      "region_states": ["borderland", "breach"],
+      "region_ids": ["forest", "swamp"]
+    },
+    "pool_ids": ["pool_forest", "pool_swamp"],
+    "weight": 18,
+    "is_one_time": false,
+    "is_instant": false,
+    "cooldown": 4,
+    "choices": [
+      {
+        "id": "fight_leshy",
+        "label": {
+          "en": "Fight the forest spirit",
+          "ru": "Вступить в бой с духом леса"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"health": 3},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": 1},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "combat_start"
+        }
+      },
+      {
+        "id": "appease_leshy",
+        "label": {
+          "en": "Try to appease with gifts (5 Faith)",
+          "ru": "Попытаться задобрить дарами (5 ✨)"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"faith": 5},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": -5},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 5,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "leshy_appeased"
+        }
+      },
+      {
+        "id": "retreat_leshy",
+        "label": {
+          "en": "Retreat and go around",
+          "ru": "Отступить и обойти стороной"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": -5,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "retreated_leshy"
+        }
+      }
+    ],
+    "mini_game_challenge": {
+      "enemy_id": "leshy",
+      "difficulty": 2,
+      "rewards": {
+        "resource_changes": {"faith": 4},
+        "set_flags": [],
+        "clear_flags": [],
+        "balance_delta": 3,
+        "region_state_change": null,
+        "quest_progress": null,
+        "trigger_event_id": null,
+        "result_key": null
+      }
+    }
+  },
+  {
+    "id": "event_boss_leshy_guardian",
+    "title": {
+      "en": "Leshy Guardian",
+      "ru": "Леший-Хранитель"
+    },
+    "body": {
+      "en": "Before you towers the ancient guardian of the Twilight Marches. The Leshy Guardian - a being of immense power whose roots reach into the very foundations of the world. Green flame burns eternally in his eyes. This is the final trial of Act I.",
+      "ru": "Перед вами возвышается древний страж Сумрачных Пределов. Леший-Хранитель - существо невиданной силы, чьи корни уходят в самые основы мира. Зелёное пламя в его глазах горит вечностью. Это финальное испытание Акта I."
+    },
+    "event_kind": {"mini_game": "combat"},
+    "availability": {
+      "required_flags": ["main_quest_started", "oak_strengthened"],
+      "forbidden_flags": ["leshy_guardian_defeated"],
+      "min_pressure": null,
+      "max_pressure": null,
+      "min_balance": null,
+      "max_balance": null,
+      "region_states": ["breach"],
+      "region_ids": ["dark_lowland"]
+    },
+    "pool_ids": ["pool_boss"],
+    "weight": 100,
+    "is_one_time": true,
+    "is_instant": false,
+    "cooldown": 0,
+    "choices": [
+      {
+        "id": "fight_boss",
+        "label": {
+          "en": "Enter the final battle",
+          "ru": "Вступить в решающий бой"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"faith": 10, "health": 8},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "boss_combat_start"
+        }
+      },
+      {
+        "id": "negotiate_boss",
+        "label": {
+          "en": "Try to negotiate (20 Faith)",
+          "ru": "Попытаться договориться (20 ✨)"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"faith": 20},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": 70,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": -20},
+          "set_flags": ["leshy_guardian_peaceful", "leshy_guardian_defeated"],
+          "clear_flags": [],
+          "balance_delta": 15,
+          "region_state_change": null,
+          "quest_progress": {
+            "quest_id": "quest_main_act1",
+            "objective_id": "obj_defeat_guardian",
+            "action": "complete"
+          },
+          "trigger_event_id": null,
+          "result_key": "boss_negotiated"
+        }
+      },
+      {
+        "id": "dark_power_boss",
+        "label": {
+          "en": "Use dark power (15 Faith)",
+          "ru": "Использовать силу тьмы (15 ✨)"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"faith": 15},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": 30
+        },
+        "consequences": {
+          "resource_changes": {"faith": -15, "health": -5},
+          "set_flags": ["leshy_guardian_corrupted", "leshy_guardian_defeated"],
+          "clear_flags": [],
+          "balance_delta": -20,
+          "region_state_change": null,
+          "quest_progress": {
+            "quest_id": "quest_main_act1",
+            "objective_id": "obj_defeat_guardian",
+            "action": "complete"
+          },
+          "trigger_event_id": null,
+          "result_key": "boss_corrupted"
+        }
+      }
+    ],
+    "mini_game_challenge": {
+      "enemy_id": "leshy_guardian_boss",
+      "difficulty": 5,
+      "rewards": {
+        "resource_changes": {"faith": 20},
+        "set_flags": ["leshy_guardian_defeated"],
+        "clear_flags": [],
+        "balance_delta": 10,
+        "region_state_change": null,
+        "quest_progress": {
+          "quest_id": "quest_main_act1",
+          "objective_id": "obj_defeat_guardian",
+          "action": "complete"
+        },
+        "trigger_event_id": null,
+        "result_key": null
+      }
+    }
+  }
+]
+
+
+// ==========================================
+// FILE: ContentPacks/TwilightMarches/Campaign/ActI/quests.json
+// ==========================================
+
+ [
+  {
+    "id": "quest_main_act1",
+    "title": {
+      "en": "Path of the Defender",
+      "ru": "Путь Защитника"
+    },
+    "description": {
+      "en": "The village is in danger. The Navi grows stronger each day. You must strengthen the three main anchors and protect the boundary between worlds.",
+      "ru": "Деревня в опасности. Навь усиливается с каждым днем. Вы должны укрепить три главных якоря и защитить границу между мирами."
+    },
+    "objectives": [
+      {
+        "id": "obj_learn_anchors",
+        "description": {
+          "en": "Learn about the three main anchors from the village elder",
+          "ru": "Узнать о трех главных якорях от старосты"
+        },
+        "hint": {
+          "en": "Visit the village and speak with the elder",
+          "ru": "Посетите деревню и поговорите со старостой"
+        },
+        "completion_condition": {"flag_set": "main_quest_started"},
+        "target_value": 1,
+        "is_optional": false,
+        "next_objective_id": "obj_find_oak",
+        "alternative_next_ids": []
+      },
+      {
+        "id": "obj_find_oak",
+        "description": {
+          "en": "Find the Sacred Oak",
+          "ru": "Найти Священный Дуб"
+        },
+        "hint": {
+          "en": "The Sacred Oak is located in the Oak region",
+          "ru": "Священный Дуб находится в регионе Дуба"
+        },
+        "completion_condition": {"visit_region": "oak"},
+        "target_value": 1,
+        "is_optional": false,
+        "next_objective_id": "obj_strengthen_oak",
+        "alternative_next_ids": []
+      },
+      {
+        "id": "obj_strengthen_oak",
+        "description": {
+          "en": "Strengthen the Oak or find an ally",
+          "ru": "Укрепить Дуб или найти союзника"
+        },
+        "hint": {
+          "en": "Use faith to strengthen the Sacred Oak's connection to the earth",
+          "ru": "Используйте веру, чтобы укрепить связь Священного Дуба с землей"
+        },
+        "completion_condition": {"flag_set": "oak_strengthened"},
+        "target_value": 1,
+        "is_optional": false,
+        "next_objective_id": "obj_explore_breach",
+        "alternative_next_ids": []
+      },
+      {
+        "id": "obj_explore_breach",
+        "description": {
+          "en": "Investigate the Navi breach in the Dark Lowland",
+          "ru": "Исследовать прорыв Нави в Чёрной Низине"
+        },
+        "hint": {
+          "en": "Travel to the Dark Lowland through the Breach region",
+          "ru": "Отправляйтесь в Тёмную Низину через регион Разлома"
+        },
+        "completion_condition": {"visit_region": "dark_lowland"},
+        "target_value": 1,
+        "is_optional": false,
+        "next_objective_id": "obj_defeat_guardian",
+        "alternative_next_ids": []
+      },
+      {
+        "id": "obj_defeat_guardian",
+        "description": {
+          "en": "Defeat the Leshy Guardian",
+          "ru": "Победить Лешего-Хранителя"
+        },
+        "hint": {
+          "en": "The Leshy Guardian awaits in the Dark Lowland. Prepare well before facing him.",
+          "ru": "Леший-Хранитель ожидает в Тёмной Низине. Хорошо подготовьтесь перед встречей с ним."
+        },
+        "completion_condition": {"flag_set": "leshy_guardian_defeated"},
+        "target_value": 1,
+        "is_optional": false,
+        "next_objective_id": null,
+        "alternative_next_ids": []
+      }
+    ],
+    "quest_kind": "main",
+    "availability": {
+      "required_flags": [],
+      "forbidden_flags": [],
+      "min_pressure": null,
+      "max_pressure": null,
+      "min_balance": null,
+      "max_balance": null,
+      "region_states": null,
+      "region_ids": null
+    },
+    "auto_start": false,
+    "completion_rewards": {
+      "resource_changes": {"faith": 20},
+      "set_flags": ["act1_complete"],
+      "card_ids": ["defender_blessing", "anchor_power"],
+      "balance_delta": 15
+    },
+    "failure_penalties": {
+      "resource_changes": {},
+      "set_flags": ["act1_failed"],
+      "card_ids": [],
+      "balance_delta": -20
+    }
+  },
+  {
+    "id": "quest_lost_child",
+    "title": {
+      "en": "Crying in the Forest",
+      "ru": "Плач в Лесу"
+    },
+    "description": {
+      "en": "You hear a child's cry in the thicket. The locals say a child went missing three days ago.",
+      "ru": "Вы слышите детский плач в чаще. Местные говорят, что ребенок пропал три дня назад."
+    },
+    "objectives": [
+      {
+        "id": "obj_find_child",
+        "description": {
+          "en": "Find the lost child in the forest",
+          "ru": "Найти потерянного ребенка в лесу"
+        },
+        "hint": {
+          "en": "Search the forest carefully",
+          "ru": "Тщательно обыщите лес"
+        },
+        "completion_condition": {"flag_set": "child_found"},
+        "target_value": 1,
+        "is_optional": false,
+        "next_objective_id": "obj_return_child",
+        "alternative_next_ids": []
+      },
+      {
+        "id": "obj_return_child",
+        "description": {
+          "en": "Return the child safely to the village",
+          "ru": "Вернуть ребенка в деревню в безопасности"
+        },
+        "hint": {
+          "en": "Bring the child back to the village",
+          "ru": "Отведите ребенка обратно в деревню"
+        },
+        "completion_condition": {"flag_set": "child_saved"},
+        "target_value": 1,
+        "is_optional": false,
+        "next_objective_id": null,
+        "alternative_next_ids": []
+      }
+    ],
+    "quest_kind": "side",
+    "availability": {
+      "required_flags": [],
+      "forbidden_flags": ["child_saved"],
+      "min_pressure": null,
+      "max_pressure": null,
+      "min_balance": null,
+      "max_balance": null,
+      "region_states": ["borderland", "breach"],
+      "region_ids": ["forest", "swamp"]
+    },
+    "auto_start": false,
+    "completion_rewards": {
+      "resource_changes": {"faith": 5},
+      "set_flags": ["child_saved_reward"],
+      "card_ids": [],
+      "balance_delta": 15
+    },
+    "failure_penalties": {
+      "resource_changes": {},
+      "set_flags": [],
+      "card_ids": [],
+      "balance_delta": 0
+    }
+  }
+]
+
+
+// ==========================================
+// FILE: ContentPacks/TwilightMarches/Campaign/ActI/regions.json
+// ==========================================
+
+[
+  {
+    "id": "village",
+    "title": {
+      "en": "Border Village",
+      "ru": "Пограничная Деревня"
+    },
+    "description": {
+      "en": "A small village on the edge of the realm",
+      "ru": "Небольшая деревня на краю королевства"
+    },
+    "region_type": "settlement",
+    "neighbor_ids": ["oak", "forest", "swamp"],
+    "initially_discovered": true,
+    "anchor_id": "anchor_village_chapel",
+    "event_pool_ids": ["pool_village", "pool_common"],
+    "initial_state": "stable",
+    "degradation_weight": 1
+  },
+  {
+    "id": "oak",
+    "title": {
+      "en": "Sacred Oak",
+      "ru": "Священный Дуб"
+    },
+    "description": {
+      "en": "An ancient oak radiating divine power",
+      "ru": "Древний дуб, излучающий божественную силу"
+    },
+    "region_type": "sacred",
+    "neighbor_ids": ["village", "forest"],
+    "initially_discovered": false,
+    "anchor_id": "anchor_sacred_oak",
+    "event_pool_ids": ["pool_sacred", "pool_common"],
+    "initial_state": "stable",
+    "degradation_weight": 1
+  },
+  {
+    "id": "forest",
+    "title": {
+      "en": "Dark Forest",
+      "ru": "Тёмный Лес"
+    },
+    "description": {
+      "en": "A dense forest shrouded in shadow",
+      "ru": "Густой лес, окутанный тенью"
+    },
+    "region_type": "forest",
+    "neighbor_ids": ["village", "oak", "mountain"],
+    "initially_discovered": false,
+    "anchor_id": "anchor_forest_idol",
+    "event_pool_ids": ["pool_forest", "pool_common"],
+    "initial_state": "borderland",
+    "degradation_weight": 1
+  },
+  {
+    "id": "swamp",
+    "title": {
+      "en": "Cursed Swamp",
+      "ru": "Проклятое Болото"
+    },
+    "description": {
+      "en": "A murky swamp tainted by dark magic",
+      "ru": "Мрачное болото, отравленное тёмной магией"
+    },
+    "region_type": "swamp",
+    "neighbor_ids": ["village", "breach"],
+    "initially_discovered": false,
+    "anchor_id": "anchor_swamp_spring",
+    "event_pool_ids": ["pool_swamp", "pool_common"],
+    "initial_state": "borderland",
+    "degradation_weight": 1
+  },
+  {
+    "id": "mountain",
+    "title": {
+      "en": "Mountain Pass",
+      "ru": "Горный Перевал"
+    },
+    "description": {
+      "en": "A treacherous pass through the mountains",
+      "ru": "Опасный путь через горы"
+    },
+    "region_type": "mountain",
+    "neighbor_ids": ["forest", "breach"],
+    "initially_discovered": false,
+    "anchor_id": "anchor_mountain_barrow",
+    "event_pool_ids": ["pool_mountain", "pool_common"],
+    "initial_state": "borderland",
+    "degradation_weight": 1
+  },
+  {
+    "id": "breach",
+    "title": {
+      "en": "The Breach",
+      "ru": "Разлом"
+    },
+    "description": {
+      "en": "A tear in reality where darkness seeps through",
+      "ru": "Разрыв в реальности, откуда сочится тьма"
+    },
+    "region_type": "wasteland",
+    "neighbor_ids": ["swamp", "mountain", "dark_lowland"],
+    "initially_discovered": false,
+    "anchor_id": "anchor_breach_shrine",
+    "event_pool_ids": ["pool_breach", "pool_common"],
+    "initial_state": "breach",
+    "degradation_weight": 2
+  },
+  {
+    "id": "dark_lowland",
+    "title": {
+      "en": "Dark Lowland",
+      "ru": "Тёмная Низина"
+    },
+    "description": {
+      "en": "A forsaken land consumed by darkness",
+      "ru": "Проклятая земля, поглощённая тьмой"
+    },
+    "region_type": "wasteland",
+    "neighbor_ids": ["breach"],
+    "initially_discovered": false,
+    "anchor_id": null,
+    "event_pool_ids": ["pool_boss", "pool_breach"],
+    "initial_state": "breach",
+    "degradation_weight": 2
+  }
+]
+
+
+// ==========================================
+// FILE: ContentPacks/TwilightMarches/Campaign/Enemies/enemies.json
+// ==========================================
+
+[
+  {
+    "id": "wild_beast",
+    "name": {
+      "en": "Wild Beast",
+      "ru": "Дикий Зверь"
+    },
+    "description": {
+      "en": "A feral creature driven mad by the encroaching Navi.",
+      "ru": "Дикое существо, обезумевшее от наступающей Нави."
+    },
+    "health": 8,
+    "power": 3,
+    "defense": 1,
+    "difficulty": 1,
+    "enemy_type": "beast",
+    "rarity": "common",
+    "abilities": [],
+    "loot_card_ids": ["beast_hide"],
+    "faith_reward": 2,
+    "balance_delta": 0
+  },
+  {
+    "id": "leshy",
+    "name": {
+      "en": "Leshy",
+      "ru": "Леший"
+    },
+    "description": {
+      "en": "Ancient forest guardian whose anger grows with the corruption.",
+      "ru": "Древний страж леса, чей гнев растёт вместе с порчей."
+    },
+    "health": 12,
+    "power": 4,
+    "defense": 2,
+    "difficulty": 2,
+    "enemy_type": "spirit",
+    "rarity": "uncommon",
+    "abilities": [
+      {
+        "id": "forest_rage",
+        "name": {
+          "en": "Forest Rage",
+          "ru": "Ярость Леса"
+        },
+        "description": {
+          "en": "Deals extra damage when below half health.",
+          "ru": "Наносит дополнительный урон при здоровье ниже половины."
+        },
+        "effect": {"bonus_damage": 2}
+      }
+    ],
+    "loot_card_ids": ["forest_blessing"],
+    "faith_reward": 5,
+    "balance_delta": 5
+  },
+  {
+    "id": "mountain_spirit",
+    "name": {
+      "en": "Mountain Spirit",
+      "ru": "Горный Дух"
+    },
+    "description": {
+      "en": "An ancient spirit of the mountain passes, testing travelers.",
+      "ru": "Древний дух горных перевалов, испытывающий путников."
+    },
+    "health": 15,
+    "power": 5,
+    "defense": 3,
+    "difficulty": 3,
+    "enemy_type": "spirit",
+    "rarity": "rare",
+    "abilities": [
+      {
+        "id": "stone_skin",
+        "name": {
+          "en": "Stone Skin",
+          "ru": "Каменная Кожа"
+        },
+        "description": {
+          "en": "Reduces all damage taken.",
+          "ru": "Уменьшает весь получаемый урон."
+        },
+        "effect": {"armor": 2}
+      }
+    ],
+    "loot_card_ids": ["mountain_blessing"],
+    "faith_reward": 8,
+    "balance_delta": 10
+  },
+  {
+    "id": "risen_dead",
+    "name": {
+      "en": "Risen Dead",
+      "ru": "Восставший Мертвец"
+    },
+    "description": {
+      "en": "A corpse animated by Navi energy, mindlessly aggressive.",
+      "ru": "Труп, оживлённый энергией Нави, бездумно агрессивный."
+    },
+    "health": 10,
+    "power": 4,
+    "defense": 1,
+    "difficulty": 2,
+    "enemy_type": "undead",
+    "rarity": "common",
+    "abilities": [],
+    "loot_card_ids": [],
+    "faith_reward": 3,
+    "balance_delta": -5
+  },
+  {
+    "id": "swamp_hag",
+    "name": {
+      "en": "Swamp Hag",
+      "ru": "Болотная Ведьма"
+    },
+    "description": {
+      "en": "A twisted creature of the swamp, wielding dark magic.",
+      "ru": "Искажённое существо болот, владеющее тёмной магией."
+    },
+    "health": 8,
+    "power": 6,
+    "defense": 1,
+    "difficulty": 3,
+    "enemy_type": "demon",
+    "rarity": "uncommon",
+    "abilities": [
+      {
+        "id": "curse_touch",
+        "name": {
+          "en": "Curse Touch",
+          "ru": "Проклятое Касание"
+        },
+        "description": {
+          "en": "Applies weakness curse on hit.",
+          "ru": "Накладывает проклятие слабости при ударе."
+        },
+        "effect": {"apply_curse": "weakness"}
+      }
+    ],
+    "loot_card_ids": ["witch_knowledge"],
+    "faith_reward": 6,
+    "balance_delta": -10
+  },
+  {
+    "id": "leshy_guardian_boss",
+    "name": {
+      "en": "Leshy Guardian",
+      "ru": "Леший-Хранитель"
+    },
+    "description": {
+      "en": "The ancient guardian of the boundary between worlds. A formidable foe.",
+      "ru": "Древний хранитель границы между мирами. Грозный противник."
+    },
+    "health": 25,
+    "power": 7,
+    "defense": 4,
+    "difficulty": 5,
+    "enemy_type": "boss",
+    "rarity": "legendary",
+    "abilities": [
+      {
+        "id": "nature_wrath",
+        "name": {
+          "en": "Nature's Wrath",
+          "ru": "Гнев Природы"
+        },
+        "description": {
+          "en": "Regenerates health each turn.",
+          "ru": "Восстанавливает здоровье каждый ход."
+        },
+        "effect": {"regeneration": 3}
+      },
+      {
+        "id": "ancient_armor",
+        "name": {
+          "en": "Ancient Armor",
+          "ru": "Древняя Броня"
+        },
+        "description": {
+          "en": "Thick bark reduces damage.",
+          "ru": "Толстая кора уменьшает урон."
+        },
+        "effect": {"armor": 2}
+      }
+    ],
+    "loot_card_ids": ["guardian_seal", "ancient_power"],
+    "faith_reward": 20,
+    "balance_delta": 20
+  }
+]
+
+
+// ==========================================
+// FILE: ContentPacks/TwilightMarches/Characters/hero_abilities.json
+// ==========================================
+
+[
+  {
+    "id": "warrior_rage",
+    "name": {
+      "en": "Battle Rage",
+      "ru": "Боевая Ярость"
+    },
+    "description": {
+      "en": "+2 damage when HP below 50%",
+      "ru": "+2 к урону при HP ниже 50%"
+    },
+    "icon": "flame.fill",
+    "type": "passive",
+    "trigger": "on_damage_dealt",
+    "condition": {
+      "type": "hp_below_percent",
+      "value": 50
+    },
+    "effects": [
+      {
+        "type": "bonus_damage",
+        "value": 2
+      }
+    ],
+    "cooldown": 0
+  },
+  {
+    "id": "mage_meditation",
+    "name": {
+      "en": "Meditation",
+      "ru": "Медитация"
+    },
+    "description": {
+      "en": "+1 faith at end of turn",
+      "ru": "+1 вера в конце хода"
+    },
+    "icon": "sparkles",
+    "type": "passive",
+    "trigger": "turn_end",
+    "condition": null,
+    "effects": [
+      {
+        "type": "gain_faith",
+        "value": 1
+      }
+    ],
+    "cooldown": 0
+  },
+  {
+    "id": "ranger_tracking",
+    "name": {
+      "en": "Tracking",
+      "ru": "Выслеживание"
+    },
+    "description": {
+      "en": "+1 bonus die on first attack",
+      "ru": "+1 кубик при первой атаке"
+    },
+    "icon": "scope",
+    "type": "passive",
+    "trigger": "on_attack",
+    "condition": {
+      "type": "first_attack"
+    },
+    "effects": [
+      {
+        "type": "bonus_dice",
+        "value": 1
+      }
+    ],
+    "cooldown": 0
+  },
+  {
+    "id": "priest_blessing",
+    "name": {
+      "en": "Divine Blessing",
+      "ru": "Божественное Благословение"
+    },
+    "description": {
+      "en": "-1 damage from dark sources",
+      "ru": "-1 урон от тёмных источников"
+    },
+    "icon": "cross.fill",
+    "type": "passive",
+    "trigger": "on_damage_received",
+    "condition": {
+      "type": "damage_source_dark"
+    },
+    "effects": [
+      {
+        "type": "damage_reduction",
+        "value": 1
+      }
+    ],
+    "cooldown": 0
+  },
+  {
+    "id": "shadow_ambush",
+    "name": {
+      "en": "Shadow Ambush",
+      "ru": "Засада из Тени"
+    },
+    "description": {
+      "en": "+3 damage to targets at full HP",
+      "ru": "+3 урона по целям с полным HP"
+    },
+    "icon": "moon.stars.fill",
+    "type": "passive",
+    "trigger": "on_damage_dealt",
+    "condition": {
+      "type": "target_full_hp"
+    },
+    "effects": [
+      {
+        "type": "bonus_damage",
+        "value": 3
+      }
+    ],
+    "cooldown": 0
+  }
+]
+
+
+// ==========================================
+// FILE: ContentPacks/TwilightMarches/Characters/heroes.json
+// ==========================================
+
+[
+  {
+    "id": "warrior_ragnar",
+    "name": "Ragnar",
+    "name_ru": "Рагнар",
+    "description": "Former commander of the royal guard. His battle rage is legendary.",
+    "description_ru": "Бывший командир королевской гвардии. Его ярость в бою легендарна.",
+    "icon": "shield.fill",
+    "ability_id": "warrior_rage",
+    "base_stats": {
+      "health": 25,
+      "max_health": 30,
+      "strength": 8,
+      "dexterity": 5,
+      "constitution": 7,
+      "intelligence": 3,
+      "wisdom": 4,
+      "charisma": 5,
+      "faith": 8,
+      "max_faith": 15,
+      "starting_balance": 50
+    },
+    "starting_deck_card_ids": ["strike_basic", "strike_basic", "defend_basic", "rage_strike"],
+    "availability": "always_available"
+  },
+  {
+    "id": "mage_elvira",
+    "name": "Elvira",
+    "name_ru": "Эльвира",
+    "description": "Master of arcane arts. Draws power from both sources.",
+    "description_ru": "Мастер арканных искусств. Черпает силу из обоих источников.",
+    "icon": "wand.and.stars",
+    "ability_id": "mage_meditation",
+    "base_stats": {
+      "health": 18,
+      "max_health": 22,
+      "strength": 3,
+      "dexterity": 5,
+      "constitution": 4,
+      "intelligence": 9,
+      "wisdom": 7,
+      "charisma": 5,
+      "faith": 12,
+      "max_faith": 25,
+      "starting_balance": 50
+    },
+    "starting_deck_card_ids": ["arcane_bolt", "arcane_bolt", "shield_spell", "meditation"],
+    "availability": "always_available"
+  },
+  {
+    "id": "ranger_thorin",
+    "name": "Thorin",
+    "name_ru": "Торин",
+    "description": "Monster hunter from the northern forests. Never misses.",
+    "description_ru": "Охотник на чудовищ из северных лесов. Никогда не промахивается.",
+    "icon": "target",
+    "ability_id": "ranger_tracking",
+    "base_stats": {
+      "health": 20,
+      "max_health": 25,
+      "strength": 5,
+      "dexterity": 9,
+      "constitution": 5,
+      "intelligence": 5,
+      "wisdom": 6,
+      "charisma": 4,
+      "faith": 10,
+      "max_faith": 18,
+      "starting_balance": 50
+    },
+    "starting_deck_card_ids": ["precise_shot", "precise_shot", "trap", "tracking"],
+    "availability": "always_available"
+  },
+  {
+    "id": "priest_aurelius",
+    "name": "Aurelius",
+    "name_ru": "Аврелий",
+    "description": "Devoted servant of the Light. His blessings protect allies.",
+    "description_ru": "Преданный служитель Света. Его благословения защищают союзников.",
+    "icon": "cross",
+    "ability_id": "priest_blessing",
+    "base_stats": {
+      "health": 20,
+      "max_health": 24,
+      "strength": 4,
+      "dexterity": 4,
+      "constitution": 5,
+      "intelligence": 6,
+      "wisdom": 9,
+      "charisma": 7,
+      "faith": 15,
+      "max_faith": 30,
+      "starting_balance": 60
+    },
+    "starting_deck_card_ids": ["holy_light", "holy_light", "blessing", "smite"],
+    "availability": "always_available"
+  },
+  {
+    "id": "shadow_umbra",
+    "name": "Umbra",
+    "name_ru": "Умбра",
+    "description": "Agent of Nav. Strikes from the shadow when the enemy least expects it.",
+    "description_ru": "Агент Нави. Наносит удар из тени, когда враг не ожидает.",
+    "icon": "moon.stars",
+    "ability_id": "shadow_ambush",
+    "base_stats": {
+      "health": 18,
+      "max_health": 22,
+      "strength": 6,
+      "dexterity": 9,
+      "constitution": 4,
+      "intelligence": 6,
+      "wisdom": 5,
+      "charisma": 5,
+      "faith": 10,
+      "max_faith": 20,
+      "starting_balance": 40
+    },
+    "starting_deck_card_ids": ["backstab", "backstab", "shadow_step", "poison_blade"],
+    "availability": "always_available"
+  }
+]
+
+
+// ==========================================
+// FILE: ContentPacks/TwilightMarches/Localization/en.json
+// ==========================================
+
+{
+  "pack.name": "Twilight Marches - Act I",
+  "pack.description": "The first act of Twilight Marches campaign",
+
+  "region.village.name": "Village by the Road",
+  "region.village.description": "A small village on the edge of the borderlands",
+  "region.oak.name": "Ancient Oak",
+  "region.oak.description": "The sacred oak stands at the crossroads",
+  "region.forest.name": "Twilight Forest",
+  "region.forest.description": "Dark trees whisper ancient secrets",
+  "region.swamp.name": "Cursed Swamp",
+  "region.swamp.description": "Mists rise from the murky waters",
+  "region.mountain.name": "Stone Mountain",
+  "region.mountain.description": "Ancient peaks guard forgotten secrets",
+  "region.breach.name": "The Breach",
+  "region.breach.description": "Where the boundary between worlds grows thin",
+  "region.dark_lowland.name": "Black Lowlands",
+  "region.dark_lowland.description": "The final frontier before darkness",
+
+  "anchor.chapel.name": "Chapel of Light",
+  "anchor.oak.name": "Heart of the Oak",
+  "anchor.stone.name": "Stone of Protection",
+  "anchor.sanctuary.name": "Forest Sanctuary",
+  "anchor.seal.name": "Mountain Seal",
+  "anchor.gates.name": "Border Gates"
+}
+
+
+// ==========================================
+// FILE: ContentPacks/TwilightMarches/Localization/ru.json
+// ==========================================
+
+{
+  "pack.name": "Сумрачные Пределы - Акт I",
+  "pack.description": "Первый акт кампании Сумрачных Пределов",
+
+  "region.village.name": "Деревня у тракта",
+  "region.village.description": "Небольшая деревня на краю порубежья",
+  "region.oak.name": "Старый Дуб",
+  "region.oak.description": "Священный дуб стоит на перекрёстке дорог",
+  "region.forest.name": "Сумеречный Лес",
+  "region.forest.description": "Тёмные деревья шепчут древние тайны",
+  "region.swamp.name": "Проклятое Болото",
+  "region.swamp.description": "Туманы поднимаются над мутными водами",
+  "region.mountain.name": "Каменная Гора",
+  "region.mountain.description": "Древние вершины хранят забытые секреты",
+  "region.breach.name": "Разлом Курганов",
+  "region.breach.description": "Где граница между мирами истончается",
+  "region.dark_lowland.name": "Чёрная Низина",
+  "region.dark_lowland.description": "Последний рубеж перед тьмой",
+
+  "anchor.chapel.name": "Часовня Света",
+  "anchor.oak.name": "Сердце Дуба",
+  "anchor.stone.name": "Камень Защиты",
+  "anchor.sanctuary.name": "Лесное Святилище",
+  "anchor.seal.name": "Горная Печать",
+  "anchor.gates.name": "Врата Рубежа"
+}
+

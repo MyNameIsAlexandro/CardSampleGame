@@ -19,6 +19,7 @@ enum L10n {
     static let characterStats = "character.stats"
     static let characterAbilities = "character.abilities"
     static let buttonStartAdventure = "button.start.adventure"
+    static let buttonSelectHeroFirst = "button.select.hero.first"
 
     // Game Board
     static let turnLabel = "turn.label"
@@ -552,6 +553,11 @@ enum L10n {
     static let loadingContentLoaded = "loading.content.loaded"
     static let loadingError = "loading.error"
     static let appTitle = "app.title"
+
+    // MARK: - Content Cache messages
+    static let loadingValidatingCache = "loading.validating.cache"
+    static let loadingFromCache = "loading.from.cache"
+    static let loadingSavingCache = "loading.saving.cache"
 
     // MARK: - ViewModels/GameViewModel
     static let defaultPlayerName = "default.player.name"

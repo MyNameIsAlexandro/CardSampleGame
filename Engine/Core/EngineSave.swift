@@ -21,22 +21,23 @@ struct EngineSave: Codable {
 
     // MARK: - Player State
     let playerName: String
+    let heroId: String?  // Hero definition ID for data-driven hero system
     let playerHealth: Int
     let playerMaxHealth: Int
     let playerFaith: Int
     let playerMaxFaith: Int
     let playerBalance: Int
 
-    // MARK: - Deck State
-    let deckCardIds: [UUID]
-    let handCardIds: [UUID]
-    let discardCardIds: [UUID]
+    // MARK: - Deck State (String IDs for stable serialization - Epic 3)
+    let deckCardIds: [String]
+    let handCardIds: [String]
+    let discardCardIds: [String]
 
     // MARK: - World State
     let currentDay: Int
     let worldTension: Int
     let lightDarkBalance: Int
-    let currentRegionId: UUID?
+    let currentRegionId: String?  // Definition ID, not UUID
 
     // MARK: - Regions State
     let regions: [RegionSaveState]
@@ -47,8 +48,8 @@ struct EngineSave: Codable {
     let completedQuestIds: [String]
     let questStages: [String: Int]
 
-    // MARK: - Events State
-    let completedEventIds: [UUID]
+    // MARK: - Events State (String IDs for stable serialization - Epic 3)
+    let completedEventIds: [String]  // Definition IDs, not UUIDs
     let eventLog: [EventLogEntrySave]
 
     // MARK: - World Flags
@@ -119,38 +120,52 @@ enum SaveCompatibilityResult {
 
 // MARK: - Region Save State
 
-/// Состояние региона для сохранения
+/// Состояние региона для сохранения (String IDs - Epic 3)
 struct RegionSaveState: Codable {
-    let id: UUID
+    let definitionId: String  // Stable definition ID
     let name: String
     let type: String  // RegionType.rawValue
     let state: String  // RegionState.rawValue
-    let anchor: AnchorSaveState?
-    let neighborIds: [UUID]
+    let anchorDefinitionId: String?
+    let anchorIntegrity: Int?
+    let neighborDefinitionIds: [String]
     let canTrade: Bool
     let visited: Bool
     let reputation: Int
 
     init(from region: EngineRegionState) {
-        self.id = region.id
+        self.definitionId = region.definitionId ?? region.id.uuidString
         self.name = region.name
         self.type = region.type.rawValue
         self.state = region.state.rawValue
-        self.anchor = region.anchor.map { AnchorSaveState(from: $0) }
-        self.neighborIds = region.neighborIds
+        self.anchorDefinitionId = region.anchor?.definitionId
+        self.anchorIntegrity = region.anchor?.integrity
+        self.neighborDefinitionIds = region.neighborDefinitionIds ?? []
         self.canTrade = region.canTrade
         self.visited = region.visited
         self.reputation = region.reputation
     }
 
     func toEngineRegionState() -> EngineRegionState {
-        EngineRegionState(
-            id: id,
+        var anchor: EngineAnchorState? = nil
+        if let anchorId = anchorDefinitionId {
+            anchor = EngineAnchorState(
+                id: UUID(),
+                definitionId: anchorId,
+                name: anchorId,
+                integrity: anchorIntegrity ?? 100
+            )
+        }
+
+        return EngineRegionState(
+            id: UUID(),
+            definitionId: definitionId,
             name: name,
-            type: RegionType(rawValue: type) ?? .wilderness,
+            type: RegionType(rawValue: type) ?? .settlement,
             state: RegionState(rawValue: state) ?? .stable,
-            anchor: anchor?.toEngineAnchorState(),
-            neighborIds: neighborIds,
+            anchor: anchor,
+            neighborIds: [],
+            neighborDefinitionIds: neighborDefinitionIds,
             canTrade: canTrade,
             visited: visited,
             reputation: reputation
@@ -158,24 +173,7 @@ struct RegionSaveState: Codable {
     }
 }
 
-// MARK: - Anchor Save State
-
-/// Состояние якоря для сохранения
-struct AnchorSaveState: Codable {
-    let id: UUID
-    let name: String
-    let integrity: Int
-
-    init(from anchor: EngineAnchorState) {
-        self.id = anchor.id
-        self.name = anchor.name
-        self.integrity = anchor.integrity
-    }
-
-    func toEngineAnchorState() -> EngineAnchorState {
-        EngineAnchorState(id: id, name: name, integrity: integrity)
-    }
-}
+// MARK: - Anchor Save State (Deprecated - anchors now stored inline in RegionSaveState)
 
 // MARK: - Event Log Entry Save
 
@@ -215,101 +213,6 @@ struct EventLogEntrySave: Codable {
     }
 }
 
-// MARK: - TwilightGameEngine Save/Load Extension
-
-extension TwilightGameEngine {
-
-    /// Create save state from current engine state
-    func createSave(gameDuration: TimeInterval = 0) -> EngineSave {
-        // Collect loaded pack versions for compatibility checking
-        var packVersions: [String: String] = [:]
-        for (packId, pack) in contentRegistry.loadedPacks {
-            packVersions[packId] = pack.manifest.version.description
-        }
-
-        return EngineSave(
-            version: EngineSave.currentVersion,
-            savedAt: Date(),
-            gameDuration: gameDuration,
-            coreVersion: EngineSave.currentCoreVersion,
-            activePackSet: packVersions,
-            formatVersion: EngineSave.currentFormatVersion,
-            playerName: playerName,
-            playerHealth: playerHealth,
-            playerMaxHealth: playerMaxHealth,
-            playerFaith: playerFaith,
-            playerMaxFaith: playerMaxFaith,
-            playerBalance: playerBalance,
-            deckCardIds: [],  // Phase 4: Card system migration
-            handCardIds: [],
-            discardCardIds: [],
-            currentDay: currentDay,
-            worldTension: worldTension,
-            lightDarkBalance: lightDarkBalance,
-            currentRegionId: currentRegionId,
-            regions: publishedRegions.values.map { RegionSaveState(from: $0) },
-            mainQuestStage: mainQuestStage,
-            activeQuestIds: publishedActiveQuests.map { $0.id },
-            completedQuestIds: Array(getCompletedQuestIds()),
-            questStages: getQuestStages(),
-            completedEventIds: Array(getCompletedEventIds()),
-            eventLog: publishedEventLog.map { EventLogEntrySave(from: $0) },
-            worldFlags: publishedWorldFlags,
-            rngSeed: nil  // Phase 4: RNG state persistence
-        )
-    }
-
-    /// Load state from save
-    func loadFromSave(_ save: EngineSave) {
-        // Player state
-        playerName = save.playerName
-        playerHealth = save.playerHealth
-        playerMaxHealth = save.playerMaxHealth
-        playerFaith = save.playerFaith
-        playerMaxFaith = save.playerMaxFaith
-        playerBalance = save.playerBalance
-
-        // World state
-        currentDay = save.currentDay
-        worldTension = save.worldTension
-        lightDarkBalance = save.lightDarkBalance
-        currentRegionId = save.currentRegionId
-
-        // Reset game state
-        isGameOver = false
-        gameResult = nil
-        currentEventId = nil
-        currentEvent = nil
-        lastDayEvent = nil
-        isInCombat = false
-
-        // Load regions
-        var newRegions: [UUID: EngineRegionState] = [:]
-        for regionSave in save.regions {
-            let region = regionSave.toEngineRegionState()
-            newRegions[region.id] = region
-        }
-        setRegions(newRegions)
-
-        // Load flags
-        setWorldFlags(save.worldFlags)
-
-        // Load completed events
-        setCompletedEventIds(Set(save.completedEventIds))
-
-        // Load event log
-        setEventLog(save.eventLog.map { $0.toEventLogEntry() })
-
-        // Load quest state
-        setMainQuestStage(save.mainQuestStage)
-        setCompletedQuestIds(Set(save.completedQuestIds))
-        setQuestStages(save.questStages)
-
-        // Sync pressure engine
-        pressureEngine.setPressure(worldTension)
-        pressureEngine.syncTriggeredThresholdsFromPressure()
-
-        // Update published state
-        updatePublishedStateAfterLoad()
-    }
-}
+// MARK: - TwilightGameEngine Save/Load
+// NOTE: Save/Load methods moved to TwilightGameEngine.swift for proper access to internal state
+// See TwilightGameEngine+Persistence.swift for implementation

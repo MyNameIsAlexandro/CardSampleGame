@@ -67,7 +67,10 @@ final class ActIPlaythroughTests: XCTestCase {
 
     func testStartingRegionIsCorrect() throws {
         let startRegion = try requireCurrentRegion()
-        XCTAssertEqual(startRegion.name, "Деревня у тракта", "Стартовый регион")
+        // Name depends on system locale - accept both English and Russian
+        // Content has: id="village", en="Border Village", ru="Пограничная Деревня"
+        let validNames = ["Пограничная Деревня", "Border Village"]
+        XCTAssertTrue(validNames.contains(startRegion.name), "Стартовый регион should be '\(validNames)' but got '\(startRegion.name)'")
         XCTAssertEqual(startRegion.state, .stable, "Стартовый регион Stable")
     }
 

@@ -34,6 +34,18 @@ final class TwilightGameEngine: ObservableObject {
     @Published private(set) var playerMaxFaith: Int = 10
     @Published private(set) var playerBalance: Int = 50
     @Published private(set) var playerName: String = "Герой"
+    @Published private(set) var heroId: String?  // Hero definition ID for data-driven hero system
+
+    /// Character stats (Engine-First) - used for combat calculations
+    @Published private(set) var playerStrength: Int = 5
+    @Published private(set) var playerDexterity: Int = 0
+    @Published private(set) var playerConstitution: Int = 0
+    @Published private(set) var playerIntelligence: Int = 0
+    @Published private(set) var playerWisdom: Int = 0
+    @Published private(set) var playerCharisma: Int = 0
+
+    /// Active curses on player (Engine-First)
+    @Published private(set) var playerActiveCurses: [ActiveCurse] = []
 
     /// World flags - for quest/event conditions
     @Published private(set) var publishedWorldFlags: [String: Bool] = [:]
@@ -119,6 +131,143 @@ final class TwilightGameEngine: ObservableObject {
         }
     }
 
+    // MARK: - Hero Abilities (Engine-First)
+
+    /// Get hero definition from registry
+    var heroDefinition: HeroDefinition? {
+        guard let heroId = heroId else { return nil }
+        return HeroRegistry.shared.hero(id: heroId)
+    }
+
+    /// Get hero's special ability
+    private var heroAbility: HeroAbility? {
+        return heroDefinition?.specialAbility
+    }
+
+    /// Check if player has a specific curse (Engine-First)
+    func hasCurse(_ type: CurseType) -> Bool {
+        return playerActiveCurses.contains { $0.type == type }
+    }
+
+    /// Get damage modifier from curses (weakness: -1, shadowOfNav: +3)
+    func getCurseDamageDealtModifier() -> Int {
+        var modifier = 0
+        if hasCurse(.weakness) { modifier -= 1 }
+        if hasCurse(.shadowOfNav) { modifier += 3 }
+        return modifier
+    }
+
+    /// Get damage taken modifier from curses (fear: +1)
+    func getCurseDamageTakenModifier() -> Int {
+        var modifier = 0
+        if hasCurse(.fear) { modifier += 1 }
+        return modifier
+    }
+
+    /// Get bonus dice from hero ability (e.g., Tracker on first attack)
+    func getHeroBonusDice(isFirstAttack: Bool) -> Int {
+        guard let ability = heroAbility,
+              ability.trigger == .onAttack else { return 0 }
+
+        // Check ability condition
+        if let condition = ability.condition {
+            switch condition.type {
+            case .firstAttack:
+                guard isFirstAttack else { return 0 }
+            default:
+                break
+            }
+        }
+
+        return ability.effects.first { $0.type == .bonusDice }?.value ?? 0
+    }
+
+    /// Get bonus damage from hero ability (e.g., Berserker when HP < 50%)
+    func getHeroDamageBonus(targetFullHP: Bool = false) -> Int {
+        guard let ability = heroAbility,
+              ability.trigger == .onDamageDealt else { return 0 }
+
+        // Check ability condition
+        if let condition = ability.condition {
+            switch condition.type {
+            case .hpBelowPercent:
+                let threshold = condition.value ?? 50
+                guard playerHealth < playerMaxHealth * threshold / 100 else { return 0 }
+            case .targetFullHP:
+                guard targetFullHP else { return 0 }
+            default:
+                break
+            }
+        }
+
+        return ability.effects.first { $0.type == .bonusDamage }?.value ?? 0
+    }
+
+    /// Get damage reduction from hero ability (e.g., Priest vs dark sources)
+    func getHeroDamageReduction(fromDarkSource: Bool = false) -> Int {
+        guard let ability = heroAbility,
+              ability.trigger == .onDamageReceived else { return 0 }
+
+        // Check ability condition
+        if let condition = ability.condition {
+            switch condition.type {
+            case .damageSourceDark:
+                guard fromDarkSource else { return 0 }
+            default:
+                break
+            }
+        }
+
+        return ability.effects.first { $0.type == .damageReduction }?.value ?? 0
+    }
+
+    /// Check if hero gains faith at end of turn (e.g., Mage meditation)
+    var shouldGainFaithEndOfTurn: Bool {
+        guard let ability = heroAbility,
+              ability.trigger == .turnEnd else { return false }
+        return ability.effects.contains { $0.type == .gainFaith }
+    }
+
+    /// Calculate total damage dealt with curses and hero abilities
+    func calculateDamageDealt(_ baseDamage: Int, targetFullHP: Bool = false) -> Int {
+        let curseModifier = getCurseDamageDealtModifier()
+        let heroBonus = getHeroDamageBonus(targetFullHP: targetFullHP)
+        return max(0, baseDamage + curseModifier + heroBonus)
+    }
+
+    /// Take damage with curse modifiers and hero abilities
+    func takeDamageWithModifiers(_ baseDamage: Int, fromDarkSource: Bool = false) {
+        let curseModifier = getCurseDamageTakenModifier()
+        let heroReduction = getHeroDamageReduction(fromDarkSource: fromDarkSource)
+        let actualDamage = max(0, baseDamage + curseModifier - heroReduction)
+        playerHealth = max(0, playerHealth - actualDamage)
+    }
+
+    /// Apply curse to player (Engine-First)
+    func applyCurse(type: CurseType, duration: Int, sourceCard: String? = nil) {
+        let curse = ActiveCurse(type: type, duration: duration, sourceCard: sourceCard)
+        playerActiveCurses.append(curse)
+    }
+
+    /// Remove curse from player (Engine-First)
+    func removeCurse(type: CurseType? = nil) {
+        if let specificType = type {
+            playerActiveCurses.removeAll { $0.type == specificType }
+        } else if !playerActiveCurses.isEmpty {
+            playerActiveCurses.removeFirst()
+        }
+    }
+
+    /// Tick curses at end of turn (reduce duration, remove expired)
+    func tickCurses() {
+        for i in (0..<playerActiveCurses.count).reversed() {
+            playerActiveCurses[i].duration -= 1
+            if playerActiveCurses[i].duration <= 0 {
+                playerActiveCurses.remove(at: i)
+            }
+        }
+    }
+
     /// World balance description
     var worldBalanceDescription: String {
         switch lightDarkBalance {
@@ -152,12 +301,58 @@ final class TwilightGameEngine: ObservableObject {
             return !events.isEmpty
         }
 
-        // Fallback: check content registry for events in this region type
+        // Engine-First: check content registry for events in this region
+        // Use definitionId (e.g., "village") not type.rawValue (e.g., "settlement")
+        guard let regionDefId = region.definitionId else { return false }
+
+        // Map region state to string for content registry
+        let regionStateString = mapRegionStateToString(region.state)
+
         let events = contentRegistry.getAvailableEvents(
-            forRegion: region.type.rawValue,
-            pressure: worldTension
+            forRegion: regionDefId,
+            pressure: worldTension,
+            regionState: regionStateString
         )
-        return !events.isEmpty
+
+        // Also filter out completed one-time events
+        let availableEvents = events.filter { eventDef in
+            if eventDef.isOneTime {
+                let eventUUID = eventDefinitionIdToUUID(eventDef.id)
+                return !completedEventIds.contains(eventUUID)
+            }
+            return true
+        }
+
+        return !availableEvents.isEmpty
+    }
+
+    /// Map RegionState to string for ContentRegistry queries
+    private func mapRegionStateToString(_ state: RegionState) -> String {
+        switch state {
+        case .stable: return "stable"
+        case .borderland: return "borderland"
+        case .breach: return "breach"
+        }
+    }
+
+    /// Convert event definition ID (String) to UUID for completed event tracking
+    /// Uses same algorithm as EventDefinitionAdapter.toGameEvent() for consistency
+    private func eventDefinitionIdToUUID(_ id: String) -> UUID {
+        // Simple hash-based UUID generation for determinism (matches EventDefinitionAdapter)
+        var hash: UInt64 = 5381
+        for char in id.utf8 {
+            hash = ((hash << 5) &+ hash) &+ UInt64(char)
+        }
+
+        // Format as UUID string (simplified)
+        let hex = String(format: "%016llX", hash)
+        let padded = hex.padding(toLength: 32, withPad: "0", startingAt: 0)
+
+        // Insert dashes: 8-4-4-4-12
+        let chars = Array(padded)
+        let uuidString = "\(String(chars[0..<8]))-\(String(chars[8..<12]))-\(String(chars[12..<16]))-\(String(chars[16..<20]))-\(String(chars[20..<32]))"
+
+        return UUID(uuidString: uuidString) ?? UUID()
     }
 
     // MARK: - Core Subsystems
@@ -234,8 +429,8 @@ final class TwilightGameEngine: ObservableObject {
 
     // MARK: - Configuration Constants (from BalanceConfiguration)
 
-    private var tensionTickInterval: Int { balanceConfig.pressure.tensionTickInterval }
-    private var restHealAmount: Int { balanceConfig.resources.restHealAmount }
+    private var tensionTickInterval: Int { balanceConfig.pressure.effectiveTickInterval }
+    private var restHealAmount: Int { balanceConfig.resources.restHealAmount ?? 3 }
     private var anchorStrengthenCost: Int { balanceConfig.anchor.strengthenCost }
     private var anchorStrengthenAmount: Int { balanceConfig.anchor.strengthenAmount }
 
@@ -286,12 +481,19 @@ final class TwilightGameEngine: ObservableObject {
         currentRegionId = adapter.worldState.currentRegionId
 
         // Sync regions (both internal and published)
-        var newRegions: [UUID: EngineRegionState] = [:]
-        for region in adapter.worldState.regions {
-            newRegions[region.id] = EngineRegionState(from: region)
+        // IMPORTANT: If legacy worldState has no regions (new game), load from ContentRegistry
+        if adapter.worldState.regions.isEmpty {
+            // New game flow: load regions from ContentRegistry
+            setupRegionsFromRegistry()
+        } else {
+            // Load game flow: sync from legacy WorldState
+            var newRegions: [UUID: EngineRegionState] = [:]
+            for region in adapter.worldState.regions {
+                newRegions[region.id] = EngineRegionState(from: region)
+            }
+            regions = newRegions
+            publishedRegions = newRegions  // Audit v1.1: publish for UI
         }
-        regions = newRegions
-        publishedRegions = newRegions  // Audit v1.1: publish for UI
 
         // Sync flags (both internal and published)
         worldFlags = adapter.worldState.worldFlags
@@ -307,8 +509,18 @@ final class TwilightGameEngine: ObservableObject {
             playerHealth = player.health
             playerMaxHealth = player.maxHealth
             playerFaith = player.faith
+            playerMaxFaith = player.maxFaith
             playerBalance = player.balance
             playerHand = player.hand
+            // Sync character stats (Engine-First)
+            playerStrength = player.strength
+            playerDexterity = player.dexterity
+            playerConstitution = player.constitution
+            playerIntelligence = player.intelligence
+            playerWisdom = player.wisdom
+            playerCharisma = player.charisma
+            // Sync curses
+            playerActiveCurses = player.activeCurses
         }
 
         // CRITICAL: Sync pressure engine state to prevent duplicate threshold events
@@ -339,7 +551,11 @@ final class TwilightGameEngine: ObservableObject {
 
     /// Initialize a new game without legacy WorldState
     /// This is the Engine-First way to start a game
-    func initializeNewGame(playerName: String = "Герой") {
+    /// - Parameters:
+    ///   - playerName: Character name for display
+    ///   - heroId: Hero definition ID from HeroRegistry (data-driven hero system)
+    ///   - startingDeck: Starting deck of cards (from CardRegistry.startingDeck)
+    func initializeNewGame(playerName: String = "Герой", heroId: String? = nil, startingDeck: [Card] = []) {
         // Reset state
         isGameOver = false
         gameResult = nil
@@ -351,13 +567,48 @@ final class TwilightGameEngine: ObservableObject {
         // Load balance config from content registry
         balanceConfig = contentRegistry.getBalanceConfig() ?? .default
 
-        // Setup player from balance config
+        // Setup player from balance config and hero definition
         self.playerName = playerName
-        playerHealth = balanceConfig.resources.startingHealth
-        playerMaxHealth = balanceConfig.resources.maxHealth
-        playerFaith = balanceConfig.resources.startingFaith
-        playerMaxFaith = balanceConfig.resources.maxFaith
-        playerBalance = 50
+        self.heroId = heroId
+
+        // Get hero stats from HeroRegistry if available
+        if let heroId = heroId,
+           let heroDef = HeroRegistry.shared.hero(id: heroId) {
+            let stats = heroDef.baseStats
+            playerHealth = stats.health
+            playerMaxHealth = stats.maxHealth
+            playerFaith = stats.faith
+            playerMaxFaith = stats.maxFaith
+            playerBalance = stats.startingBalance
+            playerStrength = stats.strength
+            playerDexterity = stats.dexterity
+            playerConstitution = stats.constitution
+            playerIntelligence = stats.intelligence
+            playerWisdom = stats.wisdom
+            playerCharisma = stats.charisma
+        } else {
+            // Default values from balance config
+            playerHealth = balanceConfig.resources.startingHealth
+            playerMaxHealth = balanceConfig.resources.maxHealth
+            playerFaith = balanceConfig.resources.startingFaith
+            playerMaxFaith = balanceConfig.resources.maxFaith
+            playerBalance = 50
+            playerStrength = 5
+            playerDexterity = 0
+            playerConstitution = 0
+            playerIntelligence = 0
+            playerWisdom = 0
+            playerCharisma = 0
+        }
+
+        // Clear curses
+        playerActiveCurses = []
+
+        // Setup starting deck
+        if !startingDeck.isEmpty {
+            playerDeck = startingDeck
+            WorldRNG.shared.shuffle(&playerDeck)
+        }
 
         // Setup world from balance config
         currentDay = 0
@@ -409,11 +660,13 @@ final class TwilightGameEngine: ObservableObject {
 
             let engineRegion = EngineRegionState(
                 id: regionUUID,
+                definitionId: def.id,  // Set definition ID for event lookup
                 name: def.title.localized,
                 type: regionType,
                 state: regionState,
                 anchor: anchor,
                 neighborIds: [],  // Will be set in second pass
+                neighborDefinitionIds: def.neighborIds,
                 canTrade: regionState == .stable && regionType == .settlement
             )
             newRegions[regionUUID] = engineRegion
@@ -432,11 +685,13 @@ final class TwilightGameEngine: ObservableObject {
             let neighborUUIDs = def.neighborIds.compactMap { stringToUUID[$0] }
             region = EngineRegionState(
                 id: region.id,
+                definitionId: region.definitionId,  // Preserve definition ID
                 name: region.name,
                 type: region.type,
                 state: region.state,
                 anchor: region.anchor,
                 neighborIds: neighborUUIDs,
+                neighborDefinitionIds: region.neighborDefinitionIds,
                 canTrade: region.canTrade,
                 visited: region.visited,
                 reputation: region.reputation
@@ -465,6 +720,7 @@ final class TwilightGameEngine: ObservableObject {
             let anchor = contentRegistry.getAnchor(forRegion: def.id).map { anchorDef in
                 EngineAnchorState(
                     id: UUID(),
+                    definitionId: anchorDef.id,
                     name: anchorDef.title.localized,
                     integrity: anchorDef.initialIntegrity
                 )
@@ -475,11 +731,13 @@ final class TwilightGameEngine: ObservableObject {
 
             let engineRegion = EngineRegionState(
                 id: regionUUID,
+                definitionId: def.id,  // CRITICAL: Set definition ID for event lookup
                 name: def.title.localized,
                 type: regionType,
                 state: regionState,
                 anchor: anchor,
                 neighborIds: [],  // Will be set in second pass
+                neighborDefinitionIds: def.neighborIds,
                 canTrade: regionState == .stable && regionType == .settlement
             )
             newRegions[regionUUID] = engineRegion
@@ -498,11 +756,13 @@ final class TwilightGameEngine: ObservableObject {
             let neighborUUIDs = def.neighborIds.compactMap { stringToUUID[$0] }
             region = EngineRegionState(
                 id: region.id,
+                definitionId: region.definitionId,  // Preserve definition ID
                 name: region.name,
                 type: region.type,
                 state: region.state,
                 anchor: region.anchor,
                 neighborIds: neighborUUIDs,
+                neighborDefinitionIds: region.neighborDefinitionIds,
                 canTrade: region.canTrade,
                 visited: region.visited,
                 reputation: region.reputation
@@ -654,9 +914,22 @@ final class TwilightGameEngine: ObservableObject {
         case .combatInitialize:
             // Shuffle deck and draw initial hand
             if let player = playerAdapter?.player {
+                // Legacy mode: use Player model
                 player.shuffleDeck()
                 player.drawCards(count: player.maxHandSize)
                 playerHand = player.hand
+            } else {
+                // Engine-First mode: use engine's own deck/hand
+                // First, return all cards from hand and discard back to deck
+                playerDeck.append(contentsOf: playerHand)
+                playerDeck.append(contentsOf: playerDiscard)
+                playerHand.removeAll()
+                playerDiscard.removeAll()
+                // Now shuffle and draw
+                WorldRNG.shared.shuffle(&playerDeck)
+                let drawCount = min(5, playerDeck.count)  // Default hand size = 5
+                playerHand = Array(playerDeck.prefix(drawCount))
+                playerDeck.removeFirst(drawCount)
             }
             combatActionsRemaining = 3
 
@@ -675,6 +948,7 @@ final class TwilightGameEngine: ObservableObject {
             guard combatActionsRemaining > 0 else { break }
             if let player = playerAdapter?.player,
                let cardIndex = player.hand.firstIndex(where: { $0.id == cardId }) {
+                // Legacy mode
                 let card = player.hand[cardIndex]
                 // Check faith cost
                 if let cost = card.cost, cost > 0 {
@@ -686,6 +960,19 @@ final class TwilightGameEngine: ObservableObject {
                 combatActionsRemaining -= 1
                 player.playCard(card)
                 playerHand = player.hand
+            } else if let cardIndex = playerHand.firstIndex(where: { $0.id == cardId }) {
+                // Engine-First mode
+                let card = playerHand[cardIndex]
+                // Check faith cost
+                if let cost = card.cost, cost > 0 {
+                    guard playerFaith >= cost else { break }
+                    playerFaith -= cost
+                    stateChanges.append(.faithChanged(delta: -cost, newValue: playerFaith))
+                }
+                combatActionsRemaining -= 1
+                // Move card from hand to discard
+                playerHand.remove(at: cardIndex)
+                playerDiscard.append(card)
             }
 
         case .combatApplyEffect(let effect):
@@ -699,16 +986,23 @@ final class TwilightGameEngine: ObservableObject {
         case .combatEnemyAttack(let damage):
             // Enemy deals damage to player
             if let player = playerAdapter?.player {
+                // Legacy mode
                 let healthBefore = player.health
                 player.takeDamageWithCurses(damage)
                 let actualDamage = healthBefore - player.health
                 playerHealth = player.health
+                stateChanges.append(.healthChanged(delta: -actualDamage, newValue: playerHealth))
+            } else {
+                // Engine-First mode
+                let actualDamage = min(damage, playerHealth)
+                playerHealth = max(0, playerHealth - damage)
                 stateChanges.append(.healthChanged(delta: -actualDamage, newValue: playerHealth))
             }
 
         case .combatEndTurnPhase:
             // End of turn: discard hand, draw new cards, restore faith
             if let player = playerAdapter?.player {
+                // Legacy mode: use Player model
                 // Discard hand
                 while !player.hand.isEmpty {
                     player.playCard(player.hand[0])
@@ -726,6 +1020,27 @@ final class TwilightGameEngine: ObservableObject {
                     playerFaith = player.faith
                     stateChanges.append(.faithChanged(delta: 1, newValue: playerFaith))
                 }
+            } else {
+                // Engine-First mode: use engine's own deck/hand/discard
+                // Discard hand to discard pile
+                playerDiscard.append(contentsOf: playerHand)
+                playerHand.removeAll()
+
+                // Recycle discard into deck if needed
+                if playerDeck.isEmpty && !playerDiscard.isEmpty {
+                    playerDeck = playerDiscard
+                    playerDiscard.removeAll()
+                    WorldRNG.shared.shuffle(&playerDeck)
+                }
+
+                // Draw new hand
+                let drawCount = min(5, playerDeck.count)
+                playerHand = Array(playerDeck.prefix(drawCount))
+                playerDeck.removeFirst(drawCount)
+
+                // Restore faith
+                playerFaith = min(playerFaith + 1, playerMaxFaith)
+                stateChanges.append(.faithChanged(delta: 1, newValue: playerFaith))
             }
             // Reset for next turn
             combatTurnNumber += 1
@@ -1176,8 +1491,65 @@ final class TwilightGameEngine: ObservableObject {
     // MARK: - Event Generation
 
     private func generateEvent(for regionId: UUID, trigger: EventTrigger) -> UUID? {
-        // Delegate to WorldState adapter for now (uses existing event system)
-        return worldStateAdapter?.generateEvent(for: regionId, trigger: trigger)
+        // Try legacy adapter first (for backward compatibility)
+        if let eventId = worldStateAdapter?.generateEvent(for: regionId, trigger: trigger) {
+            return eventId
+        }
+
+        // Engine-First: generate event from ContentRegistry
+        guard let region = publishedRegions[regionId],
+              let regionDefId = region.definitionId else {
+            return nil
+        }
+
+        // Map region state to string for content registry
+        let regionStateString = mapRegionStateToString(region.state)
+
+        // Get available events from ContentRegistry
+        let availableDefinitions = contentRegistry.getAvailableEvents(
+            forRegion: regionDefId,
+            pressure: worldTension,
+            regionState: regionStateString
+        )
+
+        // Filter out completed one-time events
+        let filteredDefinitions = availableDefinitions.filter { eventDef in
+            if eventDef.isOneTime {
+                // Check if already completed (convert definition ID to UUID)
+                let eventUUID = eventDefinitionIdToUUID(eventDef.id)
+                return !completedEventIds.contains(eventUUID)
+            }
+            return true
+        }
+
+        guard !filteredDefinitions.isEmpty else { return nil }
+
+        // Weighted random selection
+        let totalWeight = filteredDefinitions.reduce(0) { $0 + $1.weight }
+        guard totalWeight > 0 else {
+            // If all weights are 0, select randomly
+            let selectedDef = filteredDefinitions[WorldRNG.shared.nextInt(in: 0..<filteredDefinitions.count)]
+            let gameEvent = selectedDef.toGameEvent(forRegion: regionDefId)
+            currentEvent = gameEvent
+            return gameEvent.id
+        }
+
+        let roll = WorldRNG.shared.nextInt(in: 0..<totalWeight)
+        var cumulative = 0
+        for eventDef in filteredDefinitions {
+            cumulative += eventDef.weight
+            if roll < cumulative {
+                let gameEvent = eventDef.toGameEvent(forRegion: regionDefId)
+                currentEvent = gameEvent
+                return gameEvent.id
+            }
+        }
+
+        // Fallback to first event
+        let selectedDef = filteredDefinitions[0]
+        let gameEvent = selectedDef.toGameEvent(forRegion: regionDefId)
+        currentEvent = gameEvent
+        return gameEvent.id
     }
 
     // MARK: - Quest Progress
@@ -1357,7 +1729,17 @@ final class TwilightGameEngine: ObservableObject {
             playerHealth = player.health
             playerMaxHealth = player.maxHealth
             playerFaith = player.faith
+            playerMaxFaith = player.maxFaith
             playerBalance = player.balance
+            // Sync character stats
+            playerStrength = player.strength
+            playerDexterity = player.dexterity
+            playerConstitution = player.constitution
+            playerIntelligence = player.intelligence
+            playerWisdom = player.wisdom
+            playerCharisma = player.charisma
+            // Sync curses
+            playerActiveCurses = player.activeCurses
         }
         // In Engine-First mode, player stats are updated directly
     }
@@ -1443,68 +1825,110 @@ final class TwilightGameEngine: ObservableObject {
         switch effect {
         case .heal(let amount):
             if let player = playerAdapter?.player {
+                // Legacy mode
                 let newHealth = min(player.maxHealth, player.health + amount)
                 let delta = newHealth - player.health
                 playerAdapter?.updateHealth(newHealth)
                 playerHealth = newHealth
                 changes.append(.healthChanged(delta: delta, newValue: newHealth))
+            } else {
+                // Engine-First mode
+                let newHealth = min(playerMaxHealth, playerHealth + amount)
+                let delta = newHealth - playerHealth
+                playerHealth = newHealth
+                changes.append(.healthChanged(delta: delta, newValue: newHealth))
             }
 
         case .damageEnemy(let amount):
-            if let player = playerAdapter?.player, let enemy = combatEnemy {
-                let actualDamage = player.calculateDamageDealt(amount)
+            if let enemy = combatEnemy {
+                // Engine-First: use engine's calculateDamageDealt (works with or without legacy player)
+                let actualDamage = calculateDamageDealt(amount)
                 combatEnemyHealth = max(0, combatEnemyHealth - actualDamage)
                 changes.append(.enemyDamaged(enemyId: enemy.id, damage: actualDamage, newHealth: combatEnemyHealth))
             }
 
         case .drawCards(let count):
             if let player = playerAdapter?.player {
+                // Legacy mode
                 player.drawCards(count: count)
                 playerHand = player.hand
+            } else {
+                // Engine-First mode: draw with deck recycling
+                drawCardsEngineFirst(count: count)
             }
 
         case .gainFaith(let amount):
             if let player = playerAdapter?.player {
+                // Legacy mode
                 player.gainFaith(amount)
                 playerFaith = player.faith
-                changes.append(.faithChanged(delta: amount, newValue: playerFaith))
+            } else {
+                // Engine-First mode
+                playerFaith = min(playerFaith + amount, playerMaxFaith)
             }
+            changes.append(.faithChanged(delta: amount, newValue: playerFaith))
 
         case .spendFaith(let amount):
             if let player = playerAdapter?.player {
+                // Legacy mode
                 _ = player.spendFaith(amount)
                 playerFaith = player.faith
-                changes.append(.faithChanged(delta: -amount, newValue: playerFaith))
+            } else {
+                // Engine-First mode
+                playerFaith = max(0, playerFaith - amount)
             }
+            changes.append(.faithChanged(delta: -amount, newValue: playerFaith))
 
         case .takeDamage(let amount):
             if let player = playerAdapter?.player {
+                // Legacy mode
                 let healthBefore = player.health
                 player.takeDamage(amount)
                 let actualDamage = healthBefore - player.health
                 playerHealth = player.health
                 changes.append(.healthChanged(delta: -actualDamage, newValue: playerHealth))
+            } else {
+                // Engine-First mode
+                let actualDamage = min(amount, playerHealth)
+                playerHealth = max(0, playerHealth - amount)
+                changes.append(.healthChanged(delta: -actualDamage, newValue: playerHealth))
             }
 
         case .removeCurse(let type):
             if let player = playerAdapter?.player {
-                // Convert String to CurseType
+                // Legacy mode
                 let curseType: CurseType? = type.flatMap { CurseType(rawValue: $0) }
                 player.removeCurse(type: curseType)
+                playerActiveCurses = player.activeCurses
+            } else {
+                // Engine-First mode: use engine's removeCurse
+                let curseType: CurseType? = type.flatMap { CurseType(rawValue: $0) }
+                removeCurse(type: curseType)
             }
 
         case .shiftBalance(let towards, let amount):
+            let direction: CardBalance
+            switch towards.lowercased() {
+            case "light", "свет": direction = .light
+            case "dark", "тьма": direction = .dark
+            default: direction = .neutral
+            }
+
             if let player = playerAdapter?.player {
-                let direction: CardBalance
-                switch towards.lowercased() {
-                case "light", "свет": direction = .light
-                case "dark", "тьма": direction = .dark
-                default: direction = .neutral
-                }
+                // Legacy mode
                 player.shiftBalance(towards: direction, amount: amount)
                 playerBalance = player.balance
-                changes.append(.balanceChanged(delta: amount, newValue: playerBalance))
+            } else {
+                // Engine-First mode: shift balance directly
+                let delta: Int
+                switch direction {
+                case .light: delta = amount
+                case .dark: delta = -amount
+                case .neutral: delta = 0
+                }
+                playerBalance = max(0, min(100, playerBalance + delta))
             }
+            changes.append(.balanceChanged(delta: amount, newValue: playerBalance))
 
         case .addBonusDice(let count):
             combatBonusDice += count
@@ -1555,6 +1979,28 @@ final class TwilightGameEngine: ObservableObject {
     /// Access to legacy player for UI compatibility
     var legacyPlayer: Player? {
         playerAdapter?.player
+    }
+
+    // MARK: - Engine-First Card Management
+
+    /// Draw cards in Engine-First mode with deck recycling
+    private func drawCardsEngineFirst(count: Int) {
+        var remaining = count
+        while remaining > 0 {
+            // Recycle discard into deck if needed
+            if playerDeck.isEmpty && !playerDiscard.isEmpty {
+                playerDeck = playerDiscard
+                playerDiscard.removeAll()
+                WorldRNG.shared.shuffle(&playerDeck)
+            }
+
+            // If still empty, stop
+            if playerDeck.isEmpty { break }
+
+            // Draw one card
+            playerHand.append(playerDeck.removeFirst())
+            remaining -= 1
+        }
     }
 
     // MARK: - Save/Load Support Methods
@@ -1644,11 +2090,13 @@ enum EventTrigger {
 /// - `Region` (legacy) - persistence и совместимость
 struct EngineRegionState: Identifiable {
     let id: UUID
+    let definitionId: String?  // Stable definition ID for serialization (Epic 3)
     let name: String
     let type: RegionType
     var state: RegionState
     var anchor: EngineAnchorState?
     let neighborIds: [UUID]
+    let neighborDefinitionIds: [String]?  // Stable neighbor IDs for serialization (Epic 3)
     var canTrade: Bool
     var visited: Bool = false
     var reputation: Int = 0
@@ -1656,11 +2104,13 @@ struct EngineRegionState: Identifiable {
     /// Create from legacy Region (for migration)
     init(from region: Region) {
         self.id = region.id
+        self.definitionId = nil  // Legacy regions don't have definition IDs
         self.name = region.name
         self.type = region.type
         self.state = region.state
         self.anchor = region.anchor.map { EngineAnchorState(from: $0) }
         self.neighborIds = region.neighborIds
+        self.neighborDefinitionIds = nil
         self.canTrade = region.canTrade
         self.visited = region.visited
         self.reputation = region.reputation
@@ -1669,21 +2119,25 @@ struct EngineRegionState: Identifiable {
     /// Create directly (Engine-First)
     init(
         id: UUID = UUID(),
+        definitionId: String? = nil,
         name: String,
         type: RegionType,
         state: RegionState,
         anchor: EngineAnchorState? = nil,
         neighborIds: [UUID] = [],
+        neighborDefinitionIds: [String]? = nil,
         canTrade: Bool = false,
         visited: Bool = false,
         reputation: Int = 0
     ) {
         self.id = id
+        self.definitionId = definitionId
         self.name = name
         self.type = type
         self.state = state
         self.anchor = anchor
         self.neighborIds = neighborIds
+        self.neighborDefinitionIds = neighborDefinitionIds
         self.canTrade = canTrade
         self.visited = visited
         self.reputation = reputation
@@ -1700,19 +2154,22 @@ struct EngineRegionState: Identifiable {
 /// Internal state for engine anchor tracking (bridges from legacy Anchor model)
 struct EngineAnchorState {
     let id: UUID
+    let definitionId: String?  // Stable definition ID for serialization (Epic 3)
     let name: String
     var integrity: Int
 
     /// Create from legacy Anchor (for migration)
     init(from anchor: Anchor) {
         self.id = anchor.id
+        self.definitionId = nil  // Legacy anchors don't have definition IDs
         self.name = anchor.name
         self.integrity = anchor.integrity
     }
 
     /// Create directly (Engine-First)
-    init(id: UUID = UUID(), name: String, integrity: Int) {
+    init(id: UUID = UUID(), definitionId: String? = nil, name: String, integrity: Int) {
         self.id = id
+        self.definitionId = definitionId
         self.name = name
         self.integrity = max(0, min(100, integrity))
     }
@@ -1741,5 +2198,273 @@ struct CombatState {
 
     var enemyPower: Int {
         enemy.power ?? 3
+    }
+}
+
+// MARK: - Engine Persistence (Engine-First Save/Load)
+
+extension TwilightGameEngine {
+
+    /// Create a save state from current engine state (Engine-First Architecture)
+    /// This replaces GameState-based saves
+    func createEngineSave() -> EngineSave {
+        // Collect active pack versions
+        var activePackSet: [String: String] = [:]
+        for (packId, pack) in ContentRegistry.shared.loadedPacks {
+            activePackSet[packId] = pack.manifest.version.description
+        }
+
+        // Convert regions to save state
+        let regionSaves = regions.values.map { RegionSaveState(from: $0) }
+
+        // Convert event log
+        let eventLogSaves = publishedEventLog.map { EventLogEntrySave(from: $0) }
+
+        // Get current region definition ID
+        var currentRegionDefId: String? = nil
+        if let currentId = currentRegionId,
+           let region = regions[currentId] {
+            currentRegionDefId = region.definitionId
+        }
+
+        return EngineSave(
+            version: EngineSave.currentVersion,
+            savedAt: Date(),
+            gameDuration: 0,  // TODO: Track game duration
+
+            // Pack compatibility
+            coreVersion: EngineSave.currentCoreVersion,
+            activePackSet: activePackSet,
+            formatVersion: EngineSave.currentFormatVersion,
+
+            // Player state
+            playerName: playerName,
+            heroId: heroId,
+            playerHealth: playerHealth,
+            playerMaxHealth: playerMaxHealth,
+            playerFaith: playerFaith,
+            playerMaxFaith: playerMaxFaith,
+            playerBalance: playerBalance,
+
+            // Deck state (card IDs for stable serialization)
+            deckCardIds: playerDeck.map { $0.definitionId },
+            handCardIds: playerHand.map { $0.definitionId },
+            discardCardIds: playerDiscard.map { $0.definitionId },
+
+            // World state
+            currentDay: currentDay,
+            worldTension: worldTension,
+            lightDarkBalance: lightDarkBalance,
+            currentRegionId: currentRegionDefId,
+
+            // Regions
+            regions: regionSaves,
+
+            // Quest state
+            mainQuestStage: mainQuestStage,
+            activeQuestIds: publishedActiveQuests.map { $0.id.uuidString },
+            completedQuestIds: Array(completedQuestIds),
+            questStages: [:],
+
+            // Events
+            completedEventIds: completedEventIds.map { $0.uuidString },
+            eventLog: eventLogSaves,
+
+            // World flags
+            worldFlags: publishedWorldFlags,
+
+            // RNG state (not saved - system RNG is non-deterministic)
+            rngSeed: nil
+        )
+    }
+
+    /// Restore engine state from a save (Engine-First Architecture)
+    /// This replaces GameState-based loads
+    func restoreFromEngineSave(_ save: EngineSave) {
+        // Validate compatibility
+        let compatibility = save.validateCompatibility(with: ContentRegistry.shared)
+        if !compatibility.isLoadable {
+            print("❌ Save is incompatible and cannot be loaded")
+            return
+        }
+
+        // Restore player state
+        playerName = save.playerName
+        heroId = save.heroId
+        playerHealth = save.playerHealth
+        playerMaxHealth = save.playerMaxHealth
+        playerFaith = save.playerFaith
+        playerMaxFaith = save.playerMaxFaith
+        playerBalance = save.playerBalance
+
+        // Restore deck (convert card IDs back to cards)
+        playerDeck = save.deckCardIds.compactMap { CardFactory.shared.getCard(id: $0) }
+        playerHand = save.handCardIds.compactMap { CardFactory.shared.getCard(id: $0) }
+        playerDiscard = save.discardCardIds.compactMap { CardFactory.shared.getCard(id: $0) }
+
+        // Restore world state
+        currentDay = save.currentDay
+        worldTension = save.worldTension
+        lightDarkBalance = save.lightDarkBalance
+
+        // First pass: create map of definition IDs to UUIDs
+        var defIdToUUID: [String: UUID] = [:]
+        for regionSave in save.regions {
+            let uuid = UUID()
+            defIdToUUID[regionSave.definitionId] = uuid
+        }
+
+        // Second pass: create regions with resolved neighbor UUIDs
+        var newRegions: [UUID: EngineRegionState] = [:]
+        for regionSave in save.regions {
+            guard let regionUUID = defIdToUUID[regionSave.definitionId] else { continue }
+
+            // Resolve neighbor UUIDs from definition IDs
+            let neighborUUIDs = regionSave.neighborDefinitionIds.compactMap { defIdToUUID[$0] }
+
+            // Create anchor if present
+            var anchor: EngineAnchorState? = nil
+            if let anchorId = regionSave.anchorDefinitionId {
+                anchor = EngineAnchorState(
+                    id: UUID(),
+                    definitionId: anchorId,
+                    name: anchorId,
+                    integrity: regionSave.anchorIntegrity ?? 100
+                )
+            }
+
+            // Create region with all data
+            let region = EngineRegionState(
+                id: regionUUID,
+                definitionId: regionSave.definitionId,
+                name: regionSave.name,
+                type: RegionType(rawValue: regionSave.type) ?? .settlement,
+                state: RegionState(rawValue: regionSave.state) ?? .stable,
+                anchor: anchor,
+                neighborIds: neighborUUIDs,
+                neighborDefinitionIds: regionSave.neighborDefinitionIds,
+                canTrade: regionSave.canTrade,
+                visited: regionSave.visited,
+                reputation: regionSave.reputation
+            )
+            newRegions[regionUUID] = region
+        }
+
+        regions = newRegions
+        publishedRegions = newRegions
+
+        // Restore current region
+        if let currentDefId = save.currentRegionId {
+            currentRegionId = defIdToUUID[currentDefId]
+        }
+
+        // Restore quest state
+        mainQuestStage = save.mainQuestStage
+        completedQuestIds = Set(save.completedQuestIds)
+
+        // Restore completed events (convert strings back to UUIDs)
+        completedEventIds = Set(save.completedEventIds.compactMap { UUID(uuidString: $0) })
+
+        // Restore event log
+        publishedEventLog = save.eventLog.map { $0.toEventLogEntry() }
+
+        // Restore world flags
+        publishedWorldFlags = save.worldFlags
+        worldFlags = save.worldFlags
+
+        // Restore RNG state
+        if let seed = save.rngSeed {
+            WorldRNG.shared.setSeed(seed)
+        }
+
+        // Clear game over state
+        isGameOver = false
+        gameResult = nil
+    }
+
+    // MARK: - Legacy Migration
+
+    /// Migrate from legacy GameSave format (backward compatibility)
+    /// This allows loading old saves before they were migrated to EngineSave format
+    func migrateFromLegacySave(_ save: GameSave) {
+        // Initialize base game state
+        isGameOver = false
+        gameResult = nil
+        currentEventId = nil
+        currentEvent = nil
+        lastDayEvent = nil
+        isInCombat = false
+
+        // Load balance config
+        balanceConfig = contentRegistry.getBalanceConfig() ?? .default
+
+        // Restore player state from legacy save
+        playerName = save.characterName
+        heroId = save.heroId
+        playerHealth = save.health
+        playerMaxHealth = save.maxHealth
+        playerFaith = save.faith
+        playerMaxFaith = save.maxFaith
+        playerBalance = save.balance
+
+        // Restore deck from legacy save
+        if !save.playerDeck.isEmpty {
+            playerDeck = save.playerDeck
+            playerHand = save.playerHand
+            playerDiscard = save.playerDiscard
+        } else if let heroId = save.heroId {
+            // Fallback: create starting deck from CardRegistry
+            playerDeck = CardRegistry.shared.startingDeck(forHeroID: heroId)
+            WorldRNG.shared.shuffle(&playerDeck)
+        }
+
+        // Restore world state from legacy WorldState
+        currentDay = save.turnNumber  // turnNumber maps to currentDay
+        worldTension = save.worldState.worldTension
+        lightDarkBalance = save.worldState.lightDarkBalance
+
+        // Load regions from ContentRegistry (legacy WorldState regions may be outdated)
+        setupRegionsFromRegistry()
+
+        // Apply saved region states from legacy WorldState
+        for legacyRegion in save.worldState.regions {
+            // Find matching engine region by name
+            if let engineRegion = regions.values.first(where: { $0.name == legacyRegion.name }) {
+                var updated = engineRegion
+                updated.state = legacyRegion.state
+                updated.visited = legacyRegion.visited
+                updated.reputation = legacyRegion.reputation
+                updated.canTrade = legacyRegion.canTrade
+                regions[engineRegion.id] = updated
+                publishedRegions[engineRegion.id] = updated
+            }
+        }
+
+        // Set current region from legacy WorldState
+        if let legacyCurrent = save.worldState.currentRegion {
+            if let engineRegion = regions.values.first(where: { $0.name == legacyCurrent.name }) {
+                currentRegionId = engineRegion.id
+            }
+        }
+
+        // Restore world flags
+        worldFlags = save.worldState.worldFlags
+        publishedWorldFlags = save.worldState.worldFlags
+
+        // Load events and quests from ContentRegistry
+        allEvents = createInitialEvents()
+        let initialQuests = createInitialQuests()
+        if let mainQuest = initialQuests.first(where: { $0.questType == .main }) {
+            activeQuests = [mainQuest]
+        }
+
+        // Setup pressure engine
+        pressureEngine.setPressure(worldTension)
+        pressureEngine.syncTriggeredThresholdsFromPressure()
+
+        // Update published state
+        updatePublishedState()
+
+        print("✅ Migrated from legacy GameSave: \(save.characterName)")
     }
 }

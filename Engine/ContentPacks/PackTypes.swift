@@ -146,6 +146,7 @@ enum PackLoadError: Error, LocalizedError {
     case contentLoadFailed(file: String, underlyingError: Error)
     case validationFailed(errorCount: Int, firstError: String)
     case checksumMismatch(file: String, expected: String, actual: String)
+    case fileNotFound(_ path: String)  // Epic 0.3: checksum verification
     case packAlreadyLoaded(packId: String)
     case circularDependency(chain: [String])
 
@@ -167,6 +168,8 @@ enum PackLoadError: Error, LocalizedError {
             return "Validation failed with \(errorCount) errors. First: \(firstError)"
         case .checksumMismatch(let file, let expected, let actual):
             return "Checksum mismatch for \(file): expected \(expected), got \(actual)"
+        case .fileNotFound(let path):
+            return "File not found: \(path)"
         case .packAlreadyLoaded(let packId):
             return "Pack already loaded: \(packId)"
         case .circularDependency(let chain):
@@ -222,4 +225,106 @@ struct CoreVersion {
 
     /// Minimum pack version that current core supports
     static let minSupportedPackVersion = SemanticVersion(major: 1, minor: 0, patch: 0)
+}
+
+// MARK: - Content Cache Types
+
+/// Metadata for cached content pack
+/// Used to validate cache freshness without loading full content
+struct CacheMetadata: Codable {
+    /// Pack identifier
+    let packId: String
+
+    /// Pack version at cache time
+    let version: SemanticVersion
+
+    /// SHA256 hash of all pack JSON files
+    /// Used to detect content changes
+    let contentHash: String
+
+    /// When the cache was created
+    let cachedAt: Date
+
+    /// Engine version when cache was created
+    /// Cache is invalidated if major/minor version changes
+    let engineVersion: String
+
+    /// Validates if cache is still fresh
+    func isValid(currentHash: String, currentEngineVersion: String) -> Bool {
+        // Hash must match
+        guard contentHash == currentHash else { return false }
+
+        // Engine major.minor must match
+        guard let cached = SemanticVersion(string: engineVersion),
+              let current = SemanticVersion(string: currentEngineVersion) else {
+            return false
+        }
+
+        return cached.major == current.major && cached.minor == current.minor
+    }
+}
+
+/// Serialized pack data for persistent cache
+/// Contains all content that can be restored without re-parsing JSON
+struct CachedPackData: Codable {
+    /// Cache metadata for validation
+    let metadata: CacheMetadata
+
+    /// Original manifest
+    let manifest: PackManifest
+
+    /// All content indexed by ID
+    let regions: [String: RegionDefinition]
+    let events: [String: EventDefinition]
+    let quests: [String: QuestDefinition]
+    let anchors: [String: AnchorDefinition]
+    let heroes: [String: StandardHeroDefinition]
+    let cards: [String: StandardCardDefinition]
+    let enemies: [String: EnemyDefinition]
+
+    /// Hero abilities (stored separately in AbilityRegistry at runtime)
+    let abilities: [HeroAbility]
+
+    /// Balance configuration (if any)
+    let balanceConfig: BalanceConfiguration?
+
+    /// Create from LoadedPack
+    init(from pack: LoadedPack, contentHash: String) {
+        self.metadata = CacheMetadata(
+            packId: pack.manifest.packId,
+            version: pack.manifest.version,
+            contentHash: contentHash,
+            cachedAt: Date(),
+            engineVersion: CoreVersion.current.description
+        )
+        self.manifest = pack.manifest
+        self.regions = pack.regions
+        self.events = pack.events
+        self.quests = pack.quests
+        self.anchors = pack.anchors
+        self.heroes = pack.heroes
+        self.cards = pack.cards
+        self.enemies = pack.enemies
+        // Capture abilities from AbilityRegistry at cache time
+        self.abilities = AbilityRegistry.shared.allAbilities
+        self.balanceConfig = pack.balanceConfig
+    }
+
+    /// Convert back to LoadedPack
+    func toLoadedPack(sourceURL: URL = URL(fileURLWithPath: "cached")) -> LoadedPack {
+        var pack = LoadedPack(
+            manifest: manifest,
+            sourceURL: sourceURL,
+            loadedAt: metadata.cachedAt
+        )
+        pack.regions = regions
+        pack.events = events
+        pack.quests = quests
+        pack.anchors = anchors
+        pack.heroes = heroes
+        pack.cards = cards
+        pack.enemies = enemies
+        pack.balanceConfig = balanceConfig
+        return pack
+    }
 }

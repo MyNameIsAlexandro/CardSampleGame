@@ -21,10 +21,11 @@
 | "Как работает система карт?" | [CARDS_MODULE.md](../Engine/Cards/CARDS_MODULE.md) | **МОДУЛЬ** (Module) |
 | "Как работает боевая система?" | [COMBAT_MODULE.md](../Engine/Combat/COMBAT_MODULE.md) | **МОДУЛЬ** (Module) |
 | "Где сейчас лежит этот класс? Какой статус у фичи?" | [TECHNICAL_DOCUMENTATION.md](./TECHNICAL_DOCUMENTATION.md) | **КАРТА КОДА** (Map) |
-| "Готова ли фича? Как её проверить?" | [QA_ACT_I_CHECKLIST.md](./QA_ACT_I_CHECKLIST.md) | **СУДЬЯ** (Judge) |
-| "Какой план миграции к Engine v1.0?" | [MIGRATION_PLAN.md](./MIGRATION_PLAN.md) | **ПЛАН** (Roadmap) |
+| "Готова ли фича? Как её проверить?" | [Archive/QA_ACT_I_CHECKLIST.md](./Archive/QA_ACT_I_CHECKLIST.md) | **СУДЬЯ** (Judge) 📦 |
+| "Какой план миграции к Engine v1.0?" | [Archive/LEGACY_MIGRATION_PLAN.md](./Archive/LEGACY_MIGRATION_PLAN.md) | **ПЛАН** (Roadmap) 📦 |
 | "Как создать Content Pack?" | [CONTENT_PACK_GUIDE.md](./CONTENT_PACK_GUIDE.md) | **РУКОВОДСТВО** (Guide) |
-| "Что мы уже сделали и зафиксировали?" | [CAMPAIGN_IMPLEMENTATION_REPORT.md](./CAMPAIGN_IMPLEMENTATION_REPORT.md) | **ИСТОРИЯ** (History) 🔒 |
+| "Как работает кеширование контента?" | [CONTENT_CACHE_GUIDE.md](./CONTENT_CACHE_GUIDE.md) | **РУКОВОДСТВО** (Guide) |
+| "Что мы уже сделали и зафиксировали?" | [Archive/CAMPAIGN_IMPLEMENTATION_REPORT.md](./Archive/CAMPAIGN_IMPLEMENTATION_REPORT.md) | **ИСТОРИЯ** (History) 📦 |
 | "Что изменилось с последнего аудита?" | [CHANGELOG.md](../CHANGELOG.md) | **ИЗМЕНЕНИЯ** (Changelog) |
 
 ---

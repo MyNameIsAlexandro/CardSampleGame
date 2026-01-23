@@ -26,7 +26,7 @@ final class DeckBuildingTests: XCTestCase {
 
     func testPlayerModelInitializesWithEmptyDeck() {
         // Player модель инициализируется с пустой колодой
-        // Стартовая колода добавляется при старте игры через TwilightMarchesCards
+        // Стартовая колода добавляется при старте игры через CardFactory/ContentPacks
         XCTAssertTrue(player.deck.isEmpty, "Player модель начинает с пустой колодой")
         XCTAssertTrue(player.hand.isEmpty, "Начальная рука пуста")
         XCTAssertTrue(player.discard.isEmpty, "Начальный сброс пуст")

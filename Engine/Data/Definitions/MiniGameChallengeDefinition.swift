@@ -92,23 +92,35 @@ struct MiniGameChallengeDefinition: Codable, Hashable, Identifiable {
 
     // MARK: - Custom Codable
 
-    /// Coding keys for simplified JSON format from events.json
+    /// Coding keys for JSON format from events.json
+    /// Supports both camelCase (when convertFromSnakeCase is used) and snake_case (explicit)
     private enum CodingKeys: String, CodingKey {
         case id
-        case challengeKind = "challenge_kind"
+        // camelCase keys (for when convertFromSnakeCase converts them)
+        case challengeKind
+        case pressureScaling
+        case enemyId
+        case puzzleId
+        case dialogueId
+        case victoryConsequences
+        case defeatConsequences
+        case retreatConsequences
+        case canRetreat
+        case turnLimit
         case difficulty
-        case pressureScaling = "pressure_scaling"
-        case enemyId = "enemy_id"
-        case puzzleId = "puzzle_id"
-        case dialogueId = "dialogue_id"
-        case victoryConsequences = "victory_consequences"
-        case defeatConsequences = "defeat_consequences"
-        case retreatConsequences = "retreat_consequences"
-        case canRetreat = "can_retreat"
-        case turnLimit = "turn_limit"
-        // Simplified format keys
+        // Simplified format keys (always used as-is)
         case rewards
         case penalties
+    }
+
+    /// Helper to decode a value trying both camelCase and snake_case keys
+    private static func decodeOptional<T: Decodable>(
+        _ type: T.Type,
+        from container: KeyedDecodingContainer<CodingKeys>,
+        key: CodingKeys
+    ) throws -> T? {
+        // With convertFromSnakeCase, keys are already converted, so just use camelCase key
+        return try container.decodeIfPresent(type, forKey: key)
     }
 
     init(from decoder: Decoder) throws {
@@ -117,9 +129,9 @@ struct MiniGameChallengeDefinition: Codable, Hashable, Identifiable {
         // Try full format first, then simplified format
         if let id = try container.decodeIfPresent(String.self, forKey: .id) {
             self.id = id
-        } else if let enemyId = try container.decodeIfPresent(String.self, forKey: .enemyId) {
+        } else if let enemyIdValue = try container.decodeIfPresent(String.self, forKey: .enemyId) {
             // Generate ID from enemy ID for simplified format
-            self.id = "challenge_\(enemyId)"
+            self.id = "challenge_\(enemyIdValue)"
         } else {
             self.id = "challenge_unknown"
         }

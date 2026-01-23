@@ -109,9 +109,13 @@ enum EventKind: Codable, Hashable {
 
     // MARK: - Custom Codable
 
-    /// Coding keys for JSON object format: {"mini_game": "combat"}
+    /// Coding keys for JSON object format
+    /// Note: When decoder uses convertFromSnakeCase, the JSON key "mini_game"
+    /// is already converted to "miniGame", so we use that directly
     private enum CodingKeys: String, CodingKey {
-        case miniGame = "mini_game"
+        case miniGame
+        // Alternative key for when convertFromSnakeCase is NOT used
+        case miniGameSnake = "mini_game"
     }
 
     init(from decoder: Decoder) throws {
@@ -133,8 +137,20 @@ enum EventKind: Codable, Hashable {
         }
 
         // Try decoding as object: {"mini_game": "combat"}
+        // Try both key formats to support convertFromSnakeCase and regular decoding
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let miniGameString = try container.decode(String.self, forKey: .miniGame)
+        let miniGameString: String
+        if let value = try container.decodeIfPresent(String.self, forKey: .miniGame) {
+            miniGameString = value
+        } else if let value = try container.decodeIfPresent(String.self, forKey: .miniGameSnake) {
+            miniGameString = value
+        } else {
+            throw DecodingError.keyNotFound(
+                CodingKeys.miniGame,
+                DecodingError.Context(codingPath: container.codingPath, debugDescription: "Neither 'miniGame' nor 'mini_game' found")
+            )
+        }
+
         if let miniGameKind = MiniGameKind(rawValue: miniGameString) {
             self = .miniGame(miniGameKind)
         } else {
@@ -152,8 +168,9 @@ enum EventKind: Codable, Hashable {
             var container = encoder.singleValueContainer()
             try container.encode("inline")
         case .miniGame(let kind):
+            // Always encode with snake_case for JSON compatibility
             var container = encoder.container(keyedBy: CodingKeys.self)
-            try container.encode(kind.rawValue, forKey: .miniGame)
+            try container.encode(kind.rawValue, forKey: .miniGameSnake)
         }
     }
 }

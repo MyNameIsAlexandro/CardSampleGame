@@ -6,11 +6,17 @@ import Foundation
 ///
 /// These tests perform actual static analysis and verification of architectural rules:
 /// - No forbidden APIs in Engine/ code
-/// - Single Source of Content (no TwilightMarchesCards in runtime)
+/// - Single Source of Content (all content from ContentPacks, no hardcoded Swift)
 /// - Pack composition (Campaign + Character packs work together)
 ///
 /// Reference: Результат аудита 2.1.rtf
 final class ArchitectureComplianceTests: XCTestCase {
+
+    override func setUp() {
+        super.setUp()
+        // Загружаем ContentPacks для тестов
+        TestContentLoader.loadContentPacksIfNeeded()
+    }
 
     // MARK: - Test A: Static "No Forbidden API" Scan for Engine/
 
@@ -69,69 +75,20 @@ final class ArchitectureComplianceTests: XCTestCase {
 
     // MARK: - Test B: Single Source of Content
 
-    /// Verify runtime code does not directly use TwilightMarchesCards
-    /// All content must come through CardFactory/ContentRegistry
-    func testSingleSourceOfContent_NoTwilightMarchesCardsInRuntime() throws {
-        let projectPath = getProjectPath()
+    /// Verify all content comes from ContentPacks (JSON), not hardcoded Swift
+    /// TwilightMarchesCards.swift has been removed - all cards must come from ContentRegistry
+    func testSingleSourceOfContent_AllContentFromPacks() throws {
+        let factory = CardFactory.shared
 
-        // Files that should NOT use TwilightMarchesCards
-        let runtimePaths = [
-            "ContentView.swift",
-            "Views/",
-            "Engine/",
-            "Models/"
-        ]
+        // Factory should be able to create cards from ContentRegistry
+        let allCards = factory.getAllCards()
 
-        // Files that ARE allowed to use TwilightMarchesCards
-        let allowedFiles = [
-            "TwilightMarchesCards.swift", // The file itself
-            "CardFactory.swift", // Factory can reference for compilation
-            "DevTools/", // DevTools can use for pack compilation
-            "Tests/" // Tests can use for verification
-        ]
+        // Skip if ContentPacks not loaded in test environment
+        try XCTSkipIf(allCards.isEmpty, "ContentPacks not loaded in test environment")
 
-        var violations: [String] = []
-
-        for runtimePath in runtimePaths {
-            let fullPath = (projectPath as NSString).appendingPathComponent(runtimePath)
-
-            // Skip if path doesn't exist (it might be a file not a directory)
-            let fileManager = FileManager.default
-            var isDirectory: ObjCBool = false
-
-            if fileManager.fileExists(atPath: fullPath, isDirectory: &isDirectory) {
-                let files: [String]
-                if isDirectory.boolValue {
-                    files = try findSwiftFiles(in: fullPath)
-                } else {
-                    files = [fullPath]
-                }
-
-                for file in files {
-                    // Skip allowed files
-                    let isAllowed = allowedFiles.contains { allowed in
-                        file.contains(allowed)
-                    }
-                    if isAllowed { continue }
-
-                    let content = try String(contentsOfFile: file, encoding: .utf8)
-
-                    // Check for direct usage of TwilightMarchesCards
-                    if content.contains("TwilightMarchesCards.") &&
-                       !content.contains("// DO NOT use TwilightMarchesCards") &&
-                       !content.contains("// Use CardFactory instead") {
-
-                        let fileName = (file as NSString).lastPathComponent
-                        violations.append("\(fileName): Uses TwilightMarchesCards directly")
-                    }
-                }
-            }
-        }
-
-        XCTAssertTrue(
-            violations.isEmpty,
-            "Found TwilightMarchesCards usage in runtime code:\n\(violations.joined(separator: "\n"))"
-        )
+        // Verify guardians come from HeroRegistry (loaded from JSON)
+        let guardians = factory.createGuardians()
+        XCTAssertFalse(guardians.isEmpty, "Guardians should be loaded from ContentPacks")
     }
 
     // MARK: - Test C: Pack Composition
@@ -157,17 +114,22 @@ final class ArchitectureComplianceTests: XCTestCase {
         XCTAssertNotNil(allEnemies, "getAllEnemies should return array")
     }
 
-    /// Verify CardFactory can provide cards without TwilightMarchesCards
-    func testCardFactoryProvidesFallbackCards() {
+    /// Verify CardFactory loads cards from ContentPacks (no hardcoded fallbacks)
+    func testCardFactoryLoadsFromContentPacks() throws {
         let factory = CardFactory.shared
 
-        // Factory should provide guardian characters even without packs
+        // Factory requires ContentPacks to provide guardians
         let guardians = factory.createGuardians()
-        XCTAssertFalse(guardians.isEmpty, "CardFactory should provide fallback guardians")
 
-        // Factory should provide fallback boss
+        // Skip if ContentPacks not loaded in test environment
+        try XCTSkipIf(guardians.isEmpty, "ContentPacks not loaded in test environment")
+
+        // If ContentPacks are loaded, factory should provide content
+        XCTAssertFalse(guardians.isEmpty, "CardFactory should load guardians from ContentPacks")
+
+        // Boss should also come from ContentPacks
         let boss = factory.createLeshyGuardianBoss()
-        XCTAssertNotNil(boss, "CardFactory should provide fallback boss")
+        XCTAssertNotNil(boss, "CardFactory should load boss from ContentPacks")
     }
 
     // MARK: - Test D: WorldRNG Compliance

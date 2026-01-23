@@ -121,7 +121,22 @@ final class HeroRegistry {
 
     /// Загрузка героев из JSON файла в бандле
     private func registerBuiltInHeroes() {
-        // Загружаем из heroes.json в бандле
+        // Сначала пробуем загрузить из ContentPacks (новая структура)
+        if let heroesURL = Bundle.main.url(
+            forResource: "heroes",
+            withExtension: "json",
+            subdirectory: "ContentPacks/TwilightMarches/Characters"
+        ) {
+            let dataSource = JSONHeroDataSource(
+                id: "bundle_heroes",
+                name: "Bundle Heroes",
+                fileURL: heroesURL
+            )
+            registerAll(dataSource.loadHeroes())
+            return
+        }
+
+        // Fallback: старый путь (heroes.json в корне bundle)
         if let heroesURL = Bundle.main.url(forResource: "heroes", withExtension: "json") {
             let dataSource = JSONHeroDataSource(
                 id: "bundle_heroes",
@@ -129,9 +144,12 @@ final class HeroRegistry {
                 fileURL: heroesURL
             )
             registerAll(dataSource.loadHeroes())
-        } else {
-            print("HeroRegistry: ERROR - heroes.json not found in bundle!")
+            return
         }
+
+        #if DEBUG
+        print("HeroRegistry: ERROR - heroes.json not found in bundle!")
+        #endif
     }
 }
 
@@ -160,7 +178,9 @@ struct JSONHeroDataSource: HeroDataSource {
 
     func loadHeroes() -> [HeroDefinition] {
         guard let data = try? Data(contentsOf: fileURL) else {
+            #if DEBUG
             print("HeroRegistry: Failed to load JSON from \(fileURL)")
+            #endif
             return []
         }
 
@@ -170,7 +190,9 @@ struct JSONHeroDataSource: HeroDataSource {
             let decoded = try decoder.decode([JSONHeroDefinition].self, from: data)
             return decoded.map { $0.toStandard() }
         } catch {
+            #if DEBUG
             print("HeroRegistry: Failed to decode heroes: \(error)")
+            #endif
             return []
         }
     }
@@ -243,7 +265,9 @@ struct JSONHeroDefinition: Codable {
 
         // Получаем способность по ID
         guard let ability = HeroAbility.forAbilityId(abilityId) else {
+            #if DEBUG
             print("HeroRegistry: ERROR - Unknown ability ID '\(abilityId)' for hero '\(id)'")
+            #endif
             fatalError("Missing ability definition for '\(abilityId)'. Add it to HeroAbility.forAbilityId() or hero_abilities.json")
         }
 

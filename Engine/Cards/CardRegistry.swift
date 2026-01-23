@@ -28,7 +28,8 @@ final class CardRegistry {
     // MARK: - Init
 
     private init() {
-        registerBuiltInCards()
+        // No hardcoded cards - all content comes from ContentPacks
+        // Cards are loaded via PackLoader -> ContentRegistry
     }
 
     // MARK: - Registration
@@ -78,7 +79,7 @@ final class CardRegistry {
     /// Перезагрузить реестр
     func reload() {
         clear()
-        registerBuiltInCards()
+        // Load cards from data sources (ContentPacks)
         for source in dataSources {
             registerAll(source.loadCards())
         }
@@ -209,161 +210,10 @@ final class CardRegistry {
         return definitions.count
     }
 
-    // MARK: - Built-in Cards
-
-    private func registerBuiltInCards() {
-        // Базовые универсальные карты (доступны всем)
-        registerBaseCards()
-
-        // Сигнатурные карты героев
-        registerSignatureCardsForBuiltInHeroes()
-    }
-
-    private func registerBaseCards() {
-        // Базовый удар
-        register(StandardCardDefinition(
-            id: "strike_basic",
-            name: "Удар",
-            cardType: .attack,
-            rarity: .common,
-            description: "Нанести 3 урона",
-            icon: "⚔️",
-            abilities: [CardAbility(
-                name: "Удар",
-                description: "Нанести 3 урона",
-                effect: .damage(amount: 3, type: .physical)
-            )],
-            faithCost: 1,
-            balance: .neutral
-        ))
-
-        // Базовая защита
-        register(StandardCardDefinition(
-            id: "defend_basic",
-            name: "Защита",
-            cardType: .defense,
-            rarity: .common,
-            description: "Получить 3 защиты",
-            icon: "🛡️",
-            abilities: [],
-            faithCost: 1,
-            balance: .neutral,
-            defense: 3
-        ))
-
-        // Восстановление
-        register(StandardCardDefinition(
-            id: "heal_basic",
-            name: "Лечение",
-            cardType: .spell,
-            rarity: .common,
-            description: "Восстановить 2 HP",
-            icon: "💚",
-            abilities: [CardAbility(
-                name: "Исцеление",
-                description: "Восстановить 2 HP",
-                effect: .heal(amount: 2)
-            )],
-            faithCost: 2,
-            balance: .light,
-            role: .sustain
-        ))
-
-        // Взять карты
-        register(StandardCardDefinition(
-            id: "draw_basic",
-            name: "Подготовка",
-            cardType: .special,
-            rarity: .common,
-            description: "Взять 2 карты",
-            icon: "📜",
-            abilities: [CardAbility(
-                name: "Подготовка",
-                description: "Взять 2 карты",
-                effect: .drawCards(count: 2)
-            )],
-            faithCost: 2,
-            balance: .neutral,
-            role: .utility
-        ))
-    }
-
-    private func registerSignatureCardsForBuiltInHeroes() {
-        // Рагнар - Воин
-        registerSignatureCards(HeroSignatureCards(
-            heroID: "warrior_ragnar",
-            requiredCards: [
-                StandardCardDefinition(
-                    id: "ragnar_ancestral_axe",
-                    name: "Топор предков",
-                    cardType: .weapon,
-                    rarity: .rare,
-                    description: "Легендарное оружие Рагнара. +2 к урону, +1 кубик",
-                    icon: "🪓",
-                    ownership: .heroSignature(heroID: "warrior_ragnar"),
-                    abilities: [CardAbility(
-                        name: "Наследие",
-                        description: "+1 кубик атаки",
-                        effect: .addDice(count: 1)
-                    )],
-                    faithCost: 0,
-                    balance: .neutral,
-                    power: 2
-                )
-            ],
-            optionalCards: [],
-            weakness: StandardCardDefinition(
-                id: "ragnar_blood_rage",
-                name: "Кровавая ярость",
-                cardType: .curse,
-                rarity: .rare,
-                description: "Слабость Рагнара. При HP < 25% атакует ближайшую цель",
-                icon: "💢",
-                ownership: .heroSignature(heroID: "warrior_ragnar"),
-                abilities: [],
-                faithCost: 0,
-                balance: .dark,
-                curseType: .bloodCurse
-            )
-        ))
-
-        // Умбра - Тень
-        registerSignatureCards(HeroSignatureCards(
-            heroID: "shadow_umbra",
-            requiredCards: [
-                StandardCardDefinition(
-                    id: "umbra_shadow_cloak",
-                    name: "Плащ теней",
-                    cardType: .armor,
-                    rarity: .rare,
-                    description: "Артефакт Умбры. Невидимость на 1 ход после убийства",
-                    icon: "🌑",
-                    ownership: .heroSignature(heroID: "shadow_umbra"),
-                    abilities: [],
-                    faithCost: 0,
-                    balance: .dark,
-                    defense: 1
-                )
-            ],
-            optionalCards: [],
-            weakness: StandardCardDefinition(
-                id: "umbra_dark_pact",
-                name: "Тёмный договор",
-                cardType: .curse,
-                rarity: .rare,
-                description: "Слабость Умбры. Каждые 3 убийства: баланс -10 к Тьме",
-                icon: "📜",
-                ownership: .heroSignature(heroID: "shadow_umbra"),
-                abilities: [CardAbility(
-                    name: "Договор",
-                    description: "Сдвиг к Тьме",
-                    effect: .shiftBalance(towards: .dark, amount: 10)
-                )],
-                faithCost: 0,
-                balance: .dark
-            )
-        ))
-    }
+    // MARK: - Content Pack Integration
+    // All cards are now loaded from ContentPacks via PackLoader.
+    // No hardcoded cards in CardRegistry.
+    // See: ContentPacks/TwilightMarches/Cards/cards.json
 }
 
 // MARK: - Card Data Source Protocol
@@ -385,7 +235,9 @@ struct JSONCardDataSource: CardDataSource {
 
     func loadCards() -> [CardDefinition] {
         guard let data = try? Data(contentsOf: fileURL) else {
+            #if DEBUG
             print("CardRegistry: Failed to load JSON from \(fileURL)")
+            #endif
             return []
         }
 
@@ -393,7 +245,9 @@ struct JSONCardDataSource: CardDataSource {
             let decoded = try JSONDecoder().decode([JSONCardDefinition].self, from: data)
             return decoded.map { $0.toStandard() }
         } catch {
+            #if DEBUG
             print("CardRegistry: Failed to decode cards: \(error)")
+            #endif
             return []
         }
     }

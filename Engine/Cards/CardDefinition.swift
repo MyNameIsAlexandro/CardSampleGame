@@ -42,13 +42,16 @@ protocol CardDefinition {
 
 /// Принадлежность карты - определяет кто может использовать карту
 /// Аналог системы сигнатурных карт из Arkham Horror LCG
-enum CardOwnership: Codable, Equatable {
+enum CardOwnership: Equatable {
     /// Базовая карта - доступна всем
     case universal
 
     /// Сигнатурная карта героя - привязана к конкретному герою по ID
     /// Как в Arkham Horror LCG, где у каждого следователя есть свои уникальные карты
     case heroSignature(heroID: String)
+
+    /// Карта класса - доступна героям определённого класса
+    case classSpecific(className: String)
 
     /// Карта набора/дополнения - требует владения DLC
     case expansion(setID: String)
@@ -58,6 +61,75 @@ enum CardOwnership: Codable, Equatable {
 
     /// Карта с несколькими условиями (все должны выполняться)
     case composite([CardOwnership])
+}
+
+// MARK: - CardOwnership Codable
+
+extension CardOwnership: Codable {
+    private enum CodingKeys: String, CodingKey {
+        case universal
+        case heroSignature = "hero_signature"
+        case classSpecific = "class_specific"
+        case expansion
+        case requiresUnlock = "requires_unlock"
+        case composite
+    }
+
+    init(from decoder: Decoder) throws {
+        // Try string first (for "universal")
+        if let container = try? decoder.singleValueContainer(),
+           let stringValue = try? container.decode(String.self) {
+            if stringValue == "universal" {
+                self = .universal
+                return
+            }
+        }
+
+        // Try keyed container for complex types
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        if let heroID = try container.decodeIfPresent(String.self, forKey: .heroSignature) {
+            self = .heroSignature(heroID: heroID)
+        } else if let className = try container.decodeIfPresent(String.self, forKey: .classSpecific) {
+            self = .classSpecific(className: className)
+        } else if let setID = try container.decodeIfPresent(String.self, forKey: .expansion) {
+            self = .expansion(setID: setID)
+        } else if let condition = try container.decodeIfPresent(String.self, forKey: .requiresUnlock) {
+            self = .requiresUnlock(condition: condition)
+        } else if let items = try container.decodeIfPresent([CardOwnership].self, forKey: .composite) {
+            self = .composite(items)
+        } else {
+            self = .universal
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        switch self {
+        case .universal:
+            var container = encoder.singleValueContainer()
+            try container.encode("universal")
+
+        case .heroSignature(let heroID):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(heroID, forKey: .heroSignature)
+
+        case .classSpecific(let className):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(className, forKey: .classSpecific)
+
+        case .expansion(let setID):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(setID, forKey: .expansion)
+
+        case .requiresUnlock(let condition):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(condition, forKey: .requiresUnlock)
+
+        case .composite(let items):
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(items, forKey: .composite)
+        }
+    }
 }
 
 /// Стандартная реализация определения карты
@@ -149,6 +221,7 @@ extension CardOwnership {
     /// Проверить, доступна ли карта для героя
     func isAvailable(
         forHeroID heroID: String?,
+        heroClass: String? = nil,
         ownedExpansions: Set<String> = [],
         unlockedConditions: Set<String> = []
     ) -> Bool {
@@ -158,6 +231,9 @@ extension CardOwnership {
 
         case .heroSignature(let requiredHeroID):
             return heroID == requiredHeroID
+
+        case .classSpecific(let className):
+            return heroClass == className
 
         case .expansion(let setID):
             return ownedExpansions.contains(setID)
@@ -169,6 +245,7 @@ extension CardOwnership {
             return requirements.allSatisfy { requirement in
                 requirement.isAvailable(
                     forHeroID: heroID,
+                    heroClass: heroClass,
                     ownedExpansions: ownedExpansions,
                     unlockedConditions: unlockedConditions
                 )
@@ -184,6 +261,9 @@ extension CardOwnership {
 
         case .heroSignature(let heroID):
             return "Сигнатурная карта героя: \(heroID)"
+
+        case .classSpecific(let className):
+            return "Карта класса: \(className)"
 
         case .expansion(let setID):
             return "Требуется дополнение: \(setID)"

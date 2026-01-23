@@ -17,12 +17,27 @@ struct CardGameApp: App {
 
 // MARK: - Content Loader (Background Thread)
 
-/// Loads content packs on background thread to prevent main thread blocking
+/// Loading stages for progress tracking
+enum LoadingStage {
+    case searching
+    case validatingCache
+    case loadingFromCache
+    case loadingFromJSON
+    case savingCache
+    case ready
+}
+
+/// Loads content packs with caching support
+/// - First launch: loads from JSON, saves to cache
+/// - Subsequent launches: loads from cache if valid
 @MainActor
 class ContentLoader: ObservableObject {
     @Published var isLoaded = false
     @Published var loadingProgress: Double = 0
     @Published var loadingMessage = L10n.loadingDefault.localized
+    @Published var loadingStage: LoadingStage = .searching
+
+    private let cache = FileSystemCache.shared
 
     init() {
         Task {
@@ -31,11 +46,166 @@ class ContentLoader: ObservableObject {
     }
 
     private func loadContentPacks() async {
+        // Stage 1: Search for packs
+        loadingStage = .searching
         loadingMessage = L10n.loadingSearchPacks.localized
         loadingProgress = 0.1
 
-        // Run file operations on background thread
-        let packURL: URL? = await Task.detached(priority: .userInitiated) { () -> URL? in
+        let packURL = await findPackURL()
+
+        guard let url = packURL else {
+            loadingMessage = L10n.loadingContentNotFound.localized
+            print("⚠️ ContentPacks not found - using fallback content")
+            finishLoading()
+            return
+        }
+
+        // Stage 2: Validate cache
+        loadingStage = .validatingCache
+        loadingMessage = L10n.loadingValidatingCache.localized
+        loadingProgress = 0.2
+
+        let cacheResult = await validateCache(for: url)
+
+        switch cacheResult {
+        case .validCache(let packId, let contentHash):
+            // Stage 3a: Load from cache (fast path)
+            loadingStage = .loadingFromCache
+            loadingMessage = L10n.loadingFromCache.localized
+            loadingProgress = 0.5
+
+            await loadFromCache(packId: packId, expectedHash: contentHash)
+
+        case .invalidCache(let contentHash):
+            // Stage 3b: Load from JSON (slow path)
+            loadingStage = .loadingFromJSON
+            loadingMessage = L10n.loadingContent.localized
+            loadingProgress = 0.3
+
+            await loadFromJSON(at: url, contentHash: contentHash)
+
+        case .error:
+            // Fallback to JSON loading without caching
+            loadingStage = .loadingFromJSON
+            loadingMessage = L10n.loadingContent.localized
+            loadingProgress = 0.3
+
+            await loadFromJSON(at: url, contentHash: nil)
+        }
+
+        finishLoading()
+    }
+
+    // MARK: - Cache Validation
+
+    private enum CacheValidationResult {
+        case validCache(packId: String, contentHash: String)
+        case invalidCache(contentHash: String?)
+        case error
+    }
+
+    private func validateCache(for packURL: URL) async -> CacheValidationResult {
+        return await Task.detached(priority: .userInitiated) { [cache] () -> CacheValidationResult in
+            do {
+                // Compute current content hash
+                let contentHash = try CacheValidator.computeContentHash(for: packURL)
+
+                // Load manifest to get pack ID
+                let manifest = try PackManifest.load(from: packURL)
+
+                // Check if cache is valid
+                if cache.hasValidCache(for: manifest.packId, contentHash: contentHash) {
+                    return .validCache(packId: manifest.packId, contentHash: contentHash)
+                } else {
+                    return .invalidCache(contentHash: contentHash)
+                }
+            } catch {
+                print("⚠️ Cache validation failed: \(error)")
+                return .error
+            }
+        }.value
+    }
+
+    // MARK: - Loading Methods
+
+    private func loadFromCache(packId: String, expectedHash: String) async {
+        let result = await Task.detached(priority: .userInitiated) { [cache] () -> Result<CachedPackData, Error> in
+            do {
+                guard let cached = try cache.loadCachedPack(packId: packId) else {
+                    return .failure(NSError(domain: "ContentCache", code: 1, userInfo: [NSLocalizedDescriptionKey: "Pack not found in cache"]))
+                }
+                return .success(cached)
+            } catch {
+                return .failure(error)
+            }
+        }.value
+
+        switch result {
+        case .success(let cached):
+            loadingProgress = 0.8
+            let pack = ContentRegistry.shared.loadPackFromCache(cached)
+            loadingProgress = 0.9
+            loadingMessage = L10n.loadingContentLoaded.localized
+            printPackInfo(pack, source: "cache")
+
+        case .failure(let error):
+            print("⚠️ Cache load failed, falling back to JSON: \(error)")
+            // Cache corrupted, need to reload from JSON
+            // This shouldn't happen normally but handle gracefully
+            loadingStage = .loadingFromJSON
+            loadingMessage = L10n.loadingContent.localized
+        }
+    }
+
+    private func loadFromJSON(at url: URL, contentHash: String?) async {
+        let registry = ContentRegistry.shared
+
+        let result = await Task.detached(priority: .userInitiated) { () -> Result<LoadedPack, Error> in
+            do {
+                let pack = try registry.loadPack(from: url)
+                return .success(pack)
+            } catch {
+                return .failure(error)
+            }
+        }.value
+
+        switch result {
+        case .success(let pack):
+            loadingProgress = 0.7
+            printPackInfo(pack, source: "JSON")
+
+            // Stage 4: Save to cache
+            if let hash = contentHash {
+                loadingStage = .savingCache
+                loadingMessage = L10n.loadingSavingCache.localized
+                loadingProgress = 0.8
+
+                saveToCache(pack: pack, contentHash: hash)
+            }
+
+            loadingProgress = 0.9
+            loadingMessage = L10n.loadingContentLoaded.localized
+
+        case .failure(let error):
+            loadingMessage = L10n.loadingError.localized
+            print("❌ Failed to load pack from \(url.path): \(error)")
+        }
+    }
+
+    private func saveToCache(pack: LoadedPack, contentHash: String) {
+        Task.detached(priority: .background) { [cache] in
+            do {
+                try cache.savePack(pack, contentHash: contentHash)
+            } catch {
+                print("⚠️ Failed to save pack to cache: \(error)")
+            }
+        }
+    }
+
+    // MARK: - Helpers
+
+    private func findPackURL() async -> URL? {
+        return await Task.detached(priority: .userInitiated) { () -> URL? in
             // Find ContentPacks in the bundle
             if let url = Bundle.main.url(forResource: "TwilightMarches", withExtension: nil, subdirectory: "ContentPacks") {
                 return url
@@ -57,57 +227,42 @@ class ContentLoader: ObservableObject {
             if FileManager.default.fileExists(atPath: sourceURL.path) {
                 return sourceURL
             }
+
+            // Additional fallback: Project root ContentPacks
+            let projectRoot = URL(fileURLWithPath: #filePath)
+                .deletingLastPathComponent()
+                .deletingLastPathComponent()
+                .appendingPathComponent("ContentPacks/TwilightMarches")
+            if FileManager.default.fileExists(atPath: projectRoot.path) {
+                return projectRoot
+            }
             #endif
 
             return nil
         }.value
+    }
 
-        loadingProgress = 0.3
-
-        if let url = packURL {
-            loadingMessage = L10n.loadingContent.localized
-            await loadPack(at: url)
-        } else {
-            loadingMessage = L10n.loadingContentNotFound.localized
-            print("⚠️ ContentPacks not found - using fallback content")
-        }
-
+    private func finishLoading() {
+        loadingStage = .ready
         loadingProgress = 1.0
         loadingMessage = L10n.loadingReady.localized
 
         // Small delay to show completion
-        try? await Task.sleep(nanoseconds: 200_000_000)
-        isLoaded = true
+        Task {
+            try? await Task.sleep(nanoseconds: 200_000_000)
+            isLoaded = true
+        }
     }
 
-    private func loadPack(at url: URL) async {
-        let registry = ContentRegistry.shared
-
-        // Run heavy loading on background thread
-        let result = await Task.detached(priority: .userInitiated) { () -> Result<LoadedPack, Error> in
-            do {
-                let pack = try registry.loadPack(from: url)
-                return .success(pack)
-            } catch {
-                return .failure(error)
-            }
-        }.value
-
-        switch result {
-        case .success(let pack):
-            loadingProgress = 0.9
-            loadingMessage = L10n.loadingContentLoaded.localized
-            print("✅ Loaded pack: \(pack.manifest.packId) v\(pack.manifest.version)")
-            print("   - \(pack.regions.count) regions")
-            print("   - \(pack.events.count) events")
-            print("   - \(pack.quests.count) quests")
-            print("   - \(pack.anchors.count) anchors")
-            print("   - \(pack.heroes.count) heroes")
-            print("   - \(pack.cards.count) cards")
-        case .failure(let error):
-            loadingMessage = L10n.loadingError.localized
-            print("❌ Failed to load pack from \(url.path): \(error)")
-        }
+    private func printPackInfo(_ pack: LoadedPack, source: String) {
+        print("✅ Loaded pack from \(source): \(pack.manifest.packId) v\(pack.manifest.version)")
+        print("   - \(pack.regions.count) regions")
+        print("   - \(pack.events.count) events")
+        print("   - \(pack.quests.count) quests")
+        print("   - \(pack.anchors.count) anchors")
+        print("   - \(pack.heroes.count) heroes")
+        print("   - \(pack.cards.count) cards")
+        print("   - \(pack.enemies.count) enemies")
     }
 }
 

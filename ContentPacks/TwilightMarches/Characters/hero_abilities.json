@@ -1,0 +1,121 @@
+[
+  {
+    "id": "warrior_rage",
+    "name": {
+      "en": "Battle Rage",
+      "ru": "Боевая Ярость"
+    },
+    "description": {
+      "en": "+2 damage when HP below 50%",
+      "ru": "+2 к урону при HP ниже 50%"
+    },
+    "icon": "flame.fill",
+    "type": "passive",
+    "trigger": "on_damage_dealt",
+    "condition": {
+      "type": "hp_below_percent",
+      "value": 50
+    },
+    "effects": [
+      {
+        "type": "bonus_damage",
+        "value": 2
+      }
+    ],
+    "cooldown": 0
+  },
+  {
+    "id": "mage_meditation",
+    "name": {
+      "en": "Meditation",
+      "ru": "Медитация"
+    },
+    "description": {
+      "en": "+1 faith at end of turn",
+      "ru": "+1 вера в конце хода"
+    },
+    "icon": "sparkles",
+    "type": "passive",
+    "trigger": "turn_end",
+    "condition": null,
+    "effects": [
+      {
+        "type": "gain_faith",
+        "value": 1
+      }
+    ],
+    "cooldown": 0
+  },
+  {
+    "id": "ranger_tracking",
+    "name": {
+      "en": "Tracking",
+      "ru": "Выслеживание"
+    },
+    "description": {
+      "en": "+1 bonus die on first attack",
+      "ru": "+1 кубик при первой атаке"
+    },
+    "icon": "scope",
+    "type": "passive",
+    "trigger": "on_attack",
+    "condition": {
+      "type": "first_attack"
+    },
+    "effects": [
+      {
+        "type": "bonus_dice",
+        "value": 1
+      }
+    ],
+    "cooldown": 0
+  },
+  {
+    "id": "priest_blessing",
+    "name": {
+      "en": "Divine Blessing",
+      "ru": "Божественное Благословение"
+    },
+    "description": {
+      "en": "-1 damage from dark sources",
+      "ru": "-1 урон от тёмных источников"
+    },
+    "icon": "cross.fill",
+    "type": "passive",
+    "trigger": "on_damage_received",
+    "condition": {
+      "type": "damage_source_dark"
+    },
+    "effects": [
+      {
+        "type": "damage_reduction",
+        "value": 1
+      }
+    ],
+    "cooldown": 0
+  },
+  {
+    "id": "shadow_ambush",
+    "name": {
+      "en": "Shadow Ambush",
+      "ru": "Засада из Тени"
+    },
+    "description": {
+      "en": "+3 damage to targets at full HP",
+      "ru": "+3 урона по целям с полным HP"
+    },
+    "icon": "moon.stars.fill",
+    "type": "passive",
+    "trigger": "on_damage_dealt",
+    "condition": {
+      "type": "target_full_hp"
+    },
+    "effects": [
+      {
+        "type": "bonus_damage",
+        "value": 3
+      }
+    ],
+    "cooldown": 0
+  }
+]

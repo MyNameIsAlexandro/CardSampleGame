@@ -521,26 +521,32 @@ final class PackValidator {
 // MARK: - CLI Support
 
 extension PackValidator {
-    /// Run validation and print results to console
+    /// Run validation and print results to console (DEBUG only)
     static func validateAndPrint(packURL: URL) -> Bool {
         let validator = PackValidator(packURL: packURL)
         let summary = validator.validate()
+        #if DEBUG
         print(summary.description)
+        #endif
         return summary.isValid
     }
 
-    /// Validate multiple packs
+    /// Validate multiple packs (DEBUG only for console output)
     static func validateMultiple(packURLs: [URL]) -> Bool {
         var allValid = true
 
         for url in packURLs {
+            #if DEBUG
             print("\n" + String(repeating: "=", count: 60))
+            #endif
             let isValid = validateAndPrint(packURL: url)
             allValid = allValid && isValid
         }
 
+        #if DEBUG
         print("\n" + String(repeating: "=", count: 60))
         print(allValid ? "ALL PACKS VALID" : "SOME PACKS HAVE ERRORS")
+        #endif
 
         return allValid
     }

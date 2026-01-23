@@ -90,6 +90,31 @@ final class ContentRegistry {
         clearMergedContent()
     }
 
+    // MARK: - Cache Loading
+
+    /// Load pack from cached data (bypasses JSON parsing)
+    /// - Parameter cached: Cached pack data
+    /// - Returns: The loaded pack
+    @discardableResult
+    func loadPackFromCache(_ cached: CachedPackData) -> LoadedPack {
+        // IMPORTANT: Restore abilities to AbilityRegistry BEFORE creating pack
+        // Abilities are needed for hero definition conversion
+        AbilityRegistry.shared.registerAll(cached.abilities)
+        print("📦 Restored \(cached.abilities.count) abilities from cache")
+
+        let pack = cached.toLoadedPack()
+
+        // Register the pack
+        loadedPacks[cached.manifest.packId] = pack
+        loadOrder.append(cached.manifest.packId)
+
+        // Merge content
+        mergeContent(from: pack)
+
+        print("📦 Registered pack from cache: \(cached.manifest.packId)")
+        return pack
+    }
+
     // MARK: - Content Access
 
     /// Get region definition by ID
@@ -179,10 +204,31 @@ final class ContentRegistry {
 
     // MARK: - Query Methods
 
-    /// Get events available for a region with given pressure
-    func getAvailableEvents(forRegion regionId: String, pressure: Int) -> [EventDefinition] {
+    /// Get events available for a region with given pressure and state
+    /// - Parameters:
+    ///   - regionId: Region definition ID (e.g., "village", "forest")
+    ///   - pressure: Current world tension (0-100)
+    ///   - regionState: Current region state (e.g., "stable", "borderland", "breach")
+    func getAvailableEvents(forRegion regionId: String, pressure: Int, regionState: String? = nil) -> [EventDefinition] {
         return mergedEvents.values.filter { event in
+            // Check region ID matches (nil = any region)
             let regionMatches = event.availability.regionIds?.contains(regionId) ?? true
+
+            // Check region state matches (nil = any state)
+            let stateMatches: Bool
+            if let requiredStates = event.availability.regionStates, !requiredStates.isEmpty {
+                if let currentState = regionState {
+                    stateMatches = requiredStates.contains(currentState)
+                } else {
+                    // No current state provided, assume all states match
+                    stateMatches = true
+                }
+            } else {
+                // No state requirements
+                stateMatches = true
+            }
+
+            // Check pressure/tension matches
             let pressureMatches: Bool
             if let minPressure = event.availability.minPressure,
                let maxPressure = event.availability.maxPressure {
@@ -194,7 +240,8 @@ final class ContentRegistry {
             } else {
                 pressureMatches = true
             }
-            return regionMatches && pressureMatches
+
+            return regionMatches && stateMatches && pressureMatches
         }
     }
 

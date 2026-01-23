@@ -221,11 +221,8 @@ struct HeroPanel: View {
     // MARK: - Computed Properties
 
     var heroClass: String {
-        // Get hero class from legacy player or default
-        // HeroClass uses rawValue as the display name (already in Russian)
-        if let heroClass = engine.legacyPlayer?.heroClass {
-            return heroClass.rawValue
-        }
+        // In data-driven architecture, hero role comes from hero definition
+        // For now, return localized default or hero name
         return L10n.heroClassDefault.localized
     }
 

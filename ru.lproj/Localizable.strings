@@ -9,6 +9,7 @@
 "character.stats" = "Характеристики персонажа";
 "character.abilities" = "Способности";
 "button.start.adventure" = "Начать приключение";
+"button.select.hero.first" = "Выберите героя";
 
 // MARK: - Game Board
 "turn.label" = "Ход %d";
@@ -458,6 +459,7 @@
 "action.rest" = "Отдыхать";
 "action.trade" = "Торговать";
 "action.strengthen.anchor" = "Укрепить Якорь";
+"action.explore" = "Исследовать";
 "action.explore.region" = "Исследовать";
 
 // MARK: - Combat UI (Engine-First Migration)
@@ -803,6 +805,11 @@
 "loading.ready" = "Готово!";
 "loading.content.loaded" = "Контент загружен";
 "loading.error" = "Ошибка загрузки";
+
+// MARK: - Content Cache
+"loading.validating.cache" = "Проверка кеша...";
+"loading.from.cache" = "Загрузка из кеша...";
+"loading.saving.cache" = "Сохранение кеша...";
 "app.title" = "Сумрачные Пределы";
 
 // MARK: - ViewModels/GameViewModel
@@ -822,12 +829,12 @@
 "region.desc.breach" = "Навь активно проникает в регион. Очень опасно. Требуется восстановление якоря.";
 
 // MARK: - WorldMapView - Actions
-"action.travel" = "Отправиться (%d %@)";
+"action.travel.to" = "Отправиться (%d %@)";
 "action.travel.far" = "Регион далеко";
-"action.rest" = "Отдохнуть (+%d ❤️)";
-"action.trade" = "Торговать";
-"action.strengthen.anchor" = "Укрепить якорь (-%d ✨, +20%%)";
-"action.explore" = "Исследовать";
+"action.rest.heal" = "Отдохнуть (+%d ❤️)";
+"action.trade.name" = "Торговать";
+"action.strengthen.anchor.cost" = "Укрепить якорь (-%d ✨, +20%%)";
+"action.explore.region" = "Исследовать";
 "day.word.1" = "день";
 "day.word.234" = "дня";
 

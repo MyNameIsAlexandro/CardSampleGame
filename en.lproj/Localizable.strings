@@ -9,6 +9,7 @@
 "character.stats" = "Character Stats";
 "character.abilities" = "Abilities";
 "button.start.adventure" = "Start Adventure";
+"button.select.hero.first" = "Select a Hero";
 
 // MARK: - Game Board
 "turn.label" = "Turn %d";
@@ -417,6 +418,7 @@
 "action.rest" = "Rest";
 "action.trade" = "Trade";
 "action.strengthen.anchor" = "Strengthen Anchor";
+"action.explore" = "Explore";
 "action.explore.region" = "Explore";
 
 // MARK: - Combat UI (Engine-First Migration)
@@ -764,6 +766,11 @@
 "loading.error" = "Loading error";
 "app.title" = "Twilight Marches";
 
+// MARK: - Content Cache
+"loading.validating.cache" = "Validating cache...";
+"loading.from.cache" = "Loading from cache...";
+"loading.saving.cache" = "Saving to cache...";
+
 // MARK: - ViewModels/GameViewModel
 "default.player.name" = "Hero";
 "region.unknown" = "Unknown";
@@ -781,12 +788,12 @@
 "region.desc.breach" = "Nav actively penetrates the region. Very dangerous. Anchor restoration required.";
 
 // MARK: - WorldMapView - Actions
-"action.travel" = "Travel (%d %@)";
+"action.travel.to" = "Travel (%d %@)";
 "action.travel.far" = "Region too far";
-"action.rest" = "Rest (+%d ❤️)";
-"action.trade" = "Trade";
-"action.strengthen.anchor" = "Strengthen anchor (-%d ✨, +20%%)";
-"action.explore" = "Explore";
+"action.rest.heal" = "Rest (+%d ❤️)";
+"action.trade.name" = "Trade";
+"action.strengthen.anchor.cost" = "Strengthen anchor (-%d ✨, +20%%)";
+"action.explore.region" = "Explore";
 "day.word.1" = "day";
 "day.word.234" = "days";
 

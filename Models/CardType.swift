@@ -137,9 +137,10 @@ enum CurseType: String, Codable, Hashable {
 
 // Expansion tracking
 enum ExpansionSet: String, Codable {
-    case baseSet        // Базовый набор
-    case borderlands    // Порубежье (first expansion)
-    case deepForest     // Дремучий Лес
-    case ancientRuins   // Древние Руины
-    case frozenNorth    // Замерзший Север
+    case baseSet            // Базовый набор
+    case twilightMarches    // Сумрачные Пределы (campaign)
+    case borderlands        // Порубежье (first expansion)
+    case deepForest         // Дремучий Лес
+    case ancientRuins       // Древние Руины
+    case frozenNorth        // Замерзший Север
 }

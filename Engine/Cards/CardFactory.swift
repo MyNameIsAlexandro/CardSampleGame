@@ -112,9 +112,10 @@ final class CardFactory {
             return cards.map { $0.toCard() }
         }
 
-        // Fallback to CardRegistry if hero matches
-        if let heroClass = getHeroClass(forHeroId: heroId) {
-            return cardRegistry.startingDeck(forHeroID: heroId, heroClass: heroClass)
+        // Fallback to CardRegistry
+        let registryDeck = cardRegistry.startingDeck(forHeroID: heroId)
+        if !registryDeck.isEmpty {
+            return registryDeck
         }
 
         // Final fallback: generic starter deck
@@ -165,15 +166,14 @@ final class CardFactory {
     // MARK: - Market Cards
 
     /// Create market cards for purchasing
-    /// - Parameter heroClass: Optional hero class for filtering
+    /// - Parameter heroId: Optional hero ID for filtering
     /// - Returns: Array of purchasable cards
-    func createMarketCards(forHeroClass heroClass: HeroClass? = nil) -> [Card] {
+    func createMarketCards(forHeroId heroId: String? = nil) -> [Card] {
         var cards: [Card] = []
 
         // Get shop cards from CardRegistry
         let shopDefs = cardRegistry.shopCards(
-            forHeroID: nil,
-            heroClass: heroClass,
+            forHeroID: heroId,
             ownedExpansions: [],
             unlockedConditions: []
         )
@@ -191,17 +191,17 @@ final class CardFactory {
 
     /// Create guardian characters for character selection
     /// - Returns: Array of hero cards for selection screen
+    /// - Note: Requires ContentPacks to be loaded. Returns empty if no packs.
     func createGuardians() -> [Card] {
         var guardians: [Card] = []
 
-        // Get heroes from ContentRegistry
+        // Get heroes ONLY from ContentRegistry (no hardcoded fallback)
         for hero in contentRegistry.getAllHeroes() {
             guardians.append(heroToCard(hero))
         }
 
-        // Fallback: if no heroes in packs, use hardcoded fallback
         if guardians.isEmpty {
-            guardians = createFallbackGuardians()
+            print("⚠️ CardFactory: No heroes loaded from ContentPacks. Ensure packs are loaded.")
         }
 
         return guardians
@@ -230,54 +230,6 @@ final class CardFactory {
         )
     }
 
-    /// Fallback guardians when no packs loaded
-    private func createFallbackGuardians() -> [Card] {
-        // This provides minimal fallback when no packs are loaded
-        // In production, packs should always be loaded
-        return [
-            Card(
-                name: "Велеслава",
-                type: .character,
-                rarity: .legendary,
-                description: "Жрица Света. Мастер исцеления и защиты.",
-                defense: 2,
-                health: 12,
-                abilities: [],
-                faithCost: 0
-            ),
-            Card(
-                name: "Ратибор",
-                type: .character,
-                rarity: .legendary,
-                description: "Воин. Сильный боец ближнего боя.",
-                power: 4,
-                health: 14,
-                abilities: [],
-                faithCost: 0
-            ),
-            Card(
-                name: "Мирослав",
-                type: .character,
-                rarity: .legendary,
-                description: "Следопыт. Быстрый и точный.",
-                power: 3,
-                health: 10,
-                abilities: [],
-                faithCost: 0
-            ),
-            Card(
-                name: "Забава",
-                type: .character,
-                rarity: .legendary,
-                description: "Ведьма. Мастер тёмных искусств.",
-                power: 5,
-                health: 8,
-                abilities: [],
-                faithCost: 0
-            )
-        ]
-    }
-
     // MARK: - Boss Creation
 
     /// Create boss card by enemy ID
@@ -291,35 +243,16 @@ final class CardFactory {
     }
 
     /// Create Leshy Guardian boss (Act I final boss)
+    /// - Returns: Boss card from ContentPack or nil if not found
+    /// - Note: Boss must be defined in enemies.json as "leshy_guardian_boss"
     func createLeshyGuardianBoss() -> Card? {
-        // Try to get from ContentRegistry first
-        if let boss = createBoss(enemyId: "leshy_guardian") {
+        // Get boss ONLY from ContentRegistry (no hardcoded fallback)
+        if let boss = createBoss(enemyId: "leshy_guardian_boss") {
             return boss
         }
 
-        // Fallback boss
-        return Card(
-            name: "Леший-Хранитель",
-            type: .monster,
-            rarity: .legendary,
-            description: "Древний страж Сумрачных Пределов. Босс Акта I.",
-            power: 7,
-            defense: 4,
-            health: 25,
-            abilities: [
-                CardAbility(
-                    name: "Гнев Природы",
-                    description: "Регенерация 3 HP каждый ход",
-                    effect: .heal(amount: 3)
-                ),
-                CardAbility(
-                    name: "Древняя Броня",
-                    description: "+2 к защите",
-                    effect: .custom( "Дополнительная защита")
-                )
-            ],
-            faithCost: 0
-        )
+        print("⚠️ CardFactory: Boss 'leshy_guardian_boss' not found in ContentPacks")
+        return nil
     }
 
     // MARK: - Helper Methods
@@ -335,19 +268,4 @@ final class CardFactory {
         }
     }
 
-    /// Get hero class for hero ID
-    private func getHeroClass(forHeroId heroId: String) -> HeroClass? {
-        if let hero = contentRegistry.getHero(id: heroId) {
-            return hero.heroClass
-        }
-
-        // Fallback mapping
-        switch heroId.lowercased() {
-        case "veleslava": return .priest
-        case "ratibor": return .warrior
-        case "miroslav": return .ranger
-        case "zabava": return .shadow
-        default: return nil
-        }
-    }
 }

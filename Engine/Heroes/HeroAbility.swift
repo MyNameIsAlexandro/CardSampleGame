@@ -99,7 +99,7 @@ struct AbilityCondition: Codable, Equatable {
 }
 
 /// Тип условия
-enum AbilityConditionType: String, Codable {
+enum AbilityConditionType: String, Codable, CaseIterable {
     /// HP ниже процента
     case hpBelowPercent
 
@@ -145,7 +145,7 @@ struct HeroAbilityEffect: Codable, Equatable {
 }
 
 /// Тип эффекта способности
-enum HeroAbilityEffectType: String, Codable {
+enum HeroAbilityEffectType: String, Codable, CaseIterable {
     /// Бонус к урону
     case bonusDamage
 
@@ -209,89 +209,12 @@ enum AbilityCostType: String, Codable {
     case action
 }
 
-// MARK: - Предустановленные способности классов
+// MARK: - Ability Lookup
 
 extension HeroAbility {
-
-    /// Ярость Воина: +2 урона при HP < 50%
-    static let warriorRage = HeroAbility(
-        id: "warrior_rage",
-        name: L10n.abilityWarriorRageName.localized,
-        description: L10n.abilityWarriorRageDesc.localized,
-        icon: "🔥",
-        type: .passive,
-        trigger: .onDamageDealt,
-        condition: AbilityCondition(type: .hpBelowPercent, value: 50),
-        effects: [HeroAbilityEffect(type: .bonusDamage, value: 2)],
-        cooldown: 0,
-        cost: nil
-    )
-
-    /// Медитация Мага: +1 вера в конце хода
-    static let mageMeditation = HeroAbility(
-        id: "mage_meditation",
-        name: L10n.abilityMageMeditationName.localized,
-        description: L10n.abilityMageMeditationDesc.localized,
-        icon: "🧘",
-        type: .passive,
-        trigger: .turnEnd,
-        condition: nil,
-        effects: [HeroAbilityEffect(type: .gainFaith, value: 1)],
-        cooldown: 0,
-        cost: nil
-    )
-
-    /// Выслеживание Следопыта: +1 кубик при первой атаке
-    static let rangerTracking = HeroAbility(
-        id: "ranger_tracking",
-        name: L10n.abilityRangerTrackingName.localized,
-        description: L10n.abilityRangerTrackingDesc.localized,
-        icon: "🎯",
-        type: .passive,
-        trigger: .onAttack,
-        condition: AbilityCondition(type: .firstAttack),
-        effects: [HeroAbilityEffect(type: .bonusDice, value: 1)],
-        cooldown: 0,
-        cost: nil
-    )
-
-    /// Благословение Жреца: -1 урон от тёмных источников
-    static let priestBlessing = HeroAbility(
-        id: "priest_blessing",
-        name: L10n.abilityPriestBlessingName.localized,
-        description: L10n.abilityPriestBlessingDesc.localized,
-        icon: "✨",
-        type: .passive,
-        trigger: .onDamageReceived,
-        condition: AbilityCondition(type: .damageSourceDark),
-        effects: [HeroAbilityEffect(type: .damageReduction, value: 1)],
-        cooldown: 0,
-        cost: nil
-    )
-
-    /// Засада Тени: +3 урона по целям с полным HP
-    static let shadowAmbush = HeroAbility(
-        id: "shadow_ambush",
-        name: L10n.abilityShadowAmbushName.localized,
-        description: L10n.abilityShadowAmbushDesc.localized,
-        icon: "🗡️",
-        type: .passive,
-        trigger: .onDamageDealt,
-        condition: AbilityCondition(type: .targetFullHP),
-        effects: [HeroAbilityEffect(type: .bonusDamage, value: 3)],
-        cooldown: 0,
-        cost: nil
-    )
-
-    /// Получить способность по ID (для загрузки из JSON)
+    /// Получить способность по ID (data-driven через AbilityRegistry)
+    /// Способности загружаются из hero_abilities.json в ContentPack
     static func forAbilityId(_ id: String) -> HeroAbility? {
-        switch id {
-        case "warrior_rage": return .warriorRage
-        case "mage_meditation": return .mageMeditation
-        case "ranger_tracking": return .rangerTracking
-        case "priest_blessing": return .priestBlessing
-        case "shadow_ambush": return .shadowAmbush
-        default: return nil
-        }
+        return AbilityRegistry.shared.ability(id: id)
     }
 }

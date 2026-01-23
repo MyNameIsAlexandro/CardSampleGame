@@ -38,6 +38,62 @@
     "realm": "yav"
   },
   {
+    "id": "heal_basic",
+    "name": "Heal",
+    "name_ru": "Исцеление",
+    "card_type": "special",
+    "rarity": "common",
+    "description": "Basic healing. Restore 2 health.",
+    "description_ru": "Базовое исцеление. Восстанавливает 2 здоровья.",
+    "icon": "heart",
+    "expansion_set": "baseSet",
+    "ownership": "universal",
+    "abilities": [
+      {
+        "id": "heal_effect",
+        "name": "Heal",
+        "name_ru": "Исцеление",
+        "description": "Restore 2 health",
+        "description_ru": "Восстановить 2 здоровья",
+        "effect": {"heal": 2}
+      }
+    ],
+    "faith_cost": 0,
+    "balance": "light",
+    "power": null,
+    "defense": null,
+    "health": null,
+    "realm": "yav"
+  },
+  {
+    "id": "draw_basic",
+    "name": "Focus",
+    "name_ru": "Концентрация",
+    "card_type": "special",
+    "rarity": "common",
+    "description": "Focus your mind. Draw 1 card.",
+    "description_ru": "Сосредоточься. Возьми 1 карту.",
+    "icon": "eye",
+    "expansion_set": "baseSet",
+    "ownership": "universal",
+    "abilities": [
+      {
+        "id": "draw_effect",
+        "name": "Draw",
+        "name_ru": "Взять карту",
+        "description": "Draw 1 card",
+        "description_ru": "Взять 1 карту",
+        "effect": {"draw_cards": 1}
+      }
+    ],
+    "faith_cost": 0,
+    "balance": "neutral",
+    "power": null,
+    "defense": null,
+    "health": null,
+    "realm": "yav"
+  },
+  {
     "id": "rage_strike",
     "name": "Rage Strike",
     "name_ru": "Удар Ярости",

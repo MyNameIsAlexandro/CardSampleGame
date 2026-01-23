@@ -25,7 +25,19 @@
       "Bash(do if ! grep -q \"\"\"$key\"\"\" en.lproj/Localizable.strings)",
       "Bash(then echo \"Missing in en: $key\")",
       "Bash(xcrun simctl boot:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(find:*)",
+      "Bash(for f in \"Resources/Content/regions.json\" \"Resources/Content/quests.json\" \"Resources/Content/challenges.json\" \"Resources/Content/anchors.json\" \"Resources/Content/events/pool_common.json\" \"Resources/Content/events/pool_village.json\" \"Engine/Migration/LegacyAdapters.swift\" \"Helpers/Localization.swift\" \"Data/TwilightMarchesCards.swift\" \"Data/SampleCards.swift\" \"CardGameApp.swift\" \"ContentView.swift\")",
+      "Bash(do)",
+      "Bash(if [ ! -f \"$f\" ])",
+      "Bash(then echo \"MISSING: $f\")",
+      "Bash(else echo \"EXISTS: $f\")",
+      "Bash(fi)",
+      "Bash(done)",
+      "Bash(__NEW_LINE_28e51315d305b980__ grep -c \"isa = PBXNativeTarget\" CardSampleGame.xcodeproj/project.pbxproj)",
+      "Bash(ruby -e:*)",
+      "Bash(swift:*)",
+      "Bash(plutil:*)"
     ]
   }
 }

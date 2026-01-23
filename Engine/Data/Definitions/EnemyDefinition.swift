@@ -58,23 +58,8 @@ struct EnemyDefinition: GameDefinition {
     /// Balance change when defeated
     let balanceDelta: Int
 
-    // MARK: - CodingKeys for JSON compatibility
-
-    enum CodingKeys: String, CodingKey {
-        case id
-        case name
-        case description
-        case health
-        case power
-        case defense
-        case difficulty
-        case enemyType = "enemy_type"
-        case rarity
-        case abilities
-        case lootCardIds = "loot_card_ids"
-        case faithReward = "faith_reward"
-        case balanceDelta = "balance_delta"
-    }
+    // Note: No explicit CodingKeys needed - PackLoader uses .convertFromSnakeCase
+    // which automatically converts enemy_type → enemyType, faith_reward → faithReward, etc.
 
     // MARK: - Initialization
 
@@ -179,14 +164,16 @@ enum EnemyAbilityEffect: Codable, Hashable {
     case custom(String)
 
     // MARK: - Custom Codable for JSON compatibility
+    // Note: No explicit snake_case mappings - PackLoader uses .convertFromSnakeCase
+    // which automatically converts bonus_damage → bonusDamage, etc.
 
     enum CodingKeys: String, CodingKey {
-        case bonusDamage = "bonus_damage"
+        case bonusDamage
         case regeneration
         case armor
-        case firstStrike = "first_strike"
-        case spellImmune = "spell_immune"
-        case applyCurse = "apply_curse"
+        case firstStrike
+        case spellImmune
+        case applyCurse
         case custom
     }
 
