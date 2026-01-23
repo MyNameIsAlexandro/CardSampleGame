@@ -170,6 +170,66 @@ final class ArchitectureComplianceTests: XCTestCase {
         )
     }
 
+    /// Verify all game logic code (Engine + Models) uses WorldRNG for randomness
+    /// This catches issues like Player.shuffleDeck() using non-deterministic shuffle
+    func testAllGameLogicUsesDeterministicRandom() throws {
+        let pathsToCheck = [
+            getEnginePath(),
+            getModelsPath()
+        ]
+
+        let forbiddenPatterns = [
+            ".shuffle()",
+            ".shuffled()",
+            ".randomElement()",
+            "Int.random(",
+            "Double.random(",
+            "Bool.random(",
+            "arc4random",
+            "drand48"
+        ]
+
+        // Allowed contexts
+        let allowedContexts = [
+            "WorldRNG",
+            "// ",
+            "/// ",
+            "/* "
+        ]
+
+        var violations: [String] = []
+
+        for basePath in pathsToCheck {
+            let swiftFiles = try findSwiftFiles(in: basePath)
+
+            for file in swiftFiles {
+                // Skip test files
+                if file.contains("Tests") { continue }
+
+                let content = try String(contentsOfFile: file, encoding: .utf8)
+                let lines = content.components(separatedBy: .newlines)
+
+                for (lineNumber, line) in lines.enumerated() {
+                    for pattern in forbiddenPatterns {
+                        if line.contains(pattern) {
+                            let isAllowed = allowedContexts.contains { line.contains($0) }
+
+                            if !isAllowed {
+                                let fileName = (file as NSString).lastPathComponent
+                                violations.append("\(fileName):\(lineNumber + 1): Uses '\(pattern)' without WorldRNG")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        XCTAssertTrue(
+            violations.isEmpty,
+            "Found non-deterministic random APIs in game logic:\n\(violations.joined(separator: "\n"))"
+        )
+    }
+
     // MARK: - Test E: BalanceConfiguration Compliance
 
     /// Verify all gameplay constants come from BalanceConfiguration
@@ -618,6 +678,10 @@ final class ArchitectureComplianceTests: XCTestCase {
 
     private func getEnginePath() -> String {
         return (getProjectPath() as NSString).appendingPathComponent("Engine")
+    }
+
+    private func getModelsPath() -> String {
+        return (getProjectPath() as NSString).appendingPathComponent("Models")
     }
 
     private func findSwiftFiles(in directory: String) throws -> [String] {
