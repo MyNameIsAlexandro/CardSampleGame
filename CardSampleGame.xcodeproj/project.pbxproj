@@ -94,6 +94,8 @@
 		HH0001010000000000000001 /* HeroClassTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = HH0001020000000000000001 /* HeroClassTests.swift */; };
 		HH0002010000000000000001 /* CardModuleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = HH0002020000000000000001 /* CardModuleTests.swift */; };
 		TH00000300000000000000001 /* TestContentLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = TH00000200000000000000001 /* TestContentLoader.swift */; };
+		CEF00002000000000000001 /* CombatEngineFirstTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEF00001000000000000001 /* CombatEngineFirstTests.swift */; };
+		CCT0000200000000000000001 /* ContentCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCT0000100000000000000001 /* ContentCacheTests.swift */; };
 		II0001010000000000000001 /* HeroDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = II0001020000000000000001 /* HeroDefinition.swift */; };
 		II0002010000000000000001 /* HeroAbility.swift in Sources */ = {isa = PBXBuildFile; fileRef = II0002020000000000000001 /* HeroAbility.swift */; };
 		II0003010000000000000001 /* HeroRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = II0003020000000000000001 /* HeroRegistry.swift */; };
@@ -177,6 +179,8 @@
 		BB0004160000000000000001 /* GameplayFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameplayFlowTests.swift; sourceTree = "<group>"; };
 		BB0004180000000000000001 /* EnemyDefinitionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemyDefinitionTests.swift; sourceTree = "<group>"; };
 		TH00000200000000000000001 /* TestContentLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestContentLoader.swift; sourceTree = "<group>"; };
+		CEF00001000000000000001 /* CombatEngineFirstTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombatEngineFirstTests.swift; sourceTree = "<group>"; };
+		CCT0000100000000000000001 /* ContentCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentCacheTests.swift; sourceTree = "<group>"; };
 		CC0000010000000000000001 /* CombatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CombatView.swift; path = Views/CombatView.swift; sourceTree = "<group>"; };
 		CC0000030000000000000001 /* AccessibilityIdentifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityIdentifiers.swift; sourceTree = "<group>"; };
 		CA00000200000000000001 /* CacheValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CacheValidator.swift; path = Engine/ContentPacks/Cache/CacheValidator.swift; sourceTree = SOURCE_ROOT; };
@@ -408,6 +412,7 @@
 				BB0004140000000000000001 /* ArchitectureComplianceTests.swift */,
 				BB0004160000000000000001 /* GameplayFlowTests.swift */,
 				BB0004180000000000000001 /* EnemyDefinitionTests.swift */,
+				CEF00001000000000000001 /* CombatEngineFirstTests.swift */,
 			);
 			path = Engine;
 			sourceTree = "<group>";
@@ -430,6 +435,7 @@
 				CT00000000000001 /* PackLoaderTests.swift */,
 				CT00000000000002 /* ContentRegistryTests.swift */,
 				2D53A258B24EFCB94C1C6D04 /* ContentPackLoadingTests.swift */,
+				CCT0000100000000000000001 /* ContentCacheTests.swift */,
 			);
 			path = ContentPackTests;
 			sourceTree = "<group>";
@@ -840,6 +846,8 @@
 				BB0004170000000000000001 /* EnemyDefinitionTests.swift in Sources */,
 				A7A6B04A2A413EEC56960637 /* ContentPackLoadingTests.swift in Sources */,
 				TH00000300000000000000001 /* TestContentLoader.swift in Sources */,
+				CEF00002000000000000001 /* CombatEngineFirstTests.swift in Sources */,
+				CCT0000200000000000000001 /* ContentCacheTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
