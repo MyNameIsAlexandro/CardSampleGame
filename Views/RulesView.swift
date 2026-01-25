@@ -6,11 +6,11 @@ struct RulesView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: Spacing.xxl) {
                     // Game Objective
                     RuleSection(
                         icon: "target",
-                        color: .blue,
+                        color: AppColors.primary,
                         title: L10n.rulesObjectiveTitle.localized,
                         content: L10n.rulesObjectiveContent.localized
                     )
@@ -18,44 +18,44 @@ struct RulesView: View {
                     // Game Phases
                     RuleSection(
                         icon: "arrow.triangle.2.circlepath",
-                        color: .orange,
+                        color: AppColors.power,
                         title: L10n.rulesPhasesTitle.localized,
                         content: L10n.rulesPhasesContent.localized
                     )
 
-                    VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: Spacing.md) {
                         PhaseCard(
                             phase: L10n.phaseExploration.localized,
                             description: L10n.rulesPhaseExploration.localized,
-                            color: .blue
+                            color: AppColors.primary
                         )
                         PhaseCard(
                             phase: L10n.phaseEncounter.localized,
                             description: L10n.rulesPhaseEncounter.localized,
-                            color: .orange
+                            color: AppColors.power
                         )
                         PhaseCard(
                             phase: L10n.phasePlayerTurn.localized,
                             description: L10n.rulesPhasePlayerTurn.localized,
-                            color: .green
+                            color: AppColors.success
                         )
                         PhaseCard(
                             phase: L10n.phaseEnemyTurn.localized,
                             description: L10n.rulesPhaseEnemyTurn.localized,
-                            color: .red
+                            color: AppColors.danger
                         )
                         PhaseCard(
                             phase: L10n.phaseEndTurn.localized,
                             description: L10n.rulesPhaseEndTurn.localized,
-                            color: .purple
+                            color: AppColors.dark
                         )
                     }
-                    .padding(.leading, 8)
+                    .padding(.leading, Spacing.sm)
 
                     // Card Types
                     RuleSection(
                         icon: "rectangle.stack.fill",
-                        color: .purple,
+                        color: AppColors.dark,
                         title: L10n.rulesCardsTitle.localized,
                         content: L10n.rulesCardsContent.localized
                     )
@@ -63,7 +63,7 @@ struct RulesView: View {
                     // Resources
                     RuleSection(
                         icon: "star.fill",
-                        color: .pink,
+                        color: Color.pink,
                         title: L10n.rulesResourcesTitle.localized,
                         content: L10n.rulesResourcesContent.localized
                     )
@@ -71,7 +71,7 @@ struct RulesView: View {
                     // Actions
                     RuleSection(
                         icon: "bolt.fill",
-                        color: .orange,
+                        color: AppColors.power,
                         title: L10n.rulesActionsTitle.localized,
                         content: L10n.rulesActionsContent.localized
                     )
@@ -79,7 +79,7 @@ struct RulesView: View {
                     // Dice Rolls
                     RuleSection(
                         icon: "dice.fill",
-                        color: .green,
+                        color: AppColors.success,
                         title: L10n.rulesDiceTitle.localized,
                         content: L10n.rulesDiceContent.localized
                     )
@@ -87,7 +87,7 @@ struct RulesView: View {
                     // Victory Conditions
                     RuleSection(
                         icon: "trophy.fill",
-                        color: .yellow,
+                        color: AppColors.faith,
                         title: L10n.rulesVictoryTitle.localized,
                         content: L10n.rulesVictoryContent.localized
                     )
@@ -95,7 +95,7 @@ struct RulesView: View {
                     // Tips
                     RuleSection(
                         icon: "lightbulb.fill",
-                        color: .cyan,
+                        color: Color.cyan,
                         title: L10n.rulesTipsTitle.localized,
                         content: L10n.rulesTipsContent.localized
                     )
@@ -108,7 +108,7 @@ struct RulesView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.secondary)
+                            .foregroundColor(AppColors.muted)
                     }
                 }
             }
@@ -123,8 +123,8 @@ struct RuleSection: View {
     let content: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 12) {
+        VStack(alignment: .leading, spacing: Spacing.md) {
+            HStack(spacing: Spacing.md) {
                 Image(systemName: icon)
                     .font(.title2)
                     .foregroundColor(color)
@@ -141,8 +141,8 @@ struct RuleSection: View {
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(UIColor.secondarySystemBackground))
-        .cornerRadius(12)
+        .background(AppColors.cardBackground)
+        .cornerRadius(CornerRadius.lg)
     }
 }
 
@@ -152,25 +152,25 @@ struct PhaseCard: View {
     let color: Color
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Spacing.md) {
             Circle()
                 .fill(color)
-                .frame(width: 12, height: 12)
+                .frame(width: Spacing.md, height: Spacing.md)
 
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: Spacing.xxs) {
                 Text(phase)
                     .font(.headline)
                     .foregroundColor(color)
 
                 Text(description)
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(AppColors.muted)
             }
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(UIColor.tertiarySystemBackground))
-        .cornerRadius(8)
+        .cornerRadius(CornerRadius.md)
     }
 }
 
