@@ -671,65 +671,77 @@ public final class ContentRegistry {
 // MARK: - Content Provider Protocol Conformance
 
 extension ContentRegistry: ContentProvider {
+    /// Get region definition by ID (ContentProvider protocol).
     public func getRegionDefinition(id: String) -> RegionDefinition? {
         return getRegion(id: id)
     }
 
+    /// Get all region definitions (ContentProvider protocol).
     public func getAllRegionDefinitions() -> [RegionDefinition] {
         return getAllRegions()
     }
 
+    /// Get event definition by ID (ContentProvider protocol).
     public func getEventDefinition(id: String) -> EventDefinition? {
         return getEvent(id: id)
     }
 
+    /// Get all event definitions (ContentProvider protocol).
     public func getAllEventDefinitions() -> [EventDefinition] {
         return getAllEvents()
     }
 
+    /// Get anchor definition by ID (ContentProvider protocol).
     public func getAnchorDefinition(id: String) -> AnchorDefinition? {
         return getAnchor(id: id)
     }
 
+    /// Get anchor definition for a region (ContentProvider protocol).
     public func getAnchorDefinition(forRegion regionId: String) -> AnchorDefinition? {
         return getAnchor(forRegion: regionId)
     }
 
+    /// Get all anchor definitions (ContentProvider protocol).
     public func getAllAnchorDefinitions() -> [AnchorDefinition] {
         return getAllAnchors()
     }
 
+    /// Get event definitions for a specific region.
     public func getEventDefinitions(forRegion regionId: String) -> [EventDefinition] {
         return mergedEvents.values.filter { event in
             event.availability.regionIds?.contains(regionId) ?? false
         }
     }
 
+    /// Get event definitions from a specific pool.
     public func getEventDefinitions(forPool poolId: String) -> [EventDefinition] {
         return mergedEvents.values.filter { event in
             event.poolIds.contains(poolId)
         }
     }
 
+    /// Get all quest definitions (ContentProvider protocol).
     public func getAllQuestDefinitions() -> [QuestDefinition] {
         return getAllQuests()
     }
 
+    /// Get quest definition by ID (ContentProvider protocol).
     public func getQuestDefinition(id: String) -> QuestDefinition? {
         return getQuest(id: id)
     }
 
+    /// Get all mini-game challenges from loaded events.
     public func getAllMiniGameChallenges() -> [MiniGameChallengeDefinition] {
-        // Extract from events that have mini-game challenges
         return mergedEvents.values.compactMap { $0.miniGameChallenge }
     }
 
+    /// Get mini-game challenge by ID.
     public func getMiniGameChallenge(id: String) -> MiniGameChallengeDefinition? {
         return mergedEvents.values.compactMap { $0.miniGameChallenge }.first { $0.id == id }
     }
 
+    /// Validate all loaded content for errors and inconsistencies.
     public func validate() -> [ContentValidationError] {
-        // Use ContentValidator for full validation
         let validator = ContentValidator(provider: self)
         return validator.validate()
     }

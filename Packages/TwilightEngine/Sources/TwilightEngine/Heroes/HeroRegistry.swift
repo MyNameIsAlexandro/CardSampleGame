@@ -323,13 +323,21 @@ public struct JSONHeroDefinition: Codable {
 
 // MARK: - DLC Data Source
 
-/// Hero source from DLC pack
+/// Hero data source from a DLC/expansion pack.
 public struct DLCHeroDataSource: HeroDataSource {
+    /// Unique identifier for this data source.
     public let id: String
+
+    /// Human-readable name (for debugging).
     public let name: String
+
+    /// Associated DLC pack identifier.
     public let packID: String
+
+    /// Hero definitions from this DLC.
     public let heroes: [HeroDefinition]
 
+    /// Initialize a DLC hero data source.
     public init(id: String, name: String, packID: String, heroes: [HeroDefinition]) {
         self.id = id
         self.name = name

@@ -25,6 +25,7 @@
 		CT00000000000010 /* PackLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CT00000000000001 /* PackLoaderTests.swift */; };
 		CT00000000000020 /* ContentRegistryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CT00000000000002 /* ContentRegistryTests.swift */; };
 		DS00000000000010 /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DS00000000000001 /* DesignSystem.swift */; };
+		E9601DE7AB72AE3B9035899A /* CodeHygieneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60C1474DB750BB1D0378466E /* CodeHygieneTests.swift */; };
 		GG0002010000000000000001 /* HeroSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = GG0002020000000000000001 /* HeroSelectionView.swift */; };
 		HP00000000000010 /* HeroPanelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = HP00000000000001 /* HeroPanelTests.swift */; };
 		HR00000000000010 /* HeroRegistryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = HR00000000000001 /* HeroRegistryTests.swift */; };
@@ -54,6 +55,7 @@
 
 /* Begin PBXFileReference section */
 		43D4E3FBE4DC34B63B61E061 /* EventView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EventView.swift; path = EventView.swift; sourceTree = "<group>"; };
+		60C1474DB750BB1D0378466E /* CodeHygieneTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CodeHygieneTests.swift; sourceTree = "<group>"; };
 		6BEC0AA856AB6706612208E1 /* WorldMapView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WorldMapView.swift; path = WorldMapView.swift; sourceTree = "<group>"; };
 		A0CA67A53A024B4CEDD6685C /* DesignSystemComplianceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DesignSystemComplianceTests.swift; sourceTree = "<group>"; };
 		AA0000140000000000000001 /* CardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardView.swift; sourceTree = "<group>"; };
@@ -191,6 +193,7 @@
 			children = (
 				BB0004120000000000000001 /* AuditGateTests.swift */,
 				A0CA67A53A024B4CEDD6685C /* DesignSystemComplianceTests.swift */,
+				60C1474DB750BB1D0378466E /* CodeHygieneTests.swift */,
 			);
 			path = Engine;
 			sourceTree = "<group>";
@@ -388,6 +391,7 @@
 				HR00000000000010 /* HeroRegistryTests.swift in Sources */,
 				HP00000000000010 /* HeroPanelTests.swift in Sources */,
 				01856FA4AED657E11739268F /* DesignSystemComplianceTests.swift in Sources */,
+				E9601DE7AB72AE3B9035899A /* CodeHygieneTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
