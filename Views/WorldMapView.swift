@@ -25,11 +25,11 @@ struct WorldMapView: View {
             VStack(spacing: 0) {
                 // Hero Panel (persistent, consistent design across all screens)
                 HeroPanel(engine: engine)
-                    .padding(.horizontal, 8)
-                    .padding(.top, 4)
+                    .padding(.horizontal, Spacing.sm)
+                    .padding(.top, Spacing.xxs)
 
                 Divider()
-                    .padding(.vertical, 4)
+                    .padding(.vertical, Spacing.xxs)
 
                 // Top bar with world info
                 worldInfoBar
@@ -39,17 +39,17 @@ struct WorldMapView: View {
                 // Regions list (Engine-First: reads from engine.regionsArray)
                 if engine.regionsArray.isEmpty {
                     // Show loading state if regions aren't loaded yet
-                    VStack(spacing: 16) {
+                    VStack(spacing: Spacing.lg) {
                         ProgressView()
                             .scaleEffect(1.5)
                         Text(L10n.worldLoading.localized)
                             .font(.headline)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(AppColors.muted)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     ScrollView {
-                        LazyVStack(spacing: 12) {
+                        LazyVStack(spacing: Spacing.md) {
                             ForEach(engine.regionsArray, id: \.id) { region in
                                 EngineRegionCardView(
                                     region: region,
@@ -136,14 +136,14 @@ struct WorldMapView: View {
     // MARK: - World Info Bar (Engine-First: reads from engine.*)
 
     var worldInfoBar: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: Spacing.sm) {
             HStack {
                 // World Tension
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: Spacing.xxxs) {
                     Text(L10n.tooltipBalance.localized)
                         .font(.caption2)
-                        .foregroundColor(.secondary)
-                    HStack(spacing: 4) {
+                        .foregroundColor(AppColors.muted)
+                    HStack(spacing: Spacing.xxs) {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .font(.caption)
                             .foregroundColor(tensionColor)
@@ -156,10 +156,10 @@ struct WorldMapView: View {
                 Spacer()
 
                 // World Light/Dark Balance (Явь vs Навь)
-                VStack(spacing: 2) {
+                VStack(spacing: Spacing.xxxs) {
                     Text(L10n.worldLabel.localized)
                         .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
                     Text(engine.worldBalanceDescription)
                         .font(.caption)
                         .fontWeight(.bold)
@@ -169,10 +169,10 @@ struct WorldMapView: View {
                 Spacer()
 
                 // Days passed
-                VStack(alignment: .trailing, spacing: 2) {
+                VStack(alignment: .trailing, spacing: Spacing.xxxs) {
                     Text(L10n.daysInJourney.localized)
                         .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
                     Text("\(engine.currentDay)")
                         .font(.caption)
                         .fontWeight(.bold)
@@ -184,39 +184,39 @@ struct WorldMapView: View {
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {
                     Rectangle()
-                        .fill(Color.gray.opacity(0.2))
-                        .frame(height: 4)
+                        .fill(AppColors.secondary.opacity(Opacity.faint))
+                        .frame(height: Sizes.progressThin)
 
                     Rectangle()
                         .fill(tensionColor)
                         .frame(
                             width: geometry.size.width * CGFloat(engine.worldTension) / 100,
-                            height: 4
+                            height: Sizes.progressThin
                         )
                 }
             }
-            .frame(height: 4)
+            .frame(height: Sizes.progressThin)
             .padding(.horizontal)
         }
-        .padding(.vertical, 8)
-        .background(Color(UIColor.systemBackground))
+        .padding(.vertical, Spacing.sm)
+        .background(AppColors.cardBackground)
     }
 
     var tensionColor: Color {
         switch engine.worldTension {
-        case 0..<30: return .green
-        case 30..<60: return .yellow
-        case 60..<80: return .orange
-        default: return .red
+        case 0..<30: return AppColors.success
+        case 30..<60: return AppColors.warning
+        case 60..<80: return AppColors.warning
+        default: return AppColors.danger
         }
     }
 
     var balanceColor: Color {
         switch engine.lightDarkBalance {
-        case 0..<30: return .purple      // Тьма
-        case 30..<70: return .gray       // Нейтрально
-        case 70...100: return .yellow    // Свет
-        default: return .gray
+        case 0..<30: return AppColors.dark      // Тьма
+        case 30..<70: return AppColors.neutral  // Нейтрально
+        case 70...100: return AppColors.light   // Свет
+        default: return AppColors.neutral
         }
     }
 }
@@ -226,7 +226,7 @@ struct EventLogEntryView: View {
     let entry: EventLogEntry
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
             // Header
             HStack {
                 Image(systemName: entry.type.icon)
@@ -240,7 +240,7 @@ struct EventLogEntryView: View {
 
                 Text(entry.regionName)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(AppColors.muted)
             }
 
             // Event title
@@ -252,10 +252,10 @@ struct EventLogEntryView: View {
             HStack {
                 Image(systemName: "arrow.turn.down.right")
                     .font(.caption2)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(AppColors.muted)
                 Text(entry.choiceMade)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(AppColors.muted)
             }
 
             // Outcome
@@ -263,17 +263,17 @@ struct EventLogEntryView: View {
                 .font(.caption)
                 .italic()
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, Spacing.xxs)
     }
 
     var typeColor: Color {
         switch entry.type {
-        case .combat: return .red
-        case .exploration: return .blue
-        case .choice: return .orange
-        case .quest: return .purple
-        case .travel: return .green
-        case .worldChange: return .yellow
+        case .combat: return AppColors.danger
+        case .exploration: return AppColors.primary
+        case .choice: return AppColors.warning
+        case .quest: return AppColors.dark
+        case .travel: return AppColors.success
+        case .worldChange: return AppColors.light
         }
     }
 }
@@ -285,12 +285,12 @@ struct EngineRegionCardView: View {
     let isCurrentLocation: Bool
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Spacing.md) {
             // Icon
             ZStack {
                 Circle()
-                    .fill(stateColor.opacity(0.2))
-                    .frame(width: 60, height: 60)
+                    .fill(stateColor.opacity(Opacity.faint))
+                    .frame(width: Sizes.iconRegion, height: Sizes.iconRegion)
 
                 Image(systemName: region.type.icon)
                     .font(.title2)
@@ -298,7 +298,7 @@ struct EngineRegionCardView: View {
             }
 
             // Info
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: Spacing.xxs) {
                 HStack {
                     Text(region.name)
                         .font(.headline)
@@ -307,36 +307,36 @@ struct EngineRegionCardView: View {
                     if isCurrentLocation {
                         Image(systemName: "location.fill")
                             .font(.caption)
-                            .foregroundColor(.blue)
+                            .foregroundColor(AppColors.primary)
                     }
                 }
 
-                HStack(spacing: 8) {
+                HStack(spacing: Spacing.sm) {
                     Text(region.state.emoji)
                         .font(.caption)
                     Text(region.state.displayName)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
 
                     Spacer()
 
                     Text(region.type.displayName)
                         .font(.caption2)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(Color.gray.opacity(0.2))
-                        .cornerRadius(4)
+                        .padding(.horizontal, Spacing.xs)
+                        .padding(.vertical, Spacing.xxxs)
+                        .background(AppColors.secondary.opacity(Opacity.faint))
+                        .cornerRadius(CornerRadius.sm)
                 }
 
                 // Anchor info
                 if let anchor = region.anchor {
-                    HStack(spacing: 4) {
+                    HStack(spacing: Spacing.xxs) {
                         Image(systemName: "flame")
                             .font(.caption2)
-                            .foregroundColor(.orange)
+                            .foregroundColor(AppColors.power)
                         Text(anchor.name)
                             .font(.caption2)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(AppColors.muted)
                         Spacer()
                         Text("\(anchor.integrity)%")
                             .font(.caption2)
@@ -347,13 +347,13 @@ struct EngineRegionCardView: View {
 
                 // Reputation
                 if region.reputation != 0 {
-                    HStack(spacing: 4) {
+                    HStack(spacing: Spacing.xxs) {
                         Image(systemName: region.reputation > 0 ? "hand.thumbsup.fill" : "hand.thumbsdown.fill")
                             .font(.caption2)
-                            .foregroundColor(region.reputation > 0 ? .green : .red)
+                            .foregroundColor(region.reputation > 0 ? AppColors.success : AppColors.danger)
                         Text(L10n.regionReputation.localized + ": \(region.reputation > 0 ? "+" : "")\(region.reputation)")
                             .font(.caption2)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(AppColors.muted)
                     }
                 }
             }
@@ -363,33 +363,33 @@ struct EngineRegionCardView: View {
             // Arrow
             Image(systemName: "chevron.right")
                 .font(.caption)
-                .foregroundColor(.gray)
+                .foregroundColor(AppColors.secondary)
         }
         .padding()
         .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(UIColor.secondarySystemBackground))
-                .shadow(color: isCurrentLocation ? .blue.opacity(0.3) : .clear, radius: 4)
+            RoundedRectangle(cornerRadius: CornerRadius.lg)
+                .fill(AppColors.cardBackground)
+                .shadow(color: isCurrentLocation ? AppColors.primary.opacity(Opacity.light) : .clear, radius: 4)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(isCurrentLocation ? Color.blue : Color.clear, lineWidth: 2)
+            RoundedRectangle(cornerRadius: CornerRadius.lg)
+                .stroke(isCurrentLocation ? AppColors.regionCurrent : .clear, lineWidth: 2)
         )
     }
 
     var stateColor: Color {
         switch region.state {
-        case .stable: return .green
-        case .borderland: return .orange
-        case .breach: return .red
+        case .stable: return AppColors.success
+        case .borderland: return AppColors.warning
+        case .breach: return AppColors.danger
         }
     }
 
     func anchorIntegrityColor(_ integrity: Int) -> Color {
         switch integrity {
-        case 70...100: return .green
-        case 30..<70: return .orange
-        default: return .red
+        case 70...100: return AppColors.success
+        case 30..<70: return AppColors.warning
+        default: return AppColors.danger
         }
     }
 }
@@ -426,11 +426,11 @@ struct EngineRegionDetailView: View {
             VStack(spacing: 0) {
                 // Hero Panel (persistent, consistent design across all screens)
                 HeroPanel(engine: engine)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
+                    .padding(.horizontal, Spacing.sm)
+                    .padding(.vertical, Spacing.xxs)
 
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 20) {
+                    VStack(alignment: .leading, spacing: Spacing.xl) {
                         // Region header
                         regionHeader
 

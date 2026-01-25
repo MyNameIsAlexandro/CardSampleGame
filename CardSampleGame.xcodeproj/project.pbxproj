@@ -38,6 +38,7 @@
 		UT00000000000030 /* SafeImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = UT00000000000003 /* SafeImage.swift */; };
 		UT00000000000040 /* AssetRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = UT00000000000004 /* AssetRegistry.swift */; };
 		AS00000000000010 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AS00000000000001 /* Assets.xcassets */; };
+		DS00000000000010 /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DS00000000000001 /* DesignSystem.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -80,6 +81,7 @@
 		UT00000000000003 /* SafeImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafeImage.swift; sourceTree = "<group>"; };
 		UT00000000000004 /* AssetRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetRegistry.swift; sourceTree = "<group>"; };
 		AS00000000000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		DS00000000000001 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -176,6 +178,7 @@
 				UT00000000000002 /* AccessibilityIdentifiers.swift */,
 				UT00000000000003 /* SafeImage.swift */,
 				UT00000000000004 /* AssetRegistry.swift */,
+				DS00000000000001 /* DesignSystem.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -366,6 +369,7 @@
 				UT00000000000020 /* AccessibilityIdentifiers.swift in Sources */,
 				UT00000000000030 /* SafeImage.swift in Sources */,
 				UT00000000000040 /* AssetRegistry.swift in Sources */,
+				DS00000000000010 /* DesignSystem.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
