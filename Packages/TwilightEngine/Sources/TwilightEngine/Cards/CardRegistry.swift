@@ -34,28 +34,33 @@ public final class CardRegistry {
 
     // MARK: - Registration
 
-    /// Зарегистрировать определение карты
-    func register(_ definition: CardDefinition) {
+    /// Register a card definition in the registry.
+    /// - Parameter definition: The card definition to register.
+    /// - Note: If a card with the same ID already exists, it will be replaced.
+    public func register(_ definition: CardDefinition) {
         definitions[definition.id] = definition
     }
 
-    /// Зарегистрировать несколько карт
-    func registerAll(_ definitions: [CardDefinition]) {
+    /// Register multiple card definitions at once.
+    /// - Parameter definitions: Array of card definitions to register.
+    public func registerAll(_ definitions: [CardDefinition]) {
         for definition in definitions {
             register(definition)
         }
     }
 
-    /// Зарегистрировать пул карт героя
-    func registerHeroPool(_ pool: HeroCardPool) {
+    /// Register a hero's card pool (starting, purchasable, and upgrade cards).
+    /// - Parameter pool: The hero card pool containing all cards for a specific hero.
+    public func registerHeroPool(_ pool: HeroCardPool) {
         heroPools[pool.heroID] = pool
         registerAll(pool.startingCards)
         registerAll(pool.purchasableCards)
         registerAll(pool.upgradeCards)
     }
 
-    /// Зарегистрировать сигнатурные карты героя
-    func registerSignatureCards(_ cards: HeroSignatureCards) {
+    /// Register signature cards for a hero.
+    /// - Parameter cards: The signature cards collection for a hero.
+    public func registerSignatureCards(_ cards: HeroSignatureCards) {
         signatureCards[cards.heroID] = cards
         registerAll(cards.requiredCards)
         registerAll(cards.optionalCards)
@@ -64,20 +69,23 @@ public final class CardRegistry {
         }
     }
 
-    /// Удалить карту из реестра
-    func unregister(id: String) {
+    /// Remove a card from the registry.
+    /// - Parameter id: The unique identifier of the card to remove.
+    public func unregister(id: String) {
         definitions.removeValue(forKey: id)
     }
 
-    /// Очистить реестр
+    /// Clear all registered cards, hero pools, and signature cards.
+    /// - Note: This does not remove data sources; call `reload()` to repopulate.
     public func clear() {
         definitions.removeAll()
         heroPools.removeAll()
         signatureCards.removeAll()
     }
 
-    /// Перезагрузить реестр
-    func reload() {
+    /// Reload all cards from registered data sources.
+    /// - Note: Clears existing registrations before reloading.
+    public func reload() {
         clear()
         // Load cards from data sources (ContentPacks)
         for source in dataSources {
@@ -87,14 +95,16 @@ public final class CardRegistry {
 
     // MARK: - Data Sources
 
-    /// Добавить источник данных
-    func addDataSource(_ source: CardDataSource) {
+    /// Add a data source and immediately load its cards.
+    /// - Parameter source: The card data source to add.
+    public func addDataSource(_ source: CardDataSource) {
         dataSources.append(source)
         registerAll(source.loadCards())
     }
 
-    /// Удалить источник данных
-    func removeDataSource(_ source: CardDataSource) {
+    /// Remove a data source and unregister all its cards.
+    /// - Parameter source: The card data source to remove.
+    public func removeDataSource(_ source: CardDataSource) {
         if let index = dataSources.firstIndex(where: { $0.id == source.id }) {
             let source = dataSources.remove(at: index)
             for card in source.loadCards() {
@@ -105,18 +115,25 @@ public final class CardRegistry {
 
     // MARK: - Queries
 
-    /// Получить карту по ID
-    func card(id: String) -> CardDefinition? {
+    /// Get a card definition by its unique identifier.
+    /// - Parameter id: The card's unique identifier.
+    /// - Returns: The card definition, or `nil` if not found.
+    public func card(id: String) -> CardDefinition? {
         return definitions[id]
     }
 
-    /// Все карты
-    var allCards: [CardDefinition] {
+    /// All registered card definitions.
+    public var allCards: [CardDefinition] {
         return Array(definitions.values)
     }
 
-    /// Карты доступные для героя
-    func availableCards(
+    /// Get cards available for a specific hero considering ownership rules.
+    /// - Parameters:
+    ///   - heroID: The hero's unique identifier (for signature cards).
+    ///   - ownedExpansions: Set of owned expansion/DLC identifiers.
+    ///   - unlockedConditions: Set of unlocked condition flags.
+    /// - Returns: Array of card definitions available to the hero.
+    public func availableCards(
         forHeroID heroID: String?,
         ownedExpansions: Set<String> = [],
         unlockedConditions: Set<String> = []
@@ -130,25 +147,32 @@ public final class CardRegistry {
         }
     }
 
-    /// Универсальные карты (доступны всем)
-    var universalCards: [CardDefinition] {
+    /// All universal cards (available to all heroes).
+    public var universalCards: [CardDefinition] {
         return allCards.filter { card in
             if case .universal = card.ownership { return true }
             return false
         }
     }
 
-    /// Сигнатурные карты героя
-    func signatureCards(forHeroID heroID: String) -> HeroSignatureCards? {
+    /// Get signature cards for a specific hero.
+    /// - Parameter heroID: The hero's unique identifier.
+    /// - Returns: The hero's signature cards, or `nil` if none registered.
+    public func signatureCards(forHeroID heroID: String) -> HeroSignatureCards? {
         return signatureCards[heroID]
     }
 
-    /// Пул карт героя
-    func heroPool(for heroID: String) -> HeroCardPool? {
+    /// Get the card pool for a specific hero.
+    /// - Parameter heroID: The hero's unique identifier.
+    /// - Returns: The hero's card pool, or `nil` if none registered.
+    public func heroPool(for heroID: String) -> HeroCardPool? {
         return heroPools[heroID]
     }
 
-    /// Стартовая колода для героя
+    /// Build the starting deck for a hero.
+    /// - Parameter heroID: The hero's unique identifier.
+    /// - Returns: Array of Card instances for the hero's starting deck.
+    /// - Note: Includes basic universal cards, hero pool cards, and signature cards.
     public func startingDeck(forHeroID heroID: String) -> [Card] {
         var deck: [Card] = []
 
@@ -185,8 +209,15 @@ public final class CardRegistry {
         return deck
     }
 
-    /// Карты для магазина (с учётом доступности)
-    func shopCards(
+    /// Get cards available for purchase in the shop.
+    /// - Parameters:
+    ///   - heroID: The hero's unique identifier.
+    ///   - ownedExpansions: Set of owned expansion/DLC identifiers.
+    ///   - unlockedConditions: Set of unlocked condition flags.
+    ///   - maxRarity: Maximum rarity to include (default: epic).
+    /// - Returns: Array of purchasable card definitions.
+    /// - Note: Excludes signature cards and legendary cards (dungeon rewards only).
+    public func shopCards(
         forHeroID heroID: String?,
         ownedExpansions: Set<String> = [],
         unlockedConditions: Set<String> = [],
@@ -197,16 +228,16 @@ public final class CardRegistry {
             ownedExpansions: ownedExpansions,
             unlockedConditions: unlockedConditions
         ).filter { card in
-            // Исключаем сигнатурные карты из магазина
+            // Exclude signature cards from shop
             if case .heroSignature = card.ownership { return false }
-            // Исключаем легендарные (добываются только из данжей)
+            // Exclude legendary (dungeon rewards only)
             if card.rarity == .legendary { return false }
             return card.rarity.order <= maxRarity.order
         }
     }
 
-    /// Количество карт в реестре
-    var count: Int {
+    /// Number of registered cards.
+    public var count: Int {
         return definitions.count
     }
 
@@ -218,21 +249,35 @@ public final class CardRegistry {
 
 // MARK: - Card Data Source Protocol
 
-/// Протокол источника данных карт
+/// Protocol for card data sources.
+/// Allows loading cards from different sources (JSON files, server, DLC).
 public protocol CardDataSource {
+    /// Unique identifier for this data source.
     var id: String { get }
+
+    /// Human-readable name (for debugging).
     var name: String { get }
+
+    /// Load all cards from this data source.
+    /// - Returns: Array of card definitions.
     func loadCards() -> [CardDefinition]
 }
 
 // MARK: - JSON Data Source
 
-/// Загрузчик карт из JSON
+/// Card data source that loads from a JSON file.
 public struct JSONCardDataSource: CardDataSource {
+    /// Unique identifier for this data source.
     public let id: String
+
+    /// Human-readable name (for debugging).
     public let name: String
+
+    /// URL to the JSON file containing card definitions.
     public let fileURL: URL
 
+    /// Load cards from the JSON file.
+    /// - Returns: Array of card definitions, or empty array on error.
     public func loadCards() -> [CardDefinition] {
         guard let data = try? Data(contentsOf: fileURL) else {
             #if DEBUG

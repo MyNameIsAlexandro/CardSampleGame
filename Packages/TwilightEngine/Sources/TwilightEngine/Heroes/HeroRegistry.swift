@@ -27,7 +27,10 @@ public final class HeroRegistry {
 
     // MARK: - Registration
 
-    /// Register hero definition
+    /// Register a hero definition in the registry.
+    /// - Parameter definition: The hero definition to register.
+    /// - Note: If a hero with the same ID exists, it will be replaced.
+    ///         Heroes are added to display order in registration sequence.
     public func register(_ definition: HeroDefinition) {
         definitions[definition.id] = definition
         if !displayOrder.contains(definition.id) {
@@ -35,27 +38,31 @@ public final class HeroRegistry {
         }
     }
 
-    /// Register multiple heroes
-    func registerAll(_ definitions: [HeroDefinition]) {
+    /// Register multiple hero definitions at once.
+    /// - Parameter definitions: Array of hero definitions to register.
+    public func registerAll(_ definitions: [HeroDefinition]) {
         for definition in definitions {
             register(definition)
         }
     }
 
-    /// Remove hero from registry
-    func unregister(id: String) {
+    /// Remove a hero from the registry.
+    /// - Parameter id: The unique identifier of the hero to remove.
+    public func unregister(id: String) {
         definitions.removeValue(forKey: id)
         displayOrder.removeAll { $0 == id }
     }
 
-    /// Clear registry
+    /// Clear all registered heroes and display order.
+    /// - Note: Does not remove data sources; call `reload()` to repopulate.
     public func clear() {
         definitions.removeAll()
         displayOrder.removeAll()
     }
 
-    /// Reload registry from data sources
-    func reload() {
+    /// Reload all heroes from registered data sources.
+    /// - Note: Clears existing registrations before reloading.
+    public func reload() {
         clear()
         registerBuiltInHeroes()
         for source in dataSources {
@@ -65,14 +72,16 @@ public final class HeroRegistry {
 
     // MARK: - Data Sources
 
-    /// Add hero data source
-    func addDataSource(_ source: HeroDataSource) {
+    /// Add a data source and immediately load its heroes.
+    /// - Parameter source: The hero data source to add.
+    public func addDataSource(_ source: HeroDataSource) {
         dataSources.append(source)
         registerAll(source.loadHeroes())
     }
 
-    /// Remove data source
-    func removeDataSource(_ source: HeroDataSource) {
+    /// Remove a data source and unregister all its heroes.
+    /// - Parameter source: The hero data source to remove.
+    public func removeDataSource(_ source: HeroDataSource) {
         if let index = dataSources.firstIndex(where: { $0.id == source.id }) {
             let source = dataSources.remove(at: index)
             for hero in source.loadHeroes() {
@@ -83,22 +92,28 @@ public final class HeroRegistry {
 
     // MARK: - Queries
 
-    /// Get hero by ID
+    /// Get a hero definition by its unique identifier.
+    /// - Parameter id: The hero's unique identifier.
+    /// - Returns: The hero definition, or `nil` if not found.
     public func hero(id: String) -> HeroDefinition? {
         return definitions[id]
     }
 
-    /// All available heroes
+    /// All registered heroes in display order.
     public var allHeroes: [HeroDefinition] {
         return displayOrder.compactMap { definitions[$0] }
     }
 
-    /// First available hero (for default)
+    /// The first hero in display order (useful for defaults).
     public var firstHero: HeroDefinition? {
         return allHeroes.first
     }
 
-    /// Available heroes (not locked)
+    /// Get heroes available to the player based on unlock status.
+    /// - Parameters:
+    ///   - unlockedConditions: Set of unlocked condition flags.
+    ///   - ownedDLCs: Set of owned DLC pack identifiers.
+    /// - Returns: Array of hero definitions the player can select.
     public func availableHeroes(unlockedConditions: Set<String> = [], ownedDLCs: Set<String> = []) -> [HeroDefinition] {
         return allHeroes.filter { hero in
             switch hero.availability {
@@ -112,7 +127,7 @@ public final class HeroRegistry {
         }
     }
 
-    /// Number of registered heroes
+    /// Number of registered heroes.
     public var count: Int {
         return definitions.count
     }
