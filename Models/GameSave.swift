@@ -1,185 +1,148 @@
 import Foundation
+import TwilightEngine
 
-// Save slot for saving/loading games (Campaign v2.0)
-struct GameSave: Codable, Identifiable {
-    let id: UUID
-    let slotNumber: Int
-    let characterName: String
-    let heroId: String?  // Hero ID for data-driven system
-    let turnNumber: Int
+// MARK: - Save Manager (Engine-First Architecture)
+// Uses only EngineSave format - no legacy format needed
 
-    // Basic player stats
-    let health: Int
-    let maxHealth: Int
-    let faith: Int
-    let maxFaith: Int
-    let balance: Int
+// MARK: - Save Load Result
 
-    // CRITICAL: Deck composition (deck-building mechanic)
-    let playerDeck: [Card]
-    let playerHand: [Card]
-    let playerDiscard: [Card]
-    let playerBuried: [Card]
+/// Detailed result of a save load operation
+struct SaveLoadResult {
+    /// Whether the load succeeded
+    let success: Bool
+    /// Compatibility check result (if save was found)
+    let compatibility: SaveCompatibilityResult?
+    /// Error if load failed
+    let error: SaveLoadError?
 
-    // Player curses and spirits
-    let activeCurses: [ActiveCurse]
-    let spirits: [Card]
-    let currentRealm: Realm
+    /// Warnings from compatibility check (for UI display)
+    var warnings: [String] {
+        switch compatibility {
+        case .compatible(let warnings):
+            return warnings
+        default:
+            return []
+        }
+    }
 
-    // Character stats
-    let strength: Int
-    let dexterity: Int
-    let constitution: Int
-    let intelligence: Int
-    let wisdom: Int
-    let charisma: Int
-
-    // CRITICAL: World state (campaign progression)
-    let worldState: WorldState
-
-    // Game progress (old system - kept for compatibility)
-    let encountersDefeated: Int
-    let isVictory: Bool
-    let isDefeat: Bool
-
-    let timestamp: Date
-
-    var formattedDate: String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .short
-        formatter.timeStyle = .short
-        return formatter.string(from: timestamp)
+    /// Whether this was a partial load with warnings
+    var hasWarnings: Bool {
+        return success && !warnings.isEmpty
     }
 }
 
-// Manager for saving/loading games
+/// Errors that can occur during save load
+enum SaveLoadError: Error, Equatable {
+    case saveNotFound(slot: Int)
+    case incompatibleSave(details: [String])
+    case decodingFailed(reason: String)
+
+    var localizedDescription: String {
+        switch self {
+        case .saveNotFound(let slot):
+            return L10n.errorSaveNotFound.localized(with: slot)
+        case .incompatibleSave(let details):
+            return L10n.errorIncompatibleSave.localized + ": " + details.joined(separator: "; ")
+        case .decodingFailed(let reason):
+            return L10n.errorSaveDecodingFailed.localized(with: reason)
+        }
+    }
+}
+
 class SaveManager: ObservableObject {
     static let shared = SaveManager()
 
-    @Published var saveSlots: [Int: GameSave] = [:]
-
-    private let savesKey = "twilight_marches_saves"
+    private let savesKey = "twilight_marches_engine_saves"
+    @Published var saveSlots: [Int: EngineSave] = [:]
 
     init() {
-        loadAllSaves()
-        loadEngineSaves()  // Engine-First: Load engine saves
+        loadSaves()
     }
 
-    // Save game to slot (Campaign v2.0 - full save)
-    func saveGame(to slot: Int, gameState: GameState) {
-        guard let player = gameState.players.first else { return }
+    // MARK: - Public API
 
-        let save = GameSave(
-            id: UUID(),
-            slotNumber: slot,
-            characterName: player.name,
-            heroId: player.heroId,
-            turnNumber: gameState.turnNumber,
-            health: player.health,
-            maxHealth: player.maxHealth,
-            faith: player.faith,
-            maxFaith: player.maxFaith,
-            balance: player.balance,
-            // CRITICAL: Save deck composition
-            playerDeck: player.deck,
-            playerHand: player.hand,
-            playerDiscard: player.discard,
-            playerBuried: player.buried,
-            // Save curses and spirits
-            activeCurses: player.activeCurses,
-            spirits: player.spirits,
-            currentRealm: player.currentRealm,
-            // Save character stats
-            strength: player.strength,
-            dexterity: player.dexterity,
-            constitution: player.constitution,
-            intelligence: player.intelligence,
-            wisdom: player.wisdom,
-            charisma: player.charisma,
-            // CRITICAL: Save world state (campaign progression)
-            worldState: gameState.worldState,
-            // Old system (compatibility)
-            encountersDefeated: gameState.encountersDefeated,
-            isVictory: gameState.isVictory,
-            isDefeat: gameState.isDefeat,
-            timestamp: Date()
-        )
-
+    /// Save game from engine to slot
+    func saveGame(to slot: Int, engine: TwilightGameEngine) {
+        let save = engine.createEngineSave()
         saveSlots[slot] = save
         persistSaves()
     }
 
-    // Load game from slot
-    func loadGame(from slot: Int) -> GameSave? {
+    /// Load game from slot into engine
+    func loadGame(from slot: Int, engine: TwilightGameEngine) -> Bool {
+        let result = loadGameWithResult(from: slot, engine: engine)
+        return result.success
+    }
+
+    /// Load game from slot with detailed result (for UI error display)
+    func loadGameWithResult(from slot: Int, engine: TwilightGameEngine) -> SaveLoadResult {
+        guard let save = saveSlots[slot] else {
+            return SaveLoadResult(
+                success: false,
+                compatibility: nil,
+                error: .saveNotFound(slot: slot)
+            )
+        }
+
+        // Check compatibility before loading
+        let compatibility = save.validateCompatibility(with: ContentRegistry.shared)
+
+        if !compatibility.isLoadable {
+            return SaveLoadResult(
+                success: false,
+                compatibility: compatibility,
+                error: .incompatibleSave(details: compatibility.errorMessages)
+            )
+        }
+
+        // Load the save
+        engine.restoreFromEngineSave(save)
+
+        return SaveLoadResult(
+            success: true,
+            compatibility: compatibility,
+            error: nil
+        )
+    }
+
+    /// Check compatibility of a save without loading it
+    func checkCompatibility(slot: Int) -> SaveCompatibilityResult? {
+        guard let save = saveSlots[slot] else { return nil }
+        return save.validateCompatibility(with: ContentRegistry.shared)
+    }
+
+    /// Get save from slot (for display purposes)
+    func getSave(from slot: Int) -> EngineSave? {
         return saveSlots[slot]
     }
 
-    // Restore full game state from save (Campaign v2.0)
-    func restoreGameState(from save: GameSave) -> GameState {
-        // Restore player with full state and heroId
-        let player = Player(
-            name: save.characterName,
-            health: save.health,
-            maxHealth: save.maxHealth,
-            strength: save.strength,
-            dexterity: save.dexterity,
-            constitution: save.constitution,
-            intelligence: save.intelligence,
-            wisdom: save.wisdom,
-            charisma: save.charisma,
-            faith: save.faith,
-            maxFaith: save.maxFaith,
-            balance: save.balance,
-            currentRealm: save.currentRealm,
-            heroId: save.heroId
-        )
-
-        // Restore deck composition (CRITICAL for deck-building)
-        player.deck = save.playerDeck
-        player.hand = save.playerHand
-        player.discard = save.playerDiscard
-        player.buried = save.playerBuried
-
-        // Restore curses and spirits
-        player.activeCurses = save.activeCurses
-        player.spirits = save.spirits
-
-        // Create game state with restored player
-        let gameState = GameState(players: [player])
-
-        // Restore world state (CRITICAL for campaign)
-        gameState.worldState = save.worldState
-
-        // Restore game progress
-        gameState.turnNumber = save.turnNumber
-        gameState.encountersDefeated = save.encountersDefeated
-        gameState.isVictory = save.isVictory
-        gameState.isDefeat = save.isDefeat
-
-        // Set initial phase
-        if gameState.isGameOver {
-            gameState.currentPhase = .gameOver
-        } else {
-            gameState.currentPhase = .exploration
-        }
-
-        return gameState
-    }
-
-    // Delete save from slot
+    /// Delete save from slot
     func deleteSave(from slot: Int) {
         saveSlots.removeValue(forKey: slot)
         persistSaves()
+
+        // Also clean up any old legacy saves (one-time migration cleanup)
+        UserDefaults.standard.removeObject(forKey: "twilight_marches_saves")
     }
 
-    // Check if slot is empty
-    func isSlotEmpty(_ slot: Int) -> Bool {
-        return saveSlots[slot] == nil
+    /// Check if slot has a save
+    func hasSave(in slot: Int) -> Bool {
+        return saveSlots[slot] != nil
     }
 
-    // Get all saves sorted by slot number
-    var allSaves: [GameSave] {
-        return saveSlots.values.sorted { $0.slotNumber < $1.slotNumber }
+    /// Get all saves sorted by date (most recent first)
+    var allSaves: [EngineSave] {
+        return saveSlots.values.sorted { $0.savedAt > $1.savedAt }
+    }
+
+    /// Total number of saves
+    var saveCount: Int {
+        return saveSlots.count
+    }
+
+    /// Check if any saves exist
+    var hasSaves: Bool {
+        return !saveSlots.isEmpty
     }
 
     // MARK: - Persistence
@@ -190,75 +153,10 @@ class SaveManager: ObservableObject {
         }
     }
 
-    private func loadAllSaves() {
+    private func loadSaves() {
         if let data = UserDefaults.standard.data(forKey: savesKey),
-           let decoded = try? JSONDecoder().decode([Int: GameSave].self, from: data) {
-            saveSlots = decoded
-        }
-    }
-
-    // MARK: - Engine-First Save/Load (Replaces legacy GameState-based saves)
-
-    private let engineSavesKey = "twilight_marches_engine_saves"
-    @Published var engineSaveSlots: [Int: EngineSave] = [:]
-
-    /// Save game directly from Engine (Engine-First Architecture)
-    func saveGameFromEngine(to slot: Int, engine: TwilightGameEngine) {
-        let save = engine.createEngineSave()
-        engineSaveSlots[slot] = save
-        persistEngineSaves()
-    }
-
-    /// Load game into Engine (Engine-First Architecture)
-    func loadGameToEngine(from slot: Int, engine: TwilightGameEngine) -> Bool {
-        guard let save = engineSaveSlots[slot] else {
-            // Legacy save exists - caller should use migrateFromLegacySave()
-            if saveSlots[slot] != nil {
-                print("ℹ️ Legacy save found in slot \(slot) - use migrateFromLegacySave()")
-            }
-            return false
-        }
-
-        engine.restoreFromEngineSave(save)
-        return true
-    }
-
-    /// Get engine save from slot
-    func getEngineSave(from slot: Int) -> EngineSave? {
-        return engineSaveSlots[slot]
-    }
-
-    /// Delete engine save from slot
-    func deleteEngineSave(from slot: Int) {
-        engineSaveSlots.removeValue(forKey: slot)
-        persistEngineSaves()
-    }
-
-    /// Check if engine save slot is empty
-    func isEngineSlotEmpty(_ slot: Int) -> Bool {
-        return engineSaveSlots[slot] == nil
-    }
-
-    /// Get all engine saves
-    var allEngineSaves: [EngineSave] {
-        return engineSaveSlots.values.sorted { $0.savedAt > $1.savedAt }
-    }
-
-    /// Check if any engine saves exist
-    var hasEngineSaves: Bool {
-        return !engineSaveSlots.isEmpty
-    }
-
-    private func persistEngineSaves() {
-        if let encoded = try? JSONEncoder().encode(engineSaveSlots) {
-            UserDefaults.standard.set(encoded, forKey: engineSavesKey)
-        }
-    }
-
-    private func loadEngineSaves() {
-        if let data = UserDefaults.standard.data(forKey: engineSavesKey),
            let decoded = try? JSONDecoder().decode([Int: EngineSave].self, from: data) {
-            engineSaveSlots = decoded
+            saveSlots = decoded
         }
     }
 }

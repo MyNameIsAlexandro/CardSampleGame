@@ -1,4 +1,5 @@
 import SwiftUI
+import TwilightEngine
 
 /// Event view with Engine-First Architecture
 /// - All state mutations go through engine.performAction()
@@ -12,23 +13,13 @@ struct EventView: View {
     let onChoiceSelected: (EventChoice) -> Void
     let onDismiss: () -> Void
 
-    // MARK: - Legacy Support (for backwards compatibility)
-    private var legacyPlayer: Player?
-    private var legacyWorldState: WorldState?
-
     @State private var selectedChoice: EventChoice?
     @State private var showingResult = false
     @State private var resultMessage: String = ""
     @State private var combatMonster: Card?
     @State private var combatVictory: Bool?
 
-    // MARK: - Computed Properties (Engine-First with legacy fallback)
-
-    private var player: Player? {
-        legacyPlayer
-    }
-
-    // MARK: - Initialization (Engine-First)
+    // MARK: - Initialization (Engine-First only)
 
     init(
         engine: TwilightGameEngine,
@@ -42,30 +33,6 @@ struct EventView: View {
         self.regionId = regionId
         self.onChoiceSelected = onChoiceSelected
         self.onDismiss = onDismiss
-        self.legacyPlayer = nil
-        self.legacyWorldState = nil
-    }
-
-    // MARK: - Legacy Initialization (for backwards compatibility)
-
-    init(
-        event: GameEvent,
-        player: Player,
-        worldState: WorldState,
-        regionId: UUID,
-        onChoiceSelected: @escaping (EventChoice) -> Void,
-        onDismiss: @escaping () -> Void
-    ) {
-        // Create engine connected to legacy
-        let newEngine = TwilightGameEngine()
-        newEngine.connectToLegacy(worldState: worldState, player: player)
-        self.engine = newEngine
-        self.event = event
-        self.regionId = regionId
-        self.onChoiceSelected = onChoiceSelected
-        self.onDismiss = onDismiss
-        self.legacyPlayer = player
-        self.legacyWorldState = worldState
     }
 
     var body: some View {
@@ -348,11 +315,11 @@ struct EventView: View {
     func initiateCombat(choice: EventChoice) {
         guard let monster = event.monsterCard else { return }
 
-        // Engine-First: Get combat context from engine or legacy
+        // Engine-First: Get combat context from engine
         let regionState = engine.currentRegion?.state ?? .stable
         let combatContext = CombatContext(
             regionState: regionState,
-            playerCurses: player?.activeCurses.map { $0.type } ?? []
+            playerCurses: engine.playerActiveCurses.map { $0.type }
         )
 
         // Создать врага с модификаторами региона
@@ -390,16 +357,6 @@ struct EventView: View {
     }
 
     // MARK: - Helpers
-
-    func canMeetRequirements(_ choice: EventChoice) -> Bool {
-        guard let requirements = choice.requirements else { return true }
-        // Engine-First: check requirements using engine state or legacy fallback
-        if let ws = legacyWorldState, let p = legacyPlayer {
-            return requirements.canMeet(with: p, worldState: ws)
-        }
-        // TODO: Implement pure engine-based requirement checking
-        return true
-    }
 
     /// Engine-based requirement checking
     func canMeetRequirementsEngine(_ choice: EventChoice) -> Bool {
@@ -453,16 +410,9 @@ struct EventView: View {
 
 struct EventView_Previews: PreviewProvider {
     static var previews: some View {
-        let player = Player(
-            name: "Волхв",
-            health: 20,
-            maxHealth: 20,
-            maxHandSize: 5,
-            faith: 10,
-            balance: 0
-        )
-
-        let worldState = WorldState()
+        // Engine-First: Use engine for preview
+        let engine = TwilightGameEngine()
+        engine.initializeNewGame(playerName: "Волхв", heroId: nil, startingDeck: [])
 
         let event = GameEvent(
             eventType: .narrative,
@@ -489,9 +439,8 @@ struct EventView_Previews: PreviewProvider {
         )
 
         return EventView(
+            engine: engine,
             event: event,
-            player: player,
-            worldState: worldState,
             regionId: UUID(),
             onChoiceSelected: { _ in },
             onDismiss: { }

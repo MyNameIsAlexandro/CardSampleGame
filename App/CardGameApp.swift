@@ -1,4 +1,7 @@
 import SwiftUI
+import TwilightEngine
+import CoreHeroesContent
+import TwilightMarchesActIContent
 
 @main
 struct CardGameApp: App {
@@ -9,7 +12,7 @@ struct CardGameApp: App {
             if contentLoader.isLoaded {
                 ContentView()
             } else {
-                LoadingView(progress: contentLoader.loadingProgress, message: contentLoader.loadingMessage)
+                LoadingView(loader: contentLoader)
             }
         }
     }
@@ -27,6 +30,22 @@ enum LoadingStage {
     case ready
 }
 
+/// Represents a content item being loaded
+struct LoadingItem: Identifiable {
+    let id = UUID()
+    let name: String
+    let icon: String
+    var count: Int?
+    var status: LoadingItemStatus
+
+    enum LoadingItemStatus {
+        case pending
+        case loading
+        case loaded
+        case failed
+    }
+}
+
 /// Loads content packs with caching support
 /// - First launch: loads from JSON, saves to cache
 /// - Subsequent launches: loads from cache if valid
@@ -36,8 +55,35 @@ class ContentLoader: ObservableObject {
     @Published var loadingProgress: Double = 0
     @Published var loadingMessage = L10n.loadingDefault.localized
     @Published var loadingStage: LoadingStage = .searching
+    @Published var loadingItems: [LoadingItem] = []
+    @Published var loadingSummary: String = ""
+    @Published var isFromCache = false
 
     private let cache = FileSystemCache.shared
+
+    /// Initialize loading items with pending status
+    private func initializeLoadingItems() {
+        loadingItems = [
+            LoadingItem(name: L10n.loadingItemRegions.localized, icon: "map", status: .pending),
+            LoadingItem(name: L10n.loadingItemEvents.localized, icon: "sparkles", status: .pending),
+            LoadingItem(name: L10n.loadingItemQuests.localized, icon: "scroll", status: .pending),
+            LoadingItem(name: L10n.loadingItemAnchors.localized, icon: "mappin.and.ellipse", status: .pending),
+            LoadingItem(name: L10n.loadingItemHeroes.localized, icon: "person.fill", status: .pending),
+            LoadingItem(name: L10n.loadingItemCards.localized, icon: "rectangle.portrait.on.rectangle.portrait", status: .pending),
+            LoadingItem(name: L10n.loadingItemEnemies.localized, icon: "flame", status: .pending),
+            LoadingItem(name: L10n.loadingItemLocalization.localized, icon: "globe", status: .pending)
+        ]
+    }
+
+    /// Update a loading item's status and count
+    private func updateLoadingItem(name: String, status: LoadingItem.LoadingItemStatus, count: Int? = nil) {
+        if let index = loadingItems.firstIndex(where: { $0.name == name }) {
+            loadingItems[index].status = status
+            if let count = count {
+                loadingItems[index].count = count
+            }
+        }
+    }
 
     init() {
         Task {
@@ -51,47 +97,24 @@ class ContentLoader: ObservableObject {
         loadingMessage = L10n.loadingSearchPacks.localized
         loadingProgress = 0.1
 
-        let packURL = await findPackURL()
+        let packURLs = await findPackURLs()
 
-        guard let url = packURL else {
+        guard !packURLs.isEmpty else {
             loadingMessage = L10n.loadingContentNotFound.localized
+            #if DEBUG
             print("⚠️ ContentPacks not found - using fallback content")
+            #endif
             finishLoading()
             return
         }
 
-        // Stage 2: Validate cache
-        loadingStage = .validatingCache
-        loadingMessage = L10n.loadingValidatingCache.localized
-        loadingProgress = 0.2
+        // Stage 2: Load packs from JSON (multi-pack loading)
+        // Note: Cache validation for multi-pack is more complex, loading directly for now
+        loadingStage = .loadingFromJSON
+        loadingMessage = L10n.loadingContent.localized
+        loadingProgress = 0.3
 
-        let cacheResult = await validateCache(for: url)
-
-        switch cacheResult {
-        case .validCache(let packId, let contentHash):
-            // Stage 3a: Load from cache (fast path)
-            loadingStage = .loadingFromCache
-            loadingMessage = L10n.loadingFromCache.localized
-            loadingProgress = 0.5
-
-            await loadFromCache(packId: packId, expectedHash: contentHash)
-
-        case .invalidCache(let contentHash):
-            // Stage 3b: Load from JSON (slow path)
-            loadingStage = .loadingFromJSON
-            loadingMessage = L10n.loadingContent.localized
-            loadingProgress = 0.3
-
-            await loadFromJSON(at: url, contentHash: contentHash)
-
-        case .error:
-            // Fallback to JSON loading without caching
-            loadingStage = .loadingFromJSON
-            loadingMessage = L10n.loadingContent.localized
-            loadingProgress = 0.3
-
-            await loadFromJSON(at: url, contentHash: nil)
-        }
+        await loadPacksFromJSON(urls: packURLs)
 
         finishLoading()
     }
@@ -120,7 +143,9 @@ class ContentLoader: ObservableObject {
                     return .invalidCache(contentHash: contentHash)
                 }
             } catch {
+                #if DEBUG
                 print("⚠️ Cache validation failed: \(error)")
+                #endif
                 return .error
             }
         }.value
@@ -129,6 +154,9 @@ class ContentLoader: ObservableObject {
     // MARK: - Loading Methods
 
     private func loadFromCache(packId: String, expectedHash: String) async {
+        isFromCache = true
+        initializeLoadingItems()
+
         let result = await Task.detached(priority: .userInitiated) { [cache] () -> Result<CachedPackData, Error> in
             do {
                 guard let cached = try cache.loadCachedPack(packId: packId) else {
@@ -143,9 +171,21 @@ class ContentLoader: ObservableObject {
         switch result {
         case .success(let cached):
             loadingProgress = 0.8
-            _ = ContentRegistry.shared.loadPackFromCache(cached)
+            let pack = ContentRegistry.shared.loadPackFromCache(cached)
             loadingProgress = 0.9
             loadingMessage = L10n.loadingContentLoaded.localized
+
+            // Update loading items with counts from cached pack
+            updateLoadingItem(name: L10n.loadingItemRegions.localized, status: .loaded, count: pack.regions.count)
+            updateLoadingItem(name: L10n.loadingItemEvents.localized, status: .loaded, count: pack.events.count)
+            updateLoadingItem(name: L10n.loadingItemQuests.localized, status: .loaded, count: pack.quests.count)
+            updateLoadingItem(name: L10n.loadingItemAnchors.localized, status: .loaded, count: pack.anchors.count)
+            updateLoadingItem(name: L10n.loadingItemHeroes.localized, status: .loaded, count: pack.heroes.count)
+            updateLoadingItem(name: L10n.loadingItemCards.localized, status: .loaded, count: pack.cards.count)
+            updateLoadingItem(name: L10n.loadingItemEnemies.localized, status: .loaded, count: pack.enemies.count)
+            updateLoadingItem(name: L10n.loadingItemLocalization.localized, status: .loaded, count: pack.manifest.supportedLocales.count)
+
+            updateLoadingSummary(pack: pack)
 
         case .failure:
             // Cache corrupted or invalid, fall back to JSON
@@ -153,10 +193,70 @@ class ContentLoader: ObservableObject {
             // This shouldn't happen normally but handle gracefully
             loadingStage = .loadingFromJSON
             loadingMessage = L10n.loadingContent.localized
+            isFromCache = false
+        }
+    }
+
+    private func loadPacksFromJSON(urls: [URL]) async {
+        isFromCache = false
+        initializeLoadingItems()
+
+        let registry = ContentRegistry.shared
+
+        let result = await Task.detached(priority: .userInitiated) { () -> Result<[LoadedPack], Error> in
+            do {
+                let packs = try registry.loadPacks(from: urls)
+                return .success(packs)
+            } catch {
+                return .failure(error)
+            }
+        }.value
+
+        switch result {
+        case .success(let packs):
+            loadingProgress = 0.7
+
+            // Aggregate counts from all loaded packs
+            let inventory = registry.totalInventory
+
+            // Update loading items with aggregated counts
+            updateLoadingItem(name: L10n.loadingItemRegions.localized, status: .loaded, count: inventory.regionCount)
+            updateLoadingItem(name: L10n.loadingItemEvents.localized, status: .loaded, count: inventory.eventCount)
+            updateLoadingItem(name: L10n.loadingItemQuests.localized, status: .loaded, count: inventory.questCount)
+            updateLoadingItem(name: L10n.loadingItemAnchors.localized, status: .loaded, count: inventory.anchorCount)
+            updateLoadingItem(name: L10n.loadingItemHeroes.localized, status: .loaded, count: inventory.heroCount)
+            updateLoadingItem(name: L10n.loadingItemCards.localized, status: .loaded, count: inventory.cardCount)
+            updateLoadingItem(name: L10n.loadingItemEnemies.localized, status: .loaded, count: inventory.enemyCount)
+            updateLoadingItem(name: L10n.loadingItemLocalization.localized, status: .loaded, count: inventory.supportedLocales.count)
+
+            loadingProgress = 0.9
+            loadingMessage = L10n.loadingContentLoaded.localized
+
+            updateLoadingSummaryFromRegistry(packsLoaded: packs.count)
+
+            #if DEBUG
+            print("ContentLoader: Loaded \(packs.count) packs:")
+            for pack in packs {
+                print("  - \(pack.manifest.packId) (\(pack.manifest.packType.rawValue))")
+            }
+            #endif
+
+        case .failure(let error):
+            loadingMessage = L10n.loadingError.localized
+            // Mark all items as failed
+            for i in loadingItems.indices {
+                loadingItems[i].status = .failed
+            }
+            #if DEBUG
+            print("ContentLoader: Failed to load packs: \(error)")
+            #endif
         }
     }
 
     private func loadFromJSON(at url: URL, contentHash: String?) async {
+        isFromCache = false
+        initializeLoadingItems()
+
         let registry = ContentRegistry.shared
 
         let result = await Task.detached(priority: .userInitiated) { () -> Result<LoadedPack, Error> in
@@ -172,6 +272,16 @@ class ContentLoader: ObservableObject {
         case .success(let pack):
             loadingProgress = 0.7
 
+            // Update loading items with counts from loaded pack
+            updateLoadingItem(name: L10n.loadingItemRegions.localized, status: .loaded, count: pack.regions.count)
+            updateLoadingItem(name: L10n.loadingItemEvents.localized, status: .loaded, count: pack.events.count)
+            updateLoadingItem(name: L10n.loadingItemQuests.localized, status: .loaded, count: pack.quests.count)
+            updateLoadingItem(name: L10n.loadingItemAnchors.localized, status: .loaded, count: pack.anchors.count)
+            updateLoadingItem(name: L10n.loadingItemHeroes.localized, status: .loaded, count: pack.heroes.count)
+            updateLoadingItem(name: L10n.loadingItemCards.localized, status: .loaded, count: pack.cards.count)
+            updateLoadingItem(name: L10n.loadingItemEnemies.localized, status: .loaded, count: pack.enemies.count)
+            updateLoadingItem(name: L10n.loadingItemLocalization.localized, status: .loaded, count: pack.manifest.supportedLocales.count)
+
             // Stage 4: Save to cache
             if let hash = contentHash {
                 loadingStage = .savingCache
@@ -184,8 +294,17 @@ class ContentLoader: ObservableObject {
             loadingProgress = 0.9
             loadingMessage = L10n.loadingContentLoaded.localized
 
-        case .failure:
+            updateLoadingSummary(pack: pack)
+
+        case .failure(let error):
             loadingMessage = L10n.loadingError.localized
+            // Mark all items as failed
+            for i in loadingItems.indices {
+                loadingItems[i].status = .failed
+            }
+            #if DEBUG
+            print("ContentLoader: Failed to load pack: \(error)")
+            #endif
         }
     }
 
@@ -197,42 +316,31 @@ class ContentLoader: ObservableObject {
 
     // MARK: - Helpers
 
-    private func findPackURL() async -> URL? {
-        return await Task.detached(priority: .userInitiated) { () -> URL? in
-            // Find ContentPacks in the bundle
-            if let url = Bundle.main.url(forResource: "TwilightMarches", withExtension: nil, subdirectory: "ContentPacks") {
-                return url
-            }
+    private func findPackURLs() async -> [URL] {
+        var urls: [URL] = []
 
-            // Try finding ContentPacks directory in bundle
-            if let resourceURL = Bundle.main.resourceURL {
-                let contentPacksURL = resourceURL.appendingPathComponent("ContentPacks/TwilightMarches")
-                if FileManager.default.fileExists(atPath: contentPacksURL.path) {
-                    return contentPacksURL
-                }
-            }
-
-            // Fallback: Try source directory path (for development/debugging)
+        // Load character pack (CoreHeroes)
+        if let heroesURL = CoreHeroesContent.packURL {
+            urls.append(heroesURL)
             #if DEBUG
-            let sourceURL = URL(fileURLWithPath: #filePath)
-                .deletingLastPathComponent()
-                .appendingPathComponent("ContentPacks/TwilightMarches")
-            if FileManager.default.fileExists(atPath: sourceURL.path) {
-                return sourceURL
-            }
-
-            // Additional fallback: Project root ContentPacks
-            let projectRoot = URL(fileURLWithPath: #filePath)
-                .deletingLastPathComponent()
-                .deletingLastPathComponent()
-                .appendingPathComponent("ContentPacks/TwilightMarches")
-            if FileManager.default.fileExists(atPath: projectRoot.path) {
-                return projectRoot
-            }
+            print("🔍 CoreHeroesContent.packURL: \(heroesURL)")
             #endif
+        }
 
-            return nil
-        }.value
+        // Load story pack (TwilightMarchesActI)
+        if let storyURL = TwilightMarchesActIContent.packURL {
+            urls.append(storyURL)
+            #if DEBUG
+            print("🔍 TwilightMarchesActIContent.packURL: \(storyURL)")
+            #endif
+        }
+
+        #if DEBUG
+        print("🔍 Bundle.main.bundlePath: \(Bundle.main.bundlePath)")
+        print("🔍 Found \(urls.count) content packs")
+        #endif
+
+        return urls
     }
 
     private func finishLoading() {
@@ -242,17 +350,31 @@ class ContentLoader: ObservableObject {
 
         // Small delay to show completion
         Task {
-            try? await Task.sleep(nanoseconds: 200_000_000)
+            try? await Task.sleep(nanoseconds: 500_000_000) // Longer delay to show summary
             isLoaded = true
         }
+    }
+
+    /// Update loading summary from pack
+    private func updateLoadingSummary(pack: LoadedPack) {
+        let totalItems = pack.regions.count + pack.events.count + pack.quests.count +
+                         pack.heroes.count + pack.cards.count + pack.enemies.count
+        loadingSummary = String(format: L10n.loadingSummary.localized, totalItems)
+    }
+
+    /// Update loading summary from registry (multi-pack)
+    private func updateLoadingSummaryFromRegistry(packsLoaded: Int) {
+        let inventory = ContentRegistry.shared.totalInventory
+        let totalItems = inventory.regionCount + inventory.eventCount + inventory.questCount +
+                         inventory.heroCount + inventory.cardCount + inventory.enemyCount
+        loadingSummary = String(format: L10n.loadingSummary.localized, totalItems)
     }
 }
 
 // MARK: - Loading View
 
 struct LoadingView: View {
-    let progress: Double
-    let message: String
+    @ObservedObject var loader: ContentLoader
 
     var body: some View {
         VStack(spacing: 20) {
@@ -260,14 +382,103 @@ struct LoadingView: View {
                 .font(.largeTitle)
                 .fontWeight(.bold)
 
-            ProgressView(value: progress)
+            ProgressView(value: loader.loadingProgress)
                 .progressViewStyle(.linear)
-                .frame(width: 200)
+                .frame(width: 280)
 
-            Text(message)
+            Text(loader.loadingMessage)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
+
+            // Show cache indicator
+            if loader.isFromCache {
+                HStack(spacing: 4) {
+                    Image(systemName: "bolt.fill")
+                        .foregroundColor(.yellow)
+                    Text(L10n.loadingFromCacheIndicator.localized)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            // Show loading items when loading content
+            if !loader.loadingItems.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(loader.loadingItems) { item in
+                        LoadingItemRow(item: item)
+                    }
+                }
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(12)
+            }
+
+            // Show summary when loaded
+            if !loader.loadingSummary.isEmpty {
+                Text(loader.loadingSummary)
+                    .font(.caption)
+                    .foregroundColor(.green)
+            }
         }
         .padding()
+    }
+}
+
+// MARK: - Loading Item Row
+
+struct LoadingItemRow: View {
+    let item: LoadingItem
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: item.icon)
+                .foregroundColor(iconColor)
+                .frame(width: 20)
+
+            Text(item.name)
+                .font(.caption)
+                .foregroundColor(.primary)
+
+            Spacer()
+
+            if let count = item.count {
+                Text("\(count)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .monospacedDigit()
+            }
+
+            statusIcon
+        }
+    }
+
+    private var iconColor: Color {
+        switch item.status {
+        case .pending: return .gray
+        case .loading: return .blue
+        case .loaded: return .green
+        case .failed: return .red
+        }
+    }
+
+    @ViewBuilder
+    private var statusIcon: some View {
+        switch item.status {
+        case .pending:
+            Image(systemName: "circle")
+                .foregroundColor(.gray)
+                .font(.caption2)
+        case .loading:
+            ProgressView()
+                .scaleEffect(0.7)
+        case .loaded:
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundColor(.green)
+                .font(.caption)
+        case .failed:
+            Image(systemName: "xmark.circle.fill")
+                .foregroundColor(.red)
+                .font(.caption)
+        }
     }
 }

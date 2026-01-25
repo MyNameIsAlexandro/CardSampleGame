@@ -1,7 +1,8 @@
 import SwiftUI
+import TwilightEngine
 
 struct PlayerHandView: View {
-    @ObservedObject var player: Player
+    @ObservedObject var engine: TwilightGameEngine
     @Binding var selectedCard: Card?
     var onCardPlay: ((Card) -> Void)?
 
@@ -38,7 +39,7 @@ struct PlayerHandView: View {
 
             // Compact deck info
             HStack(spacing: 16) {
-                Text(player.name)
+                Text(engine.playerName)
                     .font(.caption)
                     .fontWeight(.bold)
 
@@ -48,7 +49,7 @@ struct PlayerHandView: View {
                 HStack(spacing: 4) {
                     Image(systemName: "rectangle.stack.fill")
                         .font(.caption2)
-                    Text("\(player.deck.count)")
+                    Text("\(engine.playerDeck.count)")
                         .font(.caption2)
                 }
                 .foregroundColor(.blue)
@@ -57,7 +58,7 @@ struct PlayerHandView: View {
                 HStack(spacing: 4) {
                     Image(systemName: "trash.fill")
                         .font(.caption2)
-                    Text("\(player.discard.count)")
+                    Text("\(engine.playerDiscard.count)")
                         .font(.caption2)
                 }
                 .foregroundColor(.gray)
@@ -67,7 +68,7 @@ struct PlayerHandView: View {
             .background(Color(UIColor.secondarySystemBackground))
 
             // Hand of cards
-            if player.hand.isEmpty {
+            if engine.playerHand.isEmpty {
                 Text(L10n.noCardsInHand.localized)
                     .font(.caption)
                     .foregroundColor(.secondary)
@@ -75,7 +76,7 @@ struct PlayerHandView: View {
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
-                        ForEach(player.hand) { card in
+                        ForEach(engine.playerHand) { card in
                             HandCardView(
                                 card: card,
                                 isSelected: selectedCard?.id == card.id,

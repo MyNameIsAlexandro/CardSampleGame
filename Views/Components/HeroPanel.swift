@@ -1,4 +1,5 @@
 import SwiftUI
+import TwilightEngine
 
 /// Unified Hero Panel - displays hero stats consistently across all screens
 /// Inspired by Arkham Horror LCG investigator cards but with unique Twilight Marches style
@@ -66,7 +67,7 @@ struct HeroPanel: View {
                     // Strength
                     statBadge(
                         icon: "hand.raised.fill",
-                        value: "\(engine.legacyPlayer?.strength ?? 1)",
+                        value: "\(engine.playerStrength)",
                         color: .orange,
                         label: nil
                     )

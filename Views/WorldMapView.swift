@@ -1,4 +1,5 @@
 import SwiftUI
+import TwilightEngine
 
 struct WorldMapView: View {
     // MARK: - Engine-First Architecture
@@ -6,36 +7,17 @@ struct WorldMapView: View {
     @ObservedObject var engine: TwilightGameEngine
     var onExit: (() -> Void)? = nil
 
-    // MARK: - Legacy Support (for gradual migration)
-    // These will be removed once all Views are migrated
-    private var worldState: WorldState?
-    private var player: Player?
-
     @State private var selectedRegion: EngineRegionState?
     @State private var showingExitConfirmation = false
     @State private var showingEventLog = false
     @State private var showingDayEvent = false
     @State private var currentDayEvent: DayEvent?
 
-    // MARK: - Initialization (Engine-First)
+    // MARK: - Initialization (Engine-First only)
 
     init(engine: TwilightGameEngine, onExit: (() -> Void)? = nil) {
         self.engine = engine
         self.onExit = onExit
-        self.worldState = nil
-        self.player = nil
-    }
-
-    // MARK: - Legacy Initialization (for backwards compatibility during migration)
-
-    init(worldState: WorldState, player: Player, onExit: (() -> Void)? = nil) {
-        // Create new engine connected to legacy
-        let newEngine = TwilightGameEngine()
-        newEngine.connectToLegacy(worldState: worldState, player: player)
-        self.engine = newEngine
-        self.onExit = onExit
-        self.worldState = worldState
-        self.player = player
     }
 
     var body: some View {

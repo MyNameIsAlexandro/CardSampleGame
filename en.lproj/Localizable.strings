@@ -770,6 +770,18 @@
 "loading.validating.cache" = "Validating cache...";
 "loading.from.cache" = "Loading from cache...";
 "loading.saving.cache" = "Saving to cache...";
+"loading.from.cache.indicator" = "Fast load from cache";
+"loading.summary" = "%d content items loaded";
+
+// MARK: - Loading Items
+"loading.item.regions" = "Regions";
+"loading.item.events" = "Events";
+"loading.item.quests" = "Quests";
+"loading.item.anchors" = "Anchors";
+"loading.item.heroes" = "Heroes";
+"loading.item.cards" = "Cards";
+"loading.item.enemies" = "Enemies";
+"loading.item.localization" = "Languages";
 
 // MARK: - ViewModels/GameViewModel
 "default.player.name" = "Hero";
@@ -1015,3 +1027,26 @@
 "error.card.not.in.hand" = "Card %@ not in hand";
 "error.not.enough.actions" = "Not enough actions remaining";
 "error.invalid.target" = "Invalid target";
+
+// MARK: - Save format labels
+"ui.engine.format" = "New format";
+"ui.no.saves" = "No saves";
+
+// MARK: - Save Compatibility Errors (Epic 7)
+"error.save.not.found" = "Save not found in slot %d";
+"error.incompatible.save" = "Cannot load save: incompatible";
+"error.save.decoding.failed" = "Failed to decode save: %@";
+
+// MARK: - CombatCalculator log messages
+"calc.hit" = "✅ HIT!";
+"calc.miss" = "❌ MISS!";
+"calc.attack.vs.defense" = "📊 Attack: %d vs Defense: %d";
+"calc.strength" = "Strength %d";
+"calc.bonus.dice" = "+%d bonus dice";
+"calc.bonus.damage" = "+%d bonus damage";
+"calc.damage" = "💥 Damage: %d";
+"calc.base.damage" = "   Base: %d (attack - defense + 2)";
+"calc.hero.ability.dice" = "Hero ability (+%d dice)";
+"calc.hero.ability" = "Hero ability";
+"calc.curse.weakness" = "Weakness";
+"calc.curse.shadow.of.nav" = "Shadow of Nav";

@@ -37,7 +37,23 @@
       "Bash(__NEW_LINE_28e51315d305b980__ grep -c \"isa = PBXNativeTarget\" CardSampleGame.xcodeproj/project.pbxproj)",
       "Bash(ruby -e:*)",
       "Bash(swift:*)",
-      "Bash(plutil:*)"
+      "Bash(plutil:*)",
+      "Bash(while read f)",
+      "Bash(do:*)",
+      "Bash(\"/Users/abondarenko/Library/Mobile Documents/com~apple~CloudDocs/XCode/CardSampleGame/en.lproj/Localizable.strings\")",
+      "Bash(\"/Users/abondarenko/Library/Mobile Documents/com~apple~CloudDocs/XCode/CardSampleGame/ru.lproj/Localizable.strings\")",
+      "Bash(\"/Users/abondarenko/Library/Mobile Documents/com~apple~CloudDocs/XCode/CardSampleGame/Packages/TwilightEngine/Tests/TwilightEngineTests/TwilightEngineTests.swift\")",
+      "Bash(git checkout:*)",
+      "Bash(git stash:*)",
+      "Bash(ls:*)",
+      "Bash(echo:*)",
+      "Bash(tee:*)",
+      "Bash(xcrun simctl spawn:*)",
+      "Bash(timeout 10 cat:*)",
+      "Bash(open:*)",
+      "Bash(xcrun simctl install:*)",
+      "Bash(xcrun simctl launch:*)",
+      "Bash(log show --predicate 'process == \"\"\"\"xctest\"\"\"\" OR process CONTAINS \"\"\"\"CardSampleGame\"\"\"\"' --style compact --last 2m)"
     ]
   }
 }

@@ -1,93 +1,242 @@
 import Foundation
+import TwilightEngine
+import CoreHeroesContent
+import TwilightMarchesActIContent
+
 @testable import CardSampleGame
 
 /// Helper для загрузки ContentPacks в тестовом окружении
-/// Загружает паки из исходной директории проекта
+/// Использует CoreHeroes и TwilightMarchesActI пакеты для получения контента
 enum TestContentLoader {
 
     /// Флаг, показывающий загружены ли паки
     private(set) static var isLoaded = false
 
-    /// Загрузить ContentPacks из исходной директории
-    /// Безопасно вызывать многократно - загрузка произойдёт только один раз
-    static func loadContentPacksIfNeeded() {
-        guard !isLoaded else { return }
+    /// URL to CoreHeroes pack (via Bundle.module or bundle search fallback)
+    /// Returns nil if the pack cannot be verified to exist with a valid manifest
+    static var characterPackURL: URL? {
+        #if DEBUG
+        print("🔍 TestContentLoader: Looking for CoreHeroes pack")
+        print("🔍 CoreHeroesContent.packURL = \(String(describing: CoreHeroesContent.packURL))")
+        #endif
 
-        guard let packURL = findContentPacksURL() else {
-            print("⚠️ TestContentLoader: ContentPacks not found")
-            return
+        // Try Bundle.module first
+        if let url = CoreHeroesContent.packURL {
+            if verifyPackHasManifest(at: url) {
+                return url
+            }
+            #if DEBUG
+            print("⚠️ CoreHeroesContent.packURL exists but manifest not readable")
+            #endif
         }
 
+        // Fallback: search for the resource bundle in the test bundle
+        let fallback = findResourceBundle(bundleName: "CoreHeroes_CoreHeroesContent", resourceName: "CoreHeroes")
+        #if DEBUG
+        print("🔍 Fallback result = \(String(describing: fallback))")
+        #endif
+
+        // Verify fallback has valid manifest
+        if let url = fallback, verifyPackHasManifest(at: url) {
+            return url
+        }
+
+        #if DEBUG
+        print("❌ TestContentLoader: No valid CoreHeroes pack found")
+        #endif
+        return nil
+    }
+
+    /// URL to TwilightMarchesActI pack (via Bundle.module or bundle search fallback)
+    /// Returns nil if the pack cannot be verified to exist with a valid manifest
+    static var storyPackURL: URL? {
+        #if DEBUG
+        print("🔍 TestContentLoader: Looking for TwilightMarchesActI pack")
+        print("🔍 TwilightMarchesActIContent.packURL = \(String(describing: TwilightMarchesActIContent.packURL))")
+        #endif
+
+        // Try Bundle.module first
+        if let url = TwilightMarchesActIContent.packURL {
+            if verifyPackHasManifest(at: url) {
+                return url
+            }
+            #if DEBUG
+            print("⚠️ TwilightMarchesActIContent.packURL exists but manifest not readable")
+            #endif
+        }
+
+        // Fallback: search for the resource bundle in the test bundle
+        let fallback = findResourceBundle(bundleName: "TwilightMarchesActI_TwilightMarchesActIContent", resourceName: "TwilightMarchesActI")
+        #if DEBUG
+        print("🔍 Fallback result = \(String(describing: fallback))")
+        #endif
+
+        // Verify fallback has valid manifest
+        if let url = fallback, verifyPackHasManifest(at: url) {
+            return url
+        }
+
+        #if DEBUG
+        print("❌ TestContentLoader: No valid TwilightMarchesActI pack found")
+        #endif
+        return nil
+    }
+
+    /// Загрузить ContentPacks из пакетов
+    /// Безопасно вызывать многократно - загрузка произойдёт только один раз
+    static func loadContentPacksIfNeeded() {
+        // Also reload if registry was reset externally
+        guard !isLoaded || ContentRegistry.shared.loadedPackIds.isEmpty else { return }
+
         do {
-            // Загружаем пак через ContentRegistry
+            // Загружаем паки через ContentRegistry
             let registry = ContentRegistry.shared
 
             // Проверяем, не загружен ли уже
             if registry.loadedPackIds.isEmpty {
-                try registry.loadPack(from: packURL)
-                print("✅ TestContentLoader: Loaded pack from \(packURL.lastPathComponent)")
+                var urls: [URL] = []
+
+                // Load character pack first (priority order)
+                if let heroesURL = characterPackURL {
+                    urls.append(heroesURL)
+                }
+
+                // Load story pack
+                if let storyURL = storyPackURL {
+                    urls.append(storyURL)
+                }
+
+                guard !urls.isEmpty else {
+                    print("⚠️ TestContentLoader: ContentPacks not found in packages")
+                    return
+                }
+
+                try registry.loadPacks(from: urls)
+                print("✅ TestContentLoader: Loaded \(urls.count) packs")
             }
 
             isLoaded = true
         } catch {
-            print("❌ TestContentLoader: Failed to load pack: \(error)")
+            print("❌ TestContentLoader: Failed to load packs: \(error)")
         }
     }
 
-    /// Найти путь к ContentPacks
-    private static func findContentPacksURL() -> URL? {
-        // 1. Попробуем найти через #filePath (работает в тестах)
-        let testFilePath = URL(fileURLWithPath: #filePath)
-        let projectRoot = testFilePath
-            .deletingLastPathComponent()  // TestHelpers
-            .deletingLastPathComponent()  // CardSampleGameTests
-            .deletingLastPathComponent()  // Project root
+    /// Find resource bundle by searching in test bundle and all related locations
+    private static func findResourceBundle(bundleName: String, resourceName: String) -> URL? {
+        let testBundle = Bundle(for: BundleToken.self)
 
-        let twilightMarchesPath = projectRoot
-            .appendingPathComponent("ContentPacks")
-            .appendingPathComponent("TwilightMarches")
+        #if DEBUG
+        print("🔍 findResourceBundle: Looking for \(bundleName).bundle/\(resourceName)")
+        print("🔍 Test bundle path: \(testBundle.bundlePath)")
+        #endif
 
-        print("🔍 TestContentLoader: Checking path: \(twilightMarchesPath.path)")
-
-        if FileManager.default.fileExists(atPath: twilightMarchesPath.path) {
-            print("✅ TestContentLoader: Found ContentPacks at #filePath derived path")
-            return twilightMarchesPath
+        // Method 1: Direct URL lookup in test bundle
+        if let url = testBundle.url(forResource: bundleName, withExtension: "bundle") {
+            let resourcePath = url.appendingPathComponent(resourceName)
+            #if DEBUG
+            print("🔍 Method 1: Found bundle at \(url)")
+            print("🔍 Method 1: Checking \(resourcePath.path)")
+            #endif
+            if FileManager.default.fileExists(atPath: resourcePath.path) {
+                #if DEBUG
+                print("✅ Method 1: Found resource!")
+                #endif
+                return resourcePath
+            }
         }
 
-        // 2. Попробуем Bundle основного приложения
-        if let mainBundlePath = Bundle.main.url(
-            forResource: "TwilightMarches",
-            withExtension: nil,
-            subdirectory: "ContentPacks"
-        ) {
-            print("✅ TestContentLoader: Found ContentPacks in main bundle")
-            return mainBundlePath
+        // Method 2: Direct path construction in test bundle
+        if let testBundlePath = testBundle.bundlePath as NSString? {
+            let bundlePath = testBundlePath.appendingPathComponent("\(bundleName).bundle")
+            let resourcePath = (bundlePath as NSString).appendingPathComponent(resourceName)
+            #if DEBUG
+            print("🔍 Method 2: Checking \(resourcePath)")
+            #endif
+            if FileManager.default.fileExists(atPath: resourcePath) {
+                #if DEBUG
+                print("✅ Method 2: Found resource!")
+                #endif
+                return URL(fileURLWithPath: resourcePath)
+            }
         }
 
-        // 3. Попробуем Bundle тестов
-        if let testBundlePath = Bundle(for: BundleToken.self).url(
-            forResource: "TwilightMarches",
-            withExtension: nil,
-            subdirectory: "ContentPacks"
-        ) {
-            print("✅ TestContentLoader: Found ContentPacks in test bundle")
-            return testBundlePath
+        // Method 3: Search in Frameworks folder
+        if let testBundlePath = testBundle.bundlePath as NSString? {
+            let frameworksPath = testBundlePath.appendingPathComponent("Frameworks")
+            #if DEBUG
+            print("🔍 Method 3: Checking frameworks at \(frameworksPath)")
+            #endif
+            // Look for framework containing the bundle
+            if let contents = try? FileManager.default.contentsOfDirectory(atPath: frameworksPath) {
+                #if DEBUG
+                print("🔍 Method 3: Found frameworks: \(contents)")
+                #endif
+                for item in contents where item.hasSuffix(".framework") {
+                    let frameworkPath = (frameworksPath as NSString).appendingPathComponent(item)
+                    let innerBundlePath = (frameworkPath as NSString).appendingPathComponent("\(bundleName).bundle")
+                    let resourcePath = (innerBundlePath as NSString).appendingPathComponent(resourceName)
+                    if FileManager.default.fileExists(atPath: resourcePath) {
+                        #if DEBUG
+                        print("✅ Method 3: Found resource at \(resourcePath)!")
+                        #endif
+                        return URL(fileURLWithPath: resourcePath)
+                    }
+                }
+            }
         }
 
-        // 4. Альтернативный путь
-        let altPath = projectRoot
-            .deletingLastPathComponent()
-            .appendingPathComponent("CardSampleGame")
-            .appendingPathComponent("ContentPacks")
-            .appendingPathComponent("TwilightMarches")
-
-        if FileManager.default.fileExists(atPath: altPath.path) {
-            print("✅ TestContentLoader: Found ContentPacks at alternative path")
-            return altPath
+        // Method 4: Check main app bundle
+        if let mainBundlePath = Bundle.main.bundlePath as NSString? {
+            let bundlePath = mainBundlePath.appendingPathComponent("\(bundleName).bundle")
+            let resourcePath = (bundlePath as NSString).appendingPathComponent(resourceName)
+            #if DEBUG
+            print("🔍 Method 4: Checking main bundle \(resourcePath)")
+            #endif
+            if FileManager.default.fileExists(atPath: resourcePath) {
+                #if DEBUG
+                print("✅ Method 4: Found resource!")
+                #endif
+                return URL(fileURLWithPath: resourcePath)
+            }
         }
 
-        print("❌ TestContentLoader: ContentPacks not found at any path")
+        #if DEBUG
+        print("❌ findResourceBundle: Resource not found for \(bundleName).bundle/\(resourceName)")
+        #endif
         return nil
+    }
+
+    /// Verify that a pack URL contains a readable and decodable manifest.json
+    private static func verifyPackHasManifest(at url: URL) -> Bool {
+        let manifestURL = url.appendingPathComponent("manifest.json")
+
+        #if DEBUG
+        print("🔍 verifyPackHasManifest: checking \(manifestURL.path)")
+        #endif
+
+        // Check file exists
+        guard FileManager.default.fileExists(atPath: manifestURL.path) else {
+            #if DEBUG
+            print("❌ verifyPackHasManifest: file does not exist")
+            #endif
+            return false
+        }
+
+        // Try to actually read and decode the manifest
+        do {
+            let data = try Data(contentsOf: manifestURL)
+            // Try to decode as JSON to verify it's valid
+            _ = try JSONSerialization.jsonObject(with: data, options: [])
+            #if DEBUG
+            print("✅ verifyPackHasManifest: manifest is valid JSON (\(data.count) bytes)")
+            #endif
+            return true
+        } catch {
+            #if DEBUG
+            print("❌ verifyPackHasManifest: failed to read/decode - \(error)")
+            #endif
+            return false
+        }
     }
 
     /// Сбросить состояние (для изолированных тестов)
@@ -99,5 +248,5 @@ enum TestContentLoader {
     }
 }
 
-/// Маркер для поиска bundle тестового таргета
+// Helper class to get the test bundle
 private class BundleToken {}

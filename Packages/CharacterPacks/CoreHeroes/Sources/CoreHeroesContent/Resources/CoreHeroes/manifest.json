@@ -1,0 +1,33 @@
+{
+  "id": "core-heroes",
+  "name": {
+    "en": "Core Heroes",
+    "ru": "Основные Герои"
+  },
+  "description": {
+    "en": "Base heroes and their starting cards for Twilight Marches",
+    "ru": "Базовые герои и их начальные карты для Сумеречных Маршей"
+  },
+  "version": "1.0.0",
+  "type": "character",
+  "core_version_min": "1.0.0",
+  "dependencies": [],
+  "required_capabilities": [],
+  "recommended_heroes": [],
+  "hero_ids": [
+    "warrior_ragnar",
+    "mage_elvira",
+    "ranger_thorin",
+    "priest_aurelius",
+    "shadow_umbra"
+  ],
+  "bundle_id": "core-free",
+  "author": "CardSampleGame Team",
+  "license": "proprietary",
+  "release_date": "2026-01-01",
+  "locales": ["en", "ru"],
+  "heroes_path": "Characters/heroes.json",
+  "abilities_path": "Characters/hero_abilities.json",
+  "cards_path": "Cards/cards.json",
+  "localization_path": "Localization"
+}

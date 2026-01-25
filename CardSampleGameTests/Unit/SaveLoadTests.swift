@@ -1,453 +1,410 @@
 import XCTest
+import TwilightEngine
+
 @testable import CardSampleGame
 
-/// Тесты системы сохранения/загрузки
-/// Покрывает: создание сохранений, восстановление состояния, целостность данных
-/// См. QA_ACT_I_CHECKLIST.md, TEST-016
+/// Engine-First Save/Load Tests
+/// Tests the EngineSave-based save system (no legacy GameSave)
 final class SaveLoadTests: XCTestCase {
 
-    var player: Player!
-    var gameState: GameState!
+    var engine: TwilightGameEngine!
     var saveManager: SaveManager!
 
     override func setUp() {
         super.setUp()
-        player = Player(name: "Тестовый герой")
-        gameState = GameState(players: [player])
+        TestContentLoader.loadContentPacksIfNeeded()
+        engine = TwilightGameEngine()
+        engine.initializeNewGame(playerName: "Test Hero", heroId: nil)
         saveManager = SaveManager()
 
-        // Очищаем тестовые слоты
+        // Clear test slots
         for slot in 100...105 {
             saveManager.deleteSave(from: slot)
         }
     }
 
     override func tearDown() {
-        // Очищаем после тестов
+        // Clear after tests
         for slot in 100...105 {
             saveManager.deleteSave(from: slot)
         }
-        player = nil
-        gameState = nil
+        engine = nil
         saveManager = nil
         WorldRNG.shared.resetToSystem()
         super.tearDown()
     }
 
-    // MARK: - Создание сохранения
+    // MARK: - Basic Save/Load
 
     func testSaveGameCreatesSlot() {
-        saveManager.saveGame(to: 100, gameState: gameState)
-
-        XCTAssertFalse(saveManager.isSlotEmpty(100), "Слот не должен быть пустым")
+        saveManager.saveGame(to: 100, engine: engine)
+        XCTAssertTrue(saveManager.hasSave(in: 100), "Slot should have a save")
     }
 
-    func testSaveGamePreservesCharacterName() {
-        player.name = "Иван Хранитель"
+    func testSaveGamePreservesPlayerName() {
+        saveManager.saveGame(to: 100, engine: engine)
+        let save = saveManager.getSave(from: 100)
 
-        saveManager.saveGame(to: 100, gameState: gameState)
-        let save = saveManager.loadGame(from: 100)
-
-        XCTAssertEqual(save?.characterName, "Иван Хранитель")
+        XCTAssertEqual(save?.playerName, "Test Hero")
     }
 
     func testSaveGamePreservesHealth() {
-        player.health = 7
-        player.maxHealth = 12
+        let initialHealth = engine.playerHealth
+        let initialMaxHealth = engine.playerMaxHealth
 
-        saveManager.saveGame(to: 100, gameState: gameState)
-        let save = saveManager.loadGame(from: 100)
+        saveManager.saveGame(to: 100, engine: engine)
+        let save = saveManager.getSave(from: 100)
 
-        XCTAssertEqual(save?.health, 7)
-        XCTAssertEqual(save?.maxHealth, 12)
+        XCTAssertEqual(save?.playerHealth, initialHealth)
+        XCTAssertEqual(save?.playerMaxHealth, initialMaxHealth)
     }
 
     func testSaveGamePreservesFaith() {
-        player.faith = 5
-        player.maxFaith = 15
+        let initialFaith = engine.playerFaith
+        let initialMaxFaith = engine.playerMaxFaith
 
-        saveManager.saveGame(to: 100, gameState: gameState)
-        let save = saveManager.loadGame(from: 100)
+        saveManager.saveGame(to: 100, engine: engine)
+        let save = saveManager.getSave(from: 100)
 
-        XCTAssertEqual(save?.faith, 5)
-        XCTAssertEqual(save?.maxFaith, 15)
+        XCTAssertEqual(save?.playerFaith, initialFaith)
+        XCTAssertEqual(save?.playerMaxFaith, initialMaxFaith)
     }
 
     func testSaveGamePreservesBalance() {
-        player.balance = 75
+        let initialBalance = engine.playerBalance
 
-        saveManager.saveGame(to: 100, gameState: gameState)
-        let save = saveManager.loadGame(from: 100)
+        saveManager.saveGame(to: 100, engine: engine)
+        let save = saveManager.getSave(from: 100)
 
-        XCTAssertEqual(save?.balance, 75)
+        XCTAssertEqual(save?.playerBalance, initialBalance)
     }
 
-    func testSaveGamePreservesTurnNumber() {
-        gameState.turnNumber = 15
+    func testSaveGamePreservesCurrentDay() {
+        // Advance some days
+        _ = engine.performAction(.skipTurn)
+        _ = engine.performAction(.skipTurn)
+        let currentDay = engine.currentDay
 
-        saveManager.saveGame(to: 100, gameState: gameState)
-        let save = saveManager.loadGame(from: 100)
+        saveManager.saveGame(to: 100, engine: engine)
+        let save = saveManager.getSave(from: 100)
 
-        XCTAssertEqual(save?.turnNumber, 15)
+        XCTAssertEqual(save?.currentDay, currentDay)
     }
 
-    // MARK: - Сохранение колоды (CRITICAL)
+    // MARK: - Deck Preservation (CRITICAL)
 
     func testSaveGamePreservesDeck() {
-        let card1 = Card(name: "Меч", type: .item, description: "")
-        let card2 = Card(name: "Щит", type: .item, description: "")
-        player.deck = [card1, card2]
+        let deckCount = engine.playerDeck.count
 
-        saveManager.saveGame(to: 100, gameState: gameState)
-        let save = saveManager.loadGame(from: 100)
+        saveManager.saveGame(to: 100, engine: engine)
+        let save = saveManager.getSave(from: 100)
 
-        XCTAssertEqual(save?.playerDeck.count, 2, "Колода сохранена")
-        XCTAssertEqual(save?.playerDeck[0].name, "Меч")
-        XCTAssertEqual(save?.playerDeck[1].name, "Щит")
+        XCTAssertEqual(save?.deckCardIds.count, deckCount, "Deck preserved")
     }
 
     func testSaveGamePreservesHand() {
-        let card = Card(name: "В руке", type: .spell, description: "")
-        player.hand = [card]
+        let handCount = engine.playerHand.count
 
-        saveManager.saveGame(to: 100, gameState: gameState)
-        let save = saveManager.loadGame(from: 100)
+        saveManager.saveGame(to: 100, engine: engine)
+        let save = saveManager.getSave(from: 100)
 
-        XCTAssertEqual(save?.playerHand.count, 1)
-        XCTAssertEqual(save?.playerHand[0].name, "В руке")
+        XCTAssertEqual(save?.handCardIds.count, handCount, "Hand preserved")
     }
 
-    func testSaveGamePreservesDiscard() {
-        let card = Card(name: "Сброшена", type: .spell, description: "")
-        player.discard = [card]
-
-        saveManager.saveGame(to: 100, gameState: gameState)
-        let save = saveManager.loadGame(from: 100)
-
-        XCTAssertEqual(save?.playerDiscard.count, 1)
-        XCTAssertEqual(save?.playerDiscard[0].name, "Сброшена")
-    }
-
-    // MARK: - Сохранение проклятий
-
-    func testSaveGamePreservesCurses() {
-        player.applyCurse(type: .weakness, duration: 5)
-        player.applyCurse(type: .fear, duration: 3)
-
-        saveManager.saveGame(to: 100, gameState: gameState)
-        let save = saveManager.loadGame(from: 100)
-
-        XCTAssertEqual(save?.activeCurses.count, 2)
-        XCTAssertTrue(save?.activeCurses.contains { $0.type == .weakness } ?? false)
-        XCTAssertTrue(save?.activeCurses.contains { $0.type == .fear } ?? false)
-    }
-
-    func testSaveGamePreservesCurseDuration() {
-        player.applyCurse(type: .exhaustion, duration: 7)
-
-        saveManager.saveGame(to: 100, gameState: gameState)
-        let save = saveManager.loadGame(from: 100)
-
-        let curse = save?.activeCurses.first { $0.type == .exhaustion }
-        XCTAssertEqual(curse?.duration, 7)
-    }
-
-    // MARK: - Сохранение духов
-
-    func testSaveGamePreservesSpirits() {
-        let spirit = Card(name: "Дух леса", type: .spirit, description: "")
-        player.spirits = [spirit]
-
-        saveManager.saveGame(to: 100, gameState: gameState)
-        let save = saveManager.loadGame(from: 100)
-
-        XCTAssertEqual(save?.spirits.count, 1)
-        XCTAssertEqual(save?.spirits[0].name, "Дух леса")
-    }
-
-    func testSaveGamePreservesRealm() {
-        player.currentRealm = .nav
-
-        saveManager.saveGame(to: 100, gameState: gameState)
-        let save = saveManager.loadGame(from: 100)
-
-        XCTAssertEqual(save?.currentRealm, .nav)
-    }
-
-    // MARK: - Сохранение WorldState (CRITICAL)
+    // MARK: - World State Preservation (CRITICAL)
 
     func testSaveGamePreservesWorldTension() {
-        gameState.worldState.worldTension = 55
+        // Advance time to increase tension
+        for _ in 0..<6 {
+            _ = engine.performAction(.skipTurn)
+        }
+        let tension = engine.worldTension
 
-        saveManager.saveGame(to: 100, gameState: gameState)
-        let save = saveManager.loadGame(from: 100)
+        saveManager.saveGame(to: 100, engine: engine)
+        let save = saveManager.getSave(from: 100)
 
-        XCTAssertEqual(save?.worldState.worldTension, 55)
-    }
-
-    func testSaveGamePreservesDaysPassed() {
-        gameState.worldState.daysPassed = 12
-
-        saveManager.saveGame(to: 100, gameState: gameState)
-        let save = saveManager.loadGame(from: 100)
-
-        XCTAssertEqual(save?.worldState.daysPassed, 12)
+        XCTAssertEqual(save?.worldTension, tension)
     }
 
     func testSaveGamePreservesMainQuestStage() {
-        gameState.worldState.mainQuestStage = 3
+        let stage = engine.mainQuestStage
 
-        saveManager.saveGame(to: 100, gameState: gameState)
-        let save = saveManager.loadGame(from: 100)
+        saveManager.saveGame(to: 100, engine: engine)
+        let save = saveManager.getSave(from: 100)
 
-        XCTAssertEqual(save?.worldState.mainQuestStage, 3)
+        XCTAssertEqual(save?.mainQuestStage, stage)
     }
 
     func testSaveGamePreservesWorldFlags() {
-        gameState.worldState.setFlag("quest_complete", value: true)
-        gameState.worldState.setFlag("boss_defeated", value: true)
+        engine.setWorldFlags(["test_flag": true, "another_flag": false])
 
-        saveManager.saveGame(to: 100, gameState: gameState)
-        let save = saveManager.loadGame(from: 100)
+        saveManager.saveGame(to: 100, engine: engine)
+        let save = saveManager.getSave(from: 100)
 
-        XCTAssertTrue(save?.worldState.hasFlag("quest_complete") ?? false)
-        XCTAssertTrue(save?.worldState.hasFlag("boss_defeated") ?? false)
+        XCTAssertEqual(save?.worldFlags["test_flag"], true)
+        XCTAssertEqual(save?.worldFlags["another_flag"], false)
     }
 
-    func testSaveGamePreservesCurrentRegion() {
-        let regionId = gameState.worldState.currentRegionId
+    // MARK: - Load Game
 
-        saveManager.saveGame(to: 100, gameState: gameState)
-        let save = saveManager.loadGame(from: 100)
+    func testLoadGameRestoresHealth() {
+        saveManager.saveGame(to: 100, engine: engine)
+        let savedHealth = engine.playerHealth
 
-        XCTAssertEqual(save?.worldState.currentRegionId, regionId)
+        let newEngine = TwilightGameEngine()
+        TestContentLoader.loadContentPacksIfNeeded()
+        XCTAssertTrue(saveManager.loadGame(from: 100, engine: newEngine))
+
+        XCTAssertEqual(newEngine.playerHealth, savedHealth)
     }
 
-    // MARK: - Восстановление игры
+    func testLoadGameRestoresFaith() {
+        saveManager.saveGame(to: 100, engine: engine)
+        let savedFaith = engine.playerFaith
 
-    func testRestoreGameStateHealth() {
-        player.health = 6
-        saveManager.saveGame(to: 100, gameState: gameState)
+        let newEngine = TwilightGameEngine()
+        TestContentLoader.loadContentPacksIfNeeded()
+        XCTAssertTrue(saveManager.loadGame(from: 100, engine: newEngine))
 
-        let save = saveManager.loadGame(from: 100)!
-        let restored = saveManager.restoreGameState(from: save)
-
-        XCTAssertEqual(restored.currentPlayer.health, 6)
+        XCTAssertEqual(newEngine.playerFaith, savedFaith)
     }
 
-    func testRestoreGameStateFaith() {
-        player.faith = 8
-        saveManager.saveGame(to: 100, gameState: gameState)
+    func testLoadGameRestoresBalance() {
+        saveManager.saveGame(to: 100, engine: engine)
+        let savedBalance = engine.playerBalance
 
-        let save = saveManager.loadGame(from: 100)!
-        let restored = saveManager.restoreGameState(from: save)
+        let newEngine = TwilightGameEngine()
+        TestContentLoader.loadContentPacksIfNeeded()
+        XCTAssertTrue(saveManager.loadGame(from: 100, engine: newEngine))
 
-        XCTAssertEqual(restored.currentPlayer.faith, 8)
+        XCTAssertEqual(newEngine.playerBalance, savedBalance)
     }
 
-    func testRestoreGameStateBalance() {
-        player.balance = 25
-        saveManager.saveGame(to: 100, gameState: gameState)
+    func testLoadGameRestoresCurrentDay() {
+        _ = engine.performAction(.skipTurn)
+        _ = engine.performAction(.skipTurn)
+        saveManager.saveGame(to: 100, engine: engine)
+        let savedDay = engine.currentDay
 
-        let save = saveManager.loadGame(from: 100)!
-        let restored = saveManager.restoreGameState(from: save)
+        let newEngine = TwilightGameEngine()
+        TestContentLoader.loadContentPacksIfNeeded()
+        XCTAssertTrue(saveManager.loadGame(from: 100, engine: newEngine))
 
-        XCTAssertEqual(restored.currentPlayer.balance, 25)
+        XCTAssertEqual(newEngine.currentDay, savedDay)
     }
 
-    func testRestoreGameStateDeck() {
-        let card = Card(name: "Restored Card", type: .spell, description: "")
-        player.deck = [card]
-        saveManager.saveGame(to: 100, gameState: gameState)
+    func testLoadGameRestoresWorldTension() {
+        for _ in 0..<6 {
+            _ = engine.performAction(.skipTurn)
+        }
+        saveManager.saveGame(to: 100, engine: engine)
+        let savedTension = engine.worldTension
 
-        let save = saveManager.loadGame(from: 100)!
-        let restored = saveManager.restoreGameState(from: save)
+        let newEngine = TwilightGameEngine()
+        TestContentLoader.loadContentPacksIfNeeded()
+        XCTAssertTrue(saveManager.loadGame(from: 100, engine: newEngine))
 
-        XCTAssertEqual(restored.currentPlayer.deck.count, 1)
-        XCTAssertEqual(restored.currentPlayer.deck[0].name, "Restored Card")
+        XCTAssertEqual(newEngine.worldTension, savedTension)
     }
 
-    func testRestoreGameStateCurses() {
-        player.applyCurse(type: .shadowOfNav, duration: 10)
-        saveManager.saveGame(to: 100, gameState: gameState)
-
-        let save = saveManager.loadGame(from: 100)!
-        let restored = saveManager.restoreGameState(from: save)
-
-        XCTAssertTrue(restored.currentPlayer.hasCurse(.shadowOfNav))
-    }
-
-    func testRestoreGameStateWorldTension() {
-        gameState.worldState.worldTension = 70
-        saveManager.saveGame(to: 100, gameState: gameState)
-
-        let save = saveManager.loadGame(from: 100)!
-        let restored = saveManager.restoreGameState(from: save)
-
-        XCTAssertEqual(restored.worldState.worldTension, 70)
-    }
-
-    func testRestoreGameStateTurnNumber() {
-        gameState.turnNumber = 20
-        saveManager.saveGame(to: 100, gameState: gameState)
-
-        let save = saveManager.loadGame(from: 100)!
-        let restored = saveManager.restoreGameState(from: save)
-
-        XCTAssertEqual(restored.turnNumber, 20)
-    }
-
-    func testRestoreGameStatePhase() {
-        gameState.isVictory = false
-        gameState.isDefeat = false
-        saveManager.saveGame(to: 100, gameState: gameState)
-
-        let save = saveManager.loadGame(from: 100)!
-        let restored = saveManager.restoreGameState(from: save)
-
-        XCTAssertEqual(restored.currentPhase, .exploration)
-    }
-
-    func testRestoreGameStateGameOver() {
-        gameState.isVictory = true
-        saveManager.saveGame(to: 100, gameState: gameState)
-
-        let save = saveManager.loadGame(from: 100)!
-        let restored = saveManager.restoreGameState(from: save)
-
-        XCTAssertEqual(restored.currentPhase, .gameOver)
-    }
-
-    // MARK: - Удаление сохранений
+    // MARK: - Delete Save
 
     func testDeleteSave() {
-        saveManager.saveGame(to: 100, gameState: gameState)
-        XCTAssertFalse(saveManager.isSlotEmpty(100))
+        saveManager.saveGame(to: 100, engine: engine)
+        XCTAssertTrue(saveManager.hasSave(in: 100))
 
         saveManager.deleteSave(from: 100)
 
-        XCTAssertTrue(saveManager.isSlotEmpty(100))
+        XCTAssertFalse(saveManager.hasSave(in: 100))
     }
 
-    // MARK: - Множественные слоты
+    // MARK: - Multiple Slots
 
     func testMultipleSaveSlots() {
-        player.name = "Герой 1"
-        saveManager.saveGame(to: 101, gameState: gameState)
+        engine.initializeNewGame(playerName: "Hero 1", heroId: nil)
+        saveManager.saveGame(to: 101, engine: engine)
 
-        player.name = "Герой 2"
-        saveManager.saveGame(to: 102, gameState: gameState)
+        engine.initializeNewGame(playerName: "Hero 2", heroId: nil)
+        saveManager.saveGame(to: 102, engine: engine)
 
-        let save1 = saveManager.loadGame(from: 101)
-        let save2 = saveManager.loadGame(from: 102)
+        let save1 = saveManager.getSave(from: 101)
+        let save2 = saveManager.getSave(from: 102)
 
-        XCTAssertEqual(save1?.characterName, "Герой 1")
-        XCTAssertEqual(save2?.characterName, "Герой 2")
+        XCTAssertEqual(save1?.playerName, "Hero 1")
+        XCTAssertEqual(save2?.playerName, "Hero 2")
     }
 
     func testOverwriteSave() {
-        player.health = 10
-        saveManager.saveGame(to: 100, gameState: gameState)
+        // Ensure slot is clean
+        saveManager.deleteSave(from: 100)
 
-        player.health = 5
-        saveManager.saveGame(to: 100, gameState: gameState)
+        let firstDay = engine.currentDay
+        saveManager.saveGame(to: 100, engine: engine)
 
-        let save = saveManager.loadGame(from: 100)
-        XCTAssertEqual(save?.health, 5, "Сохранение перезаписано")
+        // Advance time (use skipTurn - doesn't require region validation)
+        _ = engine.performAction(.skipTurn)
+        _ = engine.performAction(.skipTurn)
+
+        let secondDay = engine.currentDay
+        XCTAssertGreaterThan(secondDay, firstDay, "Day should advance after skipTurn")
+
+        // Overwrite save
+        saveManager.saveGame(to: 100, engine: engine)
+
+        let save = saveManager.getSave(from: 100)
+        XCTAssertEqual(save?.currentDay, secondDay, "Save should have updated day")
     }
 
-    // MARK: - Форматирование даты
-
-    func testFormattedDate() {
-        saveManager.saveGame(to: 100, gameState: gameState)
-        let save = saveManager.loadGame(from: 100)
-
-        XCTAssertFalse(save?.formattedDate.isEmpty ?? true, "Дата отформатирована")
-    }
-
-    // MARK: - Целостность данных
+    // MARK: - Data Integrity
 
     func testSaveDataIntegrity() {
-        // Полная настройка игры
-        player.name = "Тест Целостности"
-        player.health = 8
-        player.maxHealth = 12
-        player.faith = 6
-        player.balance = 35
-
-        let card1 = Card(name: "Карта1", type: .spell, description: "")
-        let card2 = Card(name: "Карта2", type: .item, description: "")
-        player.deck = [card1]
-        player.hand = [card2]
-
-        player.applyCurse(type: .fear, duration: 4)
-        player.currentRealm = .nav
-
-        gameState.turnNumber = 25
-        gameState.worldState.worldTension = 45
-        gameState.worldState.daysPassed = 18
-        gameState.worldState.mainQuestStage = 2
-
-        // Сохранение
-        saveManager.saveGame(to: 100, gameState: gameState)
-
-        // Восстановление
-        let save = saveManager.loadGame(from: 100)!
-        let restored = saveManager.restoreGameState(from: save)
-
-        // Проверка всех полей
-        XCTAssertEqual(restored.currentPlayer.name, "Тест Целостности")
-        XCTAssertEqual(restored.currentPlayer.health, 8)
-        XCTAssertEqual(restored.currentPlayer.maxHealth, 12)
-        XCTAssertEqual(restored.currentPlayer.faith, 6)
-        XCTAssertEqual(restored.currentPlayer.balance, 35)
-        XCTAssertEqual(restored.currentPlayer.deck.count, 1)
-        XCTAssertEqual(restored.currentPlayer.hand.count, 1)
-        XCTAssertTrue(restored.currentPlayer.hasCurse(.fear))
-        XCTAssertEqual(restored.currentPlayer.currentRealm, .nav)
-        XCTAssertEqual(restored.turnNumber, 25)
-        XCTAssertEqual(restored.worldState.worldTension, 45)
-        XCTAssertEqual(restored.worldState.daysPassed, 18)
-        XCTAssertEqual(restored.worldState.mainQuestStage, 2)
-    }
-
-    // MARK: - WorldState Codable
-
-    func testWorldStateEncodeDecode() {
-        let worldState = WorldState()
-        worldState.worldTension = 42
-        worldState.daysPassed = 10
-        worldState.mainQuestStage = 2
-
-        do {
-            let encoded = try JSONEncoder().encode(worldState)
-            let decoded = try JSONDecoder().decode(WorldState.self, from: encoded)
-
-            XCTAssertEqual(decoded.worldTension, 42)
-            XCTAssertEqual(decoded.daysPassed, 10)
-            XCTAssertEqual(decoded.mainQuestStage, 2)
-        } catch {
-            XCTFail("Ошибка кодирования: \(error)")
+        // Advance the game a bit
+        for _ in 0..<5 {
+            _ = engine.performAction(.skipTurn)
         }
+
+        saveManager.saveGame(to: 100, engine: engine)
+
+        let newEngine = TwilightGameEngine()
+        TestContentLoader.loadContentPacksIfNeeded()
+        XCTAssertTrue(saveManager.loadGame(from: 100, engine: newEngine))
+
+        // Verify all fields match
+        XCTAssertEqual(newEngine.playerName, engine.playerName)
+        XCTAssertEqual(newEngine.playerHealth, engine.playerHealth)
+        XCTAssertEqual(newEngine.playerMaxHealth, engine.playerMaxHealth)
+        XCTAssertEqual(newEngine.playerFaith, engine.playerFaith)
+        XCTAssertEqual(newEngine.playerMaxFaith, engine.playerMaxFaith)
+        XCTAssertEqual(newEngine.playerBalance, engine.playerBalance)
+        XCTAssertEqual(newEngine.currentDay, engine.currentDay)
+        XCTAssertEqual(newEngine.worldTension, engine.worldTension)
+        XCTAssertEqual(newEngine.mainQuestStage, engine.mainQuestStage)
     }
 
-    func testGameSaveEncodeDecode() {
-        saveManager.saveGame(to: 100, gameState: gameState)
+    // MARK: - EngineSave Encoding/Decoding
 
-        guard let save = saveManager.loadGame(from: 100) else {
-            XCTFail("Не удалось загрузить сохранение")
+    func testEngineSaveEncodeDecode() {
+        saveManager.saveGame(to: 100, engine: engine)
+
+        guard let save = saveManager.getSave(from: 100) else {
+            XCTFail("Failed to get save")
             return
         }
 
         do {
             let encoded = try JSONEncoder().encode(save)
-            let decoded = try JSONDecoder().decode(GameSave.self, from: encoded)
+            let decoded = try JSONDecoder().decode(EngineSave.self, from: encoded)
 
-            XCTAssertEqual(decoded.characterName, save.characterName)
-            XCTAssertEqual(decoded.health, save.health)
-            XCTAssertEqual(decoded.turnNumber, save.turnNumber)
+            XCTAssertEqual(decoded.playerName, save.playerName)
+            XCTAssertEqual(decoded.playerHealth, save.playerHealth)
+            XCTAssertEqual(decoded.currentDay, save.currentDay)
         } catch {
-            XCTFail("Ошибка кодирования GameSave: \(error)")
+            XCTFail("Encoding error: \(error)")
+        }
+    }
+
+    // MARK: - Pack Compatibility (Epic 7)
+
+    func testSaveStoresPackSetAndRefusesIncompatibleLoad() {
+        // 1. Save the game - should capture current pack set
+        saveManager.saveGame(to: 100, engine: engine)
+
+        guard let save = saveManager.getSave(from: 100) else {
+            XCTFail("Failed to get save")
+            return
+        }
+
+        // 2. Verify save stores pack compatibility info
+        XCTAssertFalse(save.coreVersion.isEmpty, "Save should store coreVersion")
+        XCTAssertGreaterThan(save.formatVersion, 0, "Save should store formatVersion")
+        // activePackSet may be empty if no packs loaded - that's OK for test
+
+        // 3. Verify compatibility check works for current save
+        let compatibility = save.validateCompatibility(with: ContentRegistry.shared)
+        XCTAssertTrue(compatibility.isLoadable, "Save with current packs should be loadable")
+
+        // 4. Test incompatible save (format version too new)
+        let incompatibleSave = EngineSave(
+            version: save.version,
+            savedAt: save.savedAt,
+            gameDuration: save.gameDuration,
+            coreVersion: save.coreVersion,
+            activePackSet: save.activePackSet,
+            formatVersion: EngineSave.currentFormatVersion + 10, // Future format
+            primaryCampaignPackId: "nonexistent_campaign_pack", // Missing pack
+            playerName: save.playerName,
+            heroId: save.heroId,
+            playerHealth: save.playerHealth,
+            playerMaxHealth: save.playerMaxHealth,
+            playerFaith: save.playerFaith,
+            playerMaxFaith: save.playerMaxFaith,
+            playerBalance: save.playerBalance,
+            deckCardIds: save.deckCardIds,
+            handCardIds: save.handCardIds,
+            discardCardIds: save.discardCardIds,
+            currentDay: save.currentDay,
+            worldTension: save.worldTension,
+            lightDarkBalance: save.lightDarkBalance,
+            currentRegionId: save.currentRegionId,
+            regions: save.regions,
+            mainQuestStage: save.mainQuestStage,
+            activeQuestIds: save.activeQuestIds,
+            completedQuestIds: save.completedQuestIds,
+            questStages: save.questStages,
+            completedEventIds: save.completedEventIds,
+            eventLog: save.eventLog,
+            worldFlags: save.worldFlags,
+            rngSeed: save.rngSeed
+        )
+
+        // 5. Verify incompatible save is rejected
+        let incompatibleResult = incompatibleSave.validateCompatibility(with: ContentRegistry.shared)
+        XCTAssertFalse(incompatibleResult.isLoadable, "Save with future format should not be loadable")
+        XCTAssertFalse(incompatibleResult.errorMessages.isEmpty, "Should have error messages")
+
+        // 6. Test SaveManager returns detailed result
+        let loadResult = saveManager.loadGameWithResult(from: 100, engine: engine)
+        XCTAssertTrue(loadResult.success, "Loading current save should succeed")
+        XCTAssertNil(loadResult.error, "No error for successful load")
+    }
+
+    func testSaveStoresPrimaryCampaignPackId() {
+        // Save should capture the primary campaign pack
+        saveManager.saveGame(to: 100, engine: engine)
+
+        guard let save = saveManager.getSave(from: 100) else {
+            XCTFail("Failed to get save")
+            return
+        }
+
+        // If packs are loaded, primaryCampaignPackId should be set
+        // If no packs loaded (test environment), it can be nil - that's OK
+        if !ContentRegistry.shared.loadedPacks.isEmpty {
+            // At least one pack loaded - check if it's a campaign/full pack
+            let hasCampaignPack = ContentRegistry.shared.loadedPacks.values
+                .contains { $0.manifest.packType == .campaign || $0.manifest.packType == .full }
+
+            if hasCampaignPack {
+                XCTAssertNotNil(save.primaryCampaignPackId, "Should store primary campaign pack ID")
+            }
+        }
+
+        // Either way, the save should be valid
+        let compatibility = save.validateCompatibility(with: ContentRegistry.shared)
+        XCTAssertTrue(compatibility.isLoadable, "Save should be loadable")
+    }
+
+    func testLoadGameWithResultReturnsSaveNotFoundError() {
+        // Try to load from empty slot
+        let result = saveManager.loadGameWithResult(from: 999, engine: engine)
+
+        XCTAssertFalse(result.success, "Loading from empty slot should fail")
+        XCTAssertNotNil(result.error, "Should have error")
+
+        if case .saveNotFound(let slot) = result.error {
+            XCTAssertEqual(slot, 999, "Error should contain correct slot")
+        } else {
+            XCTFail("Expected saveNotFound error")
         }
     }
 }

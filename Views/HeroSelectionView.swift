@@ -1,4 +1,5 @@
 import SwiftUI
+import TwilightEngine
 
 /// Экран выбора героя при начале новой игры
 /// Герои загружаются из HeroRegistry (data-driven)
@@ -59,7 +60,7 @@ struct HeroSelectionView: View {
                         }) {
                             HStack {
                                 Text(hero.icon)
-                                Text("Начать игру за \(hero.name)")
+                                Text("Начать игру за \(hero.name.localized)")
                                     .fontWeight(.semibold)
                             }
                             .frame(maxWidth: .infinity)
@@ -101,11 +102,11 @@ struct HeroCard: View {
                     .font(.title)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(hero.name)
+                    Text(hero.name.localized)
                         .font(.title2)
                         .fontWeight(.bold)
 
-                    Text(hero.description)
+                    Text(hero.description.localized)
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -134,7 +135,7 @@ struct HeroCard: View {
                     .foregroundColor(.yellow)
                     .font(.caption)
 
-                Text(hero.specialAbility.description)
+                Text(hero.specialAbility.description.localized)
                     .font(.caption)
                     .foregroundColor(.secondary)
             }

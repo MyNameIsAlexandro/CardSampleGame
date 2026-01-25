@@ -558,6 +558,18 @@ enum L10n {
     static let loadingValidatingCache = "loading.validating.cache"
     static let loadingFromCache = "loading.from.cache"
     static let loadingSavingCache = "loading.saving.cache"
+    static let loadingFromCacheIndicator = "loading.from.cache.indicator"
+    static let loadingSummary = "loading.summary"
+
+    // MARK: - Loading Items
+    static let loadingItemRegions = "loading.item.regions"
+    static let loadingItemEvents = "loading.item.events"
+    static let loadingItemQuests = "loading.item.quests"
+    static let loadingItemAnchors = "loading.item.anchors"
+    static let loadingItemHeroes = "loading.item.heroes"
+    static let loadingItemCards = "loading.item.cards"
+    static let loadingItemEnemies = "loading.item.enemies"
+    static let loadingItemLocalization = "loading.item.localization"
 
     // MARK: - ViewModels/GameViewModel
     static let defaultPlayerName = "default.player.name"
@@ -745,4 +757,27 @@ enum L10n {
     static let errorCardNotInHand = "error.card.not.in.hand"
     static let errorNotEnoughActions = "error.not.enough.actions"
     static let errorInvalidTarget = "error.invalid.target"
+
+    // MARK: - Save format labels
+    static let uiEngineFormat = "ui.engine.format"
+    static let uiNoSaves = "ui.no.saves"
+
+    // MARK: - Save Compatibility Errors (Epic 7)
+    static let errorSaveNotFound = "error.save.not.found"
+    static let errorIncompatibleSave = "error.incompatible.save"
+    static let errorSaveDecodingFailed = "error.save.decoding.failed"
+
+    // MARK: - CombatCalculator log messages
+    static let calcHit = "calc.hit"
+    static let calcMiss = "calc.miss"
+    static let calcAttackVsDefense = "calc.attack.vs.defense"
+    static let calcStrength = "calc.strength"
+    static let calcBonusDice = "calc.bonus.dice"
+    static let calcBonusDamage = "calc.bonus.damage"
+    static let calcDamage = "calc.damage"
+    static let calcBaseDamage = "calc.base.damage"
+    static let calcHeroAbilityDice = "calc.hero.ability.dice"
+    static let calcHeroAbility = "calc.hero.ability"
+    static let calcCurseWeakness = "calc.curse.weakness"
+    static let calcCurseShadowOfNav = "calc.curse.shadow.of.nav"
 }

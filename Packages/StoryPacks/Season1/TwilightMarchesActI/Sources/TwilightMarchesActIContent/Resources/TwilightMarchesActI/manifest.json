@@ -1,0 +1,54 @@
+{
+  "id": "twilight-marches-act1",
+  "name": {
+    "en": "Twilight Marches - Act I",
+    "ru": "Сумеречные Марши - Акт I"
+  },
+  "description": {
+    "en": "The first act of Twilight Marches campaign. Defend the borderlands from the encroaching darkness.",
+    "ru": "Первый акт кампании Сумеречные Марши. Защитите пограничье от надвигающейся тьмы."
+  },
+  "version": "1.0.0",
+  "type": "campaign",
+  "core_version_min": "1.0.0",
+  "dependencies": [],
+  "required_capabilities": [],
+  "entry_region": "village",
+  "entry_quest": "quest_main_act1",
+  "recommended_heroes": [
+    "warrior_ragnar",
+    "mage_elvira",
+    "ranger_thorin",
+    "priest_aurelius",
+    "shadow_umbra"
+  ],
+  "min_heroes_required": 1,
+  "max_heroes_supported": 4,
+  "difficulty_rating": 2,
+  "estimated_playtime_minutes": 120,
+  "mission_type": "campaign",
+  "season": "season1",
+  "season_name": {
+    "en": "Season 1: Twilight",
+    "ru": "Сезон 1: Сумерки"
+  },
+  "campaign_id": "twilight-marches",
+  "campaign_name": {
+    "en": "Twilight Marches",
+    "ru": "Сумеречные Марши"
+  },
+  "campaign_order": 1,
+  "bundle_id": "twilight-marches-complete",
+  "author": "CardSampleGame Team",
+  "license": "proprietary",
+  "release_date": "2026-01-01",
+  "locales": ["en", "ru"],
+  "regions_path": "Campaign/regions.json",
+  "events_path": "Campaign/events.json",
+  "quests_path": "Campaign/quests.json",
+  "anchors_path": "Campaign/anchors.json",
+  "enemies_path": "Enemies/enemies.json",
+  "cards_path": "Cards/story_rewards.json",
+  "balance_path": "Balance/balance.json",
+  "localization_path": "Localization"
+}

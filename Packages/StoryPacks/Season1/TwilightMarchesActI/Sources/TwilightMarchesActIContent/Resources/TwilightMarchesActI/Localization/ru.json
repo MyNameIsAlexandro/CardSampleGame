@@ -1,0 +1,37 @@
+{
+  "pack.name": "Сумеречные Марши - Акт I",
+  "pack.description": "Первый акт кампании Сумеречные Марши",
+
+  "region.village.name": "Деревня у Дороги",
+  "region.village.description": "Маленькая деревня на краю пограничья",
+  "region.oak.name": "Древний Дуб",
+  "region.oak.description": "Священный дуб стоит на перекрёстке",
+  "region.forest.name": "Сумеречный Лес",
+  "region.forest.description": "Тёмные деревья шепчут древние тайны",
+  "region.swamp.name": "Проклятое Болото",
+  "region.swamp.description": "Туман поднимается над мутными водами",
+  "region.mountain.name": "Каменная Гора",
+  "region.mountain.description": "Древние пики хранят забытые секреты",
+  "region.breach.name": "Разлом",
+  "region.breach.description": "Где граница между мирами истончается",
+  "region.dark_lowland.name": "Чёрные Низины",
+  "region.dark_lowland.description": "Последний рубеж перед тьмой",
+
+  "anchor.chapel.name": "Часовня Света",
+  "anchor.oak.name": "Сердце Дуба",
+  "anchor.stone.name": "Камень Защиты",
+  "anchor.sanctuary.name": "Лесное Святилище",
+  "anchor.seal.name": "Горная Печать",
+  "anchor.gates.name": "Пограничные Врата",
+
+  "card.defender_blessing.name": "Благословение Защитника",
+  "card.defender_blessing.description": "Награда за выполнение основного квеста. Постоянно увеличивает защиту на 2.",
+  "card.anchor_power.name": "Сила Якоря",
+  "card.anchor_power.description": "Черпать силу из якорей. Лечит 5 и даёт 1 веру.",
+  "card.forest_blessing.name": "Благословение Леса",
+  "card.forest_blessing.description": "Добыча с побеждённого Лешего. Лечит 3 в лесных регионах.",
+  "card.mountain_blessing.name": "Благословение Гор",
+  "card.mountain_blessing.description": "Награда от Горного Духа. +3 к защите на одну битву.",
+  "card.witch_knowledge.name": "Знание Ведьмы",
+  "card.witch_knowledge.description": "Тёмная мудрость от болотной ведьмы. Взять 2 карты."
+}

@@ -1,21 +1,17 @@
 import SwiftUI
+import TwilightEngine
 
 /// Боевой экран - реализация по документации GAME_DESIGN_DOCUMENT.md
 /// Цикл: PlayerTurn → EnemyTurn → EndTurn (повтор до победы/поражения)
 /// Действия: 3 за ход. Играть карту = 1 действие, Атаковать = 1 действие
 ///
-/// Engine-First Architecture (Gate 1 Compliant):
+/// Engine-First Architecture:
 /// - All player mutations go through engine.performAction()
 /// - UI reads state from engine properties
 struct CombatView: View {
     // MARK: - Engine-First Architecture
     @ObservedObject var engine: TwilightGameEngine
     let onCombatEnd: (CombatOutcome) -> Void
-
-    // MARK: - Legacy Support (for backwards compatibility during migration)
-    // Will be removed after full migration
-    private var legacyPlayer: Player?
-    private var legacyMonster: Binding<Card>?
 
     enum CombatOutcome: Equatable {
         case victory(stats: CombatStats)
@@ -79,17 +75,11 @@ struct CombatView: View {
     @State private var showDiceRollOverlay: Bool = false
     @State private var animatingDiceValues: [Int] = []
     @State private var diceAnimationPhase: Int = 0
+    @State private var pendingDamageApplication: (() -> Void)? = nil  // Deferred damage application
 
     // MARK: - Computed Properties (Engine-First)
 
-    /// Player from engine or legacy
-    private var player: Player? {
-        // In Engine-First mode, use engine's legacyPlayer
-        // Fall back to stored legacyPlayer for backwards compatibility
-        engine.legacyPlayer ?? legacyPlayer
-    }
-
-    /// Monster from engine combat state or legacy binding
+    /// Monster from engine combat state
     /// Uses savedMonsterCard when combat is over to avoid "Unknown" display
     private var monster: Card {
         get {
@@ -97,7 +87,7 @@ struct CombatView: View {
             if phase == .combatOver, let saved = savedMonsterCard {
                 return saved
             }
-            return engine.combatState?.enemy ?? legacyMonster?.wrappedValue ?? savedMonsterCard ?? Card(
+            return engine.combatState?.enemy ?? savedMonsterCard ?? Card(
                 name: "Unknown",
                 type: .monster,
                 description: "Unknown enemy"
@@ -124,26 +114,11 @@ struct CombatView: View {
         return monster.health ?? 10
     }
 
-    // MARK: - Initialization (Engine-First)
+    // MARK: - Initialization (Engine-First only)
 
     init(engine: TwilightGameEngine, onCombatEnd: @escaping (CombatOutcome) -> Void) {
         self.engine = engine
         self.onCombatEnd = onCombatEnd
-        self.legacyPlayer = nil
-        self.legacyMonster = nil
-    }
-
-    // MARK: - Legacy Initialization (for backwards compatibility)
-
-    init(player: Player, monster: Binding<Card>, onCombatEnd: @escaping (CombatOutcome) -> Void) {
-        // Create engine connected to legacy player
-        let newEngine = TwilightGameEngine()
-        // Setup combat enemy in engine
-        newEngine.setupCombatEnemy(monster.wrappedValue)
-        self.engine = newEngine
-        self.onCombatEnd = onCombatEnd
-        self.legacyPlayer = player
-        self.legacyMonster = monster
     }
 
     var body: some View {
@@ -942,14 +917,32 @@ struct CombatView: View {
                             .fill(Color.black.opacity(0.8))
                     )
                     .transition(.scale.combined(with: .opacity))
+
+                    // Confirmation button - applies damage and closes overlay
+                    Button(action: confirmAttackResult) {
+                        Text(L10n.buttonOk.localized)
+                            .font(.headline)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                            .frame(width: 120, height: 44)
+                            .background(result.isHit ? Color.green : Color.red)
+                            .cornerRadius(12)
+                    }
+                    .padding(.top, 16)
                 }
             }
         }
-        .onTapGesture {
-            // Allow dismissing overlay by tapping
-            withAnimation(.easeOut(duration: 0.2)) {
-                showDiceRollOverlay = false
-            }
+    }
+
+    /// Confirm attack result - applies pending damage and closes overlay
+    func confirmAttackResult() {
+        // Apply the pending damage
+        pendingDamageApplication?()
+        pendingDamageApplication = nil
+
+        // Close overlay
+        withAnimation(.easeOut(duration: 0.2)) {
+            showDiceRollOverlay = false
         }
     }
 
@@ -1012,31 +1005,20 @@ struct CombatView: View {
             }
         }
 
-        // Show hit/miss result
+        // Show hit/miss result and OK button
         DispatchQueue.main.asyncAfter(deadline: .now() + rollDuration * 4 + 0.3) {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                 diceAnimationPhase = 3
             }
         }
-
-        // Auto-dismiss after showing result
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-            withAnimation(.easeOut(duration: 0.3)) {
-                showDiceRollOverlay = false
-            }
-        }
+        // No auto-dismiss - player must tap OK button to confirm and apply damage
     }
 
     // MARK: - Player Hand (Engine-First)
 
-    /// Player's hand cards - use engine's published playerHand for proper UI updates
+    /// Player's hand cards from engine
     private var playerHand: [Card] {
-        // Engine-First: prefer engine.playerHand for proper @Published reactivity
-        // Fall back to legacy player.hand if engine doesn't have cards yet
-        if !engine.playerHand.isEmpty {
-            return engine.playerHand
-        }
-        return player?.hand ?? []
+        engine.playerHand
     }
 
     var playerHandView: some View {
@@ -1078,7 +1060,7 @@ struct CombatView: View {
 
     func startCombat() {
         // Save monster card for display after combat ends
-        savedMonsterCard = engine.combatState?.enemy ?? legacyMonster?.wrappedValue
+        savedMonsterCard = engine.combatState?.enemy
 
         combatLog.append(L10n.combatLogBattleStartEnemy.localized(with: monster.name))
         combatLog.append(L10n.combatLogActionsInfo.localized(with: 3))
@@ -1114,29 +1096,29 @@ struct CombatView: View {
         // Сохраняем результат для отображения
         lastCombatResult = result
 
-        // Show dice roll animation
-        showDiceAnimation(diceRolls: result.attackRoll.diceRolls)
+        // Store damage application to be called when player confirms
+        pendingDamageApplication = { [self] in
+            if result.isHit, let damageCalc = result.damageCalculation {
+                let damage = damageCalc.total
 
-        if result.isHit, let damageCalc = result.damageCalculation {
-            let damage = damageCalc.total
+                // Track damage for statistics
+                totalDamageDealt += damage
 
-            // Track damage for statistics
-            totalDamageDealt += damage
+                // Engine-First: Apply damage through engine action
+                engine.performAction(.combatApplyEffect(effect: .damageEnemy(amount: damage)))
 
-            // Engine-First: Apply damage through engine action
-            engine.performAction(.combatApplyEffect(effect: .damageEnemy(amount: damage)))
+                combatLog.append(L10n.combatLogHit.localized(with: result.attackRoll.total, monsterDef, damage, monsterHealth))
 
-            // Update legacy monster binding if available
-            // Monster health updated via engine.performAction() - no legacy sync needed
-
-            combatLog.append(L10n.combatLogHit.localized(with: result.attackRoll.total, monsterDef, damage, monsterHealth))
-
-            if monsterHealth <= 0 {
-                finishCombat(victory: true)
+                if monsterHealth <= 0 {
+                    finishCombat(victory: true)
+                }
+            } else {
+                combatLog.append(L10n.combatLogMissed.localized(with: result.attackRoll.total, monsterDef))
             }
-        } else {
-            combatLog.append(L10n.combatLogMissed.localized(with: result.attackRoll.total, monsterDef))
         }
+
+        // Show dice roll animation (player will confirm to apply damage)
+        showDiceAnimation(diceRolls: result.attackRoll.diceRolls)
 
         // Сбросить бонусы после атаки
         bonusDice = 0

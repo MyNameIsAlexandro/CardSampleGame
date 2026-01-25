@@ -1,4 +1,5 @@
 import SwiftUI
+import TwilightEngine
 
 struct ContentView: View {
     @State private var showingWorldMap = false
@@ -19,9 +20,23 @@ struct ContentView: View {
         HeroRegistry.shared.availableHeroes()
     }
 
-    // Check if there are any saves (engine-first + legacy fallback)
+    // Check if there are any saves
     var hasSaves: Bool {
-        saveManager.hasEngineSaves || !saveManager.allSaves.isEmpty
+        saveManager.hasSaves
+    }
+
+    // Get the most recent save slot (for single-save auto-load)
+    var mostRecentSaveSlot: Int? {
+        guard let mostRecent = saveManager.allSaves.first else {
+            return nil
+        }
+        // Find the slot for this save
+        for (slot, save) in saveManager.saveSlots {
+            if save.savedAt == mostRecent.savedAt {
+                return slot
+            }
+        }
+        return nil
     }
 
     var body: some View {
@@ -31,9 +46,9 @@ struct ContentView: View {
                 WorldMapView(
                     engine: engine,
                     onExit: {
-                        // MARK: - Engine-First: Save using engine state
+                        // Save game on exit
                         if let slot = selectedSaveSlot {
-                            saveManager.saveGameFromEngine(to: slot, engine: engine)
+                            saveManager.saveGame(to: slot, engine: engine)
                         }
                         showingWorldMap = false
                         showingSaveSlots = false
@@ -122,7 +137,7 @@ struct ContentView: View {
                                 Text(L10n.characterStats.localized)
                                     .font(.headline)
 
-                                Text(hero.description)
+                                Text(hero.description.localized)
                                     .font(.body)
                                     .foregroundColor(.secondary)
                                     .fixedSize(horizontal: false, vertical: true)
@@ -141,12 +156,12 @@ struct ContentView: View {
                                 VStack(alignment: .leading, spacing: 4) {
                                     HStack {
                                         Text(hero.specialAbility.icon)
-                                        Text(hero.specialAbility.name)
+                                        Text(hero.specialAbility.name.localized)
                                             .font(.subheadline)
                                             .fontWeight(.bold)
                                             .foregroundColor(.orange)
                                     }
-                                    Text(hero.specialAbility.description)
+                                    Text(hero.specialAbility.description.localized)
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                         .fixedSize(horizontal: false, vertical: true)
@@ -246,7 +261,7 @@ struct ContentView: View {
                         .fontWeight(.bold)
                     if let heroId = selectedHeroId,
                        let hero = HeroRegistry.shared.hero(id: heroId) {
-                        Text(hero.name)
+                        Text(hero.name.localized)
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
@@ -260,12 +275,10 @@ struct ContentView: View {
                     ForEach(1...3, id: \.self) { slotNumber in
                         SaveSlotCard(
                             slotNumber: slotNumber,
-                            saveData: saveManager.loadGame(from: slotNumber),
+                            saveData: saveManager.getSave(from: slotNumber),
                             onNewGame: { startGame(in: slotNumber) },
                             onLoadGame: { loadGame(from: slotNumber) },
-                            onDelete: {
-                                saveManager.deleteSave(from: slotNumber)
-                            }
+                            onDelete: { saveManager.deleteSave(from: slotNumber) }
                         )
                     }
                 }
@@ -281,64 +294,48 @@ struct ContentView: View {
             return
         }
 
-        // MARK: - Engine-First: Get starting deck from hero's card IDs via ContentRegistry
-        // Hero comes from HeroRegistry, but cards are in ContentRegistry
+        // Get starting deck from hero's card IDs
         let startingDeckDefs = hero.startingDeckCardIDs.compactMap { ContentRegistry.shared.getCard(id: $0) }
         let startingDeck = startingDeckDefs.map { $0.toCard() }
 
-        // MARK: - Engine-First: Initialize new game directly in engine
+        // Initialize new game in engine
         engine.initializeNewGame(
-            playerName: hero.name,
+            playerName: hero.name.localized,
             heroId: heroId,
             startingDeck: startingDeck
         )
 
-        // Save to selected slot using Engine-first save
+        // Save to selected slot
         selectedSaveSlot = slot
-        saveManager.saveGameFromEngine(to: slot, engine: engine)
+        saveManager.saveGame(to: slot, engine: engine)
 
         showingWorldMap = true
         showingSaveSlots = false
     }
 
     func loadGame(from slot: Int) {
-        // MARK: - Engine-First: Try to load engine save first
-        if saveManager.loadGameToEngine(from: slot, engine: engine) {
-            // Successfully loaded from engine save
+        if saveManager.loadGame(from: slot, engine: engine) {
             selectedHeroId = engine.heroId
             selectedSaveSlot = slot
             showingWorldMap = true
             showingSaveSlots = false
             showingLoadSlots = false
-            return
         }
-
-        // MARK: - Legacy fallback: Migrate from old GameSave format
-        guard let saveData = saveManager.loadGame(from: slot) else { return }
-
-        // Migrate legacy save to engine
-        engine.migrateFromLegacySave(saveData)
-
-        // Update UI state
-        selectedHeroId = saveData.heroId ?? availableHeroes.first { $0.name == saveData.characterName }?.id
-
-        // Save as engine save for future loads (auto-migration)
-        saveManager.saveGameFromEngine(to: slot, engine: engine)
-
-        selectedSaveSlot = slot
-        showingWorldMap = true
-        showingSaveSlots = false
-        showingLoadSlots = false
     }
 
     // MARK: - Continue Game
 
     func handleContinueGame() {
-        let saves = saveManager.allSaves
+        let count = saveManager.saveCount
 
-        if saves.count == 1 {
+        if count == 0 {
+            // No saves - shouldn't happen as button is hidden
+            return
+        } else if count == 1 {
             // Only one save - load it directly
-            loadGame(from: saves[0].slotNumber)
+            if let slot = mostRecentSaveSlot {
+                loadGame(from: slot)
+            }
         } else {
             // Multiple saves - show selection screen
             showingLoadSlots = true
@@ -365,14 +362,29 @@ struct ContentView: View {
             }
             .padding()
 
-            // Load slots (only show existing saves)
+            // Load slots - show all saves
             ScrollView {
                 VStack(spacing: 16) {
-                    ForEach(saveManager.allSaves) { save in
-                        LoadSlotCard(
-                            saveData: save,
-                            onLoad: { loadGame(from: save.slotNumber) }
-                        )
+                    ForEach(Array(saveManager.saveSlots.keys.sorted()), id: \.self) { slot in
+                        if let save = saveManager.getSave(from: slot) {
+                            LoadSlotCard(
+                                slot: slot,
+                                saveData: save,
+                                onLoad: { loadGame(from: slot) }
+                            )
+                        }
+                    }
+
+                    // Empty state
+                    if !saveManager.hasSaves {
+                        VStack(spacing: 12) {
+                            Image(systemName: "tray")
+                                .font(.largeTitle)
+                                .foregroundColor(.secondary)
+                            Text(L10n.uiNoSaves.localized)
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.top, 40)
                     }
                 }
                 .padding()
@@ -403,9 +415,11 @@ struct StatDisplay: View {
     }
 }
 
+// MARK: - Save Slot Card
+
 struct SaveSlotCard: View {
     let slotNumber: Int
-    let saveData: GameSave?
+    let saveData: EngineSave?
     let onNewGame: () -> Void
     let onLoadGame: () -> Void
     let onDelete: () -> Void
@@ -430,29 +444,25 @@ struct SaveSlotCard: View {
             if let save = saveData {
                 // Existing save
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(save.characterName)
+                    Text(save.playerName)
                         .font(.title3)
                         .fontWeight(.bold)
 
                     HStack(spacing: 16) {
-                        Label("\(save.health)/\(save.maxHealth)", systemImage: "heart.fill")
+                        Label("\(save.playerHealth)/\(save.playerMaxHealth)", systemImage: "heart.fill")
                             .foregroundColor(.red)
-                        Label("\(save.faith)", systemImage: "sparkles")
+                        Label("\(save.playerFaith)", systemImage: "sparkles")
                             .foregroundColor(.yellow)
-                        Label("\(save.balance)", systemImage: "scale.3d")
+                        Label("\(save.playerBalance)", systemImage: "scale.3d")
                             .foregroundColor(.purple)
                     }
                     .font(.subheadline)
 
-                    HStack {
-                        Text(L10n.uiTurnNumber.localized(with: save.turnNumber))
-                        Text("•")
-                        Text(L10n.uiVictories.localized(with: save.encountersDefeated))
-                    }
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                    Text(L10n.dayNumber.localized(with: save.currentDay))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
 
-                    Text(save.formattedDate)
+                    Text(formatDate(save.savedAt))
                         .font(.caption2)
                         .foregroundColor(.secondary)
 
@@ -522,25 +532,33 @@ struct SaveSlotCard: View {
         .alert(L10n.uiOverwriteSave.localized, isPresented: $showingOverwriteAlert) {
             Button(L10n.uiCancel.localized, role: .cancel) { }
             Button(L10n.uiOverwrite.localized, role: .destructive) {
+                onDelete()
                 onNewGame()
             }
         } message: {
             Text(L10n.uiOverwriteConfirm.localized)
         }
     }
+
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
+    }
 }
 
 // MARK: - Load Slot Card (for Continue flow)
 
 struct LoadSlotCard: View {
-    let saveData: GameSave
+    let slot: Int
+    let saveData: EngineSave
     let onLoad: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Save info
             HStack {
-                Text(L10n.uiSlotNumber.localized(with: saveData.slotNumber))
+                Text(L10n.uiSlotNumber.localized(with: slot))
                     .font(.headline)
                 Spacer()
                 Image(systemName: "chevron.right")
@@ -548,29 +566,25 @@ struct LoadSlotCard: View {
             }
 
             VStack(alignment: .leading, spacing: 8) {
-                Text(saveData.characterName)
+                Text(saveData.playerName)
                     .font(.title3)
                     .fontWeight(.bold)
 
                 HStack(spacing: 16) {
-                    Label("\(saveData.health)/\(saveData.maxHealth)", systemImage: "heart.fill")
+                    Label("\(saveData.playerHealth)/\(saveData.playerMaxHealth)", systemImage: "heart.fill")
                         .foregroundColor(.red)
-                    Label("\(saveData.faith)", systemImage: "sparkles")
+                    Label("\(saveData.playerFaith)", systemImage: "sparkles")
                         .foregroundColor(.yellow)
-                    Label("\(saveData.balance)", systemImage: "scale.3d")
+                    Label("\(saveData.playerBalance)", systemImage: "scale.3d")
                         .foregroundColor(.purple)
                 }
                 .font(.subheadline)
 
-                HStack {
-                    Text(L10n.uiTurnNumber.localized(with: saveData.turnNumber))
-                    Text("•")
-                    Text(L10n.uiVictories.localized(with: saveData.encountersDefeated))
-                }
-                .font(.caption)
-                .foregroundColor(.secondary)
+                Text(L10n.dayNumber.localized(with: saveData.currentDay))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
 
-                Text(saveData.formattedDate)
+                Text(formatDate(saveData.savedAt))
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
@@ -581,6 +595,13 @@ struct LoadSlotCard: View {
         .onTapGesture {
             onLoad()
         }
+    }
+
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
     }
 }
 
@@ -598,7 +619,7 @@ struct HeroSelectionCard: View {
                 Image(systemName: hero.icon)
                     .font(.system(size: 40))
 
-                Text(hero.name)
+                Text(hero.name.localized)
                     .font(.headline)
                     .fontWeight(.bold)
                     .lineLimit(1)

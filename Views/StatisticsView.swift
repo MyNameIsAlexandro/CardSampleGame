@@ -1,19 +1,16 @@
 import SwiftUI
+import TwilightEngine
 
 struct StatisticsView: View {
     @StateObject private var saveManager = SaveManager.shared
     @Environment(\.dismiss) var dismiss
 
-    var allSaves: [GameSave] {
-        [1, 2, 3].compactMap { saveManager.loadGame(from: $0) }
-    }
-
-    var bestEncountersDefeated: Int {
-        allSaves.map { $0.encountersDefeated }.max() ?? 0
+    var allSaves: [EngineSave] {
+        saveManager.allSaves
     }
 
     var longestSurvival: Int {
-        allSaves.map { $0.turnNumber }.max() ?? 0
+        allSaves.map { $0.currentDay }.max() ?? 0
     }
 
     var totalGames: Int {
@@ -49,13 +46,6 @@ struct StatisticsView: View {
                             )
 
                             StatCard(
-                                icon: "trophy.fill",
-                                title: L10n.statsBestResult.localized,
-                                value: "\(bestEncountersDefeated)",
-                                color: .orange
-                            )
-
-                            StatCard(
                                 icon: "clock.fill",
                                 title: L10n.statsLongestSurvival.localized,
                                 value: L10n.statsTurnsCount.localized(with: longestSurvival),
@@ -67,30 +57,14 @@ struct StatisticsView: View {
                     .background(Color(UIColor.secondarySystemBackground))
                     .cornerRadius(12)
 
-                    // Leaderboard
+                    // Game Records
                     if !allSaves.isEmpty {
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text(L10n.statsLeaderboard.localized)
-                                .font(.headline)
-
-                            ForEach(Array(allSaves.sorted(by: { $0.encountersDefeated > $1.encountersDefeated }).enumerated()), id: \.element.id) { index, save in
-                                LeaderboardRow(
-                                    rank: index + 1,
-                                    save: save
-                                )
-                            }
-                        }
-                        .padding()
-                        .background(Color(UIColor.secondarySystemBackground))
-                        .cornerRadius(12)
-
-                        // Detailed Game Records
                         VStack(alignment: .leading, spacing: 16) {
                             Text(L10n.statsHistory.localized)
                                 .font(.headline)
 
-                            ForEach(allSaves.sorted(by: { $0.timestamp > $1.timestamp })) { save in
-                                GameRecordCard(save: save)
+                            ForEach(Array(allSaves.enumerated()), id: \.element.savedAt) { index, save in
+                                GameRecordCard(slot: index + 1, save: save)
                             }
                         }
                         .padding()
@@ -156,74 +130,24 @@ struct StatCard: View {
     }
 }
 
-struct LeaderboardRow: View {
-    let rank: Int
-    let save: GameSave
-
-    var rankIcon: String {
-        switch rank {
-        case 1: return "🥇"
-        case 2: return "🥈"
-        case 3: return "🥉"
-        default: return "\(rank)."
-        }
-    }
-
-    var body: some View {
-        HStack(spacing: 12) {
-            Text(rankIcon)
-                .font(.title2)
-                .frame(width: 40)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(save.characterName)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-
-                HStack(spacing: 8) {
-                    Label("\(save.encountersDefeated)", systemImage: "star.fill")
-                        .font(.caption)
-                        .foregroundColor(.orange)
-                    Label("\(save.turnNumber)", systemImage: "clock.fill")
-                        .font(.caption)
-                        .foregroundColor(.blue)
-                }
-            }
-
-            Spacer()
-
-            VStack(alignment: .trailing, spacing: 4) {
-                Text(L10n.uiSlotNumber.localized(with: save.slotNumber))
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                Text(save.formattedDate)
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-            }
-        }
-        .padding()
-        .background(Color(UIColor.tertiarySystemBackground))
-        .cornerRadius(8)
-    }
-}
-
 struct GameRecordCard: View {
-    let save: GameSave
+    let slot: Int
+    let save: EngineSave
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(save.characterName)
+                    Text(save.playerName)
                         .font(.headline)
-                    Text(L10n.uiSlotNumber.localized(with: save.slotNumber))
+                    Text(L10n.uiSlotNumber.localized(with: slot))
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
 
                 Spacer()
 
-                Text(save.formattedDate)
+                Text(formatDate(save.savedAt))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -236,11 +160,11 @@ struct GameRecordCard: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                     HStack(spacing: 12) {
-                        Label("\(save.health)/\(save.maxHealth)", systemImage: "heart.fill")
+                        Label("\(save.playerHealth)/\(save.playerMaxHealth)", systemImage: "heart.fill")
                             .foregroundColor(.red)
-                        Label("\(save.faith)", systemImage: "sparkles")
+                        Label("\(save.playerFaith)", systemImage: "sparkles")
                             .foregroundColor(.yellow)
-                        Label("\(save.balance)", systemImage: "scale.3d")
+                        Label("\(save.playerBalance)", systemImage: "scale.3d")
                             .foregroundColor(.purple)
                     }
                     .font(.caption)
@@ -252,28 +176,21 @@ struct GameRecordCard: View {
                     Text(L10n.statsProgress.localized)
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    HStack(spacing: 12) {
-                        VStack(alignment: .trailing, spacing: 2) {
-                            Text("\(save.encountersDefeated)")
-                                .font(.headline)
-                            Text(L10n.statsVictoriesLabel.localized)
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                        }
-                        VStack(alignment: .trailing, spacing: 2) {
-                            Text("\(save.turnNumber)")
-                                .font(.headline)
-                            Text(L10n.statsTurnsLabel.localized)
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
-                        }
-                    }
+                    Text(L10n.dayNumber.localized(with: save.currentDay))
+                        .font(.headline)
                 }
             }
         }
         .padding()
         .background(Color(UIColor.tertiarySystemBackground))
         .cornerRadius(10)
+    }
+
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
     }
 }
 

@@ -1,0 +1,37 @@
+{
+  "pack.name": "Twilight Marches - Act I",
+  "pack.description": "The first act of Twilight Marches campaign",
+
+  "region.village.name": "Village by the Road",
+  "region.village.description": "A small village on the edge of the borderlands",
+  "region.oak.name": "Ancient Oak",
+  "region.oak.description": "The sacred oak stands at the crossroads",
+  "region.forest.name": "Twilight Forest",
+  "region.forest.description": "Dark trees whisper ancient secrets",
+  "region.swamp.name": "Cursed Swamp",
+  "region.swamp.description": "Mists rise from the murky waters",
+  "region.mountain.name": "Stone Mountain",
+  "region.mountain.description": "Ancient peaks guard forgotten secrets",
+  "region.breach.name": "The Breach",
+  "region.breach.description": "Where the boundary between worlds grows thin",
+  "region.dark_lowland.name": "Black Lowlands",
+  "region.dark_lowland.description": "The final frontier before darkness",
+
+  "anchor.chapel.name": "Chapel of Light",
+  "anchor.oak.name": "Heart of the Oak",
+  "anchor.stone.name": "Stone of Protection",
+  "anchor.sanctuary.name": "Forest Sanctuary",
+  "anchor.seal.name": "Mountain Seal",
+  "anchor.gates.name": "Border Gates",
+
+  "card.defender_blessing.name": "Defender's Blessing",
+  "card.defender_blessing.description": "A reward for completing the main quest. Permanently increases defense by 2.",
+  "card.anchor_power.name": "Anchor's Power",
+  "card.anchor_power.description": "Draw from the anchors' power. Heal 5 and gain 1 faith.",
+  "card.forest_blessing.name": "Forest Blessing",
+  "card.forest_blessing.description": "Loot from defeating a Leshy. Heal 3 in forest regions.",
+  "card.mountain_blessing.name": "Mountain Blessing",
+  "card.mountain_blessing.description": "Reward from the Mountain Spirit. +3 defense for one battle.",
+  "card.witch_knowledge.name": "Witch's Knowledge",
+  "card.witch_knowledge.description": "Dark wisdom from the swamp witch. Draw 2 cards."
+}

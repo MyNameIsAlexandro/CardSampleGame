@@ -810,7 +810,19 @@
 "loading.validating.cache" = "Проверка кеша...";
 "loading.from.cache" = "Загрузка из кеша...";
 "loading.saving.cache" = "Сохранение кеша...";
+"loading.from.cache.indicator" = "Быстрая загрузка из кеша";
+"loading.summary" = "Загружено %d элементов контента";
 "app.title" = "Сумрачные Пределы";
+
+// MARK: - Loading Items
+"loading.item.regions" = "Регионы";
+"loading.item.events" = "События";
+"loading.item.quests" = "Квесты";
+"loading.item.anchors" = "Якоря";
+"loading.item.heroes" = "Герои";
+"loading.item.cards" = "Карты";
+"loading.item.enemies" = "Враги";
+"loading.item.localization" = "Языки";
 
 // MARK: - ViewModels/GameViewModel
 "default.player.name" = "Герой";
@@ -1020,3 +1032,26 @@
 "error.card.not.in.hand" = "Карта %@ не в руке";
 "error.not.enough.actions" = "Недостаточно действий";
 "error.invalid.target" = "Недопустимая цель";
+
+// MARK: - Save format labels
+"ui.engine.format" = "Новый формат";
+"ui.no.saves" = "Нет сохранений";
+
+// MARK: - Save Compatibility Errors (Epic 7)
+"error.save.not.found" = "Сохранение в слоте %d не найдено";
+"error.incompatible.save" = "Не удалось загрузить: несовместимое сохранение";
+"error.save.decoding.failed" = "Ошибка чтения сохранения: %@";
+
+// MARK: - CombatCalculator log messages
+"calc.hit" = "✅ ПОПАДАНИЕ!";
+"calc.miss" = "❌ ПРОМАХ!";
+"calc.attack.vs.defense" = "📊 Атака: %d vs Защита: %d";
+"calc.strength" = "Сила %d";
+"calc.bonus.dice" = "+%d бонус кубиков";
+"calc.bonus.damage" = "+%d бонус урона";
+"calc.damage" = "💥 Урон: %d";
+"calc.base.damage" = "   Базовый: %d (атака - защита + 2)";
+"calc.hero.ability.dice" = "Способность героя (+%d кубик)";
+"calc.hero.ability" = "Способность героя";
+"calc.curse.weakness" = "Слабость";
+"calc.curse.shadow.of.nav" = "Тень Нави";

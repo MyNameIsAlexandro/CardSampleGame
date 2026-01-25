@@ -1,4 +1,6 @@
 import XCTest
+import TwilightEngine
+
 @testable import CardSampleGame
 
 /// Audit Gate Tests - Required for "фундамент для будущих игр" approval
@@ -120,12 +122,16 @@ final class AuditGateTests: XCTestCase {
         // Verify that ContentRegistry uses manifest.entryRegionId
         let registry = ContentRegistry.shared
 
-        // If no packs loaded, entryRegionId should be nil, not "village"
-        if let firstPack = registry.loadedPacks.values.first {
-            // Pack is loaded - verify manifest has entryRegionId
+        // Campaign packs should have entryRegionId, character packs don't need it
+        let campaignPacks = registry.loadedPacks.values.filter {
+            $0.manifest.packType == .campaign
+        }
+
+        for pack in campaignPacks {
+            // Campaign packs must specify entryRegionId
             XCTAssertNotNil(
-                firstPack.manifest.entryRegionId,
-                "Pack manifest must specify entryRegionId"
+                pack.manifest.entryRegionId,
+                "Campaign pack '\(pack.manifest.packId)' must specify entryRegionId"
             )
         }
 
@@ -263,21 +269,114 @@ final class AuditGateTests: XCTestCase {
         )
     }
 
-    /// Gate test: No system random in Engine/Core
+    /// Gate test: No system random in Engine/Core and core paths
     /// Requirement: "статический scan по randomElement/shuffled/Double.random"
-    func testNoSystemRandomInEngineCore() {
-        // This is primarily a code review requirement
-        // The test documents that:
-        // 1. CoreGameEngine.processWorldDegradation uses WorldRNG.shared.nextDouble()
-        // 2. CoreGameEngine.generateEvent uses WorldRNG.shared.randomElement()
-        // 3. TwilightGameEngine uses WorldRNG for all random operations
+    func testNoSystemRandomInEngineCore() throws {
+        // Get project root directory from compile-time path
+        let testFile = URL(fileURLWithPath: #filePath)
+        let projectRoot = testFile
+            .deletingLastPathComponent()  // Engine
+            .deletingLastPathComponent()  // CardSampleGameTests
+            .deletingLastPathComponent()  // Project root
 
-        // Verify WorldRNG provides deterministic results
+        // Core paths to scan for forbidden random APIs
+        let corePaths = [
+            "Engine/Core",
+            "Engine/ContentPacks",
+            "Engine/Events",
+            "Engine/Combat",
+            "Engine/Quest",
+            "Engine/Cards",
+            "Engine/Heroes",
+            "Engine/Modules",
+            "Engine/Config"
+        ]
+
+        // Forbidden patterns (system random APIs)
+        let forbiddenPatterns = [
+            ".randomElement()",      // Array.randomElement()
+            ".shuffled()",           // Array.shuffled()
+            "Int.random(",           // Int.random(in:)
+            "Double.random(",        // Double.random(in:)
+            "UInt64.random(",        // UInt64.random(in:)
+            "Bool.random(",          // Bool.random()
+            "arc4random",            // C random
+            "drand48"                // C random
+        ]
+
+        // Allowed contexts (where system random is OK)
+        let allowedContexts = [
+            "WorldRNG",              // Our deterministic RNG
+            "// ",                   // Single-line comments
+            "/// ",                  // Doc comments
+            "/* ",                   // Block comments
+            "* "                     // Block comment continuation
+        ]
+
+        // Files with allowed exceptions (e.g., seed generation)
+        let allowedExceptions: [String: [String]] = [
+            "GameRuntimeState.swift": ["UInt64.random("]  // Initial seed generation is OK
+        ]
+
+        var violations: [String] = []
+
+        for relativePath in corePaths {
+            let dirURL = projectRoot.appendingPathComponent(relativePath)
+            guard FileManager.default.fileExists(atPath: dirURL.path) else { continue }
+
+            let swiftFiles = findSwiftFiles(in: dirURL)
+
+            for fileURL in swiftFiles {
+                let fileName = fileURL.lastPathComponent
+                let content = try String(contentsOf: fileURL, encoding: .utf8)
+                let lines = content.components(separatedBy: .newlines)
+
+                for (index, line) in lines.enumerated() {
+                    let trimmedLine = line.trimmingCharacters(in: .whitespaces)
+                    let lineNumber = index + 1
+
+                    // Check each forbidden pattern
+                    for pattern in forbiddenPatterns {
+                        if line.contains(pattern) {
+                            // Check if it's in an allowed context
+                            let isAllowedContext = allowedContexts.contains { context in
+                                trimmedLine.hasPrefix(context) || line.contains(context)
+                            }
+
+                            // Check if it's an allowed exception for this file
+                            let isAllowedException = allowedExceptions[fileName]?.contains { exception in
+                                pattern.contains(exception) || exception.contains(pattern)
+                            } ?? false
+
+                            if !isAllowedContext && !isAllowedException {
+                                violations.append("  \(fileName):\(lineNumber): \(trimmedLine) [pattern: \(pattern)]")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if !violations.isEmpty {
+            let message = """
+            Found \(violations.count) system random API usages in core engine paths:
+            \(violations.joined(separator: "\n"))
+
+            All randomness in Engine/Core must use WorldRNG for determinism.
+            Replace:
+            - .randomElement() → WorldRNG.shared.randomElement(from:)
+            - .shuffled() → WorldRNG.shared.shuffle(&array)
+            - Int.random(in:) → WorldRNG.shared.nextInt(in:)
+            - Double.random(in:) → WorldRNG.shared.nextDouble()
+            """
+            XCTFail(message)
+        }
+
+        // Also verify WorldRNG determinism
         WorldRNG.shared.setSeed(42)
         let val1 = WorldRNG.shared.nextDouble()
         WorldRNG.shared.setSeed(42)
         let val2 = WorldRNG.shared.nextDouble()
-
         XCTAssertEqual(val1, val2, "WorldRNG must be deterministic with same seed")
     }
 
@@ -298,16 +397,101 @@ final class AuditGateTests: XCTestCase {
 
     /// Gate test: Save stores pack versions and validates on load
     func testSaveLoadValidatesPackVersions() {
-        // Verify EngineSave structure includes pack version info
-        // This is a design requirement check
+        // Get currently loaded packs to create a valid activePackSet
+        let registry = ContentRegistry.shared
+        var activePackSet: [String: String] = [:]
+        for (packId, pack) in registry.loadedPacks {
+            activePackSet[packId] = pack.manifest.version.description
+        }
 
-        // The save system should store:
-        // - coreVersion
-        // - activePackSet (packId → version)
-        // - formatVersion
+        // Create a test save with pack version info
+        let testSave = EngineSave(
+            version: EngineSave.currentVersion,
+            savedAt: Date(),
+            gameDuration: 100,
+            coreVersion: EngineSave.currentCoreVersion,
+            activePackSet: activePackSet,
+            formatVersion: EngineSave.currentFormatVersion,
+            primaryCampaignPackId: nil,
+            playerName: "Test",
+            heroId: nil,
+            playerHealth: 10,
+            playerMaxHealth: 10,
+            playerFaith: 5,
+            playerMaxFaith: 5,
+            playerBalance: 50,
+            deckCardIds: [],
+            handCardIds: [],
+            discardCardIds: [],
+            currentDay: 1,
+            worldTension: 0,
+            lightDarkBalance: 50,
+            currentRegionId: nil,
+            regions: [],
+            mainQuestStage: 0,
+            activeQuestIds: [],
+            completedQuestIds: [],
+            questStages: [:],
+            completedEventIds: [],
+            eventLog: [],
+            worldFlags: [:],
+            rngSeed: nil
+        )
 
-        // Note: Implementation requires EngineSave to include these fields
-        // This test documents the requirement
+        // Verify save contains required version fields
+        XCTAssertFalse(testSave.coreVersion.isEmpty, "Save must store coreVersion")
+        XCTAssertNotNil(testSave.activePackSet, "Save must store activePackSet")
+        XCTAssertGreaterThan(testSave.formatVersion, 0, "Save must have formatVersion > 0")
+
+        // Verify validation works - save with matching pack versions should be loadable
+        let compatibility = testSave.validateCompatibility(with: registry)
+        XCTAssertTrue(compatibility.isLoadable, "Save with matching pack versions should be loadable")
+
+        // Test that mismatched pack triggers warning/error
+        let mismatchedSave = EngineSave(
+            version: EngineSave.currentVersion,
+            savedAt: Date(),
+            gameDuration: 100,
+            coreVersion: EngineSave.currentCoreVersion,
+            activePackSet: ["nonexistent_pack": "1.0.0"],
+            formatVersion: EngineSave.currentFormatVersion,
+            primaryCampaignPackId: nil,
+            playerName: "Test",
+            heroId: nil,
+            playerHealth: 10,
+            playerMaxHealth: 10,
+            playerFaith: 5,
+            playerMaxFaith: 5,
+            playerBalance: 50,
+            deckCardIds: [],
+            handCardIds: [],
+            discardCardIds: [],
+            currentDay: 1,
+            worldTension: 0,
+            lightDarkBalance: 50,
+            currentRegionId: nil,
+            regions: [],
+            mainQuestStage: 0,
+            activeQuestIds: [],
+            completedQuestIds: [],
+            questStages: [:],
+            completedEventIds: [],
+            eventLog: [],
+            worldFlags: [:],
+            rngSeed: nil
+        )
+
+        let mismatchedCompatibility = mismatchedSave.validateCompatibility(with: registry)
+        // Missing packs result in warnings, not errors - save is still loadable
+        // This allows users to continue playing even if some content is unavailable
+        XCTAssertTrue(mismatchedCompatibility.isLoadable, "Save with missing pack should still be loadable (with warnings)")
+
+        // But it should have warnings
+        if case .compatible(let warnings) = mismatchedCompatibility {
+            XCTAssertFalse(warnings.isEmpty, "Missing pack should generate warnings")
+        } else if case .fullyCompatible = mismatchedCompatibility {
+            XCTFail("Missing pack should generate at least a warning")
+        }
     }
 
     // MARK: - EPIC 5: Localization Support
@@ -408,9 +592,10 @@ final class AuditGateTests: XCTestCase {
         return results
     }
 
-    // MARK: - EPIC 2.2: Contract Tests Against Production Engine
+    // MARK: - EPIC 1.2: One Engine = One Truth
 
     /// Gate test: Contract tests run against production engine, not test stub
+    /// Also verifies that TwilightGameEngine is the ONLY runtime engine
     func testContractsAgainstProductionEngine() {
         // Verify that TwilightGameEngine (production) can be tested
         let engine = TwilightGameEngine()
@@ -421,6 +606,141 @@ final class AuditGateTests: XCTestCase {
 
         // Contract: state changes are observable
         // (This is verified by the Engine-First architecture)
+    }
+
+    /// Gate test: No alternative runtime engines exist in TwilightEngine package
+    /// Requirement: "Production runtime engine должен быть единственным исполняемым движком"
+    func testNoAlternativeEnginesExist() throws {
+        // Get project root directory from compile-time path
+        let testFile = URL(fileURLWithPath: #filePath)
+        let projectRoot = testFile
+            .deletingLastPathComponent()  // Engine
+            .deletingLastPathComponent()  // CardSampleGameTests
+            .deletingLastPathComponent()  // Project root
+
+        let coreDir = projectRoot.appendingPathComponent("Packages/TwilightEngine/Sources/TwilightEngine/Core")
+
+        // Scan for files with "Engine" in the name
+        let engineFiles = try FileManager.default.contentsOfDirectory(at: coreDir, includingPropertiesForKeys: nil)
+            .filter { $0.pathExtension == "swift" }
+            .filter { $0.lastPathComponent.contains("Engine") }
+            .map { $0.lastPathComponent }
+
+        // Only TwilightGameEngine should exist as the runtime engine
+        // Other "Engine" files (TimeEngine, PressureEngine) are subsystems, not full runtime engines
+        let alternativeEngines = engineFiles.filter { file in
+            // TwilightGameEngine is the production engine
+            if file == "TwilightGameEngine.swift" { return false }
+            // TimeEngine and PressureEngine are subsystems, not runtime engines
+            if file == "TimeEngine.swift" || file == "PressureEngine.swift" { return false }
+            // EngineProtocols.swift contains protocols, not a runtime engine
+            if file == "EngineProtocols.swift" { return false }
+            // EngineSave.swift is a data model, not a runtime engine
+            if file == "EngineSave.swift" { return false }
+            // Any other "Engine" file is a potential violation
+            return true
+        }
+
+        XCTAssertTrue(
+            alternativeEngines.isEmpty,
+            "Found alternative runtime engines that should be removed: \(alternativeEngines). " +
+            "TwilightGameEngine должен быть единственным runtime движком."
+        )
+    }
+
+    // MARK: - EPIC 2.1: Single Source of Content (Packs only)
+
+    /// Gate test: Runtime does not access code registries directly
+    /// Requirement: "Вся загрузка карт/героев/квестов/ивентов осуществляется через ContentRegistry"
+    func testRuntimeDoesNotAccessCodeRegistries() throws {
+        // Get project root directory from compile-time path
+        let testFile = URL(fileURLWithPath: #filePath)
+        let projectRoot = testFile
+            .deletingLastPathComponent()  // Engine
+            .deletingLastPathComponent()  // CardSampleGameTests
+            .deletingLastPathComponent()  // Project root
+
+        // Directories to check (production code only, excluding tests)
+        // Engine code is now in TwilightEngine package
+        let productionDirs = ["Packages/TwilightEngine/Sources/TwilightEngine", "App", "Views", "Models", "Utilities"]
+
+        // Patterns that indicate direct code registry access (should use ContentRegistry/CardFactory)
+        let forbiddenPatterns = [
+            "CardRegistry.shared",           // Direct CardRegistry access
+            "TwilightMarchesCards",          // Hardcoded card definitions
+            "registerBuiltInCards",          // Built-in card registration
+            "HeroRegistry.shared.register"   // Direct hero registration (reading is OK)
+        ]
+
+        // Allowed patterns (these files ARE the registries, they can access themselves)
+        let allowedFiles = [
+            "CardRegistry.swift",
+            "CardFactory.swift",  // CardFactory internally manages registries
+            "ContentRegistry.swift",
+            "HeroRegistry.swift"
+        ]
+
+        var violations: [String] = []
+
+        for dir in productionDirs {
+            let dirURL = projectRoot.appendingPathComponent(dir)
+            guard FileManager.default.fileExists(atPath: dirURL.path) else { continue }
+
+            let swiftFiles = findSwiftFiles(in: dirURL)
+            for fileURL in swiftFiles {
+                let fileName = fileURL.lastPathComponent
+
+                // Skip allowed files (registries themselves)
+                if allowedFiles.contains(fileName) { continue }
+
+                let fileViolations = try checkForbiddenPatternsInFile(fileURL, patterns: forbiddenPatterns)
+                violations.append(contentsOf: fileViolations)
+            }
+        }
+
+        if !violations.isEmpty {
+            let message = """
+            Found \(violations.count) direct code registry accesses in production code:
+            \(violations.joined(separator: "\n"))
+
+            Runtime должен использовать ContentRegistry/CardFactory для загрузки контента.
+            Прямой доступ к CardRegistry.shared или TwilightMarchesCards запрещён.
+            """
+            XCTFail(message)
+        }
+    }
+
+    /// Check a Swift file for forbidden patterns not in comments
+    private func checkForbiddenPatternsInFile(_ fileURL: URL, patterns: [String]) throws -> [String] {
+        let content = try String(contentsOf: fileURL, encoding: .utf8)
+        let lines = content.components(separatedBy: .newlines)
+        var violations: [String] = []
+
+        for (index, line) in lines.enumerated() {
+            let trimmedLine = line.trimmingCharacters(in: .whitespaces)
+            let lineNumber = index + 1
+
+            // Skip comments
+            if trimmedLine.hasPrefix("//") || trimmedLine.hasPrefix("/*") || trimmedLine.hasPrefix("*") {
+                continue
+            }
+
+            // Remove inline comments for pattern matching
+            var lineToCheck = trimmedLine
+            if let commentRange = lineToCheck.range(of: "//") {
+                lineToCheck = String(lineToCheck[..<commentRange.lowerBound])
+            }
+
+            // Check for forbidden patterns
+            for pattern in patterns {
+                if lineToCheck.contains(pattern) {
+                    let fileName = fileURL.lastPathComponent
+                    violations.append("  \(fileName):\(lineNumber): \(trimmedLine) [pattern: \(pattern)]")
+                }
+            }
+        }
+
+        return violations
     }
 }
 
@@ -655,6 +975,7 @@ extension AuditGateTests {
             coreVersion: EngineSave.currentCoreVersion,
             activePackSet: ["twilight_marches_campaign": "1.0.0"],
             formatVersion: EngineSave.currentFormatVersion,
+            primaryCampaignPackId: nil,
             playerName: "Test Hero",
             heroId: "warrior",  // Hero definition ID for data-driven hero system
             playerHealth: 10,
@@ -796,5 +1117,361 @@ extension AuditGateTests {
 
         // Enemy health should be 0, not negative
         XCTAssertEqual(engine.combatEnemyHealth, 0, "Enemy health should be 0, not negative")
+    }
+
+    // MARK: - EPIC 0.2: Release Configuration (Debug Prints)
+
+    /// Gate test: All print() statements must be wrapped in #if DEBUG
+    /// Requirement: "В Release сборке нет debug print'ов"
+    func testAllPrintStatementsAreDebugOnly() throws {
+        // Get project root directory from compile-time path
+        let testFile = URL(fileURLWithPath: #filePath)
+        let projectRoot = testFile
+            .deletingLastPathComponent()  // Engine
+            .deletingLastPathComponent()  // CardSampleGameTests
+            .deletingLastPathComponent()  // Project root
+
+        // Skip if project source not accessible (e.g., running on CI without source)
+        guard FileManager.default.fileExists(atPath: projectRoot.path) else {
+            throw XCTSkip("Project source not accessible at \(projectRoot.path)")
+        }
+
+        // Directories to check (production code only)
+        let productionDirs = [
+            "Engine",
+            "App",
+            "Views",
+            "Models",
+            "Utilities"
+        ]
+
+        var violations: [String] = []
+
+        for dir in productionDirs {
+            let dirURL = projectRoot.appendingPathComponent(dir)
+
+            // Skip if directory doesn't exist
+            guard FileManager.default.fileExists(atPath: dirURL.path) else {
+                continue
+            }
+
+            let swiftFiles = findSwiftFiles(in: dirURL)
+
+            for fileURL in swiftFiles {
+                let fileViolations = try checkPrintStatementsInFile(fileURL)
+                violations.append(contentsOf: fileViolations)
+            }
+        }
+
+        // Report all violations
+        if !violations.isEmpty {
+            let message = "Found \(violations.count) print() statements not wrapped in #if DEBUG:\n" +
+                violations.joined(separator: "\n")
+            XCTFail(message)
+        }
+    }
+
+    /// Find all Swift files recursively in a directory
+    private func findSwiftFiles(in directory: URL) -> [URL] {
+        var result: [URL] = []
+        let fileManager = FileManager.default
+
+        guard let enumerator = fileManager.enumerator(
+            at: directory,
+            includingPropertiesForKeys: [.isRegularFileKey],
+            options: [.skipsHiddenFiles]
+        ) else {
+            return result
+        }
+
+        for case let fileURL as URL in enumerator {
+            if fileURL.pathExtension == "swift" {
+                result.append(fileURL)
+            }
+        }
+
+        return result
+    }
+
+    /// Check a Swift file for print() statements not in #if DEBUG blocks
+    /// Returns array of violation descriptions
+    private func checkPrintStatementsInFile(_ fileURL: URL) throws -> [String] {
+        let content = try String(contentsOf: fileURL, encoding: .utf8)
+        let lines = content.components(separatedBy: .newlines)
+        var violations: [String] = []
+
+        // Track preprocessor directive stack
+        // Each entry is true if we're in a DEBUG-related block
+        var conditionalStack: [Bool] = []
+        var inPreviewBlock = false
+        var previewBraceDepth = 0
+
+        for (index, line) in lines.enumerated() {
+            let trimmedLine = line.trimmingCharacters(in: .whitespaces)
+            let lineNumber = index + 1
+
+            // Track #if / #elseif / #else / #endif blocks
+            if trimmedLine.hasPrefix("#if DEBUG") || trimmedLine.hasPrefix("#if compiler") {
+                // Start of DEBUG or compiler-specific block (compiler is also debug-only)
+                conditionalStack.append(true)
+            } else if trimmedLine.hasPrefix("#if ") || trimmedLine.hasPrefix("#if(") {
+                // Start of non-DEBUG conditional
+                conditionalStack.append(false)
+            } else if trimmedLine.hasPrefix("#elseif DEBUG") {
+                // Switching to DEBUG branch
+                if !conditionalStack.isEmpty {
+                    conditionalStack[conditionalStack.count - 1] = true
+                }
+            } else if trimmedLine.hasPrefix("#elseif") || trimmedLine.hasPrefix("#else") {
+                // Switching to non-DEBUG branch (inverse of previous)
+                if !conditionalStack.isEmpty {
+                    conditionalStack[conditionalStack.count - 1] = false
+                }
+            } else if trimmedLine.hasPrefix("#endif") {
+                // End of conditional block
+                if !conditionalStack.isEmpty {
+                    conditionalStack.removeLast()
+                }
+            }
+
+            // Track #Preview blocks (SwiftUI previews are debug-only)
+            if trimmedLine.hasPrefix("#Preview") {
+                inPreviewBlock = true
+                previewBraceDepth = 0
+            }
+
+            // Track braces in preview block
+            if inPreviewBlock {
+                previewBraceDepth += trimmedLine.filter { $0 == "{" }.count
+                previewBraceDepth -= trimmedLine.filter { $0 == "}" }.count
+                if previewBraceDepth <= 0 && trimmedLine.contains("}") {
+                    inPreviewBlock = false
+                }
+            }
+
+            // Check if we're inside any DEBUG block
+            let isInsideDebugBlock = conditionalStack.contains(true)
+
+            // Skip if inside DEBUG or Preview block
+            if isInsideDebugBlock || inPreviewBlock {
+                continue
+            }
+
+            // Skip comments
+            if trimmedLine.hasPrefix("//") || trimmedLine.hasPrefix("/*") || trimmedLine.hasPrefix("*") {
+                continue
+            }
+
+            // Skip markdown files embedded in code (documentation)
+            if fileURL.lastPathComponent.hasSuffix(".md") {
+                continue
+            }
+
+            // Check for print() call
+            if trimmedLine.contains("print(") {
+                // Skip if it's in a comment on the same line
+                if let printIndex = trimmedLine.range(of: "print("),
+                   let commentIndex = trimmedLine.range(of: "//"),
+                   commentIndex.lowerBound < printIndex.lowerBound {
+                    continue
+                }
+
+                let fileName = fileURL.lastPathComponent
+                violations.append("  \(fileName):\(lineNumber): \(trimmedLine)")
+            }
+        }
+
+        return violations
+    }
+
+    // MARK: - EPIC 1.1: One Truth Runtime (No Legacy Models in Views)
+
+    /// Gate test: Views should not use legacy WorldState, GameState, or direct state mutations
+    /// Requirement: "Views/ не импортируют и не используют legacy модели"
+    func testNoLegacyWorldStateUsageInViews() throws {
+        // Get project root directory from compile-time path
+        let testFile = URL(fileURLWithPath: #filePath)
+        let projectRoot = testFile
+            .deletingLastPathComponent()  // Engine
+            .deletingLastPathComponent()  // CardSampleGameTests
+            .deletingLastPathComponent()  // Project root
+
+        let viewsDir = projectRoot.appendingPathComponent("Views")
+
+        // Skip if Views directory doesn't exist
+        guard FileManager.default.fileExists(atPath: viewsDir.path) else {
+            throw XCTSkip("Views directory not found at \(viewsDir.path)")
+        }
+
+        // Legacy patterns that should NOT appear in Views (outside of comments/previews)
+        let legacyPatterns = [
+            "WorldState",           // Legacy world state model
+            "GameState",            // Legacy game state model
+            "legacyPlayer",         // Legacy player reference
+            "legacyWorldState",     // Legacy world state reference
+            "connectToLegacy"       // Legacy connection method
+        ]
+
+        var violations: [String] = []
+        let swiftFiles = findSwiftFiles(in: viewsDir)
+
+        for fileURL in swiftFiles {
+            let fileViolations = try checkLegacyPatternsInFile(fileURL, patterns: legacyPatterns)
+            violations.append(contentsOf: fileViolations)
+        }
+
+        // Report all violations
+        if !violations.isEmpty {
+            let message = """
+            Found \(violations.count) legacy model usages in Views/:
+            \(violations.joined(separator: "\n"))
+
+            Views should only use TwilightGameEngine as the single source of truth.
+            Remove legacy WorldState/GameState references and use engine properties instead.
+            """
+            XCTFail(message)
+        }
+    }
+
+    /// Check a Swift file for legacy patterns not in comments or preview blocks
+    private func checkLegacyPatternsInFile(_ fileURL: URL, patterns: [String]) throws -> [String] {
+        let content = try String(contentsOf: fileURL, encoding: .utf8)
+        let lines = content.components(separatedBy: .newlines)
+        var violations: [String] = []
+
+        // Track if we're inside a preview block or multiline comment
+        var inPreviewBlock = false
+        var previewBraceDepth = 0
+        var inMultilineComment = false
+
+        for (index, line) in lines.enumerated() {
+            let trimmedLine = line.trimmingCharacters(in: .whitespaces)
+            let lineNumber = index + 1
+
+            // Track multiline comments
+            if trimmedLine.contains("/*") {
+                inMultilineComment = true
+            }
+            if trimmedLine.contains("*/") {
+                inMultilineComment = false
+                continue
+            }
+            if inMultilineComment {
+                continue
+            }
+
+            // Track #Preview blocks
+            if trimmedLine.hasPrefix("#Preview") || trimmedLine.contains("PreviewProvider") {
+                inPreviewBlock = true
+                previewBraceDepth = 0
+            }
+
+            // Track braces in preview block
+            if inPreviewBlock {
+                previewBraceDepth += trimmedLine.filter { $0 == "{" }.count
+                previewBraceDepth -= trimmedLine.filter { $0 == "}" }.count
+                if previewBraceDepth <= 0 && trimmedLine.contains("}") {
+                    inPreviewBlock = false
+                }
+                continue  // Skip preview content
+            }
+
+            // Skip single-line comments
+            if trimmedLine.hasPrefix("//") {
+                continue
+            }
+
+            // Remove inline comments for pattern matching
+            var lineToCheck = trimmedLine
+            if let commentRange = lineToCheck.range(of: "//") {
+                lineToCheck = String(lineToCheck[..<commentRange.lowerBound])
+            }
+
+            // Check for legacy patterns
+            for pattern in patterns {
+                if lineToCheck.contains(pattern) {
+                    let fileName = fileURL.lastPathComponent
+                    violations.append("  \(fileName):\(lineNumber): \(trimmedLine) [pattern: \(pattern)]")
+                }
+            }
+        }
+
+        return violations
+    }
+
+    // MARK: - EPIC 3.1: Stable IDs Everywhere
+
+    /// Gate test: Save/Load uses stable definition IDs, not UUIDs
+    /// Requirement: "Запрет UUID для контентных сущностей в Save/Load"
+    func testSaveLoadUsesStableDefinitionIdsOnly() throws {
+        // Get project root directory from compile-time path
+        let testFile = URL(fileURLWithPath: #filePath)
+        let projectRoot = testFile
+            .deletingLastPathComponent()  // Engine
+            .deletingLastPathComponent()  // CardSampleGameTests
+            .deletingLastPathComponent()  // Project root
+
+        let engineFile = projectRoot
+            .appendingPathComponent("Engine/Core/TwilightGameEngine.swift")
+
+        guard FileManager.default.fileExists(atPath: engineFile.path) else {
+            throw XCTSkip("TwilightGameEngine.swift not found at \(engineFile.path)")
+        }
+
+        let content = try String(contentsOf: engineFile, encoding: .utf8)
+
+        // Patterns that indicate UUID usage for content entity IDs (should use String definition IDs)
+        let forbiddenPatterns = [
+            "completedEventIds: Set<UUID>",      // Should be Set<String>
+            "completedEventIds.map { $0.uuidString }",  // Should not need conversion
+            "compactMap { UUID(uuidString:",    // Should not convert strings to UUIDs
+            "eventDefinitionIdToUUID"           // Helper should be removed
+        ]
+
+        var violations: [String] = []
+        let lines = content.components(separatedBy: .newlines)
+
+        for (index, line) in lines.enumerated() {
+            let trimmedLine = line.trimmingCharacters(in: .whitespaces)
+            let lineNumber = index + 1
+
+            // Skip comments
+            if trimmedLine.hasPrefix("//") || trimmedLine.hasPrefix("/*") || trimmedLine.hasPrefix("*") {
+                continue
+            }
+
+            for pattern in forbiddenPatterns {
+                if line.contains(pattern) {
+                    violations.append("  TwilightGameEngine.swift:\(lineNumber): \(trimmedLine) [pattern: \(pattern)]")
+                }
+            }
+        }
+
+        if !violations.isEmpty {
+            let message = """
+            Found \(violations.count) UUID usages for content entity IDs:
+            \(violations.joined(separator: "\n"))
+
+            Content entity IDs (events, quests, cards, heroes) should use stable String definition IDs,
+            not generated UUIDs. This ensures save compatibility across sessions.
+            """
+            XCTFail(message)
+        }
+
+        // Additional verification: completedEventIds should be declared as Set<String>
+        XCTAssertTrue(
+            content.contains("completedEventIds: Set<String>"),
+            "completedEventIds should be declared as Set<String>, not Set<UUID>"
+        )
+
+        // Verify EngineSave uses String IDs
+        let saveFile = projectRoot.appendingPathComponent("Engine/Core/EngineSave.swift")
+        if FileManager.default.fileExists(atPath: saveFile.path) {
+            let saveContent = try String(contentsOf: saveFile, encoding: .utf8)
+            XCTAssertTrue(
+                saveContent.contains("completedEventIds: [String]"),
+                "EngineSave.completedEventIds should be [String], not [UUID]"
+            )
+        }
     }
 }
