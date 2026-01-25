@@ -5,23 +5,17 @@ import XCTest
 /// These tests fail if magic numbers or hardcoded colors are found in View files
 /// Reference: AUDIT_ENGINE_FIRST_v1_1.md, Epic 9.1
 ///
-/// TODO: Fix remaining violations in WorldMapView.swift (legacy code)
-/// Run tests to see current violations: testNoMagicNumbersInViews, testNoHardcodedColorsInViews
-///
-/// When all violations are fixed, remove the skip conditions below.
+/// All View files are now fully compliant. These tests enforce:
+/// - No magic numbers (use Spacing.*, Sizes.*, CornerRadius.*)
+/// - No hardcoded colors (use AppColors.*)
+/// - No hardcoded opacity (use Opacity.*)
 final class DesignSystemComplianceTests: XCTestCase {
 
-    /// Set to false to enforce strict compliance (fails on any violation)
-    /// Set to true to only warn about legacy violations
-    private let allowLegacyViolations = true
+    /// Strict compliance mode - fails on any violation
+    private let allowLegacyViolations = false
 
-    /// Known legacy files that need further migration (tracked for gradual cleanup)
-    /// TODO: Complete migration for these files and remove from list
-    private let legacyFiles = [
-        "WorldMapView.swift",
-        "CardView.swift",      // Few remaining issues
-        "CombatView.swift"     // Few remaining issues
-    ]
+    /// No legacy files - all Views are now compliant
+    private let legacyFiles: [String] = []
 
     // MARK: - View Files to Audit
 

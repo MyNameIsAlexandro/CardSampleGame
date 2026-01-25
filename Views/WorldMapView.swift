@@ -72,7 +72,7 @@ struct WorldMapView: View {
                         Button(action: {
                             showingExitConfirmation = true
                         }) {
-                            HStack(spacing: 4) {
+                            HStack(spacing: Spacing.xxs) {
                                 Image(systemName: "chevron.left")
                                 Text(L10n.uiMenuButton.localized)
                             }
@@ -517,19 +517,19 @@ struct EngineRegionDetailView: View {
     var cardReceivedNotificationView: some View {
         ZStack {
             // Semi-transparent background
-            Color.black.opacity(0.5)
+            Color.black.opacity(Opacity.medium)
                 .ignoresSafeArea()
                 .onTapGesture {
-                    withAnimation(.easeOut(duration: 0.3)) {
+                    withAnimation(.easeOut(duration: AnimationDuration.slow)) {
                         showingCardNotification = false
                     }
                 }
 
-            VStack(spacing: 20) {
+            VStack(spacing: Spacing.xl) {
                 // Header
-                VStack(spacing: 8) {
+                VStack(spacing: Spacing.sm) {
                     Text("🃏")
-                        .font(.system(size: 48))
+                        .font(.system(size: Sizes.iconHero))
 
                     Text(L10n.cardsReceived.localized)
                         .font(.title2)
@@ -538,48 +538,48 @@ struct EngineRegionDetailView: View {
 
                     Text(L10n.addedToDeck.localized)
                         .font(.subheadline)
-                        .foregroundColor(.white.opacity(0.8))
+                        .foregroundColor(.white.opacity(Opacity.high))
                 }
 
                 // Cards list
-                VStack(spacing: 12) {
+                VStack(spacing: Spacing.md) {
                     ForEach(receivedCardNames, id: \.self) { cardName in
                         HStack {
                             Image(systemName: "rectangle.stack.badge.plus")
-                                .foregroundColor(.yellow)
+                                .foregroundColor(AppColors.faith)
                             Text(cardName)
                                 .fontWeight(.semibold)
                                 .foregroundColor(.white)
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
+                        .padding(.horizontal, Spacing.lg)
+                        .padding(.vertical, Spacing.smd)
                         .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.purple.opacity(0.6))
+                            RoundedRectangle(cornerRadius: CornerRadius.md)
+                                .fill(AppColors.dark.opacity(Opacity.mediumHigh))
                         )
                     }
                 }
 
                 // Dismiss button
                 Button(action: {
-                    withAnimation(.easeOut(duration: 0.3)) {
+                    withAnimation(.easeOut(duration: AnimationDuration.slow)) {
                         showingCardNotification = false
                     }
                 }) {
                     Text(L10n.buttonGreat.localized)
                         .font(.headline)
                         .foregroundColor(.white)
-                        .frame(minWidth: 120)
+                        .frame(minWidth: Sizes.buttonMinWidth)
                         .padding()
-                        .background(Color.blue)
-                        .cornerRadius(12)
+                        .background(AppColors.primary)
+                        .cornerRadius(CornerRadius.lg)
                 }
             }
-            .padding(24)
+            .padding(Spacing.xxl)
             .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(Color(UIColor.systemBackground).opacity(0.95))
-                    .shadow(radius: 20)
+                RoundedRectangle(cornerRadius: CornerRadius.xxl)
+                    .fill(Color(UIColor.systemBackground).opacity(Opacity.almostOpaque))
+                    .shadow(radius: Spacing.xl)
             )
             .transition(.scale.combined(with: .opacity))
         }
@@ -588,7 +588,7 @@ struct EngineRegionDetailView: View {
     // MARK: - Region Header
 
     var regionHeader: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Spacing.md) {
             HStack {
                 Image(systemName: region.type.icon)
                     .font(.largeTitle)
@@ -597,7 +597,7 @@ struct EngineRegionDetailView: View {
                 VStack(alignment: .leading) {
                     Text(region.type.displayName)
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
 
                     HStack {
                         Text(region.state.emoji)
@@ -612,23 +612,23 @@ struct EngineRegionDetailView: View {
 
                 // Current location indicator
                 if isPlayerHere {
-                    HStack(spacing: 4) {
+                    HStack(spacing: Spacing.xxs) {
                         Image(systemName: "person.fill")
                         Text(L10n.youAreHere.localized)
                     }
                     .font(.caption)
                     .fontWeight(.bold)
                     .foregroundColor(.white)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(Color.blue)
-                    .cornerRadius(12)
+                    .padding(.horizontal, Spacing.smd)
+                    .padding(.vertical, Spacing.xs)
+                    .background(AppColors.primary)
+                    .cornerRadius(CornerRadius.lg)
                 }
             }
 
             Text(regionDescription)
                 .font(.body)
-                .foregroundColor(.secondary)
+                .foregroundColor(AppColors.muted)
         }
     }
 
@@ -646,10 +646,10 @@ struct EngineRegionDetailView: View {
     // MARK: - Risk Info Section
 
     var riskInfoSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
             HStack {
                 Image(systemName: "exclamationmark.triangle.fill")
-                    .foregroundColor(region.state == .breach ? .red : .orange)
+                    .foregroundColor(region.state == .breach ? AppColors.danger : AppColors.warning)
                 Text(L10n.warningTitle.localized)
                     .font(.caption)
                     .fontWeight(.bold)
@@ -657,53 +657,53 @@ struct EngineRegionDetailView: View {
 
             Text(L10n.warningHighDanger.localized)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(AppColors.muted)
         }
         .padding()
         .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(region.state == .breach ? Color.red.opacity(0.1) : Color.orange.opacity(0.1))
+            RoundedRectangle(cornerRadius: CornerRadius.md)
+                .fill(region.state == .breach ? AppColors.danger.opacity(0.1) : AppColors.warning.opacity(0.1))
         )
     }
 
     // MARK: - Anchor Section
 
     func anchorSection(anchor: EngineAnchorState) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Spacing.md) {
             Text(L10n.anchorOfYav.localized)
                 .font(.headline)
 
-            HStack(spacing: 12) {
+            HStack(spacing: Spacing.md) {
                 Image(systemName: "flame")
                     .font(.title)
-                    .foregroundColor(.orange)
-                    .frame(width: 50, height: 50)
-                    .background(Circle().fill(Color.orange.opacity(0.2)))
+                    .foregroundColor(AppColors.power)
+                    .frame(width: Sizes.iconHero, height: Sizes.iconHero)
+                    .background(Circle().fill(AppColors.power.opacity(Opacity.faint)))
 
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: Spacing.xxs) {
                     Text(anchor.name)
                         .font(.subheadline)
                         .fontWeight(.bold)
 
                     // Integrity bar
-                    HStack(spacing: 4) {
+                    HStack(spacing: Spacing.xxs) {
                         Text(L10n.anchorIntegrity.localized + ":")
                             .font(.caption2)
                         GeometryReader { geometry in
                             ZStack(alignment: .leading) {
                                 Rectangle()
-                                    .fill(Color.gray.opacity(0.2))
-                                    .frame(height: 6)
+                                    .fill(AppColors.secondary.opacity(Opacity.faint))
+                                    .frame(height: Sizes.progressMedium)
 
                                 Rectangle()
                                     .fill(anchorIntegrityColor(anchor.integrity))
                                     .frame(
                                         width: geometry.size.width * CGFloat(anchor.integrity) / 100,
-                                        height: 6
+                                        height: Sizes.progressMedium
                                     )
                             }
                         }
-                        .frame(height: 6)
+                        .frame(height: Sizes.progressMedium)
 
                         Text("\(anchor.integrity)%")
                             .font(.caption2)
@@ -714,7 +714,7 @@ struct EngineRegionDetailView: View {
             }
             .padding()
             .background(
-                RoundedRectangle(cornerRadius: 12)
+                RoundedRectangle(cornerRadius: CornerRadius.lg)
                     .fill(Color(UIColor.tertiarySystemBackground))
             )
         }
@@ -727,11 +727,11 @@ struct EngineRegionDetailView: View {
     }
 
     var actionsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Spacing.md) {
             Text(L10n.availableActions.localized)
                 .font(.headline)
 
-            VStack(spacing: 8) {
+            VStack(spacing: Spacing.sm) {
                 // Travel action - only if player is NOT here
                 if !isPlayerHere {
                     let canTravel = engine.canTravelTo(regionId: region.id)
@@ -752,28 +752,28 @@ struct EngineRegionDetailView: View {
                     if canTravel {
                         HStack {
                             Image(systemName: "info.circle")
-                                .foregroundColor(.secondary)
+                                .foregroundColor(AppColors.muted)
                             Text(L10n.actionMoveToRegionHint.localized)
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(AppColors.muted)
                         }
-                        .padding(.vertical, 8)
+                        .padding(.vertical, Spacing.sm)
                     } else {
                         // Show routing hint for distant regions
                         HStack {
                             Image(systemName: "map")
-                                .foregroundColor(.orange)
+                                .foregroundColor(AppColors.warning)
                             if !routingHint.isEmpty {
                                 Text(L10n.goThroughFirst.localized(with: routingHint.joined(separator: ", ")))
                                     .font(.caption)
-                                    .foregroundColor(.orange)
+                                    .foregroundColor(AppColors.warning)
                             } else {
                                 Text(L10n.actionRegionNotDirectlyAccessible.localized)
                                     .font(.caption)
-                                    .foregroundColor(.orange)
+                                    .foregroundColor(AppColors.warning)
                             }
                         }
-                        .padding(.vertical, 8)
+                        .padding(.vertical, Spacing.sm)
                     }
                 }
 
@@ -846,9 +846,9 @@ struct EngineRegionDetailView: View {
                 Spacer()
             }
             .padding()
-            .foregroundColor(enabled ? .white : .gray)
-            .background(enabled ? color : Color.gray.opacity(0.3))
-            .cornerRadius(10)
+            .foregroundColor(enabled ? .white : AppColors.secondary)
+            .background(enabled ? color : AppColors.secondary.opacity(Opacity.light))
+            .cornerRadius(Spacing.smd)
         }
         .disabled(!enabled)
     }
@@ -857,17 +857,17 @@ struct EngineRegionDetailView: View {
 
     var stateColor: Color {
         switch region.state {
-        case .stable: return .green
-        case .borderland: return .orange
-        case .breach: return .red
+        case .stable: return AppColors.success
+        case .borderland: return AppColors.warning
+        case .breach: return AppColors.danger
         }
     }
 
     func anchorIntegrityColor(_ integrity: Int) -> Color {
         switch integrity {
-        case 70...100: return .green
-        case 30..<70: return .orange
-        default: return .red
+        case 70...100: return AppColors.success
+        case 30..<70: return AppColors.warning
+        default: return AppColors.danger
         }
     }
 
@@ -1059,7 +1059,7 @@ struct EngineEventLogView: View {
             List {
                 if engine.publishedEventLog.isEmpty {
                     Text(L10n.journalEmpty.localized)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
                         .padding()
                 } else {
                     ForEach(engine.publishedEventLog.reversed()) { entry in

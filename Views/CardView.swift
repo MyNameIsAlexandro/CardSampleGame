@@ -47,7 +47,7 @@ struct CardView: View {
                 VStack {
                     Image(systemName: cardIcon)
                         .font(.system(size: Sizes.iconRegion))
-                        .foregroundColor(.white.opacity(0.9))
+                        .foregroundColor(.white.opacity(Opacity.almostOpaque))
                 }
             }
             .frame(height: Sizes.cardHeightSmall + Spacing.xl)
@@ -123,7 +123,7 @@ struct CardView: View {
             }
             .padding(Spacing.sm)
         }
-        .frame(height: 320)
+        .frame(height: Sizes.cardHeightLarge + Sizes.cardHeightMedium)
         .background(AppColors.cardBackground)
         .cornerRadius(CornerRadius.lg)
         .shadow(color: isSelected ? AppColors.primary.opacity(Opacity.medium) : Color.black.opacity(Opacity.faint), radius: isSelected ? 8 : 4)
