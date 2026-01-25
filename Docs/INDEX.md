@@ -1,174 +1,104 @@
-# Карта Ответственности Документов
-## Documentation Responsibility Map
+# Documentation Index
+## Карта Документации
 
 > **GOVERNANCE DOCUMENT**
 >
-> Этот документ определяет **правила управления знаниями проекта**.
-> Все участники проекта обязаны следовать данной карте ответственности.
-> В случае спора — ссылайтесь на этот документ.
+> Этот документ определяет структуру документации проекта.
+> Все участники проекта обязаны следовать данной карте.
 
 ---
 
-## Какой документ открывать?
+## Активные Документы (Docs/)
 
-| Если ваш вопрос... | Документ-ответчик | Роль |
-|--------------------|-------------------|------|
-| "Какова философия игры? Что чувствует игрок?" | [GAME_DESIGN_DOCUMENT.md](./GAME_DESIGN_DOCUMENT.md) | **ВИДЕНИЕ** (Vision) |
-| "Как именно работает эта механика? Какая формула?" | [EXPLORATION_CORE_DESIGN.md](./EXPLORATION_CORE_DESIGN.md) | **СПЕЦИФИКАЦИЯ** (Spec) |
-| "Как правильно написать код? Куда положить файл?" | [ENGINE_ARCHITECTURE.md](./ENGINE_ARCHITECTURE.md) | **ЗАКОН** (Law) |
-| "Как работает Event Module? Inline vs Mini-Game?" | [EVENT_MODULE_ARCHITECTURE.md](./EVENT_MODULE_ARCHITECTURE.md) | **МОДУЛЬ** (Module) |
-| "Как работает система героев?" | [HEROES_MODULE.md](../Engine/Heroes/HEROES_MODULE.md) | **МОДУЛЬ** (Module) |
-| "Как работает система карт?" | [CARDS_MODULE.md](../Engine/Cards/CARDS_MODULE.md) | **МОДУЛЬ** (Module) |
-| "Как работает боевая система?" | [COMBAT_MODULE.md](../Engine/Combat/COMBAT_MODULE.md) | **МОДУЛЬ** (Module) |
-| "Где сейчас лежит этот класс? Какой статус у фичи?" | [TECHNICAL_DOCUMENTATION.md](./TECHNICAL_DOCUMENTATION.md) | **КАРТА КОДА** (Map) |
-| "Готова ли фича? Как её проверить?" | [Archive/QA_ACT_I_CHECKLIST.md](./Archive/QA_ACT_I_CHECKLIST.md) | **СУДЬЯ** (Judge) 📦 |
-| "Какой план миграции к Engine v1.0?" | [Archive/LEGACY_MIGRATION_PLAN.md](./Archive/LEGACY_MIGRATION_PLAN.md) | **ПЛАН** (Roadmap) 📦 |
-| "Как создать Content Pack?" | [CONTENT_PACK_GUIDE.md](./CONTENT_PACK_GUIDE.md) | **РУКОВОДСТВО** (Guide) |
-| "Как работает кеширование контента?" | [CONTENT_CACHE_GUIDE.md](./CONTENT_CACHE_GUIDE.md) | **РУКОВОДСТВО** (Guide) |
-| "Что мы уже сделали и зафиксировали?" | [Archive/CAMPAIGN_IMPLEMENTATION_REPORT.md](./Archive/CAMPAIGN_IMPLEMENTATION_REPORT.md) | **ИСТОРИЯ** (History) 📦 |
-| "Что изменилось с последнего аудита?" | [CHANGELOG.md](../CHANGELOG.md) | **ИЗМЕНЕНИЯ** (Changelog) |
+| Документ | Описание | Роль |
+|----------|----------|------|
+| [ENGINE_ARCHITECTURE.md](./ENGINE_ARCHITECTURE.md) | Архитектура движка, слои, инварианты | **ЗАКОН** |
+| [EVENT_MODULE_ARCHITECTURE.md](./EVENT_MODULE_ARCHITECTURE.md) | Событийная система, Inline/MiniGame | **МОДУЛЬ** |
+| [SPEC_CAMPAIGN_PACK.md](./SPEC_CAMPAIGN_PACK.md) | Спецификация Campaign Pack | **SPEC** |
+| [SPEC_BALANCE_PACK.md](./SPEC_BALANCE_PACK.md) | Спецификация Balance Pack | **SPEC** |
+| [SPEC_INVESTIGATOR_PACK.md](./SPEC_INVESTIGATOR_PACK.md) | Спецификация Investigator Pack | **SPEC** |
+| [QA_ACT_I_CHECKLIST.md](./QA_ACT_I_CHECKLIST.md) | Чеклист тестирования Act I | **QA** |
+| [CHANGELOG.md](./CHANGELOG.md) | История изменений | **ИСТОРИЯ** |
+| **INDEX.md** | Вы здесь | **НАВИГАЦИЯ** |
+
+### Русские версии спецификаций
+
+- [SPEC_CAMPAIGN_PACK_RU.md](./SPEC_CAMPAIGN_PACK_RU.md)
+- [SPEC_BALANCE_PACK_RU.md](./SPEC_BALANCE_PACK_RU.md)
+- [SPEC_INVESTIGATOR_PACK_RU.md](./SPEC_INVESTIGATOR_PACK_RU.md)
 
 ---
 
-## Иерархия Разрешения Конфликтов
+## Архив (Docs/Archive/)
 
-Если информация в документах противоречит друг другу, **побеждает документ выше в списке**:
+Устаревшие и исторические документы:
+
+| Документ | Описание |
+|----------|----------|
+| ARCHITECTURE.md | Старая версия архитектуры |
+| AUDIT_REPORT_v1.2.md | Отчёт аудита v1.2 |
+| CAMPAIGN_IMPLEMENTATION_REPORT.md | Отчёт реализации кампании |
+| CONTENT_CACHE_GUIDE.md | Руководство по кешированию |
+| CONTENT_PACK_GUIDE.md | Руководство по Content Pack |
+| EXPLORATION_CORE_DESIGN.md | Дизайн механик исследования |
+| GAME_DESIGN_DOCUMENT.md | Game Design Document |
+| LEGACY_MIGRATION_PLAN.md | План миграции на Engine-First |
+| MIGRATION_GUIDE.md | Руководство по миграции |
+| TECHNICAL_DOCUMENTATION.md | Техническая документация |
+
+---
+
+## Иерархия Приоритетов
+
+При конфликте информации между документами:
 
 ```
 1. ENGINE_ARCHITECTURE.md     ← Высший приоритет для КОДА
-2. EXPLORATION_CORE_DESIGN.md ← Высший приоритет для МЕХАНИК
-3. GAME_DESIGN_DOCUMENT.md    ← Высший приоритет для ИДЕИ
-4. TECHNICAL_DOCUMENTATION.md ← Отражение реальности
-```
-
-### Примеры разрешения конфликтов:
-
-| Конфликт | Победитель | Почему |
-|----------|------------|--------|
-| GDD: "сохранять в XML" vs ARCH: "JSON Codable" | ARCH | Код важнее формулировки |
-| GDD: "монстры бьют больно" vs CORE: "урон = power × 1.5" | CORE | Формула точнее |
-| CORE: формула верна, но убивает атмосферу | GDD | Идея важнее математики |
-| TECH противоречит ARCH | ARCH | TECH нужно обновить |
-
-### ❌ Анти-пример (как НЕ надо)
-
-> Разработчик меняет формулу деградации (`tensionIncrement = 3`),
-> ориентируясь только на `TECHNICAL_DOCUMENTATION.md`,
-> не проверив `ENGINE_ARCHITECTURE.md` и `QA_ACT_I_CHECKLIST.md`.
->
-> **Это нарушение governance.**
->
-> ✅ **Правильное действие:**
-> 1. Изменить формулу в `EXPLORATION_CORE_DESIGN.md`
-> 2. Обновить конфиг в `ENGINE_ARCHITECTURE.md` (если затрагивает архитектуру)
-> 3. Обновить/добавить тест в `QA_ACT_I_CHECKLIST.md`
-> 4. Только потом менять код
-
----
-
-## Когда обновлять документы
-
-| Действие | Что обновлять |
-|----------|---------------|
-| Меняем формулу / правило | EXPLORATION_CORE + QA |
-| Меняем архитектуру / слои | ENGINE_ARCHITECTURE |
-| Добавили файл / класс | TECHNICAL_DOCUMENTATION |
-| Завершили milestone | CAMPAIGN_REPORT (или новый) |
-| Изменили философию | GAME_DESIGN_DOCUMENT |
-| Завершили Phase миграции | MIGRATION_PLAN |
-
----
-
-## Практический Workflow
-
-### 1. Перед началом задачи
-
-```
-□ Открыть ENGINE_ARCHITECTURE.md
-  → Проверить слой (Core / Config / Runtime)
-  → Проверить инварианты
-
-□ Открыть EXPLORATION_CORE_DESIGN.md
-  → Взять структуру данных (JSON/Struct)
-  → Взять формулы
-```
-
-### 2. В процессе кодинга
-
-```
-□ НЕ смотреть в старый код как на истину
-□ Смотреть в ENGINE_ARCHITECTURE.md → "Инварианты"
-□ Код должен делать нарушения инвариантов невозможными
-```
-
-### 3. После написания кода
-
-```
-□ Открыть QA_ACT_I_CHECKLIST.md
-  → Написать тест, покрывающий кейс
-
-□ Обновить TECHNICAL_DOCUMENTATION.md
-  → Если добавлены новые файлы/модули
+2. SPEC_*.md                  ← Высший приоритет для ФОРМАТОВ
+3. QA_ACT_I_CHECKLIST.md      ← Высший приоритет для ТЕСТОВ
 ```
 
 ---
 
-## Визуализация экосистемы
+## Структура Проекта
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                   WHY & WHAT (Design)                   │
-│  ┌─────────────────────┐    ┌─────────────────────┐    │
-│  │ GAME_DESIGN_DOC     │───▶│ EXPLORATION_CORE    │    │
-│  │ Vision & Pillars    │    │ Mechanics & Formulas│    │
-│  └─────────────────────┘    └──────────┬──────────┘    │
-└────────────────────────────────────────┼────────────────┘
-                                         │
-                                         ▼
-┌─────────────────────────────────────────────────────────┐
-│                    HOW (Engineering)                    │
-│  ┌─────────────────────┐    ┌─────────────────────┐    │
-│  │ ENGINE_ARCHITECTURE │───▶│ TECHNICAL_DOC       │    │
-│  │ Rules & Layers      │    │ Project Structure   │    │
-│  └─────────────────────┘    └──────────┬──────────┘    │
-└────────────────────────────────────────┼────────────────┘
-                                         │
-                                         ▼
-┌─────────────────────────────────────────────────────────┐
-│                     VERIFICATION                        │
-│  ┌─────────────────────┐    ┌─────────────────────┐    │
-│  │ QA_ACT_I_CHECKLIST  │───▶│ CAMPAIGN_REPORT     │    │
-│  │ Tests & Metrics     │    │ Progress Log 🔒     │    │
-│  └─────────────────────┘    └─────────────────────┘    │
-└─────────────────────────────────────────────────────────┘
+CardSampleGame/
+├── Docs/                        # Документация
+│   ├── ENGINE_ARCHITECTURE.md   # Архитектура движка
+│   ├── EVENT_MODULE_*.md        # Событийная система
+│   ├── SPEC_*.md                # Спецификации паков
+│   ├── QA_ACT_I_CHECKLIST.md    # QA чеклист
+│   ├── CHANGELOG.md             # История изменений
+│   ├── INDEX.md                 # Этот файл
+│   └── Archive/                 # Архив старых документов
+│
+├── Packages/                    # Swift Packages
+│   ├── TwilightEngine/          # Игровой движок
+│   ├── CharacterPacks/          # Паки персонажей
+│   │   └── CoreHeroes/
+│   └── StoryPacks/              # Сюжетные паки
+│       └── Season1/
+│           └── TwilightMarchesActI/
+│
+├── Views/                       # SwiftUI Views
+├── Models/                      # Data Models
+├── Utilities/                   # Utilities (DesignSystem, Localization)
+└── CardSampleGameTests/         # Tests
 ```
 
 ---
 
-## Файлы документации
+## Автоматические Проверки
 
-| Файл | Строк | Статус |
-|------|-------|--------|
-| ENGINE_ARCHITECTURE.md | ~760 | ✅ Source of Truth |
-| EVENT_MODULE_ARCHITECTURE.md | ~450 | ✅ Active |
-| MIGRATION_PLAN.md | ~450 | ✅ Phase 1-5 Done |
-| EXPLORATION_CORE_DESIGN.md | ~3100 | ✅ Active |
-| GAME_DESIGN_DOCUMENT.md | ~950 | ✅ Active |
-| TECHNICAL_DOCUMENTATION.md | ~1100 | ✅ Active |
-| QA_ACT_I_CHECKLIST.md | ~700 | ✅ Active |
-| CONTENT_PACK_GUIDE.md | ~420 | ✅ Active (RU) |
-| CAMPAIGN_IMPLEMENTATION_REPORT.md | ~500 | 🔒 Frozen v0.6.0 |
-| CHANGELOG.md | ~100 | ✅ Active |
-| **INDEX.md** | — | 📍 Вы здесь |
+Тесты, обеспечивающие соблюдение стандартов:
 
-### Модульная документация (Engine)
-
-| Файл | Путь | Статус |
-|------|------|--------|
-| HEROES_MODULE.md | Engine/Heroes/ | ✅ Active (v2.0 data-driven) |
-| CARDS_MODULE.md | Engine/Cards/ | ✅ Active |
-| COMBAT_MODULE.md | Engine/Combat/ | ✅ Active |
+| Тест | Файл | Что проверяет |
+|------|------|---------------|
+| DesignSystemComplianceTests | Engine/ | Использование DesignSystem токенов |
+| CodeHygieneTests | Engine/ | Doc comments, размер файлов |
+| AuditGateTests | Engine/ | Критические инварианты |
 
 ---
 
-**Последнее обновление:** 22 января 2026
+**Последнее обновление:** 25 января 2026
