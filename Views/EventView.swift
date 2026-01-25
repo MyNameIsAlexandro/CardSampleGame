@@ -38,7 +38,7 @@ struct EventView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: Spacing.xl) {
                     // Hero Panel (consistent design across all screens)
                     HeroPanel(engine: engine, compact: true)
                         .padding(.horizontal)
@@ -51,13 +51,13 @@ struct EventView: View {
                     // Event description
                     Text(event.description)
                         .font(.body)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
                         .padding(.horizontal)
 
                     Divider()
 
                     // Choices
-                    VStack(spacing: 12) {
+                    VStack(spacing: Spacing.md) {
                         Text(L10n.eventChooseAction.localized)
                             .font(.headline)
                             .padding(.horizontal)
@@ -103,22 +103,22 @@ struct EventView: View {
     // MARK: - Event Header
 
     var eventHeader: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Spacing.md) {
             // Event type icon
             ZStack {
                 Circle()
-                    .fill(eventTypeColor.opacity(0.2))
-                    .frame(width: 60, height: 60)
+                    .fill(eventTypeColor.opacity(Opacity.faint))
+                    .frame(width: Sizes.iconRegion, height: Sizes.iconRegion)
 
                 Image(systemName: event.eventType.icon)
                     .font(.title2)
                     .foregroundColor(eventTypeColor)
             }
 
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: Spacing.xxs) {
                 Text(event.eventType.displayName)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(AppColors.muted)
 
                 Text(event.title)
                     .font(.title3)
@@ -135,11 +135,11 @@ struct EventView: View {
 
     var eventTypeColor: Color {
         switch event.eventType {
-        case .combat: return .red
-        case .ritual: return .purple
-        case .narrative: return .blue
-        case .exploration: return .cyan
-        case .worldShift: return .orange
+        case .combat: return AppColors.danger
+        case .ritual: return AppColors.dark
+        case .narrative: return AppColors.primary
+        case .exploration: return Color.cyan
+        case .worldShift: return AppColors.power
         }
     }
 
@@ -167,11 +167,11 @@ struct EventView: View {
                 }
             }
         } label: {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: Spacing.sm) {
                 Text(choice.text)
                     .font(.body)
                     .fontWeight(.medium)
-                    .foregroundColor(canChoose ? .primary : .gray)
+                    .foregroundColor(canChoose ? .primary : AppColors.secondary)
 
                 // Requirements
                 if let requirements = choice.requirements {
@@ -184,12 +184,12 @@ struct EventView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
             .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(canChoose ? Color(UIColor.secondarySystemBackground) : Color.gray.opacity(0.1))
+                RoundedRectangle(cornerRadius: CornerRadius.lg)
+                    .fill(canChoose ? AppColors.cardBackground : AppColors.secondary.opacity(0.1))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(canChoose ? Color.blue.opacity(0.5) : Color.clear, lineWidth: 2)
+                RoundedRectangle(cornerRadius: CornerRadius.lg)
+                    .stroke(canChoose ? AppColors.primary.opacity(Opacity.medium) : Color.clear, lineWidth: 2)
             )
             .contentShape(Rectangle())
         }
@@ -198,9 +198,9 @@ struct EventView: View {
     }
 
     func requirementsView(_ requirements: EventRequirements, canMeet: Bool) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: Spacing.xxs) {
             if let minFaith = requirements.minimumFaith {
-                HStack(spacing: 4) {
+                HStack(spacing: Spacing.xxs) {
                     Image(systemName: "sparkles")
                         .font(.caption2)
                     Text(L10n.eventRequiresFaith.localized(with: minFaith))
@@ -208,13 +208,13 @@ struct EventView: View {
                     // Engine-First: read from engine
                     Text(L10n.eventYouHaveFaith.localized(with: engine.playerFaith))
                         .font(.caption2)
-                        .foregroundColor(engine.playerFaith >= minFaith ? .green : .red)
+                        .foregroundColor(engine.playerFaith >= minFaith ? AppColors.success : AppColors.danger)
                 }
-                .foregroundColor(.secondary)
+                .foregroundColor(AppColors.muted)
             }
 
             if let minHealth = requirements.minimumHealth {
-                HStack(spacing: 4) {
+                HStack(spacing: Spacing.xxs) {
                     Image(systemName: "heart.fill")
                         .font(.caption2)
                     Text(L10n.eventRequiresHealth.localized(with: minHealth))
@@ -222,9 +222,9 @@ struct EventView: View {
                     // Engine-First: read from engine
                     Text(L10n.eventYouHaveHealth.localized(with: engine.playerHealth))
                         .font(.caption2)
-                        .foregroundColor(engine.playerHealth >= minHealth ? .green : .red)
+                        .foregroundColor(engine.playerHealth >= minHealth ? AppColors.success : AppColors.danger)
                 }
-                .foregroundColor(.secondary)
+                .foregroundColor(AppColors.muted)
             }
 
             if let reqBalance = requirements.requiredBalance {
@@ -232,80 +232,80 @@ struct EventView: View {
                 let playerBalanceEnum = getBalanceEnum(engine.playerBalance)
                 let meetsRequirement = playerBalanceEnum == reqBalance
 
-                HStack(spacing: 4) {
+                HStack(spacing: Spacing.xxs) {
                     Image(systemName: "circle.lefthalf.filled")
                         .font(.caption2)
                     Text(L10n.eventRequiresPath.localized(with: balanceText(reqBalance)))
                         .font(.caption2)
                     Text(L10n.eventYourPath.localized(with: balanceText(playerBalanceEnum)))
                         .font(.caption2)
-                        .foregroundColor(meetsRequirement ? .green : .red)
+                        .foregroundColor(meetsRequirement ? AppColors.success : AppColors.danger)
                 }
-                .foregroundColor(.secondary)
+                .foregroundColor(AppColors.muted)
             }
         }
     }
 
     func consequencesPreview(_ consequences: EventConsequences) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: Spacing.xxxs) {
             if let faithChange = consequences.faithChange, faithChange != 0 {
-                HStack(spacing: 4) {
+                HStack(spacing: Spacing.xxs) {
                     Image(systemName: faithChange > 0 ? "arrow.up" : "arrow.down")
                         .font(.caption2)
                     Text(L10n.eventFaithChange.localized(with: faithChange > 0 ? "+" : "", faithChange))
                         .font(.caption2)
                 }
-                .foregroundColor(faithChange > 0 ? .green : .orange)
+                .foregroundColor(faithChange > 0 ? AppColors.success : AppColors.warning)
             }
 
             if let healthChange = consequences.healthChange, healthChange != 0 {
-                HStack(spacing: 4) {
+                HStack(spacing: Spacing.xxs) {
                     Image(systemName: healthChange > 0 ? "arrow.up" : "arrow.down")
                         .font(.caption2)
                     Text(L10n.eventHealthChange.localized(with: healthChange > 0 ? "+" : "", healthChange))
                         .font(.caption2)
                 }
-                .foregroundColor(healthChange > 0 ? .green : .red)
+                .foregroundColor(healthChange > 0 ? AppColors.success : AppColors.danger)
             }
 
             if let balanceChange = consequences.balanceChange, balanceChange != 0 {
-                HStack(spacing: 4) {
+                HStack(spacing: Spacing.xxs) {
                     Image(systemName: balanceChange > 0 ? "sun.max.fill" : "moon.fill")
                         .font(.caption2)
                     Text(balanceChange > 0 ? L10n.eventBalanceToLight.localized : L10n.eventBalanceToDark.localized)
                         .font(.caption2)
                 }
-                .foregroundColor(balanceChange > 0 ? .yellow : .purple)
+                .foregroundColor(balanceChange > 0 ? AppColors.light : AppColors.dark)
             }
 
             if let reputationChange = consequences.reputationChange, reputationChange != 0 {
-                HStack(spacing: 4) {
+                HStack(spacing: Spacing.xxs) {
                     Image(systemName: reputationChange > 0 ? "hand.thumbsup.fill" : "hand.thumbsdown.fill")
                         .font(.caption2)
                     Text(L10n.eventReputationChange.localized(with: reputationChange > 0 ? "+" : "", reputationChange))
                         .font(.caption2)
                 }
-                .foregroundColor(reputationChange > 0 ? .green : .red)
+                .foregroundColor(reputationChange > 0 ? AppColors.success : AppColors.danger)
             }
 
             if consequences.addCards != nil {
-                HStack(spacing: 4) {
+                HStack(spacing: Spacing.xxs) {
                     Image(systemName: "rectangle.stack.fill.badge.plus")
                         .font(.caption2)
                     Text(L10n.eventReceiveCard.localized)
                         .font(.caption2)
                 }
-                .foregroundColor(.blue)
+                .foregroundColor(AppColors.primary)
             }
 
             if consequences.addCurse != nil {
-                HStack(spacing: 4) {
+                HStack(spacing: Spacing.xxs) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .font(.caption2)
                     Text(L10n.eventReceiveCurse.localized)
                         .font(.caption2)
                 }
-                .foregroundColor(.red)
+                .foregroundColor(AppColors.danger)
             }
         }
     }

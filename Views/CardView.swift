@@ -9,7 +9,7 @@ struct CardView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Card header with name and type
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: Spacing.xxs) {
                 HStack {
                     Text(card.name)
                         .font(.headline)
@@ -20,17 +20,17 @@ struct CardView: View {
                         Text("\(cost)")
                             .font(.title2)
                             .fontWeight(.bold)
-                            .foregroundColor(.yellow)
-                            .padding(6)
-                            .background(Circle().fill(Color.black.opacity(0.6)))
+                            .foregroundColor(AppColors.faith)
+                            .padding(Spacing.xs)
+                            .background(Circle().fill(Color.black.opacity(Opacity.mediumHigh)))
                     }
                 }
 
                 Text(localizedCardType)
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(.white.opacity(Opacity.high))
             }
-            .padding(12)
+            .padding(Spacing.md)
             .background(headerColor)
 
             // Card image area
@@ -38,7 +38,7 @@ struct CardView: View {
                 Rectangle()
                     .fill(
                         LinearGradient(
-                            gradient: Gradient(colors: [cardColor.opacity(0.3), cardColor]),
+                            gradient: Gradient(colors: [cardColor.opacity(Opacity.light), cardColor]),
                             startPoint: .top,
                             endPoint: .bottom
                         )
@@ -46,34 +46,34 @@ struct CardView: View {
 
                 VStack {
                     Image(systemName: cardIcon)
-                        .font(.system(size: 60))
+                        .font(.system(size: Sizes.iconRegion))
                         .foregroundColor(.white.opacity(0.9))
                 }
             }
-            .frame(height: 120)
+            .frame(height: Sizes.cardHeightSmall + Spacing.xl)
 
             // Stats section
             if hasStats {
-                HStack(spacing: 16) {
+                HStack(spacing: Spacing.lg) {
                     if let power = card.power {
-                        CardStatBadge(icon: "bolt.fill", value: power, color: .red)
+                        CardStatBadge(icon: "bolt.fill", value: power, color: AppColors.power)
                     }
                     if let defense = card.defense {
-                        CardStatBadge(icon: "shield.fill", value: defense, color: .blue)
+                        CardStatBadge(icon: "shield.fill", value: defense, color: AppColors.defense)
                     }
                     if let health = card.health {
-                        CardStatBadge(icon: "heart.fill", value: health, color: .green)
+                        CardStatBadge(icon: "heart.fill", value: health, color: AppColors.health)
                     }
                     Spacer()
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(Color.black.opacity(0.2))
+                .padding(.horizontal, Spacing.md)
+                .padding(.vertical, Spacing.sm)
+                .background(Color.black.opacity(Opacity.faint))
             }
 
             // Description
             ScrollView {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: Spacing.sm) {
                     Text(card.description)
                         .font(.caption)
                         .foregroundColor(.primary)
@@ -81,17 +81,17 @@ struct CardView: View {
 
                     // Abilities
                     ForEach(card.abilities) { ability in
-                        VStack(alignment: .leading, spacing: 2) {
+                        VStack(alignment: .leading, spacing: Spacing.xxxs) {
                             Text(ability.name)
                                 .font(.caption)
                                 .fontWeight(.bold)
-                                .foregroundColor(.orange)
+                                .foregroundColor(AppColors.power)
                             Text(ability.description)
                                 .font(.caption2)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(AppColors.muted)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
-                        .padding(.top, 4)
+                        .padding(.top, Spacing.xxs)
                     }
 
                     // Traits
@@ -100,15 +100,15 @@ struct CardView: View {
                             ForEach(card.traits, id: \.self) { trait in
                                 Text(trait.localized)
                                     .font(.caption2)
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 2)
-                                    .background(Capsule().fill(Color.gray.opacity(0.3)))
+                                    .padding(.horizontal, Spacing.xs)
+                                    .padding(.vertical, Spacing.xxxs)
+                                    .background(Capsule().fill(AppColors.secondary.opacity(Opacity.light)))
                             }
                         }
-                        .padding(.top, 4)
+                        .padding(.top, Spacing.xxs)
                     }
                 }
-                .padding(12)
+                .padding(Spacing.md)
             }
 
             // Rarity indicator
@@ -116,20 +116,20 @@ struct CardView: View {
                 Spacer()
                 Circle()
                     .fill(rarityColor)
-                    .frame(width: 8, height: 8)
+                    .frame(width: Spacing.sm, height: Spacing.sm)
                 Text(localizedRarity)
                     .font(.caption2)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(AppColors.muted)
             }
-            .padding(8)
+            .padding(Spacing.sm)
         }
         .frame(height: 320)
-        .background(Color(UIColor.systemBackground))
-        .cornerRadius(12)
-        .shadow(color: isSelected ? .blue.opacity(0.5) : .black.opacity(0.2), radius: isSelected ? 8 : 4)
+        .background(AppColors.cardBackground)
+        .cornerRadius(CornerRadius.lg)
+        .shadow(color: isSelected ? AppColors.primary.opacity(Opacity.medium) : Color.black.opacity(Opacity.faint), radius: isSelected ? 8 : 4)
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 3)
+            RoundedRectangle(cornerRadius: CornerRadius.lg)
+                .stroke(isSelected ? AppColors.primary : .clear, lineWidth: 3)
         )
         .onTapGesture {
             onTap?()
@@ -175,29 +175,29 @@ struct CardView: View {
 
     var headerColor: Color {
         switch card.type {
-        case .character: return Color.purple
-        case .weapon: return Color.red
-        case .spell: return Color.blue
-        case .armor: return Color.gray
+        case .character: return AppColors.dark
+        case .weapon: return AppColors.danger
+        case .spell: return AppColors.primary
+        case .armor: return AppColors.secondary
         case .item: return Color.brown
-        case .ally: return Color.green
-        case .blessing: return Color.yellow
-        case .monster: return Color.red.opacity(0.8)
+        case .ally: return AppColors.success
+        case .blessing: return AppColors.light
+        case .monster: return AppColors.danger.opacity(Opacity.high)
         case .location: return Color.teal
         case .scenario: return Color.indigo
         case .curse: return Color.black
         case .spirit: return Color.cyan
-        case .artifact: return Color.orange
+        case .artifact: return AppColors.power
         case .ritual: return Color.indigo
-        case .resource: return Color.green
-        case .attack: return Color.red
-        case .defense: return Color.blue
-        case .special: return Color.purple
+        case .resource: return AppColors.success
+        case .attack: return AppColors.danger
+        case .defense: return AppColors.defense
+        case .special: return AppColors.dark
         }
     }
 
     var cardColor: Color {
-        headerColor.opacity(0.6)
+        headerColor.opacity(Opacity.mediumHigh)
     }
 
     var cardIcon: String {
@@ -225,11 +225,11 @@ struct CardView: View {
 
     var rarityColor: Color {
         switch card.rarity {
-        case .common: return .gray
-        case .uncommon: return .green
-        case .rare: return .blue
-        case .epic: return .purple
-        case .legendary: return .orange
+        case .common: return AppColors.rarityCommon
+        case .uncommon: return AppColors.rarityUncommon
+        case .rare: return AppColors.rarityRare
+        case .epic: return AppColors.rarityEpic
+        case .legendary: return AppColors.rarityLegendary
         }
     }
 }
@@ -240,7 +240,7 @@ struct CardStatBadge: View {
     let color: Color
 
     var body: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: Spacing.xxs) {
             Image(systemName: icon)
                 .font(.caption)
             Text("\(value)")
@@ -251,7 +251,6 @@ struct CardStatBadge: View {
     }
 }
 
-// Compact card view for character selection
 // Compact card view for character selection
 struct CompactCardView: View {
     let card: Card
@@ -266,7 +265,7 @@ struct CompactCardView: View {
                 .fontWeight(.bold)
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
+                .padding(.vertical, Spacing.md)
                 .background(headerColor)
 
             // Card image area
@@ -274,84 +273,84 @@ struct CompactCardView: View {
                 Rectangle()
                     .fill(
                         LinearGradient(
-                            gradient: Gradient(colors: [headerColor.opacity(0.3), headerColor.opacity(0.6)]),
+                            gradient: Gradient(colors: [headerColor.opacity(Opacity.light), headerColor.opacity(Opacity.mediumHigh)]),
                             startPoint: .top,
                             endPoint: .bottom
                         )
                     )
 
                 Image(systemName: cardIcon)
-                    .font(.system(size: 70))
-                    .foregroundColor(.white.opacity(0.9))
+                    .font(.system(size: Sizes.iconRegion + Spacing.smd))
+                    .foregroundColor(.white.opacity(Opacity.almostOpaque))
             }
-            .frame(height: 140)
+            .frame(height: Sizes.cardHeightMedium)
 
             // Stats
-            VStack(spacing: 8) {
+            VStack(spacing: Spacing.sm) {
                 Text(localizedCardType)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(AppColors.muted)
 
-                HStack(spacing: 20) {
+                HStack(spacing: Spacing.xl) {
                     if let health = card.health {
-                        VStack(spacing: 2) {
+                        VStack(spacing: Spacing.xxxs) {
                             Image(systemName: "heart.fill")
                                 .font(.title3)
-                                .foregroundColor(.red)
+                                .foregroundColor(AppColors.health)
                             Text("\(health)")
                                 .font(.headline)
                                 .fontWeight(.bold)
                             Text(L10n.cardStatHealth.localized)
                                 .font(.system(size: 9))
-                                .foregroundColor(.secondary)
+                                .foregroundColor(AppColors.muted)
                         }
                     }
                     if let power = card.power {
-                        VStack(spacing: 2) {
+                        VStack(spacing: Spacing.xxxs) {
                             Image(systemName: "bolt.fill")
                                 .font(.title3)
-                                .foregroundColor(.orange)
+                                .foregroundColor(AppColors.power)
                             Text("\(power)")
                                 .font(.headline)
                                 .fontWeight(.bold)
                             Text(L10n.cardStatStrength.localized)
                                 .font(.system(size: 9))
-                                .foregroundColor(.secondary)
+                                .foregroundColor(AppColors.muted)
                         }
                     }
                     if let defense = card.defense {
-                        VStack(spacing: 2) {
+                        VStack(spacing: Spacing.xxxs) {
                             Image(systemName: "shield.fill")
                                 .font(.title3)
-                                .foregroundColor(.blue)
+                                .foregroundColor(AppColors.defense)
                             Text("\(defense)")
                                 .font(.headline)
                                 .fontWeight(.bold)
                             Text(L10n.cardStatDefense.localized)
                                 .font(.system(size: 9))
-                                .foregroundColor(.secondary)
+                                .foregroundColor(AppColors.muted)
                         }
                     }
                 }
 
                 Circle()
                     .fill(rarityColor)
-                    .frame(width: 6, height: 6)
+                    .frame(width: Spacing.xs, height: Spacing.xs)
             }
-            .padding(.vertical, 10)
+            .padding(.vertical, Spacing.smd)
             .frame(maxWidth: .infinity)
-            .background(Color(UIColor.secondarySystemBackground))
+            .background(AppColors.cardBackground)
         }
-        .frame(height: 280)
+        .frame(height: Sizes.cardHeightMedium + Sizes.cardHeightMedium)
         .background(Color(UIColor.systemBackground))
-        .cornerRadius(16)
-        .shadow(color: isSelected ? headerColor.opacity(0.5) : .black.opacity(0.2), radius: isSelected ? 10 : 5)
+        .cornerRadius(CornerRadius.xl)
+        .shadow(color: isSelected ? headerColor.opacity(Opacity.medium) : .black.opacity(Opacity.faint), radius: isSelected ? 10 : 5)
         .overlay(
-            RoundedRectangle(cornerRadius: 16)
+            RoundedRectangle(cornerRadius: CornerRadius.xl)
                 .stroke(isSelected ? headerColor : Color.clear, lineWidth: 3)
         )
         .scaleEffect(isSelected ? 1.05 : 1.0)
-        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
+        .animation(.spring(response: AnimationDuration.slow, dampingFraction: 0.7), value: isSelected)
         .onTapGesture {
             onTap?()
         }
@@ -359,24 +358,24 @@ struct CompactCardView: View {
 
     var headerColor: Color {
         switch card.type {
-        case .character: return Color.purple
-        case .weapon: return Color.red
-        case .spell: return Color.blue
-        case .armor: return Color.gray
+        case .character: return AppColors.dark
+        case .weapon: return AppColors.danger
+        case .spell: return AppColors.primary
+        case .armor: return AppColors.secondary
         case .item: return Color.brown
-        case .ally: return Color.green
-        case .blessing: return Color.yellow
-        case .monster: return Color.red.opacity(0.8)
+        case .ally: return AppColors.success
+        case .blessing: return AppColors.light
+        case .monster: return AppColors.danger.opacity(Opacity.high)
         case .location: return Color.teal
         case .scenario: return Color.indigo
         case .curse: return Color.black
         case .spirit: return Color.cyan
-        case .artifact: return Color.orange
+        case .artifact: return AppColors.power
         case .ritual: return Color.indigo
-        case .resource: return Color.green
-        case .attack: return Color.red
-        case .defense: return Color.blue
-        case .special: return Color.purple
+        case .resource: return AppColors.success
+        case .attack: return AppColors.danger
+        case .defense: return AppColors.defense
+        case .special: return AppColors.dark
         }
     }
 
@@ -428,11 +427,11 @@ struct CompactCardView: View {
 
     var rarityColor: Color {
         switch card.rarity {
-        case .common: return .gray
-        case .uncommon: return .green
-        case .rare: return .blue
-        case .epic: return .purple
-        case .legendary: return .orange
+        case .common: return AppColors.rarityCommon
+        case .uncommon: return AppColors.rarityUncommon
+        case .rare: return AppColors.rarityRare
+        case .epic: return AppColors.rarityEpic
+        case .legendary: return AppColors.rarityLegendary
         }
     }
 }
@@ -447,14 +446,14 @@ struct HandCardView: View {
         VStack(spacing: 0) {
             // Card name
             Text(card.name)
-                .font(.system(size: 10))
+                .font(.system(size: Spacing.smd))
                 .fontWeight(.bold)
                 .foregroundColor(.white)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 3)
-                .padding(.horizontal, 2)
+                .padding(.vertical, Spacing.xxxs)
+                .padding(.horizontal, Spacing.xxxs)
                 .background(headerColor)
 
             // Card icon
@@ -462,65 +461,65 @@ struct HandCardView: View {
                 Rectangle()
                     .fill(
                         LinearGradient(
-                            gradient: Gradient(colors: [headerColor.opacity(0.3), headerColor.opacity(0.6)]),
+                            gradient: Gradient(colors: [headerColor.opacity(Opacity.light), headerColor.opacity(Opacity.mediumHigh)]),
                             startPoint: .top,
                             endPoint: .bottom
                         )
                     )
 
                 Image(systemName: cardIcon)
-                    .font(.system(size: 32))
-                    .foregroundColor(.white.opacity(0.9))
+                    .font(.system(size: Sizes.iconLarge))
+                    .foregroundColor(.white.opacity(Opacity.almostOpaque))
             }
-            .frame(height: 55)
+            .frame(height: Sizes.iconHero + 5)
 
             // Stats in vertical column
-            VStack(spacing: 2) {
+            VStack(spacing: Spacing.xxxs) {
                 if let cost = card.cost {
-                    HStack(spacing: 2) {
+                    HStack(spacing: Spacing.xxxs) {
                         Image(systemName: "star.fill")
-                            .font(.system(size: 8))
-                            .foregroundColor(.yellow)
+                            .font(.system(size: Spacing.sm))
+                            .foregroundColor(AppColors.faith)
                         Text("\(cost)")
                             .font(.system(size: 9))
                             .fontWeight(.bold)
                     }
                 }
                 if let power = card.power {
-                    HStack(spacing: 2) {
+                    HStack(spacing: Spacing.xxxs) {
                         Image(systemName: "bolt.fill")
-                            .font(.system(size: 8))
-                            .foregroundColor(.red)
+                            .font(.system(size: Spacing.sm))
+                            .foregroundColor(AppColors.health)
                         Text("\(power)")
                             .font(.system(size: 9))
                             .fontWeight(.bold)
                     }
                 }
                 if let defense = card.defense {
-                    HStack(spacing: 2) {
+                    HStack(spacing: Spacing.xxxs) {
                         Image(systemName: "shield.fill")
-                            .font(.system(size: 8))
-                            .foregroundColor(.blue)
+                            .font(.system(size: Spacing.sm))
+                            .foregroundColor(AppColors.defense)
                         Text("\(defense)")
                             .font(.system(size: 9))
                             .fontWeight(.bold)
                     }
                 }
             }
-            .padding(.vertical, 3)
+            .padding(.vertical, Spacing.xxxs)
             .frame(maxWidth: .infinity)
-            .background(Color(UIColor.secondarySystemBackground))
+            .background(AppColors.cardBackground)
         }
-        .frame(width: 85, height: 115)
+        .frame(width: Sizes.cardWidthSmall + 5, height: Sizes.cardHeightSmall + Spacing.lg - 1)
         .background(Color(UIColor.systemBackground))
-        .cornerRadius(8)
-        .shadow(color: isSelected ? headerColor.opacity(0.6) : .black.opacity(0.2), radius: isSelected ? 6 : 3)
+        .cornerRadius(CornerRadius.md)
+        .shadow(color: isSelected ? headerColor.opacity(Opacity.mediumHigh) : .black.opacity(Opacity.faint), radius: isSelected ? 6 : 3)
         .overlay(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: CornerRadius.md)
                 .stroke(isSelected ? headerColor : Color.clear, lineWidth: 2)
         )
         .scaleEffect(isSelected ? 1.1 : 1.0)
-        .animation(.spring(response: 0.2, dampingFraction: 0.7), value: isSelected)
+        .animation(.spring(response: AnimationDuration.fast + 0.05, dampingFraction: 0.7), value: isSelected)
         .onTapGesture {
             onTap?()
         }
@@ -528,24 +527,24 @@ struct HandCardView: View {
 
     var headerColor: Color {
         switch card.type {
-        case .character: return Color.purple
-        case .weapon: return Color.red
-        case .spell: return Color.blue
-        case .armor: return Color.gray
+        case .character: return AppColors.dark
+        case .weapon: return AppColors.danger
+        case .spell: return AppColors.primary
+        case .armor: return AppColors.secondary
         case .item: return Color.brown
-        case .ally: return Color.green
-        case .blessing: return Color.yellow
-        case .monster: return Color.red.opacity(0.8)
+        case .ally: return AppColors.success
+        case .blessing: return AppColors.light
+        case .monster: return AppColors.danger.opacity(Opacity.high)
         case .location: return Color.teal
         case .scenario: return Color.indigo
         case .curse: return Color.black
         case .spirit: return Color.cyan
-        case .artifact: return Color.orange
+        case .artifact: return AppColors.power
         case .ritual: return Color.indigo
-        case .resource: return Color.green
-        case .attack: return Color.red
-        case .defense: return Color.blue
-        case .special: return Color.purple
+        case .resource: return AppColors.success
+        case .attack: return AppColors.danger
+        case .defense: return AppColors.defense
+        case .special: return AppColors.dark
         }
     }
 

@@ -17,42 +17,42 @@ struct HeroSelectionView: View {
         NavigationView {
             VStack(spacing: 0) {
                 // Заголовок
-                VStack(spacing: 8) {
+                VStack(spacing: Spacing.sm) {
                     Text("Выберите героя")
                         .font(.largeTitle)
                         .fontWeight(.bold)
 
                     Text("Каждый герой имеет уникальные характеристики и способности")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
                 }
-                .padding(.top, 20)
-                .padding(.bottom, 16)
+                .padding(.top, Spacing.xl)
+                .padding(.bottom, Spacing.lg)
 
                 // Список героев
                 ScrollView {
-                    VStack(spacing: 12) {
+                    VStack(spacing: Spacing.md) {
                         ForEach(availableHeroes, id: \.id) { hero in
                             HeroCard(
                                 hero: hero,
                                 isSelected: selectedHeroId == hero.id
                             ) {
-                                withAnimation(.easeInOut(duration: 0.2)) {
+                                withAnimation(.easeInOut(duration: AnimationDuration.fast)) {
                                     selectedHeroId = hero.id
                                 }
                             }
                         }
                     }
                     .padding(.horizontal)
-                    .padding(.bottom, 100)  // Место для кнопки
+                    .padding(.bottom, Sizes.cardHeightSmall)  // Место для кнопки
                 }
 
                 Spacer()
 
                 // Кнопка подтверждения
-                VStack(spacing: 8) {
+                VStack(spacing: Spacing.sm) {
                     if let heroId = selectedHeroId,
                        let hero = HeroRegistry.shared.hero(id: heroId) {
                         Button(action: {
@@ -65,24 +65,24 @@ struct HeroSelectionView: View {
                             }
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.blue)
+                            .background(AppColors.primary)
                             .foregroundColor(.white)
-                            .cornerRadius(12)
+                            .cornerRadius(CornerRadius.lg)
                         }
                         .padding(.horizontal)
                     } else {
                         Text("Выберите героя")
-                            .foregroundColor(.secondary)
+                            .foregroundColor(AppColors.muted)
                             .padding()
                     }
                 }
-                .padding(.bottom, 20)
+                .padding(.bottom, Spacing.xl)
                 .background(
                     Color(UIColor.systemBackground)
                         .shadow(radius: 5)
                 )
             }
-            .background(Color(UIColor.secondarySystemBackground))
+            .background(AppColors.cardBackground)
             .navigationBarHidden(true)
         }
     }
@@ -95,20 +95,20 @@ struct HeroCard: View {
     let onTap: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Spacing.md) {
             // Заголовок
             HStack {
                 Text(hero.icon)
                     .font(.title)
 
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: Spacing.xxxs) {
                     Text(hero.name.localized)
                         .font(.title2)
                         .fontWeight(.bold)
 
                     Text(hero.description.localized)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
                 }
 
                 Spacer()
@@ -116,40 +116,40 @@ struct HeroCard: View {
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.title2)
-                        .foregroundColor(.blue)
+                        .foregroundColor(AppColors.primary)
                 }
             }
 
             // Характеристики
             let stats = hero.baseStats
-            HStack(spacing: 16) {
-                StatBadge(icon: "heart.fill", value: stats.health, label: "HP", color: .red)
-                StatBadge(icon: "hand.raised.fill", value: stats.strength, label: "Сила", color: .orange)
-                StatBadge(icon: "sparkles", value: stats.faith, label: "Вера", color: .yellow)
-                StatBadge(icon: "brain.head.profile", value: stats.intelligence, label: "Инт", color: .purple)
+            HStack(spacing: Spacing.lg) {
+                StatBadge(icon: "heart.fill", value: stats.health, label: "HP", color: AppColors.health)
+                StatBadge(icon: "hand.raised.fill", value: stats.strength, label: "Сила", color: AppColors.power)
+                StatBadge(icon: "sparkles", value: stats.faith, label: "Вера", color: AppColors.faith)
+                StatBadge(icon: "brain.head.profile", value: stats.intelligence, label: "Инт", color: AppColors.dark)
             }
 
             // Особая способность
-            HStack(spacing: 8) {
+            HStack(spacing: Spacing.sm) {
                 Image(systemName: "star.fill")
-                    .foregroundColor(.yellow)
+                    .foregroundColor(AppColors.faith)
                     .font(.caption)
 
                 Text(hero.specialAbility.description.localized)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(AppColors.muted)
             }
-            .padding(8)
-            .background(Color.yellow.opacity(0.1))
-            .cornerRadius(8)
+            .padding(Spacing.sm)
+            .background(AppColors.faith.opacity(0.1))
+            .cornerRadius(CornerRadius.md)
         }
         .padding()
         .background(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: CornerRadius.lg)
                 .fill(Color(UIColor.systemBackground))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(isSelected ? Color.blue : Color.gray.opacity(0.3), lineWidth: isSelected ? 3 : 1)
+                    RoundedRectangle(cornerRadius: CornerRadius.lg)
+                        .stroke(isSelected ? AppColors.primary : AppColors.secondary.opacity(Opacity.light), lineWidth: isSelected ? 3 : 1)
                 )
         )
         .onTapGesture {
@@ -166,7 +166,7 @@ struct StatBadge: View {
     let color: Color
 
     var body: some View {
-        VStack(spacing: 2) {
+        VStack(spacing: Spacing.xxxs) {
             Image(systemName: icon)
                 .font(.caption)
                 .foregroundColor(color)
@@ -176,10 +176,10 @@ struct StatBadge: View {
                 .fontWeight(.bold)
 
             Text(label)
-                .font(.system(size: 8))
-                .foregroundColor(.secondary)
+                .font(.system(size: Spacing.sm))
+                .foregroundColor(AppColors.muted)
         }
-        .frame(minWidth: 40)
+        .frame(minWidth: Sizes.iconXL)
     }
 }
 

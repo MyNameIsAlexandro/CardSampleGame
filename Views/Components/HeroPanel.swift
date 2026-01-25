@@ -24,14 +24,14 @@ struct HeroPanel: View {
     // MARK: - Full Panel (for main screens like WorldMap, RegionDetail)
 
     var fullPanel: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Spacing.md) {
             // Hero Avatar
             if showAvatar {
                 heroAvatar
             }
 
             // Hero Info
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: Spacing.xxs) {
                 // Name and class
                 HStack {
                     Text(engine.playerName)
@@ -39,15 +39,15 @@ struct HeroPanel: View {
                         .fontWeight(.bold)
                     Text(heroClass)
                         .font(.caption)
-                        .foregroundColor(.secondary)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(Color.gray.opacity(0.2))
-                        .cornerRadius(4)
+                        .foregroundColor(AppColors.muted)
+                        .padding(.horizontal, Spacing.xs)
+                        .padding(.vertical, Spacing.xxxs)
+                        .background(AppColors.secondary.opacity(Opacity.faint))
+                        .cornerRadius(CornerRadius.sm)
                 }
 
                 // Stats row
-                HStack(spacing: 12) {
+                HStack(spacing: Spacing.md) {
                     // Health
                     statBadge(
                         icon: "heart.fill",
@@ -60,7 +60,7 @@ struct HeroPanel: View {
                     statBadge(
                         icon: "sparkles",
                         value: "\(engine.playerFaith)",
-                        color: .yellow,
+                        color: AppColors.faith,
                         label: nil
                     )
 
@@ -68,7 +68,7 @@ struct HeroPanel: View {
                     statBadge(
                         icon: "hand.raised.fill",
                         value: "\(engine.playerStrength)",
-                        color: .orange,
+                        color: AppColors.power,
                         label: nil
                     )
 
@@ -79,21 +79,21 @@ struct HeroPanel: View {
 
             Spacer()
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
+        .padding(.horizontal, Spacing.md)
+        .padding(.vertical, Spacing.smd)
         .background(heroPanelBackground)
     }
 
     // MARK: - Compact Panel (for combat, events with limited space)
 
     var compactPanel: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: Spacing.sm) {
             // Mini avatar
             if showAvatar {
                 ZStack {
                     Circle()
                         .fill(balanceGradient)
-                        .frame(width: 32, height: 32)
+                        .frame(width: Sizes.iconLarge, height: Sizes.iconLarge)
 
                     Text(heroInitials)
                         .font(.caption)
@@ -103,22 +103,22 @@ struct HeroPanel: View {
             }
 
             // Compact stats
-            HStack(spacing: 8) {
+            HStack(spacing: Spacing.sm) {
                 // Health
-                HStack(spacing: 2) {
+                HStack(spacing: Spacing.xxxs) {
                     Image(systemName: "heart.fill")
                         .font(.caption2)
-                        .foregroundColor(.red)
+                        .foregroundColor(AppColors.health)
                     Text("\(engine.playerHealth)")
                         .font(.caption)
                         .fontWeight(.semibold)
                 }
 
                 // Faith
-                HStack(spacing: 2) {
+                HStack(spacing: Spacing.xxxs) {
                     Image(systemName: "sparkles")
                         .font(.caption2)
-                        .foregroundColor(.yellow)
+                        .foregroundColor(AppColors.faith)
                     Text("\(engine.playerFaith)")
                         .font(.caption)
                         .fontWeight(.semibold)
@@ -132,10 +132,10 @@ struct HeroPanel: View {
 
             Spacer()
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 6)
-        .background(Color(UIColor.secondarySystemBackground).opacity(0.9))
-        .cornerRadius(8)
+        .padding(.horizontal, Spacing.sm)
+        .padding(.vertical, Spacing.xs)
+        .background(AppColors.cardBackground.opacity(Opacity.almostOpaque))
+        .cornerRadius(CornerRadius.md)
     }
 
     // MARK: - Hero Avatar
@@ -145,12 +145,12 @@ struct HeroPanel: View {
             // Background circle with balance gradient
             Circle()
                 .fill(balanceGradient)
-                .frame(width: 50, height: 50)
+                .frame(width: Sizes.iconHero, height: Sizes.iconHero)
 
             // Inner circle
             Circle()
                 .fill(Color(UIColor.systemBackground))
-                .frame(width: 44, height: 44)
+                .frame(width: Sizes.touchTarget, height: Sizes.touchTarget)
 
             // Hero initials or icon
             Text(heroInitials)
@@ -163,7 +163,7 @@ struct HeroPanel: View {
     // MARK: - Stat Badge
 
     func statBadge(icon: String, value: String, color: Color, label: String?) -> some View {
-        HStack(spacing: 4) {
+        HStack(spacing: Spacing.xxs) {
             Image(systemName: icon)
                 .font(.caption)
                 .foregroundColor(color)
@@ -176,20 +176,20 @@ struct HeroPanel: View {
                 if let label = label {
                     Text(label)
                         .font(.system(size: 9))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
                 }
             }
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
+        .padding(.horizontal, Spacing.sm)
+        .padding(.vertical, Spacing.xxs)
         .background(color.opacity(0.15))
-        .cornerRadius(6)
+        .cornerRadius(Spacing.xs)
     }
 
     // MARK: - Balance Indicator
 
     var balanceIndicator: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: Spacing.xxs) {
             Image(systemName: balanceIcon)
                 .font(.caption)
                 .foregroundColor(balanceColor)
@@ -199,10 +199,10 @@ struct HeroPanel: View {
                 .fontWeight(.medium)
                 .foregroundColor(balanceColor)
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
+        .padding(.horizontal, Spacing.sm)
+        .padding(.vertical, Spacing.xxs)
         .background(balanceColor.opacity(0.15))
-        .cornerRadius(6)
+        .cornerRadius(Spacing.xs)
     }
 
     // MARK: - Background
@@ -210,12 +210,12 @@ struct HeroPanel: View {
     var heroPanelBackground: some View {
         ZStack {
             // Base background
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(UIColor.secondarySystemBackground))
+            RoundedRectangle(cornerRadius: CornerRadius.lg)
+                .fill(AppColors.cardBackground)
 
             // Subtle balance-colored border
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(balanceColor.opacity(0.3), lineWidth: 1)
+            RoundedRectangle(cornerRadius: CornerRadius.lg)
+                .stroke(balanceColor.opacity(Opacity.light), lineWidth: 1)
         }
     }
 
@@ -239,11 +239,11 @@ struct HeroPanel: View {
     var healthColor: Color {
         let percentage = Double(engine.playerHealth) / Double(max(engine.playerMaxHealth, 1))
         if percentage > 0.6 {
-            return .green
+            return AppColors.success
         } else if percentage > 0.3 {
-            return .orange
+            return AppColors.warning
         } else {
-            return .red
+            return AppColors.danger
         }
     }
 
@@ -261,11 +261,11 @@ struct HeroPanel: View {
     var balanceColor: Color {
         let balance = engine.playerBalance
         if balance >= 70 {
-            return .yellow              // Light path
+            return AppColors.light      // Light path
         } else if balance <= 30 {
-            return .purple              // Dark path
+            return AppColors.dark       // Dark path
         } else {
-            return .gray                // Neutral
+            return AppColors.neutral    // Neutral
         }
     }
 
@@ -284,19 +284,19 @@ struct HeroPanel: View {
         let balance = engine.playerBalance
         if balance >= 70 {
             return LinearGradient(
-                colors: [.yellow.opacity(0.8), .orange.opacity(0.6)],
+                colors: [AppColors.light.opacity(Opacity.high), AppColors.power.opacity(Opacity.mediumHigh)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
         } else if balance <= 30 {
             return LinearGradient(
-                colors: [.purple.opacity(0.8), .indigo.opacity(0.6)],
+                colors: [AppColors.dark.opacity(Opacity.high), Color.indigo.opacity(Opacity.mediumHigh)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
         } else {
             return LinearGradient(
-                colors: [.gray.opacity(0.6), .gray.opacity(0.4)],
+                colors: [AppColors.neutral.opacity(Opacity.mediumHigh), AppColors.neutral.opacity(Opacity.medium)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -308,7 +308,7 @@ struct HeroPanel: View {
 
 struct HeroPanel_Previews: PreviewProvider {
     static var previews: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: Spacing.xl) {
             // Full panel
             HeroPanel(engine: previewEngine)
                 .padding()

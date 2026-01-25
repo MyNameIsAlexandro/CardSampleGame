@@ -125,15 +125,15 @@ struct CombatView: View {
         VStack(spacing: 0) {
             // Hero Panel (persistent, consistent design)
             HeroPanel(engine: engine, compact: true, showAvatar: true)
-                .padding(.horizontal, 8)
-                .padding(.top, 4)
+                .padding(.horizontal, Spacing.sm)
+                .padding(.top, Spacing.xxs)
 
             // Верхняя панель
             combatHeader
 
             // Основная область боя
             ScrollView {
-                VStack(spacing: 16) {
+                VStack(spacing: Spacing.lg) {
                     // Монстр
                     monsterCard
 
@@ -188,7 +188,7 @@ struct CombatView: View {
     var combatHeader: some View {
         HStack {
             // Ход и фаза
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: Spacing.xxxs) {
                 Text(L10n.combatTurnNumber.localized(with: turnNumber))
                     .font(.headline)
                 Text(phaseText)
@@ -200,147 +200,147 @@ struct CombatView: View {
 
             // Действия (показываем только в ход игрока)
             if phase == .playerTurn {
-                HStack(spacing: 6) {
+                HStack(spacing: Spacing.xs) {
                     ForEach(0..<3, id: \.self) { i in
                         Circle()
-                            .fill(i < actionsRemaining ? Color.orange : Color.gray.opacity(0.3))
-                            .frame(width: 16, height: 16)
+                            .fill(i < actionsRemaining ? AppColors.power : AppColors.secondary.opacity(Opacity.light))
+                            .frame(width: Sizes.iconTiny, height: Sizes.iconTiny)
                     }
                 }
 
                 Text("\(actionsRemaining)/3")
                     .font(.headline)
-                    .foregroundColor(.orange)
-                    .padding(.leading, 4)
+                    .foregroundColor(AppColors.power)
+                    .padding(.leading, Spacing.xxs)
             }
 
             Spacer()
 
             // Кнопка побега
             Button(action: flee) {
-                HStack(spacing: 4) {
+                HStack(spacing: Spacing.xxs) {
                     Image(systemName: "figure.run")
                     Text(L10n.combatFleeButton.localized)
                         .font(.caption)
                 }
-                .foregroundColor(.gray)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(Color.gray.opacity(0.2))
-                .cornerRadius(8)
+                .foregroundColor(AppColors.secondary)
+                .padding(.horizontal, Spacing.md)
+                .padding(.vertical, Spacing.xs)
+                .background(AppColors.secondary.opacity(Opacity.faint))
+                .cornerRadius(CornerRadius.md)
             }
             .disabled(phase != .playerTurn)
         }
         .padding()
-        .background(Color(UIColor.secondarySystemBackground))
+        .background(AppColors.cardBackground)
     }
 
     // MARK: - Monster Card
 
     var monsterCard: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: Spacing.sm) {
             Text(monster.name)
                 .font(.title2)
                 .fontWeight(.bold)
-                .foregroundColor(.red)
+                .foregroundColor(AppColors.danger)
 
-            HStack(spacing: 32) {
+            HStack(spacing: Spacing.xxxl) {
                 // HP монстра (Engine-First: read from engine.combatState)
                 VStack {
                     Image(systemName: "heart.fill")
                         .font(.title)
-                        .foregroundColor(.red)
+                        .foregroundColor(AppColors.health)
                     Text("\(monsterHealth)")
                         .font(.title)
                         .fontWeight(.bold)
                     Text(L10n.combatHP.localized)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
                 }
 
                 // Атака монстра
                 VStack {
                     Image(systemName: "burst.fill")
                         .font(.title)
-                        .foregroundColor(.orange)
+                        .foregroundColor(AppColors.power)
                     Text("\(monster.power ?? 3)")
                         .font(.title)
                         .fontWeight(.bold)
                     Text(L10n.combatAttack.localized)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
                 }
 
                 // Защита монстра
                 VStack {
                     Image(systemName: "shield.fill")
                         .font(.title)
-                        .foregroundColor(.blue)
+                        .foregroundColor(AppColors.defense)
                     Text("\(monster.defense ?? 10)")
                         .font(.title)
                         .fontWeight(.bold)
                     Text(L10n.combatDefense.localized)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
                 }
             }
         }
         .padding()
         .frame(maxWidth: .infinity)
         .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.red.opacity(0.1))
+            RoundedRectangle(cornerRadius: CornerRadius.lg)
+                .fill(AppColors.danger.opacity(0.1))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.red, lineWidth: 2)
+                    RoundedRectangle(cornerRadius: CornerRadius.lg)
+                        .stroke(AppColors.danger, lineWidth: 2)
                 )
         )
     }
 
     var vsIndicator: some View {
         HStack {
-            Rectangle().fill(Color.red.opacity(0.5)).frame(height: 2)
+            Rectangle().fill(AppColors.danger.opacity(Opacity.medium)).frame(height: Spacing.xxxs)
             Text("⚔️ VS ⚔️")
                 .font(.headline)
-                .padding(.horizontal, 8)
-            Rectangle().fill(Color.red.opacity(0.5)).frame(height: 2)
+                .padding(.horizontal, Spacing.sm)
+            Rectangle().fill(AppColors.danger.opacity(Opacity.medium)).frame(height: Spacing.xxxs)
         }
     }
 
     // MARK: - Player Stats (Engine-First: reads from engine.player*)
 
     var playerStats: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: Spacing.sm) {
             // Main stats row
-            HStack(spacing: 20) {
+            HStack(spacing: Spacing.xl) {
                 VStack {
                     Image(systemName: "heart.fill")
-                        .foregroundColor(.red)
+                        .foregroundColor(AppColors.health)
                     Text("\(engine.playerHealth)/\(engine.playerMaxHealth)")
                         .fontWeight(.bold)
                     Text(L10n.combatHP.localized)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
                 }
 
                 VStack {
                     Image(systemName: "hand.raised.fill")
-                        .foregroundColor(.orange)
+                        .foregroundColor(AppColors.power)
                     Text("\(engine.playerStrength)")
                         .fontWeight(.bold)
                     Text(L10n.combatStrength.localized)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
                 }
 
                 VStack {
                     Image(systemName: "sparkles")
-                        .foregroundColor(.yellow)
+                        .foregroundColor(AppColors.faith)
                     Text("\(engine.playerFaith)")
                         .fontWeight(.bold)
                     Text(L10n.tmResourceFaith.localized)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
                 }
 
                 // NEW: Shield display
@@ -352,83 +352,83 @@ struct CombatView: View {
                             .fontWeight(.bold)
                         Text(L10n.combatShield.localized)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(AppColors.muted)
                     }
                 }
             }
 
             // Combat bonuses indicator (if any)
             if bonusDice > 0 || bonusDamage > 0 {
-                HStack(spacing: 12) {
+                HStack(spacing: Spacing.md) {
                     if bonusDice > 0 {
-                        HStack(spacing: 4) {
+                        HStack(spacing: Spacing.xxs) {
                             Image(systemName: "dice.fill")
-                                .foregroundColor(.purple)
+                                .foregroundColor(AppColors.dark)
                             Text("+\(bonusDice)")
                                 .font(.caption)
                                 .fontWeight(.bold)
-                                .foregroundColor(.purple)
+                                .foregroundColor(AppColors.dark)
                         }
                     }
                     if bonusDamage > 0 {
-                        HStack(spacing: 4) {
+                        HStack(spacing: Spacing.xxs) {
                             Image(systemName: "flame.fill")
-                                .foregroundColor(.orange)
+                                .foregroundColor(AppColors.power)
                             Text("+\(bonusDamage)")
                                 .font(.caption)
                                 .fontWeight(.bold)
-                                .foregroundColor(.orange)
+                                .foregroundColor(AppColors.power)
                         }
                     }
                 }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(Color.purple.opacity(0.1))
-                .cornerRadius(8)
+                .padding(.horizontal, Spacing.sm)
+                .padding(.vertical, Spacing.xxs)
+                .background(AppColors.dark.opacity(0.1))
+                .cornerRadius(CornerRadius.md)
             }
         }
         .padding()
         .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.blue.opacity(0.1))
+            RoundedRectangle(cornerRadius: CornerRadius.lg)
+                .fill(AppColors.defense.opacity(0.1))
         )
     }
 
     // MARK: - Player Turn Controls
 
     var playerTurnControls: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: Spacing.lg) {
             // Инструкция
-            VStack(spacing: 4) {
+            VStack(spacing: Spacing.xxs) {
                 Text(L10n.combatPlayerTurn.localized)
                     .font(.headline)
-                    .foregroundColor(.green)
+                    .foregroundColor(AppColors.success)
 
                 if actionsRemaining > 0 {
                     Text(L10n.combatActionsRemaining.localized(with: actionsRemaining))
                         .font(.subheadline)
                     Text(L10n.combatTapToPlay.localized)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
                 } else {
                     Text(L10n.combatActionsRemaining.localized(with: 0))
                         .font(.subheadline)
-                        .foregroundColor(.orange)
+                        .foregroundColor(AppColors.power)
                     Text(L10n.combatEndTurnButton.localized)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
                 }
             }
             .padding()
             .frame(maxWidth: .infinity)
-            .background(Color.green.opacity(0.1))
-            .cornerRadius(12)
+            .background(AppColors.success.opacity(0.1))
+            .cornerRadius(CornerRadius.lg)
 
             // Кнопки действий (каждое действие тратит 1 из 3)
-            HStack(spacing: 8) {
+            HStack(spacing: Spacing.sm) {
                 // Базовая атака
                 Button(action: performBasicAttack) {
-                    VStack(spacing: 4) {
+                    VStack(spacing: Spacing.xxs) {
                         Image(systemName: "hand.raised.fill")
                             .font(.title2)
                         Text(L10n.combatAttackButton.localized)
@@ -438,25 +438,25 @@ struct CombatView: View {
                         if bonusDamage > 0 || bonusDice > 0 {
                             Text("+\(bonusDamage)💥 +\(bonusDice)🎲")
                                 .font(.system(size: 9))
-                                .foregroundColor(.yellow)
+                                .foregroundColor(AppColors.faith)
                         } else {
                             Text(L10n.combatActionCost.localized)
                                 .font(.system(size: 9))
-                                .foregroundColor(.white.opacity(0.7))
+                                .foregroundColor(.white.opacity(Opacity.high))
                         }
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(actionsRemaining > 0 ? Color.orange : Color.gray)
+                    .background(actionsRemaining > 0 ? AppColors.power : AppColors.secondary)
                     .foregroundColor(.white)
-                    .cornerRadius(12)
+                    .cornerRadius(CornerRadius.lg)
                 }
                 .disabled(actionsRemaining <= 0)
                 .accessibilityIdentifier(AccessibilityIdentifiers.Combat.attackButton)
 
                 // NEW: Укрытие (Defend/Take Cover)
                 Button(action: performDefend) {
-                    VStack(spacing: 4) {
+                    VStack(spacing: Spacing.xxs) {
                         Image(systemName: "shield.fill")
                             .font(.title2)
                         Text(L10n.combatDefend.localized)
@@ -464,19 +464,19 @@ struct CombatView: View {
                             .fontWeight(.semibold)
                         Text("+3🛡️ (-1)")
                             .font(.system(size: 9))
-                            .foregroundColor(.white.opacity(0.7))
+                            .foregroundColor(.white.opacity(Opacity.high))
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(actionsRemaining > 0 ? Color.cyan : Color.gray)
+                    .background(actionsRemaining > 0 ? Color.cyan : AppColors.secondary)
                     .foregroundColor(.white)
-                    .cornerRadius(12)
+                    .cornerRadius(CornerRadius.lg)
                 }
                 .disabled(actionsRemaining <= 0)
 
                 // Завершить ход
                 Button(action: endPlayerTurn) {
-                    VStack(spacing: 4) {
+                    VStack(spacing: Spacing.xxs) {
                         Image(systemName: "arrow.right.circle.fill")
                             .font(.title2)
                         Text(L10n.combatEndTurnButton.localized)
@@ -485,9 +485,9 @@ struct CombatView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.purple)
+                    .background(AppColors.dark)
                     .foregroundColor(.white)
-                    .cornerRadius(12)
+                    .cornerRadius(CornerRadius.lg)
                 }
                 .accessibilityIdentifier(AccessibilityIdentifiers.Combat.endTurnButton)
             }
@@ -498,24 +498,24 @@ struct CombatView: View {
     // MARK: - Enemy Turn View
 
     var enemyTurnView: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: Spacing.md) {
             Text(L10n.combatEnemyTurn.localized)
                 .font(.headline)
-                .foregroundColor(.red)
+                .foregroundColor(AppColors.danger)
 
             HStack {
                 Image(systemName: "burst.fill")
-                    .foregroundColor(.red)
+                    .foregroundColor(AppColors.danger)
                 Text(L10n.combatLogEnemyAttacks.localized(with: monster.name))
             }
 
             ProgressView()
-                .progressViewStyle(CircularProgressViewStyle(tint: .red))
+                .progressViewStyle(CircularProgressViewStyle(tint: AppColors.danger))
         }
         .padding()
         .frame(maxWidth: .infinity)
-        .background(Color.red.opacity(0.1))
-        .cornerRadius(12)
+        .background(AppColors.danger.opacity(0.1))
+        .cornerRadius(CornerRadius.lg)
         .onAppear {
             performEnemyAttack()
         }
@@ -524,18 +524,18 @@ struct CombatView: View {
     // MARK: - End Turn View
 
     var endTurnView: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: Spacing.md) {
             Text(L10n.combatEndTurn.localized)
                 .font(.headline)
-                .foregroundColor(.purple)
+                .foregroundColor(AppColors.dark)
 
             ProgressView()
-                .progressViewStyle(CircularProgressViewStyle(tint: .purple))
+                .progressViewStyle(CircularProgressViewStyle(tint: AppColors.dark))
         }
         .padding()
         .frame(maxWidth: .infinity)
-        .background(Color.purple.opacity(0.1))
-        .cornerRadius(12)
+        .background(AppColors.dark.opacity(0.1))
+        .cornerRadius(CornerRadius.lg)
         .onAppear {
             performEndTurn()
         }
@@ -545,57 +545,57 @@ struct CombatView: View {
     // Player must tap "Continue" to dismiss - no auto-dismiss
 
     var combatOverView: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: Spacing.xxl) {
             Spacer()
 
             // Victory/Defeat Icon and Title
             if isVictory {
-                VStack(spacing: 12) {
+                VStack(spacing: Spacing.md) {
                     Text("🎉")
-                        .font(.system(size: 72))
+                        .font(.system(size: Sizes.iconRegion + Spacing.md))
 
                     Text(L10n.combatVictory.localized)
                         .font(.largeTitle)
                         .fontWeight(.bold)
-                        .foregroundColor(.green)
+                        .foregroundColor(AppColors.success)
 
                     Text(L10n.combatMonsterDefeated.localized(with: defeatedMonsterName))
                         .font(.title3)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
                 }
             } else {
-                VStack(spacing: 12) {
+                VStack(spacing: Spacing.md) {
                     Text("💀")
-                        .font(.system(size: 72))
+                        .font(.system(size: Sizes.iconRegion + Spacing.md))
 
                     Text(L10n.combatDefeat.localized)
                         .font(.largeTitle)
                         .fontWeight(.bold)
-                        .foregroundColor(.red)
+                        .foregroundColor(AppColors.danger)
 
                     Text(L10n.combatFallen.localized)
                         .font(.title3)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
                 }
             }
 
             // Combat Statistics
             if let stats = finalCombatStats {
-                VStack(spacing: 16) {
+                VStack(spacing: Spacing.lg) {
                     Text("📊 " + L10n.combatLogTitle.localized)
                         .font(.headline)
                         .foregroundColor(.primary)
 
-                    HStack(spacing: 32) {
+                    HStack(spacing: Spacing.xxxl) {
                         // Turns
                         VStack {
                             Text("\(stats.turnsPlayed)")
                                 .font(.title)
                                 .fontWeight(.bold)
-                                .foregroundColor(.blue)
+                                .foregroundColor(AppColors.defense)
                             Text(L10n.combatStatsTurns.localized)
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(AppColors.muted)
                         }
 
                         // Damage dealt
@@ -603,10 +603,10 @@ struct CombatView: View {
                             Text("\(stats.totalDamageDealt)")
                                 .font(.title)
                                 .fontWeight(.bold)
-                                .foregroundColor(.orange)
+                                .foregroundColor(AppColors.power)
                             Text(L10n.combatStatsDamageDealt.localized)
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(AppColors.muted)
                         }
 
                         // Damage taken
@@ -614,10 +614,10 @@ struct CombatView: View {
                             Text("\(stats.totalDamageTaken)")
                                 .font(.title)
                                 .fontWeight(.bold)
-                                .foregroundColor(.red)
+                                .foregroundColor(AppColors.danger)
                             Text(L10n.combatStatsDamageTaken.localized)
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(AppColors.muted)
                         }
 
                         // Cards played
@@ -625,16 +625,16 @@ struct CombatView: View {
                             Text("\(stats.cardsPlayed)")
                                 .font(.title)
                                 .fontWeight(.bold)
-                                .foregroundColor(.purple)
+                                .foregroundColor(AppColors.dark)
                             Text(L10n.combatStatsCardsPlayed.localized)
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(AppColors.muted)
                         }
                     }
                 }
                 .padding()
-                .background(Color(UIColor.secondarySystemBackground))
-                .cornerRadius(12)
+                .background(AppColors.cardBackground)
+                .cornerRadius(CornerRadius.lg)
             }
 
             Spacer()
@@ -659,18 +659,18 @@ struct CombatView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(isVictory ? Color.green : Color.blue)
-                .cornerRadius(12)
+                .background(isVictory ? AppColors.success : AppColors.defense)
+                .cornerRadius(CornerRadius.lg)
             }
             .padding(.horizontal)
-            .padding(.bottom, 32)
+            .padding(.bottom, Spacing.xxxl)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(
             LinearGradient(
                 gradient: Gradient(colors: isVictory
-                    ? [Color.green.opacity(0.1), Color.black.opacity(0.3)]
-                    : [Color.red.opacity(0.1), Color.black.opacity(0.3)]),
+                    ? [AppColors.success.opacity(0.1), Color.black.opacity(Opacity.light)]
+                    : [AppColors.danger.opacity(0.1), Color.black.opacity(Opacity.light)]),
                 startPoint: .top,
                 endPoint: .bottom
             )
@@ -680,65 +680,65 @@ struct CombatView: View {
     // MARK: - Combat Log
 
     var combatLogView: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
             // Детальный результат последней атаки
             if let result = lastCombatResult {
                 combatResultDetailView(result)
             }
 
             // Журнал боя
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: Spacing.xxs) {
                 Text("📜 " + L10n.combatLogTitle.localized)
                     .font(.caption)
                     .fontWeight(.bold)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(AppColors.muted)
 
                 ForEach(Array(combatLog.suffix(5).enumerated()), id: \.offset) { index, entry in
                     Text("• \(entry)")
                         .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
             .background(Color(UIColor.tertiarySystemBackground))
-            .cornerRadius(8)
+            .cornerRadius(CornerRadius.md)
         }
     }
 
     /// Детальный вид результата атаки
     func combatResultDetailView(_ result: CombatResult) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: Spacing.xs) {
             // Заголовок попадание/промах
             HStack {
                 Text(result.isHit ? L10n.combatHitResult.localized : L10n.combatMissResult.localized)
                     .font(.headline)
                     .fontWeight(.bold)
-                    .foregroundColor(result.isHit ? .green : .red)
+                    .foregroundColor(result.isHit ? AppColors.success : AppColors.danger)
 
                 Spacer()
 
                 // Общий результат
                 Text(L10n.combatAttackVsDefense.localized(with: result.attackRoll.total, result.defenseValue))
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(AppColors.muted)
             }
 
             Divider()
 
             // Разбивка броска атаки
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: Spacing.xxxs) {
                 Text(L10n.combatAttackRollTitle.localized)
                     .font(.caption)
                     .fontWeight(.semibold)
 
-                HStack(spacing: 4) {
+                HStack(spacing: Spacing.xxs) {
                     Text("💪 \(result.attackRoll.baseStrength)")
                         .font(.caption2)
 
                     Text("+")
                         .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
 
                     // Кубики
                     ForEach(result.attackRoll.diceRolls.indices, id: \.self) { index in
@@ -748,7 +748,7 @@ struct CombatView: View {
                     if result.attackRoll.bonusDamage > 0 {
                         Text("+ \(result.attackRoll.bonusDamage)")
                             .font(.caption2)
-                            .foregroundColor(.orange)
+                            .foregroundColor(AppColors.power)
                     }
 
                     Text("= \(result.attackRoll.total)")
@@ -761,7 +761,7 @@ struct CombatView: View {
                     let modifier = result.attackRoll.modifiers[index]
                     Text("\(modifier.icon) \(modifier.description)")
                         .font(.caption2)
-                        .foregroundColor(.blue)
+                        .foregroundColor(AppColors.defense)
                 }
             }
 
@@ -769,7 +769,7 @@ struct CombatView: View {
             if result.isHit, let damage = result.damageCalculation {
                 Divider()
 
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: Spacing.xxxs) {
                     Text(L10n.combatDamageCalcTitle.localized)
                         .font(.caption)
                         .fontWeight(.semibold)
@@ -782,23 +782,23 @@ struct CombatView: View {
                             let mod = damage.modifiers[index]
                             Text("\(mod.value > 0 ? "+" : "")\(mod.value)")
                                 .font(.caption2)
-                                .foregroundColor(mod.value > 0 ? .green : .red)
+                                .foregroundColor(mod.value > 0 ? AppColors.success : AppColors.danger)
                         }
 
                         Text("= \(damage.total) 💥")
                             .font(.caption)
                             .fontWeight(.bold)
-                            .foregroundColor(.red)
+                            .foregroundColor(AppColors.danger)
                     }
 
                     // Детализация модификаторов урона
                     ForEach(damage.modifiers.indices, id: \.self) { index in
                         let modifier = damage.modifiers[index]
-                        HStack(spacing: 4) {
+                        HStack(spacing: Spacing.xxs) {
                             Text(modifier.icon)
                             Text(modifier.description)
                             Text("\(modifier.value > 0 ? "+" : "")\(modifier.value)")
-                                .foregroundColor(modifier.value > 0 ? .green : .red)
+                                .foregroundColor(modifier.value > 0 ? AppColors.success : AppColors.danger)
                         }
                         .font(.caption2)
                     }
@@ -807,11 +807,11 @@ struct CombatView: View {
         }
         .padding()
         .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(result.isHit ? Color.green.opacity(0.1) : Color.red.opacity(0.1))
+            RoundedRectangle(cornerRadius: CornerRadius.md)
+                .fill(result.isHit ? AppColors.success.opacity(0.1) : AppColors.danger.opacity(0.1))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(result.isHit ? Color.green : Color.red, lineWidth: 1)
+                    RoundedRectangle(cornerRadius: CornerRadius.md)
+                        .stroke(result.isHit ? AppColors.success : AppColors.danger, lineWidth: 1)
                 )
         )
     }
@@ -819,15 +819,15 @@ struct CombatView: View {
     /// Вид кубика
     func diceView(_ value: Int) -> some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 4)
+            RoundedRectangle(cornerRadius: CornerRadius.sm)
                 .fill(Color.white)
-                .frame(width: 24, height: 24)
+                .frame(width: Spacing.xxl, height: Spacing.xxl)
                 .shadow(radius: 1)
 
             Text("\(value)")
                 .font(.caption)
                 .fontWeight(.bold)
-                .foregroundColor(value >= 5 ? .green : value <= 2 ? .red : .black)
+                .foregroundColor(value >= 5 ? AppColors.success : value <= 2 ? AppColors.danger : .black)
         }
     }
 
@@ -837,10 +837,10 @@ struct CombatView: View {
     var diceRollOverlay: some View {
         ZStack {
             // Semi-transparent background
-            Color.black.opacity(0.6)
+            Color.black.opacity(Opacity.mediumHigh)
                 .ignoresSafeArea()
 
-            VStack(spacing: 20) {
+            VStack(spacing: Spacing.xl) {
                 // Title
                 Text(L10n.combatDiceRoll.localized)
                     .font(.title2)
@@ -848,7 +848,7 @@ struct CombatView: View {
                     .foregroundColor(.white)
 
                 // Animated dice
-                HStack(spacing: 16) {
+                HStack(spacing: Spacing.lg) {
                     ForEach(animatingDiceValues.indices, id: \.self) { index in
                         animatedDiceView(value: animatingDiceValues[index], index: index)
                     }
@@ -857,20 +857,20 @@ struct CombatView: View {
 
                 // Result display (after animation completes)
                 if let result = lastCombatResult, diceAnimationPhase >= 3 {
-                    VStack(spacing: 12) {
+                    VStack(spacing: Spacing.md) {
                         // Attack total
-                        HStack(spacing: 8) {
+                        HStack(spacing: Spacing.sm) {
                             Text("💪 \(result.attackRoll.baseStrength)")
                                 .foregroundColor(.cyan)
                             Text("+")
                                 .foregroundColor(.white)
                             Text("🎲 \(result.attackRoll.diceTotal)")
-                                .foregroundColor(.yellow)
+                                .foregroundColor(AppColors.faith)
                             if result.attackRoll.bonusDamage > 0 {
                                 Text("+")
                                     .foregroundColor(.white)
                                 Text("⚔️ \(result.attackRoll.bonusDamage)")
-                                    .foregroundColor(.orange)
+                                    .foregroundColor(AppColors.power)
                             }
                             Text("=")
                                 .foregroundColor(.white)
@@ -882,39 +882,39 @@ struct CombatView: View {
                         .font(.headline)
 
                         // VS Defense
-                        HStack(spacing: 8) {
+                        HStack(spacing: Spacing.sm) {
                             Text("vs")
-                                .foregroundColor(.gray)
+                                .foregroundColor(AppColors.secondary)
                             Text(L10n.combatDefenseValue.localized(with: result.defenseValue))
-                                .foregroundColor(.blue)
+                                .foregroundColor(AppColors.defense)
                         }
                         .font(.subheadline)
 
                         // Hit/Miss result
                         if result.isHit {
-                            VStack(spacing: 4) {
+                            VStack(spacing: Spacing.xxs) {
                                 Text(L10n.combatHitResult.localized)
                                     .font(.title)
                                     .fontWeight(.bold)
-                                    .foregroundColor(.green)
+                                    .foregroundColor(AppColors.success)
 
                                 if let damage = result.damageCalculation {
                                     Text(L10n.combatDamageValue.localized(with: damage.total))
                                         .font(.headline)
-                                        .foregroundColor(.red)
+                                        .foregroundColor(AppColors.danger)
                                 }
                             }
                         } else {
                             Text(L10n.combatMissResult.localized)
                                 .font(.title)
                                 .fontWeight(.bold)
-                                .foregroundColor(.red)
+                                .foregroundColor(AppColors.danger)
                         }
                     }
                     .padding()
                     .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.black.opacity(0.8))
+                        RoundedRectangle(cornerRadius: CornerRadius.lg)
+                            .fill(Color.black.opacity(Opacity.high))
                     )
                     .transition(.scale.combined(with: .opacity))
 
@@ -924,11 +924,11 @@ struct CombatView: View {
                             .font(.headline)
                             .fontWeight(.bold)
                             .foregroundColor(.white)
-                            .frame(width: 120, height: 44)
-                            .background(result.isHit ? Color.green : Color.red)
-                            .cornerRadius(12)
+                            .frame(width: Sizes.buttonMinWidth, height: Sizes.touchTarget)
+                            .background(result.isHit ? AppColors.success : AppColors.danger)
+                            .cornerRadius(CornerRadius.lg)
                     }
-                    .padding(.top, 16)
+                    .padding(.top, Spacing.lg)
                 }
             }
         }
@@ -950,20 +950,20 @@ struct CombatView: View {
     func animatedDiceView(value: Int, index: Int) -> some View {
         ZStack {
             // Dice background
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: CornerRadius.md)
                 .fill(Color.white)
-                .frame(width: 60, height: 60)
-                .shadow(color: .black.opacity(0.3), radius: 4, x: 2, y: 2)
+                .frame(width: Sizes.iconRegion, height: Sizes.iconRegion)
+                .shadow(color: .black.opacity(Opacity.light), radius: 4, x: 2, y: 2)
 
             // Dice value
             Text("\(value)")
-                .font(.system(size: 32, weight: .bold, design: .rounded))
-                .foregroundColor(value >= 5 ? .green : value <= 2 ? .red : .black)
+                .font(.system(size: Sizes.iconLarge, weight: .bold, design: .rounded))
+                .foregroundColor(value >= 5 ? AppColors.success : value <= 2 ? AppColors.danger : .black)
         }
         .scaleEffect(diceAnimationPhase >= 2 ? 1.0 : 1.2)
         .rotationEffect(.degrees(diceAnimationPhase >= 2 ? 0 : Double(index * 30)))
         .animation(
-            .spring(response: 0.3, dampingFraction: 0.6),
+            .spring(response: AnimationDuration.slow, dampingFraction: 0.6),
             value: diceAnimationPhase
         )
     }
@@ -1022,24 +1022,24 @@ struct CombatView: View {
     }
 
     var playerHandView: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: Spacing.xxs) {
             HStack {
                 Text("🃏 " + L10n.combatYourHand.localized + " (\(playerHand.count))")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(AppColors.muted)
 
                 Spacer()
 
                 if phase == .playerTurn && actionsRemaining > 0 {
                     Text(L10n.combatTapToPlay.localized)
-                        .font(.system(size: 10))
-                        .foregroundColor(.green)
+                        .font(.system(size: Spacing.smd))
+                        .foregroundColor(AppColors.success)
                 }
             }
             .padding(.horizontal)
 
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
+                HStack(spacing: Spacing.sm) {
                     ForEach(playerHand) { card in
                         CombatCardView(
                             card: card,
@@ -1052,8 +1052,8 @@ struct CombatView: View {
                 .padding(.horizontal)
             }
         }
-        .frame(height: 150)
-        .background(Color(UIColor.secondarySystemBackground))
+        .frame(height: Sizes.cardHeightMedium + Spacing.smd)
+        .background(AppColors.cardBackground)
     }
 
     // MARK: - Combat Logic (Engine-First: uses engine.performAction())
@@ -1513,7 +1513,7 @@ struct CombatCardView: View {
     let onPlay: () -> Void
 
     var body: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: Spacing.xxs) {
             // Название карты
             Text(card.name)
                 .font(.caption)
@@ -1523,13 +1523,13 @@ struct CombatCardView: View {
 
             // Стоимость веры (если есть)
             if let cost = card.cost, cost > 0 {
-                HStack(spacing: 2) {
+                HStack(spacing: Spacing.xxxs) {
                     Image(systemName: "sparkles")
-                        .font(.system(size: 10))
+                        .font(.system(size: Spacing.smd))
                     Text("\(cost)")
                         .font(.caption2)
                 }
-                .foregroundColor(.yellow)
+                .foregroundColor(AppColors.faith)
             }
 
             // Тип карты
@@ -1541,22 +1541,22 @@ struct CombatCardView: View {
             // Основной эффект
             if let ability = card.abilities.first {
                 Text(abilityText(ability))
-                    .font(.system(size: 10))
-                    .foregroundColor(.secondary)
+                    .font(.system(size: Spacing.smd))
+                    .foregroundColor(AppColors.muted)
                     .lineLimit(2)
             }
         }
-        .frame(width: 85, height: 110)
-        .padding(6)
+        .frame(width: Sizes.cardWidthSmall + 5, height: Sizes.cardHeightSmall + Spacing.smd)
+        .padding(Spacing.xs)
         .background(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: CornerRadius.md)
                 .fill(cardBackground)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(canPlay ? cardBorder : Color.gray, lineWidth: canPlay ? 2 : 1)
+                    RoundedRectangle(cornerRadius: CornerRadius.md)
+                        .stroke(canPlay ? cardBorder : AppColors.secondary, lineWidth: canPlay ? 2 : 1)
                 )
         )
-        .opacity(canPlay ? 1.0 : 0.5)
+        .opacity(canPlay ? Opacity.opaque : Opacity.medium)
         .scaleEffect(canPlay ? 1.0 : 0.95)
         .onTapGesture {
             if canPlay {
@@ -1577,31 +1577,31 @@ struct CombatCardView: View {
 
     var cardTypeColor: Color {
         switch card.type {
-        case .attack: return .red
-        case .defense: return .blue
-        case .spell: return .purple
-        case .resource: return .yellow
-        default: return .gray
+        case .attack: return AppColors.danger
+        case .defense: return AppColors.defense
+        case .spell: return AppColors.dark
+        case .resource: return AppColors.faith
+        default: return AppColors.secondary
         }
     }
 
     var cardBackground: Color {
         switch card.type {
-        case .attack: return Color.red.opacity(0.15)
-        case .defense: return Color.blue.opacity(0.15)
-        case .spell: return Color.purple.opacity(0.15)
-        case .resource: return Color.yellow.opacity(0.15)
-        default: return Color.gray.opacity(0.15)
+        case .attack: return AppColors.danger.opacity(0.15)
+        case .defense: return AppColors.defense.opacity(0.15)
+        case .spell: return AppColors.dark.opacity(0.15)
+        case .resource: return AppColors.faith.opacity(0.15)
+        default: return AppColors.secondary.opacity(0.15)
         }
     }
 
     var cardBorder: Color {
         switch card.type {
-        case .attack: return .red
-        case .defense: return .blue
-        case .spell: return .purple
-        case .resource: return .yellow
-        default: return .gray
+        case .attack: return AppColors.danger
+        case .defense: return AppColors.defense
+        case .spell: return AppColors.dark
+        case .resource: return AppColors.faith
+        default: return AppColors.secondary
         }
     }
 

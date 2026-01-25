@@ -7,10 +7,10 @@ struct PlayerHandView: View {
     var onCardPlay: ((Card) -> Void)?
 
     var body: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: Spacing.xxs) {
             // Play card button (shown when card is selected)
             if let selected = selectedCard {
-                HStack(spacing: 12) {
+                HStack(spacing: Spacing.md) {
                     Button(action: {
                         onCardPlay?(selected)
                         selectedCard = nil
@@ -19,9 +19,9 @@ struct PlayerHandView: View {
                             .font(.headline)
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 8)
-                            .background(Color.green)
-                            .cornerRadius(8)
+                            .padding(.vertical, Spacing.sm)
+                            .background(AppColors.success)
+                            .cornerRadius(CornerRadius.md)
                     }
 
                     Button(action: {
@@ -29,16 +29,16 @@ struct PlayerHandView: View {
                     }) {
                         Image(systemName: "xmark.circle.fill")
                             .font(.title2)
-                            .foregroundColor(.gray)
+                            .foregroundColor(AppColors.secondary)
                     }
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 4)
+                .padding(.horizontal, Spacing.md)
+                .padding(.vertical, Spacing.xxs)
                 .background(Color(UIColor.tertiarySystemBackground))
             }
 
             // Compact deck info
-            HStack(spacing: 16) {
+            HStack(spacing: Spacing.lg) {
                 Text(engine.playerName)
                     .font(.caption)
                     .fontWeight(.bold)
@@ -46,36 +46,36 @@ struct PlayerHandView: View {
                 Spacer()
 
                 // Deck count
-                HStack(spacing: 4) {
+                HStack(spacing: Spacing.xxs) {
                     Image(systemName: "rectangle.stack.fill")
                         .font(.caption2)
                     Text("\(engine.playerDeck.count)")
                         .font(.caption2)
                 }
-                .foregroundColor(.blue)
+                .foregroundColor(AppColors.primary)
 
                 // Discard count
-                HStack(spacing: 4) {
+                HStack(spacing: Spacing.xxs) {
                     Image(systemName: "trash.fill")
                         .font(.caption2)
                     Text("\(engine.playerDiscard.count)")
                         .font(.caption2)
                 }
-                .foregroundColor(.gray)
+                .foregroundColor(AppColors.secondary)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 4)
-            .background(Color(UIColor.secondarySystemBackground))
+            .padding(.horizontal, Spacing.md)
+            .padding(.vertical, Spacing.xxs)
+            .background(AppColors.cardBackground)
 
             // Hand of cards
             if engine.playerHand.isEmpty {
                 Text(L10n.noCardsInHand.localized)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(AppColors.muted)
                     .padding()
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
+                    HStack(spacing: Spacing.sm) {
                         ForEach(engine.playerHand) { card in
                             HandCardView(
                                 card: card,
@@ -90,8 +90,8 @@ struct PlayerHandView: View {
                             )
                         }
                     }
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
+                    .padding(.horizontal, Spacing.sm)
+                    .padding(.vertical, Spacing.xxs)
                 }
             }
         }

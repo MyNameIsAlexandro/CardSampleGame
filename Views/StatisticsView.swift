@@ -20,46 +20,46 @@ struct StatisticsView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack(spacing: 24) {
+                VStack(spacing: Spacing.xxl) {
                     // Header
-                    VStack(spacing: 8) {
+                    VStack(spacing: Spacing.sm) {
                         Text("📊 " + L10n.statsTitle.localized)
                             .font(.largeTitle)
                             .fontWeight(.bold)
                         Text(L10n.statsGameName.localized)
                             .font(.title3)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(AppColors.muted)
                     }
                     .padding(.top)
 
                     // Overall Statistics
-                    VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: Spacing.lg) {
                         Text(L10n.statsGeneral.localized)
                             .font(.headline)
 
-                        HStack(spacing: 16) {
+                        HStack(spacing: Spacing.lg) {
                             StatCard(
                                 icon: "gamecontroller.fill",
                                 title: L10n.statsGamesCount.localized,
                                 value: "\(totalGames)",
-                                color: .blue
+                                color: AppColors.primary
                             )
 
                             StatCard(
                                 icon: "clock.fill",
                                 title: L10n.statsLongestSurvival.localized,
                                 value: L10n.statsTurnsCount.localized(with: longestSurvival),
-                                color: .green
+                                color: AppColors.success
                             )
                         }
                     }
                     .padding()
-                    .background(Color(UIColor.secondarySystemBackground))
-                    .cornerRadius(12)
+                    .background(AppColors.cardBackground)
+                    .cornerRadius(CornerRadius.lg)
 
                     // Game Records
                     if !allSaves.isEmpty {
-                        VStack(alignment: .leading, spacing: 16) {
+                        VStack(alignment: .leading, spacing: Spacing.lg) {
                             Text(L10n.statsHistory.localized)
                                 .font(.headline)
 
@@ -68,24 +68,24 @@ struct StatisticsView: View {
                             }
                         }
                         .padding()
-                        .background(Color(UIColor.secondarySystemBackground))
-                        .cornerRadius(12)
+                        .background(AppColors.cardBackground)
+                        .cornerRadius(CornerRadius.lg)
                     } else {
-                        VStack(spacing: 12) {
+                        VStack(spacing: Spacing.md) {
                             Image(systemName: "chart.bar.xaxis")
-                                .font(.system(size: 60))
-                                .foregroundColor(.secondary)
+                                .font(.system(size: Sizes.iconRegion))
+                                .foregroundColor(AppColors.muted)
                             Text(L10n.statsNoSaves.localized)
                                 .font(.headline)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(AppColors.muted)
                             Text(L10n.statsStartHint.localized)
                                 .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(AppColors.muted)
                                 .multilineTextAlignment(.center)
                         }
-                        .padding(40)
-                        .background(Color(UIColor.secondarySystemBackground))
-                        .cornerRadius(12)
+                        .padding(Sizes.iconXL)
+                        .background(AppColors.cardBackground)
+                        .cornerRadius(CornerRadius.lg)
                     }
                 }
                 .padding()
@@ -110,7 +110,7 @@ struct StatCard: View {
     let color: Color
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: Spacing.sm) {
             Image(systemName: icon)
                 .font(.title2)
                 .foregroundColor(color)
@@ -121,12 +121,12 @@ struct StatCard: View {
 
             Text(title)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(AppColors.muted)
         }
         .frame(maxWidth: .infinity)
         .padding()
         .background(Color(UIColor.tertiarySystemBackground))
-        .cornerRadius(10)
+        .cornerRadius(Spacing.smd)
     }
 }
 
@@ -135,47 +135,47 @@ struct GameRecordCard: View {
     let save: EngineSave
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Spacing.md) {
             HStack {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: Spacing.xxs) {
                     Text(save.playerName)
                         .font(.headline)
                     Text(L10n.uiSlotNumber.localized(with: slot))
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
                 }
 
                 Spacer()
 
                 Text(formatDate(save.savedAt))
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(AppColors.muted)
             }
 
             Divider()
 
-            HStack(spacing: 20) {
-                VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: Spacing.xl) {
+                VStack(alignment: .leading, spacing: Spacing.xxs) {
                     Text(L10n.statsResources.localized)
                         .font(.caption)
-                        .foregroundColor(.secondary)
-                    HStack(spacing: 12) {
+                        .foregroundColor(AppColors.muted)
+                    HStack(spacing: Spacing.md) {
                         Label("\(save.playerHealth)/\(save.playerMaxHealth)", systemImage: "heart.fill")
-                            .foregroundColor(.red)
+                            .foregroundColor(AppColors.health)
                         Label("\(save.playerFaith)", systemImage: "sparkles")
-                            .foregroundColor(.yellow)
+                            .foregroundColor(AppColors.faith)
                         Label("\(save.playerBalance)", systemImage: "scale.3d")
-                            .foregroundColor(.purple)
+                            .foregroundColor(AppColors.dark)
                     }
                     .font(.caption)
                 }
 
                 Spacer()
 
-                VStack(alignment: .trailing, spacing: 4) {
+                VStack(alignment: .trailing, spacing: Spacing.xxs) {
                     Text(L10n.statsProgress.localized)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
                     Text(L10n.dayNumber.localized(with: save.currentDay))
                         .font(.headline)
                 }
@@ -183,7 +183,7 @@ struct GameRecordCard: View {
         }
         .padding()
         .background(Color(UIColor.tertiarySystemBackground))
-        .cornerRadius(10)
+        .cornerRadius(Spacing.smd)
     }
 
     private func formatDate(_ date: Date) -> String {
