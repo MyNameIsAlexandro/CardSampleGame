@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		01856FA4AED657E11739268F /* DesignSystemComplianceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CA67A53A024B4CEDD6685C /* DesignSystemComplianceTests.swift */; };
 		01D384D3F190A3976183B126 /* EventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43D4E3FBE4DC34B63B61E061 /* EventView.swift */; };
+		6352A5DDAB8A087797D247C9 /* ContentValidationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E948FF6BD58A6370B765AD94 /* ContentValidationTests.swift */; };
 		8F035EDB750B2C0441F077B0 /* WorldMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BEC0AA856AB6706612208E1 /* WorldMapView.swift */; };
 		AA0000130000000000000001 /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000140000000000000001 /* CardView.swift */; };
 		AA0000150000000000000001 /* PlayerHandView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000160000000000000001 /* PlayerHandView.swift */; };
@@ -77,6 +78,7 @@
 		CT00000000000001 /* PackLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackLoaderTests.swift; sourceTree = "<group>"; };
 		CT00000000000002 /* ContentRegistryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentRegistryTests.swift; sourceTree = "<group>"; };
 		DS00000000000001 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
+		E948FF6BD58A6370B765AD94 /* ContentValidationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ContentValidationTests.swift; sourceTree = "<group>"; };
 		GG0002020000000000000001 /* HeroSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroSelectionView.swift; sourceTree = "<group>"; };
 		HP00000000000001 /* HeroPanelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroPanelTests.swift; sourceTree = "<group>"; };
 		HR00000000000001 /* HeroRegistryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroRegistryTests.swift; sourceTree = "<group>"; };
@@ -194,6 +196,7 @@
 				BB0004120000000000000001 /* AuditGateTests.swift */,
 				A0CA67A53A024B4CEDD6685C /* DesignSystemComplianceTests.swift */,
 				60C1474DB750BB1D0378466E /* CodeHygieneTests.swift */,
+				E948FF6BD58A6370B765AD94 /* ContentValidationTests.swift */,
 			);
 			path = Engine;
 			sourceTree = "<group>";
@@ -392,6 +395,7 @@
 				HP00000000000010 /* HeroPanelTests.swift in Sources */,
 				01856FA4AED657E11739268F /* DesignSystemComplianceTests.swift in Sources */,
 				E9601DE7AB72AE3B9035899A /* CodeHygieneTests.swift in Sources */,
+				6352A5DDAB8A087797D247C9 /* ContentValidationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
