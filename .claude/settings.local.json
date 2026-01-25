@@ -53,7 +53,8 @@
       "Bash(open:*)",
       "Bash(xcrun simctl install:*)",
       "Bash(xcrun simctl launch:*)",
-      "Bash(log show --predicate 'process == \"\"\"\"xctest\"\"\"\" OR process CONTAINS \"\"\"\"CardSampleGame\"\"\"\"' --style compact --last 2m)"
+      "Bash(log show --predicate 'process == \"\"\"\"xctest\"\"\"\" OR process CONTAINS \"\"\"\"CardSampleGame\"\"\"\"' --style compact --last 2m)",
+      "Bash(cd:*)"
     ]
   }
 }

@@ -36,6 +36,8 @@
 		UT00000000000010 /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = UT00000000000001 /* Localization.swift */; };
 		UT00000000000020 /* AccessibilityIdentifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = UT00000000000002 /* AccessibilityIdentifiers.swift */; };
 		UT00000000000030 /* SafeImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = UT00000000000003 /* SafeImage.swift */; };
+		UT00000000000040 /* AssetRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = UT00000000000004 /* AssetRegistry.swift */; };
+		AS00000000000010 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AS00000000000001 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -76,6 +78,8 @@
 		UT00000000000001 /* Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Localization.swift; sourceTree = "<group>"; };
 		UT00000000000002 /* AccessibilityIdentifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityIdentifiers.swift; sourceTree = "<group>"; };
 		UT00000000000003 /* SafeImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafeImage.swift; sourceTree = "<group>"; };
+		UT00000000000004 /* AssetRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetRegistry.swift; sourceTree = "<group>"; };
+		AS00000000000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -115,6 +119,7 @@
 			isa = PBXGroup;
 			children = (
 				AA0000400000000000000001 /* CardSampleGame.entitlements */,
+				AS00000000000001 /* Assets.xcassets */,
 				AA0000270000000000000001 /* Models */,
 				AA0000280000000000000001 /* Views */,
 				UT00000000000100 /* Utilities */,
@@ -170,6 +175,7 @@
 				UT00000000000001 /* Localization.swift */,
 				UT00000000000002 /* AccessibilityIdentifiers.swift */,
 				UT00000000000003 /* SafeImage.swift */,
+				UT00000000000004 /* AssetRegistry.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -326,6 +332,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA0000430000000000000001 /* Localizable.strings in Resources */,
+				AS00000000000010 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -358,6 +365,7 @@
 				UT00000000000010 /* Localization.swift in Sources */,
 				UT00000000000020 /* AccessibilityIdentifiers.swift in Sources */,
 				UT00000000000030 /* SafeImage.swift in Sources */,
+				UT00000000000040 /* AssetRegistry.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
