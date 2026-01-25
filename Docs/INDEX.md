@@ -18,6 +18,7 @@
 | [SPEC_BALANCE_PACK.md](./SPEC_BALANCE_PACK.md) | Спецификация Balance Pack | **SPEC** |
 | [SPEC_INVESTIGATOR_PACK.md](./SPEC_INVESTIGATOR_PACK.md) | Спецификация Investigator Pack | **SPEC** |
 | [QA_ACT_I_CHECKLIST.md](./QA_ACT_I_CHECKLIST.md) | Чеклист тестирования Act I | **QA** |
+| [AUDIT_REPORT_v2.0.md](./AUDIT_REPORT_v2.0.md) | Отчёт аудита v2.0 | **АУДИТ** |
 | [CHANGELOG.md](./CHANGELOG.md) | История изменений | **ИСТОРИЯ** |
 | **INDEX.md** | Вы здесь | **НАВИГАЦИЯ** |
 
