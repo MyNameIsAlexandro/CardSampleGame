@@ -296,7 +296,7 @@ public final class TwilightGameEngine: ObservableObject {
 
         // Engine-First: check content registry for events in this region
         // Use definitionId (e.g., "village") not type.rawValue (e.g., "settlement")
-        guard let regionDefId = region.definitionId else { return false }
+        let regionDefId = region.definitionId
 
         // Map region state to string for content registry
         let regionStateString = mapRegionStateToString(region.state)
@@ -666,6 +666,7 @@ public final class TwilightGameEngine: ObservableObject {
         guard let def = def else { return nil }
         return EngineAnchorState(
             id: UUID(),
+            definitionId: def.id,
             name: def.title.localized,
             integrity: def.initialIntegrity
         )
@@ -1309,10 +1310,10 @@ public final class TwilightGameEngine: ObservableObject {
 
     private func generateEvent(for regionId: UUID, trigger: EventTrigger) -> UUID? {
         // Engine-First: generate event from ContentRegistry
-        guard let region = publishedRegions[regionId],
-              let regionDefId = region.definitionId else {
+        guard let region = publishedRegions[regionId] else {
             return nil
         }
+        let regionDefId = region.definitionId
 
         // Map region state to string for content registry
         let regionStateString = mapRegionStateToString(region.state)
@@ -1432,7 +1433,7 @@ public final class TwilightGameEngine: ObservableObject {
     private func buildQuestTriggerContext() -> QuestTriggerContext {
         // Build active quest states
         let questStates = activeQuests.compactMap { quest -> QuestState? in
-            guard let questDef = contentRegistry.getQuest(id: quest.definitionId ?? quest.id.uuidString) else {
+            guard let questDef = contentRegistry.getQuest(id: quest.definitionId) else {
                 return nil
             }
 
@@ -1812,42 +1813,27 @@ public enum EventTrigger {
 /// - `Region` (legacy) - persistence и совместимость
 public struct EngineRegionState: Identifiable {
     public let id: UUID
-    public let definitionId: String?  // Stable definition ID for serialization (Epic 3)
+    public let definitionId: String  // Stable definition ID for serialization (REQUIRED - Epic 3, Audit A1)
     public let name: String
     public let type: RegionType
     public var state: RegionState
     public var anchor: EngineAnchorState?
     public let neighborIds: [UUID]
-    public let neighborDefinitionIds: [String]?  // Stable neighbor IDs for serialization (Epic 3)
+    public let neighborDefinitionIds: [String]  // Stable neighbor IDs for serialization (Epic 3)
     public var canTrade: Bool
     public var visited: Bool = false
     public var reputation: Int = 0
 
-    /// Create from legacy Region (for migration)
-    public init(from region: Region) {
-        self.id = region.id
-        self.definitionId = nil  // Legacy regions don't have definition IDs
-        self.name = region.name
-        self.type = region.type
-        self.state = region.state
-        self.anchor = region.anchor.map { EngineAnchorState(from: $0) }
-        self.neighborIds = region.neighborIds
-        self.neighborDefinitionIds = nil
-        self.canTrade = region.canTrade
-        self.visited = region.visited
-        self.reputation = region.reputation
-    }
-
-    /// Create directly (Engine-First)
+    /// Create directly (Engine-First) - definitionId is REQUIRED
     public init(
         id: UUID = UUID(),
-        definitionId: String? = nil,
+        definitionId: String,
         name: String,
         type: RegionType,
         state: RegionState,
         anchor: EngineAnchorState? = nil,
         neighborIds: [UUID] = [],
-        neighborDefinitionIds: [String]? = nil,
+        neighborDefinitionIds: [String] = [],
         canTrade: Bool = false,
         visited: Bool = false,
         reputation: Int = 0
@@ -1873,23 +1859,15 @@ public struct EngineRegionState: Identifiable {
 
 // MARK: - Engine Anchor State (Bridge from Legacy)
 
-/// Internal state for engine anchor tracking (bridges from legacy Anchor model)
+/// Internal state for engine anchor tracking (REQUIRED definitionId - Audit A1)
 public struct EngineAnchorState {
     public let id: UUID
-    public let definitionId: String?  // Stable definition ID for serialization (Epic 3)
+    public let definitionId: String  // Stable definition ID for serialization (REQUIRED - Audit A1)
     public let name: String
     public var integrity: Int
 
-    /// Create from legacy Anchor (for migration)
-    public init(from anchor: Anchor) {
-        self.id = anchor.id
-        self.definitionId = nil  // Legacy anchors don't have definition IDs
-        self.name = anchor.name
-        self.integrity = anchor.integrity
-    }
-
-    /// Create directly (Engine-First)
-    public init(id: UUID = UUID(), definitionId: String? = nil, name: String, integrity: Int) {
+    /// Create directly (Engine-First) - definitionId is REQUIRED
+    public init(id: UUID = UUID(), definitionId: String, name: String, integrity: Int) {
         self.id = id
         self.definitionId = definitionId
         self.name = name

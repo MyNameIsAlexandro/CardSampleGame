@@ -233,13 +233,14 @@ public struct RegionSaveState: Codable {
     public let reputation: Int
 
     public init(from region: EngineRegionState) {
-        self.definitionId = region.definitionId ?? region.id.uuidString
+        // definitionId is now required (Audit A1 - no UUID fallback)
+        self.definitionId = region.definitionId
         self.name = region.name
         self.type = region.type.rawValue
         self.state = region.state.rawValue
         self.anchorDefinitionId = region.anchor?.definitionId
         self.anchorIntegrity = region.anchor?.integrity
-        self.neighborDefinitionIds = region.neighborDefinitionIds ?? []
+        self.neighborDefinitionIds = region.neighborDefinitionIds
         self.canTrade = region.canTrade
         self.visited = region.visited
         self.reputation = region.reputation

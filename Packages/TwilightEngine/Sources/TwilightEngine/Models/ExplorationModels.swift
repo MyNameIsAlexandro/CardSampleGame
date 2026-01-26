@@ -634,7 +634,7 @@ public struct QuestRewards: Codable {
 /// See EXPLORATION_CORE_DESIGN.md, section 30 (Side quests as "world mirrors")
 public struct Quest: Identifiable, Codable {
     public let id: UUID
-    public let definitionId: String?           // Content Pack ID (e.g., "quest_main_act1")
+    public let definitionId: String            // Content Pack ID (REQUIRED - Audit A1)
     public let title: String
     public let description: String
     public let questType: QuestType
@@ -649,7 +649,7 @@ public struct Quest: Identifiable, Codable {
 
     public init(
         id: UUID = UUID(),
-        definitionId: String? = nil,
+        definitionId: String,
         title: String,
         description: String,
         questType: QuestType,

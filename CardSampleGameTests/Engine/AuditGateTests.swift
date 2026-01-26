@@ -1506,4 +1506,98 @@ extension AuditGateTests {
             )
         }
     }
+
+    // MARK: - A1: definitionId Non-Optional Gate Tests
+
+    /// Gate test: definitionId must be non-optional in pack-driven entities (Audit A1)
+    /// Requirement: "definitionId должен быть обязательным для всех pack-driven сущностей"
+    func testDefinitionIdIsNonOptional() throws {
+        let testFile = URL(fileURLWithPath: #filePath)
+        let projectRoot = testFile
+            .deletingLastPathComponent()  // Engine
+            .deletingLastPathComponent()  // CardSampleGameTests
+            .deletingLastPathComponent()  // Project root
+
+        // Check EngineRegionState
+        let engineFile = projectRoot.appendingPathComponent("Packages/TwilightEngine/Sources/TwilightEngine/Core/TwilightGameEngine.swift")
+        guard FileManager.default.fileExists(atPath: engineFile.path) else {
+            XCTFail("GATE TEST FAILURE: TwilightGameEngine.swift not found")
+            return
+        }
+
+        let engineContent = try String(contentsOf: engineFile, encoding: .utf8)
+
+        // EngineRegionState.definitionId must be String (not String?)
+        XCTAssertTrue(
+            engineContent.contains("public let definitionId: String  // Stable definition ID"),
+            "EngineRegionState.definitionId must be non-optional String"
+        )
+
+        // EngineAnchorState.definitionId must be String (not String?)
+        XCTAssertTrue(
+            engineContent.contains("public let definitionId: String  // Stable definition ID for serialization (REQUIRED"),
+            "EngineAnchorState.definitionId must be non-optional String"
+        )
+
+        // Check Quest
+        let modelsFile = projectRoot.appendingPathComponent("Packages/TwilightEngine/Sources/TwilightEngine/Models/ExplorationModels.swift")
+        guard FileManager.default.fileExists(atPath: modelsFile.path) else {
+            XCTFail("GATE TEST FAILURE: ExplorationModels.swift not found")
+            return
+        }
+
+        let modelsContent = try String(contentsOf: modelsFile, encoding: .utf8)
+
+        // Quest.definitionId must be String (not String?)
+        XCTAssertTrue(
+            modelsContent.contains("public let definitionId: String            // Content Pack ID (REQUIRED"),
+            "Quest.definitionId must be non-optional String"
+        )
+    }
+
+    /// Gate test: No UUID fallback in save serialization (Audit A1)
+    /// Requirement: "Полностью удалить fallback uuidString из сейвов"
+    func testNoUuidFallbackInSave() throws {
+        let testFile = URL(fileURLWithPath: #filePath)
+        let projectRoot = testFile
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+
+        let saveFile = projectRoot.appendingPathComponent("Packages/TwilightEngine/Sources/TwilightEngine/Core/EngineSave.swift")
+        guard FileManager.default.fileExists(atPath: saveFile.path) else {
+            XCTFail("GATE TEST FAILURE: EngineSave.swift not found")
+            return
+        }
+
+        let content = try String(contentsOf: saveFile, encoding: .utf8)
+
+        // No UUID fallback patterns allowed
+        let forbiddenPatterns = [
+            "?? region.id.uuidString",
+            "?? anchor.id.uuidString",
+            "?? quest.id.uuidString",
+            ".uuidString // fallback"
+        ]
+
+        var violations: [String] = []
+        let lines = content.components(separatedBy: .newlines)
+
+        for (index, line) in lines.enumerated() {
+            for pattern in forbiddenPatterns {
+                if line.contains(pattern) {
+                    violations.append("Line \(index + 1): \(line.trimmingCharacters(in: .whitespaces))")
+                }
+            }
+        }
+
+        if !violations.isEmpty {
+            XCTFail("""
+                Found UUID fallback patterns in EngineSave.swift (Audit A1 violation):
+                \(violations.joined(separator: "\n"))
+
+                definitionId must be required, no UUID fallback allowed.
+                """)
+        }
+    }
 }
