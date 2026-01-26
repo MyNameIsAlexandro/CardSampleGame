@@ -307,17 +307,18 @@ final class AuditGateTests: XCTestCase {
             .deletingLastPathComponent()  // CardSampleGameTests
             .deletingLastPathComponent()  // Project root
 
-        // Core paths to scan for forbidden random APIs
+        // Core paths to scan for forbidden random APIs (Swift Package structure)
+        let engineBase = "Packages/TwilightEngine/Sources/TwilightEngine"
         let corePaths = [
-            "Engine/Core",
-            "Engine/ContentPacks",
-            "Engine/Events",
-            "Engine/Combat",
-            "Engine/Quest",
-            "Engine/Cards",
-            "Engine/Heroes",
-            "Engine/Modules",
-            "Engine/Config"
+            "\(engineBase)/Core",
+            "\(engineBase)/ContentPacks",
+            "\(engineBase)/Events",
+            "\(engineBase)/Combat",
+            "\(engineBase)/Quest",
+            "\(engineBase)/Cards",
+            "\(engineBase)/Heroes",
+            "\(engineBase)/Modules",
+            "\(engineBase)/Config"
         ]
 
         // Forbidden patterns (system random APIs)
@@ -1161,7 +1162,8 @@ extension AuditGateTests {
 
         // Skip if project source not accessible (e.g., running on CI without source)
         guard FileManager.default.fileExists(atPath: projectRoot.path) else {
-            throw XCTSkip("Project source not accessible at \(projectRoot.path)")
+            XCTFail("GATE TEST FAILURE: Project source not accessible at \(projectRoot.path)")
+            return
         }
 
         // Directories to check (production code only)
@@ -1328,7 +1330,8 @@ extension AuditGateTests {
 
         // Skip if Views directory doesn't exist
         guard FileManager.default.fileExists(atPath: viewsDir.path) else {
-            throw XCTSkip("Views directory not found at \(viewsDir.path)")
+            XCTFail("GATE TEST FAILURE: Views directory not found at \(viewsDir.path)")
+            return
         }
 
         // Legacy patterns that should NOT appear in Views (outside of comments/previews)
@@ -1440,10 +1443,11 @@ extension AuditGateTests {
             .deletingLastPathComponent()  // Project root
 
         let engineFile = projectRoot
-            .appendingPathComponent("Engine/Core/TwilightGameEngine.swift")
+            .appendingPathComponent("Packages/TwilightEngine/Sources/TwilightEngine/Core/TwilightGameEngine.swift")
 
         guard FileManager.default.fileExists(atPath: engineFile.path) else {
-            throw XCTSkip("TwilightGameEngine.swift not found at \(engineFile.path)")
+            XCTFail("GATE TEST FAILURE: TwilightGameEngine.swift not found at \(engineFile.path)")
+            return
         }
 
         let content = try String(contentsOf: engineFile, encoding: .utf8)
@@ -1493,7 +1497,7 @@ extension AuditGateTests {
         )
 
         // Verify EngineSave uses String IDs
-        let saveFile = projectRoot.appendingPathComponent("Engine/Core/EngineSave.swift")
+        let saveFile = projectRoot.appendingPathComponent("Packages/TwilightEngine/Sources/TwilightEngine/Core/EngineSave.swift")
         if FileManager.default.fileExists(atPath: saveFile.path) {
             let saveContent = try String(contentsOf: saveFile, encoding: .utf8)
             XCTAssertTrue(

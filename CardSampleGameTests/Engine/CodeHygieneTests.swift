@@ -119,7 +119,7 @@ final class CodeHygieneTests: XCTestCase {
 
     func testPublicMethodsHaveDocComments() throws {
         guard let engine = engineRoot else {
-            throw XCTSkip("Could not determine engine root path")
+            XCTFail("GATE TEST FAILURE: Could not determine engine root path"); return
         }
 
         var violations: [(file: String, method: String)] = []
@@ -159,7 +159,7 @@ final class CodeHygieneTests: XCTestCase {
 
     func testPublicPropertiesHaveDocComments() throws {
         guard let engine = engineRoot else {
-            throw XCTSkip("Could not determine engine root path")
+            XCTFail("GATE TEST FAILURE: Could not determine engine root path"); return
         }
 
         var violations: [(file: String, property: String)] = []
@@ -201,7 +201,7 @@ final class CodeHygieneTests: XCTestCase {
 
     func testFilesDoNotExceedLineLimit() throws {
         guard let engine = engineRoot else {
-            throw XCTSkip("Could not determine engine root path")
+            XCTFail("GATE TEST FAILURE: Could not determine engine root path"); return
         }
 
         var violations: [(file: String, lines: Int)] = []
@@ -245,7 +245,7 @@ final class CodeHygieneTests: XCTestCase {
 
     func testFilesDoNotHaveTooManyTypes() throws {
         guard let engine = engineRoot else {
-            throw XCTSkip("Could not determine engine root path")
+            XCTFail("GATE TEST FAILURE: Could not determine engine root path"); return
         }
 
         var violations: [(file: String, types: [String])] = []

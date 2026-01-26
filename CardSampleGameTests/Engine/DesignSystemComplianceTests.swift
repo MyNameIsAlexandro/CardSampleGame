@@ -146,7 +146,7 @@ final class DesignSystemComplianceTests: XCTestCase {
 
     func testNoMagicNumbersInViews() throws {
         guard projectRoot != nil else {
-            throw XCTSkip("Could not determine project root path")
+            XCTFail("GATE TEST FAILURE: Could not determine project root path"); return
         }
         var violations: [(file: String, line: Int, issue: String)] = []
 
@@ -189,7 +189,7 @@ final class DesignSystemComplianceTests: XCTestCase {
 
     func testNoHardcodedColorsInViews() throws {
         guard projectRoot != nil else {
-            throw XCTSkip("Could not determine project root path")
+            XCTFail("GATE TEST FAILURE: Could not determine project root path"); return
         }
         var violations: [(file: String, line: Int, issue: String)] = []
 
@@ -232,7 +232,7 @@ final class DesignSystemComplianceTests: XCTestCase {
 
     func testNoHardcodedOpacityInViews() throws {
         guard projectRoot != nil else {
-            throw XCTSkip("Could not determine project root path")
+            XCTFail("GATE TEST FAILURE: Could not determine project root path"); return
         }
         var violations: [(file: String, line: Int, issue: String)] = []
 
@@ -275,7 +275,7 @@ final class DesignSystemComplianceTests: XCTestCase {
 
     func testDesignSystemFilesExist() throws {
         guard let root = projectRoot else {
-            throw XCTSkip("Could not determine project root path")
+            XCTFail("GATE TEST FAILURE: Could not determine project root path"); return
         }
         let designSystemPath = root.appendingPathComponent("Utilities/DesignSystem.swift")
         XCTAssertTrue(
@@ -286,7 +286,7 @@ final class DesignSystemComplianceTests: XCTestCase {
 
     func testDesignSystemHasRequiredTokens() throws {
         guard let root = projectRoot else {
-            throw XCTSkip("Could not determine project root path")
+            XCTFail("GATE TEST FAILURE: Could not determine project root path"); return
         }
         let designSystemPath = root.appendingPathComponent("Utilities/DesignSystem.swift")
         let content = try String(contentsOf: designSystemPath, encoding: .utf8)
