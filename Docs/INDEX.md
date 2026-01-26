@@ -14,7 +14,7 @@
 
 | Вопрос | Документ |
 |--------|----------|
-| Что это за игра? | [PROJECT_BIBLE.md](./Concept/PROJECT_BIBLE.md) |
+| Что это за игра? | [PROJECT_BIBLE.md](./Design/PROJECT_BIBLE.md) |
 | Как устроен движок? | [ENGINE_ARCHITECTURE.md](./Technical/ENGINE_ARCHITECTURE.md) |
 | Как создать контент-пак? | [SPEC_CAMPAIGN_PACK.md](./Specs/SPEC_CAMPAIGN_PACK.md) |
 | Что изменилось? | [CHANGELOG.md](./Audit/CHANGELOG.md) |
@@ -24,18 +24,12 @@
 
 ## Структура документации
 
-### Concept/ — Концепция и видение
-Документы для понимания «что мы делаем и зачем».
-
-| Документ | Описание | Аудитория |
-|----------|----------|-----------|
-| [PROJECT_BIBLE.md](./Concept/PROJECT_BIBLE.md) | Единая точка входа: идея, механики, архитектура | Все |
-
-### Design/ — Геймдизайн
-Детальное описание игровых механик и систем.
+### Design/ — Концепция и геймдизайн
+Документы для понимания «что мы делаем и зачем», механики и системы.
 
 | Документ | Описание |
 |----------|----------|
+| [PROJECT_BIBLE.md](./Design/PROJECT_BIBLE.md) | Единая точка входа: идея, механики, архитектура |
 | [GAME_DESIGN_DOCUMENT.md](./Design/GAME_DESIGN_DOCUMENT.md) | Полный GDD |
 | [EXPLORATION_CORE_DESIGN.md](./Design/EXPLORATION_CORE_DESIGN.md) | Дизайн механик исследования |
 
@@ -124,16 +118,12 @@
 ```
 CardSampleGame/
 ├── Docs/                        # Документация
-│   ├── Concept/                 # Концепция игры
-│   ├── Design/                  # Геймдизайн
+│   ├── Design/                  # Концепция и геймдизайн
 │   ├── Technical/               # Техническая документация
 │   ├── Specs/                   # Спецификации форматов
 │   ├── Audit/                   # Аудит и история изменений
 │   │   ├── CHANGELOG.md
 │   │   └── Feedback/            # Замечания аудиторов
-│   │       ├── AUDIT_REPORT_v2.0.md
-│   │       ├── AUDIT_3.0.md
-│   │       └── MIGRATION_PLAN.md
 │   ├── QA/                      # Тестирование
 │   ├── Archive/                 # Архив
 │   └── INDEX.md                 # Этот файл
