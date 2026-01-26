@@ -18,7 +18,7 @@
 | Как устроен движок? | [ENGINE_ARCHITECTURE.md](./Technical/ENGINE_ARCHITECTURE.md) |
 | Как создать контент-пак? | [SPEC_CAMPAIGN_PACK.md](./Specs/SPEC_CAMPAIGN_PACK.md) |
 | Что изменилось? | [CHANGELOG.md](./Audit/CHANGELOG.md) |
-| Статус проекта? | [AUDIT_REPORT_v2.0.md](./Audit/AUDIT_REPORT_v2.0.md) |
+| Статус проекта? | [AUDIT_REPORT_v2.0.md](./Audit/Feedback/AUDIT_REPORT_v2.0.md) |
 
 ---
 
@@ -67,10 +67,15 @@
 
 | Документ | Описание | Статус |
 |----------|----------|--------|
-| [AUDIT_REPORT_v2.0.md](./Audit/AUDIT_REPORT_v2.0.md) | Финальный отчёт аудита v2.0 | **ТЕКУЩИЙ** |
-| [AUDIT_3.0.md](./Audit/AUDIT_3.0.md) | Требования аудиторов | Референс |
-| [MIGRATION_PLAN.md](./Audit/MIGRATION_PLAN.md) | Engine v1.0 Release Gates | Выполнен |
 | [CHANGELOG.md](./Audit/CHANGELOG.md) | История изменений проекта | Актуален |
+
+#### Audit/Feedback/ — Замечания аудиторов
+
+| Документ | Описание | Статус |
+|----------|----------|--------|
+| [AUDIT_REPORT_v2.0.md](./Audit/Feedback/AUDIT_REPORT_v2.0.md) | Финальный отчёт аудита v2.0 | **ТЕКУЩИЙ** |
+| [AUDIT_3.0.md](./Audit/Feedback/AUDIT_3.0.md) | Требования аудиторов | Референс |
+| [MIGRATION_PLAN.md](./Audit/Feedback/MIGRATION_PLAN.md) | Engine v1.0 Release Gates | Выполнен |
 
 ### QA/ — Тестирование
 Чеклисты и планы тестирования.
@@ -124,10 +129,11 @@ CardSampleGame/
 │   ├── Technical/               # Техническая документация
 │   ├── Specs/                   # Спецификации форматов
 │   ├── Audit/                   # Аудит и история изменений
-│   │   ├── AUDIT_REPORT_v2.0.md
-│   │   ├── AUDIT_3.0.md
-│   │   ├── MIGRATION_PLAN.md
-│   │   └── CHANGELOG.md
+│   │   ├── CHANGELOG.md
+│   │   └── Feedback/            # Замечания аудиторов
+│   │       ├── AUDIT_REPORT_v2.0.md
+│   │       ├── AUDIT_3.0.md
+│   │       └── MIGRATION_PLAN.md
 │   ├── QA/                      # Тестирование
 │   ├── Archive/                 # Архив
 │   └── INDEX.md                 # Этот файл
