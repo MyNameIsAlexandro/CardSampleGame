@@ -1746,4 +1746,78 @@ extension AuditGateTests {
             "createSave must not set rngSeed to nil (Audit A2)"
         )
     }
+
+    // MARK: - C1: No XCTSkip in Gate Tests
+
+    /// Gate test: Engine tests must not use XCTSkip (Audit C1)
+    /// Requirement: "Gate tests должны падать, а не скипаться"
+    ///
+    /// If a gate test can't verify something, it must XCTFail, not XCTSkip.
+    /// XCTSkip creates "false green" - CI passes but nothing was verified.
+    func testNoXCTSkipInEngineTests() throws {
+        let testFile = URL(fileURLWithPath: #filePath)
+        let testsRoot = testFile
+            .deletingLastPathComponent()  // Engine
+            .deletingLastPathComponent()  // CardSampleGameTests
+
+        let engineTestsDir = testsRoot.appendingPathComponent("Engine")
+
+        guard FileManager.default.fileExists(atPath: engineTestsDir.path) else {
+            XCTFail("GATE TEST FAILURE: Engine tests directory not found")
+            return
+        }
+
+        let fileManager = FileManager.default
+        guard let enumerator = fileManager.enumerator(
+            at: engineTestsDir,
+            includingPropertiesForKeys: [.isRegularFileKey],
+            options: [.skipsHiddenFiles]
+        ) else {
+            XCTFail("GATE TEST FAILURE: Cannot enumerate Engine tests directory")
+            return
+        }
+
+        var violations: [(file: String, line: Int, content: String)] = []
+
+        for case let fileURL as URL in enumerator {
+            guard fileURL.pathExtension == "swift" else { continue }
+
+            let content = try String(contentsOf: fileURL, encoding: .utf8)
+            let lines = content.components(separatedBy: .newlines)
+
+            for (index, line) in lines.enumerated() {
+                let trimmed = line.trimmingCharacters(in: .whitespaces)
+
+                // Skip comments (lines starting with // or containing XCTSkip in comments/strings)
+                if trimmed.hasPrefix("//") || trimmed.hasPrefix("/*") || trimmed.hasPrefix("*") {
+                    continue
+                }
+
+                // Skip string literals (lines containing "XCTSkip" in quotes)
+                if trimmed.contains("\"XCTSkip") || trimmed.contains("XCTSkip\"") {
+                    continue
+                }
+
+                // Match actual XCTSkip calls: throw XCTSkip( or XCTSkip(
+                if line.contains("XCTSkip(") {
+                    let fileName = fileURL.lastPathComponent
+                    violations.append((file: fileName, line: index + 1, content: trimmed))
+                }
+            }
+        }
+
+        if !violations.isEmpty {
+            let message = violations.map { "\($0.file):\($0.line): \($0.content)" }.joined(separator: "\n")
+            XCTFail("""
+                GATE TEST FAILURE: XCTSkip found in Engine tests (Audit C1)
+
+                Gate tests must use XCTFail, not XCTSkip. XCTSkip creates "false green" CI results.
+
+                Violations:
+                \(message)
+
+                Fix: Replace XCTSkip with XCTFail and return.
+                """)
+        }
+    }
 }
