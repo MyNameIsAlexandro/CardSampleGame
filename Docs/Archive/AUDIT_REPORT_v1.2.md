@@ -162,7 +162,7 @@ Total: 17 new tests, all passing
 |------|---------------|
 | `Views/Components/HeroPanel.swift` | Новый |
 | `CardSampleGameTests/Views/HeroPanelTests.swift` | Новый |
-| `CardSampleGameTests/Engine/EnemyDefinitionTests.swift` | Новый |
+| `CardSampleGameTests/GateTests/EnemyDefinitionTests.swift` | Новый |
 | `Engine/Data/Definitions/EnemyDefinition.swift` | Модифицирован |
 | `Views/WorldMapView.swift` | Модифицирован |
 | `Views/EventView.swift` | Модифицирован |

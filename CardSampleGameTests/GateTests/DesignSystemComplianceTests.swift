@@ -33,10 +33,10 @@ final class DesignSystemComplianceTests: XCTestCase {
         }
 
         // Fallback: Navigate up from test file location
-        // This file is at CardSampleGameTests/Engine/DesignSystemComplianceTests.swift
+        // This file is at CardSampleGameTests/GateTests/DesignSystemComplianceTests.swift
         let thisFile = #file
         var url = URL(fileURLWithPath: thisFile)
-        // Go up 3 levels: Engine -> CardSampleGameTests -> Project Root
+        // Go up 3 levels: GateTests -> CardSampleGameTests -> Project Root
         for _ in 0..<3 {
             url = url.deletingLastPathComponent()
         }

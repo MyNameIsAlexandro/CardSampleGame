@@ -6,6 +6,182 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [2.1.0] - 2026-01-27 - Audit Verification & Content Manager
+
+### Summary
+
+Post-audit verification release with Content Manager for hot-reload, Binary Pack format, improved test organization, and comprehensive gate tests for all audit requirements.
+
+**Test Count:** 189 tests (all passing)
+**Build Status:** SUCCESS
+
+---
+
+### Binary Pack System (v2.0-v3.0)
+
+#### Added
+- **Pack Compiler CLI** (`pack-compiler`) - Compiles JSON to binary .pack
+- **Binary Pack Format** - Optimized runtime format with checksums
+- **BinaryPackReader/Writer** - Low-level pack I/O
+- **Production Binary-Only** - Runtime rejects raw JSON
+
+#### Structure
+```
+.pack file format:
+┌────────────────────────────────┐
+│ MAGIC: "TWPK" (4 bytes)        │
+│ VERSION: UInt32                │
+│ CHECKSUM: SHA256 (32 bytes)    │
+├────────────────────────────────┤
+│ MANIFEST_SIZE: UInt64          │
+│ MANIFEST_DATA: JSON bytes      │
+├────────────────────────────────┤
+│ CONTENT_SIZE: UInt64           │
+│ CONTENT_DATA: Compressed JSON  │
+└────────────────────────────────┘
+```
+
+#### Gate Test
+- `testRuntimeRejectsRawJSON()` - Ensures production uses .pack only
+
+---
+
+### Content Manager UI
+
+#### Added
+- **ContentManager.swift** (`TwilightEngine/ContentPacks/`) - Pack lifecycle management
+- **ContentManagerVM.swift** (`ViewModels/`) - ViewModel for UI
+- **ContentManagerView.swift** (`Views/`) - SwiftUI management interface
+
+#### Features
+- View loaded/available packs with status indicators
+- Validate packs before loading (detect errors without crashing)
+- Hot-reload external packs from Documents/Packs/
+- Atomic reload with rollback on failure
+
+#### Localization
+- Full Russian/English support for Content Manager UI
+- 50+ new L10n keys for pack status, content types, errors
+
+---
+
+### Gate Tests Reorganization
+
+#### Changed
+- **Renamed:** `CardSampleGameTests/Engine/` → `CardSampleGameTests/GateTests/`
+- More accurate naming reflecting purpose (compliance/gate tests, not engine tests)
+
+#### Updated Files
+- `project.pbxproj` - Xcode project reference
+- `DesignSystemComplianceTests.swift` - Path comments
+- `AuditGateTests.swift` - Directory references
+- Documentation files with old paths
+
+#### Test Structure
+```
+CardSampleGameTests/
+├── TestHelpers/             # Test utilities
+├── Unit/                    # Module unit tests
+│   ├── ContentPackTests/    # ContentPacks system
+│   ├── SaveLoadTests
+│   └── HeroRegistryTests
+├── GateTests/               # Gate/Compliance tests
+│   ├── AuditGateTests       # Architecture requirements
+│   ├── DesignSystemComplianceTests
+│   ├── CodeHygieneTests
+│   ├── ContentValidationTests
+│   ├── ConditionValidatorTests
+│   └── LocalizationValidatorTests
+└── Views/                   # UI tests
+```
+
+---
+
+### Audit Verification (AUDIT_FIXLIST.md)
+
+#### Section C: Test Model Blockers
+- **C1:** ✅ No XCTSkip in gate tests (`testNoXCTSkipInEngineTests`)
+- **C2:** ✅ definitionId non-optional, no UUID fallback
+
+#### Section D: NO-GO Summary
+- ✅ All 4 critical gate tests passing
+
+#### Section E: Minimum Tasks
+- **E1:** ✅ No XCTSkip
+- **E2:** ✅ No optional definitionId
+- **E3:** ✅ RNG state saved/restored
+- **E4:** ✅ unitsPerDay removed
+
+#### Section F: UI Safety
+- **F1:** ✅ No legacy patterns in Views (`testNoLegacyInitializationInViews`)
+- **F2:** ✅ AssetRegistry safety (`testNoDirectUIImageNamedInViewsAndViewModels`)
+
+#### Section G: Expression Conditions
+- **G1:** ✅ Typed enums for conditions (`ConditionValidatorTests`)
+
+#### Section H: Definition of Done
+- ✅ All criteria met
+
+#### Section I: Non-Blocking Tasks
+- **B2:** ✅ Binary pack implemented
+- **F1:** ✅ Legacy removed + gate test
+- **F2:** ✅ AssetRegistry + gate test
+
+---
+
+### New Gate Tests
+
+#### Added
+- `testNoLegacyInitializationInViews()` - Scans Views/ for legacy patterns
+- `testNoDirectUIImageNamedInViewsAndViewModels()` - Enforces AssetRegistry usage
+- `testNoXCTSkipInEngineTests()` - Updated for GateTests/ path
+
+#### ConditionValidatorTests (10 tests)
+- `testValidAbilityConditionTypesExist()` - Whitelist not empty
+- `testRejectsUnknownConditionType()` - "WorldResonanse" rejected
+- `testRejectsUnknownTrigger()` - "onDamageRecieved" rejected
+- `testConditionsUseTypedEnumsNotStrings()` - DecodingError for unknown
+- `testAllPackConditionsAreValid()` - Integration validation
+
+---
+
+### Bug Fixes
+
+- Fixed anchor name localization when loading from save
+- Fixed Content Manager localization (was showing English keys)
+- Removed legacy comment in WorldMapView.swift
+
+---
+
+### Documentation Updates
+
+- Updated `INDEX.md` with test structure
+- Updated `CHANGELOG.md` with GateTests/ paths
+- Updated `QA_ACT_I_CHECKLIST.md` with new structure
+- Updated audit reports with correct paths
+
+---
+
+### Test Summary
+
+| Suite | Tests | Status |
+|-------|-------|--------|
+| AuditGateTests | 42 | ✅ |
+| CodeHygieneTests | 4 | ✅ |
+| ConditionValidatorTests | 10 | ✅ |
+| ContentManagerTests | 27 | ✅ |
+| ContentRegistryTests | 25 | ✅ |
+| ContentValidationTests | 8 | ✅ |
+| DesignSystemComplianceTests | 5 | ✅ |
+| HeroPanelTests | 7 | ✅ |
+| HeroRegistryTests | 8 | ✅ |
+| LocalizationValidatorTests | 8 | ✅ |
+| PackLoaderTests | 21 | ✅ |
+| SaveLoadTests | 24 | ✅ |
+| **Total** | **189** | ✅ |
+
+---
+
 ## [2.0.0] - 2026-01-25 - Audit Complete Release
 
 ### Summary
@@ -150,7 +326,7 @@ Localization/
 ### Epic 10: Documentation & Code Hygiene
 
 #### Added
-- **CodeHygieneTests** (`CardSampleGameTests/Engine/CodeHygieneTests.swift`)
+- **CodeHygieneTests** (`CardSampleGameTests/GateTests/CodeHygieneTests.swift`)
   - `testPublicMethodsHaveDocComments()` - Enforces `///` on public methods
   - `testPublicPropertiesHaveDocComments()` - Enforces `///` on public properties
   - `testFilesDoNotExceedLineLimit()` - Max 600 lines for new files
@@ -180,11 +356,11 @@ Files exceeding limits but stable:
 ### Epic 11: QA & Testing
 
 #### Added
-- **AuditGateTests** (`CardSampleGameTests/Engine/AuditGateTests.swift`)
+- **AuditGateTests** (`CardSampleGameTests/GateTests/AuditGateTests.swift`)
   - Critical engine invariants
   - Determinism verification
   - Save/load round-trip
-- **ContentValidationTests** (`CardSampleGameTests/Engine/ContentValidationTests.swift`)
+- **ContentValidationTests** (`CardSampleGameTests/GateTests/ContentValidationTests.swift`)
   - `testAllReferencedFlagsAreKnown` - Catches typos in flag names
   - `testAllReferencedRegionIdsExist` - Validates region references
   - `testAllReferencedQuestIdsExist` - Validates quest references
@@ -251,7 +427,7 @@ Files exceeding limits but stable:
 
 ---
 
-### Test Summary
+### Test Summary (v2.0.0)
 
 | Suite | Tests | Status |
 |-------|-------|--------|
@@ -264,9 +440,9 @@ Files exceeding limits but stable:
 | HeroRegistryTests | 9 | ✅ |
 | PackLoaderTests | 44 | ✅ |
 | SaveLoadTests | 23 | ✅ |
-| **App Total** | **134** | ✅ |
-| TwilightEngineTests | 122 | ✅ |
-| **Grand Total** | **256** | ✅ |
+| **Total** | **134** | ✅ |
+
+*Note: v2.1.0 consolidated tests to 189 with expanded gate tests.*
 
 ---
 
@@ -297,21 +473,25 @@ Initial Engine-First implementation before audit.
 ## Architecture Principles
 
 1. **Engine-First**: TwilightGameEngine is the single source of truth
-2. **Data-Driven**: All content from JSON Content Packs
+2. **Data-Driven**: All content from Binary .pack files (compiled from JSON)
 3. **Deterministic**: WorldRNG ensures reproducible gameplay
 4. **Modular**: TwilightEngine as separate Swift Package
-5. **Testable**: 248 tests with automated compliance checks
+5. **Testable**: 189 tests with automated compliance/gate checks
 6. **Documented**: All public API has doc comments
+7. **Safe**: AssetRegistry fallbacks, typed conditions, no silent failures
 
 ---
 
-## Automated Compliance
+## Automated Compliance (GateTests/)
 
 | Test Suite | Enforces |
 |------------|----------|
+| AuditGateTests | Engine invariants, architecture requirements (42 tests) |
 | DesignSystemComplianceTests | DesignSystem tokens in Views |
 | CodeHygieneTests | Doc comments, file size limits |
-| AuditGateTests | Engine invariants |
+| ContentValidationTests | Cross-references in JSON content |
+| ConditionValidatorTests | Typed conditions (prevents typos) |
+| LocalizationValidatorTests | Canonical localization approach |
 
 New code must pass all compliance tests before merge.
 

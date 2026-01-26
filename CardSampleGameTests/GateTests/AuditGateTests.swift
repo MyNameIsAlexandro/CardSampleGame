@@ -1747,6 +1747,194 @@ extension AuditGateTests {
         )
     }
 
+    // MARK: - F1: No Legacy Initialization in Views
+
+    /// Gate test: Views must not contain legacy initialization patterns (Audit F1)
+    /// Requirement: "В WorldMapView отсутствуют legacy init/ветки/комментарии"
+    ///
+    /// Legacy patterns to detect:
+    /// - "legacy init" / "legacy initialization" comments
+    /// - "shared between legacy" comments
+    /// - Legacy adapter references
+    ///
+    /// Positive patterns to allow:
+    /// - "no legacy sync needed" (indicates legacy was removed)
+    func testNoLegacyInitializationInViews() throws {
+        let testFile = URL(fileURLWithPath: #filePath)
+        let projectRoot = testFile
+            .deletingLastPathComponent()  // Engine
+            .deletingLastPathComponent()  // CardSampleGameTests
+            .deletingLastPathComponent()  // Project root
+
+        let viewsDir = projectRoot.appendingPathComponent("Views")
+
+        guard FileManager.default.fileExists(atPath: viewsDir.path) else {
+            XCTFail("GATE TEST FAILURE: Views directory not found")
+            return
+        }
+
+        // Legacy patterns that indicate old architecture (should be removed)
+        let forbiddenPatterns = [
+            "legacy init",
+            "legacy initialization",
+            "shared between legacy",
+            "LegacyAdapter",
+            "legacyInit",
+            "connectToLegacy"
+        ]
+
+        // Positive patterns that are allowed (indicate legacy was removed)
+        let allowedPatterns = [
+            "no legacy sync needed",
+            "no legacy needed",
+            "legacy removed"
+        ]
+
+        var violations: [(file: String, line: Int, content: String, pattern: String)] = []
+        let swiftFiles = findSwiftFiles(in: viewsDir)
+
+        for fileURL in swiftFiles {
+            let content = try String(contentsOf: fileURL, encoding: .utf8)
+            let lines = content.components(separatedBy: .newlines)
+            let fileName = fileURL.lastPathComponent
+
+            for (index, line) in lines.enumerated() {
+                let lowerLine = line.lowercased()
+                let lineNumber = index + 1
+
+                // Check each forbidden pattern
+                for pattern in forbiddenPatterns {
+                    if lowerLine.contains(pattern.lowercased()) {
+                        // Check if this line also contains an allowed pattern
+                        let hasAllowedPattern = allowedPatterns.contains { allowed in
+                            lowerLine.contains(allowed.lowercased())
+                        }
+
+                        if !hasAllowedPattern {
+                            violations.append((
+                                file: fileName,
+                                line: lineNumber,
+                                content: line.trimmingCharacters(in: .whitespaces),
+                                pattern: pattern
+                            ))
+                        }
+                    }
+                }
+            }
+        }
+
+        if !violations.isEmpty {
+            let message = violations.map { "\($0.file):\($0.line): \($0.content) [pattern: \($0.pattern)]" }
+                .joined(separator: "\n")
+            XCTFail("""
+                GATE TEST FAILURE: Legacy initialization patterns found in Views/ (Audit F1)
+
+                Views should use Engine-First architecture only.
+                Remove legacy initialization, adapters, and related comments.
+
+                Violations:
+                \(message)
+                """)
+        }
+    }
+
+    // MARK: - F2: AssetRegistry Safety (No Direct UIImage)
+
+    /// Gate test: Views and ViewModels must not use UIImage(named:) directly (Audit F2)
+    /// Requirement: "Запрещены прямые UIImage(named:) в UI и VM — только через AssetRegistry"
+    ///
+    /// Direct UIImage(named:) bypasses the fallback system and can show:
+    /// - Pink squares (missing image)
+    /// - Empty images
+    /// - Nil crashes
+    ///
+    /// All image loading must go through AssetRegistry which provides SF Symbol fallback.
+    func testNoDirectUIImageNamedInViewsAndViewModels() throws {
+        let testFile = URL(fileURLWithPath: #filePath)
+        let projectRoot = testFile
+            .deletingLastPathComponent()  // Engine
+            .deletingLastPathComponent()  // CardSampleGameTests
+            .deletingLastPathComponent()  // Project root
+
+        // Directories to scan
+        let dirsToScan = ["Views", "ViewModels"]
+
+        // Forbidden patterns (direct UIImage/NSImage loading)
+        let forbiddenPatterns = [
+            "UIImage(named:",
+            "NSImage(named:",
+            "Image(uiImage: UIImage(named:",
+            "Image(nsImage: NSImage(named:"
+        ]
+
+        // Allowed files (AssetRegistry itself needs to use UIImage)
+        let allowedFiles = [
+            "AssetRegistry.swift",
+            "AssetValidator.swift"
+        ]
+
+        var violations: [(file: String, line: Int, content: String)] = []
+
+        for dirName in dirsToScan {
+            let dirURL = projectRoot.appendingPathComponent(dirName)
+
+            guard FileManager.default.fileExists(atPath: dirURL.path) else {
+                continue
+            }
+
+            let swiftFiles = findSwiftFiles(in: dirURL)
+
+            for fileURL in swiftFiles {
+                let fileName = fileURL.lastPathComponent
+
+                // Skip allowed files
+                if allowedFiles.contains(fileName) {
+                    continue
+                }
+
+                let content = try String(contentsOf: fileURL, encoding: .utf8)
+                let lines = content.components(separatedBy: .newlines)
+
+                for (index, line) in lines.enumerated() {
+                    let trimmedLine = line.trimmingCharacters(in: .whitespaces)
+                    let lineNumber = index + 1
+
+                    // Skip comments
+                    if trimmedLine.hasPrefix("//") || trimmedLine.hasPrefix("/*") || trimmedLine.hasPrefix("*") {
+                        continue
+                    }
+
+                    // Check for forbidden patterns
+                    for pattern in forbiddenPatterns {
+                        if line.contains(pattern) {
+                            violations.append((
+                                file: fileName,
+                                line: lineNumber,
+                                content: trimmedLine
+                            ))
+                        }
+                    }
+                }
+            }
+        }
+
+        if !violations.isEmpty {
+            let message = violations.map { "\($0.file):\($0.line): \($0.content)" }
+                .joined(separator: "\n")
+            XCTFail("""
+                GATE TEST FAILURE: Direct UIImage(named:) found in Views/ViewModels (Audit F2)
+
+                Use AssetRegistry instead for automatic fallback support:
+                - AssetRegistry.image(for: .region("forest"))
+                - AssetRegistry.heroPortrait("warrior")
+                - AssetRegistry.cardArt("fireball")
+
+                Violations:
+                \(message)
+                """)
+        }
+    }
+
     // MARK: - C1: No XCTSkip in Gate Tests
 
     /// Gate test: Engine tests must not use XCTSkip (Audit C1)
@@ -1757,23 +1945,23 @@ extension AuditGateTests {
     func testNoXCTSkipInEngineTests() throws {
         let testFile = URL(fileURLWithPath: #filePath)
         let testsRoot = testFile
-            .deletingLastPathComponent()  // Engine
+            .deletingLastPathComponent()  // GateTests
             .deletingLastPathComponent()  // CardSampleGameTests
 
-        let engineTestsDir = testsRoot.appendingPathComponent("Engine")
+        let gateTestsDir = testsRoot.appendingPathComponent("GateTests")
 
-        guard FileManager.default.fileExists(atPath: engineTestsDir.path) else {
-            XCTFail("GATE TEST FAILURE: Engine tests directory not found")
+        guard FileManager.default.fileExists(atPath: gateTestsDir.path) else {
+            XCTFail("GATE TEST FAILURE: GateTests directory not found")
             return
         }
 
         let fileManager = FileManager.default
         guard let enumerator = fileManager.enumerator(
-            at: engineTestsDir,
+            at: gateTestsDir,
             includingPropertiesForKeys: [.isRegularFileKey],
             options: [.skipsHiddenFiles]
         ) else {
-            XCTFail("GATE TEST FAILURE: Cannot enumerate Engine tests directory")
+            XCTFail("GATE TEST FAILURE: Cannot enumerate GateTests directory")
             return
         }
 
@@ -1809,7 +1997,7 @@ extension AuditGateTests {
         if !violations.isEmpty {
             let message = violations.map { "\($0.file):\($0.line): \($0.content)" }.joined(separator: "\n")
             XCTFail("""
-                GATE TEST FAILURE: XCTSkip found in Engine tests (Audit C1)
+                GATE TEST FAILURE: XCTSkip found in GateTests (Audit C1)
 
                 Gate tests must use XCTFail, not XCTSkip. XCTSkip creates "false green" CI results.
 

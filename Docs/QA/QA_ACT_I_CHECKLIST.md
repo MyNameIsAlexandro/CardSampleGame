@@ -470,7 +470,7 @@ CardSampleGameTests/
 │   ├── SmokeConfigTests.swift          # Валидация конфигурации (канонические значения)
 │   ├── MetricsDistributionTests.swift  # 1000 симуляций, статистические проверки
 │   └── PlaythroughSimulationTests.swift # E2E детерминированная симуляция
-└── Engine/                             # 6 файлов, Engine Contract Tests (Phase 1-3)
+└── GateTests/                             # 6 файлов, Engine Contract Tests (Phase 1-3)
     ├── EngineContractsTests.swift      # Core engine invariants (INV-001..007)
     ├── EventModuleContractsTests.swift # Event module contracts (INV-E01..06)
     ├── DataSeparationTests.swift       # Definition/Runtime separation (INV-D01..05)
@@ -535,7 +535,7 @@ CardSampleGameTests/
 | PlaythroughSimulationTests.swift | E2E детерминированная симуляция | ~25 | ~700 |
 | **Unit/Integration ИТОГО** | | **~350** | **~5000** |
 | | | | |
-| **Engine/** (Contract Tests) | | | |
+| **GateTests/** (Gate/Compliance Tests) | | | |
 | EngineContractsTests.swift | Core engine invariants | ~8 | ~250 |
 | EventModuleContractsTests.swift | Event module contracts | ~10 | ~350 |
 | DataSeparationTests.swift | Definition/Runtime separation | ~8 | ~280 |

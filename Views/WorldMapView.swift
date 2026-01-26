@@ -220,7 +220,7 @@ struct WorldMapView: View {
         }
     }
 }
-// MARK: - Event Log Entry View (shared between legacy and Engine views)
+// MARK: - Event Log Entry View
 
 struct EventLogEntryView: View {
     let entry: EventLogEntry

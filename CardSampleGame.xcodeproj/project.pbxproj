@@ -214,7 +214,7 @@
 				D72352D1C9BABFA97F62257B /* ConditionValidatorTests.swift */,
 				204A28A32636BB8C22E758C3 /* LocalizationValidatorTests.swift */,
 			);
-			path = Engine;
+			path = GateTests;
 			sourceTree = "<group>";
 		};
 		BB0003060000000000000001 /* Views */ = {

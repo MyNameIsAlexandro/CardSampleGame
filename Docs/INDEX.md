@@ -139,7 +139,20 @@ CardSampleGame/
 ├── Views/                       # SwiftUI Views
 ├── Models/                      # Data Models
 ├── Utilities/                   # Utilities (DesignSystem, Localization)
-└── CardSampleGameTests/         # Tests (256 тестов)
+└── CardSampleGameTests/         # Tests
+    ├── TestHelpers/             # Утилиты для тестов
+    ├── Unit/                    # Юнит тесты модулей
+    │   ├── ContentPackTests/    # ContentPacks система
+    │   ├── SaveLoadTests        # Save/Load
+    │   └── HeroRegistryTests    # HeroRegistry
+    ├── GateTests/               # Gate/Compliance тесты
+    │   ├── AuditGateTests       # Архитектурные требования
+    │   ├── DesignSystemComplianceTests
+    │   ├── CodeHygieneTests
+    │   ├── ContentValidationTests
+    │   ├── ConditionValidatorTests
+    │   └── LocalizationValidatorTests
+    └── Views/                   # UI тесты
 ```
 
 ---
@@ -150,10 +163,12 @@ CardSampleGame/
 
 | Тест | Что проверяет |
 |------|---------------|
+| AuditGateTests | Критические инварианты движка (40+ проверок) |
 | DesignSystemComplianceTests | Использование DesignSystem токенов |
 | CodeHygieneTests | Doc comments, размер файлов |
-| ContentValidationTests | Валидность ссылок в JSON |
-| AuditGateTests | Критические инварианты движка |
+| ContentValidationTests | Валидность cross-references в JSON |
+| ConditionValidatorTests | Типизированные conditions (защита от опечаток) |
+| LocalizationValidatorTests | Канонический подход к локализации |
 
 ---
 

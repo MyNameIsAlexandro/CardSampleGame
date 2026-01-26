@@ -365,7 +365,7 @@ cd Packages/TwilightEngine && swift test
 | Hero System | `Packages/TwilightEngine/Sources/TwilightEngine/Heroes/HeroRegistry.swift` |
 | Card System | `Packages/TwilightEngine/Sources/TwilightEngine/Cards/CardRegistry.swift` |
 | Design Tokens | `Utilities/DesignSystem.swift` |
-| Compliance Tests | `CardSampleGameTests/Engine/CodeHygieneTests.swift` |
+| Compliance Tests | `CardSampleGameTests/GateTests/CodeHygieneTests.swift` |
 
 ---
 
