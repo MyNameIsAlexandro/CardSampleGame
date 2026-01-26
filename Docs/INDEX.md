@@ -97,7 +97,6 @@
 
 | Документ | Описание |
 |----------|----------|
-| [HANDOFF.md](./HANDOFF.md) | Передача контекста между сессиями |
 | **INDEX.md** | Вы здесь |
 
 ---
@@ -131,7 +130,6 @@ CardSampleGame/
 │   │   └── CHANGELOG.md
 │   ├── QA/                      # Тестирование
 │   ├── Archive/                 # Архив
-│   ├── HANDOFF.md
 │   └── INDEX.md                 # Этот файл
 │
 ├── Packages/                    # Swift Packages
