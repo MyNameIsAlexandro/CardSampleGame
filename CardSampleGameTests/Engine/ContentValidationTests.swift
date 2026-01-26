@@ -73,7 +73,7 @@ final class ContentValidationTests: XCTestCase {
         // Get loaded pack from registry
         guard let packId = ContentRegistry.shared.loadedPackIds.first(where: { $0.contains("twilight") || $0.contains("act") }),
               let pack = ContentRegistry.shared.loadedPacks[packId] else {
-            throw XCTSkip("TwilightMarchesActI pack not loaded")
+            XCTFail("CONTENT VALIDATION FAILURE: TwilightMarchesActI pack not loaded - check TestContentLoader"); return
         }
 
         self.loadedPack = pack
@@ -109,7 +109,7 @@ final class ContentValidationTests: XCTestCase {
 
     func testAllReferencedFlagsAreKnown() throws {
         guard let pack = loadedPack else {
-            throw XCTSkip("Pack not loaded")
+            XCTFail("CONTENT VALIDATION FAILURE: Pack not loaded"); return
         }
 
         var referencedFlags: Set<String> = []
@@ -164,7 +164,7 @@ final class ContentValidationTests: XCTestCase {
 
     func testAllReferencedRegionIdsExist() throws {
         guard let pack = loadedPack else {
-            throw XCTSkip("Pack not loaded")
+            XCTFail("CONTENT VALIDATION FAILURE: Pack not loaded"); return
         }
 
         var referencedRegionIds: Set<String> = []
@@ -205,7 +205,7 @@ final class ContentValidationTests: XCTestCase {
 
     func testAllReferencedQuestIdsExist() throws {
         guard let pack = loadedPack else {
-            throw XCTSkip("Pack not loaded")
+            XCTFail("CONTENT VALIDATION FAILURE: Pack not loaded"); return
         }
 
         var referencedQuestIds: Set<String> = []
@@ -236,7 +236,7 @@ final class ContentValidationTests: XCTestCase {
 
     func testAllReferencedEventIdsExist() throws {
         guard let pack = loadedPack else {
-            throw XCTSkip("Pack not loaded")
+            XCTFail("CONTENT VALIDATION FAILURE: Pack not loaded"); return
         }
 
         var referencedEventIds: Set<String> = []
@@ -267,7 +267,7 @@ final class ContentValidationTests: XCTestCase {
 
     func testAllReferencedResourceIdsAreKnown() throws {
         guard let pack = loadedPack else {
-            throw XCTSkip("Pack not loaded")
+            XCTFail("CONTENT VALIDATION FAILURE: Pack not loaded"); return
         }
 
         var referencedResources: Set<String> = []
@@ -305,7 +305,7 @@ final class ContentValidationTests: XCTestCase {
 
     func testAllReferencedRegionStatesAreKnown() throws {
         guard let pack = loadedPack else {
-            throw XCTSkip("Pack not loaded")
+            XCTFail("CONTENT VALIDATION FAILURE: Pack not loaded"); return
         }
 
         var referencedStates: Set<String> = []
@@ -341,7 +341,7 @@ final class ContentValidationTests: XCTestCase {
 
     func testAllReferencedCardIdsExist() throws {
         guard let pack = loadedPack else {
-            throw XCTSkip("Pack not loaded")
+            XCTFail("CONTENT VALIDATION FAILURE: Pack not loaded"); return
         }
 
         var referencedCardIds: Set<String> = []
@@ -374,7 +374,7 @@ final class ContentValidationTests: XCTestCase {
 
     func testContentIntegrityReport() throws {
         guard let pack = loadedPack else {
-            throw XCTSkip("Pack not loaded")
+            XCTFail("CONTENT VALIDATION FAILURE: Pack not loaded"); return
         }
 
         print("""
