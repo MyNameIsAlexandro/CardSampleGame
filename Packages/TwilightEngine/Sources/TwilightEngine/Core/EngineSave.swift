@@ -57,8 +57,9 @@ public struct EngineSave: Codable {
     // MARK: - World Flags
     public let worldFlags: [String: Bool]
 
-    // MARK: - RNG State
+    // MARK: - RNG State (Audit A2 - determinism after load)
     public let rngSeed: UInt64?
+    public let rngState: UInt64?  // Current RNG state for exact restoration
 
     // MARK: - Current Version
     public static let currentVersion = 1
@@ -97,7 +98,8 @@ public struct EngineSave: Codable {
         completedEventIds: [String] = [],
         eventLog: [EventLogEntrySave] = [],
         worldFlags: [String: Bool] = [:],
-        rngSeed: UInt64? = nil
+        rngSeed: UInt64? = nil,
+        rngState: UInt64? = nil
     ) {
         self.version = version
         self.savedAt = savedAt
@@ -129,6 +131,7 @@ public struct EngineSave: Codable {
         self.eventLog = eventLog
         self.worldFlags = worldFlags
         self.rngSeed = rngSeed
+        self.rngState = rngState
     }
 
     // MARK: - Pack Compatibility Validation

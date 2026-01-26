@@ -2002,8 +2002,9 @@ public extension TwilightGameEngine {
             // World flags
             worldFlags: publishedWorldFlags,
 
-            // RNG state (not saved - system RNG is non-deterministic)
-            rngSeed: nil
+            // RNG state (Audit A2 - save for deterministic replay)
+            rngSeed: WorldRNG.shared.currentSeed(),
+            rngState: WorldRNG.shared.currentState()
         )
     }
 
@@ -2121,8 +2122,12 @@ public extension TwilightGameEngine {
         publishedWorldFlags = save.worldFlags
         worldFlags = save.worldFlags
 
-        // Restore RNG state
-        if let seed = save.rngSeed {
+        // Restore RNG state (Audit A2 - determinism after load)
+        if let state = save.rngState {
+            // Restore exact state for deterministic continuation
+            WorldRNG.shared.restoreState(state)
+        } else if let seed = save.rngSeed {
+            // Fallback: restore from seed (less precise, for old saves)
             WorldRNG.shared.setSeed(seed)
         }
 

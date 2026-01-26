@@ -1600,4 +1600,87 @@ extension AuditGateTests {
                 """)
         }
     }
+
+    // MARK: - A2: RNG State Persistence Gate Tests
+
+    /// Gate test: RNG state is saved and restored (Audit A2)
+    /// Requirement: "Сейв обязан хранить RNG state для детерминизма после загрузки"
+    func testSaveLoadRestoresRngState() throws {
+        // Set a known RNG state
+        let testSeed: UInt64 = 12345
+        WorldRNG.shared.setSeed(testSeed)
+
+        // Advance RNG a few times
+        _ = WorldRNG.shared.next()
+        _ = WorldRNG.shared.next()
+        _ = WorldRNG.shared.next()
+
+        let stateBeforeSave = WorldRNG.shared.currentState()
+
+        // Generate some random values to verify
+        let value1 = WorldRNG.shared.next()
+        let value2 = WorldRNG.shared.next()
+
+        // Restore state to before we generated values
+        WorldRNG.shared.restoreState(stateBeforeSave)
+
+        // Verify same values are generated
+        let restored1 = WorldRNG.shared.next()
+        let restored2 = WorldRNG.shared.next()
+
+        XCTAssertEqual(value1, restored1, "RNG should produce same value after state restore")
+        XCTAssertEqual(value2, restored2, "RNG should produce same sequence after state restore")
+    }
+
+    /// Gate test: EngineSave includes rngState field (Audit A2)
+    func testEngineSaveHasRngStateField() throws {
+        let testFile = URL(fileURLWithPath: #filePath)
+        let projectRoot = testFile
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+
+        let saveFile = projectRoot.appendingPathComponent("Packages/TwilightEngine/Sources/TwilightEngine/Core/EngineSave.swift")
+        guard FileManager.default.fileExists(atPath: saveFile.path) else {
+            XCTFail("GATE TEST FAILURE: EngineSave.swift not found")
+            return
+        }
+
+        let content = try String(contentsOf: saveFile, encoding: .utf8)
+
+        // EngineSave must have rngState field
+        XCTAssertTrue(
+            content.contains("public let rngState: UInt64?"),
+            "EngineSave must have rngState field for deterministic save/load (Audit A2)"
+        )
+    }
+
+    /// Gate test: createSave saves RNG state (Audit A2)
+    func testCreateSaveSavesRngState() throws {
+        let testFile = URL(fileURLWithPath: #filePath)
+        let projectRoot = testFile
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+
+        let engineFile = projectRoot.appendingPathComponent("Packages/TwilightEngine/Sources/TwilightEngine/Core/TwilightGameEngine.swift")
+        guard FileManager.default.fileExists(atPath: engineFile.path) else {
+            XCTFail("GATE TEST FAILURE: TwilightGameEngine.swift not found")
+            return
+        }
+
+        let content = try String(contentsOf: engineFile, encoding: .utf8)
+
+        // createSave must include RNG state
+        XCTAssertTrue(
+            content.contains("rngState: WorldRNG.shared.currentState()"),
+            "createSave must save WorldRNG.shared.currentState() (Audit A2)"
+        )
+
+        // Must not have "rngSeed: nil" pattern anymore
+        XCTAssertFalse(
+            content.contains("rngSeed: nil"),
+            "createSave must not set rngSeed to nil (Audit A2)"
+        )
+    }
 }
