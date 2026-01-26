@@ -17,7 +17,7 @@
 | Что это за игра? | [PROJECT_BIBLE.md](./Concept/PROJECT_BIBLE.md) |
 | Как устроен движок? | [ENGINE_ARCHITECTURE.md](./Technical/ENGINE_ARCHITECTURE.md) |
 | Как создать контент-пак? | [SPEC_CAMPAIGN_PACK.md](./Specs/SPEC_CAMPAIGN_PACK.md) |
-| Что изменилось? | [CHANGELOG.md](./CHANGELOG.md) |
+| Что изменилось? | [CHANGELOG.md](./Audit/CHANGELOG.md) |
 | Статус проекта? | [AUDIT_REPORT_v2.0.md](./Audit/AUDIT_REPORT_v2.0.md) |
 
 ---
@@ -62,22 +62,15 @@
 - [SPEC_BALANCE_PACK_RU.md](./Specs/SPEC_BALANCE_PACK_RU.md)
 - [SPEC_INVESTIGATOR_PACK_RU.md](./Specs/SPEC_INVESTIGATOR_PACK_RU.md)
 
-### Audit/ — Отчёты аудита
-Результаты проверок качества и соответствия архитектуре.
+### Audit/ — Аудит и история изменений
+Результаты проверок, требования аудиторов, история изменений.
 
 | Документ | Описание | Статус |
 |----------|----------|--------|
 | [AUDIT_REPORT_v2.0.md](./Audit/AUDIT_REPORT_v2.0.md) | Финальный отчёт аудита v2.0 | **ТЕКУЩИЙ** |
-| [AUDIT_ENGINE_FIRST_v1_1.md](./Audit/AUDIT_ENGINE_FIRST_v1_1.md) | Аудит Engine-First v1.1 | Завершён |
-| [AUDIT_3.0.md](./Audit/AUDIT_3.0.md) | Требования Аудит 3.0 | Референс |
-
-### Migration/ — Планы миграции
-Дорожные карты и планы переходов.
-
-| Документ | Описание |
-|----------|----------|
-| [MIGRATION_PLAN.md](./Migration/MIGRATION_PLAN.md) | Engine v1.0 Release Gates |
-| [MIGRATION_GUIDE.md](./Migration/MIGRATION_GUIDE.md) | Руководство по миграции |
+| [AUDIT_3.0.md](./Audit/AUDIT_3.0.md) | Требования аудиторов | Референс |
+| [MIGRATION_PLAN.md](./Audit/MIGRATION_PLAN.md) | Engine v1.0 Release Gates | Выполнен |
+| [CHANGELOG.md](./Audit/CHANGELOG.md) | История изменений проекта | Актуален |
 
 ### QA/ — Тестирование
 Чеклисты и планы тестирования.
@@ -104,7 +97,6 @@
 
 | Документ | Описание |
 |----------|----------|
-| [CHANGELOG.md](./CHANGELOG.md) | История изменений |
 | [HANDOFF.md](./HANDOFF.md) | Передача контекста между сессиями |
 | **INDEX.md** | Вы здесь |
 
@@ -132,11 +124,13 @@ CardSampleGame/
 │   ├── Design/                  # Геймдизайн
 │   ├── Technical/               # Техническая документация
 │   ├── Specs/                   # Спецификации форматов
-│   ├── Audit/                   # Отчёты аудита
-│   ├── Migration/               # Планы миграции
+│   ├── Audit/                   # Аудит и история изменений
+│   │   ├── AUDIT_REPORT_v2.0.md
+│   │   ├── AUDIT_3.0.md
+│   │   ├── MIGRATION_PLAN.md
+│   │   └── CHANGELOG.md
 │   ├── QA/                      # Тестирование
 │   ├── Archive/                 # Архив
-│   ├── CHANGELOG.md
 │   ├── HANDOFF.md
 │   └── INDEX.md                 # Этот файл
 │
