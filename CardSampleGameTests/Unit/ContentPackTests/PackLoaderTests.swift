@@ -6,10 +6,13 @@ import TwilightMarchesActIContent
 @testable import CardSampleGame
 
 /// Tests for PackLoader functionality
+/// Note: PackLoader is used at compile-time to load JSON content packs.
+/// These tests use the JSON source directories, not the binary .pack files.
 final class PackLoaderTests: XCTestCase {
 
     // MARK: - Properties
 
+    /// URL to JSON source directory (not .pack file)
     private var characterPackURL: URL?
     private var storyPackURL: URL?
 
@@ -17,9 +20,9 @@ final class PackLoaderTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        // Use TestContentLoader for robust URL discovery (with file path fallback)
-        characterPackURL = TestContentLoader.characterPackURL
-        storyPackURL = TestContentLoader.storyPackURL
+        // Use TestContentLoader JSON URLs for PackLoader tests
+        characterPackURL = TestContentLoader.characterPackJSONURL
+        storyPackURL = TestContentLoader.storyPackJSONURL
     }
 
     override func tearDown() {

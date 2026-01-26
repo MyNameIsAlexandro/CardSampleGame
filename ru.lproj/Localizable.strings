@@ -1055,3 +1055,59 @@
 "calc.hero.ability" = "Способность героя";
 "calc.curse.weakness" = "Слабость";
 "calc.curse.shadow.of.nav" = "Тень Нави";
+
+// MARK: - Content Manager
+"content.manager.title" = "Менеджер контента";
+"content.manager.loaded.packs" = "Загруженные паки";
+"content.manager.bundled.packs" = "Встроенные паки";
+"content.manager.external.packs" = "Внешние паки (Documents/)";
+"content.manager.no.external" = "Внешние паки не найдены";
+"content.manager.how.to.add" = "Как добавить паки";
+"content.manager.place.files" = "Разместите .pack файлы в:";
+"content.manager.open" = "Открыть";
+"content.manager.reload.all" = "Обновить всё";
+"content.manager.validate" = "Проверить";
+"content.manager.load" = "Загрузить";
+"content.manager.reload" = "Обновить";
+"content.manager.done" = "Готово";
+
+// Content Manager - Status
+"content.manager.status" = "Статус";
+"content.manager.status.discovered" = "Найден";
+"content.manager.status.validating" = "Проверка...";
+"content.manager.status.valid" = "Корректен";
+"content.manager.status.errors" = "%d ошибок";
+"content.manager.status.warnings" = "%d предупреждений";
+"content.manager.status.loading" = "Загрузка...";
+"content.manager.status.loaded" = "Загружен";
+"content.manager.status.failed" = "Ошибка: %@";
+"content.manager.loaded.at" = "Загружен в %@";
+"content.manager.loaded.time" = "Загружен %@";
+
+// Content Manager - Pack details
+"content.manager.content" = "Контент";
+"content.manager.regions" = "Регионы";
+"content.manager.events" = "События";
+"content.manager.quests" = "Квесты";
+"content.manager.heroes" = "Герои";
+"content.manager.cards" = "Карты";
+"content.manager.enemies" = "Враги";
+
+// Content Manager - Validation
+"content.manager.validation" = "Валидация";
+"content.manager.validation.errors" = "Ошибки:";
+"content.manager.validation.warnings" = "Предупреждения:";
+
+// Content Manager - Source
+"content.manager.source.bundled" = "Встроенный";
+"content.manager.source.external" = "Внешний";
+
+// Content Manager - Pack types
+"content.manager.pack.type.character" = "Персонажи";
+"content.manager.pack.type.campaign" = "Кампания";
+"content.manager.pack.type.balance" = "Баланс";
+"content.manager.pack.type.rules.extension" = "Расширение правил";
+"content.manager.pack.type.full" = "Полный пак";
+"content.manager.pack.type.unknown" = "Неизвестно";
+
+"back" = "Назад";

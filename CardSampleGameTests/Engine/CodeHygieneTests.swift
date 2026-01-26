@@ -36,6 +36,7 @@ final class CodeHygieneTests: XCTestCase {
         "BalanceConfiguration.swift",   // Balance config types (intentionally grouped)
         "CardDefinition.swift",         // Card system types
         "CardType.swift",               // Card enums
+        "ContentManager.swift",         // Content management types (cohesive hot-reload API)
         "GameDefinition.swift",         // Game definition types
         "QuestDefinition.swift",        // Quest system types
         "AbilityRegistry.swift",        // Ability loading types

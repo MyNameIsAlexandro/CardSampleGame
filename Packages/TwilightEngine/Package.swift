@@ -12,12 +12,21 @@ let package = Package(
             name: "TwilightEngine",
             targets: ["TwilightEngine"]
         ),
+        .executable(
+            name: "pack-compiler",
+            targets: ["PackCompilerTool"]
+        ),
     ],
     targets: [
         .target(
             name: "TwilightEngine",
             dependencies: [],
             path: "Sources/TwilightEngine"
+        ),
+        .executableTarget(
+            name: "PackCompilerTool",
+            dependencies: ["TwilightEngine"],
+            path: "Sources/PackCompilerTool"
         ),
         .testTarget(
             name: "TwilightEngineTests",

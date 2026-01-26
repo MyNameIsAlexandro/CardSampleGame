@@ -20,6 +20,9 @@ let package = Package(
         .target(
             name: "CoreHeroesContent",
             resources: [
+                // Compiled binary pack (fast loading, compressed) - used at runtime
+                .copy("Resources/CoreHeroes.pack"),
+                // JSON source directory - for PackLoader tests and content authoring
                 .copy("Resources/CoreHeroes")
             ]
         ),

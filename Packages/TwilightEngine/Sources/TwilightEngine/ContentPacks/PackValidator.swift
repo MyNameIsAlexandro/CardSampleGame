@@ -500,11 +500,6 @@ public final class PackValidator {
             addWarning("Balance", "anchor.strengthenAmount is non-positive: \(balance.anchor.strengthenAmount)")
         }
 
-        // Time validation
-        if balance.time.unitsPerDay <= 0 {
-            addError("Balance", "unitsPerDay must be positive: \(balance.time.unitsPerDay)")
-        }
-
         addInfo("Balance", "Balance configuration validated")
     }
 

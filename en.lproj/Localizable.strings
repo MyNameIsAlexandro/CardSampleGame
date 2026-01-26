@@ -1050,3 +1050,59 @@
 "calc.hero.ability" = "Hero ability";
 "calc.curse.weakness" = "Weakness";
 "calc.curse.shadow.of.nav" = "Shadow of Nav";
+
+// MARK: - Content Manager
+"content.manager.title" = "Content Manager";
+"content.manager.loaded.packs" = "Loaded Packs";
+"content.manager.bundled.packs" = "Bundled Packs";
+"content.manager.external.packs" = "External Packs (Documents/)";
+"content.manager.no.external" = "No external packs found";
+"content.manager.how.to.add" = "How to add packs";
+"content.manager.place.files" = "Place .pack files in:";
+"content.manager.open" = "Open";
+"content.manager.reload.all" = "Reload All";
+"content.manager.validate" = "Validate";
+"content.manager.load" = "Load";
+"content.manager.reload" = "Reload";
+"content.manager.done" = "Done";
+
+// Content Manager - Status
+"content.manager.status" = "Status";
+"content.manager.status.discovered" = "Discovered";
+"content.manager.status.validating" = "Validating...";
+"content.manager.status.valid" = "Valid";
+"content.manager.status.errors" = "%d errors";
+"content.manager.status.warnings" = "%d warnings";
+"content.manager.status.loading" = "Loading...";
+"content.manager.status.loaded" = "Loaded";
+"content.manager.status.failed" = "Failed: %@";
+"content.manager.loaded.at" = "Loaded at %@";
+"content.manager.loaded.time" = "Loaded %@";
+
+// Content Manager - Pack details
+"content.manager.content" = "Content";
+"content.manager.regions" = "Regions";
+"content.manager.events" = "Events";
+"content.manager.quests" = "Quests";
+"content.manager.heroes" = "Heroes";
+"content.manager.cards" = "Cards";
+"content.manager.enemies" = "Enemies";
+
+// Content Manager - Validation
+"content.manager.validation" = "Validation";
+"content.manager.validation.errors" = "Errors:";
+"content.manager.validation.warnings" = "Warnings:";
+
+// Content Manager - Source
+"content.manager.source.bundled" = "Bundled";
+"content.manager.source.external" = "External";
+
+// Content Manager - Pack types
+"content.manager.pack.type.character" = "Character";
+"content.manager.pack.type.campaign" = "Campaign";
+"content.manager.pack.type.balance" = "Balance";
+"content.manager.pack.type.rules.extension" = "Rules Extension";
+"content.manager.pack.type.full" = "Full Pack";
+"content.manager.pack.type.unknown" = "Unknown";
+
+"back" = "Back";

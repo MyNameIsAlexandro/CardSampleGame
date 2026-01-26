@@ -1,0 +1,233 @@
+import Foundation
+import Compression
+
+// MARK: - Binary Pack Format
+// .pack file = Header + gzip(JSON-encoded PackContent)
+
+/// Magic bytes for .pack file identification
+private let packMagic: [UInt8] = [0x54, 0x57, 0x50, 0x4B] // "TWPK"
+
+/// Binary pack format version
+private let packFormatVersion: UInt16 = 1
+
+// MARK: - Pack Content (serializable)
+
+/// All content in a pack, serializable to binary format
+public struct PackContent: Codable {
+    public let manifest: PackManifest
+    public let regions: [String: RegionDefinition]
+    public let events: [String: EventDefinition]
+    public let quests: [String: QuestDefinition]
+    public let anchors: [String: AnchorDefinition]
+    public let heroes: [String: StandardHeroDefinition]
+    public let cards: [String: StandardCardDefinition]
+    public let enemies: [String: EnemyDefinition]
+    public let abilities: [HeroAbility]
+    public let balanceConfig: BalanceConfiguration?
+
+    /// Create from LoadedPack
+    public init(from pack: LoadedPack) {
+        self.manifest = pack.manifest
+        self.regions = pack.regions
+        self.events = pack.events
+        self.quests = pack.quests
+        self.anchors = pack.anchors
+        self.heroes = pack.heroes
+        self.cards = pack.cards
+        self.enemies = pack.enemies
+        self.abilities = AbilityRegistry.shared.allAbilities
+        self.balanceConfig = pack.balanceConfig
+    }
+
+    /// Convert to LoadedPack
+    public func toLoadedPack(sourceURL: URL) -> LoadedPack {
+        var pack = LoadedPack(manifest: manifest, sourceURL: sourceURL)
+        pack.regions = regions
+        pack.events = events
+        pack.quests = quests
+        pack.anchors = anchors
+        pack.heroes = heroes
+        pack.cards = cards
+        pack.enemies = enemies
+        pack.balanceConfig = balanceConfig
+        return pack
+    }
+}
+
+// MARK: - Binary Pack Writer
+
+/// Compiles JSON packs to binary .pack format
+public final class BinaryPackWriter {
+
+    /// Compile a LoadedPack to binary .pack file
+    /// - Parameters:
+    ///   - pack: The loaded pack to compile
+    ///   - outputURL: Destination URL for .pack file
+    /// - Throws: Error if compilation fails
+    public static func compile(_ pack: LoadedPack, to outputURL: URL) throws {
+        let content = PackContent(from: pack)
+        try compile(content, to: outputURL)
+    }
+
+    /// Compile PackContent to binary .pack file
+    public static func compile(_ content: PackContent, to outputURL: URL) throws {
+        // Encode to JSON
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [] // Compact, no pretty print
+        let jsonData = try encoder.encode(content)
+
+        // Compress with gzip
+        let compressedData = try compress(jsonData)
+
+        // Build file: Header + Compressed Data
+        var fileData = Data()
+
+        // Magic (4 bytes)
+        fileData.append(contentsOf: packMagic)
+
+        // Format version (2 bytes, little-endian)
+        var version = packFormatVersion.littleEndian
+        fileData.append(Data(bytes: &version, count: 2))
+
+        // Original size (4 bytes, for decompression buffer allocation)
+        var originalSize = UInt32(jsonData.count).littleEndian
+        fileData.append(Data(bytes: &originalSize, count: 4))
+
+        // Compressed data
+        fileData.append(compressedData)
+
+        // Write to file
+        try fileData.write(to: outputURL)
+    }
+
+    /// Compress data using zlib
+    private static func compress(_ data: Data) throws -> Data {
+        let destinationBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: data.count)
+        defer { destinationBuffer.deallocate() }
+
+        let compressedSize = data.withUnsafeBytes { sourceBuffer -> Int in
+            guard let sourcePtr = sourceBuffer.baseAddress?.assumingMemoryBound(to: UInt8.self) else {
+                return 0
+            }
+            return compression_encode_buffer(
+                destinationBuffer,
+                data.count,
+                sourcePtr,
+                data.count,
+                nil,
+                COMPRESSION_ZLIB
+            )
+        }
+
+        guard compressedSize > 0 else {
+            throw PackLoadError.contentLoadFailed(file: "compression", underlyingError: NSError(domain: "BinaryPack", code: 1, userInfo: [NSLocalizedDescriptionKey: "Compression failed"]))
+        }
+
+        return Data(bytes: destinationBuffer, count: compressedSize)
+    }
+}
+
+// MARK: - Binary Pack Reader
+
+/// Loads binary .pack files
+public final class BinaryPackReader {
+
+    /// Load a .pack file
+    /// - Parameter url: URL to .pack file
+    /// - Returns: Loaded pack content
+    /// - Throws: PackLoadError if loading fails
+    public static func load(from url: URL) throws -> LoadedPack {
+        let content = try loadContent(from: url)
+
+        // Register abilities BEFORE creating LoadedPack
+        AbilityRegistry.shared.registerAll(content.abilities)
+
+        return content.toLoadedPack(sourceURL: url)
+    }
+
+    /// Load pack content from .pack file
+    public static func loadContent(from url: URL) throws -> PackContent {
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            throw PackLoadError.fileNotFound(url.path)
+        }
+
+        let fileData = try Data(contentsOf: url)
+
+        // Verify minimum size (header = 10 bytes)
+        guard fileData.count >= 10 else {
+            throw PackLoadError.invalidManifest(reason: "File too small")
+        }
+
+        // Verify magic
+        let magic = Array(fileData[0..<4])
+        guard magic == packMagic else {
+            throw PackLoadError.invalidManifest(reason: "Invalid pack file (bad magic)")
+        }
+
+        // Read format version (use loadUnaligned to handle sliced Data alignment)
+        let formatVersion = fileData[4..<6].withUnsafeBytes { $0.loadUnaligned(as: UInt16.self).littleEndian }
+        guard formatVersion == packFormatVersion else {
+            throw PackLoadError.invalidManifest(reason: "Unsupported pack format version: \(formatVersion)")
+        }
+
+        // Read original size (use loadUnaligned for safety)
+        let originalSize = Int(fileData[6..<10].withUnsafeBytes { $0.loadUnaligned(as: UInt32.self).littleEndian })
+
+        // Decompress
+        let compressedData = fileData[10...]
+        let jsonData = try decompress(Data(compressedData), originalSize: originalSize)
+
+        // Decode JSON
+        let decoder = JSONDecoder()
+        do {
+            return try decoder.decode(PackContent.self, from: jsonData)
+        } catch {
+            throw PackLoadError.contentLoadFailed(file: url.lastPathComponent, underlyingError: error)
+        }
+    }
+
+    /// Decompress data using zlib
+    private static func decompress(_ data: Data, originalSize: Int) throws -> Data {
+        let destinationBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: originalSize)
+        defer { destinationBuffer.deallocate() }
+
+        let decompressedSize = data.withUnsafeBytes { sourceBuffer -> Int in
+            guard let sourcePtr = sourceBuffer.baseAddress?.assumingMemoryBound(to: UInt8.self) else {
+                return 0
+            }
+            return compression_decode_buffer(
+                destinationBuffer,
+                originalSize,
+                sourcePtr,
+                data.count,
+                nil,
+                COMPRESSION_ZLIB
+            )
+        }
+
+        guard decompressedSize == originalSize else {
+            throw PackLoadError.contentLoadFailed(file: "decompression", underlyingError: NSError(domain: "BinaryPack", code: 2, userInfo: [NSLocalizedDescriptionKey: "Decompression failed: expected \(originalSize), got \(decompressedSize)"]))
+        }
+
+        return Data(bytes: destinationBuffer, count: decompressedSize)
+    }
+
+    /// Check if URL points to a valid .pack file (quick check, doesn't load content)
+    public static func isValidPackFile(_ url: URL) -> Bool {
+        guard url.pathExtension == "pack" else { return false }
+        guard let handle = try? FileHandle(forReadingFrom: url) else { return false }
+        defer { try? handle.close() }
+
+        guard let magicData = try? handle.read(upToCount: 4) else { return false }
+        return Array(magicData) == packMagic
+    }
+}
+
+// MARK: - Pack File Extension
+
+public extension URL {
+    /// Check if this URL points to a .pack file
+    var isPackFile: Bool {
+        pathExtension == "pack"
+    }
+}

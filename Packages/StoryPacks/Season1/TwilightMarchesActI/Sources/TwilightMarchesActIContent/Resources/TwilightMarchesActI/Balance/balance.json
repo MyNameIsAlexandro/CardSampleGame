@@ -38,7 +38,6 @@
     "max_hand_size": 7
   },
   "time": {
-    "units_per_day": 24,
     "starting_time": 8,
     "max_days": null,
     "travel_cost": 1,

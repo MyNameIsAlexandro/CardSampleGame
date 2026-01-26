@@ -35,67 +35,83 @@ public final class ContentRegistry {
 
     // MARK: - Pack Loading
 
-    /// Load multiple packs from URLs, sorted by priority
+    /// Load multiple .pack files from URLs, sorted by priority
     /// Character packs are loaded before campaign packs
-    /// - Parameter urls: URLs to pack directories
+    /// - Parameter urls: URLs to .pack files
     /// - Returns: Array of loaded packs in load order
     /// - Throws: PackLoadError if loading fails
     @discardableResult
     public func loadPacks(from urls: [URL]) throws -> [LoadedPack] {
-        // Load manifests first to sort by priority
-        var manifestsWithUrls: [(manifest: PackManifest, url: URL)] = []
+        // Load all pack contents
+        var contentsWithUrls: [(content: PackContent, url: URL)] = []
         for url in urls {
-            let manifest = try PackManifest.load(from: url)
-            manifestsWithUrls.append((manifest, url))
+            let content = try BinaryPackReader.loadContent(from: url)
+            contentsWithUrls.append((content, url))
         }
 
         // Sort by pack type priority (character packs first, then campaigns)
-        manifestsWithUrls.sort { $0.manifest.packType.loadPriority < $1.manifest.packType.loadPriority }
+        contentsWithUrls.sort { $0.content.manifest.packType.loadPriority < $1.content.manifest.packType.loadPriority }
 
-        // Load packs in priority order
-        var loadedPacks: [LoadedPack] = []
-        for (_, url) in manifestsWithUrls {
-            let pack = try loadPack(from: url)
-            loadedPacks.append(pack)
+        // Register packs in priority order
+        var result: [LoadedPack] = []
+        for (content, url) in contentsWithUrls {
+            let pack = try registerPackContent(content, from: url)
+            result.append(pack)
         }
 
-        return loadedPacks
+        return result
     }
 
-    /// Load a pack from URL
-    /// - Parameter url: URL to pack directory or .pack file
-    /// - Returns: The loaded pack
-    /// - Throws: PackLoadError if loading fails
-    @discardableResult
-    public func loadPack(from url: URL) throws -> LoadedPack {
+    /// Register pack content (internal helper)
+    private func registerPackContent(_ content: PackContent, from url: URL) throws -> LoadedPack {
+        // Register abilities BEFORE creating pack (needed for hero definitions)
+        AbilityRegistry.shared.registerAll(content.abilities)
+
+        let pack = content.toLoadedPack(sourceURL: url)
+
         // Check if already loaded
-        let manifest = try PackManifest.load(from: url)
-        if loadedPacks[manifest.packId] != nil {
-            throw PackLoadError.packAlreadyLoaded(packId: manifest.packId)
+        if loadedPacks[pack.manifest.packId] != nil {
+            throw PackLoadError.packAlreadyLoaded(packId: pack.manifest.packId)
         }
 
         // Verify Core compatibility
-        guard manifest.isCompatibleWithCore() else {
+        guard pack.manifest.isCompatibleWithCore() else {
             throw PackLoadError.incompatibleCoreVersion(
-                required: manifest.coreVersionMin,
+                required: pack.manifest.coreVersionMin,
                 current: CoreVersion.current
             )
         }
 
         // Check dependencies
-        try validateDependencies(for: manifest)
-
-        // Load the pack content
-        let pack = try PackLoader.load(manifest: manifest, from: url)
+        try validateDependencies(for: pack.manifest)
 
         // Register the pack
-        loadedPacks[manifest.packId] = pack
-        loadOrder.append(manifest.packId)
+        loadedPacks[pack.manifest.packId] = pack
+        loadOrder.append(pack.manifest.packId)
 
         // Merge content
         mergeContent(from: pack)
 
         return pack
+    }
+
+    /// Load a .pack file
+    /// - Parameter url: URL to .pack file (binary format only)
+    /// - Returns: The loaded pack
+    /// - Throws: PackLoadError if loading fails
+    @discardableResult
+    public func loadPack(from url: URL) throws -> LoadedPack {
+        // Verify it's a valid .pack file (checks extension AND magic bytes)
+        guard BinaryPackReader.isValidPackFile(url) else {
+            throw PackLoadError.invalidManifest(
+                reason: "Invalid or missing .pack file. Only binary .pack files are supported. " +
+                        "Use 'swift run pack-compiler compile' to compile JSON packs."
+            )
+        }
+
+        // Load binary pack content
+        let content = try BinaryPackReader.loadContent(from: url)
+        return try registerPackContent(content, from: url)
     }
 
     /// Unload a pack
@@ -117,26 +133,44 @@ public final class ContentRegistry {
         clearMergedContent()
     }
 
-    // MARK: - Cache Loading
+    // MARK: - Safe Reload (Hot-Reload Support)
 
-    /// Load pack from cached data (bypasses JSON parsing)
-    /// - Parameter cached: Cached pack data
-    /// - Returns: The loaded pack
-    @discardableResult
-    public func loadPackFromCache(_ cached: CachedPackData) -> LoadedPack {
-        // IMPORTANT: Restore abilities to AbilityRegistry BEFORE creating pack
-        // Abilities are needed for hero definition conversion
-        AbilityRegistry.shared.registerAll(cached.abilities)
+    /// Safely reload a pack with rollback on failure
+    /// - Parameters:
+    ///   - packId: ID of pack to reload
+    ///   - url: URL to new pack file
+    /// - Returns: Result with loaded pack or error (old pack preserved on failure)
+    public func safeReloadPack(_ packId: String, from url: URL) -> Result<LoadedPack, Error> {
+        // Store old state for potential rollback
+        let oldPack = loadedPacks[packId]
+        let oldLoadOrder = loadOrder
 
-        let pack = cached.toLoadedPack()
+        do {
+            // Unload old pack
+            unloadPack(packId)
 
-        // Register the pack
-        loadedPacks[cached.manifest.packId] = pack
-        loadOrder.append(cached.manifest.packId)
+            // Load new pack
+            let newPack = try loadPack(from: url)
 
-        // Merge content
-        mergeContent(from: pack)
-        return pack
+            #if DEBUG
+            print("ContentRegistry: Successfully reloaded '\(packId)'")
+            #endif
+
+            return .success(newPack)
+        } catch {
+            // Rollback: restore old pack if it existed
+            if let oldPack = oldPack {
+                loadedPacks[packId] = oldPack
+                // Restore load order
+                loadOrder = oldLoadOrder
+                rebuildMergedContent()
+
+                #if DEBUG
+                print("ContentRegistry: Rolled back to previous version of '\(packId)'")
+                #endif
+            }
+            return .failure(error)
+        }
     }
 
     // MARK: - Content Access

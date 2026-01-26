@@ -239,7 +239,11 @@ final class AuditGateTests: XCTestCase {
         // Factory should provide guardians
         let guardians = factory.createGuardians()
         // Skip if ContentPacks not loaded in test environment
-        try XCTSkipIf(guardians.isEmpty, "ContentPacks not loaded in test environment")
+        // GATE TEST: Must not skip - if packs not loaded, this is a test environment issue
+        if guardians.isEmpty {
+            XCTFail("GATE TEST FAILURE: ContentPacks not loaded - test environment configuration issue")
+            return
+        }
 
         // Factory should provide encounter deck
         let encounters = factory.createEncounterDeck()
@@ -739,6 +743,61 @@ final class AuditGateTests: XCTestCase {
         }
     }
 
+    /// Gate test: Runtime rejects raw JSON files, only accepts binary .pack
+    /// Requirement: "Runtime загружает только .pack файлы, JSON только для compile-time"
+    func testRuntimeRejectsRawJSON() throws {
+        // Create a temporary JSON directory (simulating raw JSON pack)
+        let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        // Create a minimal manifest.json file
+        let manifestJSON = """
+        {
+            "packId": "test-json-pack",
+            "displayName": { "en": "Test JSON Pack", "ru": "Тестовый JSON пак" },
+            "version": "1.0.0",
+            "packType": "character",
+            "coreVersionMin": "1.0.0"
+        }
+        """
+        let manifestURL = tempDir.appendingPathComponent("manifest.json")
+        try manifestJSON.write(to: manifestURL, atomically: true, encoding: .utf8)
+
+        // Attempt to load raw JSON directory should fail
+        let registry = ContentRegistry.shared
+        registry.resetForTesting()
+
+        // Try to load the JSON directory (not a .pack file)
+        do {
+            _ = try registry.loadPack(from: tempDir)
+            XCTFail("GATE TEST FAILURE: Runtime должен отвергать raw JSON директории")
+        } catch let error as PackLoadError {
+            // Expected: should fail with invalidManifest error
+            if case .invalidManifest(let reason) = error {
+                XCTAssertTrue(
+                    reason.contains(".pack") || reason.contains("pack"),
+                    "Error message should mention .pack files: \(reason)"
+                )
+            } else {
+                // Any PackLoadError is acceptable - runtime rejected the JSON
+            }
+        } catch {
+            // Any error is fine - runtime rejected the raw JSON
+        }
+
+        // Also verify that a file with wrong extension is rejected
+        let wrongExtFile = tempDir.appendingPathComponent("test.json")
+        try "{}".write(to: wrongExtFile, atomically: true, encoding: .utf8)
+
+        do {
+            _ = try registry.loadPack(from: wrongExtFile)
+            XCTFail("GATE TEST FAILURE: Runtime должен отвергать файлы без расширения .pack")
+        } catch {
+            // Expected: any error means runtime correctly rejected the file
+        }
+    }
+
     /// Check a Swift file for forbidden patterns not in comments
     private func checkForbiddenPatternsInFile(_ fileURL: URL, patterns: [String]) throws -> [String] {
         let content = try String(contentsOf: fileURL, encoding: .utf8)
@@ -807,7 +866,11 @@ extension AuditGateTests {
 
         let guardians = factory.createGuardians()
         // Skip if ContentPacks not loaded in test environment
-        try XCTSkipIf(guardians.isEmpty, "ContentPacks not loaded in test environment")
+        // GATE TEST: Must not skip - if packs not loaded, this is a test environment issue
+        if guardians.isEmpty {
+            XCTFail("GATE TEST FAILURE: ContentPacks not loaded - test environment configuration issue")
+            return
+        }
     }
 
     // MARK: - EPIC 0.3: Content Hash Verification

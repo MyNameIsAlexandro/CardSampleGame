@@ -314,15 +314,10 @@ Balance Pack предоставляет конфигурацию игры без
 
 ```json
 {
-  "units_per_day": {
-    "type": "integer",
-    "default": 24,
-    "range": [12, 48],
-    "description": "Единицы времени в одном дне"
-  },
   "starting_time": {
     "type": "integer",
     "default": 8,
+    "range": [0, 23],
     "description": "Начальное время суток"
   },
   "travel_cost": {
@@ -522,7 +517,7 @@ Balance Pack предоставляет конфигурацию игры без
 | VAL-CON-002 | starting_faith <= max_faith | Ошибка |
 | VAL-CON-003 | low < medium < high < critical (пороги) | Ошибка |
 | VAL-CON-004 | breach < borderland < stable (якорь) | Ошибка |
-| VAL-CON-005 | starting_time < units_per_day | Ошибка |
+| VAL-CON-005 | starting_time в диапазоне [0, 23] | Ошибка |
 
 ### 5.3 Валидация геймплея
 
@@ -726,7 +721,6 @@ let travelCost = BalanceConfig.current.time.travelCost
     "decay_per_turn": 5
   },
   "time": {
-    "units_per_day": 24,
     "starting_time": 8,
     "travel_cost": 4,
     "rest_cost": 8

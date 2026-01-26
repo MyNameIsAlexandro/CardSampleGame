@@ -74,7 +74,7 @@ public enum HeroAbilityType: String, Codable {
 }
 
 /// Ability activation trigger
-public enum AbilityTrigger: String, Codable {
+public enum AbilityTrigger: String, Codable, CaseIterable {
     /// Always active
     case always
 

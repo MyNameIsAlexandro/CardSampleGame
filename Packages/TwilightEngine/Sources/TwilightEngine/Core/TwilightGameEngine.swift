@@ -528,6 +528,10 @@ public final class TwilightGameEngine: ObservableObject {
         var newRegions: [UUID: EngineRegionState] = [:]
         var stringToUUID: [String: UUID] = [:]  // Map string IDs to UUIDs
 
+        // CRITICAL: Reset currentRegionId before creating new regions
+        // This fixes a bug where old UUID from previous game could persist
+        currentRegionId = nil
+
         // Determine entry region from manifest (no hardcoded "village")
         let entryRegionId = contentRegistry.loadedPacks.values.first?.manifest.entryRegionId
 
@@ -590,6 +594,10 @@ public final class TwilightGameEngine: ObservableObject {
         let regionDefs = contentRegistry.getAllRegions()
         var newRegions: [UUID: EngineRegionState] = [:]
         var stringToUUID: [String: UUID] = [:]  // Map string IDs to UUIDs
+
+        // CRITICAL: Reset currentRegionId before creating new regions
+        // This fixes a bug where old UUID from previous game could persist
+        currentRegionId = nil
 
         // Determine entry region from loaded pack manifest (no hardcoded fallback)
         let entryRegionId = contentRegistry.loadedPacks.values.first?.manifest.entryRegionId
@@ -1989,11 +1997,11 @@ public extension TwilightGameEngine {
             // Regions
             regions: regionSaves,
 
-            // Quest state
+            // Quest state (using definitionId for stable serialization - Audit A1)
             mainQuestStage: mainQuestStage,
-            activeQuestIds: publishedActiveQuests.map { $0.id.uuidString },
+            activeQuestIds: publishedActiveQuests.map { $0.definitionId },
             completedQuestIds: Array(completedQuestIds),
-            questStages: [:],
+            questStages: Dictionary(uniqueKeysWithValues: publishedActiveQuests.map { ($0.definitionId, $0.stage) }),
 
             // Events (already String definition IDs)
             completedEventIds: Array(completedEventIds),
@@ -2047,6 +2055,18 @@ public extension TwilightGameEngine {
         playerMaxFaith = save.playerMaxFaith
         playerBalance = save.playerBalance
 
+        // Restore hero stats from heroId (stats that don't change during gameplay)
+        if let heroId = save.heroId,
+           let heroDef = HeroRegistry.shared.hero(id: heroId) {
+            let stats = heroDef.baseStats
+            playerStrength = stats.strength
+            playerDexterity = stats.dexterity
+            playerConstitution = stats.constitution
+            playerIntelligence = stats.intelligence
+            playerWisdom = stats.wisdom
+            playerCharisma = stats.charisma
+        }
+
         // Restore deck (convert card IDs back to cards)
         _playerDeck = save.deckCardIds.compactMap { CardFactory.shared.getCard(id: $0) }
         playerHand = save.handCardIds.compactMap { CardFactory.shared.getCard(id: $0) }
@@ -2075,10 +2095,13 @@ public extension TwilightGameEngine {
             // Create anchor if present
             var anchor: EngineAnchorState? = nil
             if let anchorId = regionSave.anchorDefinitionId {
+                // Look up anchor definition to get localized name
+                let anchorDef = contentRegistry.getAnchor(id: anchorId)
+                let anchorName = anchorDef?.title.localized ?? anchorId
                 anchor = EngineAnchorState(
                     id: UUID(),
                     definitionId: anchorId,
-                    name: anchorId,
+                    name: anchorName,
                     integrity: regionSave.anchorIntegrity ?? 100
                 )
             }
@@ -2111,6 +2134,21 @@ public extension TwilightGameEngine {
         // Restore quest state
         mainQuestStage = save.mainQuestStage
         completedQuestIds = Set(save.completedQuestIds)
+
+        // Restore active quests from definitionIds (using ContentRegistry)
+        var restoredQuests: [Quest] = []
+        for questDefId in save.activeQuestIds {
+            if let questDef = contentRegistry.getQuest(id: questDefId) {
+                var quest = questDef.toQuest()
+                // Restore stage from saved data
+                if let savedStage = save.questStages[questDefId] {
+                    quest.stage = savedStage
+                }
+                restoredQuests.append(quest)
+            }
+        }
+        activeQuests = restoredQuests
+        publishedActiveQuests = restoredQuests
 
         // Restore completed events (already String definition IDs)
         completedEventIds = Set(save.completedEventIds)

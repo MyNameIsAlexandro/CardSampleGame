@@ -279,6 +279,12 @@ struct LocalizedString: Codable, Hashable {
     var localized: String { /* возвращает текст для текущей локали */ }
 }
 
+// КАНОН ЛОКАЛИЗАЦИИ (Audit B1):
+// - Canonical scheme: Inline LocalizedString { "en": "...", "ru": "..." }
+// - Запрещено: смешивание inline и StringKey в одном паке
+// - LocalizationValidator проверяет соблюдение канона при загрузке паков
+// - UI использует LocalizableText.resolved для получения строк
+
 protocol EventSystemProtocol {
     associatedtype Event: EventDefinitionProtocol
     func getAvailableEvents(in context: EventContext) -> [Event]
@@ -799,6 +805,15 @@ Engine/Data/Definitions/
 - [SPEC_CAMPAIGN_PACK.md](./SPEC_CAMPAIGN_PACK.md) — спецификация Campaign паков
 - [SPEC_INVESTIGATOR_PACK.md](./SPEC_INVESTIGATOR_PACK.md) — спецификация Investigator паков
 - [SPEC_BALANCE_PACK.md](./SPEC_BALANCE_PACK.md) — спецификация Balance паков
+
+**Pack Format (текущий vs планируемый):**
+| Формат | v1.x (текущий) | v2.0 (план) |
+|--------|----------------|-------------|
+| Authoring | JSON | JSON |
+| Runtime | JSON | Binary .pack |
+| Валидация | Runtime | Compile-time |
+
+> См. [CONTENT_PACK_GUIDE.md](./CONTENT_PACK_GUIDE.md#pack-format-roadmap) для деталей roadmap.
 
 ---
 

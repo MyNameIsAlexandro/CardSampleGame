@@ -232,9 +232,6 @@ public struct CombatBalanceConfig: Codable, Sendable {
 
 /// Time system balance configuration.
 public struct TimeBalanceConfig: Codable, Sendable {
-    /// Time units per day.
-    public let unitsPerDay: Int
-
     /// Starting time of day.
     public let startingTime: Int
 
@@ -258,7 +255,6 @@ public struct TimeBalanceConfig: Codable, Sendable {
 
     /// Default time configuration.
     public static let `default` = TimeBalanceConfig(
-        unitsPerDay: 24,
         startingTime: 8,
         maxDays: nil,
         travelCost: 2,

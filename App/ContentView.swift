@@ -1,5 +1,7 @@
 import SwiftUI
 import TwilightEngine
+import CoreHeroesContent
+import TwilightMarchesActIContent
 
 struct ContentView: View {
     @State private var showingWorldMap = false
@@ -7,6 +9,7 @@ struct ContentView: View {
     @State private var showingSaveSlots = false
     @State private var showingLoadSlots = false  // New: for "Continue" flow
     @State private var showingStatistics = false
+    @State private var showingContentManager = false
     @State private var selectedHeroId: String?
     @State private var selectedSaveSlot: Int?
 
@@ -86,6 +89,17 @@ struct ContentView: View {
                                     .minimumScaleFactor(0.8)
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
+
+                            #if DEBUG
+                            Button(action: { showingContentManager = true }) {
+                                Image(systemName: "shippingbox.fill")
+                                    .font(.title3)
+                                    .padding(8)
+                                    .background(Color.purple.opacity(0.2))
+                                    .foregroundColor(.purple)
+                                    .cornerRadius(8)
+                            }
+                            #endif
 
                             Button(action: { showingStatistics = true }) {
                                 Image(systemName: "chart.bar.fill")
@@ -241,6 +255,11 @@ struct ContentView: View {
         .sheet(isPresented: $showingStatistics) {
             StatisticsView()
         }
+        #if DEBUG
+        .sheet(isPresented: $showingContentManager) {
+            ContentManagerView(bundledPackURLs: getBundledPackURLs())
+        }
+        #endif
     }
 
     var saveSlotSelectionView: some View {
@@ -672,6 +691,22 @@ struct StatMini: View {
         }
     }
 }
+
+// MARK: - Content Manager Helpers
+
+#if DEBUG
+/// Get bundled pack URLs for Content Manager
+private func getBundledPackURLs() -> [URL] {
+    var urls: [URL] = []
+    if let heroesURL = CoreHeroesContent.packURL {
+        urls.append(heroesURL)
+    }
+    if let storyURL = TwilightMarchesActIContent.packURL {
+        urls.append(storyURL)
+    }
+    return urls
+}
+#endif
 
 #Preview {
     ContentView()

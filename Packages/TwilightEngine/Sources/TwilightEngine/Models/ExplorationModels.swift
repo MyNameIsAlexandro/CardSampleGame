@@ -2,7 +2,7 @@ import Foundation
 
 // MARK: - Region State
 
-public enum RegionState: String, Codable, Hashable {
+public enum RegionState: String, Codable, Hashable, CaseIterable {
     case stable         // Стабильная Явь - безопасно
     case borderland     // Пограничье - повышенный риск
     case breach         // Прорыв Нави - опасно
