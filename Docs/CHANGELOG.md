@@ -12,7 +12,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 Complete architectural overhaul following comprehensive audit. Project now uses Engine-First architecture with modular Content Pack system, automated compliance testing, and full documentation.
 
-**Test Count:** 248 tests (126 app + 122 engine)
+**Test Count:** 256 tests (134 app + 122 engine)
 **Build Status:** SUCCESS
 
 ---
@@ -184,6 +184,15 @@ Files exceeding limits but stable:
   - Critical engine invariants
   - Determinism verification
   - Save/load round-trip
+- **ContentValidationTests** (`CardSampleGameTests/Engine/ContentValidationTests.swift`)
+  - `testAllReferencedFlagsAreKnown` - Catches typos in flag names
+  - `testAllReferencedRegionIdsExist` - Validates region references
+  - `testAllReferencedQuestIdsExist` - Validates quest references
+  - `testAllReferencedEventIdsExist` - Validates event trigger references
+  - `testAllReferencedResourceIdsAreKnown` - Validates resource IDs
+  - `testAllReferencedRegionStatesAreKnown` - Validates state names
+  - `testAllReferencedCardIdsExist` - Validates card references
+  - `testContentIntegrityReport` - Diagnostic summary
 - **Negative Tests**
   - `testBrokenJSONFailsToLoad()` - Malformed JSON handling
   - `testMissingRequiredFieldsFailsValidation()` - Schema validation
@@ -197,6 +206,7 @@ Files exceeding limits but stable:
 #### Commits
 - `66ca6c9` Add gate tests for critical game guarantees
 - `4cd3291` Add comprehensive determinism test
+- `dd0fa76` Add ContentValidationTests to prevent silent JSON failures
 
 ---
 
@@ -248,14 +258,15 @@ Files exceeding limits but stable:
 | AuditGateTests | 4 | ✅ |
 | CodeHygieneTests | 4 | ✅ |
 | ContentRegistryTests | 35 | ✅ |
+| ContentValidationTests | 8 | ✅ |
 | DesignSystemComplianceTests | 4 | ✅ |
 | HeroPanelTests | 3 | ✅ |
 | HeroRegistryTests | 9 | ✅ |
 | PackLoaderTests | 44 | ✅ |
 | SaveLoadTests | 23 | ✅ |
-| **App Total** | **126** | ✅ |
+| **App Total** | **134** | ✅ |
 | TwilightEngineTests | 122 | ✅ |
-| **Grand Total** | **248** | ✅ |
+| **Grand Total** | **256** | ✅ |
 
 ---
 
