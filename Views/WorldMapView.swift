@@ -130,10 +130,7 @@ struct WorldMapView: View {
         }
     }
 
-    // MARK: - Player Info (now uses HeroPanel component)
-    // Old playerInfoBar removed - using unified HeroPanel component instead
-
-    // MARK: - World Info Bar (Engine-First: reads from engine.*)
+    // MARK: - World Info Bar
 
     var worldInfoBar: some View {
         VStack(spacing: Spacing.sm) {
