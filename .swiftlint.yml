@@ -1,0 +1,66 @@
+# SwiftLint Configuration — Audit v2.1, Section 5.2
+# Enforces code hygiene rules for CardSampleGame
+
+disabled_rules:
+  - trailing_whitespace
+  - todo
+
+opt_in_rules:
+  - force_cast
+  - force_try
+  - force_unwrapping
+
+excluded:
+  - .build
+  - DevTools
+  - Packages/TwilightEngine/.build
+
+force_cast:
+  severity: error
+
+force_try:
+  severity: error
+
+force_unwrapping:
+  severity: warning
+
+line_length:
+  warning: 150
+  error: 200
+  ignores_comments: true
+  ignores_urls: true
+
+type_body_length:
+  warning: 400
+  error: 600
+
+file_length:
+  warning: 800
+  error: 1200
+
+function_body_length:
+  warning: 60
+  error: 100
+
+cyclomatic_complexity:
+  warning: 15
+  error: 25
+
+nesting:
+  type_level: 3
+  function_level: 5
+
+identifier_name:
+  min_length:
+    warning: 2
+    error: 1
+  max_length:
+    warning: 50
+    error: 70
+  excluded:
+    - id
+    - en
+    - ru
+    - i
+    - x
+    - y

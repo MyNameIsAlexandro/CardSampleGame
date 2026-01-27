@@ -6,42 +6,32 @@ import XCTest
 final class GameplayFlowTests: XCTestCase {
 
     var engine: TwilightGameEngine!
-    private var testPackURL: URL!
 
     override func setUp() {
         super.setUp()
-        // Load ContentRegistry with TwilightMarches pack
-        ContentRegistry.shared.resetForTesting()
-        testPackURL = URL(fileURLWithPath: #file)
-            .deletingLastPathComponent() // Engine
-            .deletingLastPathComponent() // CardSampleGameTests
-            .deletingLastPathComponent() // CardSampleGame
-            .appendingPathComponent("ContentPacks/TwilightMarches")
-        _ = try? ContentRegistry.shared.loadPack(from: testPackURL)
-
-        // Engine-First: engine initializes its own state
+        TestContentLoader.loadContentPacksIfNeeded()
         engine = TwilightGameEngine()
-        engine.initializeFromContentRegistry(ContentRegistry.shared)
+        engine.initializeNewGame(playerName: "Test", heroId: nil)
     }
 
     override func tearDown() {
         engine = nil
-        ContentRegistry.shared.resetForTesting()
-        testPackURL = nil
         super.tearDown()
     }
 
-    /// Helper to skip test if regions not loaded
-    private func requireRegionsLoaded() throws {
+    /// Helper to fail test if regions not loaded
+    private func requireRegionsLoaded() -> Bool {
         if engine.regionsArray.isEmpty {
-            throw XCTSkip("Skipping: ContentPack not loaded (no regions)")
+            XCTFail("Skipping: ContentPack not loaded (no regions)")
+            return false
         }
+        return true
     }
 
     // MARK: - Region Tests
 
-    func testRegionsArrayNotEmpty() throws {
-        try requireRegionsLoaded()
+    func testRegionsArrayNotEmpty() {
+        guard requireRegionsLoaded() else { return }
         // Given: Engine initialized
         // When: Accessing regions
         let regions = engine.regionsArray
@@ -50,8 +40,8 @@ final class GameplayFlowTests: XCTestCase {
         XCTAssertFalse(regions.isEmpty, "Engine should have at least one region")
     }
 
-    func testCurrentRegionExists() throws {
-        try requireRegionsLoaded()
+    func testCurrentRegionExists() {
+        guard requireRegionsLoaded() else { return }
         // Given: Engine initialized
         // When: Checking current region
         let currentRegionId = engine.currentRegionId
@@ -64,11 +54,11 @@ final class GameplayFlowTests: XCTestCase {
         XCTAssertNotNil(currentRegion, "Current region should exist in regionsArray")
     }
 
-    func testRegionHasRequiredProperties() throws {
-        try requireRegionsLoaded()
+    func testRegionHasRequiredProperties() {
+        guard requireRegionsLoaded() else { return }
         // Given: Engine with regions
         guard let region = engine.regionsArray.first else {
-            throw XCTSkip("No regions available")
+            XCTFail("No regions available"); return
         }
 
         // Then: Region should have required properties
@@ -79,15 +69,15 @@ final class GameplayFlowTests: XCTestCase {
 
     // MARK: - Travel Tests
 
-    func testTravelToNeighborRegion() throws {
-        try requireRegionsLoaded()
+    func testTravelToNeighborRegion() {
+        guard requireRegionsLoaded() else { return }
         // Given: Current region with neighbors
         guard let currentRegion = engine.currentRegion else {
-            throw XCTSkip("No current region")
+            XCTFail("No current region"); return
         }
 
         guard let neighborId = currentRegion.neighborIds.first else {
-            throw XCTSkip("Current region has no neighbors to travel to")
+            XCTFail("Current region has no neighbors to travel to"); return
         }
 
         let initialRegionId = engine.currentRegionId
@@ -103,13 +93,13 @@ final class GameplayFlowTests: XCTestCase {
         XCTAssertEqual(engine.currentRegionId, neighborId, "Current region should be destination")
     }
 
-    func testTravelAdvancesTime() throws {
+    func testTravelAdvancesTime() {
         // Given: Current day
         let initialDay = engine.currentDay
 
         guard let currentRegion = engine.currentRegion,
               let neighborId = currentRegion.neighborIds.first else {
-            throw XCTSkip("Cannot test travel time - no neighbors")
+            XCTFail("Cannot test travel time - no neighbors"); return
         }
 
         // When: Traveling
@@ -119,11 +109,11 @@ final class GameplayFlowTests: XCTestCase {
         XCTAssertGreaterThan(engine.currentDay, initialDay, "Travel should advance time")
     }
 
-    func testCannotTravelToNonNeighbor() throws {
-        try requireRegionsLoaded()
+    func testCannotTravelToNonNeighbor() {
+        guard requireRegionsLoaded() else { return }
         // Given: A region that is not a neighbor
         guard let currentRegion = engine.currentRegion else {
-            throw XCTSkip("No current region")
+            XCTFail("No current region"); return
         }
 
         // Find a non-neighbor region
@@ -132,7 +122,7 @@ final class GameplayFlowTests: XCTestCase {
         }
 
         guard let targetRegion = nonNeighborRegion else {
-            throw XCTSkip("All regions are neighbors - cannot test non-neighbor travel")
+            XCTFail("All regions are neighbors - cannot test non-neighbor travel"); return
         }
 
         // When: Trying to travel to non-neighbor
@@ -149,11 +139,11 @@ final class GameplayFlowTests: XCTestCase {
 
     // MARK: - Event Tests
 
-    func testExploreTriggersEvent() throws {
-        try requireRegionsLoaded()
+    func testExploreTriggersEvent() {
+        guard requireRegionsLoaded() else { return }
         // Given: Engine in a region
         guard engine.currentRegion != nil else {
-            throw XCTSkip("No current region")
+            XCTFail("No current region"); return
         }
 
         // When: Exploring
@@ -174,10 +164,12 @@ final class GameplayFlowTests: XCTestCase {
             description: "Test description",
             choices: [
                 EventChoice(
+                    id: "fight",
                     text: "Fight",
                     consequences: EventConsequences(message: "Fought")
                 ),
                 EventChoice(
+                    id: "flee",
                     text: "Flee",
                     consequences: EventConsequences(healthChange: -1, message: "Fled")
                 )
@@ -194,6 +186,7 @@ final class GameplayFlowTests: XCTestCase {
     func testChoiceWithNoRequirementsIsAvailable() {
         // Given: A choice with no requirements
         let choice = EventChoice(
+            id: "simple_choice",
             text: "Simple choice",
             requirements: nil,
             consequences: EventConsequences(message: "Done")
@@ -206,6 +199,7 @@ final class GameplayFlowTests: XCTestCase {
     func testChoiceWithFaithRequirement() {
         // Given: A choice requiring faith
         let choice = EventChoice(
+            id: "holy_action",
             text: "Holy action",
             requirements: EventRequirements(minimumFaith: 5),
             consequences: EventConsequences(message: "Blessed")
@@ -225,6 +219,7 @@ final class GameplayFlowTests: XCTestCase {
     func testChoiceWithHealthRequirement() {
         // Given: A choice requiring health
         let choice = EventChoice(
+            id: "dangerous_action",
             text: "Dangerous action",
             requirements: EventRequirements(minimumHealth: 3),
             consequences: EventConsequences(message: "Survived")
@@ -364,11 +359,11 @@ final class GameplayFlowTests: XCTestCase {
 
     // MARK: - State Persistence Tests
 
-    func testRegionStateAfterTravel() throws {
+    func testRegionStateAfterTravel() {
         // Given: Initial state
         guard let initialRegion = engine.currentRegion,
               let neighborId = initialRegion.neighborIds.first else {
-            throw XCTSkip("Cannot test - no neighbors")
+            XCTFail("Cannot test - no neighbors"); return
         }
 
         // When: Traveling
@@ -384,11 +379,11 @@ final class GameplayFlowTests: XCTestCase {
 
     // MARK: - Explore Flow Tests
 
-    func testExploreActionSuccess() throws {
-        try requireRegionsLoaded()
+    func testExploreActionSuccess() {
+        guard requireRegionsLoaded() else { return }
         // Given: Engine in a region
         guard engine.currentRegion != nil else {
-            throw XCTSkip("No current region")
+            XCTFail("No current region"); return
         }
 
         // When: Exploring
@@ -398,11 +393,11 @@ final class GameplayFlowTests: XCTestCase {
         XCTAssertTrue(result.success, "Explore action should always succeed")
     }
 
-    func testExploreReturnsEventOrNil() throws {
-        try requireRegionsLoaded()
+    func testExploreReturnsEventOrNil() {
+        guard requireRegionsLoaded() else { return }
         // Given: Engine in a region
         guard engine.currentRegion != nil else {
-            throw XCTSkip("No current region")
+            XCTFail("No current region"); return
         }
 
         // When: Exploring
@@ -422,8 +417,8 @@ final class GameplayFlowTests: XCTestCase {
         }
     }
 
-    func testExploreDoesNotAdvanceTimeWhenNoEvent() throws {
-        try requireRegionsLoaded()
+    func testExploreDoesNotAdvanceTimeWhenNoEvent() {
+        guard requireRegionsLoaded() else { return }
         // Given: Engine with current day
         let initialDay = engine.currentDay
 
@@ -512,7 +507,7 @@ final class GameplayFlowTests: XCTestCase {
             XCTAssertEqual(amount, 6, "Damage amount should be 6")
             XCTAssertEqual(type, .fire, "Damage type should be fire")
         } else {
-            XCTFail("First ability should be damage effect")
+            XCTFail("First ability should be damage effect"); return
         }
     }
 
@@ -554,7 +549,7 @@ final class GameplayFlowTests: XCTestCase {
         if case .addDice(let count) = ability.effect {
             XCTAssertEqual(count, 2, "Should add 2 dice")
         } else {
-            XCTFail("Effect should be addDice")
+            XCTFail("Effect should be addDice"); return
         }
     }
 
@@ -570,7 +565,7 @@ final class GameplayFlowTests: XCTestCase {
         if case .heal(let amount) = ability.effect {
             XCTAssertEqual(amount, 5, "Should heal 5 HP")
         } else {
-            XCTFail("Effect should be heal")
+            XCTFail("Effect should be heal"); return
         }
     }
 
@@ -586,17 +581,17 @@ final class GameplayFlowTests: XCTestCase {
         if case .gainFaith(let amount) = ability.effect {
             XCTAssertEqual(amount, 3, "Should grant 3 faith")
         } else {
-            XCTFail("Effect should be gainFaith")
+            XCTFail("Effect should be gainFaith"); return
         }
     }
 
     // MARK: - Navigation System Tests v2.0
 
-    func testIsNeighborReturnsTrue() throws {
+    func testIsNeighborReturnsTrue() {
         // Given: Current region with neighbors
         guard let currentRegion = engine.currentRegion,
               let neighborId = currentRegion.neighborIds.first else {
-            throw XCTSkip("No neighbors available")
+            XCTFail("No neighbors available"); return
         }
 
         // When: Checking if neighbor
@@ -606,10 +601,10 @@ final class GameplayFlowTests: XCTestCase {
         XCTAssertTrue(isNeighbor, "Should return true for neighbor region")
     }
 
-    func testIsNeighborReturnsFalseForDistant() throws {
+    func testIsNeighborReturnsFalseForDistant() {
         // Given: A region that is not a neighbor
         guard let currentRegion = engine.currentRegion else {
-            throw XCTSkip("No current region")
+            XCTFail("No current region"); return
         }
 
         let distantRegion = engine.regionsArray.first { region in
@@ -617,7 +612,7 @@ final class GameplayFlowTests: XCTestCase {
         }
 
         guard let distant = distantRegion else {
-            throw XCTSkip("All regions are neighbors")
+            XCTFail("All regions are neighbors"); return
         }
 
         // When: Checking if neighbor
@@ -627,11 +622,11 @@ final class GameplayFlowTests: XCTestCase {
         XCTAssertFalse(isNeighbor, "Should return false for distant region")
     }
 
-    func testCalculateTravelCostForNeighbor() throws {
+    func testCalculateTravelCostForNeighbor() {
         // Given: Current region with neighbors
         guard let currentRegion = engine.currentRegion,
               let neighborId = currentRegion.neighborIds.first else {
-            throw XCTSkip("No neighbors available")
+            XCTFail("No neighbors available"); return
         }
 
         // When: Calculating travel cost
@@ -641,10 +636,10 @@ final class GameplayFlowTests: XCTestCase {
         XCTAssertEqual(cost, 1, "Travel cost to neighbor should be 1 day")
     }
 
-    func testCalculateTravelCostForDistant() throws {
+    func testCalculateTravelCostForDistant() {
         // Given: A distant region
         guard let currentRegion = engine.currentRegion else {
-            throw XCTSkip("No current region")
+            XCTFail("No current region"); return
         }
 
         let distantRegion = engine.regionsArray.first { region in
@@ -652,7 +647,7 @@ final class GameplayFlowTests: XCTestCase {
         }
 
         guard let distant = distantRegion else {
-            throw XCTSkip("All regions are neighbors")
+            XCTFail("All regions are neighbors"); return
         }
 
         // When: Calculating travel cost
@@ -662,11 +657,11 @@ final class GameplayFlowTests: XCTestCase {
         XCTAssertEqual(cost, 2, "Travel cost to distant region should be 2 days")
     }
 
-    func testCanTravelToNeighbor() throws {
+    func testCanTravelToNeighbor() {
         // Given: Current region with neighbors
         guard let currentRegion = engine.currentRegion,
               let neighborId = currentRegion.neighborIds.first else {
-            throw XCTSkip("No neighbors available")
+            XCTFail("No neighbors available"); return
         }
 
         // When: Checking if can travel
@@ -676,10 +671,10 @@ final class GameplayFlowTests: XCTestCase {
         XCTAssertTrue(canTravel, "Should be able to travel to neighbor")
     }
 
-    func testCannotTravelToDistantRegion() throws {
+    func testCannotTravelToDistantRegion() {
         // Given: A distant region
         guard let currentRegion = engine.currentRegion else {
-            throw XCTSkip("No current region")
+            XCTFail("No current region"); return
         }
 
         let distantRegion = engine.regionsArray.first { region in
@@ -687,7 +682,7 @@ final class GameplayFlowTests: XCTestCase {
         }
 
         guard let distant = distantRegion else {
-            throw XCTSkip("All regions are neighbors")
+            XCTFail("All regions are neighbors"); return
         }
 
         // When: Checking if can travel
@@ -697,10 +692,10 @@ final class GameplayFlowTests: XCTestCase {
         XCTAssertFalse(canTravel, "Should not be able to travel to distant region directly")
     }
 
-    func testCannotTravelToCurrentRegion() throws {
+    func testCannotTravelToCurrentRegion() {
         // Given: Current region
         guard let currentRegionId = engine.currentRegionId else {
-            throw XCTSkip("No current region")
+            XCTFail("No current region"); return
         }
 
         // When: Checking if can travel to self
@@ -710,10 +705,10 @@ final class GameplayFlowTests: XCTestCase {
         XCTAssertFalse(canTravel, "Should not be able to travel to current region")
     }
 
-    func testGetRoutingHintForDistantRegion() throws {
+    func testGetRoutingHintForDistantRegion() {
         // Given: A distant region
         guard let currentRegion = engine.currentRegion else {
-            throw XCTSkip("No current region")
+            XCTFail("No current region"); return
         }
 
         let distantRegion = engine.regionsArray.first { region in
@@ -721,7 +716,7 @@ final class GameplayFlowTests: XCTestCase {
         }
 
         guard let distant = distantRegion else {
-            throw XCTSkip("All regions are neighbors")
+            XCTFail("All regions are neighbors"); return
         }
 
         // When: Getting routing hint
@@ -734,11 +729,11 @@ final class GameplayFlowTests: XCTestCase {
         }
     }
 
-    func testGetRoutingHintEmptyForNeighbor() throws {
+    func testGetRoutingHintEmptyForNeighbor() {
         // Given: A neighbor region
         guard let currentRegion = engine.currentRegion,
               let neighborId = currentRegion.neighborIds.first else {
-            throw XCTSkip("No neighbors available")
+            XCTFail("No neighbors available"); return
         }
 
         // When: Getting routing hint for neighbor
@@ -869,8 +864,8 @@ final class GameplayFlowTests: XCTestCase {
 
     // MARK: - Performance Tests
 
-    func testEngineInitializationPerformance() throws {
-        try requireRegionsLoaded()
+    func testEngineInitializationPerformance() {
+        guard requireRegionsLoaded() else { return }
         // Measure time to initialize engine (Engine-First)
         measure {
             let testEngine = TwilightGameEngine()
@@ -881,8 +876,8 @@ final class GameplayFlowTests: XCTestCase {
         }
     }
 
-    func testRegionAccessPerformance() throws {
-        try requireRegionsLoaded()
+    func testRegionAccessPerformance() {
+        guard requireRegionsLoaded() else { return }
         // Measure time to access regions multiple times
         measure {
             for _ in 0..<100 {
@@ -892,10 +887,10 @@ final class GameplayFlowTests: XCTestCase {
         }
     }
 
-    func testTravelActionPerformance() throws {
+    func testTravelActionPerformance() {
         guard let currentRegion = engine.currentRegion,
               let neighborId = currentRegion.neighborIds.first else {
-            throw XCTSkip("No neighbors for performance test")
+            XCTFail("No neighbors for performance test"); return
         }
 
         // Measure travel performance
@@ -965,8 +960,8 @@ final class GameplayFlowTests: XCTestCase {
     }
 
     /// Test that new game creates fresh world state - Engine-First version
-    func testNewGameCreatesFreshWorldState() throws {
-        try requireRegionsLoaded()
+    func testNewGameCreatesFreshWorldState() {
+        guard requireRegionsLoaded() else { return }
         // Given: A fresh engine after initialization
         let freshEngine = TwilightGameEngine()
         TestContentLoader.loadContentPacksIfNeeded()
@@ -985,9 +980,9 @@ final class GameplayFlowTests: XCTestCase {
     // MARK: - Travel Validation Tests
 
     /// Test that travel to non-neighbor region is blocked
-    func testTravelToNonNeighborIsBlocked() throws {
+    func testTravelToNonNeighborIsBlocked() {
         guard let currentRegion = engine.currentRegion else {
-            throw XCTSkip("No current region")
+            XCTFail("No current region"); return
         }
 
         // Find a non-neighbor region
@@ -996,7 +991,7 @@ final class GameplayFlowTests: XCTestCase {
         }
 
         guard let targetRegion = nonNeighborRegion else {
-            throw XCTSkip("No non-neighbor region available for testing")
+            XCTFail("No non-neighbor region available for testing"); return
         }
 
         // When: Try to travel to non-neighbor
@@ -1008,10 +1003,10 @@ final class GameplayFlowTests: XCTestCase {
     }
 
     /// Test that travel to neighbor region succeeds
-    func testTravelToNeighborSucceeds() throws {
+    func testTravelToNeighborSucceeds() {
         guard let currentRegion = engine.currentRegion,
               let neighborId = currentRegion.neighborIds.first else {
-            throw XCTSkip("No neighbor available for travel test")
+            XCTFail("No neighbor available for travel test"); return
         }
 
         let initialDay = engine.currentDay
@@ -1026,10 +1021,10 @@ final class GameplayFlowTests: XCTestCase {
     }
 
     /// Test that travel cost is calculated correctly
-    func testTravelCostCalculation() throws {
+    func testTravelCostCalculation() {
         guard let currentRegion = engine.currentRegion,
               let neighborId = currentRegion.neighborIds.first else {
-            throw XCTSkip("No neighbor for cost test")
+            XCTFail("No neighbor for cost test"); return
         }
 
         // When: Calculate travel cost to neighbor

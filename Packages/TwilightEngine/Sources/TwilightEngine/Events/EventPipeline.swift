@@ -119,8 +119,8 @@ public final class EventSelector {
             return false
         }
 
-        // Also check against context's completed set
-        if event.oneTime && context.completedEvents.contains(event.id.uuidString) {
+        // Also check against context's completed set (uses stable definitionId, not UUID)
+        if event.oneTime && context.completedEvents.contains(event.definitionId) {
             return false
         }
 

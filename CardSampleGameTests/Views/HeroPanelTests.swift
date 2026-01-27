@@ -23,11 +23,11 @@ final class HeroPanelTests: XCTestCase {
 
     // MARK: - Hero Display Tests
 
-    func testHeroDisplaysCorrectly() throws {
+    func testHeroDisplaysCorrectly() {
         // Given: Get first available hero from registry
         let registry = HeroRegistry.shared
         guard let hero = registry.firstHero else {
-            throw XCTSkip("No heroes in registry")
+            XCTFail("No heroes in registry"); return
         }
 
         // Set hero via Engine-First

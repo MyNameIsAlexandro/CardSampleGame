@@ -48,7 +48,7 @@ public class CodeContentProvider: ContentProvider {
             id: "test_region",
             title: .inline(LocalizedString(en: "Test Region", ru: "Тестовый Регион")),
             description: .inline(LocalizedString(en: "A test region", ru: "Тестовый регион")),
-            regionType: "forest",
+            regionType: "test",
             neighborIds: ["test_neighbor"],
             initiallyDiscovered: true,
             anchorId: "test_anchor",

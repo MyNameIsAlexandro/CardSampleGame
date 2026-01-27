@@ -2,7 +2,7 @@ import Foundation
 
 public struct Card: Identifiable, Codable, Hashable, Sendable {
     public let id: UUID
-    public let definitionId: String  // Content Pack ID (e.g., "leshy_guardian" for enemies)
+    public let definitionId: String  // Content Pack ID for this card definition
     public let name: String
     public let type: CardType
     public let rarity: CardRarity

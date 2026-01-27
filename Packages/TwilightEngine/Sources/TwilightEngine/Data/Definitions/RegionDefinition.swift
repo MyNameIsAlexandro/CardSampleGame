@@ -9,7 +9,7 @@ import Foundation
 public struct RegionDefinition: GameDefinition {
     // MARK: - Identity
 
-    /// Unique region identifier (e.g., "forest", "village_square")
+    /// Unique region identifier (e.g., "region_01", "market_square")
     public let id: String
 
     // MARK: - Localized Content
@@ -22,7 +22,7 @@ public struct RegionDefinition: GameDefinition {
 
     // MARK: - Type
 
-    /// Region type string (e.g., "forest", "settlement", "swamp")
+    /// Region type string — must match a RegionType rawValue
     /// This determines visual representation and gameplay effects
     public let regionType: String
 
@@ -56,7 +56,7 @@ public struct RegionDefinition: GameDefinition {
         id: String,
         title: LocalizableText,
         description: LocalizableText,
-        regionType: String = "forest",
+        regionType: String,
         neighborIds: [String],
         initiallyDiscovered: Bool = false,
         anchorId: String? = nil,
@@ -113,14 +113,3 @@ public enum RegionStateType: String, Codable, Hashable, CaseIterable {
     }
 }
 
-// MARK: - Region Type (Twilight Marches specific)
-
-/// Specific region types for Twilight Marches setting
-/// Note: This is game-specific, not engine-level
-public enum TwilightMarchesRegionType: String, Codable, Hashable {
-    case settlement = "settlement"
-    case wilderness = "wilderness"
-    case sacred = "sacred"
-    case corrupted = "corrupted"
-    case threshold = "threshold"
-}

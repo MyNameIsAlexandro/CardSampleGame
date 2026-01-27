@@ -24,13 +24,10 @@ final class TimeSystemTests: XCTestCase {
     }
 
     // MARK: - Day Processing Invariants
-    // NOTE: These tests are skipped because .rest action doesn't advance time in current engine implementation
-    // TODO: Implement time advancement in TwilightGameEngine.performAction(.rest)
 
     /// INVARIANT: Each day must be processed individually, not skipped
     /// When advancing multiple days, tension should increase for EACH eligible day
-    func testEachDayProcessedIndividually() throws {
-        try XCTSkipIf(true, "Rest action doesn't advance time - needs engine implementation")
+    func testEachDayProcessedIndividually() {
         // Given: Engine at day 0 with initial tension
         let initialDay = engine.currentDay
         let initialTension = engine.worldTension
@@ -73,8 +70,7 @@ final class TimeSystemTests: XCTestCase {
 
     /// INVARIANT: No day can be skipped when advancing time
     /// If we go from day 1 to day 10, days 2-9 must all be processed
-    func testNoDaySkipping() throws {
-        try XCTSkipIf(true, "Rest action doesn't advance time - needs engine implementation")
+    func testNoDaySkipping() {
         // This test verifies the implementation correctness
         // by checking that tension ticks happen at the expected intervals
 
@@ -130,8 +126,7 @@ final class TimeSystemTests: XCTestCase {
 
     /// INVARIANT: Tension tick interval is respected
     /// Tension should only increase every N days (default 3)
-    func testTensionTickIntervalRespected() throws {
-        try XCTSkipIf(true, "Rest action doesn't advance time - needs engine implementation")
+    func testTensionTickIntervalRespected() {
         // Record initial tension
         let initialTension = engine.worldTension
 
@@ -151,8 +146,7 @@ final class TimeSystemTests: XCTestCase {
     // MARK: - Free Action Invariants
 
     /// INVARIANT: Most actions cost time (no free actions except instant ones)
-    func testMostActionsCostTime() throws {
-        try XCTSkipIf(true, "Rest action doesn't advance time - needs engine implementation")
+    func testMostActionsCostTime() {
         let dayBefore = engine.currentDay
 
         // Rest should cost time
@@ -180,8 +174,7 @@ final class TimeSystemTests: XCTestCase {
 
     /// Regression test: Ensure advancing by N days doesn't skip day processing
     /// This guards against the bug: `daysPassed += N` instead of proper iteration
-    func testAdvanceMultipleDaysProcessesEach() throws {
-        try XCTSkipIf(true, "Rest action doesn't advance time - needs engine implementation")
+    func testAdvanceMultipleDaysProcessesEach() {
         // Setup: Start at day 0, tension tick every 3 days
         let initialTension = engine.worldTension
 

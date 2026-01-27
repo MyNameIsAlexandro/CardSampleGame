@@ -11,13 +11,13 @@ final class AuditGateTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        WorldRNG.shared.resetToSystem()
+        WorldRNG.shared.setSeed(0)
         // Загружаем ContentPacks для тестов
         TestContentLoader.loadContentPacksIfNeeded()
     }
 
     override func tearDown() {
-        WorldRNG.shared.resetToSystem()
+        WorldRNG.shared.setSeed(0)
         super.tearDown()
     }
 
@@ -311,19 +311,8 @@ final class AuditGateTests: XCTestCase {
             .deletingLastPathComponent()  // CardSampleGameTests
             .deletingLastPathComponent()  // Project root
 
-        // Core paths to scan for forbidden random APIs (Swift Package structure)
-        let engineBase = "Packages/TwilightEngine/Sources/TwilightEngine"
-        let corePaths = [
-            "\(engineBase)/Core",
-            "\(engineBase)/ContentPacks",
-            "\(engineBase)/Events",
-            "\(engineBase)/Combat",
-            "\(engineBase)/Quest",
-            "\(engineBase)/Cards",
-            "\(engineBase)/Heroes",
-            "\(engineBase)/Modules",
-            "\(engineBase)/Config"
-        ]
+        // Scan entire engine source tree recursively (no hardcoded subdirectory list)
+        let engineBase = SourcePathResolver.engineBase
 
         // Forbidden patterns (system random APIs)
         let forbiddenPatterns = [
@@ -346,44 +335,38 @@ final class AuditGateTests: XCTestCase {
             "* "                     // Block comment continuation
         ]
 
-        // Files with allowed exceptions (e.g., seed generation)
-        let allowedExceptions: [String: [String]] = [
-            "GameRuntimeState.swift": ["UInt64.random("]  // Initial seed generation is OK
-        ]
+        // No exceptions: all system RNG removed from engine
+        let allowedExceptions: [String: [String]] = [:]
 
         var violations: [String] = []
 
-        for relativePath in corePaths {
-            let dirURL = projectRoot.appendingPathComponent(relativePath)
-            guard FileManager.default.fileExists(atPath: dirURL.path) else { continue }
+        let engineDir = projectRoot.appendingPathComponent(engineBase)
+        let swiftFiles = findSwiftFiles(in: engineDir)
 
-            let swiftFiles = findSwiftFiles(in: dirURL)
+        for fileURL in swiftFiles {
+            let fileName = fileURL.lastPathComponent
+            let content = try String(contentsOf: fileURL, encoding: .utf8)
+            let lines = content.components(separatedBy: .newlines)
 
-            for fileURL in swiftFiles {
-                let fileName = fileURL.lastPathComponent
-                let content = try String(contentsOf: fileURL, encoding: .utf8)
-                let lines = content.components(separatedBy: .newlines)
+            for (index, line) in lines.enumerated() {
+                let trimmedLine = line.trimmingCharacters(in: .whitespaces)
+                let lineNumber = index + 1
 
-                for (index, line) in lines.enumerated() {
-                    let trimmedLine = line.trimmingCharacters(in: .whitespaces)
-                    let lineNumber = index + 1
+                // Check each forbidden pattern
+                for pattern in forbiddenPatterns {
+                    if line.contains(pattern) {
+                        // Check if it's in an allowed context
+                        let isAllowedContext = allowedContexts.contains { context in
+                            trimmedLine.hasPrefix(context) || line.contains(context)
+                        }
 
-                    // Check each forbidden pattern
-                    for pattern in forbiddenPatterns {
-                        if line.contains(pattern) {
-                            // Check if it's in an allowed context
-                            let isAllowedContext = allowedContexts.contains { context in
-                                trimmedLine.hasPrefix(context) || line.contains(context)
-                            }
+                        // Check if it's an allowed exception for this file
+                        let isAllowedException = allowedExceptions[fileName]?.contains { exception in
+                            pattern.contains(exception) || exception.contains(pattern)
+                        } ?? false
 
-                            // Check if it's an allowed exception for this file
-                            let isAllowedException = allowedExceptions[fileName]?.contains { exception in
-                                pattern.contains(exception) || exception.contains(pattern)
-                            } ?? false
-
-                            if !isAllowedContext && !isAllowedException {
-                                violations.append("  \(fileName):\(lineNumber): \(trimmedLine) [pattern: \(pattern)]")
-                            }
+                        if !isAllowedContext && !isAllowedException {
+                            violations.append("  \(fileName):\(lineNumber): \(trimmedLine) [pattern: \(pattern)]")
                         }
                     }
                 }
@@ -468,7 +451,8 @@ final class AuditGateTests: XCTestCase {
             completedEventIds: [],
             eventLog: [],
             worldFlags: [:],
-            rngSeed: nil
+            rngSeed: 0,
+            rngState: 0
         )
 
         // Verify save contains required version fields
@@ -511,7 +495,8 @@ final class AuditGateTests: XCTestCase {
             completedEventIds: [],
             eventLog: [],
             worldFlags: [:],
-            rngSeed: nil
+            rngSeed: 0,
+            rngState: 0
         )
 
         let mismatchedCompatibility = mismatchedSave.validateCompatibility(with: registry)
@@ -651,7 +636,7 @@ final class AuditGateTests: XCTestCase {
             .deletingLastPathComponent()  // CardSampleGameTests
             .deletingLastPathComponent()  // Project root
 
-        let coreDir = projectRoot.appendingPathComponent("Packages/TwilightEngine/Sources/TwilightEngine/Core")
+        let coreDir = projectRoot.appendingPathComponent(SourcePathResolver.engineBase + "/Core")
 
         // Scan for files with "Engine" in the name
         let engineFiles = try FileManager.default.contentsOfDirectory(at: coreDir, includingPropertiesForKeys: nil)
@@ -695,7 +680,7 @@ final class AuditGateTests: XCTestCase {
 
         // Directories to check (production code only, excluding tests)
         // Engine code is now in TwilightEngine package
-        let productionDirs = ["Packages/TwilightEngine/Sources/TwilightEngine", "App", "Views", "Models", "Utilities"]
+        let productionDirs = [SourcePathResolver.engineBase, "App", "Views", "Models", "Utilities"]
 
         // Patterns that indicate direct code registry access (should use ContentRegistry/CardFactory)
         let forbiddenPatterns = [
@@ -1065,11 +1050,11 @@ extension AuditGateTests {
             savedAt: Date(),
             gameDuration: 3600.0,
             coreVersion: EngineSave.currentCoreVersion,
-            activePackSet: ["twilight_marches_campaign": "1.0.0"],
+            activePackSet: ["test_campaign": "1.0.0"],
             formatVersion: EngineSave.currentFormatVersion,
             primaryCampaignPackId: nil,
             playerName: "Test Hero",
-            heroId: "warrior",  // Hero definition ID for data-driven hero system
+            heroId: "test_hero",
             playerHealth: 10,
             playerMaxHealth: 12,
             playerFaith: 5,
@@ -1081,7 +1066,7 @@ extension AuditGateTests {
             currentDay: 3,
             worldTension: 25,
             lightDarkBalance: 50,
-            currentRegionId: "village",
+            currentRegionId: "test_region",
             regions: [],
             mainQuestStage: 2,
             activeQuestIds: ["quest_1"],
@@ -1090,7 +1075,8 @@ extension AuditGateTests {
             completedEventIds: ["event_1", "event_2"],
             eventLog: [],
             worldFlags: ["flag_1": true, "flag_2": false],
-            rngSeed: 12345
+            rngSeed: 12345,
+            rngState: 12345
         )
 
         // Encode to JSON
@@ -1506,7 +1492,7 @@ extension AuditGateTests {
             .deletingLastPathComponent()  // Project root
 
         let engineFile = projectRoot
-            .appendingPathComponent("Packages/TwilightEngine/Sources/TwilightEngine/Core/TwilightGameEngine.swift")
+            .appendingPathComponent(SourcePathResolver.engineBase + "/Core/TwilightGameEngine.swift")
 
         guard FileManager.default.fileExists(atPath: engineFile.path) else {
             XCTFail("GATE TEST FAILURE: TwilightGameEngine.swift not found at \(engineFile.path)")
@@ -1560,7 +1546,7 @@ extension AuditGateTests {
         )
 
         // Verify EngineSave uses String IDs
-        let saveFile = projectRoot.appendingPathComponent("Packages/TwilightEngine/Sources/TwilightEngine/Core/EngineSave.swift")
+        let saveFile = projectRoot.appendingPathComponent(SourcePathResolver.engineBase + "/Core/EngineSave.swift")
         if FileManager.default.fileExists(atPath: saveFile.path) {
             let saveContent = try String(contentsOf: saveFile, encoding: .utf8)
             XCTAssertTrue(
@@ -1582,7 +1568,7 @@ extension AuditGateTests {
             .deletingLastPathComponent()  // Project root
 
         // Check EngineRegionState
-        let engineFile = projectRoot.appendingPathComponent("Packages/TwilightEngine/Sources/TwilightEngine/Core/TwilightGameEngine.swift")
+        let engineFile = projectRoot.appendingPathComponent(SourcePathResolver.engineBase + "/Core/TwilightGameEngine.swift")
         guard FileManager.default.fileExists(atPath: engineFile.path) else {
             XCTFail("GATE TEST FAILURE: TwilightGameEngine.swift not found")
             return
@@ -1592,18 +1578,16 @@ extension AuditGateTests {
 
         // EngineRegionState.definitionId must be String (not String?)
         XCTAssertTrue(
-            engineContent.contains("public let definitionId: String  // Stable definition ID"),
+            engineContent.contains("public let definitionId: String"),
             "EngineRegionState.definitionId must be non-optional String"
         )
-
-        // EngineAnchorState.definitionId must be String (not String?)
-        XCTAssertTrue(
-            engineContent.contains("public let definitionId: String  // Stable definition ID for serialization (REQUIRED"),
+        XCTAssertFalse(
+            engineContent.contains("public let definitionId: String?"),
             "EngineAnchorState.definitionId must be non-optional String"
         )
 
         // Check Quest
-        let modelsFile = projectRoot.appendingPathComponent("Packages/TwilightEngine/Sources/TwilightEngine/Models/ExplorationModels.swift")
+        let modelsFile = projectRoot.appendingPathComponent(SourcePathResolver.engineBase + "/Models/ExplorationModels.swift")
         guard FileManager.default.fileExists(atPath: modelsFile.path) else {
             XCTFail("GATE TEST FAILURE: ExplorationModels.swift not found")
             return
@@ -1618,6 +1602,50 @@ extension AuditGateTests {
         )
     }
 
+    /// Gate test: All pack-driven entities have non-empty definitionId at runtime (Audit 1.4)
+    func testDefinitionIdNeverNilForPackEntities() throws {
+        let registry = ContentRegistry.shared
+        XCTAssertFalse(registry.loadedPacks.isEmpty, "Content packs must be loaded")
+
+        // Regions
+        for (id, region) in registry.loadedPacks.values.flatMap({ $0.regions }) {
+            XCTAssertFalse(id.isEmpty, "Region definitionId must not be empty")
+            XCTAssertEqual(id, region.id, "Region key must match id")
+        }
+
+        // Events
+        for (id, event) in registry.loadedPacks.values.flatMap({ $0.events }) {
+            XCTAssertFalse(id.isEmpty, "Event definitionId must not be empty")
+            XCTAssertEqual(id, event.id, "Event key must match id")
+            for choice in event.choices {
+                XCTAssertFalse(choice.id.isEmpty, "EventChoice.id must not be empty (event: \(id))")
+            }
+        }
+
+        // Quests
+        for (id, quest) in registry.loadedPacks.values.flatMap({ $0.quests }) {
+            XCTAssertFalse(id.isEmpty, "Quest definitionId must not be empty")
+            XCTAssertEqual(id, quest.id, "Quest key must match id")
+        }
+
+        // Heroes
+        for (id, hero) in registry.loadedPacks.values.flatMap({ $0.heroes }) {
+            XCTAssertFalse(id.isEmpty, "Hero definitionId must not be empty")
+            XCTAssertEqual(id, hero.id, "Hero key must match id")
+        }
+
+        // Enemies
+        for (id, enemy) in registry.loadedPacks.values.flatMap({ $0.enemies }) {
+            XCTAssertFalse(id.isEmpty, "Enemy definitionId must not be empty")
+            XCTAssertEqual(id, enemy.id, "Enemy key must match id")
+        }
+
+        // Cards
+        for card in registry.getAllCards() {
+            XCTAssertFalse(card.id.isEmpty, "Card definitionId must not be empty")
+        }
+    }
+
     /// Gate test: No UUID fallback in save serialization (Audit A1)
     /// Requirement: "Полностью удалить fallback uuidString из сейвов"
     func testNoUuidFallbackInSave() throws {
@@ -1627,7 +1655,7 @@ extension AuditGateTests {
             .deletingLastPathComponent()
             .deletingLastPathComponent()
 
-        let saveFile = projectRoot.appendingPathComponent("Packages/TwilightEngine/Sources/TwilightEngine/Core/EngineSave.swift")
+        let saveFile = projectRoot.appendingPathComponent(SourcePathResolver.engineBase + "/Core/EngineSave.swift")
         guard FileManager.default.fileExists(atPath: saveFile.path) else {
             XCTFail("GATE TEST FAILURE: EngineSave.swift not found")
             return
@@ -1703,7 +1731,7 @@ extension AuditGateTests {
             .deletingLastPathComponent()
             .deletingLastPathComponent()
 
-        let saveFile = projectRoot.appendingPathComponent("Packages/TwilightEngine/Sources/TwilightEngine/Core/EngineSave.swift")
+        let saveFile = projectRoot.appendingPathComponent(SourcePathResolver.engineBase + "/Core/EngineSave.swift")
         guard FileManager.default.fileExists(atPath: saveFile.path) else {
             XCTFail("GATE TEST FAILURE: EngineSave.swift not found")
             return
@@ -1713,8 +1741,8 @@ extension AuditGateTests {
 
         // EngineSave must have rngState field
         XCTAssertTrue(
-            content.contains("public let rngState: UInt64?"),
-            "EngineSave must have rngState field for deterministic save/load (Audit A2)"
+            content.contains("public let rngState: UInt64"),
+            "EngineSave must have rngState field for deterministic save/load (Audit 1.5)"
         )
     }
 
@@ -1726,7 +1754,7 @@ extension AuditGateTests {
             .deletingLastPathComponent()
             .deletingLastPathComponent()
 
-        let engineFile = projectRoot.appendingPathComponent("Packages/TwilightEngine/Sources/TwilightEngine/Core/TwilightGameEngine.swift")
+        let engineFile = projectRoot.appendingPathComponent(SourcePathResolver.engineBase + "/Core/TwilightGameEngine.swift")
         guard FileManager.default.fileExists(atPath: engineFile.path) else {
             XCTFail("GATE TEST FAILURE: TwilightGameEngine.swift not found")
             return
@@ -1745,6 +1773,46 @@ extension AuditGateTests {
             content.contains("rngSeed: nil"),
             "createSave must not set rngSeed to nil (Audit A2)"
         )
+    }
+
+    // MARK: - Audit 4.2: Pack Compiler Round-Trip
+
+    /// Gate test: .pack load → re-write → re-load round-trip (Audit 4.2)
+    func testPackCompilerRoundTrip() throws {
+        // Load the compiled .pack via registry (already loaded)
+        let registry = ContentRegistry.shared
+        XCTAssertFalse(registry.loadedPacks.isEmpty, "Packs must be loaded")
+
+        guard let pack = registry.loadedPacks.values.first else {
+            XCTFail("GATE TEST FAILURE: No loaded packs available")
+            return
+        }
+
+        let originalRegionCount = pack.regions.count
+        let originalEventCount = pack.events.count
+        let packId = pack.manifest.packId
+
+        // Write to temp .pack file
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("pack_roundtrip_\(ProcessInfo.processInfo.globallyUniqueString)")
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        let packFile = tempDir.appendingPathComponent("roundtrip.pack")
+        try BinaryPackWriter.compile(pack, to: packFile)
+
+        // Verify .pack file exists and is non-empty
+        let attrs = try FileManager.default.attributesOfItem(atPath: packFile.path)
+        let fileSize = attrs[.size] as? Int64 ?? 0
+        XCTAssertGreaterThan(fileSize, 0, ".pack file must not be empty")
+
+        // Re-load .pack
+        let reloaded = try BinaryPackReader.loadContent(from: packFile)
+
+        // Validate round-trip: content is intact
+        XCTAssertEqual(reloaded.manifest.packId, packId, "Pack ID must survive round-trip")
+        XCTAssertEqual(reloaded.regions.count, originalRegionCount, "Region count must survive round-trip")
+        XCTAssertEqual(reloaded.events.count, originalEventCount, "Event count must survive round-trip")
     }
 
     // MARK: - F1: No Legacy Initialization in Views
@@ -1838,6 +1906,11 @@ extension AuditGateTests {
         }
     }
 
+    /// Audit 2.1 alias: exact name from acceptance criteria
+    func testNoLegacyInitializationCommentsInWorldMapView() throws {
+        try testNoLegacyInitializationInViews()
+    }
+
     // MARK: - F2: AssetRegistry Safety (No Direct UIImage)
 
     /// Gate test: Views and ViewModels must not use UIImage(named:) directly (Audit F2)
@@ -1849,6 +1922,11 @@ extension AuditGateTests {
     /// - Nil crashes
     ///
     /// All image loading must go through AssetRegistry which provides SF Symbol fallback.
+    /// Audit 2.2 alias: exact name from acceptance criteria
+    func testNoDirectImageNamedInViews() throws {
+        try testNoDirectUIImageNamedInViewsAndViewModels()
+    }
+
     func testNoDirectUIImageNamedInViewsAndViewModels() throws {
         let testFile = URL(fileURLWithPath: #filePath)
         let projectRoot = testFile
@@ -1859,13 +1937,16 @@ extension AuditGateTests {
         // Directories to scan
         let dirsToScan = ["Views", "ViewModels"]
 
-        // Forbidden patterns (direct UIImage/NSImage loading)
+        // Forbidden patterns (direct UIImage/NSImage/SwiftUI Image loading)
         let forbiddenPatterns = [
             "UIImage(named:",
             "NSImage(named:",
             "Image(uiImage: UIImage(named:",
             "Image(nsImage: NSImage(named:"
         ]
+
+        // Forbidden SwiftUI pattern: Image("...") but NOT Image(systemName:
+        let swiftUIImagePattern = "Image(\""
 
         // Allowed files (AssetRegistry itself needs to use UIImage)
         let allowedFiles = [
@@ -1914,6 +1995,15 @@ extension AuditGateTests {
                             ))
                         }
                     }
+
+                    // Check for SwiftUI Image("...") — but not Image(systemName:
+                    if line.contains(swiftUIImagePattern) && !line.contains("Image(systemName:") {
+                        violations.append((
+                            file: fileName,
+                            line: lineNumber,
+                            content: trimmedLine
+                        ))
+                    }
                 }
             }
         }
@@ -1922,7 +2012,7 @@ extension AuditGateTests {
             let message = violations.map { "\($0.file):\($0.line): \($0.content)" }
                 .joined(separator: "\n")
             XCTFail("""
-                GATE TEST FAILURE: Direct UIImage(named:) found in Views/ViewModels (Audit F2)
+                GATE TEST FAILURE: Direct Image(named:)/UIImage(named:) found in Views/ViewModels (Audit 2.2)
 
                 Use AssetRegistry instead for automatic fallback support:
                 - AssetRegistry.image(for: .region("forest"))
@@ -1935,40 +2025,61 @@ extension AuditGateTests {
         }
     }
 
-    // MARK: - C1: No XCTSkip in Gate Tests
+    // MARK: - B1.2: Static Scan — No Game-Specific IDs in Engine Source
 
-    /// Gate test: Engine tests must not use XCTSkip (Audit C1)
-    /// Requirement: "Gate tests должны падать, а не скипаться"
-    ///
-    /// If a gate test can't verify something, it must XCTFail, not XCTSkip.
-    /// XCTSkip creates "false green" - CI passes but nothing was verified.
-    func testNoXCTSkipInEngineTests() throws {
+    /// Gate test: Engine source must not contain hardcoded game-specific region/entity IDs (Audit 1.2)
+    /// Requirement: "Engine не должен содержать game-specific IDs/словари конкретной игры"
+    func testEngineSourceContainsNoGameSpecificIds() throws {
         let testFile = URL(fileURLWithPath: #filePath)
-        let testsRoot = testFile
+        let projectRoot = testFile
             .deletingLastPathComponent()  // GateTests
             .deletingLastPathComponent()  // CardSampleGameTests
+            .deletingLastPathComponent()  // Project root
 
-        let gateTestsDir = testsRoot.appendingPathComponent("GateTests")
+        let engineBase = projectRoot.appendingPathComponent(SourcePathResolver.engineBase)
 
-        guard FileManager.default.fileExists(atPath: gateTestsDir.path) else {
-            XCTFail("GATE TEST FAILURE: GateTests directory not found")
-            return
+        // Build forbidden literals dynamically from loaded content packs.
+        // Any content-defined ID (region, event, quest, hero, enemy) should NOT
+        // appear as a string literal in Engine source code.
+        TestContentLoader.loadContentPacksIfNeeded()
+        var contentIds: Set<String> = []
+        for pack in ContentRegistry.shared.loadedPacks.values {
+            contentIds.formUnion(pack.regions.keys)
+            contentIds.formUnion(pack.events.keys)
+            contentIds.formUnion(pack.quests.keys)
+            contentIds.formUnion(pack.heroes.keys)
+            contentIds.formUnion(pack.enemies.keys)
         }
 
-        let fileManager = FileManager.default
-        guard let enumerator = fileManager.enumerator(
-            at: gateTestsDir,
-            includingPropertiesForKeys: [.isRegularFileKey],
-            options: [.skipsHiddenFiles]
-        ) else {
-            XCTFail("GATE TEST FAILURE: Cannot enumerate GateTests directory")
-            return
-        }
+        // Exclude engine-level enum rawValues that coincide with content IDs
+        // (e.g., "breach" is both a region ID and a RegionState enum value)
+        var engineTerms: Set<String> = []
+        // RegionState rawValues
+        for state in RegionState.allCases { engineTerms.insert(state.rawValue) }
+        // RegionStateType rawValues
+        for state in RegionStateType.allCases { engineTerms.insert(state.rawValue) }
+        // Generic terms used by engine code (defaults, error messages)
+        engineTerms.insert("unknown")
+        engineTerms.insert("test")
+        engineTerms.insert("rest")
+        contentIds.subtract(engineTerms)
 
-        var violations: [(file: String, line: Int, content: String)] = []
+        // Format as quoted string literals for source scanning
+        let forbiddenLiterals = contentIds.map { "\"\($0)\"" }
 
-        for case let fileURL as URL in enumerator {
-            guard fileURL.pathExtension == "swift" else { continue }
+        // Allowed contexts: files that define type enums with rawValue strings
+        let allowedFiles = [
+            "ExplorationModels.swift"  // RegionType enum rawValues
+        ]
+
+        var violations: [String] = []
+
+        // Scan all Swift files recursively under engine source (no hardcoded subdirectory list)
+        let swiftFiles = findSwiftFiles(in: engineBase)
+
+        for fileURL in swiftFiles {
+            let fileName = fileURL.lastPathComponent
+            if allowedFiles.contains(fileName) { continue }
 
             let content = try String(contentsOf: fileURL, encoding: .utf8)
             let lines = content.components(separatedBy: .newlines)
@@ -1976,20 +2087,89 @@ extension AuditGateTests {
             for (index, line) in lines.enumerated() {
                 let trimmed = line.trimmingCharacters(in: .whitespaces)
 
-                // Skip comments (lines starting with // or containing XCTSkip in comments/strings)
+                // Skip comments
                 if trimmed.hasPrefix("//") || trimmed.hasPrefix("/*") || trimmed.hasPrefix("*") {
                     continue
                 }
 
-                // Skip string literals (lines containing "XCTSkip" in quotes)
-                if trimmed.contains("\"XCTSkip") || trimmed.contains("XCTSkip\"") {
-                    continue
+                for literal in forbiddenLiterals {
+                    if line.contains(literal) {
+                        violations.append("  \(fileName):\(index + 1): \(trimmed) [literal: \(literal)]")
+                    }
                 }
+            }
+        }
 
-                // Match actual XCTSkip calls: throw XCTSkip( or XCTSkip(
-                if line.contains("XCTSkip(") {
-                    let fileName = fileURL.lastPathComponent
-                    violations.append((file: fileName, line: index + 1, content: trimmed))
+        if !violations.isEmpty {
+            XCTFail("""
+                GATE TEST FAILURE: Game-specific IDs found in Engine source (Audit 1.2)
+
+                Engine must not contain hardcoded game-specific strings.
+                All IDs must come from pack manifests/definitions.
+
+                Violations:
+                \(violations.joined(separator: "\n"))
+                """)
+        }
+    }
+
+    // MARK: - C1: No XCTSkip in ANY Tests
+
+    /// Gate test: ALL tests must not use XCTSkip (Audit C1 / v2.1)
+    /// Requirement: "Gate tests должны падать, а не скипаться"
+    /// Scope expanded to ALL test directories (v2.1 audit requirement)
+    ///
+    /// If a test can't verify something, it must XCTFail, not XCTSkip.
+    /// XCTSkip creates "false green" - CI passes but nothing was verified.
+    func testNoXCTSkipInAnyTests() throws {
+        let testFile = URL(fileURLWithPath: #filePath)
+        let projectRoot = testFile
+            .deletingLastPathComponent()  // GateTests
+            .deletingLastPathComponent()  // CardSampleGameTests
+            .deletingLastPathComponent()  // Project root
+
+        // Scan ALL test directories (v2.1: expanded from GateTests only)
+        let testDirs = [
+            projectRoot.appendingPathComponent("CardSampleGameTests"),
+            projectRoot.appendingPathComponent("Packages/TwilightEngine/Tests/TwilightEngineTests") // Test dir, not engine source
+        ]
+
+        var violations: [(file: String, line: Int, content: String)] = []
+
+        for testDir in testDirs {
+            guard FileManager.default.fileExists(atPath: testDir.path) else { continue }
+
+            let fileManager = FileManager.default
+            guard let enumerator = fileManager.enumerator(
+                at: testDir,
+                includingPropertiesForKeys: [.isRegularFileKey],
+                options: [.skipsHiddenFiles]
+            ) else { continue }
+
+            for case let fileURL as URL in enumerator {
+                guard fileURL.pathExtension == "swift" else { continue }
+
+                let content = try String(contentsOf: fileURL, encoding: .utf8)
+                let lines = content.components(separatedBy: .newlines)
+
+                for (index, line) in lines.enumerated() {
+                    let trimmed = line.trimmingCharacters(in: .whitespaces)
+
+                    // Skip comments
+                    if trimmed.hasPrefix("//") || trimmed.hasPrefix("/*") || trimmed.hasPrefix("*") {
+                        continue
+                    }
+
+                    // Skip string literals containing "XCTSkip" (e.g. in this very test's detection logic)
+                    if trimmed.contains("\"XCTSkip") || trimmed.contains("XCTSkip\"") {
+                        continue
+                    }
+
+                    // Match actual XCTSkip/XCTSkipIf calls
+                    if line.contains("XCTSkip(") || line.contains("XCTSkipIf(") || line.contains("XCTSkipUnless(") {
+                        let fileName = fileURL.lastPathComponent
+                        violations.append((file: fileName, line: index + 1, content: trimmed))
+                    }
                 }
             }
         }
@@ -1997,14 +2177,14 @@ extension AuditGateTests {
         if !violations.isEmpty {
             let message = violations.map { "\($0.file):\($0.line): \($0.content)" }.joined(separator: "\n")
             XCTFail("""
-                GATE TEST FAILURE: XCTSkip found in GateTests (Audit C1)
+                GATE TEST FAILURE: XCTSkip found in tests (Audit C1 v2.1)
 
-                Gate tests must use XCTFail, not XCTSkip. XCTSkip creates "false green" CI results.
+                ALL tests must use XCTFail, not XCTSkip. XCTSkip creates "false green" CI results.
 
                 Violations:
                 \(message)
 
-                Fix: Replace XCTSkip with XCTFail and return.
+                Fix: Replace XCTSkip/XCTSkipIf with XCTFail and return.
                 """)
         }
     }

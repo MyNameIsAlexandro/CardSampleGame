@@ -11,7 +11,14 @@ enum TestContentLoader {
     /// Загрузить ContentPacks из исходной директории
     /// Безопасно вызывать многократно - загрузка произойдёт только один раз
     static func loadContentPacksIfNeeded() {
-        guard !isLoaded else { return }
+        let registry = ContentRegistry.shared
+
+        // Always check actual registry state, not just isLoaded flag.
+        // Other test classes may call resetForTesting() which clears the registry.
+        guard registry.loadedPackIds.isEmpty else {
+            isLoaded = true
+            return
+        }
 
         let packURLs = findContentPacksURLs()
 
@@ -21,15 +28,8 @@ enum TestContentLoader {
         }
 
         do {
-            // Загружаем паки через ContentRegistry
-            let registry = ContentRegistry.shared
-
-            // Проверяем, не загружен ли уже
-            if registry.loadedPackIds.isEmpty {
-                try registry.loadPacks(from: packURLs)
-                print("✅ TestContentLoader: Loaded \(packURLs.count) packs")
-            }
-
+            try registry.loadPacks(from: packURLs)
+            print("✅ TestContentLoader: Loaded \(packURLs.count) packs")
             isLoaded = true
         } catch {
             print("❌ TestContentLoader: Failed to load packs: \(error)")
@@ -56,7 +56,7 @@ enum TestContentLoader {
 
         var urls: [URL] = []
 
-        // Character pack (CoreHeroes)
+        // Character pack (CoreHeroes) — must point to .pack file, not directory
         let coreHeroesPath = projectRoot
             .appendingPathComponent("Packages")
             .appendingPathComponent("CharacterPacks")
@@ -64,21 +64,22 @@ enum TestContentLoader {
             .appendingPathComponent("Sources")
             .appendingPathComponent("CoreHeroesContent")
             .appendingPathComponent("Resources")
-            .appendingPathComponent("CoreHeroes")
+            .appendingPathComponent("CoreHeroes.pack")
 
         if FileManager.default.fileExists(atPath: coreHeroesPath.path) {
             urls.append(coreHeroesPath)
         }
 
-        // Story pack (TwilightMarchesActI)
+        // Story pack (TwilightMarchesActI) — must point to .pack file, not directory
         let storyPackPath = projectRoot
             .appendingPathComponent("Packages")
             .appendingPathComponent("StoryPacks")
+            .appendingPathComponent("Season1")
             .appendingPathComponent("TwilightMarchesActI")
             .appendingPathComponent("Sources")
             .appendingPathComponent("TwilightMarchesActIContent")
             .appendingPathComponent("Resources")
-            .appendingPathComponent("TwilightMarchesActI")
+            .appendingPathComponent("TwilightMarchesActI.pack")
 
         if FileManager.default.fileExists(atPath: storyPackPath.path) {
             urls.append(storyPackPath)

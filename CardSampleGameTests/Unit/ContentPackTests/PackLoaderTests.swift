@@ -34,8 +34,8 @@ final class PackLoaderTests: XCTestCase {
     // MARK: - Character Pack Manifest Tests
 
     func testLoadCharacterPackManifest() throws {
-        // Skip if character pack not available (Bundle.module resolution issue in tests)
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
+        // Fail if character pack not available (Bundle.module resolution issue in tests)
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
 
         // Given
         let url = characterPackURL!
@@ -125,8 +125,8 @@ final class PackLoaderTests: XCTestCase {
     // MARK: - Content Loading Tests
 
     func testLoadCharacterPackContent() throws {
-        // Skip if character pack not available (Bundle.module resolution issue in tests)
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
+        // Fail if character pack not available (Bundle.module resolution issue in tests)
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
 
         // Given
         let url = characterPackURL!
@@ -185,8 +185,8 @@ final class PackLoaderTests: XCTestCase {
     // MARK: - Cards Loading Tests
 
     func testLoadCards() throws {
-        // Skip if character pack not available (Bundle.module resolution issue in tests)
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
+        // Fail if character pack not available (Bundle.module resolution issue in tests)
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
 
         // Given
         let url = characterPackURL!
@@ -206,8 +206,8 @@ final class PackLoaderTests: XCTestCase {
     }
 
     func testCardsHaveValidFaithCost() throws {
-        // Skip if character pack not available (Bundle.module resolution issue in tests)
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
+        // Fail if character pack not available (Bundle.module resolution issue in tests)
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
 
         // Given
         let url = characterPackURL!
@@ -223,8 +223,8 @@ final class PackLoaderTests: XCTestCase {
     // MARK: - Heroes Loading Tests
 
     func testLoadHeroes() throws {
-        // Skip if character pack not available (Bundle.module resolution issue in tests)
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
+        // Fail if character pack not available (Bundle.module resolution issue in tests)
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
 
         // Given
         let url = characterPackURL!
@@ -244,8 +244,8 @@ final class PackLoaderTests: XCTestCase {
     }
 
     func testHeroesHaveStartingDecks() throws {
-        // Skip if character pack not available (Bundle.module resolution issue in tests)
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
+        // Fail if character pack not available (Bundle.module resolution issue in tests)
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
 
         // Given
         let url = characterPackURL!
@@ -259,8 +259,8 @@ final class PackLoaderTests: XCTestCase {
     }
 
     func testHeroesHaveValidBaseStats() throws {
-        // Skip if character pack not available (Bundle.module resolution issue in tests)
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
+        // Fail if character pack not available (Bundle.module resolution issue in tests)
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
 
         // Given
         let url = characterPackURL!
@@ -275,8 +275,8 @@ final class PackLoaderTests: XCTestCase {
     }
 
     func testHeroesHaveSpecialAbility() throws {
-        // Skip if character pack not available (Bundle.module resolution issue in tests)
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
+        // Fail if character pack not available (Bundle.module resolution issue in tests)
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
 
         // Given
         let url = characterPackURL!

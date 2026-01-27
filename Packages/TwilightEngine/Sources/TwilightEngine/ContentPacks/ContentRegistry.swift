@@ -7,6 +7,7 @@ import Foundation
 public final class ContentRegistry {
     // MARK: - Singleton
 
+    /// Shared singleton instance of the content registry.
     public static let shared = ContentRegistry()
 
     // MARK: - State
@@ -264,7 +265,7 @@ public final class ContentRegistry {
 
     /// Get events available for a region with given pressure and state
     /// - Parameters:
-    ///   - regionId: Region definition ID (e.g., "village", "forest")
+    ///   - regionId: Region definition ID (from pack manifest)
     ///   - pressure: Current world tension (0-100)
     ///   - regionState: Current region state (e.g., "stable", "borderland", "breach")
     public func getAvailableEvents(forRegion regionId: String, pressure: Int, regionState: String? = nil) -> [EventDefinition] {

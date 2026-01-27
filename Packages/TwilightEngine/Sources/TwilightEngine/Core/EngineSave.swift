@@ -58,8 +58,8 @@ public struct EngineSave: Codable {
     public let worldFlags: [String: Bool]
 
     // MARK: - RNG State (Audit A2 - determinism after load)
-    public let rngSeed: UInt64?
-    public let rngState: UInt64?  // Current RNG state for exact restoration
+    public let rngSeed: UInt64
+    public let rngState: UInt64
 
     // MARK: - Current Version
     public static let currentVersion = 1
@@ -98,8 +98,8 @@ public struct EngineSave: Codable {
         completedEventIds: [String] = [],
         eventLog: [EventLogEntrySave] = [],
         worldFlags: [String: Bool] = [:],
-        rngSeed: UInt64? = nil,
-        rngState: UInt64? = nil
+        rngSeed: UInt64,
+        rngState: UInt64
     ) {
         self.version = version
         self.savedAt = savedAt

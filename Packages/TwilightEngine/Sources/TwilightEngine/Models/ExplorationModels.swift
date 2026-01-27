@@ -251,7 +251,7 @@ public struct Anchor: Identifiable, Codable {
 /// - After full UI migration to Engine this model will become internal for persistence
 public struct Region: Identifiable, Codable {
     public let id: UUID
-    public let definitionId: String        // Content Pack ID (e.g., "village", "sacred_oak")
+    public let definitionId: String        // Content Pack ID (e.g., "region_01", "market_square")
     public let name: String
     public let type: RegionType
     public var state: RegionState
@@ -353,7 +353,7 @@ public struct EventChoice: Identifiable, Codable, Hashable {
     public let consequences: EventConsequences
 
     public init(
-        id: String = UUID().uuidString,
+        id: String,
         text: String,
         requirements: EventRequirements? = nil,
         consequences: EventConsequences

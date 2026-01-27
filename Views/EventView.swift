@@ -420,6 +420,7 @@ struct EventView_Previews: PreviewProvider {
             description: "Это тестовое событие для предварительного просмотра",
             choices: [
                 EventChoice(
+                    id: "preview_choice_1",
                     text: "Выбор 1",
                     consequences: EventConsequences(
                         faithChange: 5,
@@ -427,6 +428,7 @@ struct EventView_Previews: PreviewProvider {
                     )
                 ),
                 EventChoice(
+                    id: "preview_choice_2",
                     text: "Выбор 2",
                     requirements: EventRequirements(minimumFaith: 10),
                     consequences: EventConsequences(

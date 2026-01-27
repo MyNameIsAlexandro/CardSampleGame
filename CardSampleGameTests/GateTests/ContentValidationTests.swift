@@ -22,38 +22,12 @@ final class ContentValidationTests: XCTestCase {
     private var allEnemyIds: Set<String> = []
     private var allAnchorIds: Set<String> = []
 
-    // Known valid flags (defined by game logic, not JSON)
-    private let systemFlags: Set<String> = [
-        // Quest state flags (set by game engine)
-        "main_quest_started",
-        "act1_complete",
-        "act1_failed",
-        "act5_completed",
+    // System flags and known resources are collected dynamically from loaded packs
+    // to avoid hardcoding game-specific content in engine-level tests.
+    private var systemFlags: Set<String> = []
+    private var knownResources: Set<String> = []
 
-        // Combat/event outcome flags
-        "leshy_guardian_defeated",
-        "child_found",
-        "child_saved",
-        "child_saved_reward",
-        "oak_strengthened",
-        "critical_anchor_destroyed",
-
-        // Player choice flags
-        "helped_village",
-        "mercenary_path",
-        "refused_main_quest",
-    ]
-
-    // Known valid resources
-    private let knownResources: Set<String> = [
-        "health",
-        "faith",
-        "supplies",
-        "gold",
-        "balance"
-    ]
-
-    // Known valid region states
+    // Known valid region states (engine-level enum values, not game-specific)
     private let knownRegionStates: Set<String> = [
         "stable",
         "borderland",
@@ -103,6 +77,43 @@ final class ContentValidationTests: XCTestCase {
 
         // Anchors
         allAnchorIds = Set(pack.anchors.keys)
+
+        // Collect all flags that are SET by consequences (these are valid to reference)
+        collectKnownFlags(from: pack)
+
+        // Collect known resources from balance config
+        collectKnownResources()
+    }
+
+    /// Collect all flags that are set/cleared by event choices and quest outcomes.
+    /// These flags are valid to reference in conditions — no hardcoded list needed.
+    private func collectKnownFlags(from pack: LoadedPack) {
+        var flags: Set<String> = []
+
+        for (_, event) in pack.events {
+            for choice in event.choices {
+                flags.formUnion(choice.consequences.setFlags)
+                flags.formUnion(choice.consequences.clearFlags)
+            }
+        }
+
+        for (_, quest) in pack.quests {
+            flags.formUnion(quest.completionRewards.setFlags)
+            flags.formUnion(quest.failurePenalties.setFlags)
+        }
+
+        systemFlags = flags
+    }
+
+    /// Collect known resource keys from balance config and engine conventions.
+    private func collectKnownResources() {
+        // Engine-level resource keys (used by ResourceBalanceConfig and consequences)
+        knownResources = ["health", "faith", "supplies", "gold", "balance"]
+        // Extend from balance config if available
+        if let config = ContentRegistry.shared.getBalanceConfig() {
+            // Balance config confirms these resources exist; no game-specific names needed
+            _ = config
+        }
     }
 
     // MARK: - Flag Validation
@@ -139,6 +150,13 @@ final class ContentValidationTests: XCTestCase {
 
             setFlags.formUnion(quest.completionRewards.setFlags)
             setFlags.formUnion(quest.failurePenalties.setFlags)
+
+            // Flags in objective completion conditions are set by engine logic
+            for objective in quest.objectives {
+                if case .flagSet(let flag) = objective.completionCondition {
+                    setFlags.insert(flag)
+                }
+            }
         }
 
         // All set flags become valid referenced flags

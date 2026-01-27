@@ -11,15 +11,23 @@ public final class TwilightGameEngine: ObservableObject {
     // MARK: - Published State (for UI binding)
     // Audit v1.1 Issue #1, #8: UI reads directly from Engine, not WorldState
 
+    /// Current in-game day number
     @Published public private(set) var currentDay: Int = 0
+    /// World tension level (0-100), drives degradation and difficulty
     @Published public private(set) var worldTension: Int = 30
+    /// UUID of the region the player is currently in
     @Published public private(set) var currentRegionId: UUID?
+    /// Whether the game has ended (victory or defeat)
     @Published public private(set) var isGameOver: Bool = false
+    /// Result of the game if it has ended
     @Published public private(set) var gameResult: GameEndResult?
 
+    /// UUID of the event currently being presented to the player
     @Published public private(set) var currentEventId: UUID?
+    /// Whether the player is currently in combat
     @Published public private(set) var isInCombat: Bool = false
 
+    /// Result of the last performed action
     @Published public private(set) var lastActionResult: ActionResult?
 
     // MARK: - Published State for UI (Engine-First Architecture)
@@ -295,7 +303,7 @@ public final class TwilightGameEngine: ObservableObject {
               let region = publishedRegions[regionId] else { return false }
 
         // Engine-First: check content registry for events in this region
-        // Use definitionId (e.g., "village") not type.rawValue (e.g., "settlement")
+        // Use definitionId (from pack manifest) not type.rawValue
         let regionDefId = region.definitionId
 
         // Map region state to string for content registry
@@ -405,6 +413,7 @@ public final class TwilightGameEngine: ObservableObject {
 
     // MARK: - Initialization
 
+    /// Initialize engine with a content registry for loading game data
     public init(registry: ContentRegistry = .shared) {
         self.contentRegistry = registry
         self.balanceConfig = registry.getBalanceConfig() ?? .default
@@ -532,8 +541,8 @@ public final class TwilightGameEngine: ObservableObject {
         // This fixes a bug where old UUID from previous game could persist
         currentRegionId = nil
 
-        // Determine entry region from manifest (no hardcoded "village")
-        let entryRegionId = contentRegistry.loadedPacks.values.first?.manifest.entryRegionId
+        // Determine entry region from manifest (no hardcoded entry point)
+        let entryRegionId = contentRegistry.loadedPacks.values.first(where: { $0.manifest.entryRegionId != nil })?.manifest.entryRegionId
 
         // First pass: create regions and map IDs
         for def in regionDefs {
@@ -600,7 +609,7 @@ public final class TwilightGameEngine: ObservableObject {
         currentRegionId = nil
 
         // Determine entry region from loaded pack manifest (no hardcoded fallback)
-        let entryRegionId = contentRegistry.loadedPacks.values.first?.manifest.entryRegionId
+        let entryRegionId = contentRegistry.loadedPacks.values.first(where: { $0.manifest.entryRegionId != nil })?.manifest.entryRegionId
 
         // First pass: create regions and map IDs
         for def in regionDefs {
@@ -663,9 +672,11 @@ public final class TwilightGameEngine: ObservableObject {
         regions = newRegions
         publishedRegions = newRegions
 
-        // Set first region as current if none set
+        // Set first region as current if none set — prefer stable region
         if currentRegionId == nil {
-            currentRegionId = newRegions.keys.first
+            currentRegionId = newRegions.values.first(where: { $0.state == .stable })?.id
+                ?? newRegions.values.first(where: { $0.state != .breach })?.id
+                ?? newRegions.keys.first
         }
     }
 
@@ -688,18 +699,9 @@ public final class TwilightGameEngine: ObservableObject {
     }
 
     /// Map region type string from ContentPack to RegionType enum
-    /// The type comes from JSON/manifest, not hardcoded IDs
+    /// Uses RegionType(rawValue:) — no hardcoded game-specific strings in Engine
     private func mapRegionType(fromString typeString: String) -> RegionType {
-        switch typeString.lowercased() {
-        case "settlement": return .settlement
-        case "forest": return .forest
-        case "swamp": return .swamp
-        case "wasteland": return .wasteland
-        case "sacred": return .sacred
-        case "mountain": return .mountain
-        case "water": return .water
-        default: return .forest
-        }
+        RegionType(rawValue: typeString.lowercased()) ?? .settlement
     }
 
     /// Map RegionStateType to RegionState
@@ -1505,9 +1507,10 @@ public final class TwilightGameEngine: ObservableObject {
             return .defeat(reason: "Герой погиб")
         }
 
-        // Victory: main quest completed (check flags)
-        if worldFlags["act1_completed"] == true {
-            return .victory(endingId: "act1_standard")
+        // Victory: main quest completed (flag from BalanceConfiguration)
+        if let victoryFlag = balanceConfig.endConditions.mainQuestCompleteFlag,
+           worldFlags[victoryFlag] == true {
+            return .victory(endingId: "main_quest_complete")
         }
 
         return nil
@@ -1797,6 +1800,7 @@ public final class TwilightGameEngine: ObservableObject {
 
 // MARK: - Event Trigger
 
+/// Trigger type that causes an event to fire
 public enum EventTrigger {
     case arrival
     case exploration
@@ -1820,16 +1824,27 @@ public enum EventTrigger {
 /// - `EngineRegionState` - объединённое для UI (этот struct)
 /// - `Region` (legacy) - persistence и совместимость
 public struct EngineRegionState: Identifiable {
+    /// Unique runtime identifier for this region
     public let id: UUID
-    public let definitionId: String  // Stable definition ID for serialization (REQUIRED - Epic 3, Audit A1)
+    /// Stable definition ID for serialization (from content pack)
+    public let definitionId: String
+    /// Localized display name
     public let name: String
+    /// Region type (settlement, sacred, etc.)
     public let type: RegionType
+    /// Current state (stable, borderland, breach)
     public var state: RegionState
+    /// Anchor protecting this region, if any
     public var anchor: EngineAnchorState?
+    /// Runtime UUIDs of neighboring regions
     public let neighborIds: [UUID]
-    public let neighborDefinitionIds: [String]  // Stable neighbor IDs for serialization (Epic 3)
+    /// Stable definition IDs of neighboring regions for serialization
+    public let neighborDefinitionIds: [String]
+    /// Whether trading is available in this region
     public var canTrade: Bool
+    /// Whether the player has visited this region
     public var visited: Bool = false
+    /// Player reputation in this region
     public var reputation: Int = 0
 
     /// Create directly (Engine-First) - definitionId is REQUIRED
@@ -1869,9 +1884,13 @@ public struct EngineRegionState: Identifiable {
 
 /// Internal state for engine anchor tracking (REQUIRED definitionId - Audit A1)
 public struct EngineAnchorState {
+    /// Unique runtime identifier
     public let id: UUID
-    public let definitionId: String  // Stable definition ID for serialization (REQUIRED - Audit A1)
+    /// Stable definition ID for serialization
+    public let definitionId: String
+    /// Localized display name
     public let name: String
+    /// Current integrity level (0-100)
     public var integrity: Int
 
     /// Create directly (Engine-First) - definitionId is REQUIRED
@@ -1887,27 +1906,39 @@ public struct EngineAnchorState {
 
 /// Read-only combat state for UI binding
 public struct CombatState {
+    /// The enemy card being fought
     public let enemy: Card
+    /// Enemy's current health points
     public let enemyHealth: Int
+    /// Current combat turn number
     public let turnNumber: Int
+    /// Actions remaining this turn
     public let actionsRemaining: Int
+    /// Bonus dice accumulated for next attack
     public let bonusDice: Int
+    /// Bonus damage accumulated for next attack
     public let bonusDamage: Int
+    /// Whether the next attack is the first in this combat
     public let isFirstAttack: Bool
+    /// Cards currently in the player's hand
     public let playerHand: [Card]
 
+    /// Enemy's maximum health from card definition
     public var enemyMaxHealth: Int {
         enemy.health ?? 10
     }
 
+    /// Enemy's defense value from card definition
     public var enemyDefense: Int {
         enemy.defense ?? 10
     }
 
+    /// Enemy's attack power from card definition
     public var enemyPower: Int {
         enemy.power ?? 3
     }
 
+    /// Initialize combat state with all required fields
     public init(
         enemy: Card,
         enemyHealth: Int,
@@ -2160,14 +2191,8 @@ public extension TwilightGameEngine {
         publishedWorldFlags = save.worldFlags
         worldFlags = save.worldFlags
 
-        // Restore RNG state (Audit A2 - determinism after load)
-        if let state = save.rngState {
-            // Restore exact state for deterministic continuation
-            WorldRNG.shared.restoreState(state)
-        } else if let seed = save.rngSeed {
-            // Fallback: restore from seed (less precise, for old saves)
-            WorldRNG.shared.setSeed(seed)
-        }
+        // Restore RNG state (Audit 1.5 - determinism after load)
+        WorldRNG.shared.restoreState(save.rngState)
 
         // Clear game over state
         isGameOver = false

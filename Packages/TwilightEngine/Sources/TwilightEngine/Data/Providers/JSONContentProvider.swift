@@ -340,7 +340,7 @@ private struct JSONRegion: Codable {
             id: id,
             title: .inline(title),
             description: .inline(description),
-            regionType: regionType ?? "forest",
+            regionType: regionType ?? "unknown",
             neighborIds: neighborIds,
             initiallyDiscovered: initiallyDiscovered ?? false,
             anchorId: anchorId,

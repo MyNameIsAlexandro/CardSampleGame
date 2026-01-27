@@ -20,7 +20,7 @@ public protocol DegradationRuleSet {
     var minimumTensionForDegradation: Int { get }
 }
 
-/// Правила деградации для "Сумрачных Пределов" (Twilight Marches)
+/// Default degradation rules for world region state changes
 public struct TwilightDegradationRules: DegradationRuleSet {
 
     /// Веса выбора региона:

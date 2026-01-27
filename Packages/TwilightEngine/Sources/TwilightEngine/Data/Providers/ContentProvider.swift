@@ -87,6 +87,7 @@ public struct ContentValidationError: Equatable, CustomStringConvertible {
         case emptyChoices = "EMPTY_CHOICES"
         case invalidLocalizationKey = "INVALID_KEY"
         case circularReference = "CIRCULAR_REF"
+        case invalidExpression = "INVALID_EXPRESSION"
     }
 }
 

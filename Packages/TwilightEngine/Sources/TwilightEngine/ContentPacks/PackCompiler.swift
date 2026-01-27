@@ -118,11 +118,17 @@ public enum PackCompiler {
 
 /// Result of pack compilation
 public struct CompilationResult {
+    /// Identifier of the compiled pack
     public let packId: String
+    /// Semantic version of the compiled pack
     public let version: SemanticVersion
+    /// Total size of source files in bytes
     public let inputSize: Int64
+    /// Size of the compiled .pack file in bytes
     public let outputSize: Int64
+    /// Time taken to compile in seconds
     public let compilationTime: TimeInterval
+    /// Statistics about the compiled content
     public let contentStats: ContentStats
 
     /// Compression ratio (output/input)
@@ -149,14 +155,22 @@ public struct CompilationResult {
 
 /// Content statistics
 public struct ContentStats {
+    /// Number of regions in the pack
     public let regions: Int
+    /// Number of events in the pack
     public let events: Int
+    /// Number of quests in the pack
     public let quests: Int
+    /// Number of heroes in the pack
     public let heroes: Int
+    /// Number of cards in the pack
     public let cards: Int
+    /// Number of enemies in the pack
     public let enemies: Int
+    /// Number of anchors in the pack
     public let anchors: Int
 
+    /// Initialize stats from a loaded pack
     public init(from pack: LoadedPack) {
         self.regions = pack.regions.count
         self.events = pack.events.count
@@ -167,6 +181,7 @@ public struct ContentStats {
         self.anchors = pack.anchors.count
     }
 
+    /// Human-readable summary of content counts
     public var summary: String {
         var parts: [String] = []
         if regions > 0 { parts.append("\(regions) regions") }
@@ -181,16 +196,23 @@ public struct ContentStats {
 
 /// Validation result
 public struct ValidationResult {
+    /// Identifier of the validated pack
     public let packId: String
+    /// Semantic version of the validated pack
     public let version: SemanticVersion
+    /// Whether the pack is compatible with the current core version
     public let coreCompatible: Bool
+    /// Whether the pack content passed validation
     public let contentValid: Bool
+    /// Error message if validation failed, nil otherwise
     public let error: String?
 
+    /// True if both core-compatible and content-valid
     public var isValid: Bool {
         coreCompatible && contentValid
     }
 
+    /// Human-readable validation summary with pass/fail status
     public var summary: String {
         if isValid {
             return "✅ Pack '\(packId)' v\(version) is valid"

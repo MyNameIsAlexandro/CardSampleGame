@@ -13,37 +13,27 @@ import XCTest
 final class Phase3ContractTests: XCTestCase {
 
     var engine: TwilightGameEngine!
-    private var testPackURL: URL!
 
     override func setUp() {
         super.setUp()
-        // Load ContentRegistry with TwilightMarches pack
-        ContentRegistry.shared.resetForTesting()
-        testPackURL = URL(fileURLWithPath: #file)
-            .deletingLastPathComponent() // Engine
-            .deletingLastPathComponent() // CardSampleGameTests
-            .deletingLastPathComponent() // CardSampleGame
-            .appendingPathComponent("ContentPacks/TwilightMarches")
-        _ = try? ContentRegistry.shared.loadPack(from: testPackURL)
-
+        TestContentLoader.loadContentPacksIfNeeded()
         engine = TwilightGameEngine()
-        // Engine-First: engine initializes its own state from ContentRegistry
-        engine.initializeFromContentRegistry(ContentRegistry.shared)
+        engine.initializeNewGame(playerName: "Test", heroId: nil)
     }
 
     override func tearDown() {
         engine = nil
-        ContentRegistry.shared.resetForTesting()
-        testPackURL = nil
-        WorldRNG.shared.resetToSystem()
+        WorldRNG.shared.setSeed(0)
         super.tearDown()
     }
 
-    /// Helper to skip test if regions not loaded
-    private func requireRegionsLoaded() throws {
+    /// Helper to fail test if regions not loaded
+    private func requireRegionsLoaded() -> Bool {
         if engine.publishedRegions.isEmpty {
-            throw XCTSkip("Skipping: ContentPack not loaded (regions empty)")
+            XCTFail("Skipping: ContentPack not loaded (regions empty)")
+            return false
         }
+        return true
     }
 
     // MARK: - INV-P3-001: All Actions Through Engine
@@ -64,8 +54,8 @@ final class Phase3ContractTests: XCTestCase {
 
     // MARK: - INV-P3-002: Time Advances Only Via Engine
 
-    func testTimeAdvancesOnlyViaEngine() throws {
-        try requireRegionsLoaded()
+    func testTimeAdvancesOnlyViaEngine() {
+        guard requireRegionsLoaded() else { return }
         let initialDay = engine.currentDay
 
         // Perform action with time cost
@@ -77,8 +67,8 @@ final class Phase3ContractTests: XCTestCase {
 
     // MARK: - INV-P3-003: State Changes Are Tracked
 
-    func testStateChangesAreTracked() throws {
-        try requireRegionsLoaded()
+    func testStateChangesAreTracked() {
+        guard requireRegionsLoaded() else { return }
         // Perform action that changes state
         let result = engine.performAction(.rest)
 
@@ -112,8 +102,8 @@ final class Phase3ContractTests: XCTestCase {
 
     // MARK: - INV-P3-005: Tension Escalation Through Engine
 
-    func testTensionEscalatesOnDay3() throws {
-        try requireRegionsLoaded()
+    func testTensionEscalatesOnDay3() {
+        guard requireRegionsLoaded() else { return }
         // Advance to day 3
         _ = engine.performAction(.rest)  // Day 1
         _ = engine.performAction(.rest)  // Day 2
@@ -136,8 +126,8 @@ final class Phase3ContractTests: XCTestCase {
 
     // MARK: - INV-P3-007: Rest Heals Player
 
-    func testRestHealsPlayer() throws {
-        try requireRegionsLoaded()
+    func testRestHealsPlayer() {
+        guard requireRegionsLoaded() else { return }
         // Damage player first by setting engine health directly
         engine.setPlayerHealth(5)
 
@@ -153,13 +143,13 @@ final class Phase3ContractTests: XCTestCase {
 
     // MARK: - INV-P3-008: Strengthen Anchor Costs Faith
 
-    func testStrengthenAnchorCostsFaith() throws {
+    func testStrengthenAnchorCostsFaith() {
         // Ensure player has enough faith
         engine.setPlayerFaith(20)
 
         // Move to region with anchor
         guard let regionWithAnchor = engine.publishedRegions.values.first(where: { $0.anchor != nil }) else {
-            throw XCTSkip("No region with anchor found")
+            XCTFail("No region with anchor found"); return
         }
         engine.setCurrentRegion(regionWithAnchor.id)
 
@@ -248,6 +238,7 @@ final class Phase3ContractTests: XCTestCase {
         )
 
         let choice = EventChoice(
+            id: "test_choice",
             text: "Test Choice",
             consequences: consequences
         )

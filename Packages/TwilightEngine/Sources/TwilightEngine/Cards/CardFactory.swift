@@ -14,6 +14,7 @@ public final class CardFactory {
 
     // MARK: - Singleton
 
+    /// Shared singleton instance using the default ContentRegistry.
     public static let shared = CardFactory()
 
     // MARK: - Dependencies
@@ -22,6 +23,7 @@ public final class CardFactory {
 
     // MARK: - Initialization
 
+    /// Creates a CardFactory backed by the given content registry.
     public init(contentRegistry: ContentRegistry = .shared) {
         self.contentRegistry = contentRegistry
     }
@@ -77,30 +79,14 @@ public final class CardFactory {
         return createGenericStarterDeck()
     }
 
-    /// Create starting deck for a hero by name (legacy compatibility)
-    /// - Parameter heroName: Hero name
-    /// - Returns: Array of runtime Card instances for starting deck
-    public func createStartingDeck(forHeroName heroName: String) -> [Card] {
-        // Map name to hero ID
-        let heroId = mapHeroNameToId(heroName)
-        return createStartingDeck(forHero: heroId)
-    }
 
     /// Create generic starter deck (fallback)
+    /// Returns empty if no starter deck defined in content packs.
     private func createGenericStarterDeck() -> [Card] {
-        var deck: [Card] = []
-
-        // Add basic cards from registry
-        let basicCardIds = ["strike_basic", "defend_basic", "heal_basic", "draw_basic"]
-        for id in basicCardIds {
-            if let card = getCard(id: id) {
-                // Add 2 copies of each basic card
-                deck.append(card)
-                deck.append(getCard(id: id)!) // New instance
-            }
-        }
-
-        return deck
+        #if DEBUG
+        print("⚠️ CardFactory: No starting deck found for hero. Ensure content pack defines starting_deck.")
+        #endif
+        return []
     }
 
     // MARK: - Encounter Deck
@@ -190,34 +176,6 @@ public final class CardFactory {
             return enemy.toCard()
         }
         return nil
-    }
-
-    /// Create Leshy Guardian boss (Act I final boss)
-    /// - Returns: Boss card from ContentPack or nil if not found
-    /// - Note: Boss must be defined in enemies.json as "leshy_guardian_boss"
-    public func createLeshyGuardianBoss() -> Card? {
-        // Get boss ONLY from ContentRegistry (no hardcoded fallback)
-        if let boss = createBoss(enemyId: "leshy_guardian_boss") {
-            return boss
-        }
-
-        #if DEBUG
-        print("⚠️ CardFactory: Boss 'leshy_guardian_boss' not found in ContentPacks")
-        #endif
-        return nil
-    }
-
-    // MARK: - Helper Methods
-
-    /// Map hero name to ID for legacy compatibility
-    private func mapHeroNameToId(_ name: String) -> String {
-        switch name.lowercased() {
-        case "велеслава": return "veleslava"
-        case "ратибор": return "ratibor"
-        case "мирослав": return "miroslav"
-        case "забава": return "zabava"
-        default: return name.lowercased().replacingOccurrences(of: " ", with: "_")
-        }
     }
 
 }

@@ -104,9 +104,9 @@ extension GameRuntimeState {
         startingRegionId: String,
         startingResources: [String: Int],
         startingDeck: [String],
-        seed: UInt64? = nil
+        seed: UInt64
     ) -> GameRuntimeState {
-        let actualSeed = seed ?? UInt64.random(in: 0...UInt64.max)
+        let actualSeed = seed
 
         let world = WorldRuntimeState(
             currentRegionId: startingRegionId,

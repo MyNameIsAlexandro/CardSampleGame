@@ -30,7 +30,7 @@ final class SaveLoadTests: XCTestCase {
         }
         engine = nil
         saveManager = nil
-        WorldRNG.shared.resetToSystem()
+        WorldRNG.shared.setSeed(0)
         super.tearDown()
     }
 
@@ -354,7 +354,8 @@ final class SaveLoadTests: XCTestCase {
             completedEventIds: save.completedEventIds,
             eventLog: save.eventLog,
             worldFlags: save.worldFlags,
-            rngSeed: save.rngSeed
+            rngSeed: save.rngSeed,
+            rngState: save.rngState
         )
 
         // 5. Verify incompatible save is rejected

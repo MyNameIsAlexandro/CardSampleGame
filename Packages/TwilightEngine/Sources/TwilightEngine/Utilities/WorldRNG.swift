@@ -3,37 +3,37 @@ import Foundation
 /// Deterministic random number generator for world events
 /// Uses a seeded approach for reproducible results
 public final class WorldRNG {
+    /// Shared singleton instance with default seed.
     public static let shared = WorldRNG()
 
     private var seed: UInt64
     private var state: UInt64
 
+    /// Initialize with an optional seed value for deterministic output.
     public init(seed: UInt64 = 0) {
         self.seed = seed
         self.state = seed
     }
 
+    /// Reset the generator with a new seed value.
     public func setSeed(_ seed: UInt64) {
         self.seed = seed
         self.state = seed
     }
 
+    /// Returns the original seed used to initialize the generator.
     public func currentSeed() -> UInt64 {
         return seed
     }
 
+    /// Returns the current internal state for save/restore purposes.
     public func currentState() -> UInt64 {
         return state
     }
 
+    /// Restore a previously saved internal state.
     public func restoreState(_ state: UInt64) {
         self.state = state
-    }
-
-    /// Reset to system randomness (non-deterministic)
-    public func resetToSystem() {
-        self.seed = UInt64.random(in: 0...UInt64.max)
-        self.state = seed
     }
 
     /// Generate next random UInt64 using xorshift64

@@ -10,6 +10,7 @@ public enum PackSource: Equatable, Hashable {
     /// External in Documents folder (hot-reloadable)
     case external(url: URL)
 
+    /// The file URL for this pack source.
     public var url: URL {
         switch self {
         case .bundled(let url), .external(let url):
@@ -17,11 +18,13 @@ public enum PackSource: Equatable, Hashable {
         }
     }
 
+    /// Whether this pack source supports hot-reload.
     public var isReloadable: Bool {
         if case .external = self { return true }
         return false
     }
 
+    /// Human-readable label for this pack source type.
     public var displayName: String {
         switch self {
         case .bundled: return "Bundled"
@@ -39,6 +42,7 @@ public enum PackLoadState: Equatable {
     case loaded               // Successfully loaded into ContentRegistry
     case failed(String)       // Load/validation failed with error
 
+    /// SF Symbol name representing the current load state.
     public var statusIcon: String {
         switch self {
         case .discovered: return "circle"
@@ -53,6 +57,7 @@ public enum PackLoadState: Equatable {
         }
     }
 
+    /// Color name representing the current load state.
     public var statusColor: String {
         switch self {
         case .discovered: return "gray"
@@ -66,6 +71,7 @@ public enum PackLoadState: Equatable {
         }
     }
 
+    /// Equatable conformance comparing load state cases.
     public static func == (lhs: PackLoadState, rhs: PackLoadState) -> Bool {
         switch (lhs, rhs) {
         case (.discovered, .discovered): return true
@@ -81,16 +87,25 @@ public enum PackLoadState: Equatable {
 
 /// Validation summary for display
 public struct ValidationSummary: Equatable {
+    /// Identifier of the validated pack.
     public let packId: String
+    /// Number of validation errors found.
     public let errorCount: Int
+    /// Number of validation warnings found.
     public let warningCount: Int
+    /// Number of informational messages.
     public let infoCount: Int
+    /// Time taken to validate, in seconds.
     public let duration: TimeInterval
+    /// Descriptive error messages.
     public let errors: [String]
+    /// Descriptive warning messages.
     public let warnings: [String]
 
+    /// Whether the pack passed validation with no errors.
     public var isValid: Bool { errorCount == 0 }
 
+    /// Create a validation summary with the given counts and messages.
     public init(packId: String, errorCount: Int, warningCount: Int, infoCount: Int,
                 duration: TimeInterval, errors: [String] = [], warnings: [String] = []) {
         self.packId = packId
@@ -105,19 +120,29 @@ public struct ValidationSummary: Equatable {
 
 /// A pack managed by ContentManager
 public struct ManagedPack: Identifiable {
+    /// Unique pack identifier.
     public let id: String              // packId
+    /// Where this pack was discovered from.
     public let source: PackSource
+    /// Current load state of the pack.
     public var state: PackLoadState
+    /// Pack manifest, if successfully read.
     public var manifest: PackManifest?
+    /// Most recent validation result, if any.
     public var lastValidation: ValidationSummary?
+    /// File size in bytes on disk.
     public var fileSize: Int64
+    /// Last modification date of the pack file.
     public var modifiedAt: Date
+    /// Date the pack was loaded into the registry, if loaded.
     public var loadedAt: Date?
 
+    /// Whether this pack can be hot-reloaded.
     public var canReload: Bool {
         source.isReloadable && (state == .loaded || isValidatedSuccessfully)
     }
 
+    /// Whether this pack can currently be validated.
     public var canValidate: Bool {
         switch state {
         case .validating, .loading: return false
@@ -125,10 +150,12 @@ public struct ManagedPack: Identifiable {
         }
     }
 
+    /// Whether this pack is ready to be loaded into the registry.
     public var canLoad: Bool {
         isValidatedSuccessfully && state != .loaded && state != .loading
     }
 
+    /// Whether the pack passed validation without errors.
     public var isValidatedSuccessfully: Bool {
         if case .validated(let summary) = state {
             return summary.isValid
@@ -136,6 +163,7 @@ public struct ManagedPack: Identifiable {
         return false
     }
 
+    /// Whether validation or loading produced errors.
     public var hasErrors: Bool {
         if case .validated(let summary) = state {
             return summary.errorCount > 0
@@ -146,6 +174,7 @@ public struct ManagedPack: Identifiable {
         return false
     }
 
+    /// Whether validation produced warnings.
     public var hasWarnings: Bool {
         if case .validated(let summary) = state {
             return summary.warningCount > 0
@@ -155,6 +184,7 @@ public struct ManagedPack: Identifiable {
 }
 
 extension ManagedPack: Equatable {
+    /// Equatable conformance comparing pack identity and state.
     public static func == (lhs: ManagedPack, rhs: ManagedPack) -> Bool {
         lhs.id == rhs.id &&
         lhs.source == rhs.source &&
@@ -172,6 +202,7 @@ public enum ContentReloadError: Error, LocalizedError {
     case validationFailed(summary: ValidationSummary)
     case loadFailed(underlying: Error)
 
+    /// Localized description of the reload error.
     public var errorDescription: String? {
         switch self {
         case .packNotFound(let id): return "Pack '\(id)' not found"
@@ -188,6 +219,7 @@ public enum ContentReloadError: Error, LocalizedError {
 public final class ContentManager {
     // MARK: - Singleton
 
+    /// Shared singleton instance of the content manager.
     public static let shared = ContentManager()
 
     // MARK: - State
@@ -284,7 +316,7 @@ public final class ContentManager {
         )
     }
 
-    /// Scan for changes in external packs directory
+    /// Scan for changes in external packs directory and re-discover all packs.
     public func scanForChanges(bundledURLs: [URL]) -> [ManagedPack] {
         return discoverPacks(bundledURLs: bundledURLs)
     }

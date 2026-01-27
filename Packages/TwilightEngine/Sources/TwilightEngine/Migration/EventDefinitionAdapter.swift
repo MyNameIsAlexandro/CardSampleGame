@@ -105,16 +105,7 @@ extension EventDefinition {
     }
 
     private func mapRegionTypeString(_ typeString: String) -> RegionType {
-        switch typeString.lowercased() {
-        case "settlement": return .settlement
-        case "forest": return .forest
-        case "swamp": return .swamp
-        case "wasteland": return .wasteland
-        case "sacred": return .sacred
-        case "mountain": return .mountain
-        case "water": return .water
-        default: return .forest
-        }
+        RegionType(rawValue: typeString.lowercased()) ?? .settlement
     }
 
     private func extractQuestLinks() -> [String] {
@@ -154,24 +145,16 @@ extension EventDefinition {
     }
 
     private func getEnemyStats(for enemyId: String, difficulty: Int) -> (health: Int, power: Int, defense: Int) {
-        // Base stats scaled by difficulty
+        // Try to get stats from ContentRegistry (data-driven)
+        if let enemyDef = ContentRegistry.shared.getEnemy(id: enemyId) {
+            return (health: enemyDef.health, power: enemyDef.power, defense: enemyDef.defense)
+        }
+
+        // Fallback: base stats scaled by difficulty (no game-specific IDs)
         let baseHealth = 5 + (difficulty * 3)
         let basePower = 2 + difficulty
         let baseDefense = 1 + (difficulty / 2)
-
-        // Enemy-specific adjustments
-        switch enemyId {
-        case "wild_beast":
-            return (health: baseHealth, power: basePower + 1, defense: baseDefense)
-        case "leshy":
-            return (health: baseHealth + 2, power: basePower, defense: baseDefense + 1)
-        case "mountain_spirit":
-            return (health: baseHealth + 3, power: basePower + 1, defense: baseDefense + 2)
-        case "leshy_guardian_boss":
-            return (health: baseHealth + 10, power: basePower + 3, defense: baseDefense + 3)
-        default:
-            return (health: baseHealth, power: basePower, defense: baseDefense)
-        }
+        return (health: baseHealth, power: basePower, defense: baseDefense)
     }
 
     private func difficultyToRarity(_ difficulty: Int) -> CardRarity {

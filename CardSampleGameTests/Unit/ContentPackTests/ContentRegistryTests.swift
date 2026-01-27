@@ -36,8 +36,8 @@ final class ContentRegistryTests: XCTestCase {
 
     func testLoadMultiplePacks() throws {
         // Skip if packs not available (Bundle.module resolution issue in tests)
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
-        try XCTSkipIf(storyPackURL == nil, "TwilightMarchesActI pack not available")
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
+        if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // When - Load both packs using multi-pack loader
         let packs = try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
@@ -50,8 +50,8 @@ final class ContentRegistryTests: XCTestCase {
 
     func testLoadPackRegistersContent() throws {
         // Skip if packs not available
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
-        try XCTSkipIf(storyPackURL == nil, "TwilightMarchesActI pack not available")
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
+        if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // When
         try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
@@ -67,8 +67,8 @@ final class ContentRegistryTests: XCTestCase {
         XCTAssertNil(ContentRegistry.shared.getBalanceConfig())
 
         // Skip if packs not available
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
-        try XCTSkipIf(storyPackURL == nil, "TwilightMarchesActI pack not available")
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
+        if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // When
         try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
@@ -79,7 +79,7 @@ final class ContentRegistryTests: XCTestCase {
 
     func testCannotLoadSamePackTwice() throws {
         // Skip if character pack not available
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
 
         // Given
         try ContentRegistry.shared.loadPack(from: characterPackURL!)
@@ -98,8 +98,8 @@ final class ContentRegistryTests: XCTestCase {
 
     func testGetCardById() throws {
         // Skip if packs not available
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
-        try XCTSkipIf(storyPackURL == nil, "TwilightMarchesActI pack not available")
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
+        if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
         try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
@@ -119,8 +119,8 @@ final class ContentRegistryTests: XCTestCase {
 
     func testGetHeroById() throws {
         // Skip if packs not available
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
-        try XCTSkipIf(storyPackURL == nil, "TwilightMarchesActI pack not available")
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
+        if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
         try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
@@ -140,8 +140,8 @@ final class ContentRegistryTests: XCTestCase {
 
     func testGetNonExistentContent() throws {
         // Skip if packs not available
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
-        try XCTSkipIf(storyPackURL == nil, "TwilightMarchesActI pack not available")
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
+        if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
         try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
@@ -156,8 +156,8 @@ final class ContentRegistryTests: XCTestCase {
 
     func testGetStartingDeckForHero() throws {
         // Skip if packs not available
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
-        try XCTSkipIf(storyPackURL == nil, "TwilightMarchesActI pack not available")
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
+        if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
         try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
@@ -179,8 +179,8 @@ final class ContentRegistryTests: XCTestCase {
 
     func testUnloadPack() throws {
         // Skip if packs not available
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
-        try XCTSkipIf(storyPackURL == nil, "TwilightMarchesActI pack not available")
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
+        if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
         try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
@@ -195,8 +195,8 @@ final class ContentRegistryTests: XCTestCase {
 
     func testUnloadAllPacks() throws {
         // Skip if packs not available
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
-        try XCTSkipIf(storyPackURL == nil, "TwilightMarchesActI pack not available")
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
+        if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
         try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
@@ -215,8 +215,8 @@ final class ContentRegistryTests: XCTestCase {
 
     func testValidateLoadedContent() throws {
         // Skip if packs not available
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
-        try XCTSkipIf(storyPackURL == nil, "TwilightMarchesActI pack not available")
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
+        if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
         try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
@@ -233,8 +233,8 @@ final class ContentRegistryTests: XCTestCase {
 
     func testTotalInventory() throws {
         // Skip if packs not available
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
-        try XCTSkipIf(storyPackURL == nil, "TwilightMarchesActI pack not available")
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
+        if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
         try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
@@ -252,8 +252,8 @@ final class ContentRegistryTests: XCTestCase {
 
     func testContentProviderProtocolConformance() throws {
         // Skip if packs not available
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
-        try XCTSkipIf(storyPackURL == nil, "TwilightMarchesActI pack not available")
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
+        if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
         try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
@@ -269,8 +269,8 @@ final class ContentRegistryTests: XCTestCase {
 
     func testGetCharacterPacks() throws {
         // Skip if packs not available
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
-        try XCTSkipIf(storyPackURL == nil, "TwilightMarchesActI pack not available")
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
+        if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
         try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
@@ -285,8 +285,8 @@ final class ContentRegistryTests: XCTestCase {
 
     func testGetStoryPacks() throws {
         // Skip if packs not available
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
-        try XCTSkipIf(storyPackURL == nil, "TwilightMarchesActI pack not available")
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
+        if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
         try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
@@ -304,8 +304,8 @@ final class ContentRegistryTests: XCTestCase {
         XCTAssertFalse(ContentRegistry.shared.isReadyForGameplay)
 
         // Skip if packs not available
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
-        try XCTSkipIf(storyPackURL == nil, "TwilightMarchesActI pack not available")
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
+        if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // When - Load only character pack
         try ContentRegistry.shared.loadPack(from: characterPackURL!)
@@ -320,8 +320,8 @@ final class ContentRegistryTests: XCTestCase {
 
     func testGetPacksBySeason() throws {
         // Skip if packs not available
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
-        try XCTSkipIf(storyPackURL == nil, "TwilightMarchesActI pack not available")
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
+        if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
         try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
@@ -336,8 +336,8 @@ final class ContentRegistryTests: XCTestCase {
 
     func testGetPacksByCampaign() throws {
         // Skip if packs not available
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
-        try XCTSkipIf(storyPackURL == nil, "TwilightMarchesActI pack not available")
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
+        if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
         try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
@@ -353,8 +353,8 @@ final class ContentRegistryTests: XCTestCase {
 
     func testGetAvailableSeasons() throws {
         // Skip if packs not available
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
-        try XCTSkipIf(storyPackURL == nil, "TwilightMarchesActI pack not available")
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
+        if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
         try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
@@ -368,8 +368,8 @@ final class ContentRegistryTests: XCTestCase {
 
     func testGetCampaignsInSeason() throws {
         // Skip if packs not available
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
-        try XCTSkipIf(storyPackURL == nil, "TwilightMarchesActI pack not available")
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
+        if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
         try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
@@ -383,8 +383,8 @@ final class ContentRegistryTests: XCTestCase {
 
     func testIsCampaignCompleteWithSingleAct() throws {
         // Skip if packs not available
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
-        try XCTSkipIf(storyPackURL == nil, "TwilightMarchesActI pack not available")
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
+        if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
         try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
@@ -398,8 +398,8 @@ final class ContentRegistryTests: XCTestCase {
 
     func testGetNextPackInCampaignReturnsNilForLastAct() throws {
         // Skip if packs not available
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
-        try XCTSkipIf(storyPackURL == nil, "TwilightMarchesActI pack not available")
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
+        if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
         try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
@@ -413,8 +413,8 @@ final class ContentRegistryTests: XCTestCase {
 
     func testHasAllRequiredPacksForFirstAct() throws {
         // Skip if packs not available
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
-        try XCTSkipIf(storyPackURL == nil, "TwilightMarchesActI pack not available")
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
+        if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
         try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
@@ -428,8 +428,8 @@ final class ContentRegistryTests: XCTestCase {
 
     func testCharacterPackHasNoSeason() throws {
         // Skip if packs not available
-        try XCTSkipIf(characterPackURL == nil, "CoreHeroes pack not available - Bundle.module resolution issue")
-        try XCTSkipIf(storyPackURL == nil, "TwilightMarchesActI pack not available")
+        if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
+        if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
         try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
@@ -453,6 +453,7 @@ final class ContentRegistryTests: XCTestCase {
             id: "test_region",
             title: .inline(LocalizedString(en: "Test", ru: "Тест")),
             description: .inline(LocalizedString(en: "Test region", ru: "Тестовый регион")),
+            regionType: "test",
             neighborIds: []
         )
 

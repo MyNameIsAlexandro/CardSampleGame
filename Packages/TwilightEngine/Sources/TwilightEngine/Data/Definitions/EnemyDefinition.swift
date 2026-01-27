@@ -9,7 +9,7 @@ import Foundation
 public struct EnemyDefinition: GameDefinition {
     // MARK: - Identity
 
-    /// Unique enemy identifier (e.g., "leshy", "wild_beast")
+    /// Unique enemy identifier (defined in content pack)
     public let id: String
 
     // MARK: - Localized Content
