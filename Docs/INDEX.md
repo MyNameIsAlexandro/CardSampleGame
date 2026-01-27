@@ -49,12 +49,12 @@
 |----------|----------|
 | [SPEC_CAMPAIGN_PACK.md](./Specs/SPEC_CAMPAIGN_PACK.md) | Спецификация Campaign Pack |
 | [SPEC_BALANCE_PACK.md](./Specs/SPEC_BALANCE_PACK.md) | Спецификация Balance Pack |
-| [SPEC_INVESTIGATOR_PACK.md](./Specs/SPEC_INVESTIGATOR_PACK.md) | Спецификация Character/Investigator Pack |
+| [SPEC_CHARACTER_PACK.md](./Specs/SPEC_CHARACTER_PACK.md) | Спецификация Character Pack |
 
 **Русские версии:**
 - [SPEC_CAMPAIGN_PACK_RU.md](./Specs/SPEC_CAMPAIGN_PACK_RU.md)
 - [SPEC_BALANCE_PACK_RU.md](./Specs/SPEC_BALANCE_PACK_RU.md)
-- [SPEC_INVESTIGATOR_PACK_RU.md](./Specs/SPEC_INVESTIGATOR_PACK_RU.md)
+- [SPEC_CHARACTER_PACK_RU.md](./Specs/SPEC_CHARACTER_PACK_RU.md)
 
 ### Audit/ — Аудит и история изменений
 Результаты проверок, требования аудиторов, история изменений.

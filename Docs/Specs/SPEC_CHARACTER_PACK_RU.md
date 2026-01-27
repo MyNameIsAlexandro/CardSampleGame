@@ -1,4 +1,4 @@
-# Спецификация Investigator Pack
+# Спецификация Character Pack
 
 > **Версия:** 1.0
 > **Статус:** Активна
@@ -10,7 +10,7 @@
 
 ### 1.1 Назначение
 
-Investigator Pack предоставляет игровых персонажей-героев с их стартовыми колодами, способностями и связанными картами. Эти паки фокусируются на кастомизации персонажей и возможностях построения колоды.
+Character Pack предоставляет игровых персонажей-героев с их стартовыми колодами, способностями и связанными картами. Эти паки фокусируются на кастомизации персонажей и возможностях построения колоды.
 
 ### 1.2 Область применения
 
@@ -116,12 +116,12 @@ Investigator Pack предоставляет игровых персонажей
 
 ```json
 {
-  "$schema": "investigator-pack-manifest-v1",
+  "$schema": "character-pack-manifest-v1",
   "id": "string (обязательно, уникальный)",
   "name": "LocalizedString (обязательно)",
   "description": "LocalizedString (обязательно)",
   "version": "SemanticVersion (обязательно)",
-  "type": "investigator (обязательно)",
+  "type": "character (обязательно)",
   "core_version_min": "SemanticVersion (обязательно)",
   "core_version_max": "SemanticVersion | null",
   "dependencies": "PackDependency[] (опционально)",
@@ -302,12 +302,12 @@ common | uncommon | rare | epic | legendary
 ### 6.1 Интерфейс загрузки
 
 ```swift
-protocol InvestigatorPackLoader {
-    func loadInvestigators(from url: URL) throws -> InvestigatorContent
+protocol CharacterPackLoader {
+    func loadCharacters(from url: URL) throws -> CharacterContent
     func validate(at url: URL) -> ValidationResult
 }
 
-struct InvestigatorContent {
+struct CharacterContent {
     let heroes: [String: StandardHeroDefinition]
     let cards: [String: StandardCardDefinition]
 }
@@ -389,7 +389,7 @@ AbilityRegistry.register("my_custom_effect") { context in
 
 ## 9. Примеры
 
-### 9.1 Минимальный Investigator Pack
+### 9.1 Минимальный Character Pack
 
 ```json
 // manifest.json
@@ -397,7 +397,7 @@ AbilityRegistry.register("my_custom_effect") { context in
   "id": "new-hero-pack",
   "name": { "en": "New Hero Pack" },
   "version": "1.0.0",
-  "type": "investigator",
+  "type": "character",
   "core_version_min": "1.0.0",
   "heroes_path": "heroes.json"
 }

@@ -141,7 +141,7 @@
 
 ## Epic 6 — Pack Composition (Arkham-like) (Critical)
 
-### 6.1 Campaign + Investigator packs совместимы
+### 6.1 Campaign + Character packs совместимы
 
 **Задачи**
 * Реализовать композицию packset:
@@ -149,7 +149,7 @@
 * Гарантировать отсутствие коллизий ID (namespaced ids или packId-prefix enforced validator).
 
 **Acceptance**
-* Тест: `testCampaignPackPlusInvestigatorPackComposition()`.
+* Тест: `testCampaignPackPlusCharacterPackComposition()`.
 
 ---
 

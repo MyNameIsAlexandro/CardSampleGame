@@ -1,4 +1,4 @@
-# Спецификация Investigator Pack
+# Спецификация Character Pack
 
 > **Версия:** 1.0
 > **Статус:** Активный
@@ -10,12 +10,12 @@
 
 ### 1.1 Назначение
 
-Investigator Pack предоставляет игровых персонажей-героев с их стартовыми колодами, способностями и связанными картами игрока. Эти packs фокусируются на кастомизации персонажа и опциях для построения колоды.
+Character Pack предоставляет игровых персонажей-героев с их стартовыми колодами, способностями и связанными картами игрока. Эти packs фокусируются на кастомизации персонажа и опциях для построения колоды.
 
 ### 1.2 Область применения
 
 Данная спецификация охватывает:
-- Структуру investigator pack и требования к манифесту
+- Структуру character pack и требования к манифесту
 - Схемы определения героев
 - Схемы определения карт
 - Правила составления стартовой колоды
@@ -124,12 +124,12 @@ Investigator Pack предоставляет игровых персонажей
 
 ```json
 {
-  "$schema": "investigator-pack-manifest-v1",
+  "$schema": "character-pack-manifest-v1",
   "id": "string (обязательно, уникальный, lowercase-hyphen)",
   "name": "LocalizedString (обязательно)",
   "description": "LocalizedString (обязательно)",
   "version": "SemanticVersion (обязательно)",
-  "type": "investigator (обязательно)",
+  "type": "character (обязательно)",
   "core_version_min": "SemanticVersion (обязательно)",
   "core_version_max": "SemanticVersion | null",
   "dependencies": "PackDependency[] (опционально)",
@@ -367,6 +367,7 @@ common | uncommon | rare | epic | legendary
 | VAL-LOC-001 | Имя не должно быть пустым | Ошибка |
 | VAL-LOC-002 | Описание не должно быть пустым | Ошибка |
 | VAL-LOC-003 | Рекомендуется русский перевод | Информация |
+| VAL-LOC-004 | Только inline `LocalizedString`; key-based зарезервирован, запрещён валидатором | Ошибка |
 
 ---
 
@@ -375,12 +376,12 @@ common | uncommon | rare | epic | legendary
 ### 6.1 Интерфейс загрузки
 
 ```swift
-protocol InvestigatorPackLoader {
-    func loadInvestigators(from url: URL) throws -> InvestigatorContent
+protocol CharacterPackLoader {
+    func loadCharacters(from url: URL) throws -> CharacterContent
     func validate(at url: URL) -> ValidationResult
 }
 
-struct InvestigatorContent {
+struct CharacterContent {
     let heroes: [String: StandardHeroDefinition]
     let cards: [String: StandardCardDefinition]
 }
@@ -414,7 +415,7 @@ protocol CardProvider {
 
 ```swift
 extension ContentRegistry {
-    func loadInvestigatorPack(from url: URL) throws -> LoadedPack
+    func loadCharacterPack(from url: URL) throws -> LoadedPack
     func getHero(id: String) -> StandardHeroDefinition?
     func getCard(id: String) -> StandardCardDefinition?
     func getStartingDeck(forHero: String) -> [StandardCardDefinition]
@@ -485,7 +486,7 @@ AbilityRegistry.register("my_custom_effect") { context in
 
 ## 9. Примеры
 
-### 9.1 Минимальный Investigator Pack
+### 9.1 Минимальный Character Pack
 
 ```json
 // manifest.json
@@ -493,7 +494,7 @@ AbilityRegistry.register("my_custom_effect") { context in
   "id": "new-hero-pack",
   "name": { "en": "New Hero Pack" },
   "version": "1.0.0",
-  "type": "investigator",
+  "type": "character",
   "core_version_min": "1.0.0",
   "heroes_path": "heroes.json"
 }

@@ -61,7 +61,7 @@ Resources/Content/           # Основной контент (загружае
 
 ContentPacks/TwilightMarches/   # Дополнительный пак
 ├── manifest.json              # Метаданные пака
-├── Investigators/
+├── Characters/
 │   └── heroes.json            # Доп. персонажи
 ├── Cards/
 │   └── cards.json             # Карты

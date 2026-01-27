@@ -105,7 +105,7 @@ Balance Pack предоставляет конфигурацию игры без
 |----|------------|------|
 | NFR-COMP-001 | Версия ядра | Семантическое версионирование |
 | NFR-COMP-002 | Совместимость с campaign | Любой campaign |
-| NFR-COMP-003 | Совместимость с investigator | Любой investigator |
+| NFR-COMP-003 | Совместимость с character pack | Любой character pack |
 
 ### 3.3 Безопасность
 
@@ -817,7 +817,7 @@ Packs могут наследовать от других balance packs:
 
 - [CONTENT_PACK_GUIDE.md](./CONTENT_PACK_GUIDE.md) - Общее руководство по pack
 - [SPEC_CAMPAIGN_PACK.md](./SPEC_CAMPAIGN_PACK.md) - Спецификация Campaign pack
-- [SPEC_INVESTIGATOR_PACK.md](./SPEC_INVESTIGATOR_PACK.md) - Спецификация Investigator pack
+- [SPEC_CHARACTER_PACK.md](./SPEC_CHARACTER_PACK.md) - Спецификация Character pack
 - [ENGINE_ARCHITECTURE.md](./ENGINE_ARCHITECTURE.md) - Архитектура Engine
 
 ---

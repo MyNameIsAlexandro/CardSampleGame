@@ -129,6 +129,7 @@ Campaign Pack предоставляет сюжетный контент: рег
 | NFR-LOC-001 | Весь пользовательский текст | Локализован |
 | NFR-LOC-002 | Запасной язык | Английский (en) |
 | NFR-LOC-003 | Минимум локалей | 1 (en) |
+| NFR-LOC-004 | Формат локализации | Inline `LocalizedString { "en": "...", "ru": "..." }`. Key-based (StringKey + string tables) зарезервирован, запрещён валидатором |
 
 ### 3.4 Валидация
 
@@ -426,7 +427,7 @@ TwilightMarches/
 ## 9. Связанные документы
 
 - [CONTENT_PACK_GUIDE.md](./CONTENT_PACK_GUIDE.md) - Общий гайд по пакам
-- [SPEC_INVESTIGATOR_PACK.md](./SPEC_INVESTIGATOR_PACK.md) - Спецификация Investigator Pack
+- [SPEC_CHARACTER_PACK.md](./SPEC_CHARACTER_PACK.md) - Спецификация Character Pack
 - [SPEC_BALANCE_PACK.md](./SPEC_BALANCE_PACK.md) - Спецификация Balance Pack
 - [ENGINE_ARCHITECTURE.md](./ENGINE_ARCHITECTURE.md) - Архитектура движка
 

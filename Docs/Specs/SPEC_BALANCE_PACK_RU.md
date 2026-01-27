@@ -780,7 +780,7 @@ let travelCost = BalanceConfig.current.time.travelCost
 
 - [CONTENT_PACK_GUIDE.md](./CONTENT_PACK_GUIDE.md) - Общий гайд по пакам
 - [SPEC_CAMPAIGN_PACK.md](./SPEC_CAMPAIGN_PACK.md) - Спецификация Campaign Pack
-- [SPEC_INVESTIGATOR_PACK.md](./SPEC_INVESTIGATOR_PACK.md) - Спецификация Investigator Pack
+- [SPEC_CHARACTER_PACK.md](./SPEC_CHARACTER_PACK.md) - Спецификация Character Pack
 - [ENGINE_ARCHITECTURE.md](./ENGINE_ARCHITECTURE.md) - Архитектура движка
 
 ---

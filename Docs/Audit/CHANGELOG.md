@@ -718,7 +718,7 @@ Files exceeding limits but stable:
 | EVENT_MODULE_ARCHITECTURE.md | Event system |
 | SPEC_CAMPAIGN_PACK.md | Campaign pack spec |
 | SPEC_BALANCE_PACK.md | Balance pack spec |
-| SPEC_INVESTIGATOR_PACK.md | Character pack spec |
+| SPEC_CHARACTER_PACK.md | Character pack spec |
 | QA_ACT_I_CHECKLIST.md | QA checklist |
 | AUDIT_REPORT_v2.0.md | Audit report |
 | CHANGELOG.md | Change history |

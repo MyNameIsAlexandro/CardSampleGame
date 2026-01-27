@@ -282,7 +282,8 @@ struct LocalizedString: Codable, Hashable {
 // КАНОН ЛОКАЛИЗАЦИИ (Audit B1):
 // - Canonical scheme: Inline LocalizedString { "en": "...", "ru": "..." }
 // - Запрещено: смешивание inline и StringKey в одном паке
-// - LocalizationValidator проверяет соблюдение канона при загрузке паков
+// - Key-based локализация (StringKey + string tables) зарезервирована под будущую миграцию,
+//   сейчас запрещена валидатором (LocalizationValidatorTests)
 // - UI использует LocalizableText.resolved для получения строк
 
 protocol EventSystemProtocol {
@@ -779,7 +780,7 @@ Engine/Data/Definitions/
 - [x] Экспортировать контент в JSON
 - [x] Реализовать Content Pack System (PackManifest, PackLoader, ContentRegistry)
 - [x] Создать `ContentPacks/TwilightMarches/` со всем контентом
-- [x] Написать спецификации: SPEC_CAMPAIGN_PACK.md, SPEC_INVESTIGATOR_PACK.md, SPEC_BALANCE_PACK.md
+- [x] Написать спецификации: SPEC_CAMPAIGN_PACK.md, SPEC_CHARACTER_PACK.md, SPEC_BALANCE_PACK.md
 - [x] Создать DevTools/PackCompiler для разработки паков
 
 ---
@@ -803,7 +804,7 @@ Engine/Data/Definitions/
 **Документация системы контентных паков:**
 - [CONTENT_PACK_GUIDE.md](./CONTENT_PACK_GUIDE.md) — гайд по созданию паков
 - [SPEC_CAMPAIGN_PACK.md](./SPEC_CAMPAIGN_PACK.md) — спецификация Campaign паков
-- [SPEC_INVESTIGATOR_PACK.md](./SPEC_INVESTIGATOR_PACK.md) — спецификация Investigator паков
+- [SPEC_CHARACTER_PACK.md](./SPEC_CHARACTER_PACK.md) — спецификация Character паков
 - [SPEC_BALANCE_PACK.md](./SPEC_BALANCE_PACK.md) — спецификация Balance паков
 
 **Pack Format (текущий vs планируемый):**
@@ -870,7 +871,7 @@ ContentPacks/
 └── TwilightMarches/                # "Сумрачные Пределы" Pack
     ├── manifest.json               # Pack metadata
     ├── Campaign/ActI/              # Regions, events, quests
-    ├── Investigators/              # Heroes, starting decks
+    ├── Characters/              # Heroes, starting decks
     ├── Cards/                      # Player/enemy cards
     ├── Balance/                    # Game configuration
     └── Localization/               # en.json, ru.json
