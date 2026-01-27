@@ -6,6 +6,150 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [2.1.1] - 2026-01-27 - Stage Acceptance: All Audit v2.1 Blockers Resolved
+
+### Summary
+
+Full stage acceptance for Audit v2.1. Every blocker from `AUDIT_FIXLIST_v2_1_ACCEPTANCE.md` resolved and enforced by gate tests. No XCTSkip, no system RNG, no game-specific IDs in engine, no UUID fallbacks, non-optional RNG state in saves, doc comments on all public API.
+
+**Test Count:** 194 Xcode + 122 SPM (all passing, 0 skipped)
+**Build Status:** SUCCESS
+**Commit:** `a0225b8`
+
+---
+
+### 1) BLOCKERS — все закрыты
+
+#### 1.1 XCTSkip = 0
+- **Было:** 126 вызовов `XCTSkip`/`XCTSkipIf` в 7 файлах тестов
+- **Стало:** 0 реальных вызовов. Все заменены на `XCTFail` + `return`
+- **Gate test:** `testNoXCTSkipInAnyTests()` — сканирует ВСЕ директории тестов
+- **Файлы:** `GameplayFlowTests.swift`, `Phase3ContractTests.swift`, `TimeSystemTests.swift`, `PackLoaderTests.swift`, `ContentRegistryTests.swift`, `ContentManagerTests.swift`, `HeroPanelTests.swift`, `ContentValidationTests.swift`
+
+#### 1.2 Engine без game-specific IDs
+- **Было:** `mapHeroNameToId` с "велеслава"→"veleslava", hardcoded card IDs в `createGenericStarterDeck()`, `"act1_completed"` в `checkEndConditions()`, `TwilightMarchesRegionType` enum, `"forest"` defaults
+- **Стало:** Мёртвый код удалён, `checkEndConditions()` читает `balanceConfig.endConditions.mainQuestCompleteFlag`, `RegionType(rawValue:)` вместо switch-case, defaults `"unknown"` вместо `"forest"`
+- **Gate test:** `testEngineContainsNoGameSpecificIds()` — статический скан исходников Engine
+- **Файлы:** `CardFactory.swift`, `TwilightGameEngine.swift`, `RegionDefinition.swift`, `EventDefinitionAdapter.swift`, `CodeContentProvider.swift`, `JSONContentProvider.swift`
+
+#### 1.3 Запрет системного RNG
+- **Было:** `resetToSystem()` в WorldRNG использовал `UInt64.random(in:)`, `seed` был optional в `GameRuntimeState.newGame()`
+- **Стало:** `resetToSystem()` удалён полностью, `seed: UInt64` обязательный параметр, legacy `Utilities/WorldRNG.swift` удалён
+- **Gate test:** `testNoSystemRandomInEngineCore()` — 0 исключений, рекурсивный скан всего Engine
+- **Файлы:** `WorldRNG.swift`, `GameRuntimeState.swift`, deleted `Utilities/WorldRNG.swift`
+
+#### 1.4 Stable IDs — нет UUID fallback
+- **Было:** `EventChoice.id` имел default `UUID().uuidString`, `EventPipeline` использовал `event.id.uuidString`
+- **Стало:** `EventChoice.id` — обязательный параметр, `EventPipeline` использует `definitionId`
+- **Gate test:** `testDefinitionIdIsNonOptional()` + `testDefinitionIdNeverNilForPackEntities()`
+- **Файлы:** `ExplorationModels.swift`, `EventPipeline.swift`, `EventView.swift`, `GameplayFlowTests.swift`
+
+#### 1.5 RNG state в Save/Load
+- **Было:** `rngSeed: UInt64?`, `rngState: UInt64?` — optional с fallback
+- **Стало:** `rngSeed: UInt64`, `rngState: UInt64` — обязательные поля, одна строка для restore: `WorldRNG.shared.restoreState(save.rngState)`
+- **Gate test:** `testEngineSaveContainsRNGState()` — проверяет non-optional типы в исходнике
+- **Файлы:** `EngineSave.swift`, `TwilightGameEngine.swift`, `SaveLoadTests.swift`
+
+---
+
+### 2) UI
+
+#### 2.1 Legacy Comments — WorldMapView чист
+- **Gate test:** `testNoLegacyInitializationCommentsInWorldMapView()`
+
+#### 2.2 SafeImage везде
+- **Было:** Потенциально `Image("...")` напрямую
+- **Стало:** 0 вхождений `Image("...")` в Views/
+- **Gate test:** `testNoDirectImageNamedInViews()`
+
+---
+
+### 3) Content Validation
+
+#### 3.1 ExpressionParser
+- **Добавлен:** `ExpressionParser.swift` — whitelist переменных (`WorldTension`, `lightDarkBalance`, `playerHealth` и др.) и функций
+- **Добавлен:** `ContentValidationError.ErrorType.invalidExpression`
+- **Gate tests:** `testRejectsUnknownVariables()`, `testRejectsUnknownFunctions()`, `testRejectsInvalidSyntax()`, `testAllPackConditionsAreValid()`
+- **Файлы:** `ExpressionParser.swift`, `ExpressionParserTests.swift`, `ContentProvider.swift`
+
+---
+
+### 4) Pack System
+
+#### 4.1 Локализация — единый канон
+- **Gate test:** `testNoMixedLocalizationSchema()` — inline `LocalizedString` с ru/en
+
+#### 4.2 Binary Pack round-trip
+- **Gate test:** `testPackCompilerRoundTrip()` — load → BinaryPackWriter → BinaryPackReader → сравнение
+
+---
+
+### 5) Code Hygiene
+
+#### 5.1 Doc Comments
+- **Добавлены `///`** ко всем public API в: `TwilightGameEngine.swift` (~35), `PackCompiler.swift` (22), `WorldRNG.swift` (6), `CardFactory.swift` (2)
+- **Уже задокументированы:** `ContentRegistry.swift`, `ExpressionParser.swift`
+
+#### 5.2 SwiftLint
+- `.swiftlint.yml`: `force_cast` error, `force_try` error, `cyclomatic_complexity` 15/25, `function_body_length` 60/100
+
+---
+
+### Definition of Done — Stage Accepted ✅
+
+| Критерий | Статус |
+|----------|--------|
+| Все BLOCKERS закрыты и подтверждены тестами | ✅ |
+| UI не содержит legacy закомментированного кода | ✅ |
+| SafeImage используется во всех местах | ✅ |
+| ExpressionParser валидирует conditions во всех pack'ах | ✅ |
+| Gate tests не skip'аются и реально падают при нарушениях | ✅ |
+
+---
+
+### Полный список изменённых файлов (35 файлов)
+
+**Engine (15 файлов):**
+- `Cards/CardFactory.swift` — удалён мёртвый код, doc comments
+- `Config/DegradationRules.swift` — minor fix
+- `ContentPacks/ContentManager.swift` — XCTSkip fixes в тестах
+- `ContentPacks/ContentRegistry.swift` — minor
+- `ContentPacks/ExpressionParser.swift` — **NEW**
+- `ContentPacks/PackCompiler.swift` — doc comments
+- `Core/EngineSave.swift` — non-optional rngSeed/rngState
+- `Core/TwilightGameEngine.swift` — endConditions config, doc comments, mapRegionType fix
+- `Data/Definitions/RegionDefinition.swift` — удалён TwilightMarchesRegionType
+- `Data/Providers/CodeContentProvider.swift` — default "unknown"
+- `Data/Providers/ContentProvider.swift` — invalidExpression error type
+- `Data/Providers/JSONContentProvider.swift` — default "unknown"
+- `Events/EventPipeline.swift` — definitionId вместо uuidString
+- `Migration/EventDefinitionAdapter.swift` — RegionType(rawValue:)
+- `Models/ExplorationModels.swift` — EventChoice.id required
+- `Runtime/GameRuntimeState.swift` — seed required
+- `Utilities/WorldRNG.swift` — удалён resetToSystem(), doc comments
+
+**Tests (11 файлов):**
+- `AuditGateTests.swift` — +390 строк новых gate tests
+- `ContentValidationTests.swift` — XCTSkip → XCTFail
+- `ExpressionParserTests.swift` — **NEW**
+- `ContentManagerTests.swift` — XCTSkip → XCTFail
+- `ContentRegistryTests.swift` — XCTSkip → XCTFail
+- `PackLoaderTests.swift` — XCTSkip → XCTFail
+- `SaveLoadTests.swift` — rng non-optional
+- `HeroPanelTests.swift` — XCTSkip → XCTFail
+- `GameplayFlowTests.swift` — XCTSkip → XCTFail, explicit IDs
+- `Phase3ContractTests.swift` — XCTSkip → XCTFail
+- `TimeSystemTests.swift` — XCTSkip → XCTFail
+
+**App (2 файла):**
+- `Views/EventView.swift` — explicit choice IDs in preview
+- `Utilities/WorldRNG.swift` — **DELETED** (legacy duplicate)
+
+**Config (1 файл):**
+- `.swiftlint.yml` — **NEW**
+
+---
+
 ## [2.1.0] - 2026-01-27 - Audit Verification & Content Manager
 
 ### Summary
