@@ -7,7 +7,7 @@ import Foundation
 public struct PackManifest: Codable {
     // MARK: - Identity
 
-    /// Unique pack identifier (e.g., "twilight-marches-act1")
+    /// Unique pack identifier (e.g., "my-campaign-act1")
     public let packId: String
 
     /// Human-readable display name
@@ -74,13 +74,13 @@ public struct PackManifest: Codable {
     /// Season this pack belongs to (e.g., "season1", "season2")
     public let season: String?
 
-    /// Campaign ID for multi-part stories (e.g., "twilight-marches")
+    /// Campaign ID for multi-part stories (e.g., "dark-forest")
     public let campaignId: String?
 
     /// Order within campaign (1 = Act I, 2 = Act II, etc.)
     public let campaignOrder: Int?
 
-    /// Bundle ID for purchasing (e.g., "twilight-marches-complete")
+    /// Bundle ID for purchasing (e.g., "dark-forest-complete")
     public let bundleId: String?
 
     /// Packs required to play this one (for story continuity)
@@ -89,7 +89,7 @@ public struct PackManifest: Codable {
     /// Localized season display name (e.g., "Season 1: Twilight")
     public let seasonDisplayName: LocalizedString?
 
-    /// Localized campaign display name (e.g., "Twilight Marches")
+    /// Localized campaign display name (e.g., "The Dark Forest")
     public let campaignDisplayName: LocalizedString?
 
     // MARK: - Metadata

@@ -88,6 +88,7 @@ struct CombatView: View {
                 return saved
             }
             return engine.combatState?.enemy ?? savedMonsterCard ?? Card(
+                id: "unknown_enemy",
                 name: "Unknown",
                 type: .monster,
                 description: "Unknown enemy"

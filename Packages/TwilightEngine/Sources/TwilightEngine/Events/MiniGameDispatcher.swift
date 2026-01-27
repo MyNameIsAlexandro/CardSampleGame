@@ -84,7 +84,7 @@ public final class MiniGameDispatcher {
 
 /// Definition of a mini-game challenge
 public struct MiniGameChallenge {
-    public let id: UUID
+    public let id: String
     public let type: MiniGameType
     public let difficulty: Int
     public let requirements: [String: Any]
@@ -92,7 +92,7 @@ public struct MiniGameChallenge {
     public let penalties: MiniGamePenalties
 
     public init(
-        id: UUID = UUID(),
+        id: String,
         type: MiniGameType,
         difficulty: Int = 1,
         requirements: [String: Any] = [:],
@@ -123,14 +123,14 @@ public struct MiniGameRewards {
     public var faithGain: Int = 0
     public var tensionReduction: Int = 0
     public var flagsToSet: [String] = []
-    public var cardsToGain: [UUID] = []
+    public var cardsToGain: [String] = []
 
     public init(
         healthGain: Int = 0,
         faithGain: Int = 0,
         tensionReduction: Int = 0,
         flagsToSet: [String] = [],
-        cardsToGain: [UUID] = []
+        cardsToGain: [String] = []
     ) {
         self.healthGain = healthGain
         self.faithGain = faithGain

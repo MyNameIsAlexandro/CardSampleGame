@@ -9,7 +9,7 @@ struct EventView: View {
     @ObservedObject var engine: TwilightGameEngine
 
     let event: GameEvent
-    let regionId: UUID
+    let regionId: String
     let onChoiceSelected: (EventChoice) -> Void
     let onDismiss: () -> Void
 
@@ -24,7 +24,7 @@ struct EventView: View {
     init(
         engine: TwilightGameEngine,
         event: GameEvent,
-        regionId: UUID,
+        regionId: String,
         onChoiceSelected: @escaping (EventChoice) -> Void,
         onDismiss: @escaping () -> Void
     ) {
@@ -415,6 +415,7 @@ struct EventView_Previews: PreviewProvider {
         engine.initializeNewGame(playerName: "Волхв", heroId: nil, startingDeck: [])
 
         let event = GameEvent(
+            id: "preview_event",
             eventType: .narrative,
             title: "Тестовое событие",
             description: "Это тестовое событие для предварительного просмотра",
@@ -443,7 +444,7 @@ struct EventView_Previews: PreviewProvider {
         return EventView(
             engine: engine,
             event: event,
-            regionId: UUID(),
+            regionId: "preview_region",
             onChoiceSelected: { _ in },
             onDismiss: { }
         )

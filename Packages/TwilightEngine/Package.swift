@@ -12,6 +12,10 @@ let package = Package(
             name: "TwilightEngine",
             targets: ["TwilightEngine"]
         ),
+        .library(
+            name: "PackAuthoring",
+            targets: ["PackAuthoring"]
+        ),
         .executable(
             name: "pack-compiler",
             targets: ["PackCompilerTool"]
@@ -23,15 +27,25 @@ let package = Package(
             dependencies: [],
             path: "Sources/TwilightEngine"
         ),
+        .target(
+            name: "PackAuthoring",
+            dependencies: ["TwilightEngine"],
+            path: "Sources/PackAuthoring"
+        ),
         .executableTarget(
             name: "PackCompilerTool",
-            dependencies: ["TwilightEngine"],
+            dependencies: ["PackAuthoring"],
             path: "Sources/PackCompilerTool"
         ),
         .testTarget(
             name: "TwilightEngineTests",
             dependencies: ["TwilightEngine"],
             path: "Tests/TwilightEngineTests"
+        ),
+        .testTarget(
+            name: "PackAuthoringTests",
+            dependencies: ["PackAuthoring", "TwilightEngine"],
+            path: "Tests/PackAuthoringTests"
         ),
     ]
 )

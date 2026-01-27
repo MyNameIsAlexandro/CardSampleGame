@@ -1,4 +1,5 @@
 import Foundation
+import TwilightEngine
 
 // MARK: - Pack Compiler
 // Compiles JSON content packs to binary .pack format

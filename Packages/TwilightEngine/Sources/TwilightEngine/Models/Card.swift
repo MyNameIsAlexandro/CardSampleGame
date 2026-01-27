@@ -1,8 +1,7 @@
 import Foundation
 
 public struct Card: Identifiable, Codable, Hashable, Sendable {
-    public let id: UUID
-    public let definitionId: String  // Content Pack ID for this card definition
+    public let id: String
     public let name: String
     public let type: CardType
     public let rarity: CardRarity
@@ -23,7 +22,7 @@ public struct Card: Identifiable, Codable, Hashable, Sendable {
     public var damageType: DamageType?
     public var range: Int?
 
-    // Twilight Marches mechanics
+    // Campaign mechanics
     public var balance: CardBalance?  // Light/Dark alignment
     public var realm: Realm?  // Yav/Nav/Prav
     public var curseType: CurseType?  // For curse cards
@@ -33,8 +32,7 @@ public struct Card: Identifiable, Codable, Hashable, Sendable {
     public var faithCost: Int  // Cost in faith to purchase from market
 
     public init(
-        id: UUID = UUID(),
-        definitionId: String = "",
+        id: String,
         name: String,
         type: CardType,
         rarity: CardRarity = .common,
@@ -57,7 +55,6 @@ public struct Card: Identifiable, Codable, Hashable, Sendable {
         faithCost: Int = 3
     ) {
         self.id = id
-        self.definitionId = definitionId
         self.name = name
         self.type = type
         self.rarity = rarity
@@ -103,21 +100,18 @@ public struct Card: Identifiable, Codable, Hashable, Sendable {
 }
 
 public struct CardAbility: Identifiable, Hashable, Sendable {
-    public let id: UUID
-    public let stringId: String?
+    public let id: String
     public let name: String
     public let description: String
     public let effect: AbilityEffect
 
     public init(
-        id: UUID = UUID(),
-        stringId: String? = nil,
+        id: String,
         name: String,
         description: String,
         effect: AbilityEffect
     ) {
         self.id = id
-        self.stringId = stringId
         self.name = name
         self.description = description
         self.effect = effect
@@ -139,18 +133,7 @@ extension CardAbility: Codable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        // Try to decode id as UUID first, then as String
-        if let uuidId = try? container.decode(UUID.self, forKey: .id) {
-            self.id = uuidId
-            self.stringId = nil
-        } else if let stringId = try? container.decode(String.self, forKey: .id) {
-            self.stringId = stringId
-            // Generate deterministic UUID from string
-            self.id = UUID(uuidString: stringId.stableUUID) ?? UUID()
-        } else {
-            self.id = UUID()
-            self.stringId = nil
-        }
+        self.id = try container.decode(String.self, forKey: .id)
 
         // Handle localized name
         let name = try container.decode(String.self, forKey: .name)
@@ -175,27 +158,10 @@ extension CardAbility: Codable {
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        if let stringId = stringId {
-            try container.encode(stringId, forKey: .id)
-        } else {
-            try container.encode(id, forKey: .id)
-        }
+        try container.encode(id, forKey: .id)
         try container.encode(name, forKey: .name)
         try container.encode(description, forKey: .description)
         try container.encode(effect, forKey: .effect)
-    }
-}
-
-private extension String {
-    var stableUUID: String {
-        var hash: UInt64 = 5381
-        for char in self.utf8 {
-            hash = ((hash << 5) &+ hash) &+ UInt64(char)
-        }
-        let hex = String(format: "%016llX", hash)
-        let padded = hex.padding(toLength: 32, withPad: "0", startingAt: 0)
-        let chars = Array(padded)
-        return "\(String(chars[0..<8]))-\(String(chars[8..<12]))-\(String(chars[12..<16]))-\(String(chars[16..<20]))-\(String(chars[20..<32]))"
     }
 }
 
@@ -208,7 +174,7 @@ public enum AbilityEffect: Hashable, Sendable {
     case explore
     case custom(String)
 
-    // Twilight Marches mechanics
+    // Campaign mechanics
     case applyCurse(type: CurseType, duration: Int)  // Apply curse
     case removeCurse(type: CurseType?)  // Remove specific or any curse
     case summonSpirit(power: Int, realm: Realm)  // Summon spirit guardian

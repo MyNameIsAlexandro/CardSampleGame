@@ -159,6 +159,7 @@ final class GameplayFlowTests: XCTestCase {
     func testEventHasChoices() {
         // Given: A combat event
         let testEvent = GameEvent(
+            id: "test_event_1",
             eventType: .combat,
             title: "Test Combat",
             description: "Test description",
@@ -438,6 +439,7 @@ final class GameplayFlowTests: XCTestCase {
     func testCardTypeAttackAddsBonus() {
         // Given: An attack card
         let attackCard = Card(
+            id: "test_card_1",
             name: "Test Sword",
             type: .attack,
             description: "A test weapon",
@@ -452,6 +454,7 @@ final class GameplayFlowTests: XCTestCase {
     func testCardTypeDefenseHasDefenseValue() {
         // Given: A defense card
         let defenseCard = Card(
+            id: "test_card_2",
             name: "Test Shield",
             type: .defense,
             description: "A test shield",
@@ -466,12 +469,14 @@ final class GameplayFlowTests: XCTestCase {
     func testCardCostProperty() {
         // Given: Cards with different costs
         let freeCard = Card(
+            id: "test_card_3",
             name: "Free Card",
             type: .attack,
             description: "No cost",
             cost: 0
         )
         let costlyCard = Card(
+            id: "test_card_4",
             name: "Costly Card",
             type: .spell,
             description: "Costs faith",
@@ -486,12 +491,14 @@ final class GameplayFlowTests: XCTestCase {
     func testCardTypeSpellHasAbilities() {
         // Given: A spell card with abilities
         let spellCard = Card(
+            id: "test_card_5",
             name: "Fireball",
             type: .spell,
             description: "Deals damage",
             cost: 2,
             abilities: [
                 CardAbility(
+                    id: "test_ability_1",
                     name: "Fire Damage",
                     description: "Deals fire damage",
                     effect: .damage(amount: 6, type: .fire)
@@ -540,6 +547,7 @@ final class GameplayFlowTests: XCTestCase {
     func testCardAbilityAddDice() {
         // Given: An ability that adds dice
         let ability = CardAbility(
+            id: "test_ability_2",
             name: "Blessing",
             description: "Adds bonus dice",
             effect: .addDice(count: 2)
@@ -556,6 +564,7 @@ final class GameplayFlowTests: XCTestCase {
     func testCardAbilityHeal() {
         // Given: An ability that heals
         let ability = CardAbility(
+            id: "test_ability_3",
             name: "Heal",
             description: "Heals player",
             effect: .heal(amount: 5)
@@ -572,6 +581,7 @@ final class GameplayFlowTests: XCTestCase {
     func testCardAbilityGainFaith() {
         // Given: An ability that grants faith
         let ability = CardAbility(
+            id: "test_ability_4",
             name: "Prayer",
             description: "Grants faith",
             effect: .gainFaith(amount: 3)
@@ -748,6 +758,7 @@ final class GameplayFlowTests: XCTestCase {
     func testDuplicateCardsHaveUniqueIds() {
         // Given: Two cards with the same name (like "Защитный Посох")
         let card1 = Card(
+            id: "test_card_dup_1",
             name: "Защитный Посох",
             type: .attack,
             rarity: .common,
@@ -755,6 +766,7 @@ final class GameplayFlowTests: XCTestCase {
             power: 2
         )
         let card2 = Card(
+            id: "test_card_dup_2",
             name: "Защитный Посох",
             type: .attack,
             rarity: .common,
@@ -794,10 +806,10 @@ final class GameplayFlowTests: XCTestCase {
     func testDeckCanContainMultipleCopiesOfSameCard() {
         // Given: A deck with multiple copies of the same card name
         let cards = [
-            Card(name: "Защитный Посох", type: .attack, rarity: .common, description: "Test", power: 2),
-            Card(name: "Защитный Посох", type: .attack, rarity: .common, description: "Test", power: 2),
-            Card(name: "Светлый Оберег", type: .defense, rarity: .common, description: "Test", defense: 1),
-            Card(name: "Светлый Оберег", type: .defense, rarity: .common, description: "Test", defense: 1)
+            Card(id: "test_deck_1", name: "Защитный Посох", type: .attack, rarity: .common, description: "Test", power: 2),
+            Card(id: "test_deck_2", name: "Защитный Посох", type: .attack, rarity: .common, description: "Test", power: 2),
+            Card(id: "test_deck_3", name: "Светлый Оберег", type: .defense, rarity: .common, description: "Test", defense: 1),
+            Card(id: "test_deck_4", name: "Светлый Оберег", type: .defense, rarity: .common, description: "Test", defense: 1)
         ]
 
         // When: Getting unique IDs
@@ -911,6 +923,7 @@ final class GameplayFlowTests: XCTestCase {
         measure {
             for i in 0..<100 {
                 _ = Card(
+                    id: "test_perf_\(i)",
                     name: "Test Card \(i)",
                     type: .attack,
                     rarity: .common,

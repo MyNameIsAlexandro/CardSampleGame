@@ -58,7 +58,7 @@ public struct EnemyDefinition: GameDefinition {
     /// Balance change when defeated
     public let balanceDelta: Int
 
-    // Note: No explicit CodingKeys needed - PackLoader uses .convertFromSnakeCase
+    // Note: No explicit CodingKeys needed - JSONDecoder uses .convertFromSnakeCase
     // which automatically converts enemy_type → enemyType, faith_reward → faithReward, etc.
 
     // MARK: - Initialization
@@ -96,8 +96,7 @@ public struct EnemyDefinition: GameDefinition {
     /// Convert to legacy Card (monster type) for UI compatibility
     public func toCard() -> Card {
         return Card(
-            id: UUID(uuidString: id.md5UUID) ?? UUID(),
-            definitionId: id,  // Content Pack ID for tracking
+            id: id,
             name: name.resolved,
             type: .monster,
             rarity: rarity,
@@ -164,7 +163,7 @@ public enum EnemyAbilityEffect: Codable, Hashable {
     case custom(String)
 
     // MARK: - Custom Codable for JSON compatibility
-    // Note: No explicit snake_case mappings - PackLoader uses .convertFromSnakeCase
+    // Note: No explicit snake_case mappings - JSONDecoder uses .convertFromSnakeCase
     // which automatically converts bonus_damage → bonusDamage, etc.
 
     enum CodingKeys: String, CodingKey {
@@ -222,17 +221,3 @@ public enum EnemyAbilityEffect: Codable, Hashable {
     }
 }
 
-// MARK: - String UUID Extension (reuse pattern)
-
-private extension String {
-    var md5UUID: String {
-        var hash: UInt64 = 5381
-        for char in self.utf8 {
-            hash = ((hash << 5) &+ hash) &+ UInt64(char)
-        }
-        let hex = String(format: "%016llX", hash)
-        let padded = hex.padding(toLength: 32, withPad: "0", startingAt: 0)
-        let chars = Array(padded)
-        return "\(String(chars[0..<8]))-\(String(chars[8..<12]))-\(String(chars[12..<16]))-\(String(chars[16..<20]))-\(String(chars[20..<32]))"
-    }
-}

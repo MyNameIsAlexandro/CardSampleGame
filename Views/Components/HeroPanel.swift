@@ -52,7 +52,7 @@ struct HeroPanel: View {
                     statBadge(
                         icon: "heart.fill",
                         value: "\(engine.playerHealth)/\(engine.playerMaxHealth)",
-                        color: healthColor,
+                        color: AppColors.health,
                         label: nil
                     )
 
@@ -234,17 +234,6 @@ struct HeroPanel: View {
             return String(words[0].prefix(1)) + String(words[1].prefix(1))
         }
         return String(name.prefix(2)).uppercased()
-    }
-
-    var healthColor: Color {
-        let percentage = Double(engine.playerHealth) / Double(max(engine.playerMaxHealth, 1))
-        if percentage > 0.6 {
-            return AppColors.success
-        } else if percentage > 0.3 {
-            return AppColors.warning
-        } else {
-            return AppColors.danger
-        }
     }
 
     var balanceIcon: String {

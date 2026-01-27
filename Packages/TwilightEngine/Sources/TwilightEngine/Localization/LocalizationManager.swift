@@ -67,7 +67,7 @@ public final class LocalizationManager: ObservableObject, StringResolver {
     ///   - url: URL to the localization directory (contains en.json, ru.json, etc.)
     ///   - locales: List of supported locale codes
     /// - Throws: If string tables cannot be loaded
-    func loadStringTables(for packId: String, from url: URL, locales: [String]) throws {
+    public func loadStringTables(for packId: String, from url: URL, locales: [String]) throws {
         var packTables: [String: [String: String]] = [:]
 
         for locale in locales {

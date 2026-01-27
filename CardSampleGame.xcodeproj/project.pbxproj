@@ -39,6 +39,7 @@
 		PKG0019000000000000000001 /* TwilightMarchesActIContent in Frameworks */ = {isa = PBXBuildFile; productRef = PKG0015000000000000000001 /* TwilightMarchesActIContent */; };
 		PKG0020000000000000000001 /* CoreHeroesContent in Frameworks */ = {isa = PBXBuildFile; productRef = PKG0016000000000000000001 /* CoreHeroesContent */; };
 		PKG0021000000000000000001 /* TwilightMarchesActIContent in Frameworks */ = {isa = PBXBuildFile; productRef = PKG0017000000000000000001 /* TwilightMarchesActIContent */; };
+		PKG0022000000000000000001 /* PackAuthoring in Frameworks */ = {isa = PBXBuildFile; productRef = PKG0023000000000000000001 /* PackAuthoring */; };
 		TH00000300000000000000001 /* TestContentLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = TH00000200000000000000001 /* TestContentLoader.swift */; };
 		UT00000000000010 /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = UT00000000000001 /* Localization.swift */; };
 		UT00000000000020 /* AccessibilityIdentifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = UT00000000000002 /* AccessibilityIdentifiers.swift */; };
@@ -118,6 +119,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				PKG0005000000000000000001 /* TwilightEngine in Frameworks */,
+				PKG0022000000000000000001 /* PackAuthoring in Frameworks */,
 				PKG0020000000000000000001 /* CoreHeroesContent in Frameworks */,
 				PKG0021000000000000000001 /* TwilightMarchesActIContent in Frameworks */,
 			);
@@ -313,6 +315,7 @@
 			name = CardSampleGameTests;
 			packageProductDependencies = (
 				PKG0006000000000000000001 /* TwilightEngine */,
+				PKG0023000000000000000001 /* PackAuthoring */,
 				PKG0016000000000000000001 /* CoreHeroesContent */,
 				PKG0017000000000000000001 /* TwilightMarchesActIContent */,
 			);
@@ -742,6 +745,10 @@
 		PKG0017000000000000000001 /* TwilightMarchesActIContent */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = TwilightMarchesActIContent;
+		};
+		PKG0023000000000000000001 /* PackAuthoring */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PackAuthoring;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

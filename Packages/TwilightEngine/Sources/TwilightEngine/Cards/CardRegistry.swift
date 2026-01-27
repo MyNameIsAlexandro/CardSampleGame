@@ -29,7 +29,6 @@ public final class CardRegistry {
 
     private init() {
         // No hardcoded cards - all content comes from ContentPacks
-        // Cards are loaded via PackLoader -> ContentRegistry
     }
 
     // MARK: - Registration
@@ -242,9 +241,7 @@ public final class CardRegistry {
     }
 
     // MARK: - Content Pack Integration
-    // All cards are now loaded from ContentPacks via PackLoader.
-    // No hardcoded cards in CardRegistry.
-    // See: ContentPacks/TwilightMarches/Cards/cards.json
+    // All cards are loaded from ContentPacks via ContentRegistry.
 }
 
 // MARK: - Card Data Source Protocol

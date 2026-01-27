@@ -6,6 +6,176 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [2.2.0] - 2026-01-27 - PackAuthoring Extraction & UUID→String Migration
+
+### Summary
+
+Module extraction release. Moved authoring tools (PackLoader, PackCompiler, PackValidator — 1502 lines) into a separate `PackAuthoring` library target with its own test target (`PackAuthoringTests`), making TwilightEngine runtime-only. Migrated all content-driven model IDs from `UUID` to `String`. Added 24 new tests, hardened gate tests against false-green scenarios. Fixed HeroPanel health color.
+
+**Test Count:** 199 Xcode + 141 SPM (all passing, 0 skipped, total 340)
+**Build Status:** SUCCESS
+
+---
+
+### 1) PackAuthoring Module Extraction
+
+#### Architecture Change
+
+```
+Packages/TwilightEngine/
+├── Sources/
+│   ├── TwilightEngine/          ← Runtime-only (no JSON loading)
+│   │   └── ContentPacks/
+│   │       ├── ContentRegistry.swift
+│   │       ├── ContentManager.swift
+│   │       ├── BinaryPack.swift
+│   │       └── (PackLoader, PackCompiler, PackValidator REMOVED)
+│   ├── PackAuthoring/           ← NEW library target
+│   │   ├── PackLoader.swift
+│   │   ├── PackCompiler.swift
+│   │   └── PackValidator.swift
+│   └── PackCompilerTool/
+│       └── main.swift           ← imports PackAuthoring
+├── Tests/
+│   ├── TwilightEngineTests/     ← 122 engine tests
+│   └── PackAuthoringTests/      ← NEW: 19 authoring tests
+│       ├── PackAuthoringTestHelper.swift
+│       ├── PackCompilerTests.swift
+│       └── PackValidatorTests.swift
+```
+
+#### Changed
+- **Package.swift** — Added `PackAuthoring` library product and target (depends on `TwilightEngine`)
+- **PackCompilerTool** — Dependency changed from `TwilightEngine` to `PackAuthoring`
+- **GameDefinition.swift** — Made `Availability` struct properties and init `public` (cross-module access)
+- **LocalizationManager.swift** — Made `loadStringTables()` `public` (used by PackLoader)
+
+#### Gate Test
+- `testRuntimeDoesNotUsePackLoader()` — now passes structurally (PackLoader not in engine Sources)
+
+---
+
+### 2) UUID→String Migration
+
+All content-driven model IDs changed from `UUID` to `String` for stable, human-readable identifiers.
+
+#### Changed (20+ files)
+- **Card.swift** — `id: UUID` → `id: String`
+- **ExplorationModels.swift** — `EventChoice.id`, `Region.id`, etc. → `String`
+- **TwilightGameAction.swift** — All associated values with IDs → `String`
+- **TwilightGameEngine.swift** — All internal ID handling → `String`
+- **EngineSave.swift** — Save format uses `String` IDs
+- **Adapters** — Removed `md5UUID()`, `stableUUID()`, `definitionId` bridge code
+- **All engine tests** — Updated to use `String` IDs
+
+---
+
+### 3) New Tests (+24)
+
+#### Added
+- **PackCompilerTests.swift** (10 tests) — Compile story/character packs, validate output, error paths
+- **PackValidatorTests.swift** (10 tests) — Validate packs, cross-references, error detection
+- **PackLoaderTests.swift** (+4 tests) — Corrupted JSON, SHA256 consistency/difference/missing
+
+#### Test Summary — Xcode (199 tests)
+
+| Suite | Tests | Status |
+|-------|-------|--------|
+| AuditGateTests | 48 | OK |
+| CodeHygieneTests | 4 | OK |
+| ConditionValidatorTests | 10 | OK |
+| ContentManagerTests | 27 | OK |
+| ContentRegistryTests | 25 | OK |
+| ContentValidationTests | 8 | OK |
+| DesignSystemComplianceTests | 5 | OK |
+| HeroPanelTests | 7 | OK |
+| HeroRegistryTests | 8 | OK |
+| LocalizationValidatorTests | 8 | OK |
+| PackLoaderTests | 25 | OK |
+| SaveLoadTests | 24 | OK |
+| **Xcode Total** | **199** | OK |
+
+#### Test Summary — SPM (141 tests)
+
+| Suite | Tests | Target |
+|-------|-------|--------|
+| CombatEngineFirstTests | 20 | TwilightEngineTests |
+| DataSeparationTests | 8 | TwilightEngineTests |
+| EnemyDefinitionTests | 9 | TwilightEngineTests |
+| GameplayFlowTests | 56 | TwilightEngineTests |
+| Phase3ContractTests | 9 | TwilightEngineTests |
+| RegressionPlaythroughTests | 12 | TwilightEngineTests |
+| TimeSystemTests | 8 | TwilightEngineTests |
+| PackCompilerTests | 9 | PackAuthoringTests |
+| PackValidatorTests | 10 | PackAuthoringTests |
+| **SPM Total** | **141** | OK |
+
+---
+
+### 4) Gate Test Hardening (False-Green Prevention)
+
+Added directory/file existence assertions to 5 gate tests. If the repo structure changes and scanned directories disappear, tests now fail instead of silently passing.
+
+#### Changed
+- `testCardFactoryIsThePrimaryInterface` — asserts `dirsFound > 0`
+- `testAllPrintStatementsAreDebugOnly` — asserts `dirsFound > 0`
+- Asset image test — asserts `dirsFound > 0`
+- `testRuntimeDoesNotUsePackLoader` — asserts `filesFound > 0`
+- `testNoXCTSkipInAnyTests` — asserts `dirsFound > 0`
+
+---
+
+### 5) Comment Cleanup
+
+Removed 18 "twilight-marches" references from engine doc-comments and section markers. Replaced with neutral examples (`"my-campaign-act1"`, `"dark-forest"`, `"Game Actions"`, etc.). Actual code/config references (enum cases, resource paths) left intact.
+
+#### Files
+- `PackManifest.swift` — 4 replacements
+- `ContentRegistry.swift` — 1 replacement
+- `PackTypes.swift` — 1 replacement
+- `CardType.swift` — 5 replacements
+- `Card.swift` — 2 replacements
+- `AnchorDefinition.swift` — 1 replacement
+- `TwilightGameAction.swift` — 2 replacements
+- `TwilightGameEngine.swift` — 2 replacements
+
+---
+
+### 6) Test Modularity: PackAuthoringTests SPM Target
+
+PackCompilerTests and PackValidatorTests moved from Xcode app tests into a dedicated SPM test target `PackAuthoringTests`, preserving module boundaries.
+
+#### Added
+- **Package.swift** — `PackAuthoringTests` test target (depends on `PackAuthoring`, `TwilightEngine`)
+- **Tests/PackAuthoringTests/PackAuthoringTestHelper.swift** — Locates pack JSON directories via `#filePath`
+- **Tests/PackAuthoringTests/PackCompilerTests.swift** — 9 tests
+- **Tests/PackAuthoringTests/PackValidatorTests.swift** — 10 tests
+
+#### Removed
+- `CardSampleGameTests/Unit/ContentPackTests/PackCompilerTests.swift` — moved to SPM
+- `CardSampleGameTests/Unit/ContentPackTests/PackValidatorTests.swift` — moved to SPM
+
+---
+
+### 7) HeroPanel: Health Color Fix
+
+Health icon always shows `AppColors.health` (red) instead of computed green/yellow/red based on percentage.
+
+#### Changed
+- **HeroPanel.swift** — Replaced `healthColor` computed property with `AppColors.health` on line 55
+- Removed unused `healthColor` computed property (lines 239-248)
+
+---
+
+### Full File List
+
+**Moved (3):** PackLoader.swift, PackCompiler.swift, PackValidator.swift → `Sources/PackAuthoring/`
+**Moved to SPM (2):** PackCompilerTests.swift, PackValidatorTests.swift → `Tests/PackAuthoringTests/`
+**New (3):** PackAuthoringTestHelper.swift, PackCompilerTests.swift (SPM), PackValidatorTests.swift (SPM)
+**Modified (20+):** Package.swift, Card.swift, ExplorationModels.swift, TwilightGameAction.swift, TwilightGameEngine.swift, EngineSave.swift, GameDefinition.swift, LocalizationManager.swift, AuditGateTests.swift, PackLoaderTests.swift, CodeHygieneTests.swift, TestContentLoader.swift, project.pbxproj, CardRegistry.swift, EnemyDefinition.swift, PackManifest.swift, ContentRegistry.swift, PackTypes.swift, CardType.swift, AnchorDefinition.swift, HeroPanel.swift
+
+---
+
 ## [2.1.1] - 2026-01-27 - Stage Acceptance: All Audit v2.1 Blockers Resolved
 
 ### Summary
@@ -620,7 +790,7 @@ Initial Engine-First implementation before audit.
 2. **Data-Driven**: All content from Binary .pack files (compiled from JSON)
 3. **Deterministic**: WorldRNG ensures reproducible gameplay
 4. **Modular**: TwilightEngine as separate Swift Package
-5. **Testable**: 189 tests with automated compliance/gate checks
+5. **Testable**: 340 tests (199 Xcode + 141 SPM) with automated compliance/gate checks
 6. **Documented**: All public API has doc comments
 7. **Safe**: AssetRegistry fallbacks, typed conditions, no silent failures
 

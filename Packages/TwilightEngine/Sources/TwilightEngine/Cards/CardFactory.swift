@@ -146,7 +146,7 @@ public final class CardFactory {
     /// Convert hero definition to Card for UI display
     private func heroToCard(_ hero: StandardHeroDefinition) -> Card {
         return Card(
-            id: UUID(),
+            id: hero.id,
             name: hero.name.localized,
             type: .character,
             rarity: .legendary,
@@ -157,6 +157,7 @@ public final class CardFactory {
             health: hero.baseStats.health,
             abilities: [
                 CardAbility(
+                    id: "\(hero.id)_ability",
                     name: hero.specialAbility.name.localized,
                     description: hero.specialAbility.description.localized,
                     effect: .custom(hero.specialAbility.description.localized)

@@ -1,10 +1,11 @@
 import Foundation
 import CryptoKit
+import TwilightEngine
 
 // MARK: - Pack Loader
 
-/// Loads content pack data from disk
-/// Supports JSON format (Protobuf support planned)
+/// Loads content pack data from JSON source directories (authoring/compilation only).
+/// Runtime uses BinaryPackReader — do NOT use PackLoader in production code paths.
 public enum PackLoader {
     // MARK: - Main Loading
 

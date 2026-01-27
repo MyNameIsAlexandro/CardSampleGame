@@ -168,8 +168,6 @@ final class DataSeparationTests: XCTestCase {
         XCTAssertNotEqual(regionDef.title.en, regionDef.title.ru, "Localizations should be different")
     }
 
-    // NOTE: ContentRegistry JSON loading tests are in ContentRegistryTests.
-    // Removed duplicate stubs that were just throwing XCTSkip.
 }
 
 // MARK: - Mock Types

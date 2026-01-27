@@ -12,7 +12,7 @@ public enum CardType: String, Codable, Hashable, Sendable {
     case location
     case scenario
 
-    // Twilight Marches specific card types
+    // Campaign-specific card types
     case curse      // Проклятия - negative effects
     case spirit     // Духи - summonable allies/enemies
     case artifact   // Артефакты - powerful ancient items
@@ -44,7 +44,7 @@ public enum DamageType: String, Codable, Hashable, Sendable {
     case arcane
 }
 
-// Twilight Marches: Balance system (Light/Dark)
+// Balance system (Light/Dark)
 public enum CardBalance: String, Codable, Hashable, Sendable {
     case light      // Cards from Prav, protective/healing
     case neutral    // Balanced cards
@@ -61,14 +61,14 @@ public enum CardBalance: String, Codable, Hashable, Sendable {
     }
 }
 
-// Twilight Marches: Three Realms system
+// Three Realms system
 public enum Realm: String, Codable, Hashable, Sendable {
     case yav        // Явь - World of the Living (reality, settlements, heroes)
     case nav        // Навь - World of the Dead (spirits, undead, curses)
     case prav       // Правь - World of the Gods (higher powers, blessings, ancient magic)
 }
 
-// Twilight Marches: Functional Card Roles (Campaign system)
+// Functional Card Roles (Campaign system)
 // See EXPLORATION_CORE_DESIGN.md, section 22
 public enum CardRole: String, Codable, Hashable, Sendable {
     case sustain    // Поддержка - healing, curse removal, recovery
@@ -97,7 +97,7 @@ public enum CardRole: String, Codable, Hashable, Sendable {
     }
 }
 
-// Twilight Marches: Curse system (PLAYABLE curses)
+// Curse system (PLAYABLE curses)
 // See EXPLORATION_CORE_DESIGN.md, section 26
 public enum CurseType: String, Codable, Hashable, Sendable {
     case weakness       // Слабость: -1 к урону до конца боя (2 веры снять)

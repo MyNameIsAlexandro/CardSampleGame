@@ -9,9 +9,6 @@ extension QuestDefinition {
     /// Convert QuestDefinition to legacy Quest for UI compatibility
     /// - Returns: Quest compatible with existing UI
     public func toQuest() -> Quest {
-        // Generate deterministic UUID from string ID for consistency
-        let questUUID = UUID(uuidString: id.md5UUID) ?? UUID()
-
         // Map quest kind to legacy quest type
         let questType = mapQuestKind(questKind)
 
@@ -22,8 +19,7 @@ extension QuestDefinition {
         let rewards = completionRewards.toQuestRewards()
 
         return Quest(
-            id: questUUID,
-            definitionId: id,  // Content Pack ID for QuestTriggerEngine
+            id: id,
             title: title.localized,
             description: description.localized,
             questType: questType,
@@ -52,14 +48,11 @@ extension ObjectiveDefinition {
 
     /// Convert ObjectiveDefinition to legacy QuestObjective
     public func toQuestObjective() -> QuestObjective {
-        // Generate deterministic UUID from string ID
-        let objectiveUUID = UUID(uuidString: id.md5UUID) ?? UUID()
-
         // Extract required flags from completion condition
         let requiredFlags = extractRequiredFlags(from: completionCondition)
 
         return QuestObjective(
-            id: objectiveUUID,
+            id: id,
             description: description.localized,
             completed: false,
             requiredFlags: requiredFlags
@@ -104,23 +97,3 @@ extension QuestCompletionRewards {
     }
 }
 
-// MARK: - String UUID Extension (reuse from EventDefinitionAdapter)
-
-private extension String {
-    /// Generate a deterministic UUID-like string from this string
-    var md5UUID: String {
-        // Simple hash-based UUID generation for determinism
-        var hash: UInt64 = 5381
-        for char in self.utf8 {
-            hash = ((hash << 5) &+ hash) &+ UInt64(char)
-        }
-
-        // Format as UUID string (simplified)
-        let hex = String(format: "%016llX", hash)
-        let padded = hex.padding(toLength: 32, withPad: "0", startingAt: 0)
-
-        // Insert dashes: 8-4-4-4-12
-        let chars = Array(padded)
-        return "\(String(chars[0..<8]))-\(String(chars[8..<12]))-\(String(chars[12..<16]))-\(String(chars[16..<20]))-\(String(chars[20..<32]))"
-    }
-}

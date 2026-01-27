@@ -1,5 +1,6 @@
 import XCTest
 import TwilightEngine
+import PackAuthoring
 import CoreHeroesContent
 import TwilightMarchesActIContent
 
@@ -300,6 +301,75 @@ final class PackLoaderTests: XCTestCase {
             // Should throw a file not found or similar error
             XCTAssertTrue(error is PackLoadError || error is DecodingError)
         }
+    }
+
+    func testLoadPackWithCorruptedJSONThrows() throws {
+        // Given: a temp directory with broken regions file
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("PackLoaderTests_\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        // Write corrupted regions JSON
+        try "{ not valid json [[[".data(using: .utf8)!.write(to: tempDir.appendingPathComponent("regions.json"))
+
+        // Create manifest programmatically pointing to the corrupted file
+        let manifest = PackManifest(
+            packId: "broken-test",
+            displayName: LocalizedString(en: "Broken", ru: "Сломанный"),
+            description: LocalizedString(en: "Test", ru: "Тест"),
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            packType: .campaign,
+            coreVersionMin: SemanticVersion(major: 1, minor: 0, patch: 0),
+            author: "test",
+            regionsPath: "regions.json"
+        )
+
+        // Then
+        XCTAssertThrowsError(try PackLoader.load(manifest: manifest, from: tempDir))
+    }
+
+    // MARK: - SHA256 Tests
+
+    func testComputeSHA256ProducesConsistentHash() throws {
+        // Given: a temp file with known content
+        let tempFile = FileManager.default.temporaryDirectory
+            .appendingPathComponent("sha256test_\(UUID().uuidString).txt")
+        try "hello world".data(using: .utf8)!.write(to: tempFile)
+        defer { try? FileManager.default.removeItem(at: tempFile) }
+
+        // When
+        let hash1 = try PackLoader.computeSHA256(of: tempFile)
+        let hash2 = try PackLoader.computeSHA256(of: tempFile)
+
+        // Then
+        XCTAssertEqual(hash1, hash2, "Same file should produce same hash")
+        XCTAssertEqual(hash1.count, 64, "SHA256 hex string should be 64 characters")
+    }
+
+    func testComputeSHA256DiffersForDifferentContent() throws {
+        let tempFile1 = FileManager.default.temporaryDirectory
+            .appendingPathComponent("sha256test_a_\(UUID().uuidString).txt")
+        let tempFile2 = FileManager.default.temporaryDirectory
+            .appendingPathComponent("sha256test_b_\(UUID().uuidString).txt")
+        try "content A".data(using: .utf8)!.write(to: tempFile1)
+        try "content B".data(using: .utf8)!.write(to: tempFile2)
+        defer {
+            try? FileManager.default.removeItem(at: tempFile1)
+            try? FileManager.default.removeItem(at: tempFile2)
+        }
+
+        // When
+        let hash1 = try PackLoader.computeSHA256(of: tempFile1)
+        let hash2 = try PackLoader.computeSHA256(of: tempFile2)
+
+        // Then
+        XCTAssertNotEqual(hash1, hash2, "Different content should produce different hashes")
+    }
+
+    func testComputeSHA256ThrowsForMissingFile() {
+        let missingFile = URL(fileURLWithPath: "/nonexistent/file.txt")
+        XCTAssertThrowsError(try PackLoader.computeSHA256(of: missingFile))
     }
 
     // MARK: - Semantic Version Tests

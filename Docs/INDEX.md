@@ -6,7 +6,7 @@
 > Все участники проекта обязаны следовать данной карте.
 
 **Проект:** ECHO: Legends of the Veil (раб. назв. «Грань Миров»)
-**Последнее обновление:** 26 января 2026
+**Последнее обновление:** 27 января 2026
 
 ---
 
@@ -129,7 +129,8 @@ CardSampleGame/
 │   └── INDEX.md                 # Этот файл
 │
 ├── Packages/                    # Swift Packages
-│   ├── TwilightEngine/          # Игровой движок
+│   ├── TwilightEngine/          # Игровой движок (runtime)
+│   │   └── PackAuthoring/      # Authoring tools (отдельный target)
 │   ├── CharacterPacks/          # Паки персонажей
 │   │   └── CoreHeroes/
 │   └── StoryPacks/              # Сюжетные паки
@@ -175,5 +176,5 @@ CardSampleGame/
 ## Контакты и ресурсы
 
 - **Репозиторий:** github.com/MyNameIsAlexandro/CardSampleGame
-- **Тесты:** 256 passed, 0 failed
+- **Тесты:** 199 Xcode + 141 SPM = 340 passed, 0 failed
 - **Build:** SUCCESS

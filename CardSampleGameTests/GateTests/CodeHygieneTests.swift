@@ -26,7 +26,7 @@ final class CodeHygieneTests: XCTestCase {
         "TwilightGameEngine.swift",     // 2247 lines - main engine
         "ContentRegistry.swift",        // 844 lines - registry
         "JSONContentProvider.swift",    // 969 lines - JSON loading
-        "PackValidator.swift",          // 699 lines - validation
+        // PackValidator.swift moved to PackAuthoring module
         // Files with many related types (>5 types)
         "EngineProtocols.swift",        // 30+ protocols - all engine contracts
         "CodeContentProvider.swift",    // JSON loading types
@@ -70,7 +70,6 @@ final class CodeHygieneTests: XCTestCase {
         "CardRegistry.swift",
         "HeroRegistry.swift",
         "ContentRegistry.swift",
-        "PackLoader.swift",
         "PackManifest.swift"
     ]
 

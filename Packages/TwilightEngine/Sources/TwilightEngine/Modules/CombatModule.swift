@@ -111,7 +111,7 @@ public final class CombatModule {
 
     /// Execute player card play using CombatPlayerContext (Engine-First Architecture)
     public func playCard(
-        cardId: UUID,
+        cardId: String,
         context: CombatPlayerContext,
         effects: [CardEffect]
     ) -> CombatActionResult {
@@ -267,7 +267,7 @@ public final class CombatModule {
 
 /// Combat encounter state
 public struct CombatEncounter {
-    public let id: UUID
+    public let id: String
     public let name: String
     public let maxHP: Int
     public var currentHP: Int
@@ -276,7 +276,7 @@ public struct CombatEncounter {
     public let isBoss: Bool
 
     public init(
-        id: UUID = UUID(),
+        id: String,
         name: String,
         maxHP: Int,
         strength: Int,

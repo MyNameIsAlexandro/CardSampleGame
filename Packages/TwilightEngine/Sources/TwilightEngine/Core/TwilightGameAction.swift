@@ -1,13 +1,13 @@
 import Foundation
 
-// MARK: - Twilight Marches Game Actions
+// MARK: - Game Actions
 // All player actions go through these - UI never mutates state directly
 
-/// All possible player actions in Twilight Marches
+/// All possible player actions in the game engine
 public enum TwilightGameAction: TimedAction, Equatable {
     // MARK: - Movement
     /// Travel to another region
-    case travel(toRegionId: UUID)
+    case travel(toRegionId: String)
 
     // MARK: - Region Actions
     /// Rest in current region (heals, costs time)
@@ -24,14 +24,14 @@ public enum TwilightGameAction: TimedAction, Equatable {
 
     // MARK: - Event Handling
     /// Choose an option in an event
-    case chooseEventOption(eventId: UUID, choiceIndex: Int)
+    case chooseEventOption(eventId: String, choiceIndex: Int)
 
     /// Resolve a mini-game result
     case resolveMiniGame(input: MiniGameInput)
 
     // MARK: - Combat Setup
     /// Start combat with encounter
-    case startCombat(encounterId: UUID)
+    case startCombat(encounterId: String)
 
     /// Initialize combat: shuffle deck and draw initial hand
     case combatInitialize
@@ -41,7 +41,7 @@ public enum TwilightGameAction: TimedAction, Equatable {
     case combatAttack(bonusDice: Int, bonusDamage: Int, isFirstAttack: Bool)
 
     /// Play a card in combat
-    case playCard(cardId: UUID, targetId: UUID?)
+    case playCard(cardId: String, targetId: String?)
 
     /// Apply card ability effect
     case combatApplyEffect(effect: CombatActionEffect)
@@ -152,12 +152,12 @@ public enum TwilightGameAction: TimedAction, Equatable {
 /// Input data for resolving a mini-game action
 /// Different from MiniGameResult in MiniGameChallengeDefinition.swift (serializable state diff)
 public struct MiniGameInput: Equatable {
-    public let challengeId: UUID
+    public let challengeId: String
     public let success: Bool
     public let score: Int?
     public let bonusRewards: [String: Int]
 
-    public init(challengeId: UUID, success: Bool, score: Int? = nil, bonusRewards: [String: Int] = [:]) {
+    public init(challengeId: String, success: Bool, score: Int? = nil, bonusRewards: [String: Int] = [:]) {
         self.challengeId = challengeId
         self.success = success
         self.score = score
@@ -217,10 +217,10 @@ public struct ActionResult: Equatable {
     public let stateChanges: [StateChange]
 
     /// Events triggered by this action
-    public let triggeredEvents: [UUID]
+    public let triggeredEvents: [String]
 
     /// New current event (if any)
-    public let currentEvent: UUID?
+    public let currentEvent: String?
 
     /// Combat started (if any)
     public let combatStarted: Bool
@@ -234,8 +234,8 @@ public struct ActionResult: Equatable {
         success: Bool,
         error: ActionError?,
         stateChanges: [StateChange],
-        triggeredEvents: [UUID],
-        currentEvent: UUID?,
+        triggeredEvents: [String],
+        currentEvent: String?,
         combatStarted: Bool,
         gameEnded: GameEndResult?
     ) {
@@ -250,8 +250,8 @@ public struct ActionResult: Equatable {
 
     public static func success(
         changes: [StateChange] = [],
-        triggeredEvents: [UUID] = [],
-        currentEvent: UUID? = nil,
+        triggeredEvents: [String] = [],
+        currentEvent: String? = nil,
         combatStarted: Bool = false
     ) -> ActionResult {
         ActionResult(
@@ -296,8 +296,8 @@ public struct ActionResult: Equatable {
 public enum ActionError: Error, Equatable {
     // Validation errors
     case invalidAction(reason: String)
-    case regionNotAccessible(regionId: UUID)
-    case regionNotNeighbor(regionId: UUID)
+    case regionNotAccessible(regionId: String)
+    case regionNotNeighbor(regionId: String)
     case actionNotAvailableInRegion(action: String, regionType: String)
 
     // Resource errors
@@ -312,12 +312,12 @@ public enum ActionError: Error, Equatable {
     case noActiveCombat
 
     // Event errors
-    case eventNotFound(eventId: UUID)
+    case eventNotFound(eventId: String)
     case invalidChoiceIndex(index: Int, maxIndex: Int)
     case choiceRequirementsNotMet(reason: String)
 
     // Combat errors
-    case cardNotInHand(cardId: UUID)
+    case cardNotInHand(cardId: String)
     case notEnoughActions
     case invalidTarget
 
@@ -326,9 +326,9 @@ public enum ActionError: Error, Equatable {
         case .invalidAction(let reason):
             return L10n.errorInvalidAction.localized(with: reason)
         case .regionNotAccessible(let id):
-            return L10n.errorRegionNotAccessible.localized(with: String(id.uuidString.prefix(8)))
+            return L10n.errorRegionNotAccessible.localized(with: id)
         case .regionNotNeighbor(let id):
-            return L10n.errorRegionNotNeighbor.localized(with: String(id.uuidString.prefix(8)))
+            return L10n.errorRegionNotNeighbor.localized(with: id)
         case .actionNotAvailableInRegion(let action, let type):
             return L10n.errorActionNotAvailable.localized(with: action, type)
         case .insufficientResources(let resource, let required, let available):
@@ -346,13 +346,13 @@ public enum ActionError: Error, Equatable {
         case .noActiveCombat:
             return L10n.errorNoActiveCombat.localized
         case .eventNotFound(let id):
-            return L10n.errorEventNotFound.localized(with: String(id.uuidString.prefix(8)))
+            return L10n.errorEventNotFound.localized(with: id)
         case .invalidChoiceIndex(let index, let max):
             return L10n.errorInvalidChoiceIndex.localized(with: index, max)
         case .choiceRequirementsNotMet(let reason):
             return L10n.errorChoiceRequirementsNotMet.localized(with: reason)
         case .cardNotInHand(let id):
-            return L10n.errorCardNotInHand.localized(with: String(id.uuidString.prefix(8)))
+            return L10n.errorCardNotInHand.localized(with: id)
         case .notEnoughActions:
             return L10n.errorNotEnoughActions.localized
         case .invalidTarget:
@@ -374,27 +374,27 @@ public enum StateChange: Equatable {
     // World changes
     case tensionChanged(delta: Int, newValue: Int)
     case dayAdvanced(newDay: Int)
-    case regionChanged(regionId: UUID)
-    case regionStateChanged(regionId: UUID, newState: String)
-    case anchorIntegrityChanged(anchorId: UUID, delta: Int, newValue: Int)
+    case regionChanged(regionId: String)
+    case regionStateChanged(regionId: String, newState: String)
+    case anchorIntegrityChanged(anchorId: String, delta: Int, newValue: Int)
 
     // Flags and progress
     case flagSet(key: String, value: Bool)
     case questProgressed(questId: String, newStage: Int)
-    case eventCompleted(eventId: UUID)
+    case eventCompleted(eventId: String)
     case questStarted(questId: String)
     case objectiveCompleted(questId: String, objectiveId: String)
     case questCompleted(questId: String)
     case questFailed(questId: String)
 
     // Cards and deck
-    case cardAdded(cardId: UUID, zone: String)
-    case cardRemoved(cardId: UUID, zone: String)
-    case cardMoved(cardId: UUID, fromZone: String, toZone: String)
+    case cardAdded(cardId: String, zone: String)
+    case cardRemoved(cardId: String, zone: String)
+    case cardMoved(cardId: String, fromZone: String, toZone: String)
 
     // Combat
-    case enemyDamaged(enemyId: UUID, damage: Int, newHealth: Int)
-    case enemyDefeated(enemyId: UUID)
+    case enemyDamaged(enemyId: String, damage: Int, newHealth: Int)
+    case enemyDefeated(enemyId: String)
     case combatEnded(victory: Bool)
 
     // Custom

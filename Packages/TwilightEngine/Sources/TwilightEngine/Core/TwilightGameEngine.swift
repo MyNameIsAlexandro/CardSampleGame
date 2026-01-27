@@ -1,10 +1,10 @@
 import Foundation
 import Combine
 
-// MARK: - Twilight Marches Game Engine
+// MARK: - Game Engine
 // The central game orchestrator - ALL game actions go through here
 
-/// Main game engine for Twilight Marches
+/// Main game engine — the central orchestrator for all game actions
 /// UI should NEVER mutate state directly - always go through performAction()
 public final class TwilightGameEngine: ObservableObject {
 
@@ -15,15 +15,15 @@ public final class TwilightGameEngine: ObservableObject {
     @Published public private(set) var currentDay: Int = 0
     /// World tension level (0-100), drives degradation and difficulty
     @Published public private(set) var worldTension: Int = 30
-    /// UUID of the region the player is currently in
-    @Published public private(set) var currentRegionId: UUID?
+    /// ID of the region the player is currently in
+    @Published public private(set) var currentRegionId: String?
     /// Whether the game has ended (victory or defeat)
     @Published public private(set) var isGameOver: Bool = false
     /// Result of the game if it has ended
     @Published public private(set) var gameResult: GameEndResult?
 
-    /// UUID of the event currently being presented to the player
-    @Published public private(set) var currentEventId: UUID?
+    /// ID of the event currently being presented to the player
+    @Published public private(set) var currentEventId: String?
     /// Whether the player is currently in combat
     @Published public private(set) var isInCombat: Bool = false
 
@@ -33,7 +33,7 @@ public final class TwilightGameEngine: ObservableObject {
     // MARK: - Published State for UI (Engine-First Architecture)
 
     /// All regions with their current state - UI reads this directly
-    @Published public private(set) var publishedRegions: [UUID: EngineRegionState] = [:]
+    @Published public private(set) var publishedRegions: [String: EngineRegionState] = [:]
 
     /// Player stats - UI reads these directly instead of Player model
     @Published public private(set) var playerHealth: Int = 10
@@ -95,24 +95,24 @@ public final class TwilightGameEngine: ObservableObject {
     }
 
     /// Check if region is neighbor to current region
-    public func isNeighbor(regionId: UUID) -> Bool {
+    public func isNeighbor(regionId: String) -> Bool {
         guard let current = currentRegion else { return false }
         return current.neighborIds.contains(regionId)
     }
 
     /// Calculate travel cost to target region (1 = neighbor, 2 = distant)
-    public func calculateTravelCost(to targetId: UUID) -> Int {
+    public func calculateTravelCost(to targetId: String) -> Int {
         return isNeighbor(regionId: targetId) ? 1 : 2
     }
 
     /// Check if travel to region is allowed (only neighbors allowed)
-    public func canTravelTo(regionId: UUID) -> Bool {
+    public func canTravelTo(regionId: String) -> Bool {
         guard regionId != currentRegionId else { return false }
         return isNeighbor(regionId: regionId)
     }
 
     /// Get neighboring region names that connect to target (for routing hints)
-    public func getRoutingHint(to targetId: UUID) -> [String] {
+    public func getRoutingHint(to targetId: String) -> [String] {
         guard let current = currentRegion else { return [] }
 
         // If already neighbor, no hint needed
@@ -303,8 +303,7 @@ public final class TwilightGameEngine: ObservableObject {
               let region = publishedRegions[regionId] else { return false }
 
         // Engine-First: check content registry for events in this region
-        // Use definitionId (from pack manifest) not type.rawValue
-        let regionDefId = region.definitionId
+        let regionDefId = region.id
 
         // Map region state to string for content registry
         let regionStateString = mapRegionStateToString(region.state)
@@ -344,7 +343,7 @@ public final class TwilightGameEngine: ObservableObject {
 
     // MARK: - Internal State
 
-    private var regions: [UUID: EngineRegionState] = [:]
+    private var regions: [String: EngineRegionState] = [:]
     private var completedEventIds: Set<String> = []  // Definition IDs (Epic 3: Stable IDs)
     private var worldFlags: [String: Bool] = [:]
     private var questStages: [String: Int] = [:]
@@ -534,64 +533,33 @@ public final class TwilightGameEngine: ObservableObject {
     /// Setup regions from ContentProvider
     private func setupRegionsFromProvider(_ provider: ContentProvider) {
         let regionDefs = provider.getAllRegionDefinitions()
-        var newRegions: [UUID: EngineRegionState] = [:]
-        var stringToUUID: [String: UUID] = [:]  // Map string IDs to UUIDs
+        var newRegions: [String: EngineRegionState] = [:]
 
         // CRITICAL: Reset currentRegionId before creating new regions
-        // This fixes a bug where old UUID from previous game could persist
         currentRegionId = nil
 
         // Determine entry region from manifest (no hardcoded entry point)
         let entryRegionId = contentRegistry.loadedPacks.values.first(where: { $0.manifest.entryRegionId != nil })?.manifest.entryRegionId
 
-        // First pass: create regions and map IDs
         for def in regionDefs {
-            let regionUUID = UUID()
-            stringToUUID[def.id] = regionUUID
-
             let anchor = createEngineAnchor(from: provider.getAnchorDefinition(forRegion: def.id))
             let regionType = mapRegionType(fromString: def.regionType)
             let regionState = mapRegionState(def.initialState)
 
             let engineRegion = EngineRegionState(
-                id: regionUUID,
-                definitionId: def.id,  // Set definition ID for event lookup
+                id: def.id,
                 name: def.title.localized,
                 type: regionType,
                 state: regionState,
                 anchor: anchor,
-                neighborIds: [],  // Will be set in second pass
-                neighborDefinitionIds: def.neighborIds,
+                neighborIds: def.neighborIds,
                 canTrade: regionState == .stable && regionType == .settlement
             )
-            newRegions[regionUUID] = engineRegion
+            newRegions[def.id] = engineRegion
 
-            // Set starting region from manifest entryRegionId
             if def.id == entryRegionId {
-                currentRegionId = regionUUID
+                currentRegionId = def.id
             }
-        }
-
-        // Second pass: resolve neighbor IDs
-        for def in regionDefs {
-            guard let regionUUID = stringToUUID[def.id],
-                  var region = newRegions[regionUUID] else { continue }
-
-            let neighborUUIDs = def.neighborIds.compactMap { stringToUUID[$0] }
-            region = EngineRegionState(
-                id: region.id,
-                definitionId: region.definitionId,  // Preserve definition ID
-                name: region.name,
-                type: region.type,
-                state: region.state,
-                anchor: region.anchor,
-                neighborIds: neighborUUIDs,
-                neighborDefinitionIds: region.neighborDefinitionIds,
-                canTrade: region.canTrade,
-                visited: region.visited,
-                reputation: region.reputation
-            )
-            newRegions[regionUUID] = region
         }
 
         regions = newRegions
@@ -601,25 +569,18 @@ public final class TwilightGameEngine: ObservableObject {
     /// Setup regions from ContentRegistry (Engine-First architecture)
     private func setupRegionsFromRegistry() {
         let regionDefs = contentRegistry.getAllRegions()
-        var newRegions: [UUID: EngineRegionState] = [:]
-        var stringToUUID: [String: UUID] = [:]  // Map string IDs to UUIDs
+        var newRegions: [String: EngineRegionState] = [:]
 
         // CRITICAL: Reset currentRegionId before creating new regions
-        // This fixes a bug where old UUID from previous game could persist
         currentRegionId = nil
 
         // Determine entry region from loaded pack manifest (no hardcoded fallback)
         let entryRegionId = contentRegistry.loadedPacks.values.first(where: { $0.manifest.entryRegionId != nil })?.manifest.entryRegionId
 
-        // First pass: create regions and map IDs
         for def in regionDefs {
-            let regionUUID = UUID()
-            stringToUUID[def.id] = regionUUID
-
             let anchor = contentRegistry.getAnchor(forRegion: def.id).map { anchorDef in
                 EngineAnchorState(
-                    id: UUID(),
-                    definitionId: anchorDef.id,
+                    id: anchorDef.id,
                     name: anchorDef.title.localized,
                     integrity: anchorDef.initialIntegrity
                 )
@@ -629,44 +590,19 @@ public final class TwilightGameEngine: ObservableObject {
             let regionState = mapRegionState(def.initialState)
 
             let engineRegion = EngineRegionState(
-                id: regionUUID,
-                definitionId: def.id,  // CRITICAL: Set definition ID for event lookup
+                id: def.id,
                 name: def.title.localized,
                 type: regionType,
                 state: regionState,
                 anchor: anchor,
-                neighborIds: [],  // Will be set in second pass
-                neighborDefinitionIds: def.neighborIds,
+                neighborIds: def.neighborIds,
                 canTrade: regionState == .stable && regionType == .settlement
             )
-            newRegions[regionUUID] = engineRegion
+            newRegions[def.id] = engineRegion
 
-            // Set starting region
             if def.id == entryRegionId {
-                currentRegionId = regionUUID
+                currentRegionId = def.id
             }
-        }
-
-        // Second pass: resolve neighbor IDs
-        for def in regionDefs {
-            guard let regionUUID = stringToUUID[def.id],
-                  var region = newRegions[regionUUID] else { continue }
-
-            let neighborUUIDs = def.neighborIds.compactMap { stringToUUID[$0] }
-            region = EngineRegionState(
-                id: region.id,
-                definitionId: region.definitionId,  // Preserve definition ID
-                name: region.name,
-                type: region.type,
-                state: region.state,
-                anchor: region.anchor,
-                neighborIds: neighborUUIDs,
-                neighborDefinitionIds: region.neighborDefinitionIds,
-                canTrade: region.canTrade,
-                visited: region.visited,
-                reputation: region.reputation
-            )
-            newRegions[regionUUID] = region
         }
 
         regions = newRegions
@@ -684,18 +620,10 @@ public final class TwilightGameEngine: ObservableObject {
     private func createEngineAnchor(from def: AnchorDefinition?) -> EngineAnchorState? {
         guard let def = def else { return nil }
         return EngineAnchorState(
-            id: UUID(),
-            definitionId: def.id,
+            id: def.id,
             name: def.title.localized,
             integrity: def.initialIntegrity
         )
-    }
-
-    /// Resolve neighbor region IDs from string IDs to UUIDs
-    private func resolveNeighborIds(_ neighborStringIds: [String], from defs: [RegionDefinition]) -> [UUID] {
-        // This would need to be implemented properly with a mapping
-        // For now, return empty - neighbors will be set up separately
-        return []
     }
 
     /// Map region type string from ContentPack to RegionType enum
@@ -745,8 +673,8 @@ public final class TwilightGameEngine: ObservableObject {
 
         // 3. Execute action and collect state changes
         var stateChanges: [StateChange] = []
-        var triggeredEvents: [UUID] = []
-        var newCurrentEvent: UUID? = nil
+        var triggeredEvents: [String] = []
+        var newCurrentEvent: String? = nil
         var combatStarted = false
 
         // 4. Advance time (if action costs time)
@@ -897,7 +825,7 @@ public final class TwilightGameEngine: ObservableObject {
             combatEnemy = nil
             stateChanges.append(.combatEnded(victory: victory))
             if victory {
-                stateChanges.append(.enemyDefeated(enemyId: UUID()))
+                stateChanges.append(.enemyDefeated(enemyId: combatEnemy?.id ?? "unknown"))
             }
 
         case .dismissCurrentEvent:
@@ -981,7 +909,7 @@ public final class TwilightGameEngine: ObservableObject {
         }
     }
 
-    private func validateTravel(to regionId: UUID) -> ActionError? {
+    private func validateTravel(to regionId: String) -> ActionError? {
         guard let currentId = currentRegionId,
               let currentRegion = regions[currentId] else {
             return .invalidAction(reason: "No current region")
@@ -1046,7 +974,7 @@ public final class TwilightGameEngine: ObservableObject {
         return nil
     }
 
-    private func validateEventChoice(eventId: UUID, choiceIndex: Int) -> ActionError? {
+    private func validateEventChoice(eventId: String, choiceIndex: Int) -> ActionError? {
         guard currentEventId == eventId else {
             return .eventNotFound(eventId: eventId)
         }
@@ -1158,9 +1086,9 @@ public final class TwilightGameEngine: ObservableObject {
 
     // MARK: - Action Execution
 
-    private func executeTravel(to regionId: UUID) -> ([StateChange], [UUID]) {
+    private func executeTravel(to regionId: String) -> ([StateChange], [String]) {
         var changes: [StateChange] = []
-        let events: [UUID] = []
+        let events: [String] = []
 
         // Update current region
         currentRegionId = regionId
@@ -1186,9 +1114,9 @@ public final class TwilightGameEngine: ObservableObject {
         return changes
     }
 
-    private func executeExplore() -> ([StateChange], [UUID]) {
+    private func executeExplore() -> ([StateChange], [String]) {
         let changes: [StateChange] = []
-        var events: [UUID] = []
+        var events: [String] = []
 
         guard let regionId = currentRegionId else {
             return (changes, events)
@@ -1230,7 +1158,7 @@ public final class TwilightGameEngine: ObservableObject {
         return changes
     }
 
-    private func executeEventChoice(eventId: UUID, choiceIndex: Int) -> [StateChange] {
+    private func executeEventChoice(eventId: String, choiceIndex: Int) -> [StateChange] {
         var changes: [StateChange] = []
 
         // Get consequences from current event
@@ -1241,8 +1169,8 @@ public final class TwilightGameEngine: ObservableObject {
         }
 
         // Mark event completed if oneTime (using definition ID for persistence)
-        if let defId = currentEvent?.definitionId {
-            completedEventIds.insert(defId)
+        if let eventId = currentEvent?.id {
+            completedEventIds.insert(eventId)
         }
         changes.append(.eventCompleted(eventId: eventId))
 
@@ -1318,12 +1246,12 @@ public final class TwilightGameEngine: ObservableObject {
 
     // MARK: - Event Generation
 
-    private func generateEvent(for regionId: UUID, trigger: EventTrigger) -> UUID? {
+    private func generateEvent(for regionId: String, trigger: EventTrigger) -> String? {
         // Engine-First: generate event from ContentRegistry
         guard let region = publishedRegions[regionId] else {
             return nil
         }
-        let regionDefId = region.definitionId
+        let regionDefId = region.id
 
         // Map region state to string for content registry
         let regionStateString = mapRegionStateToString(region.state)
@@ -1405,7 +1333,7 @@ public final class TwilightGameEngine: ObservableObject {
 
             case .objectiveCompleted:
                 // Update quest progress
-                if let index = activeQuests.firstIndex(where: { $0.id.uuidString == update.questId || String(describing: $0.id) == update.questId }),
+                if let index = activeQuests.firstIndex(where: { $0.id == update.questId }),
                    let objectiveId = update.objectiveId {
                     // Mark objective as completed
                     changes.append(.objectiveCompleted(questId: update.questId, objectiveId: objectiveId))
@@ -1443,7 +1371,7 @@ public final class TwilightGameEngine: ObservableObject {
     private func buildQuestTriggerContext() -> QuestTriggerContext {
         // Build active quest states
         let questStates = activeQuests.compactMap { quest -> QuestState? in
-            guard let questDef = contentRegistry.getQuest(id: quest.definitionId) else {
+            guard let questDef = contentRegistry.getQuest(id: quest.id) else {
                 return nil
             }
 
@@ -1470,19 +1398,8 @@ public final class TwilightGameEngine: ObservableObject {
             "tension": worldTension
         ]
 
-        // Get current region ID as string
-        let currentRegionStringId: String
-        if let regionId = currentRegionId,
-           let region = regions[regionId] {
-            // Try to find matching definition by name
-            if let def = contentRegistry.getAllRegions().first(where: { $0.title.localized == region.name }) {
-                currentRegionStringId = def.id
-            } else {
-                currentRegionStringId = regionId.uuidString
-            }
-        } else {
-            currentRegionStringId = ""
-        }
+        // Get current region ID (already a String definition ID)
+        let currentRegionStringId: String = currentRegionId ?? ""
 
         return QuestTriggerContext(
             activeQuests: questStates,
@@ -1755,7 +1672,7 @@ public final class TwilightGameEngine: ObservableObject {
     }
 
     /// Set regions from save
-    public func setRegions(_ newRegions: [UUID: EngineRegionState]) {
+    public func setRegions(_ newRegions: [String: EngineRegionState]) {
         regions = newRegions
         publishedRegions = newRegions
     }
@@ -1824,10 +1741,8 @@ public enum EventTrigger {
 /// - `EngineRegionState` - объединённое для UI (этот struct)
 /// - `Region` (legacy) - persistence и совместимость
 public struct EngineRegionState: Identifiable {
-    /// Unique runtime identifier for this region
-    public let id: UUID
-    /// Stable definition ID for serialization (from content pack)
-    public let definitionId: String
+    /// Stable definition ID (serves as both identity and definition reference)
+    public let id: String
     /// Localized display name
     public let name: String
     /// Region type (settlement, sacred, etc.)
@@ -1836,10 +1751,8 @@ public struct EngineRegionState: Identifiable {
     public var state: RegionState
     /// Anchor protecting this region, if any
     public var anchor: EngineAnchorState?
-    /// Runtime UUIDs of neighboring regions
-    public let neighborIds: [UUID]
-    /// Stable definition IDs of neighboring regions for serialization
-    public let neighborDefinitionIds: [String]
+    /// Definition IDs of neighboring regions
+    public let neighborIds: [String]
     /// Whether trading is available in this region
     public var canTrade: Bool
     /// Whether the player has visited this region
@@ -1847,28 +1760,24 @@ public struct EngineRegionState: Identifiable {
     /// Player reputation in this region
     public var reputation: Int = 0
 
-    /// Create directly (Engine-First) - definitionId is REQUIRED
+    /// Create directly (Engine-First) - id is the definition ID
     public init(
-        id: UUID = UUID(),
-        definitionId: String,
+        id: String,
         name: String,
         type: RegionType,
         state: RegionState,
         anchor: EngineAnchorState? = nil,
-        neighborIds: [UUID] = [],
-        neighborDefinitionIds: [String] = [],
+        neighborIds: [String] = [],
         canTrade: Bool = false,
         visited: Bool = false,
         reputation: Int = 0
     ) {
         self.id = id
-        self.definitionId = definitionId
         self.name = name
         self.type = type
         self.state = state
         self.anchor = anchor
         self.neighborIds = neighborIds
-        self.neighborDefinitionIds = neighborDefinitionIds
         self.canTrade = canTrade
         self.visited = visited
         self.reputation = reputation
@@ -1884,19 +1793,16 @@ public struct EngineRegionState: Identifiable {
 
 /// Internal state for engine anchor tracking (REQUIRED definitionId - Audit A1)
 public struct EngineAnchorState {
-    /// Unique runtime identifier
-    public let id: UUID
-    /// Stable definition ID for serialization
-    public let definitionId: String
+    /// Stable definition ID (serves as both identity and definition reference)
+    public let id: String
     /// Localized display name
     public let name: String
     /// Current integrity level (0-100)
     public var integrity: Int
 
-    /// Create directly (Engine-First) - definitionId is REQUIRED
-    public init(id: UUID = UUID(), definitionId: String, name: String, integrity: Int) {
+    /// Create directly (Engine-First) - id is the definition ID
+    public init(id: String, name: String, integrity: Int) {
         self.id = id
-        self.definitionId = definitionId
         self.name = name
         self.integrity = max(0, min(100, integrity))
     }
@@ -1991,7 +1897,7 @@ public extension TwilightGameEngine {
         var currentRegionDefId: String? = nil
         if let currentId = currentRegionId,
            let region = regions[currentId] {
-            currentRegionDefId = region.definitionId
+            currentRegionDefId = region.id
         }
 
         return EngineSave(
@@ -2015,9 +1921,9 @@ public extension TwilightGameEngine {
             playerBalance: playerBalance,
 
             // Deck state (card IDs for stable serialization)
-            deckCardIds: _playerDeck.map { $0.definitionId },
-            handCardIds: playerHand.map { $0.definitionId },
-            discardCardIds: _playerDiscard.map { $0.definitionId },
+            deckCardIds: _playerDeck.map { $0.id },
+            handCardIds: playerHand.map { $0.id },
+            discardCardIds: _playerDiscard.map { $0.id },
 
             // World state
             currentDay: currentDay,
@@ -2030,9 +1936,9 @@ public extension TwilightGameEngine {
 
             // Quest state (using definitionId for stable serialization - Audit A1)
             mainQuestStage: mainQuestStage,
-            activeQuestIds: publishedActiveQuests.map { $0.definitionId },
+            activeQuestIds: publishedActiveQuests.map { $0.id },
             completedQuestIds: Array(completedQuestIds),
-            questStages: Dictionary(uniqueKeysWithValues: publishedActiveQuests.map { ($0.definitionId, $0.stage) }),
+            questStages: Dictionary(uniqueKeysWithValues: publishedActiveQuests.map { ($0.id, $0.stage) }),
 
             // Events (already String definition IDs)
             completedEventIds: Array(completedEventIds),
@@ -2108,50 +2014,32 @@ public extension TwilightGameEngine {
         worldTension = save.worldTension
         lightDarkBalance = save.lightDarkBalance
 
-        // First pass: create map of definition IDs to UUIDs
-        var defIdToUUID: [String: UUID] = [:]
+        // Create regions from save data
+        var newRegions: [String: EngineRegionState] = [:]
         for regionSave in save.regions {
-            let uuid = UUID()
-            defIdToUUID[regionSave.definitionId] = uuid
-        }
-
-        // Second pass: create regions with resolved neighbor UUIDs
-        var newRegions: [UUID: EngineRegionState] = [:]
-        for regionSave in save.regions {
-            guard let regionUUID = defIdToUUID[regionSave.definitionId] else { continue }
-
-            // Resolve neighbor UUIDs from definition IDs
-            let neighborUUIDs = regionSave.neighborDefinitionIds.compactMap { defIdToUUID[$0] }
-
-            // Create anchor if present
             var anchor: EngineAnchorState? = nil
             if let anchorId = regionSave.anchorDefinitionId {
-                // Look up anchor definition to get localized name
                 let anchorDef = contentRegistry.getAnchor(id: anchorId)
                 let anchorName = anchorDef?.title.localized ?? anchorId
                 anchor = EngineAnchorState(
-                    id: UUID(),
-                    definitionId: anchorId,
+                    id: anchorId,
                     name: anchorName,
                     integrity: regionSave.anchorIntegrity ?? 100
                 )
             }
 
-            // Create region with all data
             let region = EngineRegionState(
-                id: regionUUID,
-                definitionId: regionSave.definitionId,
+                id: regionSave.definitionId,
                 name: regionSave.name,
                 type: RegionType(rawValue: regionSave.type) ?? .settlement,
                 state: RegionState(rawValue: regionSave.state) ?? .stable,
                 anchor: anchor,
-                neighborIds: neighborUUIDs,
-                neighborDefinitionIds: regionSave.neighborDefinitionIds,
+                neighborIds: regionSave.neighborDefinitionIds,
                 canTrade: regionSave.canTrade,
                 visited: regionSave.visited,
                 reputation: regionSave.reputation
             )
-            newRegions[regionUUID] = region
+            newRegions[regionSave.definitionId] = region
         }
 
         regions = newRegions
@@ -2159,7 +2047,7 @@ public extension TwilightGameEngine {
 
         // Restore current region
         if let currentDefId = save.currentRegionId {
-            currentRegionId = defIdToUUID[currentDefId]
+            currentRegionId = currentDefId
         }
 
         // Restore quest state
@@ -2286,7 +2174,7 @@ public extension TwilightGameEngine {
     }
 
     /// Set current region directly (for testing)
-    func setCurrentRegion(_ regionId: UUID) {
+    func setCurrentRegion(_ regionId: String) {
         currentRegionId = regionId
     }
 }

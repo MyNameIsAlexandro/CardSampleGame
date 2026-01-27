@@ -1,5 +1,6 @@
 import Foundation
 import TwilightEngine
+import PackAuthoring
 
 // MARK: - Pack Compiler CLI Tool
 // Compiles JSON content packs to binary .pack format

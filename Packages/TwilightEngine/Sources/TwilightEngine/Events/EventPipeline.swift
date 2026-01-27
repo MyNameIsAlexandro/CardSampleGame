@@ -120,7 +120,7 @@ public final class EventSelector {
         }
 
         // Also check against context's completed set (uses stable definitionId, not UUID)
-        if event.oneTime && context.completedEvents.contains(event.definitionId) {
+        if event.oneTime && context.completedEvents.contains(event.id) {
             return false
         }
 
@@ -263,7 +263,7 @@ public final class EventResolver {
         }
 
         // Check for triggered combat (monster card in event)
-        var triggeredCombat: UUID? = nil
+        var triggeredCombat: String? = nil
         if event.monsterCard != nil {
             // Combat events have monsterCard, use event ID as combat trigger
             triggeredCombat = event.id
@@ -271,7 +271,7 @@ public final class EventResolver {
 
         // Check for triggered mini-game (not directly in EventConsequences,
         // would be triggered through specific event types or flags)
-        let triggeredMiniGame: UUID? = nil
+        let triggeredMiniGame: String? = nil
 
         // Mark event as completed if oneTime
         if event.oneTime {
@@ -320,8 +320,8 @@ public struct EventResolutionResult {
     public let success: Bool
     public let error: String?
     public let stateChanges: [StateChange]
-    public let triggeredCombat: UUID?
-    public let triggeredMiniGame: UUID?
+    public let triggeredCombat: String?
+    public let triggeredMiniGame: String?
     public let narrativeText: String?
 }
 

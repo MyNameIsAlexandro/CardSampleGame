@@ -437,7 +437,7 @@ public final class ContentRegistry {
     }
 
     /// Get all packs in a campaign, sorted by campaign order
-    /// - Parameter campaignId: Campaign identifier (e.g., "twilight-marches")
+    /// - Parameter campaignId: Campaign identifier (e.g., "dark-forest")
     /// - Returns: Array of packs sorted by campaignOrder
     public func getPacksByCampaign(_ campaignId: String) -> [LoadedPack] {
         return loadedPacks.values

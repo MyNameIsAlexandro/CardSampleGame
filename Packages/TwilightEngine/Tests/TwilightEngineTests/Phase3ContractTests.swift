@@ -93,7 +93,7 @@ final class Phase3ContractTests: XCTestCase {
 
     func testInvalidActionReturnsError() {
         // Try to travel to non-neighbor region
-        let farRegionId = UUID()  // Non-existent region
+        let farRegionId = "nonexistent_region_999"  // Non-existent region
         let result = engine.performAction(.travel(toRegionId: farRegionId))
 
         XCTAssertFalse(result.success, "Invalid travel should fail")
@@ -244,6 +244,7 @@ final class Phase3ContractTests: XCTestCase {
         )
 
         let event = GameEvent(
+            id: "test_event_1",
             eventType: .exploration,
             title: "Test Event",
             description: "Test description",

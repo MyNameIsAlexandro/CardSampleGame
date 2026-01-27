@@ -833,11 +833,11 @@ Engine/
 │   ├── TwilightGameAction.swift    # Все игровые действия
 │   ├── TwilightGameEngine.swift    # Центральный оркестратор
 │   └── CoreGameEngine.swift        # Generic engine (Content Pack aware)
-├── ContentPacks/                   # Content Pack инфраструктура
+├── ContentPacks/                   # Content Pack инфраструктура (runtime)
 │   ├── PackManifest.swift          # Pack metadata & versioning
-│   ├── PackLoader.swift            # Load/validate packs
-│   ├── PackValidator.swift         # Cross-reference validation
 │   ├── ContentRegistry.swift       # Runtime content registry
+│   ├── ContentManager.swift        # Pack lifecycle management
+│   ├── BinaryPack.swift            # Binary pack reader/writer
 │   └── PackTypes.swift             # Pack type definitions
 ├── Config/
 │   ├── TwilightMarchesConfig.swift # Конфигурация игры
@@ -875,9 +875,13 @@ ContentPacks/
     ├── Balance/                    # Game configuration
     └── Localization/               # en.json, ru.json
 
-DevTools/
-└── PackCompiler/                   # CLI for pack development
-    └── main.swift
+PackAuthoring/                      # Authoring tools (separate target)
+├── PackLoader.swift                # Load/validate JSON packs
+├── PackCompiler.swift              # Compile JSON → binary .pack
+└── PackValidator.swift             # Cross-reference validation
+
+PackCompilerTool/                   # CLI for pack development
+└── main.swift                      # imports PackAuthoring
 ```
 
 ### Конфигурация "Сумрачных Пределов"

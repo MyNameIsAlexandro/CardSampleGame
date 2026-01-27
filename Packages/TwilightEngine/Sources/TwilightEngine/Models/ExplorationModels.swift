@@ -197,7 +197,7 @@ public enum AnchorType: String, Codable {
 // MARK: - Anchor
 
 public struct Anchor: Identifiable, Codable {
-    public let id: UUID
+    public let id: String
     public let name: String
     public let type: AnchorType
     public var integrity: Int          // 0-100%
@@ -205,7 +205,7 @@ public struct Anchor: Identifiable, Codable {
     public let power: Int              // Сила влияния (1-10)
 
     public init(
-        id: UUID = UUID(),
+        id: String,
         name: String,
         type: AnchorType,
         integrity: Int = 100,
@@ -250,8 +250,7 @@ public struct Anchor: Identifiable, Codable {
 /// - This model is preserved for: save serialization, legacy UI, unit tests
 /// - After full UI migration to Engine this model will become internal for persistence
 public struct Region: Identifiable, Codable {
-    public let id: UUID
-    public let definitionId: String        // Content Pack ID (e.g., "region_01", "market_square")
+    public let id: String
     public let name: String
     public let type: RegionType
     public var state: RegionState
@@ -260,11 +259,10 @@ public struct Region: Identifiable, Codable {
     public var activeQuests: [String]      // Active quest IDs
     public var reputation: Int             // -100 to 100
     public var visited: Bool               // Has player been here
-    public var neighborIds: [UUID]         // Neighbor region IDs (travel = 1 day)
+    public var neighborIds: [String]       // Neighbor region IDs (travel = 1 day)
 
     public init(
-        id: UUID = UUID(),
-        definitionId: String = "",
+        id: String,
         name: String,
         type: RegionType,
         state: RegionState = .stable,
@@ -273,10 +271,9 @@ public struct Region: Identifiable, Codable {
         activeQuests: [String] = [],
         reputation: Int = 0,
         visited: Bool = false,
-        neighborIds: [UUID] = []
+        neighborIds: [String] = []
     ) {
         self.id = id
-        self.definitionId = definitionId
         self.name = name
         self.type = type
         self.state = state
@@ -289,7 +286,7 @@ public struct Region: Identifiable, Codable {
     }
 
     /// Check if region is neighbor
-    public func isNeighbor(_ regionId: UUID) -> Bool {
+    public func isNeighbor(_ regionId: String) -> Bool {
         return neighborIds.contains(regionId)
     }
 
@@ -475,8 +472,7 @@ public struct EventConsequences: Codable, Hashable {
 // MARK: - Game Event
 
 public struct GameEvent: Identifiable, Codable, Hashable {
-    public let id: UUID
-    public let definitionId: String            // Content Pack ID (e.g., "village_elder_request")
+    public let id: String
     public let eventType: EventType
     public let title: String
     public let description: String
@@ -497,8 +493,7 @@ public struct GameEvent: Identifiable, Codable, Hashable {
     public let forbiddenFlags: [String]?       // Flags that must NOT be set
 
     public init(
-        id: UUID = UUID(),
-        definitionId: String = "",
+        id: String,
         eventType: EventType,
         title: String,
         description: String,
@@ -517,7 +512,6 @@ public struct GameEvent: Identifiable, Codable, Hashable {
         forbiddenFlags: [String]? = nil
     ) {
         self.id = id
-        self.definitionId = definitionId
         self.eventType = eventType
         self.title = title
         self.description = description
@@ -598,12 +592,12 @@ public enum QuestType: String, Codable {
 // MARK: - Quest Objective
 
 public struct QuestObjective: Identifiable, Codable {
-    public let id: UUID
+    public let id: String
     public let description: String
     public var completed: Bool
     public var requiredFlags: [String]?  // Flags required to complete objective
 
-    public init(id: UUID = UUID(), description: String, completed: Bool = false, requiredFlags: [String]? = nil) {
+    public init(id: String, description: String, completed: Bool = false, requiredFlags: [String]? = nil) {
         self.id = id
         self.description = description
         self.completed = completed
@@ -633,8 +627,7 @@ public struct QuestRewards: Codable {
 /// For side quests use theme to define narrative theme
 /// See EXPLORATION_CORE_DESIGN.md, section 30 (Side quests as "world mirrors")
 public struct Quest: Identifiable, Codable {
-    public let id: UUID
-    public let definitionId: String            // Content Pack ID (REQUIRED - Audit A1)
+    public let id: String
     public let title: String
     public let description: String
     public let questType: QuestType
@@ -648,8 +641,7 @@ public struct Quest: Identifiable, Codable {
     public var mirrorFlag: String?             // Which player choice this quest "mirrors"
 
     public init(
-        id: UUID = UUID(),
-        definitionId: String,
+        id: String,
         title: String,
         description: String,
         questType: QuestType,
@@ -661,7 +653,6 @@ public struct Quest: Identifiable, Codable {
         mirrorFlag: String? = nil
     ) {
         self.id = id
-        self.definitionId = definitionId
         self.title = title
         self.description = description
         self.questType = questType

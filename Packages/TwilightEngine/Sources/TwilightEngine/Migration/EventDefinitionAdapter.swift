@@ -10,9 +10,6 @@ extension EventDefinition {
     /// - Parameter regionId: Optional region ID for context-specific conversion
     /// - Returns: GameEvent compatible with existing UI
     public func toGameEvent(forRegion regionId: String? = nil) -> GameEvent {
-        // Generate deterministic UUID from string ID for consistency
-        let eventUUID = UUID(uuidString: id.md5UUID) ?? UUID()
-
         // Map event kind to legacy event type
         let eventType = mapEventKind(eventKind)
 
@@ -29,8 +26,7 @@ extension EventDefinition {
         let monsterCard = createMonsterCard(for: miniGameChallenge)
 
         return GameEvent(
-            id: eventUUID,
-            definitionId: id,  // Content Pack ID (e.g., "village_elder_request")
+            id: id,
             eventType: eventType,
             title: title.localized,
             description: body.localized,
@@ -132,8 +128,7 @@ extension EventDefinition {
         let enemyStats = getEnemyStats(for: enemyId, difficulty: challenge.difficulty)
 
         return Card(
-            id: UUID(),
-            definitionId: enemyId,  // Content Pack ID for tracking
+            id: enemyId,
             name: enemyId.replacingOccurrences(of: "_", with: " ").capitalized,
             type: .monster,
             rarity: difficultyToRarity(challenge.difficulty),
@@ -270,23 +265,3 @@ extension ChoiceConsequences {
     }
 }
 
-// MARK: - String UUID Extension
-
-private extension String {
-    /// Generate a deterministic UUID-like string from this string
-    var md5UUID: String {
-        // Simple hash-based UUID generation for determinism
-        var hash: UInt64 = 5381
-        for char in self.utf8 {
-            hash = ((hash << 5) &+ hash) &+ UInt64(char)
-        }
-
-        // Format as UUID string (simplified)
-        let hex = String(format: "%016llX", hash)
-        let padded = hex.padding(toLength: 32, withPad: "0", startingAt: 0)
-
-        // Insert dashes: 8-4-4-4-12
-        let chars = Array(padded)
-        return "\(String(chars[0..<8]))-\(String(chars[8..<12]))-\(String(chars[12..<16]))-\(String(chars[16..<20]))-\(String(chars[20..<32]))"
-    }
-}

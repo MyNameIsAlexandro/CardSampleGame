@@ -195,8 +195,7 @@ public struct StandardCardDefinition: CardDefinition, Codable {
     /// Конвертация в игровую Card
     public func toCard() -> Card {
         return Card(
-            id: UUID(),
-            definitionId: id,  // Content Pack ID
+            id: id,
             name: name.resolved,
             type: cardType,
             rarity: rarity,

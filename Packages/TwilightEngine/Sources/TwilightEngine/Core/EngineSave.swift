@@ -237,13 +237,13 @@ public struct RegionSaveState: Codable {
 
     public init(from region: EngineRegionState) {
         // definitionId is now required (Audit A1 - no UUID fallback)
-        self.definitionId = region.definitionId
+        self.definitionId = region.id
         self.name = region.name
         self.type = region.type.rawValue
         self.state = region.state.rawValue
-        self.anchorDefinitionId = region.anchor?.definitionId
+        self.anchorDefinitionId = region.anchor?.id
         self.anchorIntegrity = region.anchor?.integrity
-        self.neighborDefinitionIds = region.neighborDefinitionIds
+        self.neighborDefinitionIds = region.neighborIds
         self.canTrade = region.canTrade
         self.visited = region.visited
         self.reputation = region.reputation
@@ -253,22 +253,19 @@ public struct RegionSaveState: Codable {
         var anchor: EngineAnchorState? = nil
         if let anchorId = anchorDefinitionId {
             anchor = EngineAnchorState(
-                id: UUID(),
-                definitionId: anchorId,
+                id: anchorId,
                 name: anchorId,
                 integrity: anchorIntegrity ?? 100
             )
         }
 
         return EngineRegionState(
-            id: UUID(),
-            definitionId: definitionId,
+            id: definitionId,
             name: name,
             type: RegionType(rawValue: type) ?? .settlement,
             state: RegionState(rawValue: state) ?? .stable,
             anchor: anchor,
-            neighborIds: [],
-            neighborDefinitionIds: neighborDefinitionIds,
+            neighborIds: neighborDefinitionIds,
             canTrade: canTrade,
             visited: visited,
             reputation: reputation

@@ -1,5 +1,6 @@
 import XCTest
 import TwilightEngine
+import PackAuthoring
 
 @testable import CardSampleGame
 
@@ -699,10 +700,12 @@ final class AuditGateTests: XCTestCase {
         ]
 
         var violations: [String] = []
+        var dirsFound = 0
 
         for dir in productionDirs {
             let dirURL = projectRoot.appendingPathComponent(dir)
             guard FileManager.default.fileExists(atPath: dirURL.path) else { continue }
+            dirsFound += 1
 
             let swiftFiles = findSwiftFiles(in: dirURL)
             for fileURL in swiftFiles {
@@ -715,6 +718,8 @@ final class AuditGateTests: XCTestCase {
                 violations.append(contentsOf: fileViolations)
             }
         }
+
+        XCTAssertGreaterThan(dirsFound, 0, "No production directories found — repo structure may have changed")
 
         if !violations.isEmpty {
             let message = """
@@ -1187,7 +1192,7 @@ extension AuditGateTests {
         let engine = TwilightGameEngine()
         engine.initializeNewGame(playerName: "Test", heroId: nil, startingDeck: [])
 
-        let enemy = Card(name: "Test Enemy", type: .monster, description: "Test", health: 10)
+        let enemy = Card(id: "test_enemy", name: "Test Enemy", type: .monster, description: "Test", health: 10)
         engine.setupCombatEnemy(enemy)
 
         // Deal massive damage
@@ -1225,6 +1230,7 @@ extension AuditGateTests {
         ]
 
         var violations: [String] = []
+        var dirsFound = 0
 
         for dir in productionDirs {
             let dirURL = projectRoot.appendingPathComponent(dir)
@@ -1233,6 +1239,7 @@ extension AuditGateTests {
             guard FileManager.default.fileExists(atPath: dirURL.path) else {
                 continue
             }
+            dirsFound += 1
 
             let swiftFiles = findSwiftFiles(in: dirURL)
 
@@ -1241,6 +1248,8 @@ extension AuditGateTests {
                 violations.append(contentsOf: fileViolations)
             }
         }
+
+        XCTAssertGreaterThan(dirsFound, 0, "No production directories found — repo structure may have changed")
 
         // Report all violations
         if !violations.isEmpty {
@@ -1576,14 +1585,10 @@ extension AuditGateTests {
 
         let engineContent = try String(contentsOf: engineFile, encoding: .utf8)
 
-        // EngineRegionState.definitionId must be String (not String?)
+        // EngineRegionState.id must be String (id IS the definitionId after UUID->String migration)
         XCTAssertTrue(
-            engineContent.contains("public let definitionId: String"),
-            "EngineRegionState.definitionId must be non-optional String"
-        )
-        XCTAssertFalse(
-            engineContent.contains("public let definitionId: String?"),
-            "EngineAnchorState.definitionId must be non-optional String"
+            engineContent.contains("public let id: String"),
+            "EngineRegionState.id must be non-optional String (id IS definitionId)"
         )
 
         // Check Quest
@@ -1595,10 +1600,10 @@ extension AuditGateTests {
 
         let modelsContent = try String(contentsOf: modelsFile, encoding: .utf8)
 
-        // Quest.definitionId must be String (not String?)
+        // Quest.id must be String (id IS the definitionId after UUID->String migration)
         XCTAssertTrue(
-            modelsContent.contains("public let definitionId: String            // Content Pack ID (REQUIRED"),
-            "Quest.definitionId must be non-optional String"
+            modelsContent.contains("public let id: String"),
+            "Quest.id must be non-optional String (id IS definitionId)"
         )
     }
 
@@ -1955,6 +1960,7 @@ extension AuditGateTests {
         ]
 
         var violations: [(file: String, line: Int, content: String)] = []
+        var dirsFound = 0
 
         for dirName in dirsToScan {
             let dirURL = projectRoot.appendingPathComponent(dirName)
@@ -1962,6 +1968,7 @@ extension AuditGateTests {
             guard FileManager.default.fileExists(atPath: dirURL.path) else {
                 continue
             }
+            dirsFound += 1
 
             let swiftFiles = findSwiftFiles(in: dirURL)
 
@@ -2007,6 +2014,8 @@ extension AuditGateTests {
                 }
             }
         }
+
+        XCTAssertGreaterThan(dirsFound, 0, "No view directories found — repo structure may have changed")
 
         if !violations.isEmpty {
             let message = violations.map { "\($0.file):\($0.line): \($0.content)" }
@@ -2113,6 +2122,31 @@ extension AuditGateTests {
         }
     }
 
+    // MARK: - Runtime must not use PackLoader (JSON is authoring-only)
+
+    /// Gate test: ContentRegistry and ContentManager must NOT reference PackLoader.
+    /// Runtime loads only binary .pack files via BinaryPackReader.
+    func testRuntimeDoesNotUsePackLoader() throws {
+        let projectRoot = SourcePathResolver.projectRoot
+        let runtimeFiles = [
+            "ContentPacks/ContentRegistry.swift",
+            "ContentPacks/ContentManager.swift"
+        ]
+
+        var filesFound = 0
+        for file in runtimeFiles {
+            let filePath = projectRoot.appendingPathComponent(SourcePathResolver.engineBase + "/" + file)
+            guard FileManager.default.fileExists(atPath: filePath.path) else { continue }
+            filesFound += 1
+            let content = try String(contentsOf: filePath, encoding: .utf8)
+            XCTAssertFalse(
+                content.contains("PackLoader"),
+                "\(file) must not use PackLoader — runtime uses BinaryPackReader only"
+            )
+        }
+        XCTAssertGreaterThan(filesFound, 0, "No runtime files found — repo structure may have changed")
+    }
+
     // MARK: - C1: No XCTSkip in ANY Tests
 
     /// Gate test: ALL tests must not use XCTSkip (Audit C1 / v2.1)
@@ -2135,9 +2169,11 @@ extension AuditGateTests {
         ]
 
         var violations: [(file: String, line: Int, content: String)] = []
+        var dirsFound = 0
 
         for testDir in testDirs {
             guard FileManager.default.fileExists(atPath: testDir.path) else { continue }
+            dirsFound += 1
 
             let fileManager = FileManager.default
             guard let enumerator = fileManager.enumerator(
@@ -2173,6 +2209,8 @@ extension AuditGateTests {
                 }
             }
         }
+
+        XCTAssertGreaterThan(dirsFound, 0, "No test directories found — repo structure may have changed")
 
         if !violations.isEmpty {
             let message = violations.map { "\($0.file):\($0.line): \($0.content)" }.joined(separator: "\n")

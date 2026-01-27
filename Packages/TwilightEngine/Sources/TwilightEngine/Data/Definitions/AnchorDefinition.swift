@@ -35,7 +35,7 @@ public struct AnchorDefinition: GameDefinition {
     /// ID of the region where this anchor is located
     public let regionId: String
 
-    // MARK: - Type & Influence (Twilight Marches specific)
+    // MARK: - Type & Influence
 
     /// Anchor type (e.g., "chapel", "shrine", "sacred_tree")
     public let anchorType: String

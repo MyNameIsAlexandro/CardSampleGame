@@ -72,7 +72,7 @@ public enum PackType: String, Codable {
 
     /// Character/Hero content: heroes, starting decks, player cards
     /// Note: Called "Character Pack" (not "Investigator Pack" as in Arkham Horror)
-    /// to match Twilight Marches theme
+    /// to match the game's theme
     case character
 
     /// Balance tuning: numbers, weights, costs (no new content)

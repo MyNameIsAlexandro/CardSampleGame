@@ -19,11 +19,11 @@ final class CombatEngineFirstTests: XCTestCase {
 
         // Initialize game with starting deck
         let startingDeck = [
-            Card(name: "Strike", type: .attack, description: "Basic attack", power: 3),
-            Card(name: "Strike", type: .attack, description: "Basic attack", power: 3),
-            Card(name: "Defend", type: .defense, description: "Basic defense", defense: 2),
-            Card(name: "Defend", type: .defense, description: "Basic defense", defense: 2),
-            Card(name: "Heal", type: .spell, description: "Heal 2 HP")
+            Card(id: "strike_1", name: "Strike", type: .attack, description: "Basic attack", power: 3),
+            Card(id: "strike_2", name: "Strike", type: .attack, description: "Basic attack", power: 3),
+            Card(id: "defend_1", name: "Defend", type: .defense, description: "Basic defense", defense: 2),
+            Card(id: "defend_2", name: "Defend", type: .defense, description: "Basic defense", defense: 2),
+            Card(id: "heal_1", name: "Heal", type: .spell, description: "Heal 2 HP")
         ]
         engine.initializeNewGame(playerName: "Test Hero", heroId: nil, startingDeck: startingDeck)
     }
@@ -37,7 +37,7 @@ final class CombatEngineFirstTests: XCTestCase {
 
     func testSetupCombatEnemy() {
         // Given
-        let enemy = Card(name: "Wild Beast", type: .monster, description: "A wild beast", power: 3, defense: 2, health: 10)
+        let enemy = Card(id: "enemy_wild_beast", name: "Wild Beast", type: .monster, description: "A wild beast", power: 3, defense: 2, health: 10)
 
         // When
         engine.setupCombatEnemy(enemy)
@@ -51,7 +51,7 @@ final class CombatEngineFirstTests: XCTestCase {
 
     func testCombatInitializeDrawsCards() {
         // Given
-        let enemy = Card(name: "Enemy", type: .monster, description: "Test", health: 10)
+        let enemy = Card(id: "test_enemy", name: "Enemy", type: .monster, description: "Test", health: 10)
         engine.setupCombatEnemy(enemy)
 
         // When
@@ -65,7 +65,7 @@ final class CombatEngineFirstTests: XCTestCase {
 
     func testDamageEnemyReducesHealth() {
         // Given
-        let enemy = Card(name: "Enemy", type: .monster, description: "Test", health: 10)
+        let enemy = Card(id: "test_enemy", name: "Enemy", type: .monster, description: "Test", health: 10)
         engine.setupCombatEnemy(enemy)
         let initialHealth = engine.combatEnemyHealth
 
@@ -78,7 +78,7 @@ final class CombatEngineFirstTests: XCTestCase {
 
     func testDamageEnemyCannotGoBelowZero() {
         // Given
-        let enemy = Card(name: "Enemy", type: .monster, description: "Test", health: 5)
+        let enemy = Card(id: "test_enemy_5hp", name: "Enemy", type: .monster, description: "Test", health: 5)
         engine.setupCombatEnemy(enemy)
 
         // When
@@ -126,7 +126,7 @@ final class CombatEngineFirstTests: XCTestCase {
 
     func testDrawCardsEffect() {
         // Given
-        let enemy = Card(name: "Enemy", type: .monster, description: "Test", health: 10)
+        let enemy = Card(id: "test_enemy", name: "Enemy", type: .monster, description: "Test", health: 10)
         engine.setupCombatEnemy(enemy)
         engine.performAction(.combatInitialize)
         XCTAssertEqual(engine.playerHand.count, 5, "Should start with 5 cards")
@@ -177,7 +177,7 @@ final class CombatEngineFirstTests: XCTestCase {
 
     func testAddBonusDiceEffect() {
         // Given
-        let enemy = Card(name: "Enemy", type: .monster, description: "Test", health: 10)
+        let enemy = Card(id: "test_enemy", name: "Enemy", type: .monster, description: "Test", health: 10)
         engine.setupCombatEnemy(enemy)
 
         // When
@@ -189,7 +189,7 @@ final class CombatEngineFirstTests: XCTestCase {
 
     func testAddBonusDamageEffect() {
         // Given
-        let enemy = Card(name: "Enemy", type: .monster, description: "Test", health: 10)
+        let enemy = Card(id: "test_enemy", name: "Enemy", type: .monster, description: "Test", health: 10)
         engine.setupCombatEnemy(enemy)
 
         // When
@@ -203,7 +203,7 @@ final class CombatEngineFirstTests: XCTestCase {
 
     func testCombatFinishClearsEnemy() {
         // Given
-        let enemy = Card(name: "Enemy", type: .monster, description: "Test", health: 10)
+        let enemy = Card(id: "test_enemy", name: "Enemy", type: .monster, description: "Test", health: 10)
         engine.setupCombatEnemy(enemy)
         XCTAssertTrue(engine.isInCombat)
 
@@ -217,7 +217,7 @@ final class CombatEngineFirstTests: XCTestCase {
 
     func testCombatFleeClearsEnemy() {
         // Given
-        let enemy = Card(name: "Enemy", type: .monster, description: "Test", health: 10)
+        let enemy = Card(id: "test_enemy", name: "Enemy", type: .monster, description: "Test", health: 10)
         engine.setupCombatEnemy(enemy)
 
         // When
@@ -231,7 +231,7 @@ final class CombatEngineFirstTests: XCTestCase {
 
     func testSecondCombatRestoresDeck() {
         // Given - first combat
-        let enemy1 = Card(name: "Enemy 1", type: .monster, description: "Test", health: 5)
+        let enemy1 = Card(id: "test_enemy_1", name: "Enemy 1", type: .monster, description: "Test", health: 5)
         engine.setupCombatEnemy(enemy1)
         engine.performAction(.combatInitialize)
 
@@ -249,7 +249,7 @@ final class CombatEngineFirstTests: XCTestCase {
         engine.performAction(.combatFinish(victory: true))
 
         // When - start second combat
-        let enemy2 = Card(name: "Enemy 2", type: .monster, description: "Test", health: 5)
+        let enemy2 = Card(id: "test_enemy_2", name: "Enemy 2", type: .monster, description: "Test", health: 5)
         engine.setupCombatEnemy(enemy2)
         engine.performAction(.combatInitialize)
 
@@ -259,7 +259,7 @@ final class CombatEngineFirstTests: XCTestCase {
 
     func testCardsReturnFromDiscardOnNewCombat() {
         // Given - setup and use cards in first combat
-        let enemy = Card(name: "Enemy", type: .monster, description: "Test", health: 100)
+        let enemy = Card(id: "test_enemy_100hp", name: "Enemy", type: .monster, description: "Test", health: 100)
         engine.setupCombatEnemy(enemy)
         engine.performAction(.combatInitialize)
 
@@ -341,16 +341,16 @@ final class CombatEngineFirstTests: XCTestCase {
 
         // Initialize with known deck
         let startingDeck = [
-            Card(name: "Strike", type: .attack, description: "Basic attack", power: 3),
-            Card(name: "Strike", type: .attack, description: "Basic attack", power: 3),
-            Card(name: "Defend", type: .defense, description: "Basic defense", defense: 2),
-            Card(name: "Heal", type: .spell, description: "Heal 2 HP"),
-            Card(name: "Power", type: .attack, description: "Strong attack", power: 5)
+            Card(id: "sim_strike_1", name: "Strike", type: .attack, description: "Basic attack", power: 3),
+            Card(id: "sim_strike_2", name: "Strike", type: .attack, description: "Basic attack", power: 3),
+            Card(id: "sim_defend_1", name: "Defend", type: .defense, description: "Basic defense", defense: 2),
+            Card(id: "sim_heal_1", name: "Heal", type: .spell, description: "Heal 2 HP"),
+            Card(id: "sim_power_1", name: "Power", type: .attack, description: "Strong attack", power: 5)
         ]
         engine.initializeNewGame(playerName: "Test", heroId: nil, startingDeck: startingDeck)
 
         // Setup combat
-        let enemy = Card(name: "Test Enemy", type: .monster, description: "Test", power: 4, health: 20)
+        let enemy = Card(id: "sim_test_enemy", name: "Test Enemy", type: .monster, description: "Test", power: 4, health: 20)
         engine.setupCombatEnemy(enemy)
         engine.performAction(.combatInitialize)
 

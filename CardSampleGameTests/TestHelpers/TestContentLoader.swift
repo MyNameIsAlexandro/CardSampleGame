@@ -1,5 +1,6 @@
 import Foundation
 import TwilightEngine
+import PackAuthoring
 import CoreHeroesContent
 import TwilightMarchesActIContent
 
