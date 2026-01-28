@@ -139,7 +139,7 @@ ContentPacks/TwilightMarches/   # Дополнительный пак
 | `charisma` | Харизма |
 | `faith` | Текущая вера |
 | `max_faith` | Максимальная вера |
-| `starting_balance` | Начальный баланс Свет/Тьма (0-100) |
+| `starting_affinity` | Начальная склонность героя PlayerAffinity (-100..+100) |
 
 ### Способности
 

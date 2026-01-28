@@ -245,7 +245,7 @@ testSaveLoadRoundTrip()         // State persistence integrity
 | EVENT_MODULE_ARCHITECTURE.md | MODULE | Event system design |
 | SPEC_CAMPAIGN_PACK.md | SPEC | Campaign pack format |
 | SPEC_BALANCE_PACK.md | SPEC | Balance pack format |
-| SPEC_INVESTIGATOR_PACK.md | SPEC | Character pack format |
+| SPEC_CHARACTER_PACK.md | SPEC | Character pack format |
 | QA_ACT_I_CHECKLIST.md | QA | Testing checklist |
 | CHANGELOG.md | HISTORY | Change log |
 | INDEX.md | NAV | Documentation index |

@@ -240,8 +240,8 @@ Campaign Pack предоставляет сюжетный контент: рег
 ```json
 {
   "min_resources": "{ [resource]: integer } (опционально)",
-  "min_balance": "integer | null (0-100)",
-  "max_balance": "integer | null (0-100)",
+  "min_resonance": "integer | null (-100..+100)",
+  "max_resonance": "integer | null (-100..+100)",
   "required_flags": "string[] (опционально)",
   "required_cards": "string[] (опционально)"
 }

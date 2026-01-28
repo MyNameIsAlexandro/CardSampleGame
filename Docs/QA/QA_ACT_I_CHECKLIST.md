@@ -1,17 +1,23 @@
 # QA-ЧЕКЛИСТ И ЦЕЛЕВЫЕ МЕТРИКИ АКТА I
 
-**Версия:** 2.0
-**Дата:** 17 января 2026
+**Версия:** 2.1
+**Дата:** 28 января 2026
 **Статус:** Активный
 
+> **📜 PROJECT_BIBLE.md — конституция проекта (Source of Truth).**
+> Тестовая структура описана в [TESTING_GUIDE.md](./TESTING_GUIDE.md).
+
 **Документация проекта:**
-- 📖 [GAME_DESIGN_DOCUMENT.md](./GAME_DESIGN_DOCUMENT.md) - игровой дизайн
-- ⚙️ [ENGINE_ARCHITECTURE.md](./ENGINE_ARCHITECTURE.md) - **архитектура движка (source of truth)**
-- 🔧 [TECHNICAL_DOCUMENTATION.md](./TECHNICAL_DOCUMENTATION.md) - техническая документация
+- 📜 [PROJECT_BIBLE.md](../PROJECT_BIBLE.md) - **конституция проекта**
+- 📖 [GAME_DESIGN_DOCUMENT.md](../Design/GAME_DESIGN_DOCUMENT.md) - игровой дизайн
+- ⚙️ [ENGINE_ARCHITECTURE.md](../Technical/ENGINE_ARCHITECTURE.md) - архитектура движка (SoT для кода)
+- 🧪 [TESTING_GUIDE.md](./TESTING_GUIDE.md) - **структура тестов и traceability**
 - ✅ [QA_ACT_I_CHECKLIST.md](./QA_ACT_I_CHECKLIST.md) - этот файл (QA-контракт)
 
 > Этот документ определяет критерии качества и целевые метрики для тестирования Акта I.
 > Используется для ручного тестирования, автотестов и валидации дизайна.
+>
+> **Терминология:** WorldResonance (-100..+100), PlayerAffinity (-100..+100). См. [COMBAT_DIPLOMACY_SPEC.md §4](../Design/COMBAT_DIPLOMACY_SPEC.md#4-влияние-резонанса).
 
 ---
 
@@ -71,7 +77,7 @@
 #### TEST-001: Новый старт
 **Приоритет:** Critical
 **Тип:** Unit + UI
-**Файл:** `WorldStateTests.swift`
+**Canonical:** `Phase3ContractTests.swift` (TwilightEngineTests)
 
 **Шаги:**
 1. Создать новую игру
@@ -79,7 +85,8 @@
 
 **Ожидаемый результат:**
 - [x] WorldTension = 30%
-- [x] Player.balance = 50
+- [x] WorldResonance = 0 (Явь — равновесие)
+- [x] PlayerAffinity = 0 (нейтральный)
 - [x] daysPassed = 0
 - [x] currentRegionId = Деревня у тракта
 - [x] Главный квест "Путь Защитника" активен
@@ -89,9 +96,9 @@
 - Любой параметр ≠ канону
 - Карта скрыта или частично открыта
 
-**Автотесты:**
+**Автотесты:** (см. `Phase3ContractTests.swift`, `TwilightEngineTests`)
 - `testInitialWorldTension()`
-- `testInitialBalance()`
+- `testInitialResonance()`
 - `testInitialDaysPassed()`
 - `testInitialRegionsCount()`
 - `testInitialRegionStates()`
@@ -104,8 +111,8 @@
 #### TEST-002: Стоимость действий
 **Приоритет:** Critical
 **Тип:** Unit
-**Файл:** `WorldStateTests.swift`
-**Engine Contract:** `EngineContractsTests.testTimeAdvancesOnlyViaTimeEngine()`
+**Canonical:** `Phase3ContractTests.swift` (TwilightEngineTests)
+**Engine Contract:** `testTimeAdvancesOnlyViaEngine()`
 
 **Проверить:**
 | Действие | Ожидаемая стоимость |
@@ -129,8 +136,8 @@
 #### TEST-003: Авто-деградация мира
 **Приоритет:** Critical
 **Тип:** Unit + Integration
-**Файл:** `WorldStateTests.swift`
-**Engine Contract:** `EngineContractsTests.testWorldTickTriggeredByTimeThresholds()`
+**Canonical:** `Phase3ContractTests.swift` (TwilightEngineTests)
+**Engine Contract:** `testTensionEscalatesOnDay3()`
 
 **Шаги:**
 1. Провести 9 дней (любыми действиями)
@@ -255,13 +262,13 @@
 **Автотесты:**
 - `testConsequencesFaithChange()`
 - `testConsequencesHealthChange()`
-- `testConsequencesBalanceChange()`
+- `testConsequencesResonanceChange()`
 - `testConsequencesTensionChange()`
 - `testConsequencesSetFlags()`
 - `testConsequencesAnchorIntegrity()`
 - `testChoiceRequirementsFaith()`
 - `testChoiceRequirementsHealth()`
-- `testChoiceRequirementsBalance()`
+- `testChoiceRequirementsResonance()`
 - `testChoiceRequirementsFlags()`
 
 ---
@@ -302,7 +309,7 @@
 - [x] Минимум 2 побочных квеста доступны до финала
 - [x] Побочные квесты влияют на:
   - [x] Мир (регионы, якоря)
-  - [x] Баланс Light/Dark
+  - [x] WorldResonance / PlayerAffinity
   - [x] Эксклюзивные флаги
 - [x] Можно пропустить побочные квесты (не блокируют игру)
 
@@ -372,7 +379,7 @@
 **Проверить за прохождение Акта I:**
 - [x] Игрок получает 10–15 новых карт
 - [x] Карты соответствуют региону (Stable=Sustain, Breach=Power)
-- [x] Колода отражает путь (Light/Dark/Neutral)
+- [x] Колода отражает путь (Nav/Yav/Prav affinity)
 
 **Автотесты:**
 - `testDeckGrowthDuringActI()`
@@ -453,8 +460,8 @@
 
 ```
 CardSampleGameTests/
-├── Unit/                               # 11 файлов, ~295 тестов
-│   ├── WorldStateTests.swift           # Мир, регионы, деградация, время
+├── GateTests/                          # Blocking gate tests (см. TESTING_GUIDE.md)
+├── Unit/                               # ~11 файлов
 │   ├── PlayerTests.swift               # Игрок, ресурсы, проклятия
 │   ├── EventSystemTests.swift          # События, фильтрация, веса
 │   ├── QuestSystemTests.swift          # Квесты, прогресс, этапы
@@ -518,7 +525,7 @@ CardSampleGameTests/
 
 | Файл | Описание | Тестов | Строк |
 |------|----------|--------|-------|
-| WorldStateTests.swift | Мир, регионы, деградация | ~30 | ~350 |
+| Phase3ContractTests.swift | **Канон:** Engine contracts, мир, время | ~15 | ~360 |
 | PlayerTests.swift | Игрок, колода, проклятия | ~25 | ~300 |
 | EventSystemTests.swift | События, фильтрация, веса | ~35 | ~420 |
 | QuestSystemTests.swift | Квесты, прогресс | ~20 | ~280 |
