@@ -21,7 +21,8 @@ Packages/TwilightEngine/Tests/TwilightEngineTests/
 ├── GateTests/                      # Инварианты (блокируют merge)
 │   ├── INV_ENC_GateTests.swift     # Encounter Engine invariants
 │   ├── INV_FATE_GateTests.swift    # Fate Deck invariants
-│   └── INV_BHV_GateTests.swift     # Behavior Runtime invariants
+│   ├── INV_BHV_GateTests.swift     # Behavior Runtime invariants
+│   └── INV_CNT_GateTests.swift     # Content Validation invariants
 │
 ├── LayerTests/                     # Юнит-тесты по компонентам
 │   ├── EncounterEngineTests.swift  # Turn loop, phases, outcomes
@@ -44,7 +45,7 @@ Packages/TwilightEngine/Tests/TwilightEngineTests/
 | Правило | Описание |
 |---------|----------|
 | **Gate < 2 секунды** | Каждый gate-тест обязан выполняться < 2 секунд. Если дольше — тест переносится в LayerTests/ или оптимизируется |
-| **Gate = no RNG** | Gate-тесты запрещено использовать random. Все данные детерминированы (hardcoded fixtures) |
+| **Gate = no nondeterministic RNG** | Gate-тесты запрещено использовать system random (`Int.random()`, `UUID()`). Seeded RNG с фиксированным seed допускается. Все данные детерминированы (hardcoded fixtures + fixed seeds) |
 | **Gate = no XCTSkip** | Невозможность проверки = FAIL, не skip |
 | **TDD/ = только RED** | В TDD/ директории запрещены GREEN тесты. Тест стал GREEN → немедленный перенос в LayerTests/ или IntegrationTests/ |
 | **Один файл = один компонент** | LayerTests/ организованы по компоненту, не по фиче |
@@ -74,11 +75,12 @@ Gate-тесты проверяют **архитектурные инвариан
 ```swift
 // INV-ENC-001: Phase Order
 func test_INV_ENC_001_PhaseOrderEnforced() {
-    // Arrange: encounter в Phase 1 (Intent)
+    // Arrange: encounter в фазе .intent
     let ctx = EncounterContextFixtures.standard()
     let engine = EncounterEngine(context: ctx)
+    XCTAssertEqual(engine.currentPhase, .intent)
 
-    // Act: попытка Player Action до завершения Intent
+    // Act: попытка Player Action до завершения intent
     let result = engine.performPlayerAction(.attack(targetId: "enemy_1"))
 
     // Assert: ошибка, а не молчаливый пропуск
@@ -95,15 +97,27 @@ func test_INV_ENC_001_PhaseOrderEnforced() {
 | INV-FATE-003 | **Reshuffle Trigger** | drawPile пустой → автоматический reshuffle (discard → draw, shuffle). Если и discard пустой → `.deckExhausted` error, не бесконечный цикл | Зависание или panic |
 | INV-FATE-004 | **Draw Order Determinism** | Одинаковый seed → одинаковая последовательность draw. 100 итераций — 100 одинаковых результатов | Расхождение на любой итерации |
 | INV-FATE-005 | **Sticky Card Persistence** | Sticky card (проклятие) остаётся в колоде после reshuffle. `removedPile` не содержит sticky cards | Sticky card исчезла после reshuffle |
+| INV-FATE-006 | **Suit Validity** | Каждая FateCard имеет `suit` ∈ {nav, prav, yav, neutral} | Невалидный suit прошёл валидацию |
+| INV-FATE-007 | **Choice Card Completeness** | FateCard с `type: "choice"` имеет оба варианта (safe/risk) | Неполная choice card прошла валидацию |
+| INV-FATE-008 | **Keyword Validity** | FateCard.keyword ∈ FateKeyword enum (surge/focus/echo/shadow/ward) | Невалидный keyword прошёл валидацию |
 
 ### 2.3 INV-BHV — Behavior Runtime Invariants
 
 | ID | Инвариант | Проверка | Критерий FAIL |
 |----|-----------|----------|---------------|
-| INV-BHV-001 | **Priority Determinism** | Два правила с одинаковым priority → стабильный порядок (по id: лексикографически) | Разный Intent при повторном запуске |
-| INV-BHV-002 | **Unknown Condition Fail** | Неизвестный `condition.type` → hard fail при валидации, safe fallback (default intent) в runtime | Crash в runtime ИЛИ silent skip при валидации |
-| INV-BHV-003 | **Default Intent Required** | Behavior без хотя бы одного `conditions: []` правила → validation error | Enemy без intent на раунд (deadlock) |
+| INV-BHV-001 | **Priority Determinism** | Два правила с одинаковым priority → стабильный порядок (первый в массиве `rules[]` побеждает) | Разный Intent при повторном запуске |
+| INV-BHV-002 | **Unknown Condition Fail** | Неизвестный `condition.type` → hard fail при валидации, safe fallback (`default_intent`) в runtime | Crash в runtime ИЛИ silent skip при валидации |
+| INV-BHV-003 | **Default Intent Required** | Behavior без `default_intent` или `default_intent` ссылается на несуществующий ключ в `intents{}` → validation error | Enemy без intent на раунд (deadlock) |
 | INV-BHV-004 | **Formula Whitelist** | `value_formula` содержит hardcoded число → validation error. Допускаются только: `"power"`, `"influence"`, `"hp_percent"`, `"power * MULTIPLIER_ID"`, `"influence * MULTIPLIER_ID"` | Число прошло валидацию |
+| INV-BHV-005 | **Intent Type Valid** | `intent.type` не в enum IntentType → validation error | Неизвестный intent type прошёл валидацию |
+
+### 2.4 INV-CNT — Content Validation Invariants
+
+| ID | Инвариант | Проверка | Критерий FAIL |
+|----|-----------|----------|---------------|
+| INV-CNT-001 | **Behavior Refs Exist** | Все `behavior_id` в enemies.json ссылаются на существующие behaviors | Ссылка на несуществующий behavior |
+| INV-CNT-002 | **Fate Card IDs Unique** | Все `id` в Fate Cards уникальны глобально | Дубликат ID |
+| INV-CNT-003 | **Multiplier Refs Exist** | MULTIPLIER_ID в `value_formula` существует в Balance Pack | Ссылка на несуществующий multiplier |
 
 ---
 
@@ -115,7 +129,7 @@ Layer-тесты проверяют **поведение** конкретных 
 
 | Тест | Что проверяет | Mock/Stub |
 |------|---------------|-----------|
-| `testTurnLoopAdvancesPhases` | Phase 1→2→3→4→1 корректно | Stub participants |
+| `testTurnLoopAdvancesPhases` | intent→playerAction→enemyResolution→roundEnd→intent корректно | Stub participants |
 | `testVictoryConditionKill` | HP=0 → outcome .killed | — |
 | `testVictoryConditionPacify` | WP=0, HP>0 → outcome .pacified | — |
 | `testFleeWithCost` | Flee → outcome .escaped, cost applied | — |
@@ -153,11 +167,12 @@ Layer-тесты проверяют **поведение** конкретных 
 
 | Тест | Что проверяет |
 |------|---------------|
-| `testHighPriorityWins` | Rule с priority 10 выбирается над priority 1 |
-| `testConditionEvaluation` | hp_below_percent(30) + enemy.hp=20% → true |
-| `testDefaultFallback` | Ни одно условие не сработало → default intent |
-| `testCompositeConditions` | AND из двух условий → оба должны быть true |
-| `testUnknownConditionSafeFallback` | Неизвестный type → safe fallback в runtime (не crash) |
+| `testHighPriorityWins` | Rule с priority 100 выбирается над priority 50 |
+| `testConditionEvaluation` | `{type: "hp_percent", operator: "<", value: 30}` + enemy.hp=20% → true |
+| `testDefaultFallback` | Ни одно правило не сработало → `default_intent` из behavior |
+| `testWeightedRandom` | `type: "weighted_random"` с pool использует seeded RNG, детерминирован |
+| `testUnknownConditionSafeFallback` | Неизвестный condition.type → safe fallback (`default_intent`) в runtime (не crash) |
+| `testTieBreakByArrayOrder` | Два правила с одинаковым priority → первый в `rules[]` побеждает |
 | `testHasFateCardSuit` | has_fate_card_suit("nav") + nav card в руке → true |
 | `testLastPlayerAction` | last_player_action("attack") после атаки → true |
 

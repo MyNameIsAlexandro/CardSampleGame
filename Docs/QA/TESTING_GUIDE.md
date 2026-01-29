@@ -455,7 +455,7 @@ Encounter System использует **гибридную модель тест
 
 | Правило | Описание |
 |---------|----------|
-| **Gate < 2s, no RNG** | Gate-тесты выполняются < 2 секунд, используют только детерминированные фикстуры |
+| **Gate < 2s, no nondeterministic RNG** | Gate-тесты < 2 секунд; запрещён system random, seeded RNG допускается |
 | **Gate = no XCTSkip** | Невозможность проверки = FAIL |
 | **TDD/ = только RED** | GREEN тест в TDD/ = CI failure. Немедленный перенос в LayerTests/ или IntegrationTests/ |
 | **INV-xxx ID** | Каждый gate-инвариант имеет уникальный ID: `INV-ENC-001`, `INV-FATE-001`, `INV-BHV-001` |
@@ -466,7 +466,7 @@ Encounter System использует **гибридную модель тест
 
 ```
 TwilightEngineTests/
-├── GateTests/          # INV-ENC, INV-FATE, INV-BHV инварианты
+├── GateTests/          # INV-ENC, INV-FATE, INV-BHV, INV-CNT инварианты
 ├── LayerTests/         # Юнит-тесты по компонентам (EncounterEngine, FateDeck, Behavior, Keyword, Modifier)
 ├── IntegrationTests/   # E2E сценарии (Kill path, Pacify path, Flee, Multi-enemy)
 └── TDD/                # Инкубатор (только RED тесты)
@@ -475,8 +475,9 @@ TwilightEngineTests/
 ### 9.3 Инварианты (сводка)
 
 - **INV-ENC-001..007** — Phase Order, Dual Track Independence, Kill Priority, Transaction Atomicity, Determinism, No External State, One Finish Action
-- **INV-FATE-001..005** — Conservation, Snapshot Isolation, Reshuffle Trigger, Draw Order Determinism, Sticky Card Persistence
-- **INV-BHV-001..004** — Priority Determinism, Unknown Condition Fail, Default Intent Required, Formula Whitelist
+- **INV-FATE-001..008** — Conservation, Snapshot Isolation, Reshuffle Trigger, Draw Order Determinism, Sticky Card Persistence, Suit Validity, Choice Card Completeness, Keyword Validity
+- **INV-BHV-001..005** — Priority Determinism, Unknown Condition Fail, Default Intent Required, Formula Whitelist, Intent Type Valid
+- **INV-CNT-001..003** — Behavior Refs Exist, Fate Card IDs Unique, Multiplier Refs Exist
 
 ---
 
