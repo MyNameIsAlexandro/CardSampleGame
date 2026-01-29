@@ -65,8 +65,8 @@ Gate-тесты проверяют **архитектурные инвариан
 | INV-ENC-001 | **Phase Order** | Вызовы фаз в неправильном порядке → Engine возвращает `.invalidPhaseOrder` error | Принятие действия вне очереди |
 | INV-ENC-002 | **Dual Track Independence** | Physical attack → только HP меняется; Spirit → только WP | HP и WP меняются одновременно от одного действия |
 | INV-ENC-003 | **Kill Priority** | HP=0 → outcome = .killed, независимо от WP | WP=0 && HP=0 → outcome != .killed |
-| INV-ENC-004 | **Transaction Atomicity** | Abort mid-encounter → ни одно поле мира не изменено | Частичное применение transaction |
-| INV-ENC-005 | **Determinism** | Одинаковый EncounterContext + одинаковый seed → побитово идентичный EncounterResult | Расхождение при повторном запуске |
+| INV-ENC-004 | **Transaction Atomicity** | Abort mid-encounter → ни одно поле мира не изменено. Ответственность: Game Integration (EncounterEngine возвращает EncounterResult, GameEngine решает применять ли transaction) | Частичное применение transaction |
+| INV-ENC-005 | **Determinism** | Одинаковый EncounterContext + одинаковый seed → семантически идентичный EncounterResult (Equatable) | Расхождение при повторном запуске |
 | INV-ENC-006 | **No External State** | Encounter Engine не читает и не пишет ничего вне EncounterContext/EncounterResult | Обращение к глобальному состоянию (синглтонам, файлам) |
 | INV-ENC-007 | **One Finish Action** | Попытка второго Finish Action за раунд → `.actionNotAllowed` error | Два Finish Action проходят без ошибки |
 
@@ -221,7 +221,7 @@ Integration-тесты проверяют **полный pipeline** от Encount
 |------|---------------|
 | `testRegionToModifiers` | "Болото" → {heal_mult: 0.5} в modifiers |
 | `testCursesToModifiers` | Active curse → modifier в context |
-| `testResonanceZone` | WorldResonance=-80 → zone: "deep_nav" |
+| `testResonanceZone` | WorldResonance=-80 → zone: "deepNav" |
 | `testEmptyContext` | Нет модификаторов → валидный context без modifiers |
 
 ---

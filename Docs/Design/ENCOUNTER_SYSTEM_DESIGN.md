@@ -78,10 +78,10 @@ Encounter System — "слепой" модуль. Он не знает про р
 
 ```
 EncounterContext
-├── participants: [Participant]       // Герой(и) + противники
-│   ├── stats                         // HP, WP, armor, will, strength...
-│   ├── intentTable                   // Таблица намерений (для NPC/врагов)
-│   └── behaviors                     // Декларативные правила поведения
+├── hero: EncounterHero               // Статы героя (HP, strength, armor, wisdom...)
+├── enemies: [EncounterEnemy]         // Противники с dual-track (HP + WP)
+│   ├── stats                         // HP, WP, power, defense...
+│   └── behaviorId                    // Ссылка на behaviors.json (для AI)
 ├── playerDeck: DeckSnapshot          // Текущая колода игрока
 ├── fateDeck: FateDeckSnapshot        // Текущее состояние Fate Deck
 ├── modifiers: [EncounterModifier]    // Generic модификаторы среды
@@ -397,7 +397,7 @@ Context Builder (Вход)                Result Applier (Выход)
 │                      │              │  → Quest.checkFlags() │
 │ WorldResonance →     │              │  → Analytics.log()   │
 │  modifiers           │              │  → Save/Load         │
-│  {zone: "deep_nav",  │              │                      │
+│  {zone: "deepNav",  │              │                      │
 │   enemy_dmg: +1}     │              │ Всё через             │
 └──────────────────────┘              │ Engine.performAction() │
                                       └──────────────────────┘
@@ -502,16 +502,18 @@ sequenceDiagram
     Note right of GameEngine: Environment Modifiers +
     Note right of GameEngine: Fate Deck Snapshot
 
-    GameEngine->>Encounter: 2. startEncounter(context)
+    GameEngine->>Encounter: 2. EncounterEngine(context:)
 
     rect rgb(30, 30, 30)
-        Note over Encounter: ЦИКЛ ВСТРЕЧИ (изолирован)
-        Encounter->>Encounter: Intent → Action → Resolution
-        Encounter->>Encounter: Изменение локального HP/WP
-        Encounter->>Encounter: Изменение локальной Fate Deck
+        Note over Encounter: STEP-BASED ЦИКЛ (изолирован)
+        Encounter->>Encounter: generateIntent(for:)
+        Encounter->>Encounter: performAction(.attack / .spiritAttack / ...)
+        Encounter->>Encounter: resolveEnemyAction(enemyId:)
+        Encounter->>Encounter: advancePhase()
+        Note over Encounter: Повтор до завершения
     end
 
-    Encounter-->>GameEngine: 3. return EncounterResult
+    Encounter-->>GameEngine: 3. finishEncounter() → EncounterResult
 
     GameEngine->>GameEngine: 4. State update (мгновенно)
     GameEngine->>ViewModel: 5. Transaction → Event Queue
