@@ -9,12 +9,11 @@
 > Остальные документы подчиняются ей. ENGINE_ARCHITECTURE.md — SoT для кода/контрактов.
 
 **Документация проекта:**
-- 📜 [PROJECT_BIBLE.md](../PROJECT_BIBLE.md) - **конституция проекта**
+- 📜 [PROJECT_BIBLE.md](./PROJECT_BIBLE.md) - **конституция проекта**
 - 📖 [GAME_DESIGN_DOCUMENT.md](./GAME_DESIGN_DOCUMENT.md) - игровой дизайн (каноническая декомпозиция)
 - 🗺️ [EXPLORATION_CORE_DESIGN.md](./EXPLORATION_CORE_DESIGN.md) - этот файл (система исследования)
-- 🔧 [TECHNICAL_DOCUMENTATION.md](./TECHNICAL_DOCUMENTATION.md) - техническая документация
-- ⚙️ [ENGINE_ARCHITECTURE.md](./ENGINE_ARCHITECTURE.md) - архитектура движка (SoT для кода)
-- 📊 [CAMPAIGN_IMPLEMENTATION_REPORT.md](./CAMPAIGN_IMPLEMENTATION_REPORT.md) - отчёт о реализации
+- ⚙️ [ENGINE_ARCHITECTURE.md](../Technical/ENGINE_ARCHITECTURE.md) - архитектура движка (SoT для кода)
+- 📦 История реализации — в [Docs/Archive/](../Archive/) (read-only)
 
 ---
 
@@ -1299,7 +1298,7 @@ Data/
 
 > **Каноническая спецификация механик (Twilight Marches).**
 > Этот раздел описывает референс-реализацию механик для сеттинга Twilight Marches.
-> Engine-level контракты и инварианты — см. [ENGINE_ARCHITECTURE.md](./ENGINE_ARCHITECTURE.md) и [EVENT_MODULE_ARCHITECTURE.md](./EVENT_MODULE_ARCHITECTURE.md).
+> Engine-level контракты и инварианты — см. [ENGINE_ARCHITECTURE.md](../Technical/ENGINE_ARCHITECTURE.md) и [EVENT_MODULE_ARCHITECTURE.md](../Technical/EVENT_MODULE_ARCHITECTURE.md).
 
 ---
 
@@ -1482,7 +1481,7 @@ if worldFlags["main_quest_started"] == true {
 
 > **Это механический DoD** — детальные проверки для валидации реализации.
 > - Философский DoD (что должно работать): [GAME_DESIGN_DOCUMENT.md, раздел 17](./GAME_DESIGN_DOCUMENT.md)
-> - Enforced DoD (автотесты): [QA_ACT_I_CHECKLIST.md](./QA_ACT_I_CHECKLIST.md)
+> - Enforced DoD (автотесты): [QA_ACT_I_CHECKLIST.md](../QA/QA_ACT_I_CHECKLIST.md)
 
 **Core Loop считается реализованным, если:**
 

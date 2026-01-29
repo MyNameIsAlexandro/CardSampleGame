@@ -8,13 +8,12 @@
 > Остальные документы подчиняются ей. ENGINE_ARCHITECTURE.md — SoT для кода/контрактов.
 
 **Документация проекта:**
-- 📜 [PROJECT_BIBLE.md](../PROJECT_BIBLE.md) - **конституция проекта**
+- 📜 [PROJECT_BIBLE.md](./PROJECT_BIBLE.md) - **конституция проекта**
 - 📖 [GAME_DESIGN_DOCUMENT.md](./GAME_DESIGN_DOCUMENT.md) - этот файл (игровой дизайн)
 - 🗺️ [EXPLORATION_CORE_DESIGN.md](./EXPLORATION_CORE_DESIGN.md) - система исследования
 - ✍️ [EXPLORATION_CORE_DESIGN.md#content-bible](./EXPLORATION_CORE_DESIGN.md#content-bible-для-сценариста-и-narrative-designer) - **Content Bible** (секции 35-45)
-- 🔧 [TECHNICAL_DOCUMENTATION.md](./TECHNICAL_DOCUMENTATION.md) - техническая документация
 - ⚙️ [ENGINE_ARCHITECTURE.md](../Technical/ENGINE_ARCHITECTURE.md) - архитектура движка (SoT для кода)
-- 📊 [CAMPAIGN_IMPLEMENTATION_REPORT.md](./CAMPAIGN_IMPLEMENTATION_REPORT.md) - отчёт о реализации
+- 📦 История реализации — в [Docs/Archive/](../Archive/) (read-only)
 
 ---
 
@@ -1117,9 +1116,9 @@ Stable (якорь 70-100%) → Borderland (якорь 30-69%) → Breach (як�
 ## 13. ТЕХНИЧЕСКАЯ РЕАЛИЗАЦИЯ
 
 > **Подробная техническая документация:**
-> - [TECHNICAL_DOCUMENTATION.md](./TECHNICAL_DOCUMENTATION.md) — файлы, модули, зависимости
-> - [ENGINE_ARCHITECTURE.md](./ENGINE_ARCHITECTURE.md) — архитектура движка TwilightEngine
+> - [ENGINE_ARCHITECTURE.md](../Technical/ENGINE_ARCHITECTURE.md) — архитектура движка TwilightEngine (SoT для кода)
 > - [EVENT_MODULE_ARCHITECTURE.md](../Technical/EVENT_MODULE_ARCHITECTURE.md) — система событий
+> - История реализации — в [Docs/Archive/](../Archive/) (read-only)
 
 **Ключевые принципы:**
 - **Data-driven:** Контент (карты, враги, события) загружается из JSON/Content Packs
@@ -1212,7 +1211,7 @@ Stable (якорь 70-100%) → Borderland (якорь 30-69%) → Breach (як�
 
 > **Это философский DoD** — определяет *что* должно работать с точки зрения дизайна.
 > - Механический DoD (как проверить): [EXPLORATION_CORE_DESIGN.md, раздел 18.10](./EXPLORATION_CORE_DESIGN.md#1810-definition-of-done-core-loop)
-> - Enforced DoD (автотесты): [QA_ACT_I_CHECKLIST.md](./QA_ACT_I_CHECKLIST.md)
+> - Enforced DoD (автотесты): [QA_ACT_I_CHECKLIST.md](../QA/QA_ACT_I_CHECKLIST.md)
 
 ### Критерии готовности Core Loop:
 
@@ -1244,7 +1243,7 @@ Stable (якорь 70-100%) → Borderland (якорь 30-69%) → Breach (як�
 
 ### 18.1 Приоритеты (дизайн)
 
-> **Статус реализации:** См. [TECHNICAL_DOCUMENTATION.md](./TECHNICAL_DOCUMENTATION.md)
+> **Статус реализации:** См. [CHANGELOG.md](../Audit/CHANGELOG.md)
 
 1. Базовая deck-building механика
 2. Система рынка (extension point)

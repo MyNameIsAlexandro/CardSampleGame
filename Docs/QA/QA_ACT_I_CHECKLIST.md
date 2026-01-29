@@ -8,7 +8,7 @@
 > Тестовая структура описана в [TESTING_GUIDE.md](./TESTING_GUIDE.md).
 
 **Документация проекта:**
-- 📜 [PROJECT_BIBLE.md](../PROJECT_BIBLE.md) - **конституция проекта**
+- 📜 [PROJECT_BIBLE.md](../Design/PROJECT_BIBLE.md) - **конституция проекта**
 - 📖 [GAME_DESIGN_DOCUMENT.md](../Design/GAME_DESIGN_DOCUMENT.md) - игровой дизайн
 - ⚙️ [ENGINE_ARCHITECTURE.md](../Technical/ENGINE_ARCHITECTURE.md) - архитектура движка (SoT для кода)
 - 🧪 [TESTING_GUIDE.md](./TESTING_GUIDE.md) - **структура тестов и traceability**
