@@ -1,7 +1,10 @@
 # Testing Guide
 
 **Project:** Сумрачные Пределы (Twilight Marches)
-**Last Updated:** 2026-01-28
+**Last Updated:** 2026-01-29
+
+> **📜 PROJECT_BIBLE.md — конституция проекта (Source of Truth).**
+> ENGINE_ARCHITECTURE.md — SoT для кода/контрактов.
 
 ---
 

@@ -486,20 +486,22 @@ CardSampleGameTests/
 
 ### Покрытие по категориям
 
-| Категория | Unit | Integration | Engine | Всего |
-|-----------|------|-------------|--------|-------|
-| Инициализация (TEST-001) | ✅ 11 | - | - | 11 |
-| Время/дни (TEST-002, 003) | ✅ 12 | ✅ 5 | ✅ 3 | 20 |
-| Регионы (TEST-004, 005, 006) | ✅ 22 | ✅ 6 | - | 28 |
-| События (TEST-007, 008) | ✅ 33 | ✅ 4 | ✅ 8 | 45 |
-| Квесты (TEST-009, 010) | ✅ 15 | ✅ 10 | - | 25 |
-| Бой (TEST-011, 012) | ✅ 40 | - | - | 40 |
-| Колода (TEST-013, 014) | ✅ 40 | ✅ 8 | - | 48 |
-| Сохранения (TEST-016) | ✅ 38 | - | ✅ 4 | 42 |
-| E2E симуляция (TEST-015) | - | ✅ 20 | ✅ 3 | 23 |
-| Engine Contracts (NEW) | - | - | ✅ 18 | 18 |
-| Phase 3 Contracts (NEW) | - | - | ✅ 13 | 13 |
-| **ИТОГО** | **211** | **53** | **49** | **313** |
+> **Актуальное количество тестов:** см. [CHANGELOG.md](../Audit/CHANGELOG.md) и вывод CI (`xcodebuild test`).
+> Таблица ниже описывает **категории и слои покрытия**, а не точные числа.
+
+| Категория | Unit | Integration | Engine |
+|-----------|------|-------------|--------|
+| Инициализация (TEST-001) | ✅ | - | - |
+| Время/дни (TEST-002, 003) | ✅ | ✅ | ✅ |
+| Регионы (TEST-004, 005, 006) | ✅ | ✅ | - |
+| События (TEST-007, 008) | ✅ | ✅ | ✅ |
+| Квесты (TEST-009, 010) | ✅ | ✅ | - |
+| Бой (TEST-011, 012) | ✅ | - | - |
+| Колода (TEST-013, 014) | ✅ | ✅ | - |
+| Сохранения (TEST-016) | ✅ | - | ✅ |
+| E2E симуляция (TEST-015) | - | ✅ | ✅ |
+| Engine Contracts | - | - | ✅ |
+| Phase 3 Contracts | - | - | ✅ |
 
 > **Engine Contract Tests** — слой тестов, проверяющий инварианты движка.
 > После миграции на Engine v1.0, тесты TEST-002/003 (время) и TEST-007/008 (события)
@@ -523,34 +525,33 @@ CardSampleGameTests/
 
 ### Детализация по файлам
 
-| Файл | Описание | Тестов | Строк |
-|------|----------|--------|-------|
-| Phase3ContractTests.swift | **Канон:** Engine contracts, мир, время | ~15 | ~360 |
-| PlayerTests.swift | Игрок, колода, проклятия | ~25 | ~300 |
-| EventSystemTests.swift | События, фильтрация, веса | ~35 | ~420 |
-| QuestSystemTests.swift | Квесты, прогресс | ~20 | ~280 |
-| CombatModifiersTests.swift | Модификаторы боя | ~15 | ~200 |
-| CombatSystemTests.swift | Урон, проклятия в бою | ~35 | ~450 |
-| DeckBuildingTests.swift | Draw/discard, покупка | ~40 | ~480 |
-| SaveLoadTests.swift | Сохранение/загрузка | ~35 | ~400 |
-| WorldMapModelTests.swift | Данные карты, индикаторы | ~15 | ~180 |
-| RegionActionsModelTests.swift | Доступность действий | ~12 | ~160 |
-| EventFlowModelTests.swift | Структура событий | ~8 | ~120 |
-| ActIPlaythroughTests.swift | Полное прохождение | ~35 | ~420 |
-| SmokeConfigTests.swift | Валидация конфигурации | ~8 | ~150 |
-| MetricsDistributionTests.swift | Статистика 1000 симуляций | ~15 | ~480 |
-| PlaythroughSimulationTests.swift | E2E детерминированная симуляция | ~25 | ~700 |
-| **Unit/Integration ИТОГО** | | **~350** | **~5000** |
-| | | | |
-| **GateTests/** (Gate/Compliance Tests) | | | |
-| EngineContractsTests.swift | Core engine invariants | ~8 | ~250 |
-| EventModuleContractsTests.swift | Event module contracts | ~10 | ~350 |
-| DataSeparationTests.swift | Definition/Runtime separation | ~8 | ~280 |
-| RegressionPlaythroughTests.swift | Migration safety harness | ~10 | ~350 |
-| Phase2ContractTests.swift | Phase 2 data separation | ~8 | ~300 |
-| Phase3ContractTests.swift | Phase 3 GameLoop integration | ~13 | ~350 |
-| **Engine ИТОГО** | | **~57** | **~1880** |
-| **ВСЕГО** | | **~407** | **~6880** |
+> **Актуальные числа тестов и строк:** см. CI-отчёт / `xcodebuild test`.
+> Каноническая структура тестовых файлов описана в [TESTING_GUIDE.md](./TESTING_GUIDE.md).
+
+| Файл | Описание |
+|------|----------|
+| Phase3ContractTests.swift | **Канон:** Engine contracts, мир, время |
+| PlayerTests.swift | Игрок, колода, проклятия |
+| EventSystemTests.swift | События, фильтрация, веса |
+| QuestSystemTests.swift | Квесты, прогресс |
+| CombatModifiersTests.swift | Модификаторы боя |
+| CombatSystemTests.swift | Урон, проклятия в бою |
+| DeckBuildingTests.swift | Draw/discard, покупка |
+| SaveLoadTests.swift | Сохранение/загрузка |
+| WorldMapModelTests.swift | Данные карты, индикаторы |
+| RegionActionsModelTests.swift | Доступность действий |
+| EventFlowModelTests.swift | Структура событий |
+| ActIPlaythroughTests.swift | Полное прохождение |
+| SmokeConfigTests.swift | Валидация конфигурации |
+| MetricsDistributionTests.swift | Статистика 1000 симуляций |
+| PlaythroughSimulationTests.swift | E2E детерминированная симуляция |
+| **GateTests/** | |
+| EngineContractsTests.swift | Core engine invariants |
+| EventModuleContractsTests.swift | Event module contracts |
+| DataSeparationTests.swift | Definition/Runtime separation |
+| RegressionPlaythroughTests.swift | Migration safety harness |
+| Phase2ContractTests.swift | Phase 2 data separation |
+| Phase3ContractTests.swift | Phase 3 GameLoop integration |
 
 ### Правила для MetricsDistributionTests
 
