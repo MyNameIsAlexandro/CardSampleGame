@@ -42,6 +42,14 @@ public struct EnemyDefinition: GameDefinition {
     /// Card rarity for loot/display
     public let rarity: CardRarity
 
+    // MARK: - Spirit
+
+    /// Spirit/Resolve stat (optional — not all enemies have Will)
+    public let will: Int?
+
+    /// Per-zone stat modifiers keyed by ResonanceZone raw value
+    public let resonanceBehavior: [String: EnemyModifier]?
+
     // MARK: - Abilities
 
     /// Special abilities this enemy has
@@ -73,6 +81,8 @@ public struct EnemyDefinition: GameDefinition {
         difficulty: Int = 1,
         enemyType: EnemyType = .beast,
         rarity: CardRarity = .common,
+        will: Int? = nil,
+        resonanceBehavior: [String: EnemyModifier]? = nil,
         abilities: [EnemyAbility] = [],
         lootCardIds: [String] = [],
         faithReward: Int = 0,
@@ -87,6 +97,8 @@ public struct EnemyDefinition: GameDefinition {
         self.difficulty = difficulty
         self.enemyType = enemyType
         self.rarity = rarity
+        self.will = will
+        self.resonanceBehavior = resonanceBehavior
         self.abilities = abilities
         self.lootCardIds = lootCardIds
         self.faithReward = faithReward
@@ -105,6 +117,23 @@ public struct EnemyDefinition: GameDefinition {
             defense: defense,
             health: health
         )
+    }
+}
+
+// MARK: - Enemy Modifier (Resonance-based)
+
+/// Stat modifier applied to an enemy based on the current ResonanceZone
+public struct EnemyModifier: Codable, Equatable, Hashable {
+    public let powerDelta: Int
+    public let defenseDelta: Int
+    public let healthDelta: Int
+    public let willDelta: Int
+
+    public init(powerDelta: Int = 0, defenseDelta: Int = 0, healthDelta: Int = 0, willDelta: Int = 0) {
+        self.powerDelta = powerDelta
+        self.defenseDelta = defenseDelta
+        self.healthDelta = healthDelta
+        self.willDelta = willDelta
     }
 }
 

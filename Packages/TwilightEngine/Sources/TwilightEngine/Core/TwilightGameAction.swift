@@ -36,9 +36,28 @@ public enum TwilightGameAction: TimedAction, Equatable {
     /// Initialize combat: shuffle deck and draw initial hand
     case combatInitialize
 
-    // MARK: - Combat Actions
-    /// Perform basic attack in combat
-    case combatAttack(bonusDice: Int, bonusDamage: Int, isFirstAttack: Bool)
+    // MARK: - Combat Actions (Active Defense System)
+
+    /// Mulligan: replace selected cards at combat start
+    case combatMulligan(cardIds: [String])
+
+    /// Generate and show enemy intent for this turn
+    case combatGenerateIntent
+
+    /// Player attack with automatic Fate card draw (Active Defense)
+    /// bonusDamage: extra damage from played cards
+    case combatPlayerAttackWithFate(bonusDamage: Int)
+
+    /// Player skips attack phase (saves resources, still defends)
+    case combatSkipAttack
+
+    /// Enemy resolves their intent with automatic Defense Fate card
+    case combatEnemyResolveWithFate
+
+    // MARK: - Legacy Combat Actions (kept for compatibility)
+
+    /// Perform basic attack in combat (Unified Resolution via Fate Deck)
+    case combatAttack(effortCards: Int, bonusDamage: Int)
 
     /// Play a card in combat
     case playCard(cardId: String, targetId: String?)
@@ -55,10 +74,13 @@ public enum TwilightGameAction: TimedAction, Equatable {
     /// End turn phase: discard hand, draw new cards, restore faith
     case combatEndTurnPhase
 
+    /// Deal spirit/will damage to enemy (Pacify path)
+    case combatSpiritAttack
+
     /// Flee from combat
     case combatFlee
 
-    /// Finish combat with result
+    /// Finish combat with result (victory: true, pacified: whether enemy was pacified vs killed)
     case combatFinish(victory: Bool)
 
     // MARK: - UI Actions
@@ -108,6 +130,21 @@ public enum TwilightGameAction: TimedAction, Equatable {
         case .combatInitialize:
             return 0  // Setup, no time cost
 
+        case .combatMulligan:
+            return 0  // Part of combat setup
+
+        case .combatGenerateIntent:
+            return 0  // Intent generation
+
+        case .combatPlayerAttackWithFate:
+            return 0  // Within combat turn
+
+        case .combatSkipAttack:
+            return 0  // Within combat turn
+
+        case .combatEnemyResolveWithFate:
+            return 0  // Enemy phase
+
         case .combatAttack:
             return 0  // Within combat turn
 
@@ -125,6 +162,9 @@ public enum TwilightGameAction: TimedAction, Equatable {
 
         case .combatEndTurnPhase:
             return 0  // End of turn
+
+        case .combatSpiritAttack:
+            return 0  // Within combat turn
 
         case .combatFlee:
             return 0  // Escape
@@ -372,6 +412,7 @@ public enum StateChange: Equatable {
     case strengthChanged(delta: Int, newValue: Int)
 
     // World changes
+    case resonanceChanged(delta: Float, newValue: Float)
     case tensionChanged(delta: Int, newValue: Int)
     case dayAdvanced(newDay: Int)
     case regionChanged(regionId: String)
@@ -394,7 +435,9 @@ public enum StateChange: Equatable {
 
     // Combat
     case enemyDamaged(enemyId: String, damage: Int, newHealth: Int)
+    case enemyWillDamaged(enemyId: String, damage: Int, newWill: Int)
     case enemyDefeated(enemyId: String)
+    case enemyPacified(enemyId: String)
     case combatEnded(victory: Bool)
 
     // Custom

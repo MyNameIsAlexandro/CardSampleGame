@@ -23,6 +23,7 @@ public final class ContentRegistry {
     private var mergedHeroes: [String: StandardHeroDefinition] = [:]
     private var mergedCards: [String: StandardCardDefinition] = [:]
     private var mergedEnemies: [String: EnemyDefinition] = [:]
+    private var mergedFateCards: [String: FateCard] = [:]
 
     /// Active balance configuration (from highest priority pack)
     private var activeBalanceConfig: BalanceConfiguration?
@@ -254,6 +255,16 @@ public final class ContentRegistry {
     /// Get all enemy definitions
     public func getAllEnemies() -> [EnemyDefinition] {
         return Array(mergedEnemies.values)
+    }
+
+    /// Get fate card by ID
+    public func getFateCard(id: String) -> FateCard? {
+        return mergedFateCards[id]
+    }
+
+    /// Get all fate cards
+    public func getAllFateCards() -> [FateCard] {
+        return Array(mergedFateCards.values)
     }
 
     /// Get the active balance configuration
@@ -625,6 +636,11 @@ public final class ContentRegistry {
             mergedEnemies[id] = enemy
         }
 
+        // Merge fate cards
+        for (id, card) in pack.fateCards {
+            mergedFateCards[id] = card
+        }
+
         // Update balance config if pack provides one
         if let balanceConfig = pack.balanceConfig {
             activeBalanceConfig = balanceConfig
@@ -650,6 +666,7 @@ public final class ContentRegistry {
         mergedHeroes.removeAll()
         mergedCards.removeAll()
         mergedEnemies.removeAll()
+        mergedFateCards.removeAll()
         activeBalanceConfig = nil
     }
 
@@ -799,7 +816,8 @@ extension ContentRegistry {
         anchors: [String: AnchorDefinition] = [:],
         heroes: [String: StandardHeroDefinition] = [:],
         cards: [String: StandardCardDefinition] = [:],
-        enemies: [String: EnemyDefinition] = [:]
+        enemies: [String: EnemyDefinition] = [:],
+        fateCards: [String: FateCard] = [:]
     ) {
         mergedRegions = regions
         mergedEvents = events
@@ -807,6 +825,7 @@ extension ContentRegistry {
         mergedHeroes = heroes
         mergedCards = cards
         mergedEnemies = enemies
+        mergedFateCards = fateCards
     }
 
     /// Load a mock pack for testing (simulates real pack loading)

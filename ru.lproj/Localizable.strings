@@ -1110,4 +1110,72 @@
 "content.manager.pack.type.full" = "Полный пак";
 "content.manager.pack.type.unknown" = "Неизвестно";
 
+// MARK: - Arena UI
+"arena.title" = "Арена";
+"arena.hero" = "Герой";
+"arena.enemy" = "Противник";
+"arena.fight" = "В бой!";
+"arena.victory" = "Победа!";
+"arena.defeat" = "Поражение";
+
+// MARK: - Resonance Zones
+"resonance.zone.deep.nav" = "Глубокая Навь";
+"resonance.zone.nav" = "Навь";
+"resonance.zone.yav" = "Явь";
+"resonance.zone.prav" = "Правь";
+"resonance.zone.deep.prav" = "Глубокая Правь";
+
+// MARK: - Fate Combat
+"combat.fate.draw" = "Карта Судьбы";
+"combat.fate.effort" = "Усилие";
+"combat.fate.effort.hint" = "Сбросьте карты для +1 к атаке";
+"combat.fate.deck.count" = "Колода: %d";
+"combat.fate.discard.count" = "Сброс: %d";
+"combat.fate.discard.title" = "Сыгранные карты Судьбы";
+
 "back" = "Назад";
+
+// MARK: - Active Defense Combat System
+
+// Fate card context
+"combat.fate.attack" = "Судьба Атаки";
+"combat.fate.defense" = "Судьба Защиты";
+
+// Fate card result interpretations
+"combat.fate.attack.great" = "Отличный удар!";
+"combat.fate.attack.good" = "Крепкий удар";
+"combat.fate.attack.weak" = "Слабый удар";
+"combat.fate.defense.great" = "Мастерский блок!";
+"combat.fate.defense.good" = "Защита выдержала";
+"combat.fate.defense.weak" = "Уязвимость";
+
+// Resonance zone names (for FateCardRevealView)
+"resonance.deep.nav" = "Глубокая Навь";
+"resonance.nav" = "Навь";
+"resonance.yav" = "Явь";
+"resonance.prav" = "Правь";
+"resonance.deep.prav" = "Глубокая Правь";
+
+// Enemy intent types
+"combat.intent.attack" = "Атака";
+"combat.intent.ritual" = "Ритуал";
+"combat.intent.block" = "Блок";
+"combat.intent.buff" = "Усиление";
+"combat.intent.heal" = "Лечение";
+"combat.intent.summon" = "Призыв";
+
+// Combat phase names (Active Defense)
+"combat.phase.preparation" = "Подготовка";
+"combat.phase.enemy.intent" = "Намерение врага";
+"combat.phase.player.action" = "Ваш ход";
+"combat.phase.fate.reveal" = "Карта Судьбы";
+"combat.phase.enemy.resolution" = "Действие врага";
+"combat.phase.defense.fate" = "Защита";
+
+// Combat actions (Active Defense)
+"combat.action.attack.fate" = "Атаковать";
+"combat.action.wait" = "Ждать";
+"combat.mulligan.title" = "Выберите карты для замены";
+"combat.mulligan.hint" = "Выберите до 5 карт для обмена";
+"combat.mulligan.confirm" = "Заменить";
+"combat.mulligan.skip" = "Оставить руку";

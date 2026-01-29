@@ -1105,4 +1105,72 @@
 "content.manager.pack.type.full" = "Full Pack";
 "content.manager.pack.type.unknown" = "Unknown";
 
+// MARK: - Arena UI
+"arena.title" = "Arena";
+"arena.hero" = "Hero";
+"arena.enemy" = "Enemy";
+"arena.fight" = "Fight!";
+"arena.victory" = "Victory!";
+"arena.defeat" = "Defeat";
+
+// MARK: - Resonance Zones
+"resonance.zone.deep.nav" = "Deep Nav";
+"resonance.zone.nav" = "Nav";
+"resonance.zone.yav" = "Yav";
+"resonance.zone.prav" = "Prav";
+"resonance.zone.deep.prav" = "Deep Prav";
+
+// MARK: - Fate Combat
+"combat.fate.draw" = "Fate Card";
+"combat.fate.effort" = "Effort";
+"combat.fate.effort.hint" = "Discard cards for +1 to attack";
+"combat.fate.deck.count" = "Deck: %d";
+"combat.fate.discard.count" = "Discard: %d";
+"combat.fate.discard.title" = "Played Fate Cards";
+
 "back" = "Back";
+
+// MARK: - Active Defense Combat System
+
+// Fate card context
+"combat.fate.attack" = "Attack Fate";
+"combat.fate.defense" = "Defense Fate";
+
+// Fate card result interpretations
+"combat.fate.attack.great" = "Excellent strike!";
+"combat.fate.attack.good" = "Solid hit";
+"combat.fate.attack.weak" = "Weak blow";
+"combat.fate.defense.great" = "Expertly blocked!";
+"combat.fate.defense.good" = "Defended well";
+"combat.fate.defense.weak" = "Vulnerable";
+
+// Resonance zone names (for FateCardRevealView)
+"resonance.deep.nav" = "Deep Nav";
+"resonance.nav" = "Nav";
+"resonance.yav" = "Yav";
+"resonance.prav" = "Prav";
+"resonance.deep.prav" = "Deep Prav";
+
+// Enemy intent types
+"combat.intent.attack" = "Attack";
+"combat.intent.ritual" = "Ritual";
+"combat.intent.block" = "Block";
+"combat.intent.buff" = "Buff";
+"combat.intent.heal" = "Heal";
+"combat.intent.summon" = "Summon";
+
+// Combat phase names (Active Defense)
+"combat.phase.preparation" = "Preparation";
+"combat.phase.enemy.intent" = "Enemy Intent";
+"combat.phase.player.action" = "Your Action";
+"combat.phase.fate.reveal" = "Fate Reveal";
+"combat.phase.enemy.resolution" = "Enemy Resolution";
+"combat.phase.defense.fate" = "Defense";
+
+// Combat actions (Active Defense)
+"combat.action.attack.fate" = "Attack";
+"combat.action.wait" = "Wait";
+"combat.mulligan.title" = "Choose Cards to Replace";
+"combat.mulligan.hint" = "Select up to 5 cards to swap";
+"combat.mulligan.confirm" = "Replace";
+"combat.mulligan.skip" = "Keep Hand";

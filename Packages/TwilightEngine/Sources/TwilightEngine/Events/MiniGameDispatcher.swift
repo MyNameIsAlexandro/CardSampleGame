@@ -20,6 +20,11 @@ public final class MiniGameDispatcher {
         self.skillCheckResolver = SkillCheckResolver()
     }
 
+    /// Connect a Fate Deck to the skill check resolver
+    public func setFateDeck(_ deck: FateDeckManager?) {
+        skillCheckResolver.fateDeck = deck
+    }
+
     // MARK: - Dispatch
 
     /// Dispatch a mini-game challenge and return result
@@ -365,8 +370,16 @@ public final class PuzzleMiniGameResolver {
 
 // MARK: - Skill Check Resolver
 
-/// Resolves skill check mini-games
+/// Resolves skill check mini-games using Fate Deck when available.
+/// Fate Test formula: PlayerStat + FateCard.modifier >= Difficulty
 public final class SkillCheckResolver {
+
+    /// Optional Fate Deck — when set, skill checks draw from it instead of using raw RNG.
+    public var fateDeck: FateDeckManager?
+
+    /// Current world resonance for fate card resolution
+    public var worldResonance: Float = 0.0
+
     public func resolve(
         challenge: MiniGameChallenge,
         context: MiniGameContext
@@ -374,11 +387,29 @@ public final class SkillCheckResolver {
 
         var changes: [StateChange] = []
 
-        // Skill check based on relevant stat
         let targetNumber = challenge.difficulty * 3
-        let roll = WorldRNG.shared.nextInt(in: 1...20) + context.playerStrength
 
-        if roll >= targetNumber {
+        // Fate Test: stat + fate card modifier vs target
+        let fateModifier: Int
+        if let deck = fateDeck, let result = deck.drawAndResolve(worldResonance: worldResonance) {
+            fateModifier = result.effectiveValue
+            // Apply draw effects as state changes
+            for effect in result.drawEffects {
+                switch effect.type {
+                case .shiftResonance:
+                    changes.append(.custom(key: "resonanceShift", description: "Fate card shifted resonance by \(effect.value)"))
+                case .shiftTension:
+                    changes.append(.tensionChanged(delta: effect.value, newValue: Int(context.worldTension) + effect.value))
+                }
+            }
+        } else {
+            // Fallback: legacy d20 roll scaled to fate-like range (-2...+3)
+            fateModifier = WorldRNG.shared.nextInt(in: -2...3)
+        }
+
+        let testResult = context.playerStrength + fateModifier
+
+        if testResult >= targetNumber {
             // Success
             for flag in challenge.rewards.flagsToSet {
                 changes.append(.flagSet(key: flag, value: true))

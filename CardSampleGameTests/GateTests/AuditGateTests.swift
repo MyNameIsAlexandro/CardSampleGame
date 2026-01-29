@@ -656,6 +656,8 @@ final class AuditGateTests: XCTestCase {
             if file == "EngineProtocols.swift" { return false }
             // EngineSave.swift is a data model, not a runtime engine
             if file == "EngineSave.swift" { return false }
+            // ResonanceEngine.swift is a subsystem (zone detection + resonance state), not a runtime engine
+            if file == "ResonanceEngine.swift" { return false }
             // Any other "Engine" file is a potential violation
             return true
         }

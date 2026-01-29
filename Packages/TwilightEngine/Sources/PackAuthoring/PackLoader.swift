@@ -96,6 +96,14 @@ public enum PackLoader {
             #endif
         }
 
+        // Load fate deck cards
+        if let fateDeckPath = manifest.fateDeckPath {
+            pack.fateCards = try loadFateCards(from: url.appendingPathComponent(fateDeckPath))
+            #if DEBUG
+            print("PackLoader: Loaded \(pack.fateCards.count) fate cards from \(fateDeckPath)")
+            #endif
+        }
+
         // Load localization string tables (Epic 5)
         if let localizationPath = manifest.localizationPath {
             let locURL = url.appendingPathComponent(localizationPath)
@@ -285,6 +293,28 @@ public enum PackLoader {
         }
 
         return enemies
+    }
+
+    /// Load fate cards from JSON
+    private static func loadFateCards(from url: URL) throws -> [String: FateCard] {
+        var fateCards: [String: FateCard] = [:]
+
+        if isDirectory(url) {
+            let files = try jsonFiles(in: url)
+            for file in files {
+                let fileCards = try loadJSONArray(FateCard.self, from: file)
+                for card in fileCards {
+                    fateCards[card.id] = card
+                }
+            }
+        } else {
+            let fileCards = try loadJSONArray(FateCard.self, from: url)
+            for card in fileCards {
+                fateCards[card.id] = card
+            }
+        }
+
+        return fateCards
     }
 
     // MARK: - JSON Helpers

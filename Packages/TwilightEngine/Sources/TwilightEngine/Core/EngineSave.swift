@@ -39,6 +39,7 @@ public struct EngineSave: Codable {
     public let currentDay: Int
     public let worldTension: Int
     public let lightDarkBalance: Int
+    public let resonance: Float
     public let currentRegionId: String?  // Definition ID, not UUID
 
     // MARK: - Regions State
@@ -89,6 +90,7 @@ public struct EngineSave: Codable {
         currentDay: Int = 1,
         worldTension: Int = 0,
         lightDarkBalance: Int = 50,
+        resonance: Float = 0.0,
         currentRegionId: String? = nil,
         regions: [RegionSaveState] = [],
         mainQuestStage: Int = 1,
@@ -121,6 +123,7 @@ public struct EngineSave: Codable {
         self.currentDay = currentDay
         self.worldTension = worldTension
         self.lightDarkBalance = lightDarkBalance
+        self.resonance = resonance
         self.currentRegionId = currentRegionId
         self.regions = regions
         self.mainQuestStage = mainQuestStage
@@ -132,6 +135,57 @@ public struct EngineSave: Codable {
         self.worldFlags = worldFlags
         self.rngSeed = rngSeed
         self.rngState = rngState
+    }
+
+    // MARK: - Codable (backward compatibility for resonance)
+
+    private enum CodingKeys: String, CodingKey {
+        case version, savedAt, gameDuration
+        case coreVersion, activePackSet, formatVersion, primaryCampaignPackId
+        case playerName, heroId, playerHealth, playerMaxHealth
+        case playerFaith, playerMaxFaith, playerBalance
+        case deckCardIds, handCardIds, discardCardIds
+        case currentDay, worldTension, lightDarkBalance, resonance
+        case currentRegionId, regions
+        case mainQuestStage, activeQuestIds, completedQuestIds, questStages
+        case completedEventIds, eventLog
+        case worldFlags, rngSeed, rngState
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        version = try c.decode(Int.self, forKey: .version)
+        savedAt = try c.decode(Date.self, forKey: .savedAt)
+        gameDuration = try c.decode(TimeInterval.self, forKey: .gameDuration)
+        coreVersion = try c.decode(String.self, forKey: .coreVersion)
+        activePackSet = try c.decode([String: String].self, forKey: .activePackSet)
+        formatVersion = try c.decode(Int.self, forKey: .formatVersion)
+        primaryCampaignPackId = try c.decodeIfPresent(String.self, forKey: .primaryCampaignPackId)
+        playerName = try c.decode(String.self, forKey: .playerName)
+        heroId = try c.decodeIfPresent(String.self, forKey: .heroId)
+        playerHealth = try c.decode(Int.self, forKey: .playerHealth)
+        playerMaxHealth = try c.decode(Int.self, forKey: .playerMaxHealth)
+        playerFaith = try c.decode(Int.self, forKey: .playerFaith)
+        playerMaxFaith = try c.decode(Int.self, forKey: .playerMaxFaith)
+        playerBalance = try c.decode(Int.self, forKey: .playerBalance)
+        deckCardIds = try c.decode([String].self, forKey: .deckCardIds)
+        handCardIds = try c.decode([String].self, forKey: .handCardIds)
+        discardCardIds = try c.decode([String].self, forKey: .discardCardIds)
+        currentDay = try c.decode(Int.self, forKey: .currentDay)
+        worldTension = try c.decode(Int.self, forKey: .worldTension)
+        lightDarkBalance = try c.decode(Int.self, forKey: .lightDarkBalance)
+        resonance = try c.decodeIfPresent(Float.self, forKey: .resonance) ?? 0.0
+        currentRegionId = try c.decodeIfPresent(String.self, forKey: .currentRegionId)
+        regions = try c.decode([RegionSaveState].self, forKey: .regions)
+        mainQuestStage = try c.decode(Int.self, forKey: .mainQuestStage)
+        activeQuestIds = try c.decode([String].self, forKey: .activeQuestIds)
+        completedQuestIds = try c.decode([String].self, forKey: .completedQuestIds)
+        questStages = try c.decode([String: Int].self, forKey: .questStages)
+        completedEventIds = try c.decode([String].self, forKey: .completedEventIds)
+        eventLog = try c.decode([EventLogEntrySave].self, forKey: .eventLog)
+        worldFlags = try c.decode([String: Bool].self, forKey: .worldFlags)
+        rngSeed = try c.decode(UInt64.self, forKey: .rngSeed)
+        rngState = try c.decode(UInt64.self, forKey: .rngState)
     }
 
     // MARK: - Pack Compatibility Validation

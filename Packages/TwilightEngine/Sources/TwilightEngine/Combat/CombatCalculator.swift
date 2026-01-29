@@ -181,13 +181,118 @@ public enum CombatEffectType {
     case special
 }
 
+// MARK: - Fate Attack Result
+
+/// Result of an attack resolved via Fate Deck (Unified Resolution System)
+public struct FateAttackResult {
+    public let baseStrength: Int
+    public let effortBonus: Int
+    public let fateDrawResult: FateDrawResult?
+    public let totalAttack: Int
+    public let defenseValue: Int
+    public let isHit: Bool
+    public let damage: Int
+    public let fateDrawEffects: [FateDrawEffect]
+    public let specialEffects: [CombatEffect]
+
+    public var logDescription: String {
+        let fateValue = fateDrawResult?.effectiveValue ?? 0
+        let cardName = fateDrawResult?.card.name ?? "?"
+        let hitStr = isHit ? "HIT(\(damage) dmg)" : "MISS"
+        return "Attack: \(baseStrength) + effort(\(effortBonus)) + fate[\(cardName)](\(fateValue)) = \(totalAttack) vs \(defenseValue) → \(hitStr)"
+    }
+}
+
 /// Combat calculator - computes attack result with full breakdown
 public struct CombatCalculator {
+
+    // MARK: - Attack with Fate Deck (Unified Resolution)
+
+    /// Calculate attack using Fate Deck instead of dice.
+    /// Formula: totalAttack = baseStrength + effortBonus + fateEffectiveValue
+    /// Hit if totalAttack >= monsterDefense
+    /// Damage = max(1, totalAttack - monsterDefense + 2) + bonusDamage + modifiers
+    public static func calculateAttackWithFate(
+        context: CombatPlayerContext,
+        fateDeck: FateDeckManager?,
+        worldResonance: Float,
+        effortCards: Int,
+        monsterDefense: Int,
+        bonusDamage: Int
+    ) -> FateAttackResult {
+        let baseStrength = context.strength
+        let effortBonus = max(0, effortCards)
+
+        // Draw fate card (replaces dice roll)
+        let fateResult: FateDrawResult?
+        let fateValue: Int
+        if let deck = fateDeck, let result = deck.drawAndResolve(worldResonance: worldResonance) {
+            fateResult = result
+            fateValue = result.effectiveValue
+        } else {
+            fateResult = nil
+            fateValue = WorldRNG.shared.nextInt(in: -1...2)  // fallback if no deck
+        }
+
+        let totalAttack = baseStrength + effortBonus + fateValue + bonusDamage
+        let isHit = totalAttack >= monsterDefense
+
+        // Damage calculation
+        var damage = 0
+        var specialEffects: [CombatEffect] = []
+
+        if isHit {
+            var baseDamage = max(1, totalAttack - monsterDefense + 2)
+
+            // Apply curse modifiers
+            if context.activeCurses.contains(.weakness) {
+                baseDamage = max(1, baseDamage - 1)
+                specialEffects.append(CombatEffect(
+                    icon: "💀",
+                    description: "Weakness: -1 damage",
+                    type: .debuff
+                ))
+            }
+            if context.activeCurses.contains(.shadowOfNav) {
+                baseDamage += 3
+                specialEffects.append(CombatEffect(
+                    icon: "💀",
+                    description: "Shadow of Nav: +3 damage",
+                    type: .buff
+                ))
+            }
+
+            // Hero damage bonus
+            if context.heroDamageBonus > 0 {
+                baseDamage += context.heroDamageBonus
+                specialEffects.append(CombatEffect(
+                    icon: "⭐",
+                    description: "Hero ability: +\(context.heroDamageBonus) damage",
+                    type: .buff
+                ))
+            }
+
+            damage = max(1, baseDamage)
+        }
+
+        return FateAttackResult(
+            baseStrength: baseStrength,
+            effortBonus: effortBonus,
+            fateDrawResult: fateResult,
+            totalAttack: totalAttack,
+            defenseValue: monsterDefense,
+            isHit: isHit,
+            damage: damage,
+            fateDrawEffects: fateResult?.drawEffects ?? [],
+            specialEffects: specialEffects
+        )
+    }
 
     // MARK: - Engine-First Attack Calculation
 
     /// Calculate player attack without requiring Player model (Engine-First Architecture)
     /// Uses engine stats directly for full independence from legacy Player
+    @available(*, deprecated, message: "Use calculateAttackWithFate(context:...) instead")
     public static func calculateAttackEngineFirst(
         engine: TwilightGameEngine,
         monsterDefense: Int,
@@ -376,6 +481,88 @@ public struct CombatCalculator {
             specialEffects: specialEffects
         )
     }
+
+    // MARK: - Spirit Attack (Pacify Path)
+
+    /// Calculate spirit/will damage for the Pacify path (decoupled from engine).
+    /// Uses player wisdom or intelligence from CombatPlayerContext.
+    public static func calculateSpiritAttack(
+        context: CombatPlayerContext,
+        enemyCurrentWill: Int,
+        fateDeck: FateDeckManager?,
+        worldResonance: Float = 0.0
+    ) -> SpiritAttackResult {
+        let baseStat = max(context.wisdom, context.intelligence, 1)
+
+        // Draw fate card for modifier (resonance-aware)
+        let fateModifier: Int
+        var fateDrawEffects: [FateDrawEffect] = []
+        if let deck = fateDeck, let result = deck.drawAndResolve(worldResonance: worldResonance) {
+            fateModifier = result.effectiveValue
+            fateDrawEffects = result.drawEffects
+        } else {
+            fateModifier = WorldRNG.shared.nextInt(in: -1...2)
+        }
+
+        let damage = max(1, baseStat + fateModifier)
+        let newWill = max(0, enemyCurrentWill - damage)
+
+        return SpiritAttackResult(
+            damage: damage,
+            baseStat: baseStat,
+            fateModifier: fateModifier,
+            newWill: newWill,
+            isPacified: newWill <= 0,
+            fateDrawEffects: fateDrawEffects
+        )
+    }
+
+    /// Calculate spirit/will damage for the Pacify path (engine-coupled, deprecated).
+    @available(*, deprecated, message: "Use calculateSpiritAttack(context:...) instead")
+    public static func calculateSpiritAttack(
+        engine: TwilightGameEngine,
+        enemyCurrentWill: Int,
+        fateDeck: FateDeckManager?,
+        worldResonance: Float = 0.0
+    ) -> SpiritAttackResult {
+        let context = CombatPlayerContext.from(engine: engine)
+        return calculateSpiritAttack(
+            context: context,
+            enemyCurrentWill: enemyCurrentWill,
+            fateDeck: fateDeck,
+            worldResonance: worldResonance
+        )
+    }
+
+}
+
+/// Result of a spirit/will attack (Pacify path)
+public struct SpiritAttackResult {
+    public let damage: Int
+    public let baseStat: Int
+    public let fateModifier: Int
+    public let newWill: Int
+    public let isPacified: Bool
+    public let fateDrawEffects: [FateDrawEffect]
+
+    public init(damage: Int, baseStat: Int, fateModifier: Int, newWill: Int, isPacified: Bool, fateDrawEffects: [FateDrawEffect] = []) {
+        self.damage = damage
+        self.baseStat = baseStat
+        self.fateModifier = fateModifier
+        self.newWill = newWill
+        self.isPacified = isPacified
+        self.fateDrawEffects = fateDrawEffects
+    }
+
+    public var logDescription: String {
+        var lines: [String] = []
+        lines.append("✨ Spirit Attack")
+        lines.append("   Base: \(baseStat) + Fate: \(fateModifier > 0 ? "+" : "")\(fateModifier) = \(damage) damage")
+        if isPacified {
+            lines.append("   🕊️ Enemy pacified!")
+        }
+        return lines.joined(separator: "\n")
+    }
 }
 
 // MARK: - Combat Player Context
@@ -388,6 +575,8 @@ public struct CombatPlayerContext {
     public let faith: Int
     public let balance: Int
     public let strength: Int
+    public let wisdom: Int
+    public let intelligence: Int
     public let activeCurses: [CurseType]
     public let heroBonusDice: Int
     public let heroDamageBonus: Int
@@ -398,6 +587,8 @@ public struct CombatPlayerContext {
         faith: Int,
         balance: Int,
         strength: Int,
+        wisdom: Int = 0,
+        intelligence: Int = 0,
         activeCurses: [CurseType],
         heroBonusDice: Int,
         heroDamageBonus: Int
@@ -407,6 +598,8 @@ public struct CombatPlayerContext {
         self.faith = faith
         self.balance = balance
         self.strength = strength
+        self.wisdom = wisdom
+        self.intelligence = intelligence
         self.activeCurses = activeCurses
         self.heroBonusDice = heroBonusDice
         self.heroDamageBonus = heroDamageBonus
@@ -445,6 +638,8 @@ public struct CombatPlayerContext {
             faith: engine.playerFaith,
             balance: engine.playerBalance,
             strength: engine.playerStrength,
+            wisdom: engine.playerWisdom,
+            intelligence: engine.playerIntelligence,
             activeCurses: engine.playerActiveCurses.map { $0.type },
             heroBonusDice: engine.getHeroBonusDice(isFirstAttack: true),
             heroDamageBonus: engine.getHeroDamageBonus(targetFullHP: false)

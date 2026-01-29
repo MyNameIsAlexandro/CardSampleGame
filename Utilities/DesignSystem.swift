@@ -126,6 +126,16 @@ public enum AppColors {
     /// Neutral alignment
     public static let neutral = Color.gray
 
+    // MARK: - Resonance
+    /// Nav (dark world) resonance color
+    public static let resonanceNav = Color.purple
+    /// Prav (light world) resonance color
+    public static let resonancePrav = Color(red: 0.85, green: 0.7, blue: 0.2)
+    /// Yav (neutral) resonance color
+    public static let resonanceYav = Color.gray
+    /// Spirit/Will track color
+    public static let spirit = Color(red: 0.3, green: 0.5, blue: 0.9)
+
     // MARK: - Resources
     /// Health color
     public static let health = Color.red
@@ -139,6 +149,8 @@ public enum AppColors {
     // MARK: - UI Elements
     /// Card background
     public static let cardBackground = Color(UIColor.secondarySystemBackground)
+    /// Card back (fate deck)
+    public static let cardBack = Color(red: 0.15, green: 0.25, blue: 0.4)
     /// Overlay background
     public static let overlay = Color.black.opacity(0.5)
     /// Highlight color

@@ -27,15 +27,23 @@
       "ru": "Леший"
     },
     "description": {
-      "en": "Ancient forest guardian whose anger grows with the corruption.",
-      "ru": "Древний страж леса, чей гнев растёт вместе с порчей."
+      "en": "Ancient forest guardian whose anger grows with the corruption. His spirit is bound to the resonance of the world.",
+      "ru": "Древний страж леса, чей гнев растёт вместе с порчей. Его дух связан с резонансом мира."
     },
-    "health": 12,
+    "health": 50,
     "power": 4,
     "defense": 2,
+    "will": 30,
     "difficulty": 2,
     "enemy_type": "spirit",
     "rarity": "uncommon",
+    "resonance_behavior": {
+      "deepNav": {"power_delta": 2, "defense_delta": 0, "health_delta": 10, "will_delta": 5},
+      "nav": {"power_delta": 1, "defense_delta": 0, "health_delta": 5, "will_delta": 2},
+      "yav": {"power_delta": 0, "defense_delta": 0, "health_delta": 0, "will_delta": 0},
+      "prav": {"power_delta": -1, "defense_delta": 0, "health_delta": -5, "will_delta": -2},
+      "deepPrav": {"power_delta": -2, "defense_delta": -1, "health_delta": -10, "will_delta": -5}
+    },
     "abilities": [
       {
         "id": "forest_rage",

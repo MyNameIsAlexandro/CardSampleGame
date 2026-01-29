@@ -17,6 +17,11 @@ public struct WorldRuntimeState: Codable, Equatable {
     /// Current game time (days passed)
     public var currentTime: Int
 
+    // MARK: - Resonance
+
+    /// Global world resonance (-100..+100), Nav↔Prav axis
+    public var resonance: Float
+
     // MARK: - Pressure
 
     /// Current world tension/pressure (0-100)
@@ -45,6 +50,7 @@ public struct WorldRuntimeState: Codable, Equatable {
     public init(
         currentRegionId: String,
         currentTime: Int = 0,
+        resonance: Float = 0.0,
         pressure: Int = 0,
         daysSinceEscalation: Int = 0,
         regionsState: [String: RegionRuntimeState] = [:],
@@ -53,11 +59,31 @@ public struct WorldRuntimeState: Codable, Equatable {
     ) {
         self.currentRegionId = currentRegionId
         self.currentTime = currentTime
+        self.resonance = resonance
         self.pressure = pressure
         self.daysSinceEscalation = daysSinceEscalation
         self.regionsState = regionsState
         self.anchorsState = anchorsState
         self.flags = flags
+    }
+
+    // MARK: - Codable (backward compatibility)
+
+    enum CodingKeys: String, CodingKey {
+        case currentRegionId, currentTime, resonance, pressure
+        case daysSinceEscalation, regionsState, anchorsState, flags
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        currentRegionId = try c.decode(String.self, forKey: .currentRegionId)
+        currentTime = try c.decode(Int.self, forKey: .currentTime)
+        resonance = try c.decodeIfPresent(Float.self, forKey: .resonance) ?? 0.0
+        pressure = try c.decode(Int.self, forKey: .pressure)
+        daysSinceEscalation = try c.decode(Int.self, forKey: .daysSinceEscalation)
+        regionsState = try c.decode([String: RegionRuntimeState].self, forKey: .regionsState)
+        anchorsState = try c.decode([String: AnchorRuntimeState].self, forKey: .anchorsState)
+        flags = try c.decode([String: Bool].self, forKey: .flags)
     }
 
     // MARK: - Flag Operations

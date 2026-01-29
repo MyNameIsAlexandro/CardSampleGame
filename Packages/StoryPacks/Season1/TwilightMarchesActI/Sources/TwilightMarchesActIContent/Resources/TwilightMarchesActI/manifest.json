@@ -49,6 +49,7 @@
   "anchors_path": "Campaign/anchors.json",
   "enemies_path": "Enemies/enemies.json",
   "cards_path": "Cards/story_rewards.json",
+  "fate_deck_path": "Cards/fate_deck_core.json",
   "balance_path": "Balance/balance.json",
   "localization_path": "Localization"
 }

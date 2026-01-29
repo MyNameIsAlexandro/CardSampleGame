@@ -22,8 +22,25 @@ public struct PackContent: Codable {
     public let heroes: [String: StandardHeroDefinition]
     public let cards: [String: StandardCardDefinition]
     public let enemies: [String: EnemyDefinition]
+    public let fateCards: [String: FateCard]
     public let abilities: [HeroAbility]
     public let balanceConfig: BalanceConfiguration?
+
+    // Custom Decodable to handle backward compatibility (old .pack files without fateCards)
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        manifest = try container.decode(PackManifest.self, forKey: .manifest)
+        regions = try container.decode([String: RegionDefinition].self, forKey: .regions)
+        events = try container.decode([String: EventDefinition].self, forKey: .events)
+        quests = try container.decode([String: QuestDefinition].self, forKey: .quests)
+        anchors = try container.decode([String: AnchorDefinition].self, forKey: .anchors)
+        heroes = try container.decode([String: StandardHeroDefinition].self, forKey: .heroes)
+        cards = try container.decode([String: StandardCardDefinition].self, forKey: .cards)
+        enemies = try container.decode([String: EnemyDefinition].self, forKey: .enemies)
+        fateCards = try container.decodeIfPresent([String: FateCard].self, forKey: .fateCards) ?? [:]
+        abilities = try container.decode([HeroAbility].self, forKey: .abilities)
+        balanceConfig = try container.decodeIfPresent(BalanceConfiguration.self, forKey: .balanceConfig)
+    }
 
     /// Create from LoadedPack
     public init(from pack: LoadedPack) {
@@ -35,6 +52,7 @@ public struct PackContent: Codable {
         self.heroes = pack.heroes
         self.cards = pack.cards
         self.enemies = pack.enemies
+        self.fateCards = pack.fateCards
         self.abilities = AbilityRegistry.shared.allAbilities
         self.balanceConfig = pack.balanceConfig
     }
@@ -49,6 +67,7 @@ public struct PackContent: Codable {
         pack.heroes = heroes
         pack.cards = cards
         pack.enemies = enemies
+        pack.fateCards = fateCards
         pack.balanceConfig = balanceConfig
         return pack
     }

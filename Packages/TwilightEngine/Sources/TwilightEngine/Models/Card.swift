@@ -12,6 +12,7 @@ public struct Card: Identifiable, Codable, Hashable, Sendable {
     public var power: Int?
     public var defense: Int?
     public var health: Int?
+    public var will: Int?
     public var cost: Int?
 
     // Abilities and traits
@@ -41,6 +42,7 @@ public struct Card: Identifiable, Codable, Hashable, Sendable {
         power: Int? = nil,
         defense: Int? = nil,
         health: Int? = nil,
+        will: Int? = nil,
         cost: Int? = nil,
         abilities: [CardAbility] = [],
         traits: [String] = [],
@@ -63,6 +65,7 @@ public struct Card: Identifiable, Codable, Hashable, Sendable {
         self.power = power
         self.defense = defense
         self.health = health
+        self.will = will
         self.cost = cost
         self.abilities = abilities
         self.traits = traits
@@ -285,8 +288,9 @@ extension AbilityEffect: Codable {
         } else if let customString = try container.decodeIfPresent(String.self, forKey: .custom) {
             self = .custom(customString)
         } else {
-            // Default to custom with unknown
-            self = .custom("unknown")
+            // Default: no recognized effect - treat as empty/no-op
+            // This prevents "unknown" from appearing in combat log
+            self = .custom("")
         }
     }
 

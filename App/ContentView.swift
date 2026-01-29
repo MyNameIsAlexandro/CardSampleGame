@@ -10,6 +10,7 @@ struct ContentView: View {
     @State private var showingLoadSlots = false  // New: for "Continue" flow
     @State private var showingStatistics = false
     @State private var showingContentManager = false
+    @State private var showingBattleArena = false
     @State private var selectedHeroId: String?
     @State private var selectedSaveSlot: Int?
 
@@ -44,7 +45,11 @@ struct ContentView: View {
 
     var body: some View {
         NavigationView {
-            if showingWorldMap {
+            if showingBattleArena {
+                BattleArenaView(engine: engine, onExit: {
+                    showingBattleArena = false
+                })
+            } else if showingWorldMap {
                 // MARK: - Engine-First: Pass engine directly to WorldMapView
                 WorldMapView(
                     engine: engine,
@@ -241,6 +246,21 @@ struct ContentView: View {
                             .cornerRadius(12)
                         }
                         .disabled(selectedHeroId == nil)
+
+                        // Quick Battle button
+                        Button(action: { showingBattleArena = true }) {
+                            HStack {
+                                Image(systemName: "flame.fill")
+                                Text(L10n.arenaTitle.localized)
+                            }
+                            .font(.title3)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(AppColors.danger.opacity(Opacity.high))
+                            .cornerRadius(CornerRadius.lg)
+                        }
                     }
                     .padding(.horizontal)
                     .padding(.bottom, 12)

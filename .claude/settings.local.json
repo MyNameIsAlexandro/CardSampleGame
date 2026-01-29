@@ -54,7 +54,16 @@
       "Bash(xcrun simctl install:*)",
       "Bash(xcrun simctl launch:*)",
       "Bash(log show --predicate 'process == \"\"\"\"xctest\"\"\"\" OR process CONTAINS \"\"\"\"CardSampleGame\"\"\"\"' --style compact --last 2m)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(wc:*)",
+      "Bash(__NEW_LINE_3f6ecd24ffb37c1a__ python3 -c \"\nimport re\n\nwith open\\(''Phase3ContractTests.swift'', ''r''\\) as f:\n    content = f.read\\(\\)\n\nlines = content.split\\(''\\\\n''\\)\ni = 0\nwhile i < len\\(lines\\):\n    line = lines[i]\n    m = re.match\\(r''^\\(\\\\s+func test\\\\w+\\\\\\(\\\\\\)\\)\\\\s+throws\\\\s+\\\\{'', line\\)\n    if m:\n        brace_count = 1\n        j = i + 1\n        has_try = False\n        while j < len\\(lines\\) and brace_count > 0:\n            for ch in lines[j]:\n                if ch == ''{'': brace_count += 1\n                elif ch == ''}'': brace_count -= 1\n            if '' try '' in lines[j] or lines[j].strip\\(\\).startswith\\(''try ''\\):\n                has_try = True\n            j += 1\n        if not has_try:\n            lines[i] = m.group\\(1\\) + '' {''\n    i += 1\n\nwith open\\(''Phase3ContractTests.swift'', ''w''\\) as f:\n    f.write\\(''\\\\n''.join\\(lines\\)\\)\n\")",
+      "Bash(for i in 1 2 3)",
+      "Bash(xargs:*)",
+      "Bash(git status:*)",
+      "Bash(git mv:*)",
+      "Bash(tree:*)",
+      "Bash(cat:*)",
+      "Bash(\"/Users/abondarenko/Library/Mobile Documents/com~apple~CloudDocs/XCode/CardSampleGame/Packages/StoryPacks/Season1/TwilightMarchesActI/Sources/TwilightMarchesActIContent/Resources/TwilightMarchesActI/Cards/fate_deck_core.json\")"
     ]
   }
 }

@@ -28,6 +28,9 @@ struct WorldMapView: View {
                     .padding(.horizontal, Spacing.sm)
                     .padding(.top, Spacing.xxs)
 
+                // Resonance gauge
+                ResonanceWidget(engine: engine)
+
                 Divider()
                     .padding(.vertical, Spacing.xxs)
 

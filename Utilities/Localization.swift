@@ -216,6 +216,29 @@ enum L10n {
     static let actionStrengthenAnchor = "action.strengthen.anchor"
     static let actionExploreRegion = "action.explore.region"
 
+    // MARK: - Arena UI
+    static let arenaTitle = "arena.title"
+    static let arenaHero = "arena.hero"
+    static let arenaEnemy = "arena.enemy"
+    static let arenaFight = "arena.fight"
+    static let arenaVictory = "arena.victory"
+    static let arenaDefeat = "arena.defeat"
+
+    // MARK: - Resonance Zones
+    static let resonanceZoneDeepNav = "resonance.zone.deep.nav"
+    static let resonanceZoneNav = "resonance.zone.nav"
+    static let resonanceZoneYav = "resonance.zone.yav"
+    static let resonanceZonePrav = "resonance.zone.prav"
+    static let resonanceZoneDeepPrav = "resonance.zone.deep.prav"
+
+    // MARK: - Fate Combat
+    static let combatFateDraw = "combat.fate.draw"
+    static let combatFateEffort = "combat.fate.effort"
+    static let combatFateEffortHint = "combat.fate.effort.hint"
+    static let combatFateDeckCount = "combat.fate.deck.count"
+    static let combatFateDiscardCount = "combat.fate.discard.count"
+    static let combatFateDiscardTitle = "combat.fate.discard.title"
+
     // MARK: - Combat UI (Engine-First Migration)
 
     // Combat phases
@@ -780,4 +803,49 @@ enum L10n {
     static let calcHeroAbility = "calc.hero.ability"
     static let calcCurseWeakness = "calc.curse.weakness"
     static let calcCurseShadowOfNav = "calc.curse.shadow.of.nav"
+
+    // MARK: - Active Defense Combat System
+
+    // Fate card context
+    static let combatFateAttack = "combat.fate.attack"
+    static let combatFateDefense = "combat.fate.defense"
+
+    // Fate card result interpretations
+    static let combatFateAttackGreat = "combat.fate.attack.great"
+    static let combatFateAttackGood = "combat.fate.attack.good"
+    static let combatFateAttackWeak = "combat.fate.attack.weak"
+    static let combatFateDefenseGreat = "combat.fate.defense.great"
+    static let combatFateDefenseGood = "combat.fate.defense.good"
+    static let combatFateDefenseWeak = "combat.fate.defense.weak"
+
+    // Resonance zone names (for FateCardRevealView)
+    static let resonanceDeepNav = "resonance.deep.nav"
+    static let resonanceNav = "resonance.nav"
+    static let resonanceYav = "resonance.yav"
+    static let resonancePrav = "resonance.prav"
+    static let resonanceDeepPrav = "resonance.deep.prav"
+
+    // Enemy intent types
+    static let combatIntentAttack = "combat.intent.attack"
+    static let combatIntentRitual = "combat.intent.ritual"
+    static let combatIntentBlock = "combat.intent.block"
+    static let combatIntentBuff = "combat.intent.buff"
+    static let combatIntentHeal = "combat.intent.heal"
+    static let combatIntentSummon = "combat.intent.summon"
+
+    // Combat phase names (Active Defense)
+    static let combatPhasePreparation = "combat.phase.preparation"
+    static let combatPhaseEnemyIntent = "combat.phase.enemy.intent"
+    static let combatPhasePlayerAction = "combat.phase.player.action"
+    static let combatPhaseFateReveal = "combat.phase.fate.reveal"
+    static let combatPhaseEnemyResolution = "combat.phase.enemy.resolution"
+    static let combatPhaseDefenseFate = "combat.phase.defense.fate"
+
+    // Combat actions (Active Defense)
+    static let combatActionAttackFate = "combat.action.attack.fate"
+    static let combatActionWait = "combat.action.wait"
+    static let combatMulliganTitle = "combat.mulligan.title"
+    static let combatMulliganHint = "combat.mulligan.hint"
+    static let combatMulliganConfirm = "combat.mulligan.confirm"
+    static let combatMulliganSkip = "combat.mulligan.skip"
 }

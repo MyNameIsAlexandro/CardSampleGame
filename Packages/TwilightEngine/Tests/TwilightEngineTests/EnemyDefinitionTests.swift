@@ -309,6 +309,54 @@ final class EnemyDefinitionTests: XCTestCase {
         XCTAssertEqual(card.rarity, .common)
     }
 
+    // MARK: - Will & Resonance Behavior Tests
+
+    func testWillFieldIsOptional() throws {
+        // Given: JSON without will field (legacy format)
+        let json = """
+        {
+            "id": "no_will",
+            "name": {"en": "Beast", "ru": "Зверь"},
+            "description": {"en": "Test", "ru": "Тест"},
+            "health": 10, "power": 3, "defense": 1, "difficulty": 1,
+            "enemy_type": "beast", "rarity": "common",
+            "abilities": [], "loot_card_ids": [],
+            "faith_reward": 1, "balance_delta": 0
+        }
+        """.data(using: .utf8)!
+
+        let enemy = try makeDecoder().decode(EnemyDefinition.self, from: json)
+        XCTAssertNil(enemy.will)
+        XCTAssertNil(enemy.resonanceBehavior)
+    }
+
+    func testResonanceBehaviorDecodes() throws {
+        // Given: JSON with will and resonance_behavior
+        let json = """
+        {
+            "id": "spirit_enemy",
+            "name": {"en": "Spirit", "ru": "Дух"},
+            "description": {"en": "Test", "ru": "Тест"},
+            "health": 12, "power": 4, "defense": 2, "difficulty": 3,
+            "will": 5,
+            "enemy_type": "spirit", "rarity": "uncommon",
+            "resonance_behavior": {
+                "deepNav": {"power_delta": 2, "defense_delta": 1, "health_delta": 5, "will_delta": 3},
+                "deepPrav": {"power_delta": -1, "defense_delta": -1, "health_delta": -3, "will_delta": -2}
+            },
+            "abilities": [], "loot_card_ids": [],
+            "faith_reward": 5, "balance_delta": 0
+        }
+        """.data(using: .utf8)!
+
+        let enemy = try makeDecoder().decode(EnemyDefinition.self, from: json)
+        XCTAssertEqual(enemy.will, 5)
+        XCTAssertNotNil(enemy.resonanceBehavior)
+        XCTAssertEqual(enemy.resonanceBehavior?["deepNav"]?.powerDelta, 2)
+        XCTAssertEqual(enemy.resonanceBehavior?["deepNav"]?.healthDelta, 5)
+        XCTAssertEqual(enemy.resonanceBehavior?["deepPrav"]?.powerDelta, -1)
+    }
+
     // MARK: - Multiple Abilities Test
 
     func testDecodeEnemyWithMultipleAbilities() throws {

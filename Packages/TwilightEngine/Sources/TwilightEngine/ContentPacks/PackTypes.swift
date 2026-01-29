@@ -230,6 +230,7 @@ public struct LoadedPack {
     public var heroes: [String: StandardHeroDefinition] = [:]
     public var cards: [String: StandardCardDefinition] = [:]
     public var enemies: [String: EnemyDefinition] = [:]
+    public var fateCards: [String: FateCard] = [:]
 
     /// Balance configuration (if pack provides one)
     public var balanceConfig: BalanceConfiguration?

@@ -1,0 +1,217 @@
+[
+  {
+    "id": "fate_nav_whisper_a",
+    "name": "Misfortune",
+    "name_key": "card_nav_whisper_name",
+    "base_value": -1,
+    "suit": "nav",
+    "is_critical": false,
+    "is_sticky": false,
+    "resonance_rules": [
+      { "zone": "deepNav", "modify_value": -1, "visual_effect": "shadow_pulse" },
+      { "zone": "nav", "modify_value": -1, "visual_effect": "shadow_creep" },
+      { "zone": "prav", "modify_value": 1 },
+      { "zone": "deepPrav", "modify_value": 1 }
+    ],
+    "on_draw_effects": [
+      { "type": "shiftResonance", "value": -5 }
+    ]
+  },
+  {
+    "id": "fate_nav_whisper_b",
+    "name": "Misfortune",
+    "name_key": "card_nav_whisper_name",
+    "base_value": -1,
+    "suit": "nav",
+    "is_critical": false,
+    "is_sticky": false,
+    "resonance_rules": [
+      { "zone": "deepNav", "modify_value": -1, "visual_effect": "shadow_pulse" },
+      { "zone": "nav", "modify_value": -1, "visual_effect": "shadow_creep" },
+      { "zone": "prav", "modify_value": 1 },
+      { "zone": "deepPrav", "modify_value": 1 }
+    ],
+    "on_draw_effects": [
+      { "type": "shiftResonance", "value": -5 }
+    ]
+  },
+  {
+    "id": "fate_yav_balance_a",
+    "name": "Neutral Fate",
+    "name_key": "card_yav_balance_name",
+    "base_value": 0,
+    "suit": "yav",
+    "is_critical": false,
+    "is_sticky": false,
+    "resonance_rules": [
+      { "zone": "deepNav", "modify_value": -1, "visual_effect": "shadow_flicker" },
+      { "zone": "deepPrav", "modify_value": 1, "visual_effect": "light_flicker" }
+    ],
+    "on_draw_effects": [
+      { "type": "shiftResonance", "value": 1 }
+    ]
+  },
+  {
+    "id": "fate_yav_balance_b",
+    "name": "Neutral Fate",
+    "name_key": "card_yav_balance_name",
+    "base_value": 0,
+    "suit": "yav",
+    "is_critical": false,
+    "is_sticky": false,
+    "resonance_rules": [
+      { "zone": "deepNav", "modify_value": -1, "visual_effect": "shadow_flicker" },
+      { "zone": "deepPrav", "modify_value": 1, "visual_effect": "light_flicker" }
+    ],
+    "on_draw_effects": [
+      { "type": "shiftResonance", "value": -1 }
+    ]
+  },
+  {
+    "id": "fate_yav_calm_a",
+    "name": "Calm Winds",
+    "name_key": "card_yav_calm_name",
+    "base_value": 0,
+    "suit": "yav",
+    "is_critical": false,
+    "is_sticky": false,
+    "resonance_rules": [
+      { "zone": "deepNav", "modify_value": -1 },
+      { "zone": "nav", "modify_value": 0 },
+      { "zone": "prav", "modify_value": 0 },
+      { "zone": "deepPrav", "modify_value": 1 }
+    ],
+    "on_draw_effects": [
+      { "type": "shiftTension", "value": -1 }
+    ]
+  },
+  {
+    "id": "fate_yav_calm_b",
+    "name": "Calm Winds",
+    "name_key": "card_yav_calm_name",
+    "base_value": 0,
+    "suit": "yav",
+    "is_critical": false,
+    "is_sticky": false,
+    "resonance_rules": [
+      { "zone": "deepNav", "modify_value": -1 },
+      { "zone": "nav", "modify_value": 0 },
+      { "zone": "prav", "modify_value": 0 },
+      { "zone": "deepPrav", "modify_value": 1 }
+    ],
+    "on_draw_effects": [
+      { "type": "shiftTension", "value": -1 }
+    ]
+  },
+  {
+    "id": "fate_prav_light_a",
+    "name": "Fortune",
+    "name_key": "card_prav_light_name",
+    "base_value": 1,
+    "suit": "prav",
+    "is_critical": false,
+    "is_sticky": false,
+    "resonance_rules": [
+      { "zone": "deepPrav", "modify_value": 1, "visual_effect": "light_shimmer" },
+      { "zone": "prav", "modify_value": 1 },
+      { "zone": "nav", "modify_value": -1 },
+      { "zone": "deepNav", "modify_value": -1 }
+    ],
+    "on_draw_effects": [
+      { "type": "shiftResonance", "value": 5 }
+    ]
+  },
+  {
+    "id": "fate_prav_light_b",
+    "name": "Fortune",
+    "name_key": "card_prav_light_name",
+    "base_value": 1,
+    "suit": "prav",
+    "is_critical": false,
+    "is_sticky": false,
+    "resonance_rules": [
+      { "zone": "deepPrav", "modify_value": 1, "visual_effect": "light_shimmer" },
+      { "zone": "prav", "modify_value": 1 },
+      { "zone": "nav", "modify_value": -1 },
+      { "zone": "deepNav", "modify_value": -1 }
+    ],
+    "on_draw_effects": [
+      { "type": "shiftResonance", "value": 5 }
+    ]
+  },
+  {
+    "id": "fate_prav_light_c",
+    "name": "Fortune",
+    "name_key": "card_prav_light_name",
+    "base_value": 1,
+    "suit": "prav",
+    "is_critical": false,
+    "is_sticky": false,
+    "resonance_rules": [
+      { "zone": "deepPrav", "modify_value": 1, "visual_effect": "light_shimmer" },
+      { "zone": "prav", "modify_value": 1 },
+      { "zone": "nav", "modify_value": -1 },
+      { "zone": "deepNav", "modify_value": -1 }
+    ],
+    "on_draw_effects": [
+      { "type": "shiftResonance", "value": 3 }
+    ]
+  },
+  {
+    "id": "fate_prav_blessing",
+    "name": "Great Fortune",
+    "name_key": "card_prav_blessing_name",
+    "base_value": 2,
+    "suit": "prav",
+    "is_critical": false,
+    "is_sticky": false,
+    "resonance_rules": [
+      { "zone": "deepPrav", "modify_value": 2, "visual_effect": "light_burst" },
+      { "zone": "prav", "modify_value": 1, "visual_effect": "light_shimmer" },
+      { "zone": "nav", "modify_value": -1, "visual_effect": "shadow_flicker" },
+      { "zone": "deepNav", "modify_value": -2, "visual_effect": "shadow_pulse" }
+    ],
+    "on_draw_effects": [
+      { "type": "shiftResonance", "value": 5 },
+      { "type": "shiftTension", "value": -2 }
+    ]
+  },
+  {
+    "id": "fate_crit",
+    "name": "Critical Success",
+    "name_key": "card_fate_crit_name",
+    "base_value": 3,
+    "suit": "prav",
+    "is_critical": true,
+    "is_sticky": false,
+    "resonance_rules": [
+      { "zone": "deepPrav", "modify_value": 1, "visual_effect": "light_explosion" },
+      { "zone": "prav", "modify_value": 0 },
+      { "zone": "nav", "modify_value": -1, "visual_effect": "shadow_flicker" },
+      { "zone": "deepNav", "modify_value": -2, "visual_effect": "shadow_pulse" }
+    ],
+    "on_draw_effects": [
+      { "type": "shiftResonance", "value": 10 },
+      { "type": "shiftTension", "value": -3 }
+    ]
+  },
+  {
+    "id": "fate_curse_navi",
+    "name": "Curse of the Navi",
+    "name_key": "card_curse_navi_name",
+    "base_value": -2,
+    "suit": "nav",
+    "is_critical": false,
+    "is_sticky": true,
+    "resonance_rules": [
+      { "zone": "deepNav", "modify_value": -2, "visual_effect": "shadow_pulse" },
+      { "zone": "nav", "modify_value": -1, "visual_effect": "shadow_creep" },
+      { "zone": "prav", "modify_value": 1 },
+      { "zone": "deepPrav", "modify_value": 2 }
+    ],
+    "on_draw_effects": [
+      { "type": "shiftResonance", "value": -10 },
+      { "type": "shiftTension", "value": 5 }
+    ]
+  }
+]

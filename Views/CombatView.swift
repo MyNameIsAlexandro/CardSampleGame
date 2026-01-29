@@ -71,11 +71,13 @@ struct CombatView: View {
     @State private var defeatedMonsterName: String = ""  // Saved before combat ends for UI
     @State private var savedMonsterCard: Card? = nil     // Saved monster for display after combat ends
 
-    // Dice roll animation state
-    @State private var showDiceRollOverlay: Bool = false
-    @State private var animatingDiceValues: [Int] = []
-    @State private var diceAnimationPhase: Int = 0
+    // Fate card overlay state
+    @State private var showFateCardOverlay: Bool = false
+    @State private var fateAnimationPhase: Int = 0
     @State private var pendingDamageApplication: (() -> Void)? = nil  // Deferred damage application
+    @State private var selectedEffortCardIds: Set<String> = []
+    @State private var showEffortPhase: Bool = false
+    @State private var showFateDiscardPile: Bool = false
 
     // MARK: - Computed Properties (Engine-First)
 
@@ -169,9 +171,13 @@ struct CombatView: View {
         .background(Color(UIColor.systemBackground))
         .accessibilityIdentifier(AccessibilityIdentifiers.Combat.view)
         .overlay {
-            // Dice roll animation overlay
-            if showDiceRollOverlay {
-                diceRollOverlay
+            // Effort selection overlay
+            if showEffortPhase {
+                effortSelectionOverlay
+            }
+            // Fate card draw overlay
+            if showFateCardOverlay {
+                fateCardOverlay
             }
         }
         .alert(L10n.combatTitle.localized, isPresented: $showingMessage) {
@@ -215,6 +221,9 @@ struct CombatView: View {
                     .padding(.leading, Spacing.xxs)
             }
 
+            // Fate Deck widget
+            FateDeckWidget(engine: engine)
+
             Spacer()
 
             // Кнопка побега
@@ -245,20 +254,16 @@ struct CombatView: View {
                 .fontWeight(.bold)
                 .foregroundColor(AppColors.danger)
 
-            HStack(spacing: Spacing.xxxl) {
-                // HP монстра (Engine-First: read from engine.combatState)
-                VStack {
-                    Image(systemName: "heart.fill")
-                        .font(.title)
-                        .foregroundColor(AppColors.health)
-                    Text("\(monsterHealth)")
-                        .font(.title)
-                        .fontWeight(.bold)
-                    Text(L10n.combatHP.localized)
-                        .font(.caption)
-                        .foregroundColor(AppColors.muted)
-                }
+            // Dual health bars (Body + Spirit)
+            DualHealthBar(
+                currentHP: monsterHealth,
+                maxHP: monster.health ?? 10,
+                currentWill: engine.combatEnemyWill,
+                maxWill: engine.combatEnemyMaxWill
+            )
+            .padding(.horizontal, Spacing.sm)
 
+            HStack(spacing: Spacing.xxxl) {
                 // Атака монстра
                 VStack {
                     Image(systemName: "burst.fill")
@@ -359,27 +364,15 @@ struct CombatView: View {
             }
 
             // Combat bonuses indicator (if any)
-            if bonusDice > 0 || bonusDamage > 0 {
+            if bonusDamage > 0 {
                 HStack(spacing: Spacing.md) {
-                    if bonusDice > 0 {
-                        HStack(spacing: Spacing.xxs) {
-                            Image(systemName: "dice.fill")
-                                .foregroundColor(AppColors.dark)
-                            Text("+\(bonusDice)")
-                                .font(.caption)
-                                .fontWeight(.bold)
-                                .foregroundColor(AppColors.dark)
-                        }
-                    }
-                    if bonusDamage > 0 {
-                        HStack(spacing: Spacing.xxs) {
-                            Image(systemName: "flame.fill")
-                                .foregroundColor(AppColors.power)
-                            Text("+\(bonusDamage)")
-                                .font(.caption)
-                                .fontWeight(.bold)
-                                .foregroundColor(AppColors.power)
-                        }
+                    HStack(spacing: Spacing.xxs) {
+                        Image(systemName: "flame.fill")
+                            .foregroundColor(AppColors.power)
+                        Text("+\(bonusDamage)")
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .foregroundColor(AppColors.power)
                     }
                 }
                 .padding(.horizontal, Spacing.sm)
@@ -436,8 +429,8 @@ struct CombatView: View {
                             .font(.caption)
                             .fontWeight(.semibold)
                         // Show accumulated bonuses
-                        if bonusDamage > 0 || bonusDice > 0 {
-                            Text("+\(bonusDamage)💥 +\(bonusDice)🎲")
+                        if bonusDamage > 0 {
+                            Text("+\(bonusDamage)💥")
                                 .font(.system(size: 9))
                                 .foregroundColor(AppColors.faith)
                         } else {
@@ -682,8 +675,10 @@ struct CombatView: View {
 
     var combatLogView: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            // Детальный результат последней атаки
-            if let result = lastCombatResult {
+            // Детальный результат последней атаки (fate-based)
+            if let result = engine.lastFateAttackResult {
+                fateResultDetailView(result)
+            } else if let result = lastCombatResult {
                 combatResultDetailView(result)
             }
 
@@ -817,7 +812,90 @@ struct CombatView: View {
         )
     }
 
-    /// Вид кубика
+    /// Fate attack result detail view
+    func fateResultDetailView(_ result: FateAttackResult) -> some View {
+        VStack(alignment: .leading, spacing: Spacing.xs) {
+            HStack {
+                Text(result.isHit ? L10n.combatHitResult.localized : L10n.combatMissResult.localized)
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundColor(result.isHit ? AppColors.success : AppColors.danger)
+
+                Spacer()
+
+                Text(L10n.combatAttackVsDefense.localized(with: result.totalAttack, result.defenseValue))
+                    .font(.caption)
+                    .foregroundColor(AppColors.muted)
+            }
+
+            Divider()
+
+            // Attack breakdown
+            VStack(alignment: .leading, spacing: Spacing.xxxs) {
+                Text(L10n.combatAttackRollTitle.localized)
+                    .font(.caption)
+                    .fontWeight(.semibold)
+
+                HStack(spacing: Spacing.xxs) {
+                    Text("\(result.baseStrength)")
+                        .font(.caption2)
+
+                    if result.effortBonus > 0 {
+                        Text("+ \(result.effortBonus)")
+                            .font(.caption2)
+                            .foregroundColor(AppColors.power)
+                    }
+
+                    if let fateResult = result.fateDrawResult {
+                        Text("+ [\(fateResult.card.name)] \(fateResult.effectiveValue > 0 ? "+" : "")\(fateResult.effectiveValue)")
+                            .font(.caption2)
+                            .foregroundColor(AppColors.faith)
+                    }
+
+                    Text("= \(result.totalAttack)")
+                        .font(.caption)
+                        .fontWeight(.bold)
+                }
+            }
+
+            if result.isHit && result.damage > 0 {
+                Divider()
+
+                VStack(alignment: .leading, spacing: Spacing.xxxs) {
+                    Text(L10n.combatDamageCalcTitle.localized)
+                        .font(.caption)
+                        .fontWeight(.semibold)
+
+                    Text("\(result.damage)")
+                        .font(.caption)
+                        .fontWeight(.bold)
+                        .foregroundColor(AppColors.danger)
+                }
+            }
+
+            // Special effects
+            ForEach(result.specialEffects.indices, id: \.self) { index in
+                let effect = result.specialEffects[index]
+                HStack(spacing: Spacing.xxs) {
+                    Text(effect.icon)
+                    Text(effect.description)
+                }
+                .font(.caption2)
+                .foregroundColor(AppColors.muted)
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: CornerRadius.md)
+                .fill(result.isHit ? AppColors.success.opacity(0.1) : AppColors.danger.opacity(0.1))
+                .overlay(
+                    RoundedRectangle(cornerRadius: CornerRadius.md)
+                        .stroke(result.isHit ? AppColors.success : AppColors.danger, lineWidth: 1)
+                )
+        )
+    }
+
+    /// Вид кубика (legacy, kept for compatibility)
     func diceView(_ value: Int) -> some View {
         ZStack {
             RoundedRectangle(cornerRadius: CornerRadius.sm)
@@ -832,50 +910,181 @@ struct CombatView: View {
         }
     }
 
-    // MARK: - Dice Roll Overlay
+    // MARK: - Effort Selection Overlay
 
-    /// Prominent dice roll animation overlay
-    var diceRollOverlay: some View {
+    /// Overlay for selecting effort cards before attack
+    var effortSelectionOverlay: some View {
         ZStack {
-            // Semi-transparent background
+            Color.black.opacity(Opacity.mediumHigh)
+                .ignoresSafeArea()
+                .onTapGesture { }  // prevent tap-through
+
+            VStack(spacing: Spacing.lg) {
+                Text(L10n.combatFateEffort.localized)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+
+                Text(L10n.combatFateEffortHint.localized)
+                    .font(.subheadline)
+                    .foregroundColor(AppColors.secondary)
+
+                // Player hand cards for effort selection
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: Spacing.sm) {
+                        ForEach(playerHand) { card in
+                            VStack(spacing: Spacing.xxs) {
+                                Text(card.name)
+                                    .font(.caption)
+                                    .fontWeight(.semibold)
+                                    .lineLimit(2)
+                                    .multilineTextAlignment(.center)
+                            }
+                            .frame(width: Sizes.cardWidthSmall, height: Sizes.cardHeightSmall)
+                            .background(
+                                RoundedRectangle(cornerRadius: CornerRadius.md)
+                                    .fill(selectedEffortCardIds.contains(card.id)
+                                          ? AppColors.power.opacity(Opacity.light)
+                                          : AppColors.cardBackground)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: CornerRadius.md)
+                                            .stroke(selectedEffortCardIds.contains(card.id)
+                                                    ? AppColors.power : AppColors.secondary,
+                                                    lineWidth: selectedEffortCardIds.contains(card.id) ? 3 : 1)
+                                    )
+                            )
+                            .onTapGesture {
+                                if selectedEffortCardIds.contains(card.id) {
+                                    selectedEffortCardIds.remove(card.id)
+                                } else {
+                                    selectedEffortCardIds.insert(card.id)
+                                }
+                            }
+                        }
+                    }
+                    .padding(.horizontal, Spacing.lg)
+                }
+
+                if !selectedEffortCardIds.isEmpty {
+                    Text("+\(selectedEffortCardIds.count)")
+                        .font(.headline)
+                        .foregroundColor(AppColors.power)
+                }
+
+                HStack(spacing: Spacing.lg) {
+                    // Skip effort
+                    Button(action: {
+                        selectedEffortCardIds = []
+                        showEffortPhase = false
+                        confirmAttackWithEffort()
+                    }) {
+                        Text(L10n.combatEndTurnButton.localized)
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(width: Sizes.buttonMinWidth, height: Sizes.touchTarget)
+                            .background(AppColors.secondary)
+                            .cornerRadius(CornerRadius.lg)
+                    }
+
+                    // Confirm with effort
+                    Button(action: {
+                        showEffortPhase = false
+                        confirmAttackWithEffort()
+                    }) {
+                        Text(L10n.combatAttackButton.localized)
+                            .font(.headline)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                            .frame(width: Sizes.buttonMinWidth, height: Sizes.touchTarget)
+                            .background(AppColors.power)
+                            .cornerRadius(CornerRadius.lg)
+                    }
+                }
+            }
+            .padding()
+        }
+    }
+
+    // MARK: - Fate Card Overlay
+
+    /// Fate card draw animation overlay
+    var fateCardOverlay: some View {
+        ZStack {
             Color.black.opacity(Opacity.mediumHigh)
                 .ignoresSafeArea()
 
             VStack(spacing: Spacing.xl) {
                 // Title
-                Text(L10n.combatDiceRoll.localized)
+                Text(L10n.combatFateDraw.localized)
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(.white)
 
-                // Animated dice
-                HStack(spacing: Spacing.lg) {
-                    ForEach(animatingDiceValues.indices, id: \.self) { index in
-                        animatedDiceView(value: animatingDiceValues[index], index: index)
+                // Card visual
+                if let result = engine.lastFateAttackResult, let fateResult = result.fateDrawResult {
+                    if fateAnimationPhase == 0 {
+                        // Card back
+                        RoundedRectangle(cornerRadius: CornerRadius.lg)
+                            .fill(AppColors.dark)
+                            .frame(width: Sizes.cardWidthLarge, height: Sizes.cardHeightLarge)
+                            .overlay(
+                                Image(systemName: "sparkles")
+                                    .font(.largeTitle)
+                                    .foregroundColor(AppColors.faith)
+                            )
+                            .shadow(color: AppColors.dark.opacity(Opacity.medium), radius: Spacing.sm)
+                    } else {
+                        // Revealed card
+                        VStack(spacing: Spacing.sm) {
+                            if let suit = fateResult.card.suit {
+                                Image(systemName: fateSuitIcon(suit))
+                                    .font(.title)
+                                    .foregroundColor(fateSuitColor(suit))
+                            }
+
+                            Text(fateResult.card.name)
+                                .font(.headline)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+
+                            Text("\(fateResult.effectiveValue > 0 ? "+" : "")\(fateResult.effectiveValue)")
+                                .font(.title)
+                                .fontWeight(.bold)
+                                .foregroundColor(fateResult.effectiveValue >= 0 ? AppColors.success : AppColors.danger)
+                        }
+                        .frame(width: Sizes.cardWidthLarge, height: Sizes.cardHeightLarge)
+                        .background(
+                            RoundedRectangle(cornerRadius: CornerRadius.lg)
+                                .fill(Color.black.opacity(Opacity.high))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: CornerRadius.lg)
+                                        .stroke(fateResult.effectiveValue >= 0 ? AppColors.success : AppColors.danger, lineWidth: 2)
+                                )
+                        )
+                        .transition(.scale.combined(with: .opacity))
                     }
                 }
-                .padding()
 
-                // Result display (after animation completes)
-                if let result = lastCombatResult, diceAnimationPhase >= 3 {
+                // Result breakdown (phase 2)
+                if let result = engine.lastFateAttackResult, fateAnimationPhase >= 2 {
                     VStack(spacing: Spacing.md) {
-                        // Attack total
+                        // Attack formula
                         HStack(spacing: Spacing.sm) {
-                            Text("💪 \(result.attackRoll.baseStrength)")
+                            Text("\(result.baseStrength)")
                                 .foregroundColor(.cyan)
-                            Text("+")
-                                .foregroundColor(.white)
-                            Text("🎲 \(result.attackRoll.diceTotal)")
-                                .foregroundColor(AppColors.faith)
-                            if result.attackRoll.bonusDamage > 0 {
+                            if result.effortBonus > 0 {
                                 Text("+")
                                     .foregroundColor(.white)
-                                Text("⚔️ \(result.attackRoll.bonusDamage)")
+                                Text("\(result.effortBonus)")
                                     .foregroundColor(AppColors.power)
                             }
+                            Text("+")
+                                .foregroundColor(.white)
+                            Text("\(result.fateDrawResult?.effectiveValue ?? 0)")
+                                .foregroundColor(AppColors.faith)
                             Text("=")
                                 .foregroundColor(.white)
-                            Text("\(result.attackRoll.total)")
+                            Text("\(result.totalAttack)")
                                 .font(.title)
                                 .fontWeight(.bold)
                                 .foregroundColor(.white)
@@ -891,7 +1100,7 @@ struct CombatView: View {
                         }
                         .font(.subheadline)
 
-                        // Hit/Miss result
+                        // Hit/Miss
                         if result.isHit {
                             VStack(spacing: Spacing.xxs) {
                                 Text(L10n.combatHitResult.localized)
@@ -899,8 +1108,8 @@ struct CombatView: View {
                                     .fontWeight(.bold)
                                     .foregroundColor(AppColors.success)
 
-                                if let damage = result.damageCalculation {
-                                    Text(L10n.combatDamageValue.localized(with: damage.total))
+                                if result.damage > 0 {
+                                    Text(L10n.combatDamageValue.localized(with: result.damage))
                                         .font(.headline)
                                         .foregroundColor(AppColors.danger)
                                 }
@@ -919,14 +1128,14 @@ struct CombatView: View {
                     )
                     .transition(.scale.combined(with: .opacity))
 
-                    // Confirmation button - applies damage and closes overlay
-                    Button(action: confirmAttackResult) {
+                    // OK button
+                    Button(action: confirmFateResult) {
                         Text(L10n.buttonOk.localized)
                             .font(.headline)
                             .fontWeight(.bold)
                             .foregroundColor(.white)
                             .frame(width: Sizes.buttonMinWidth, height: Sizes.touchTarget)
-                            .background(result.isHit ? AppColors.success : AppColors.danger)
+                            .background(engine.lastFateAttackResult?.isHit == true ? AppColors.success : AppColors.danger)
                             .cornerRadius(CornerRadius.lg)
                     }
                     .padding(.top, Spacing.lg)
@@ -935,84 +1144,55 @@ struct CombatView: View {
         }
     }
 
-    /// Confirm attack result - applies pending damage and closes overlay
-    func confirmAttackResult() {
-        // Apply the pending damage
+    /// Confirm fate attack result - applies pending effects and closes overlay
+    func confirmFateResult() {
         pendingDamageApplication?()
         pendingDamageApplication = nil
 
-        // Close overlay
-        withAnimation(.easeOut(duration: 0.2)) {
-            showDiceRollOverlay = false
+        withAnimation(.easeOut(duration: AnimationDuration.fast)) {
+            showFateCardOverlay = false
         }
     }
 
-    /// Single animated dice
-    func animatedDiceView(value: Int, index: Int) -> some View {
-        ZStack {
-            // Dice background
-            RoundedRectangle(cornerRadius: CornerRadius.md)
-                .fill(Color.white)
-                .frame(width: Sizes.iconRegion, height: Sizes.iconRegion)
-                .shadow(color: .black.opacity(Opacity.light), radius: 4, x: 2, y: 2)
-
-            // Dice value
-            Text("\(value)")
-                .font(.system(size: Sizes.iconLarge, weight: .bold, design: .rounded))
-                .foregroundColor(value >= 5 ? AppColors.success : value <= 2 ? AppColors.danger : .black)
-        }
-        .scaleEffect(diceAnimationPhase >= 2 ? 1.0 : 1.2)
-        .rotationEffect(.degrees(diceAnimationPhase >= 2 ? 0 : Double(index * 30)))
-        .animation(
-            .spring(response: AnimationDuration.slow, dampingFraction: 0.6),
-            value: diceAnimationPhase
-        )
-    }
-
-    /// Trigger dice roll animation
-    func showDiceAnimation(diceRolls: [Int]) {
-        // Start with random values
-        animatingDiceValues = diceRolls.map { _ in Int.random(in: 1...6) }
-        diceAnimationPhase = 0
+    /// Trigger fate card draw animation
+    func showFateCardAnimation() {
+        fateAnimationPhase = 0
 
         withAnimation(.easeIn(duration: 0.1)) {
-            showDiceRollOverlay = true
+            showFateCardOverlay = true
         }
 
-        // Animation sequence: roll several times then show final result
-        let rollDuration = 0.1
-
-        // Roll 1
-        DispatchQueue.main.asyncAfter(deadline: .now() + rollDuration) {
-            animatingDiceValues = diceRolls.map { _ in Int.random(in: 1...6) }
-            diceAnimationPhase = 1
-        }
-
-        // Roll 2
-        DispatchQueue.main.asyncAfter(deadline: .now() + rollDuration * 2) {
-            animatingDiceValues = diceRolls.map { _ in Int.random(in: 1...6) }
-        }
-
-        // Roll 3
-        DispatchQueue.main.asyncAfter(deadline: .now() + rollDuration * 3) {
-            animatingDiceValues = diceRolls.map { _ in Int.random(in: 1...6) }
-        }
-
-        // Final result
-        DispatchQueue.main.asyncAfter(deadline: .now() + rollDuration * 4) {
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-                animatingDiceValues = diceRolls
-                diceAnimationPhase = 2
+        // Phase 1: flip to reveal card
+        DispatchQueue.main.asyncAfter(deadline: .now() + AnimationDuration.verySlow) {
+            withAnimation(.spring(response: AnimationDuration.slow, dampingFraction: 0.7)) {
+                fateAnimationPhase = 1
             }
         }
 
-        // Show hit/miss result and OK button
-        DispatchQueue.main.asyncAfter(deadline: .now() + rollDuration * 4 + 0.3) {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                diceAnimationPhase = 3
+        // Phase 2: show result breakdown + OK
+        DispatchQueue.main.asyncAfter(deadline: .now() + AnimationDuration.verySlow * 2) {
+            withAnimation(.spring(response: AnimationDuration.normal, dampingFraction: 0.8)) {
+                fateAnimationPhase = 2
             }
         }
-        // No auto-dismiss - player must tap OK button to confirm and apply damage
+    }
+
+    // MARK: - Fate Card Helpers
+
+    func fateSuitIcon(_ suit: FateCardSuit) -> String {
+        switch suit {
+        case .nav: return "moon.fill"
+        case .yav: return "circle.fill"
+        case .prav: return "sun.max.fill"
+        }
+    }
+
+    func fateSuitColor(_ suit: FateCardSuit) -> Color {
+        switch suit {
+        case .nav: return AppColors.resonanceNav
+        case .yav: return AppColors.resonanceYav
+        case .prav: return AppColors.resonancePrav
+        }
     }
 
     // MARK: - Player Hand (Engine-First)
@@ -1077,53 +1257,51 @@ struct CombatView: View {
     func performBasicAttack() {
         guard actionsRemaining > 0 else { return }
 
+        // If player has cards in hand, show effort selection first
+        if !playerHand.isEmpty {
+            selectedEffortCardIds = []
+            showEffortPhase = true
+        } else {
+            confirmAttackWithEffort()
+        }
+    }
+
+    /// Confirm attack after effort selection (or skip)
+    func confirmAttackWithEffort() {
+        guard actionsRemaining > 0 else { return }
         actionsRemaining -= 1
 
         let monsterDef = monster.defense ?? 10
-        let monsterCurrentHP = monsterHealth
-        let monsterMaxHP = monster.health ?? 10
 
-        // Engine-First: Use Engine-based calculator (no Player dependency)
-        let result = CombatCalculator.calculateAttackEngineFirst(
-            engine: engine,
-            monsterDefense: monsterDef,
-            monsterCurrentHP: monsterCurrentHP,
-            monsterMaxHP: monsterMaxHP,
-            bonusDice: bonusDice,
-            bonusDamage: bonusDamage,
-            isFirstAttack: isFirstAttackThisCombat
-        )
+        // Engine-First: perform attack through engine (handles fate draw, damage, effort)
+        engine.performAction(.combatAttack(effortCards: selectedEffortCardIds.count, bonusDamage: bonusDamage))
 
-        // Сохраняем результат для отображения
-        lastCombatResult = result
+        // Read result from engine
+        let result = engine.lastFateAttackResult
 
-        // Store damage application to be called when player confirms
+        // Store pending damage confirmation (engine already applied damage,
+        // but we defer log + victory check until player confirms overlay)
         pendingDamageApplication = { [self] in
-            if result.isHit, let damageCalc = result.damageCalculation {
-                let damage = damageCalc.total
-
-                // Track damage for statistics
-                totalDamageDealt += damage
-
-                // Engine-First: Apply damage through engine action
-                engine.performAction(.combatApplyEffect(effect: .damageEnemy(amount: damage)))
-
-                combatLog.append(L10n.combatLogHit.localized(with: result.attackRoll.total, monsterDef, damage, monsterHealth))
-
-                if monsterHealth <= 0 {
-                    finishCombat(victory: true)
+            if let result = result {
+                if result.isHit && result.damage > 0 {
+                    totalDamageDealt += result.damage
+                    combatLog.append(L10n.combatLogHit.localized(with: result.totalAttack, monsterDef, result.damage, monsterHealth))
+                    if monsterHealth <= 0 {
+                        finishCombat(victory: true)
+                    }
+                } else {
+                    combatLog.append(L10n.combatLogMissed.localized(with: result.totalAttack, monsterDef))
                 }
-            } else {
-                combatLog.append(L10n.combatLogMissed.localized(with: result.attackRoll.total, monsterDef))
             }
         }
 
-        // Show dice roll animation (player will confirm to apply damage)
-        showDiceAnimation(diceRolls: result.attackRoll.diceRolls)
+        // Show fate card animation
+        showFateCardAnimation()
 
-        // Сбросить бонусы после атаки
+        // Reset bonuses
         bonusDice = 0
         bonusDamage = 0
+        selectedEffortCardIds = []
         isFirstAttackThisCombat = false
     }
 
@@ -1323,7 +1501,10 @@ struct CombatView: View {
                 }
 
             case .custom(let description):
-                combatLog.append("   📜 \(description)")
+                // Only log non-empty custom effects
+                if !description.isEmpty {
+                    combatLog.append("   📜 \(description)")
+                }
             }
         }
     }
@@ -1612,7 +1793,7 @@ struct CombatCardView: View {
         case .heal(let amount): return "Лечение: +\(amount)"
         case .drawCards(let count): return "Карты: +\(count)"
         case .gainFaith(let amount): return "Вера: +\(amount)"
-        case .addDice(let count): return "+\(count) 🎲"
+        case .addDice(let count): return "+\(count)"
         case .reroll: return "Перебросок"
         case .shiftBalance(let towards, let amount):
             let dir = towards == .light ? "☀️" : towards == .dark ? "🌙" : "⚖️"

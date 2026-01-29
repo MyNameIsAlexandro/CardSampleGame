@@ -7,60 +7,112 @@ en.lproj/
 App/
 .claude/
     settings.local.json
-ContentPacks/
-    TwilightMarches/
-        manifest.json
-        Cards/
-            cards.json
-        Balance/
-            balance.json
-        Campaign/
-            ActI/
-                anchors.json
-                events.json
-                quests.json
-                regions.json
-            Enemies/
-                enemies.json
-        Characters/
-            hero_abilities.json
-            heroes.json
-        Localization/
-            en.json
-            ru.json
 Models/
 Docs/
+    Design/
     Archive/
+    Specs/
+    QA/
+    Audit/
+        Feedback/
+    Technical/
 Utilities/
+Packages/
+    CharacterPacks/
+        CoreHeroes/
+            Sources/
+                CoreHeroesContent/
+                    Resources/
+                        CoreHeroes/
+                            manifest.json
+                            Cards/
+                                cards.json
+                            Characters/
+                                hero_abilities.json
+                                heroes.json
+                            Localization/
+                                en.json
+                                ru.json
+            .swiftpm/
+                xcode/
+                    xcuserdata/
+                        abondarenko.xcuserdatad/
+                            xcschemes/
+    TwilightEngine/
+        Tests/
+            TwilightEngineTests/
+                Helpers/
+        Sources/
+            TwilightEngine/
+                Core/
+                Combat/
+                Config/
+                Heroes/
+                Cards/
+                Runtime/
+                ContentPacks/
+                Models/
+                Utilities/
+                Quest/
+                Events/
+                Modules/
+                Data/
+                    Providers/
+                    Definitions/
+                Migration/
+                Story/
+                Localization/
+            PackCompilerTool/
+        .swiftpm/
+            xcode/
+                package.xcworkspace/
+                    xcuserdata/
+                        abondarenko.xcuserdatad/
+                xcuserdata/
+                    abondarenko.xcuserdatad/
+                        xcschemes/
+                xcshareddata/
+                    xcschemes/
+            configuration/
+    StoryPacks/
+        Season1/
+            TwilightMarchesActI/
+                Sources/
+                    TwilightMarchesActIContent/
+                        Resources/
+                            TwilightMarchesActI/
+                                manifest.json
+                                Cards/
+                                    story_rewards.json
+                                Balance/
+                                    balance.json
+                                Campaign/
+                                    anchors.json
+                                    events.json
+                                    quests.json
+                                    regions.json
+                                Localization/
+                                    en.json
+                                    ru.json
+                                Enemies/
+                                    enemies.json
+                .swiftpm/
+                    xcode/
+                        xcuserdata/
+                            abondarenko.xcuserdatad/
+                                xcschemes/
 .github/
     workflows/
 ru.lproj/
-Data/
 Views/
     Components/
-Engine/
-    Core/
-    Combat/
-    Config/
-    Heroes/
-    Cards/
-    Runtime/
-    ContentPacks/
-    Quest/
-    Events/
-    Modules/
-    Data/
-        Providers/
-        Definitions/
-    Migration/
-    Story/
-Helpers/
 CardSampleGameTests/
     Unit/
         ContentPackTests/
     Integration/
+    TestHelpers/
     Views/
-    Engine/
+    GateTests/
 
 === FILE CONTENTS ===
 
@@ -105,61 +157,75 @@ CardSampleGameTests/
       "Bash(fi)",
       "Bash(done)",
       "Bash(__NEW_LINE_28e51315d305b980__ grep -c \"isa = PBXNativeTarget\" CardSampleGame.xcodeproj/project.pbxproj)",
-      "Bash(ruby -e:*)"
+      "Bash(ruby -e:*)",
+      "Bash(swift:*)",
+      "Bash(plutil:*)",
+      "Bash(while read f)",
+      "Bash(do:*)",
+      "Bash(\"/Users/abondarenko/Library/Mobile Documents/com~apple~CloudDocs/XCode/CardSampleGame/en.lproj/Localizable.strings\")",
+      "Bash(\"/Users/abondarenko/Library/Mobile Documents/com~apple~CloudDocs/XCode/CardSampleGame/ru.lproj/Localizable.strings\")",
+      "Bash(\"/Users/abondarenko/Library/Mobile Documents/com~apple~CloudDocs/XCode/CardSampleGame/Packages/TwilightEngine/Tests/TwilightEngineTests/TwilightEngineTests.swift\")",
+      "Bash(git checkout:*)",
+      "Bash(git stash:*)",
+      "Bash(ls:*)",
+      "Bash(echo:*)",
+      "Bash(tee:*)",
+      "Bash(xcrun simctl spawn:*)",
+      "Bash(timeout 10 cat:*)",
+      "Bash(open:*)",
+      "Bash(xcrun simctl install:*)",
+      "Bash(xcrun simctl launch:*)",
+      "Bash(log show --predicate 'process == \"\"\"\"xctest\"\"\"\" OR process CONTAINS \"\"\"\"CardSampleGame\"\"\"\"' --style compact --last 2m)",
+      "Bash(cd:*)",
+      "Bash(wc:*)",
+      "Bash(__NEW_LINE_3f6ecd24ffb37c1a__ python3 -c \"\nimport re\n\nwith open\\(''Phase3ContractTests.swift'', ''r''\\) as f:\n    content = f.read\\(\\)\n\nlines = content.split\\(''\\\\n''\\)\ni = 0\nwhile i < len\\(lines\\):\n    line = lines[i]\n    m = re.match\\(r''^\\(\\\\s+func test\\\\w+\\\\\\(\\\\\\)\\)\\\\s+throws\\\\s+\\\\{'', line\\)\n    if m:\n        brace_count = 1\n        j = i + 1\n        has_try = False\n        while j < len\\(lines\\) and brace_count > 0:\n            for ch in lines[j]:\n                if ch == ''{'': brace_count += 1\n                elif ch == ''}'': brace_count -= 1\n            if '' try '' in lines[j] or lines[j].strip\\(\\).startswith\\(''try ''\\):\n                has_try = True\n            j += 1\n        if not has_try:\n            lines[i] = m.group\\(1\\) + '' {''\n    i += 1\n\nwith open\\(''Phase3ContractTests.swift'', ''w''\\) as f:\n    f.write\\(''\\\\n''.join\\(lines\\)\\)\n\")",
+      "Bash(for i in 1 2 3)"
     ]
   }
 }
 
 
 // ==========================================
-// FILE: ContentPacks/TwilightMarches/manifest.json
+// FILE: Packages/CharacterPacks/CoreHeroes/Sources/CoreHeroesContent/Resources/CoreHeroes/manifest.json
 // ==========================================
 
 {
-  "id": "twilight-marches-act1",
+  "id": "core-heroes",
   "name": {
-    "en": "Twilight Marches - Act I",
-    "ru": "Сумрачные Пределы - Акт I"
+    "en": "Core Heroes",
+    "ru": "Основные Герои"
   },
   "description": {
-    "en": "The first act of Twilight Marches campaign. Explore the borderlands between worlds and protect the sacred anchors.",
-    "ru": "Первый акт кампании Сумрачных Пределов. Исследуйте порубежье между мирами и защитите священные якоря."
+    "en": "Base heroes and their starting cards for Twilight Marches",
+    "ru": "Базовые герои и их начальные карты для Сумеречных Маршей"
   },
   "version": "1.0.0",
-  "type": "campaign",
+  "type": "character",
   "core_version_min": "1.0.0",
-  "core_version_max": null,
   "dependencies": [],
   "required_capabilities": [],
-  "entry_region": "village",
-  "entry_quest": "quest_main_act1",
-  "recommended_heroes": [
+  "recommended_heroes": [],
+  "hero_ids": [
     "warrior_ragnar",
     "mage_elvira",
     "ranger_thorin",
     "priest_aurelius",
     "shadow_umbra"
   ],
+  "bundle_id": "core-free",
   "author": "CardSampleGame Team",
   "license": "proprietary",
   "release_date": "2026-01-01",
   "locales": ["en", "ru"],
-  "checksums": null,
-  "regions_path": "Campaign/ActI/regions.json",
-  "events_path": "Campaign/ActI/events.json",
-  "quests_path": "Campaign/ActI/quests.json",
-  "anchors_path": "Campaign/ActI/anchors.json",
   "heroes_path": "Characters/heroes.json",
   "abilities_path": "Characters/hero_abilities.json",
-  "cards_path": "Cards",
-  "enemies_path": "Campaign/Enemies",
-  "balance_path": "Balance/balance.json",
+  "cards_path": "Cards/cards.json",
   "localization_path": "Localization"
 }
 
 
 // ==========================================
-// FILE: ContentPacks/TwilightMarches/Cards/cards.json
+// FILE: Packages/CharacterPacks/CoreHeroes/Sources/CoreHeroesContent/Resources/CoreHeroes/Cards/cards.json
 // ==========================================
 
 [
@@ -198,6 +264,62 @@ CardSampleGameTests/
     "balance": "neutral",
     "power": null,
     "defense": 2,
+    "health": null,
+    "realm": "yav"
+  },
+  {
+    "id": "heal_basic",
+    "name": "Heal",
+    "name_ru": "Исцеление",
+    "card_type": "special",
+    "rarity": "common",
+    "description": "Basic healing. Restore 2 health.",
+    "description_ru": "Базовое исцеление. Восстанавливает 2 здоровья.",
+    "icon": "heart",
+    "expansion_set": "baseSet",
+    "ownership": "universal",
+    "abilities": [
+      {
+        "id": "heal_effect",
+        "name": "Heal",
+        "name_ru": "Исцеление",
+        "description": "Restore 2 health",
+        "description_ru": "Восстановить 2 здоровья",
+        "effect": {"heal": 2}
+      }
+    ],
+    "faith_cost": 0,
+    "balance": "light",
+    "power": null,
+    "defense": null,
+    "health": null,
+    "realm": "yav"
+  },
+  {
+    "id": "draw_basic",
+    "name": "Focus",
+    "name_ru": "Концентрация",
+    "card_type": "special",
+    "rarity": "common",
+    "description": "Focus your mind. Draw 1 card.",
+    "description_ru": "Сосредоточься. Возьми 1 карту.",
+    "icon": "eye",
+    "expansion_set": "baseSet",
+    "ownership": "universal",
+    "abilities": [
+      {
+        "id": "draw_effect",
+        "name": "Draw",
+        "name_ru": "Взять карту",
+        "description": "Draw 1 card",
+        "description_ru": "Взять 1 карту",
+        "effect": {"draw_cards": 1}
+      }
+    ],
+    "faith_cost": 0,
+    "balance": "neutral",
+    "power": null,
+    "defense": null,
     "health": null,
     "realm": "yav"
   },
@@ -519,7 +641,464 @@ CardSampleGameTests/
     "defense": null,
     "health": null,
     "realm": "nav"
+  }
+]
+
+
+// ==========================================
+// FILE: Packages/CharacterPacks/CoreHeroes/Sources/CoreHeroesContent/Resources/CoreHeroes/Characters/hero_abilities.json
+// ==========================================
+
+[
+  {
+    "id": "warrior_rage",
+    "name": {
+      "en": "Battle Rage",
+      "ru": "Боевая Ярость"
+    },
+    "description": {
+      "en": "+2 damage when HP below 50%",
+      "ru": "+2 к урону при HP ниже 50%"
+    },
+    "icon": "flame.fill",
+    "type": "passive",
+    "trigger": "on_damage_dealt",
+    "condition": {
+      "type": "hp_below_percent",
+      "value": 50
+    },
+    "effects": [
+      {
+        "type": "bonus_damage",
+        "value": 2
+      }
+    ],
+    "cooldown": 0
   },
+  {
+    "id": "mage_meditation",
+    "name": {
+      "en": "Meditation",
+      "ru": "Медитация"
+    },
+    "description": {
+      "en": "+1 faith at end of turn",
+      "ru": "+1 вера в конце хода"
+    },
+    "icon": "sparkles",
+    "type": "passive",
+    "trigger": "turn_end",
+    "condition": null,
+    "effects": [
+      {
+        "type": "gain_faith",
+        "value": 1
+      }
+    ],
+    "cooldown": 0
+  },
+  {
+    "id": "ranger_tracking",
+    "name": {
+      "en": "Tracking",
+      "ru": "Выслеживание"
+    },
+    "description": {
+      "en": "+1 bonus die on first attack",
+      "ru": "+1 кубик при первой атаке"
+    },
+    "icon": "scope",
+    "type": "passive",
+    "trigger": "on_attack",
+    "condition": {
+      "type": "first_attack"
+    },
+    "effects": [
+      {
+        "type": "bonus_dice",
+        "value": 1
+      }
+    ],
+    "cooldown": 0
+  },
+  {
+    "id": "priest_blessing",
+    "name": {
+      "en": "Divine Blessing",
+      "ru": "Божественное Благословение"
+    },
+    "description": {
+      "en": "-1 damage from dark sources",
+      "ru": "-1 урон от тёмных источников"
+    },
+    "icon": "cross.fill",
+    "type": "passive",
+    "trigger": "on_damage_received",
+    "condition": {
+      "type": "damage_source_dark"
+    },
+    "effects": [
+      {
+        "type": "damage_reduction",
+        "value": 1
+      }
+    ],
+    "cooldown": 0
+  },
+  {
+    "id": "shadow_ambush",
+    "name": {
+      "en": "Shadow Ambush",
+      "ru": "Засада из Тени"
+    },
+    "description": {
+      "en": "+3 damage to targets at full HP",
+      "ru": "+3 урона по целям с полным HP"
+    },
+    "icon": "moon.stars.fill",
+    "type": "passive",
+    "trigger": "on_damage_dealt",
+    "condition": {
+      "type": "target_full_hp"
+    },
+    "effects": [
+      {
+        "type": "bonus_damage",
+        "value": 3
+      }
+    ],
+    "cooldown": 0
+  }
+]
+
+
+// ==========================================
+// FILE: Packages/CharacterPacks/CoreHeroes/Sources/CoreHeroesContent/Resources/CoreHeroes/Characters/heroes.json
+// ==========================================
+
+[
+  {
+    "id": "warrior_ragnar",
+    "name": "Ragnar",
+    "name_ru": "Рагнар",
+    "description": "Former commander of the royal guard. His battle rage is legendary.",
+    "description_ru": "Бывший командир королевской гвардии. Его ярость в бою легендарна.",
+    "icon": "shield.fill",
+    "ability_id": "warrior_rage",
+    "base_stats": {
+      "health": 25,
+      "max_health": 30,
+      "strength": 8,
+      "dexterity": 5,
+      "constitution": 7,
+      "intelligence": 3,
+      "wisdom": 4,
+      "charisma": 5,
+      "faith": 8,
+      "max_faith": 15,
+      "starting_balance": 50
+    },
+    "starting_deck_card_ids": ["strike_basic", "strike_basic", "defend_basic", "rage_strike"],
+    "availability": "always_available"
+  },
+  {
+    "id": "mage_elvira",
+    "name": "Elvira",
+    "name_ru": "Эльвира",
+    "description": "Master of arcane arts. Draws power from both sources.",
+    "description_ru": "Мастер арканных искусств. Черпает силу из обоих источников.",
+    "icon": "wand.and.stars",
+    "ability_id": "mage_meditation",
+    "base_stats": {
+      "health": 18,
+      "max_health": 22,
+      "strength": 3,
+      "dexterity": 5,
+      "constitution": 4,
+      "intelligence": 9,
+      "wisdom": 7,
+      "charisma": 5,
+      "faith": 12,
+      "max_faith": 25,
+      "starting_balance": 50
+    },
+    "starting_deck_card_ids": ["arcane_bolt", "arcane_bolt", "shield_spell", "meditation"],
+    "availability": "always_available"
+  },
+  {
+    "id": "ranger_thorin",
+    "name": "Thorin",
+    "name_ru": "Торин",
+    "description": "Monster hunter from the northern forests. Never misses.",
+    "description_ru": "Охотник на чудовищ из северных лесов. Никогда не промахивается.",
+    "icon": "target",
+    "ability_id": "ranger_tracking",
+    "base_stats": {
+      "health": 20,
+      "max_health": 25,
+      "strength": 5,
+      "dexterity": 9,
+      "constitution": 5,
+      "intelligence": 5,
+      "wisdom": 6,
+      "charisma": 4,
+      "faith": 10,
+      "max_faith": 18,
+      "starting_balance": 50
+    },
+    "starting_deck_card_ids": ["precise_shot", "precise_shot", "trap", "tracking"],
+    "availability": "always_available"
+  },
+  {
+    "id": "priest_aurelius",
+    "name": "Aurelius",
+    "name_ru": "Аврелий",
+    "description": "Devoted servant of the Light. His blessings protect allies.",
+    "description_ru": "Преданный служитель Света. Его благословения защищают союзников.",
+    "icon": "cross",
+    "ability_id": "priest_blessing",
+    "base_stats": {
+      "health": 20,
+      "max_health": 24,
+      "strength": 4,
+      "dexterity": 4,
+      "constitution": 5,
+      "intelligence": 6,
+      "wisdom": 9,
+      "charisma": 7,
+      "faith": 15,
+      "max_faith": 30,
+      "starting_balance": 60
+    },
+    "starting_deck_card_ids": ["holy_light", "holy_light", "blessing", "smite"],
+    "availability": "always_available"
+  },
+  {
+    "id": "shadow_umbra",
+    "name": "Umbra",
+    "name_ru": "Умбра",
+    "description": "Agent of Nav. Strikes from the shadow when the enemy least expects it.",
+    "description_ru": "Агент Нави. Наносит удар из тени, когда враг не ожидает.",
+    "icon": "moon.stars",
+    "ability_id": "shadow_ambush",
+    "base_stats": {
+      "health": 18,
+      "max_health": 22,
+      "strength": 6,
+      "dexterity": 9,
+      "constitution": 4,
+      "intelligence": 6,
+      "wisdom": 5,
+      "charisma": 5,
+      "faith": 10,
+      "max_faith": 20,
+      "starting_balance": 40
+    },
+    "starting_deck_card_ids": ["backstab", "backstab", "shadow_step", "poison_blade"],
+    "availability": "always_available"
+  }
+]
+
+
+// ==========================================
+// FILE: Packages/CharacterPacks/CoreHeroes/Sources/CoreHeroesContent/Resources/CoreHeroes/Localization/en.json
+// ==========================================
+
+{
+  "pack.name": "Core Heroes",
+  "pack.description": "Base heroes and their starting cards for Twilight Marches",
+
+  "hero.warrior_ragnar.name": "Ragnar",
+  "hero.warrior_ragnar.description": "Former commander of the royal guard. His battle rage is legendary.",
+  "hero.mage_elvira.name": "Elvira",
+  "hero.mage_elvira.description": "Master of arcane arts. Draws power from both sources.",
+  "hero.ranger_thorin.name": "Thorin",
+  "hero.ranger_thorin.description": "Monster hunter from the northern forests. Never misses.",
+  "hero.priest_aurelius.name": "Aurelius",
+  "hero.priest_aurelius.description": "Devoted servant of the Light. His blessings protect allies.",
+  "hero.shadow_umbra.name": "Umbra",
+  "hero.shadow_umbra.description": "Agent of Nav. Strikes from the shadow when the enemy least expects it.",
+
+  "ability.warrior_rage.name": "Battle Rage",
+  "ability.warrior_rage.description": "+2 damage when HP below 50%",
+  "ability.mage_meditation.name": "Meditation",
+  "ability.mage_meditation.description": "+1 faith at end of turn",
+  "ability.ranger_tracking.name": "Tracking",
+  "ability.ranger_tracking.description": "+1 bonus die on first attack",
+  "ability.priest_blessing.name": "Divine Blessing",
+  "ability.priest_blessing.description": "-1 damage from dark sources",
+  "ability.shadow_ambush.name": "Shadow Ambush",
+  "ability.shadow_ambush.description": "+3 damage to targets at full HP",
+
+  "card.strike_basic.name": "Strike",
+  "card.strike_basic.description": "A basic attack. Deals 3 damage.",
+  "card.defend_basic.name": "Defend",
+  "card.defend_basic.description": "Basic defense. Blocks 2 damage.",
+  "card.heal_basic.name": "Heal",
+  "card.heal_basic.description": "Basic healing. Restore 2 health.",
+  "card.draw_basic.name": "Focus",
+  "card.draw_basic.description": "Focus your mind. Draw 1 card.",
+  "card.rage_strike.name": "Rage Strike",
+  "card.rage_strike.description": "A powerful strike fueled by rage. Deals 5 damage.",
+  "card.arcane_bolt.name": "Arcane Bolt",
+  "card.arcane_bolt.description": "A bolt of arcane energy. Deals 3 damage.",
+  "card.shield_spell.name": "Shield Spell",
+  "card.shield_spell.description": "A magical shield. Blocks 3 damage.",
+  "card.meditation.name": "Meditation",
+  "card.meditation.description": "Center yourself. Gain 2 faith.",
+  "card.precise_shot.name": "Precise Shot",
+  "card.precise_shot.description": "A precisely aimed arrow. Deals 2 damage at range.",
+  "card.trap.name": "Trap",
+  "card.trap.description": "Set a trap. Enemy takes 3 damage next turn.",
+  "card.tracking.name": "Tracking",
+  "card.tracking.description": "Track your prey. Draw 2 cards.",
+  "card.holy_light.name": "Holy Light",
+  "card.holy_light.description": "A beam of holy light. Deals 2 damage, heals 1.",
+  "card.blessing.name": "Blessing",
+  "card.blessing.description": "Bestow a blessing. Heal 3 health.",
+  "card.smite.name": "Smite",
+  "card.smite.description": "Divine punishment. Deals 4 damage to dark enemies.",
+  "card.backstab.name": "Backstab",
+  "card.backstab.description": "Attack from the shadows. Deals 3 damage, +2 if enemy at full health.",
+  "card.shadow_step.name": "Shadow Step",
+  "card.shadow_step.description": "Move through shadows. Draw a card and gain 1 defense.",
+  "card.poison_blade.name": "Poison Blade",
+  "card.poison_blade.description": "A poisoned weapon. Deals 2 damage and applies weakness."
+}
+
+
+// ==========================================
+// FILE: Packages/CharacterPacks/CoreHeroes/Sources/CoreHeroesContent/Resources/CoreHeroes/Localization/ru.json
+// ==========================================
+
+{
+  "pack.name": "Основные Герои",
+  "pack.description": "Базовые герои и их начальные карты для Сумеречных Маршей",
+
+  "hero.warrior_ragnar.name": "Рагнар",
+  "hero.warrior_ragnar.description": "Бывший командир королевской гвардии. Его ярость в бою легендарна.",
+  "hero.mage_elvira.name": "Эльвира",
+  "hero.mage_elvira.description": "Мастер арканных искусств. Черпает силу из обоих источников.",
+  "hero.ranger_thorin.name": "Торин",
+  "hero.ranger_thorin.description": "Охотник на чудовищ из северных лесов. Никогда не промахивается.",
+  "hero.priest_aurelius.name": "Аврелий",
+  "hero.priest_aurelius.description": "Преданный служитель Света. Его благословения защищают союзников.",
+  "hero.shadow_umbra.name": "Умбра",
+  "hero.shadow_umbra.description": "Агент Нави. Наносит удар из тени, когда враг не ожидает.",
+
+  "ability.warrior_rage.name": "Боевая Ярость",
+  "ability.warrior_rage.description": "+2 к урону при HP ниже 50%",
+  "ability.mage_meditation.name": "Медитация",
+  "ability.mage_meditation.description": "+1 вера в конце хода",
+  "ability.ranger_tracking.name": "Выслеживание",
+  "ability.ranger_tracking.description": "+1 кубик при первой атаке",
+  "ability.priest_blessing.name": "Божественное Благословение",
+  "ability.priest_blessing.description": "-1 урон от тёмных источников",
+  "ability.shadow_ambush.name": "Засада из Тени",
+  "ability.shadow_ambush.description": "+3 урона по целям с полным HP",
+
+  "card.strike_basic.name": "Удар Мечом",
+  "card.strike_basic.description": "Удар воеводы. Наносит 3 урона.",
+  "card.defend_basic.name": "Защита",
+  "card.defend_basic.description": "Базовая защита. Блокирует 2 урона.",
+  "card.heal_basic.name": "Исцеление",
+  "card.heal_basic.description": "Базовое исцеление. Восстанавливает 2 здоровья.",
+  "card.draw_basic.name": "Концентрация",
+  "card.draw_basic.description": "Сосредоточься. Возьми 1 карту.",
+  "card.rage_strike.name": "Удар Ярости",
+  "card.rage_strike.description": "Мощный удар, питаемый яростью. Наносит 5 урона.",
+  "card.arcane_bolt.name": "Волшебный Снаряд",
+  "card.arcane_bolt.description": "Снаряд магической энергии. Наносит 3 урона.",
+  "card.shield_spell.name": "Щит",
+  "card.shield_spell.description": "Магический щит. Блокирует 3 урона.",
+  "card.meditation.name": "Медитация",
+  "card.meditation.description": "Сосредоточься. Получи 2 веры.",
+  "card.precise_shot.name": "Точный Выстрел",
+  "card.precise_shot.description": "Точно нацеленная стрела. Наносит 2 урона на расстоянии.",
+  "card.trap.name": "Ловушка",
+  "card.trap.description": "Установить ловушку. Враг получает 3 урона в следующем ходу.",
+  "card.tracking.name": "Выслеживание",
+  "card.tracking.description": "Выследить добычу. Возьми 2 карты.",
+  "card.holy_light.name": "Святой Свет",
+  "card.holy_light.description": "Луч святого света. Наносит 2 урона, лечит 1.",
+  "card.blessing.name": "Благословение",
+  "card.blessing.description": "Даровать благословение. Восстановить 3 здоровья.",
+  "card.smite.name": "Кара",
+  "card.smite.description": "Божественная кара. Наносит 4 урона тёмным врагам.",
+  "card.backstab.name": "Удар в Спину",
+  "card.backstab.description": "Атака из тени. Наносит 3 урона, +2 если враг на полном здоровье.",
+  "card.shadow_step.name": "Шаг Сквозь Тень",
+  "card.shadow_step.description": "Переместиться сквозь тени. Взять карту и получить 1 защиту.",
+  "card.poison_blade.name": "Отравленный Клинок",
+  "card.poison_blade.description": "Отравленное оружие. Наносит 2 урона и накладывает слабость."
+}
+
+
+// ==========================================
+// FILE: Packages/StoryPacks/Season1/TwilightMarchesActI/Sources/TwilightMarchesActIContent/Resources/TwilightMarchesActI/manifest.json
+// ==========================================
+
+{
+  "id": "twilight-marches-act1",
+  "name": {
+    "en": "Twilight Marches - Act I",
+    "ru": "Сумеречные Марши - Акт I"
+  },
+  "description": {
+    "en": "The first act of Twilight Marches campaign. Defend the borderlands from the encroaching darkness.",
+    "ru": "Первый акт кампании Сумеречные Марши. Защитите пограничье от надвигающейся тьмы."
+  },
+  "version": "1.0.0",
+  "type": "campaign",
+  "core_version_min": "1.0.0",
+  "dependencies": [],
+  "required_capabilities": [],
+  "entry_region": "village",
+  "entry_quest": "quest_main_act1",
+  "recommended_heroes": [
+    "warrior_ragnar",
+    "mage_elvira",
+    "ranger_thorin",
+    "priest_aurelius",
+    "shadow_umbra"
+  ],
+  "min_heroes_required": 1,
+  "max_heroes_supported": 4,
+  "difficulty_rating": 2,
+  "estimated_playtime_minutes": 120,
+  "mission_type": "campaign",
+  "season": "season1",
+  "season_name": {
+    "en": "Season 1: Twilight",
+    "ru": "Сезон 1: Сумерки"
+  },
+  "campaign_id": "twilight-marches",
+  "campaign_name": {
+    "en": "Twilight Marches",
+    "ru": "Сумеречные Марши"
+  },
+  "campaign_order": 1,
+  "bundle_id": "twilight-marches-complete",
+  "author": "CardSampleGame Team",
+  "license": "proprietary",
+  "release_date": "2026-01-01",
+  "locales": ["en", "ru"],
+  "regions_path": "Campaign/regions.json",
+  "events_path": "Campaign/events.json",
+  "quests_path": "Campaign/quests.json",
+  "anchors_path": "Campaign/anchors.json",
+  "enemies_path": "Enemies/enemies.json",
+  "cards_path": "Cards/story_rewards.json",
+  "balance_path": "Balance/balance.json",
+  "localization_path": "Localization"
+}
+
+
+// ==========================================
+// FILE: Packages/StoryPacks/Season1/TwilightMarchesActI/Sources/TwilightMarchesActIContent/Resources/TwilightMarchesActI/Cards/story_rewards.json
+// ==========================================
+
+[
   {
     "id": "defender_blessing",
     "name": "Defender's Blessing",
@@ -664,7 +1243,7 @@ CardSampleGameTests/
 
 
 // ==========================================
-// FILE: ContentPacks/TwilightMarches/Balance/balance.json
+// FILE: Packages/StoryPacks/Season1/TwilightMarchesActI/Sources/TwilightMarchesActIContent/Resources/TwilightMarchesActI/Balance/balance.json
 // ==========================================
 
 {
@@ -707,7 +1286,6 @@ CardSampleGameTests/
     "max_hand_size": 7
   },
   "time": {
-    "units_per_day": 24,
     "starting_time": 8,
     "max_days": null,
     "travel_cost": 1,
@@ -743,7 +1321,7 @@ CardSampleGameTests/
 
 
 // ==========================================
-// FILE: ContentPacks/TwilightMarches/Campaign/ActI/anchors.json
+// FILE: Packages/StoryPacks/Season1/TwilightMarchesActI/Sources/TwilightMarchesActIContent/Resources/TwilightMarchesActI/Campaign/anchors.json
 // ==========================================
 
 [
@@ -895,7 +1473,7 @@ CardSampleGameTests/
 
 
 // ==========================================
-// FILE: ContentPacks/TwilightMarches/Campaign/ActI/events.json
+// FILE: Packages/StoryPacks/Season1/TwilightMarchesActI/Sources/TwilightMarchesActIContent/Resources/TwilightMarchesActI/Campaign/events.json
 // ==========================================
 
 [
@@ -1955,7 +2533,7 @@ CardSampleGameTests/
 
 
 // ==========================================
-// FILE: ContentPacks/TwilightMarches/Campaign/ActI/quests.json
+// FILE: Packages/StoryPacks/Season1/TwilightMarchesActI/Sources/TwilightMarchesActIContent/Resources/TwilightMarchesActI/Campaign/quests.json
 // ==========================================
 
  [
@@ -2149,7 +2727,7 @@ CardSampleGameTests/
 
 
 // ==========================================
-// FILE: ContentPacks/TwilightMarches/Campaign/ActI/regions.json
+// FILE: Packages/StoryPacks/Season1/TwilightMarchesActI/Sources/TwilightMarchesActIContent/Resources/TwilightMarchesActI/Campaign/regions.json
 // ==========================================
 
 [
@@ -2283,7 +2861,93 @@ CardSampleGameTests/
 
 
 // ==========================================
-// FILE: ContentPacks/TwilightMarches/Campaign/Enemies/enemies.json
+// FILE: Packages/StoryPacks/Season1/TwilightMarchesActI/Sources/TwilightMarchesActIContent/Resources/TwilightMarchesActI/Localization/en.json
+// ==========================================
+
+{
+  "pack.name": "Twilight Marches - Act I",
+  "pack.description": "The first act of Twilight Marches campaign",
+
+  "region.village.name": "Village by the Road",
+  "region.village.description": "A small village on the edge of the borderlands",
+  "region.oak.name": "Ancient Oak",
+  "region.oak.description": "The sacred oak stands at the crossroads",
+  "region.forest.name": "Twilight Forest",
+  "region.forest.description": "Dark trees whisper ancient secrets",
+  "region.swamp.name": "Cursed Swamp",
+  "region.swamp.description": "Mists rise from the murky waters",
+  "region.mountain.name": "Stone Mountain",
+  "region.mountain.description": "Ancient peaks guard forgotten secrets",
+  "region.breach.name": "The Breach",
+  "region.breach.description": "Where the boundary between worlds grows thin",
+  "region.dark_lowland.name": "Black Lowlands",
+  "region.dark_lowland.description": "The final frontier before darkness",
+
+  "anchor.chapel.name": "Chapel of Light",
+  "anchor.oak.name": "Heart of the Oak",
+  "anchor.stone.name": "Stone of Protection",
+  "anchor.sanctuary.name": "Forest Sanctuary",
+  "anchor.seal.name": "Mountain Seal",
+  "anchor.gates.name": "Border Gates",
+
+  "card.defender_blessing.name": "Defender's Blessing",
+  "card.defender_blessing.description": "A reward for completing the main quest. Permanently increases defense by 2.",
+  "card.anchor_power.name": "Anchor's Power",
+  "card.anchor_power.description": "Draw from the anchors' power. Heal 5 and gain 1 faith.",
+  "card.forest_blessing.name": "Forest Blessing",
+  "card.forest_blessing.description": "Loot from defeating a Leshy. Heal 3 in forest regions.",
+  "card.mountain_blessing.name": "Mountain Blessing",
+  "card.mountain_blessing.description": "Reward from the Mountain Spirit. +3 defense for one battle.",
+  "card.witch_knowledge.name": "Witch's Knowledge",
+  "card.witch_knowledge.description": "Dark wisdom from the swamp witch. Draw 2 cards."
+}
+
+
+// ==========================================
+// FILE: Packages/StoryPacks/Season1/TwilightMarchesActI/Sources/TwilightMarchesActIContent/Resources/TwilightMarchesActI/Localization/ru.json
+// ==========================================
+
+{
+  "pack.name": "Сумеречные Марши - Акт I",
+  "pack.description": "Первый акт кампании Сумеречные Марши",
+
+  "region.village.name": "Деревня у Дороги",
+  "region.village.description": "Маленькая деревня на краю пограничья",
+  "region.oak.name": "Древний Дуб",
+  "region.oak.description": "Священный дуб стоит на перекрёстке",
+  "region.forest.name": "Сумеречный Лес",
+  "region.forest.description": "Тёмные деревья шепчут древние тайны",
+  "region.swamp.name": "Проклятое Болото",
+  "region.swamp.description": "Туман поднимается над мутными водами",
+  "region.mountain.name": "Каменная Гора",
+  "region.mountain.description": "Древние пики хранят забытые секреты",
+  "region.breach.name": "Разлом",
+  "region.breach.description": "Где граница между мирами истончается",
+  "region.dark_lowland.name": "Чёрные Низины",
+  "region.dark_lowland.description": "Последний рубеж перед тьмой",
+
+  "anchor.chapel.name": "Часовня Света",
+  "anchor.oak.name": "Сердце Дуба",
+  "anchor.stone.name": "Камень Защиты",
+  "anchor.sanctuary.name": "Лесное Святилище",
+  "anchor.seal.name": "Горная Печать",
+  "anchor.gates.name": "Пограничные Врата",
+
+  "card.defender_blessing.name": "Благословение Защитника",
+  "card.defender_blessing.description": "Награда за выполнение основного квеста. Постоянно увеличивает защиту на 2.",
+  "card.anchor_power.name": "Сила Якоря",
+  "card.anchor_power.description": "Черпать силу из якорей. Лечит 5 и даёт 1 веру.",
+  "card.forest_blessing.name": "Благословение Леса",
+  "card.forest_blessing.description": "Добыча с побеждённого Лешего. Лечит 3 в лесных регионах.",
+  "card.mountain_blessing.name": "Благословение Гор",
+  "card.mountain_blessing.description": "Награда от Горного Духа. +3 к защите на одну битву.",
+  "card.witch_knowledge.name": "Знание Ведьмы",
+  "card.witch_knowledge.description": "Тёмная мудрость от болотной ведьмы. Взять 2 карты."
+}
+
+
+// ==========================================
+// FILE: Packages/StoryPacks/Season1/TwilightMarchesActI/Sources/TwilightMarchesActIContent/Resources/TwilightMarchesActI/Enemies/enemies.json
 // ==========================================
 
 [
@@ -2478,323 +3142,4 @@ CardSampleGameTests/
     "balance_delta": 20
   }
 ]
-
-
-// ==========================================
-// FILE: ContentPacks/TwilightMarches/Characters/hero_abilities.json
-// ==========================================
-
-[
-  {
-    "id": "warrior_rage",
-    "name": {
-      "en": "Battle Rage",
-      "ru": "Боевая Ярость"
-    },
-    "description": {
-      "en": "+2 damage when HP below 50%",
-      "ru": "+2 к урону при HP ниже 50%"
-    },
-    "icon": "flame.fill",
-    "type": "passive",
-    "trigger": "on_damage_dealt",
-    "condition": {
-      "type": "hp_below_percent",
-      "value": 50
-    },
-    "effects": [
-      {
-        "type": "bonus_damage",
-        "value": 2
-      }
-    ],
-    "cooldown": 0
-  },
-  {
-    "id": "mage_meditation",
-    "name": {
-      "en": "Meditation",
-      "ru": "Медитация"
-    },
-    "description": {
-      "en": "+1 faith at end of turn",
-      "ru": "+1 вера в конце хода"
-    },
-    "icon": "sparkles",
-    "type": "passive",
-    "trigger": "turn_end",
-    "condition": null,
-    "effects": [
-      {
-        "type": "gain_faith",
-        "value": 1
-      }
-    ],
-    "cooldown": 0
-  },
-  {
-    "id": "ranger_tracking",
-    "name": {
-      "en": "Tracking",
-      "ru": "Выслеживание"
-    },
-    "description": {
-      "en": "+1 bonus die on first attack",
-      "ru": "+1 кубик при первой атаке"
-    },
-    "icon": "scope",
-    "type": "passive",
-    "trigger": "on_attack",
-    "condition": {
-      "type": "first_attack"
-    },
-    "effects": [
-      {
-        "type": "bonus_dice",
-        "value": 1
-      }
-    ],
-    "cooldown": 0
-  },
-  {
-    "id": "priest_blessing",
-    "name": {
-      "en": "Divine Blessing",
-      "ru": "Божественное Благословение"
-    },
-    "description": {
-      "en": "-1 damage from dark sources",
-      "ru": "-1 урон от тёмных источников"
-    },
-    "icon": "cross.fill",
-    "type": "passive",
-    "trigger": "on_damage_received",
-    "condition": {
-      "type": "damage_source_dark"
-    },
-    "effects": [
-      {
-        "type": "damage_reduction",
-        "value": 1
-      }
-    ],
-    "cooldown": 0
-  },
-  {
-    "id": "shadow_ambush",
-    "name": {
-      "en": "Shadow Ambush",
-      "ru": "Засада из Тени"
-    },
-    "description": {
-      "en": "+3 damage to targets at full HP",
-      "ru": "+3 урона по целям с полным HP"
-    },
-    "icon": "moon.stars.fill",
-    "type": "passive",
-    "trigger": "on_damage_dealt",
-    "condition": {
-      "type": "target_full_hp"
-    },
-    "effects": [
-      {
-        "type": "bonus_damage",
-        "value": 3
-      }
-    ],
-    "cooldown": 0
-  }
-]
-
-
-// ==========================================
-// FILE: ContentPacks/TwilightMarches/Characters/heroes.json
-// ==========================================
-
-[
-  {
-    "id": "warrior_ragnar",
-    "name": "Ragnar",
-    "name_ru": "Рагнар",
-    "description": "Former commander of the royal guard. His battle rage is legendary.",
-    "description_ru": "Бывший командир королевской гвардии. Его ярость в бою легендарна.",
-    "icon": "shield.fill",
-    "ability_id": "warrior_rage",
-    "base_stats": {
-      "health": 25,
-      "max_health": 30,
-      "strength": 8,
-      "dexterity": 5,
-      "constitution": 7,
-      "intelligence": 3,
-      "wisdom": 4,
-      "charisma": 5,
-      "faith": 8,
-      "max_faith": 15,
-      "starting_balance": 50
-    },
-    "starting_deck_card_ids": ["strike_basic", "strike_basic", "defend_basic", "rage_strike"],
-    "availability": "always_available"
-  },
-  {
-    "id": "mage_elvira",
-    "name": "Elvira",
-    "name_ru": "Эльвира",
-    "description": "Master of arcane arts. Draws power from both sources.",
-    "description_ru": "Мастер арканных искусств. Черпает силу из обоих источников.",
-    "icon": "wand.and.stars",
-    "ability_id": "mage_meditation",
-    "base_stats": {
-      "health": 18,
-      "max_health": 22,
-      "strength": 3,
-      "dexterity": 5,
-      "constitution": 4,
-      "intelligence": 9,
-      "wisdom": 7,
-      "charisma": 5,
-      "faith": 12,
-      "max_faith": 25,
-      "starting_balance": 50
-    },
-    "starting_deck_card_ids": ["arcane_bolt", "arcane_bolt", "shield_spell", "meditation"],
-    "availability": "always_available"
-  },
-  {
-    "id": "ranger_thorin",
-    "name": "Thorin",
-    "name_ru": "Торин",
-    "description": "Monster hunter from the northern forests. Never misses.",
-    "description_ru": "Охотник на чудовищ из северных лесов. Никогда не промахивается.",
-    "icon": "target",
-    "ability_id": "ranger_tracking",
-    "base_stats": {
-      "health": 20,
-      "max_health": 25,
-      "strength": 5,
-      "dexterity": 9,
-      "constitution": 5,
-      "intelligence": 5,
-      "wisdom": 6,
-      "charisma": 4,
-      "faith": 10,
-      "max_faith": 18,
-      "starting_balance": 50
-    },
-    "starting_deck_card_ids": ["precise_shot", "precise_shot", "trap", "tracking"],
-    "availability": "always_available"
-  },
-  {
-    "id": "priest_aurelius",
-    "name": "Aurelius",
-    "name_ru": "Аврелий",
-    "description": "Devoted servant of the Light. His blessings protect allies.",
-    "description_ru": "Преданный служитель Света. Его благословения защищают союзников.",
-    "icon": "cross",
-    "ability_id": "priest_blessing",
-    "base_stats": {
-      "health": 20,
-      "max_health": 24,
-      "strength": 4,
-      "dexterity": 4,
-      "constitution": 5,
-      "intelligence": 6,
-      "wisdom": 9,
-      "charisma": 7,
-      "faith": 15,
-      "max_faith": 30,
-      "starting_balance": 60
-    },
-    "starting_deck_card_ids": ["holy_light", "holy_light", "blessing", "smite"],
-    "availability": "always_available"
-  },
-  {
-    "id": "shadow_umbra",
-    "name": "Umbra",
-    "name_ru": "Умбра",
-    "description": "Agent of Nav. Strikes from the shadow when the enemy least expects it.",
-    "description_ru": "Агент Нави. Наносит удар из тени, когда враг не ожидает.",
-    "icon": "moon.stars",
-    "ability_id": "shadow_ambush",
-    "base_stats": {
-      "health": 18,
-      "max_health": 22,
-      "strength": 6,
-      "dexterity": 9,
-      "constitution": 4,
-      "intelligence": 6,
-      "wisdom": 5,
-      "charisma": 5,
-      "faith": 10,
-      "max_faith": 20,
-      "starting_balance": 40
-    },
-    "starting_deck_card_ids": ["backstab", "backstab", "shadow_step", "poison_blade"],
-    "availability": "always_available"
-  }
-]
-
-
-// ==========================================
-// FILE: ContentPacks/TwilightMarches/Localization/en.json
-// ==========================================
-
-{
-  "pack.name": "Twilight Marches - Act I",
-  "pack.description": "The first act of Twilight Marches campaign",
-
-  "region.village.name": "Village by the Road",
-  "region.village.description": "A small village on the edge of the borderlands",
-  "region.oak.name": "Ancient Oak",
-  "region.oak.description": "The sacred oak stands at the crossroads",
-  "region.forest.name": "Twilight Forest",
-  "region.forest.description": "Dark trees whisper ancient secrets",
-  "region.swamp.name": "Cursed Swamp",
-  "region.swamp.description": "Mists rise from the murky waters",
-  "region.mountain.name": "Stone Mountain",
-  "region.mountain.description": "Ancient peaks guard forgotten secrets",
-  "region.breach.name": "The Breach",
-  "region.breach.description": "Where the boundary between worlds grows thin",
-  "region.dark_lowland.name": "Black Lowlands",
-  "region.dark_lowland.description": "The final frontier before darkness",
-
-  "anchor.chapel.name": "Chapel of Light",
-  "anchor.oak.name": "Heart of the Oak",
-  "anchor.stone.name": "Stone of Protection",
-  "anchor.sanctuary.name": "Forest Sanctuary",
-  "anchor.seal.name": "Mountain Seal",
-  "anchor.gates.name": "Border Gates"
-}
-
-
-// ==========================================
-// FILE: ContentPacks/TwilightMarches/Localization/ru.json
-// ==========================================
-
-{
-  "pack.name": "Сумрачные Пределы - Акт I",
-  "pack.description": "Первый акт кампании Сумрачных Пределов",
-
-  "region.village.name": "Деревня у тракта",
-  "region.village.description": "Небольшая деревня на краю порубежья",
-  "region.oak.name": "Старый Дуб",
-  "region.oak.description": "Священный дуб стоит на перекрёстке дорог",
-  "region.forest.name": "Сумеречный Лес",
-  "region.forest.description": "Тёмные деревья шепчут древние тайны",
-  "region.swamp.name": "Проклятое Болото",
-  "region.swamp.description": "Туманы поднимаются над мутными водами",
-  "region.mountain.name": "Каменная Гора",
-  "region.mountain.description": "Древние вершины хранят забытые секреты",
-  "region.breach.name": "Разлом Курганов",
-  "region.breach.description": "Где граница между мирами истончается",
-  "region.dark_lowland.name": "Чёрная Низина",
-  "region.dark_lowland.description": "Последний рубеж перед тьмой",
-
-  "anchor.chapel.name": "Часовня Света",
-  "anchor.oak.name": "Сердце Дуба",
-  "anchor.stone.name": "Камень Защиты",
-  "anchor.sanctuary.name": "Лесное Святилище",
-  "anchor.seal.name": "Горная Печать",
-  "anchor.gates.name": "Врата Рубежа"
-}
 

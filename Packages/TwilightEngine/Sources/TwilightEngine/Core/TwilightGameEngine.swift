@@ -52,6 +52,9 @@ public final class TwilightGameEngine: ObservableObject {
     @Published public private(set) var playerWisdom: Int = 0
     @Published public private(set) var playerCharisma: Int = 0
 
+    /// World resonance value (-100..+100), drives Navi/Prav world state
+    @Published public private(set) var resonanceValue: Float = 0.0
+
     /// Active curses on player (Engine-First)
     @Published public private(set) var playerActiveCurses: [ActiveCurse] = []
 
@@ -380,6 +383,12 @@ public final class TwilightGameEngine: ObservableObject {
     /// Enemy current health
     @Published public private(set) var combatEnemyHealth: Int = 0
 
+    /// Enemy current will/resolve (Spirit track, 0 if enemy has no will)
+    @Published public private(set) var combatEnemyWill: Int = 0
+
+    /// Enemy maximum will/resolve for UI progress bars
+    @Published public private(set) var combatEnemyMaxWill: Int = 0
+
     /// Combat actions remaining this turn
     @Published public private(set) var combatActionsRemaining: Int = 3
 
@@ -394,6 +403,40 @@ public final class TwilightGameEngine: ObservableObject {
 
     /// Is this the first attack in this combat (for abilities)
     private var combatIsFirstAttack: Bool = true
+
+    // MARK: - Fate Deck
+
+    /// Fate Deck manager for skill checks and event resolution
+    public private(set) var fateDeck: FateDeckManager?
+
+    /// Last fate attack result for UI display
+    @Published public private(set) var lastFateAttackResult: FateAttackResult?
+
+    // MARK: - Active Defense System (Fate-based combat)
+
+    /// Last attack fate card result (player attacking enemy)
+    @Published public private(set) var lastAttackFateResult: FateDrawResult?
+
+    /// Last defense fate card result (player defending from enemy)
+    @Published public private(set) var lastDefenseFateResult: FateDrawResult?
+
+    /// Current enemy intent for this turn (shown before player acts)
+    @Published public private(set) var currentEnemyIntent: EnemyIntent?
+
+    /// Whether mulligan has been done this combat
+    @Published public private(set) var combatMulliganDone: Bool = false
+
+    /// Whether player has attacked this turn
+    @Published public private(set) var combatPlayerAttackedThisTurn: Bool = false
+
+    /// Number of cards remaining in the fate draw pile
+    public var fateDeckDrawCount: Int { fateDeck?.drawPile.count ?? 0 }
+
+    /// Number of cards in the fate discard pile
+    public var fateDeckDiscardCount: Int { fateDeck?.discardPile.count ?? 0 }
+
+    /// Cards in the fate discard pile (for card-counting UI)
+    public var fateDeckDiscardCards: [FateCard] { fateDeck?.discardPile ?? [] }
 
     // MARK: - Content Registry
 
@@ -434,7 +477,14 @@ public final class TwilightGameEngine: ObservableObject {
         isInCombat = false
         combatEnemy = nil
         combatEnemyHealth = 0
+        combatEnemyWill = 0
+        combatEnemyMaxWill = 0
         combatTurnNumber = 0
+    }
+
+    /// Initialize the Fate Deck with a set of cards
+    public func setupFateDeck(cards: [FateCard]) {
+        fateDeck = FateDeckManager(cards: cards)
     }
 
     // MARK: - Engine-First Initialization
@@ -520,6 +570,12 @@ public final class TwilightGameEngine: ObservableObject {
         let initialQuests = createInitialQuests()
         if let mainQuest = initialQuests.first(where: { $0.questType == .main }) {
             activeQuests = [mainQuest]
+        }
+
+        // Setup fate deck from content registry
+        let allFateCards = contentRegistry.getAllFateCards()
+        if !allFateCards.isEmpty {
+            setupFateDeck(cards: allFateCards)
         }
 
         // Setup pressure engine
@@ -722,111 +778,15 @@ public final class TwilightGameEngine: ObservableObject {
             let changes = executeMiniGameInput(input)
             stateChanges.append(contentsOf: changes)
 
-        case .startCombat:
-            combatStarted = true
-            isInCombat = true
-            combatTurnNumber = 1
-            combatActionsRemaining = 3
-            combatBonusDice = 0
-            combatBonusDamage = 0
-            combatIsFirstAttack = true
-            // Enemy setup done when combat view appears
-
-        case .combatInitialize:
-            // Shuffle deck and draw initial hand
-            // First, return all cards from hand and discard back to deck
-            _playerDeck.append(contentsOf: playerHand)
-            _playerDeck.append(contentsOf: _playerDiscard)
-            playerHand.removeAll()
-            _playerDiscard.removeAll()
-            // Now shuffle and draw
-            WorldRNG.shared.shuffle(&_playerDeck)
-            let drawCount = min(5, _playerDeck.count)  // Default hand size = 5
-            playerHand = Array(_playerDeck.prefix(drawCount))
-            _playerDeck.removeFirst(drawCount)
-            combatActionsRemaining = 3
-
-        case .combatAttack(let bonusDice, let bonusDamage, let isFirstAttack):
-            guard combatActionsRemaining > 0 else { break }
-            combatActionsRemaining -= 1
-            let changes = executeCombatAttack(bonusDice: bonusDice, bonusDamage: bonusDamage, isFirstAttack: isFirstAttack)
-            stateChanges.append(contentsOf: changes)
-            combatIsFirstAttack = false
-            // Check if enemy defeated
-            if combatEnemyHealth <= 0 {
-                // Victory will be handled by combatFinish
-            }
-
-        case .playCard(let cardId, _):
-            guard combatActionsRemaining > 0 else { break }
-            if let cardIndex = playerHand.firstIndex(where: { $0.id == cardId }) {
-                let card = playerHand[cardIndex]
-                // Check faith cost
-                if let cost = card.cost, cost > 0 {
-                    guard playerFaith >= cost else { break }
-                    playerFaith -= cost
-                    stateChanges.append(.faithChanged(delta: -cost, newValue: playerFaith))
-                }
-                combatActionsRemaining -= 1
-                // Move card from hand to discard
-                playerHand.remove(at: cardIndex)
-                _playerDiscard.append(card)
-            }
-
-        case .combatApplyEffect(let effect):
-            let changes = executeCombatEffect(effect)
-            stateChanges.append(contentsOf: changes)
-
-        case .endCombatTurn:
-            // Player ended their turn, enemy attacks next
-            break
-
-        case .combatEnemyAttack(let damage):
-            // Enemy deals damage to player
-            let actualDamage = min(damage, playerHealth)
-            playerHealth = max(0, playerHealth - damage)
-            stateChanges.append(.healthChanged(delta: -actualDamage, newValue: playerHealth))
-
-        case .combatEndTurnPhase:
-            // End of turn: discard hand, draw new cards, restore faith
-            // Discard hand to discard pile
-            _playerDiscard.append(contentsOf: playerHand)
-            playerHand.removeAll()
-
-            // Recycle discard into deck if needed
-            if _playerDeck.isEmpty && !_playerDiscard.isEmpty {
-                _playerDeck = _playerDiscard
-                _playerDiscard.removeAll()
-                WorldRNG.shared.shuffle(&_playerDeck)
-            }
-
-            // Draw new hand
-            let drawCount = min(5, _playerDeck.count)
-            playerHand = Array(_playerDeck.prefix(drawCount))
-            _playerDeck.removeFirst(drawCount)
-
-            // Restore faith
-            playerFaith = min(playerFaith + 1, playerMaxFaith)
-            stateChanges.append(.faithChanged(delta: 1, newValue: playerFaith))
-
-            // Reset for next turn
-            combatTurnNumber += 1
-            combatActionsRemaining = 3
-            combatBonusDice = 0
-            combatBonusDamage = 0
-
-        case .combatFlee:
-            isInCombat = false
-            combatEnemy = nil
-            stateChanges.append(.combatEnded(victory: false))
-
-        case .combatFinish(let victory):
-            isInCombat = false
-            combatEnemy = nil
-            stateChanges.append(.combatEnded(victory: victory))
-            if victory {
-                stateChanges.append(.enemyDefeated(enemyId: combatEnemy?.id ?? "unknown"))
-            }
+        case .startCombat, .combatInitialize, .combatAttack, .combatSpiritAttack,
+             .playCard, .combatApplyEffect, .endCombatTurn, .combatEnemyAttack,
+             .combatEndTurnPhase, .combatFlee, .combatFinish,
+             // Active Defense actions
+             .combatMulligan, .combatGenerateIntent, .combatPlayerAttackWithFate,
+             .combatSkipAttack, .combatEnemyResolveWithFate:
+            let result = handleCombatAction(action)
+            stateChanges.append(contentsOf: result.changes)
+            if result.combatStarted { combatStarted = true }
 
         case .dismissCurrentEvent:
             currentEvent = nil
@@ -1493,40 +1453,378 @@ public final class TwilightGameEngine: ObservableObject {
         lastDayEvent = event
     }
 
+    // MARK: - Combat Action Handler
+
+    /// Handle all combat-related actions, extracted from performAction to reduce switch size
+    private func handleCombatAction(_ action: TwilightGameAction) -> (changes: [StateChange], combatStarted: Bool) {
+        var stateChanges: [StateChange] = []
+        var didStartCombat = false
+
+        switch action {
+        case .startCombat:
+            didStartCombat = true
+            isInCombat = true
+            combatTurnNumber = 1
+            combatActionsRemaining = 3
+            combatBonusDice = 0
+            combatBonusDamage = 0
+            combatIsFirstAttack = true
+            // Reset Active Defense state
+            combatMulliganDone = false
+            combatPlayerAttackedThisTurn = false
+            currentEnemyIntent = nil
+            lastAttackFateResult = nil
+            lastDefenseFateResult = nil
+
+        // MARK: Active Defense Actions
+
+        case .combatMulligan(let cardIds):
+            // Mulligan: return selected cards to deck, draw replacements
+            guard !combatMulliganDone else { break }
+
+            var cardsToReturn: [Card] = []
+            for cardId in cardIds {
+                if let index = playerHand.firstIndex(where: { $0.id == cardId }) {
+                    cardsToReturn.append(playerHand.remove(at: index))
+                }
+            }
+
+            if !cardsToReturn.isEmpty {
+                _playerDeck.append(contentsOf: cardsToReturn)
+                WorldRNG.shared.shuffle(&_playerDeck)
+
+                // Draw replacement cards
+                let drawCount = min(cardsToReturn.count, _playerDeck.count)
+                let newCards = Array(_playerDeck.prefix(drawCount))
+                _playerDeck.removeFirst(drawCount)
+                playerHand.append(contentsOf: newCards)
+            }
+
+            combatMulliganDone = true
+
+        case .combatGenerateIntent:
+            // Generate enemy intent for this turn
+            guard let enemy = combatEnemy else { break }
+
+            let enemyPower = enemy.power ?? 3
+            currentEnemyIntent = EnemyIntentGenerator.generateIntent(
+                enemyPower: enemyPower,
+                enemyHealth: combatEnemyHealth,
+                enemyMaxHealth: enemy.health ?? 10,
+                turnNumber: combatTurnNumber
+            )
+
+        case .combatPlayerAttackWithFate(let bonusDamage):
+            // Player attack with automatic Fate card draw
+            guard let enemy = combatEnemy else { break }
+
+            combatPlayerAttackedThisTurn = true
+
+            // Draw fate card for attack
+            if let fateResult = fateDeck?.drawAndResolve(worldResonance: resonanceValue) {
+                lastAttackFateResult = fateResult
+
+                // Calculate damage: PlayerStrength + WeaponBonus + FateCard + bonusDamage
+                let baseDamage = playerStrength + combatBonusDamage + bonusDamage
+                let fateBonus = fateResult.effectiveValue
+                let totalAttack = baseDamage + fateBonus
+
+                // Check if hit (attack >= enemy defense)
+                let enemyDefense = enemy.defense ?? 10
+                if totalAttack >= enemyDefense {
+                    let damage = max(1, totalAttack - enemyDefense + 1)
+                    combatEnemyHealth = max(0, combatEnemyHealth - damage)
+                    stateChanges.append(.enemyDamaged(
+                        enemyId: enemy.id,
+                        damage: damage,
+                        newHealth: combatEnemyHealth
+                    ))
+
+                    if combatEnemyHealth <= 0 {
+                        stateChanges.append(.enemyDefeated(enemyId: enemy.id))
+                    }
+                }
+
+                // Apply fate draw effects (resonance/tension shifts)
+                let fateChanges = applyFateDrawEffects(fateResult.drawEffects)
+                stateChanges.append(contentsOf: fateChanges)
+            }
+
+            combatBonusDice = 0
+            combatBonusDamage = 0
+
+        case .combatSkipAttack:
+            // Player skips attack, proceeds to enemy resolution
+            combatPlayerAttackedThisTurn = false
+            lastAttackFateResult = nil
+
+        case .combatEnemyResolveWithFate:
+            // Enemy resolves their intent, player defends with Fate card
+            guard let intent = currentEnemyIntent else { break }
+
+            switch intent.type {
+            case .attack:
+                // Draw fate card for defense
+                if let fateResult = fateDeck?.drawAndResolve(worldResonance: resonanceValue) {
+                    lastDefenseFateResult = fateResult
+
+                    // Calculate damage: EnemyAttack - (PlayerArmor + FateCard)
+                    // High fate card = less damage to player
+                    let fateBonus = fateResult.effectiveValue
+                    let playerArmor = 0  // TODO: Get from equipment
+                    let damageReduction = playerArmor + fateBonus
+                    let actualDamage = max(0, intent.value - damageReduction)
+
+                    if actualDamage > 0 {
+                        playerHealth = max(0, playerHealth - actualDamage)
+                        stateChanges.append(.healthChanged(
+                            delta: -actualDamage,
+                            newValue: playerHealth
+                        ))
+                    }
+
+                    // Apply fate draw effects
+                    let fateChanges = applyFateDrawEffects(fateResult.drawEffects)
+                    stateChanges.append(contentsOf: fateChanges)
+                } else {
+                    // No fate deck available, take full damage
+                    playerHealth = max(0, playerHealth - intent.value)
+                    stateChanges.append(.healthChanged(
+                        delta: -intent.value,
+                        newValue: playerHealth
+                    ))
+                }
+
+            case .ritual:
+                // Ritual shifts resonance toward Nav
+                let shift = Float(intent.secondaryValue ?? -5)
+                resonanceValue = max(-100, min(100, resonanceValue + shift))
+                stateChanges.append(.resonanceChanged(delta: shift, newValue: resonanceValue))
+
+            case .block:
+                // Enemy is blocking - will take less damage next turn
+                // For now, just note it (could add a state variable for enemy block)
+                break
+
+            case .buff:
+                // Enemy buffs themselves
+                // For now, no effect (could increase enemy power/defense)
+                break
+
+            case .heal:
+                // Enemy heals
+                if let enemy = combatEnemy {
+                    let maxHealth = enemy.health ?? 10
+                    combatEnemyHealth = min(maxHealth, combatEnemyHealth + intent.value)
+                    // No state change needed for enemy heal
+                }
+
+            case .summon:
+                // Not implemented yet
+                break
+            }
+
+            // Reset for next turn
+            combatPlayerAttackedThisTurn = false
+            currentEnemyIntent = nil
+
+        case .combatInitialize:
+            _playerDeck.append(contentsOf: playerHand)
+            _playerDeck.append(contentsOf: _playerDiscard)
+            playerHand.removeAll()
+            _playerDiscard.removeAll()
+            WorldRNG.shared.shuffle(&_playerDeck)
+            let drawCount = min(5, _playerDeck.count)
+            playerHand = Array(_playerDeck.prefix(drawCount))
+            _playerDeck.removeFirst(drawCount)
+            combatActionsRemaining = 3
+
+        case .combatAttack(let effortCards, let bonusDamage):
+            guard combatActionsRemaining > 0 else { break }
+            combatActionsRemaining -= 1
+            let changes = executeCombatAttack(effortCards: effortCards, bonusDamage: bonusDamage + combatBonusDamage)
+            stateChanges.append(contentsOf: changes)
+            combatBonusDice = 0
+            combatBonusDamage = 0
+
+        case .combatSpiritAttack:
+            guard combatActionsRemaining > 0 else { break }
+            guard combatEnemyMaxWill > 0 else { break }
+            combatActionsRemaining -= 1
+
+            let context = CombatPlayerContext.from(engine: self)
+            let spiritResult = CombatCalculator.calculateSpiritAttack(
+                context: context,
+                enemyCurrentWill: combatEnemyWill,
+                fateDeck: fateDeck,
+                worldResonance: resonanceValue
+            )
+
+            let actualDamage = min(spiritResult.damage, combatEnemyWill)
+            combatEnemyWill = max(0, combatEnemyWill - actualDamage)
+            stateChanges.append(.enemyWillDamaged(
+                enemyId: combatEnemy?.id ?? "unknown",
+                damage: actualDamage,
+                newWill: combatEnemyWill
+            ))
+
+            let fateChanges = applyFateDrawEffects(spiritResult.fateDrawEffects)
+            stateChanges.append(contentsOf: fateChanges)
+
+            if combatEnemyWill <= 0 {
+                stateChanges.append(.enemyPacified(enemyId: combatEnemy?.id ?? "unknown"))
+            }
+
+        case .playCard(let cardId, _):
+            guard combatActionsRemaining > 0 else { break }
+            if let cardIndex = playerHand.firstIndex(where: { $0.id == cardId }) {
+                let card = playerHand[cardIndex]
+                if let cost = card.cost, cost > 0 {
+                    guard playerFaith >= cost else { break }
+                    playerFaith -= cost
+                    stateChanges.append(.faithChanged(delta: -cost, newValue: playerFaith))
+                }
+                combatActionsRemaining -= 1
+                playerHand.remove(at: cardIndex)
+                _playerDiscard.append(card)
+            }
+
+        case .combatApplyEffect(let effect):
+            let changes = executeCombatEffect(effect)
+            stateChanges.append(contentsOf: changes)
+
+        case .endCombatTurn:
+            break
+
+        case .combatEnemyAttack(let damage):
+            let actualDamage = min(damage, playerHealth)
+            playerHealth = max(0, playerHealth - damage)
+            stateChanges.append(.healthChanged(delta: -actualDamage, newValue: playerHealth))
+
+        case .combatEndTurnPhase:
+            _playerDiscard.append(contentsOf: playerHand)
+            playerHand.removeAll()
+
+            if _playerDeck.isEmpty && !_playerDiscard.isEmpty {
+                _playerDeck = _playerDiscard
+                _playerDiscard.removeAll()
+                WorldRNG.shared.shuffle(&_playerDeck)
+            }
+
+            let drawCount = min(5, _playerDeck.count)
+            playerHand = Array(_playerDeck.prefix(drawCount))
+            _playerDeck.removeFirst(drawCount)
+
+            playerFaith = min(playerFaith + 1, playerMaxFaith)
+            stateChanges.append(.faithChanged(delta: 1, newValue: playerFaith))
+
+            combatTurnNumber += 1
+            combatActionsRemaining = 3
+            combatBonusDice = 0
+            combatBonusDamage = 0
+
+            // Reset Active Defense state for new turn
+            combatPlayerAttackedThisTurn = false
+            lastAttackFateResult = nil
+            lastDefenseFateResult = nil
+            currentEnemyIntent = nil
+
+        case .combatFlee:
+            isInCombat = false
+            combatEnemy = nil
+            // Reset Active Defense state
+            combatMulliganDone = false
+            combatPlayerAttackedThisTurn = false
+            currentEnemyIntent = nil
+            lastAttackFateResult = nil
+            lastDefenseFateResult = nil
+            stateChanges.append(.combatEnded(victory: false))
+
+        case .combatFinish(let victory):
+            isInCombat = false
+            combatEnemy = nil
+            // Reset Active Defense state
+            combatMulliganDone = false
+            combatPlayerAttackedThisTurn = false
+            currentEnemyIntent = nil
+            lastAttackFateResult = nil
+            lastDefenseFateResult = nil
+            stateChanges.append(.combatEnded(victory: victory))
+            if victory {
+                stateChanges.append(.enemyDefeated(enemyId: combatEnemy?.id ?? "unknown"))
+            }
+
+        default:
+            break
+        }
+
+        return (stateChanges, didStartCombat)
+    }
+
+    // MARK: - Fate Draw Effects
+
+    /// Apply side effects from a fate card draw (resonance shift, tension shift)
+    private func applyFateDrawEffects(_ effects: [FateDrawEffect]) -> [StateChange] {
+        var changes: [StateChange] = []
+        for effect in effects {
+            switch effect.type {
+            case .shiftResonance:
+                let delta = Float(effect.value)
+                resonanceValue = max(-100, min(100, resonanceValue + delta))
+                changes.append(.resonanceChanged(delta: delta, newValue: resonanceValue))
+            case .shiftTension:
+                let oldTension = worldTension
+                worldTension = max(0, min(100, worldTension + effect.value))
+                let actualDelta = worldTension - oldTension
+                if actualDelta != 0 {
+                    changes.append(.tensionChanged(delta: actualDelta, newValue: worldTension))
+                }
+            }
+        }
+        return changes
+    }
+
     // MARK: - Combat Helper Methods
 
-    /// Execute a combat attack with bonus dice and damage
-    private func executeCombatAttack(bonusDice: Int, bonusDamage: Int, isFirstAttack: Bool) -> [StateChange] {
+    /// Execute a combat attack via Fate Deck (Unified Resolution System)
+    private func executeCombatAttack(effortCards: Int, bonusDamage: Int) -> [StateChange] {
         var changes: [StateChange] = []
 
         guard let enemy = combatEnemy else {
             return changes
         }
 
-        let monsterDef = enemy.defense ?? 10
-        let monsterCurrentHP = combatEnemyHealth
-        let monsterMaxHP = enemy.health ?? 10
-
-        // Use CombatCalculator for attack calculation (Engine-First)
-        let result = CombatCalculator.calculateAttackEngineFirst(
-            engine: self,
-            monsterDefense: monsterDef,
-            monsterCurrentHP: monsterCurrentHP,
-            monsterMaxHP: monsterMaxHP,
-            bonusDice: bonusDice + combatBonusDice,
-            bonusDamage: bonusDamage + combatBonusDamage,
-            isFirstAttack: isFirstAttack
-        )
-
-        if result.isHit, let damageCalc = result.damageCalculation {
-            let damage = damageCalc.total
-            combatEnemyHealth = max(0, combatEnemyHealth - damage)
-            changes.append(.enemyDamaged(enemyId: enemy.id, damage: damage, newHealth: combatEnemyHealth))
+        // Discard effort cards from hand
+        let actualEffort = min(effortCards, playerHand.count)
+        if actualEffort > 0 {
+            let discarded = playerHand.suffix(actualEffort)
+            _playerDiscard.append(contentsOf: discarded)
+            playerHand.removeLast(actualEffort)
         }
 
-        // Reset bonuses after attack
-        combatBonusDice = 0
-        combatBonusDamage = 0
+        let monsterDef = enemy.defense ?? 10
+        let context = CombatPlayerContext.from(engine: self)
+
+        let result = CombatCalculator.calculateAttackWithFate(
+            context: context,
+            fateDeck: fateDeck,
+            worldResonance: resonanceValue,
+            effortCards: actualEffort,
+            monsterDefense: monsterDef,
+            bonusDamage: bonusDamage
+        )
+
+        // Store result for UI display
+        lastFateAttackResult = result
+
+        if result.isHit && result.damage > 0 {
+            combatEnemyHealth = max(0, combatEnemyHealth - result.damage)
+            changes.append(.enemyDamaged(enemyId: enemy.id, damage: result.damage, newHealth: combatEnemyHealth))
+        }
+
+        // Apply fate draw side effects (resonance/tension shifts)
+        let fateChanges = applyFateDrawEffects(result.fateDrawEffects)
+        changes.append(contentsOf: fateChanges)
 
         return changes
     }
@@ -1609,6 +1907,8 @@ public final class TwilightGameEngine: ObservableObject {
     public func setupCombatEnemy(_ enemy: Card) {
         combatEnemy = enemy
         combatEnemyHealth = enemy.health ?? 10
+        combatEnemyWill = enemy.will ?? 0
+        combatEnemyMaxWill = enemy.will ?? 0
         combatTurnNumber = 1
         combatActionsRemaining = 3
         combatBonusDice = 0
@@ -1623,6 +1923,8 @@ public final class TwilightGameEngine: ObservableObject {
         return CombatState(
             enemy: enemy,
             enemyHealth: combatEnemyHealth,
+            enemyWill: combatEnemyWill,
+            enemyMaxWill: combatEnemyMaxWill,
             turnNumber: combatTurnNumber,
             actionsRemaining: combatActionsRemaining,
             bonusDice: combatBonusDice,
@@ -1816,6 +2118,10 @@ public struct CombatState {
     public let enemy: Card
     /// Enemy's current health points
     public let enemyHealth: Int
+    /// Enemy's current will/resolve (Spirit track)
+    public let enemyWill: Int
+    /// Enemy's maximum will/resolve
+    public let enemyMaxWill: Int
     /// Current combat turn number
     public let turnNumber: Int
     /// Actions remaining this turn
@@ -1828,6 +2134,11 @@ public struct CombatState {
     public let isFirstAttack: Bool
     /// Cards currently in the player's hand
     public let playerHand: [Card]
+
+    /// Whether this enemy has a Spirit track (will > 0)
+    public var hasSpiritTrack: Bool {
+        enemyMaxWill > 0
+    }
 
     /// Enemy's maximum health from card definition
     public var enemyMaxHealth: Int {
@@ -1848,6 +2159,8 @@ public struct CombatState {
     public init(
         enemy: Card,
         enemyHealth: Int,
+        enemyWill: Int = 0,
+        enemyMaxWill: Int = 0,
         turnNumber: Int,
         actionsRemaining: Int,
         bonusDice: Int,
@@ -1857,6 +2170,8 @@ public struct CombatState {
     ) {
         self.enemy = enemy
         self.enemyHealth = enemyHealth
+        self.enemyWill = enemyWill
+        self.enemyMaxWill = enemyMaxWill
         self.turnNumber = turnNumber
         self.actionsRemaining = actionsRemaining
         self.bonusDice = bonusDice
@@ -2176,5 +2491,10 @@ public extension TwilightGameEngine {
     /// Set current region directly (for testing)
     func setCurrentRegion(_ regionId: String) {
         currentRegionId = regionId
+    }
+
+    /// Set resonance value directly (for testing)
+    func setResonance(_ value: Float) {
+        resonanceValue = max(-100, min(100, value))
     }
 }

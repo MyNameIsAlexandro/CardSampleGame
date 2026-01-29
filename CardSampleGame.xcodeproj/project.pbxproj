@@ -46,6 +46,11 @@
 		UT00000000000030 /* SafeImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = UT00000000000003 /* SafeImage.swift */; };
 		UT00000000000040 /* AssetRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = UT00000000000004 /* AssetRegistry.swift */; };
 		VWC00101000000000000001 /* HeroPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = VWC00102000000000000001 /* HeroPanel.swift */; };
+		RW00000100000000000000001 /* ResonanceWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = RW00000200000000000000001 /* ResonanceWidget.swift */; };
+		DHB0000100000000000000001 /* DualHealthBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = DHB0000200000000000000001 /* DualHealthBar.swift */; };
+		FDW0000100000000000000001 /* FateDeckWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDW0000200000000000000001 /* FateDeckWidget.swift */; };
+		BAV0000100000000000000001 /* BattleArenaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAV0000200000000000000001 /* BattleArenaView.swift */; };
+		ESC0000100000000000000001 /* EnemySelectionCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = ESC0000200000000000000001 /* EnemySelectionCard.swift */; };
 		CM00000100000000000000001 /* ContentManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CM00000200000000000000001 /* ContentManagerView.swift */; };
 		CM00000300000000000000001 /* ContentManagerVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = CM00000400000000000000001 /* ContentManagerVM.swift */; };
 		CMT0000100000000000000001 /* ContentManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CMT0000200000000000000001 /* ContentManagerTests.swift */; };
@@ -98,6 +103,11 @@
 		UT00000000000003 /* SafeImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafeImage.swift; sourceTree = "<group>"; };
 		UT00000000000004 /* AssetRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetRegistry.swift; sourceTree = "<group>"; };
 		VWC00102000000000000001 /* HeroPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/Components/HeroPanel.swift; sourceTree = SOURCE_ROOT; };
+		RW00000200000000000000001 /* ResonanceWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/Components/ResonanceWidget.swift; sourceTree = SOURCE_ROOT; };
+		DHB0000200000000000000001 /* DualHealthBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/Components/DualHealthBar.swift; sourceTree = SOURCE_ROOT; };
+		FDW0000200000000000000001 /* FateDeckWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/Components/FateDeckWidget.swift; sourceTree = SOURCE_ROOT; };
+		BAV0000200000000000000001 /* BattleArenaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BattleArenaView.swift; sourceTree = "<group>"; };
+		ESC0000200000000000000001 /* EnemySelectionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemySelectionCard.swift; sourceTree = "<group>"; };
 		CM00000200000000000000001 /* ContentManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentManagerView.swift; sourceTree = "<group>"; };
 		CM00000400000000000000001 /* ContentManagerVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModels/ContentManagerVM.swift; sourceTree = SOURCE_ROOT; };
 		CMT0000200000000000000001 /* ContentManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentManagerTests.swift; sourceTree = "<group>"; };
@@ -180,6 +190,7 @@
 				43D4E3FBE4DC34B63B61E061 /* EventView.swift */,
 				6BEC0AA856AB6706612208E1 /* WorldMapView.swift */,
 				CC0000010000000000000001 /* CombatView.swift */,
+				BAV0000200000000000000001 /* BattleArenaView.swift */,
 				CM00000200000000000000001 /* ContentManagerView.swift */,
 			);
 			path = Views;
@@ -262,6 +273,10 @@
 			isa = PBXGroup;
 			children = (
 				VWC00102000000000000001 /* HeroPanel.swift */,
+				RW00000200000000000000001 /* ResonanceWidget.swift */,
+				DHB0000200000000000000001 /* DualHealthBar.swift */,
+				FDW0000200000000000000001 /* FateDeckWidget.swift */,
+				ESC0000200000000000000001 /* EnemySelectionCard.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -394,6 +409,11 @@
 				APP00101000000000000001 /* CardGameApp.swift in Sources */,
 				APP00201000000000000001 /* ContentView.swift in Sources */,
 				VWC00101000000000000001 /* HeroPanel.swift in Sources */,
+				RW00000100000000000000001 /* ResonanceWidget.swift in Sources */,
+				DHB0000100000000000000001 /* DualHealthBar.swift in Sources */,
+				FDW0000100000000000000001 /* FateDeckWidget.swift in Sources */,
+				BAV0000100000000000000001 /* BattleArenaView.swift in Sources */,
+				ESC0000100000000000000001 /* EnemySelectionCard.swift in Sources */,
 				AA0000130000000000000001 /* CardView.swift in Sources */,
 				AA0000150000000000000001 /* PlayerHandView.swift in Sources */,
 				AA0000480000000000000001 /* RulesView.swift in Sources */,
