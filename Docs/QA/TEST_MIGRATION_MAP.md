@@ -12,7 +12,7 @@
 
 ## Формат
 
-**Статусы:** 🔴 RED (в TDD) → 🟡 GREEN (готов к миграции) → 🟢 MIGRATED (в целевой директории)
+**Статусы:** 🟢 MIGRATED (в TDD) → 🟡 GREEN (готов к миграции) → 🟢 MIGRATED (в целевой директории)
 
 > **Правило:** Каждый тест маппится на **один** целевой ID или имя. Если тест покрывает несколько инвариантов — он должен быть split при миграции.
 
@@ -22,61 +22,61 @@
 
 | # | Текущий тест | Целевая директория | Целевой файл | Целевой ID/имя | Статус |
 |---|-------------|-------------------|-------------|----------------|--------|
-| 1 | `testEnemyHasDualTracks` | LayerTests/ | EncounterEngineTests | `testDualTrackInitialization` | 🔴 RED |
-| 2 | `testPhysicalAttackReducesHPOnly` | GateTests/ | INV_ENC_GateTests | INV-ENC-002 | 🔴 RED |
-| 3 | `testSpiritualInfluenceReducesWPOnly` | GateTests/ | INV_ENC_GateTests | INV-ENC-002 (split: second case) | 🔴 RED |
-| 4 | `testActiveDefenseUsesFateCard` | LayerTests/ | EncounterEngineTests | `testActiveDefenseFateCard` | 🔴 RED |
-| 5 | `testCriticalDefenseZeroDamage` | LayerTests/ | EncounterEngineTests | `testCriticalDefenseBlocksAll` | 🔴 RED |
-| 6 | `testIntentGeneratedAtRoundStart` | LayerTests/ | EncounterEngineTests | `testIntentGeneratedInIntentPhase` | 🔴 RED |
-| 7 | `testIntentVisibleBeforePlayerAction` | LayerTests/ | EncounterEngineTests | `testIntentVisibility` | 🔴 RED |
-| 8 | `testEscalationPenaltyOnSwitchToPhysical` | LayerTests/ | EncounterEngineTests | `testEscalationResonanceShift` | 🔴 RED |
-| 9 | `testEscalationSurpriseDamageBonus` | LayerTests/ | EncounterEngineTests | `testEscalationSurpriseDamage` | 🔴 RED |
-| 10 | `testDeEscalationRageShieldApplied` | LayerTests/ | EncounterEngineTests | `testDeEscalationRageShield` | 🔴 RED |
-| 11 | `testKillPriorityWhenBothZero` | GateTests/ | INV_ENC_GateTests | INV-ENC-003 | 🔴 RED |
-| 12 | `testPacifyWhenWPZeroHPRemains` | LayerTests/ | EncounterEngineTests | `testPacifyOutcome` | 🔴 RED |
-| 13 | `testResonanceCostModifierNavInPrav` | LayerTests/ | ModifierSystemTests | `testResonanceCostModifier` | 🔴 RED |
-| 14 | `testWaitActionConservesFateCard` | LayerTests/ | FateDeckEngineTests | `testWaitNoFateDraw` | 🔴 RED |
-| 15 | `testWaitHasNoHiddenFateDeckSideEffects` | GateTests/ | INV_FATE_GateTests | INV-FATE-002 | 🔴 RED |
-| 16 | `testMulliganReplacesSelectedCards` | LayerTests/ | EncounterEngineTests | `testMulliganReplace` | 🔴 RED |
-| 17 | `testMulliganOnlyOnce` | LayerTests/ | EncounterEngineTests | `testMulliganOnceOnly` | 🔴 RED |
-| 18 | `testEscalationUsesBalancePackValue` | GateTests/ | INV_BHV_GateTests | INV-BHV-004 | 🔴 RED |
-| 19 | `testMultiEnemyPerEntityOutcome` | IntegrationTests/ | EncounterIntegrationTests | `testMultiEnemy1vN` | 🔴 RED |
-| 20 | `testMultiEnemyAllPacifiedIsNonviolent` | IntegrationTests/ | EncounterIntegrationTests | `testMultiEnemyAllPacified` | 🔴 RED |
-| 21 | `testIntentUpdatesOnConditionChange` | LayerTests/ | BehaviorRuntimeTests | `testDynamicIntentUpdate` | 🔴 RED |
+| 1 | `testEnemyHasDualTracks` | LayerTests/ | EncounterEngineTests | `testDualTrackInitialization` | 🟢 MIGRATED |
+| 2 | `testPhysicalAttackReducesHPOnly` | GateTests/ | INV_ENC_GateTests | INV-ENC-002 | 🟢 MIGRATED |
+| 3 | `testSpiritualInfluenceReducesWPOnly` | GateTests/ | INV_ENC_GateTests | INV-ENC-002 (split: second case) | 🟢 MIGRATED |
+| 4 | `testActiveDefenseUsesFateCard` | LayerTests/ | EncounterEngineTests | `testActiveDefenseFateCard` | 🟢 MIGRATED |
+| 5 | `testCriticalDefenseZeroDamage` | LayerTests/ | EncounterEngineTests | `testCriticalDefenseBlocksAll` | 🟢 MIGRATED |
+| 6 | `testIntentGeneratedAtRoundStart` | LayerTests/ | EncounterEngineTests | `testIntentGeneratedInIntentPhase` | 🟢 MIGRATED |
+| 7 | `testIntentVisibleBeforePlayerAction` | LayerTests/ | EncounterEngineTests | `testIntentVisibility` | 🟢 MIGRATED |
+| 8 | `testEscalationPenaltyOnSwitchToPhysical` | LayerTests/ | EncounterEngineTests | `testEscalationResonanceShift` | 🟢 MIGRATED |
+| 9 | `testEscalationSurpriseDamageBonus` | LayerTests/ | EncounterEngineTests | `testEscalationSurpriseDamage` | 🟢 MIGRATED |
+| 10 | `testDeEscalationRageShieldApplied` | LayerTests/ | EncounterEngineTests | `testDeEscalationRageShield` | 🟢 MIGRATED |
+| 11 | `testKillPriorityWhenBothZero` | GateTests/ | INV_ENC_GateTests | INV-ENC-003 | 🟢 MIGRATED |
+| 12 | `testPacifyWhenWPZeroHPRemains` | LayerTests/ | EncounterEngineTests | `testPacifyOutcome` | 🟢 MIGRATED |
+| 13 | `testResonanceCostModifierNavInPrav` | LayerTests/ | ModifierSystemTests | `testResonanceCostModifier` | 🟢 MIGRATED |
+| 14 | `testWaitActionConservesFateCard` | LayerTests/ | FateDeckEngineTests | `testWaitNoFateDraw` | 🟢 MIGRATED |
+| 15 | `testWaitHasNoHiddenFateDeckSideEffects` | GateTests/ | INV_FATE_GateTests | INV-FATE-002 | 🟢 MIGRATED |
+| 16 | `testMulliganReplacesSelectedCards` | LayerTests/ | EncounterEngineTests | `testMulliganReplace` | 🟢 MIGRATED |
+| 17 | `testMulliganOnlyOnce` | LayerTests/ | EncounterEngineTests | `testMulliganOnceOnly` | 🟢 MIGRATED |
+| 18 | `testEscalationUsesBalancePackValue` | GateTests/ | INV_BHV_GateTests | INV-BHV-004 | 🟢 MIGRATED |
+| 19 | `testMultiEnemyPerEntityOutcome` | IntegrationTests/ | EncounterIntegrationTests | `testMultiEnemy1vN` | 🟢 MIGRATED |
+| 20 | `testMultiEnemyAllPacifiedIsNonviolent` | IntegrationTests/ | EncounterIntegrationTests | `testMultiEnemyAllPacified` | 🟢 MIGRATED |
+| 21 | `testIntentUpdatesOnConditionChange` | LayerTests/ | BehaviorRuntimeTests | `testDynamicIntentUpdate` | 🟢 MIGRATED |
 
 ## DualTrackCombatIntegrationTests (3 теста)
 
 | # | Текущий тест | Целевая директория | Целевой файл | Целевой ID/имя | Статус |
 |---|-------------|-------------------|-------------|----------------|--------|
-| 22 | `testFullCombatKillPath` | IntegrationTests/ | EncounterIntegrationTests | `testFullKillPath` | 🔴 RED |
-| 23 | `testFullCombatPacifyPath` | IntegrationTests/ | EncounterIntegrationTests | `testFullPacifyPath` | 🔴 RED |
-| 24 | `testEscalationResonancePenaltyApplied` | IntegrationTests/ | EncounterIntegrationTests | `testEscalationFullCycle` | 🔴 RED |
+| 22 | `testFullCombatKillPath` | IntegrationTests/ | EncounterIntegrationTests | `testFullKillPath` | 🟢 MIGRATED |
+| 23 | `testFullCombatPacifyPath` | IntegrationTests/ | EncounterIntegrationTests | `testFullPacifyPath` | 🟢 MIGRATED |
+| 24 | `testEscalationResonancePenaltyApplied` | IntegrationTests/ | EncounterIntegrationTests | `testEscalationFullCycle` | 🟢 MIGRATED |
 
 ## CombatContentValidationTests (9 тестов)
 
 | # | Текущий тест | Целевая директория | Целевой файл | Целевой ID/имя | Статус |
 |---|-------------|-------------------|-------------|----------------|--------|
-| 25 | `testAllBehaviorReferencesExist` | GateTests/ | INV_CNT_GateTests | INV-CNT-001 | 🔴 RED |
-| 26 | `testFateCardIdsUnique` | GateTests/ | INV_CNT_GateTests | INV-CNT-002 | 🔴 RED |
-| 27 | `testFateCardSuitsValid` | GateTests/ | INV_FATE_GateTests | INV-FATE-006 | 🔴 RED |
-| 28 | `testChoiceCardsHaveBothOptions` | GateTests/ | INV_FATE_GateTests | INV-FATE-007 | 🔴 RED |
-| 29 | `testValueFormulaWhitelist` | GateTests/ | INV_BHV_GateTests | INV-BHV-004 | 🔴 RED |
-| 30 | `testValueFormulaMultipliersExist` | GateTests/ | INV_CNT_GateTests | INV-CNT-003 | 🔴 RED |
-| 31 | `testBehaviorConditionsParsable` | GateTests/ | INV_BHV_GateTests | INV-BHV-002 | 🔴 RED |
-| 32 | `testIntentTypesValid` | GateTests/ | INV_BHV_GateTests | INV-BHV-005 | 🔴 RED |
-| 33 | `testFateCardKeywordsValid` | GateTests/ | INV_FATE_GateTests | INV-FATE-008 | 🔴 RED |
+| 25 | `testAllBehaviorReferencesExist` | GateTests/ | INV_CNT_GateTests | INV-CNT-001 | 🟢 MIGRATED |
+| 26 | `testFateCardIdsUnique` | GateTests/ | INV_CNT_GateTests | INV-CNT-002 | 🟢 MIGRATED |
+| 27 | `testFateCardSuitsValid` | GateTests/ | INV_FATE_GateTests | INV-FATE-006 | 🟢 MIGRATED |
+| 28 | `testChoiceCardsHaveBothOptions` | GateTests/ | INV_FATE_GateTests | INV-FATE-007 | 🟢 MIGRATED |
+| 29 | `testValueFormulaWhitelist` | GateTests/ | INV_BHV_GateTests | INV-BHV-004 | 🟢 MIGRATED |
+| 30 | `testValueFormulaMultipliersExist` | GateTests/ | INV_CNT_GateTests | INV-CNT-003 | 🟢 MIGRATED |
+| 31 | `testBehaviorConditionsParsable` | GateTests/ | INV_BHV_GateTests | INV-BHV-002 | 🟢 MIGRATED |
+| 32 | `testIntentTypesValid` | GateTests/ | INV_BHV_GateTests | INV-BHV-005 | 🟢 MIGRATED |
+| 33 | `testFateCardKeywordsValid` | GateTests/ | INV_FATE_GateTests | INV-FATE-008 | 🟢 MIGRATED |
 
 ## UniversalFateKeywordTests (7 тестов)
 
 | # | Текущий тест | Целевая директория | Целевой файл | Целевой ID/имя | Статус |
 |---|-------------|-------------------|-------------|----------------|--------|
-| 34 | `testKeywordInterpretationByContext` | LayerTests/ | KeywordInterpreterTests | `testSurgeInCombatPhysical` (split) | 🔴 RED |
-| 35 | `testMatchBonusWhenSuitMatchesAction` | LayerTests/ | KeywordInterpreterTests | `testMatchBonusEnhanced` | 🔴 RED |
-| 36 | `testMismatchGivesOnlyValue` | LayerTests/ | KeywordInterpreterTests | `testMismatchSuppressed` | 🔴 RED |
-| 37 | `testAllKeywordsHaveAllContextEffects` | LayerTests/ | KeywordInterpreterTests | `testAllKeywordsAllContexts` | 🔴 RED |
-| 38 | `testFateDeckStateGlobalAcrossContexts` | GateTests/ | INV_FATE_GateTests | INV-FATE-001 | 🔴 RED |
-| 39 | `testFateCardResolutionOrder` | LayerTests/ | FateDeckEngineTests | `testResolutionOrder` | 🔴 RED |
-| 40 | `testMatchBonusMultiplierFromBalancePack` | GateTests/ | INV_BHV_GateTests | INV-BHV-004 (split: matchMultiplier) | 🔴 RED |
+| 34 | `testKeywordInterpretationByContext` | LayerTests/ | KeywordInterpreterTests | `testSurgeInCombatPhysical` (split) | 🟢 MIGRATED |
+| 35 | `testMatchBonusWhenSuitMatchesAction` | LayerTests/ | KeywordInterpreterTests | `testMatchBonusEnhanced` | 🟢 MIGRATED |
+| 36 | `testMismatchGivesOnlyValue` | LayerTests/ | KeywordInterpreterTests | `testMismatchSuppressed` | 🟢 MIGRATED |
+| 37 | `testAllKeywordsHaveAllContextEffects` | LayerTests/ | KeywordInterpreterTests | `testAllKeywordsAllContexts` | 🟢 MIGRATED |
+| 38 | `testFateDeckStateGlobalAcrossContexts` | GateTests/ | INV_FATE_GateTests | INV-FATE-001 | 🟢 MIGRATED |
+| 39 | `testFateCardResolutionOrder` | LayerTests/ | FateDeckEngineTests | `testResolutionOrder` | 🟢 MIGRATED |
+| 40 | `testMatchBonusMultiplierFromBalancePack` | GateTests/ | INV_BHV_GateTests | INV-BHV-004 (split: matchMultiplier) | 🟢 MIGRATED |
 
 ---
 

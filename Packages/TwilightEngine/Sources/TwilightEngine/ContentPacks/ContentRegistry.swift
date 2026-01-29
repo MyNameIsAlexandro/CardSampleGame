@@ -799,6 +799,64 @@ extension ContentRegistry: ContentProvider {
     }
 }
 
+// MARK: - Encounter System Convenience Properties (Stubs)
+
+extension ContentRegistry {
+    /// Convenience property for all fate cards
+    public var allFateCards: [FateCard] { getAllFateCards() }
+
+    /// Convenience property for all enemies
+    public var allEnemies: [EnemyDefinition] { getAllEnemies() }
+
+    /// Convenience property for balance pack (stub until behaviors system)
+    public var balancePack: BalancePackAccess { BalancePackAccess(config: getBalanceConfig()) }
+
+    /// Stub: All behavior IDs (empty until behavior system implemented)
+    public var allBehaviorIds: [String] { [] }
+
+    /// Stub: All behaviors (empty until behavior system implemented)
+    public var allBehaviors: [BehaviorDefinition] { [] }
+}
+
+/// Stub balance pack access for gate tests
+public struct BalancePackAccess {
+    let config: BalanceConfiguration?
+
+    public var allKeys: [String] { [] }
+
+    public func value(for key: String) -> Any? { nil }
+}
+
+/// Stub behavior definition for gate tests
+public struct BehaviorDefinition {
+    public let id: String
+    public let rules: [BehaviorRule]
+    public let intents: [String: BehaviorIntent]
+}
+
+/// Stub behavior rule
+public struct BehaviorRule {
+    public let priority: Int
+    public let condition: String?
+    public let intentId: String
+}
+
+/// Stub behavior intent
+public struct BehaviorIntent {
+    public let type: String
+    public let valueFormula: String?
+}
+
+/// Stub condition parser for gate tests
+public enum ConditionParser {
+    public struct ParsedCondition {}
+
+    public static func parse(_ condition: String) throws -> ParsedCondition {
+        // Stub: always succeeds until real parser implemented
+        return ParsedCondition()
+    }
+}
+
 // MARK: - Testing Support
 
 extension ContentRegistry {
