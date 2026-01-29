@@ -21,6 +21,7 @@ public final class EncounterEngine {
     private let context: EncounterContext
     private let rng: WorldRNG
     private var fateDeck: FateDeckManager
+    private var accumulatedResonanceDelta: Float = 0
 
     // MARK: - Init
 
@@ -43,23 +44,184 @@ public final class EncounterEngine {
     // MARK: - Actions
 
     public func performAction(_ action: PlayerAction) -> EncounterActionResult {
-        fatalError("EncounterEngine.performAction not implemented — TDD RED")
+        switch action {
+        case .attack(let targetId):
+            return performPhysicalAttack(targetId: targetId)
+        case .spiritAttack(let targetId):
+            return performSpiritAttack(targetId: targetId)
+        case .wait:
+            return .ok([])
+        case .mulligan:
+            if mulliganDone { return .fail(.mulliganAlreadyDone) }
+            mulliganDone = true
+            return .ok([])
+        case .defend, .flee, .useCard:
+            return .ok([])
+        }
     }
 
     public func advancePhase() -> EncounterPhase {
-        fatalError("EncounterEngine.advancePhase not implemented — TDD RED")
+        switch currentPhase {
+        case .intent:
+            currentPhase = .playerAction
+        case .playerAction:
+            currentPhase = .enemyResolution
+        case .enemyResolution:
+            currentPhase = .roundEnd
+        case .roundEnd:
+            currentPhase = .intent
+            currentRound += 1
+        }
+        return currentPhase
     }
 
     public func generateIntent(for enemyId: String) -> EnemyIntent {
-        fatalError("EncounterEngine.generateIntent not implemented — TDD RED")
+        guard let idx = findEnemyIndex(id: enemyId) else {
+            return .attack(damage: 1)
+        }
+        let enemy = enemies[idx]
+        let intent = EnemyIntentGenerator.generateIntent(
+            enemyPower: enemy.power,
+            enemyHealth: enemy.hp,
+            enemyMaxHealth: enemy.maxHp,
+            turnNumber: currentRound
+        )
+        currentIntent = intent
+        return intent
     }
 
     public func resolveEnemyAction(enemyId: String) -> EncounterActionResult {
-        fatalError("EncounterEngine.resolveEnemyAction not implemented — TDD RED")
+        guard let intent = currentIntent else {
+            return .fail(.actionNotAllowed)
+        }
+        var changes: [EncounterStateChange] = []
+
+        if intent.type == .attack {
+            let fateCard = fateDeck.draw()
+            var damage: Int
+            if let card = fateCard {
+                changes.append(.fateDraw(cardId: card.id, value: card.baseValue))
+                if card.isCritical {
+                    damage = 0
+                } else {
+                    damage = max(0, intent.value - card.baseValue - context.hero.armor)
+                }
+            } else {
+                damage = max(0, intent.value - context.hero.armor)
+            }
+            heroHP -= damage
+            changes.append(.playerHPChanged(delta: -damage, newValue: heroHP))
+        }
+
+        currentIntent = nil
+        return .ok(changes)
     }
 
     public func finishEncounter() -> EncounterResult {
-        fatalError("EncounterEngine.finishEncounter not implemented — TDD RED")
+        isFinished = true
+
+        var perEntity: [String: EntityOutcome] = [:]
+        for enemy in enemies {
+            perEntity[enemy.id] = enemy.outcome ?? .alive
+        }
+
+        let outcome: EncounterOutcome
+        let allDead = enemies.allSatisfy { !$0.isAlive }
+        let allPacified = enemies.allSatisfy { $0.isPacified }
+        let anyKilled = enemies.contains { $0.outcome == .killed }
+
+        if allPacified && !anyKilled {
+            outcome = .victory(.pacified)
+        } else if allDead || anyKilled {
+            outcome = .victory(.killed)
+        } else if heroHP <= 0 {
+            outcome = .defeat
+        } else {
+            outcome = .escaped
+        }
+
+        var worldFlags: [String: Bool] = [:]
+        if allPacified && !anyKilled {
+            worldFlags["nonviolent"] = true
+        }
+
+        let transaction = EncounterTransaction(
+            hpDelta: heroHP - context.hero.hp,
+            resonanceDelta: accumulatedResonanceDelta,
+            worldFlags: worldFlags
+        )
+
+        return EncounterResult(
+            outcome: outcome,
+            perEntityOutcomes: perEntity,
+            transaction: transaction,
+            updatedFateDeck: fateDeck.getState(),
+            rngState: rng.currentState()
+        )
+    }
+
+    // MARK: - Private
+
+    private func findEnemyIndex(id: String) -> Int? {
+        enemies.firstIndex(where: { $0.id == id })
+    }
+
+    private func performPhysicalAttack(targetId: String) -> EncounterActionResult {
+        guard let idx = findEnemyIndex(id: targetId) else {
+            return .fail(.invalidTarget)
+        }
+        var changes: [EncounterStateChange] = []
+        var surpriseBonus = 0
+
+        if lastAttackTrack == .spiritual {
+            surpriseBonus = 3
+            let delta: Float = -5.0
+            accumulatedResonanceDelta += delta
+            changes.append(.resonanceShifted(delta: delta, newValue: context.worldResonance + accumulatedResonanceDelta))
+        }
+
+        let damage = max(1, context.hero.strength - enemies[idx].defense + surpriseBonus)
+        enemies[idx].hp = max(0, enemies[idx].hp - damage)
+        lastAttackTrack = .physical
+
+        changes.append(.enemyHPChanged(enemyId: targetId, delta: -damage, newValue: enemies[idx].hp))
+
+        if enemies[idx].hp == 0 {
+            enemies[idx].outcome = .killed
+            changes.append(.enemyKilled(enemyId: targetId))
+        }
+
+        return .ok(changes)
+    }
+
+    private func performSpiritAttack(targetId: String) -> EncounterActionResult {
+        guard let idx = findEnemyIndex(id: targetId) else {
+            return .fail(.invalidTarget)
+        }
+        guard enemies[idx].hasSpiritTrack else {
+            return .fail(.actionNotAllowed)
+        }
+        var changes: [EncounterStateChange] = []
+
+        if lastAttackTrack == .physical {
+            let shieldValue = 3
+            enemies[idx].rageShield = shieldValue
+            changes.append(.rageShieldApplied(enemyId: targetId, value: shieldValue))
+        }
+
+        let damage = max(1, context.hero.wisdom)
+        let currentWP = enemies[idx].wp!
+        enemies[idx].wp = max(0, currentWP - damage)
+        lastAttackTrack = .spiritual
+
+        changes.append(.enemyWPChanged(enemyId: targetId, delta: -damage, newValue: enemies[idx].wp!))
+
+        if enemies[idx].wp! == 0 && enemies[idx].hp > 0 {
+            enemies[idx].outcome = .pacified
+            changes.append(.enemyPacified(enemyId: targetId))
+        }
+
+        return .ok(changes)
     }
 }
 

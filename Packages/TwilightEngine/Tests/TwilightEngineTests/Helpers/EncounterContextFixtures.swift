@@ -59,7 +59,7 @@ enum EncounterContextFixtures {
             hero: EncounterHero(
                 id: "test_hero",
                 hp: 100, maxHp: 100,
-                strength: 5, armor: 2
+                strength: 5, armor: 2, wisdom: 10
             ),
             enemies: [
                 EncounterEnemy(id: "enemy_1", name: "Bandit A", hp: 10, maxHp: 10, wp: 5, maxWp: 5, power: 3, defense: 1),
