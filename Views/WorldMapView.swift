@@ -578,7 +578,7 @@ struct EngineRegionDetailView: View {
             .padding(Spacing.xxl)
             .background(
                 RoundedRectangle(cornerRadius: CornerRadius.xxl)
-                    .fill(Color(UIColor.systemBackground).opacity(Opacity.almostOpaque))
+                    .fill(AppColors.backgroundSystem.opacity(Opacity.almostOpaque))
                     .shadow(radius: Spacing.xl)
             )
             .transition(.scale.combined(with: .opacity))
@@ -715,7 +715,7 @@ struct EngineRegionDetailView: View {
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: CornerRadius.lg)
-                    .fill(Color(UIColor.tertiarySystemBackground))
+                    .fill(AppColors.backgroundTertiary)
             )
         }
     }

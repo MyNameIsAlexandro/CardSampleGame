@@ -103,7 +103,7 @@ struct BattleArenaView: View {
                 .disabled(!canStart)
                 .padding()
             }
-            .background(Color(UIColor.systemBackground))
+            .background(AppColors.backgroundSystem)
         }
         .navigationBarHidden(true)
         .fullScreenCover(isPresented: $showingCombat) {

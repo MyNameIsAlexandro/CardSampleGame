@@ -50,6 +50,20 @@ public enum Sizes {
     public static let iconHero: CGFloat = 50
     /// 60pt - Region card icon
     public static let iconRegion: CGFloat = 60
+    /// 70pt - Large region icon
+    public static let iconRegionLarge: CGFloat = 70
+    /// 72pt - Extra large region icon
+    public static let iconRegionXL: CGFloat = 72
+
+    // MARK: - Font Sizes
+    /// 9pt - Tiny caption text
+    public static let tinyCaption: CGFloat = 9
+    /// 36pt - Large display icon
+    public static let largeIcon: CGFloat = 36
+    /// 48pt - Extra extra large icon
+    public static let iconXXL: CGFloat = 48
+    /// 52pt - Huge card value display
+    public static let hugeCardValue: CGFloat = 52
 
     // MARK: - Components
     /// 4pt - Progress bar thin
@@ -145,6 +159,12 @@ public enum AppColors {
     public static let power = Color.orange
     /// Defense/Shield color
     public static let defense = Color.blue
+
+    // MARK: - Backgrounds
+    /// System background
+    public static let backgroundSystem = Color(UIColor.systemBackground)
+    /// Tertiary system background
+    public static let backgroundTertiary = Color(UIColor.tertiarySystemBackground)
 
     // MARK: - UI Elements
     /// Card background

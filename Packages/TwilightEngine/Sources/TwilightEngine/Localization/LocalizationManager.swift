@@ -53,7 +53,7 @@ public final class LocalizationManager: ObservableObject, StringResolver {
 
     // MARK: - Initialization
 
-    private init() {
+    public init() {
         // Initialize with device locale or fallback
         let deviceLocale = Locale.current.language.languageCode?.identifier ?? Self.fallbackLocale
         self.currentLocale = deviceLocale

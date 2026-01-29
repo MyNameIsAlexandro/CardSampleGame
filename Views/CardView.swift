@@ -301,7 +301,7 @@ struct CompactCardView: View {
                                 .font(.headline)
                                 .fontWeight(.bold)
                             Text(L10n.cardStatHealth.localized)
-                                .font(.system(size: 9))
+                                .font(.system(size: Sizes.tinyCaption))
                                 .foregroundColor(AppColors.muted)
                         }
                     }
@@ -314,7 +314,7 @@ struct CompactCardView: View {
                                 .font(.headline)
                                 .fontWeight(.bold)
                             Text(L10n.cardStatStrength.localized)
-                                .font(.system(size: 9))
+                                .font(.system(size: Sizes.tinyCaption))
                                 .foregroundColor(AppColors.muted)
                         }
                     }
@@ -327,7 +327,7 @@ struct CompactCardView: View {
                                 .font(.headline)
                                 .fontWeight(.bold)
                             Text(L10n.cardStatDefense.localized)
-                                .font(.system(size: 9))
+                                .font(.system(size: Sizes.tinyCaption))
                                 .foregroundColor(AppColors.muted)
                         }
                     }
@@ -342,7 +342,7 @@ struct CompactCardView: View {
             .background(AppColors.cardBackground)
         }
         .frame(height: Sizes.cardHeightMedium + Sizes.cardHeightMedium)
-        .background(Color(UIColor.systemBackground))
+        .background(AppColors.backgroundSystem)
         .cornerRadius(CornerRadius.xl)
         .shadow(color: isSelected ? headerColor.opacity(Opacity.medium) : .black.opacity(Opacity.faint), radius: isSelected ? 10 : 5)
         .overlay(
@@ -481,7 +481,7 @@ struct HandCardView: View {
                             .font(.system(size: Spacing.sm))
                             .foregroundColor(AppColors.faith)
                         Text("\(cost)")
-                            .font(.system(size: 9))
+                            .font(.system(size: Sizes.tinyCaption))
                             .fontWeight(.bold)
                     }
                 }
@@ -491,7 +491,7 @@ struct HandCardView: View {
                             .font(.system(size: Spacing.sm))
                             .foregroundColor(AppColors.health)
                         Text("\(power)")
-                            .font(.system(size: 9))
+                            .font(.system(size: Sizes.tinyCaption))
                             .fontWeight(.bold)
                     }
                 }
@@ -501,7 +501,7 @@ struct HandCardView: View {
                             .font(.system(size: Spacing.sm))
                             .foregroundColor(AppColors.defense)
                         Text("\(defense)")
-                            .font(.system(size: 9))
+                            .font(.system(size: Sizes.tinyCaption))
                             .fontWeight(.bold)
                     }
                 }
@@ -511,7 +511,7 @@ struct HandCardView: View {
             .background(AppColors.cardBackground)
         }
         .frame(width: Sizes.cardWidthSmall + 5, height: Sizes.cardHeightSmall + Spacing.lg - 1)
-        .background(Color(UIColor.systemBackground))
+        .background(AppColors.backgroundSystem)
         .cornerRadius(CornerRadius.md)
         .shadow(color: isSelected ? headerColor.opacity(Opacity.mediumHigh) : .black.opacity(Opacity.faint), radius: isSelected ? 6 : 3)
         .overlay(

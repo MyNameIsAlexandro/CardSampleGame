@@ -33,7 +33,7 @@ public final class ContentRegistry {
 
     // MARK: - Initialization
 
-    private init() {}
+    public init() {}
 
     // MARK: - Pack Loading
 

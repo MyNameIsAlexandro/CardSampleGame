@@ -34,7 +34,7 @@ struct PlayerHandView: View {
                 }
                 .padding(.horizontal, Spacing.md)
                 .padding(.vertical, Spacing.xxs)
-                .background(Color(UIColor.tertiarySystemBackground))
+                .background(AppColors.backgroundTertiary)
             }
 
             // Compact deck info

@@ -168,7 +168,7 @@ struct CombatView: View {
             // Рука игрока
             playerHandView
         }
-        .background(Color(UIColor.systemBackground))
+        .background(AppColors.backgroundSystem)
         .accessibilityIdentifier(AccessibilityIdentifiers.Combat.view)
         .overlay {
             // Effort selection overlay
@@ -431,11 +431,11 @@ struct CombatView: View {
                         // Show accumulated bonuses
                         if bonusDamage > 0 {
                             Text("+\(bonusDamage)💥")
-                                .font(.system(size: 9))
+                                .font(.system(size: Sizes.tinyCaption))
                                 .foregroundColor(AppColors.faith)
                         } else {
                             Text(L10n.combatActionCost.localized)
-                                .font(.system(size: 9))
+                                .font(.system(size: Sizes.tinyCaption))
                                 .foregroundColor(.white.opacity(Opacity.high))
                         }
                     }
@@ -457,7 +457,7 @@ struct CombatView: View {
                             .font(.caption)
                             .fontWeight(.semibold)
                         Text("+3🛡️ (-1)")
-                            .font(.system(size: 9))
+                            .font(.system(size: Sizes.tinyCaption))
                             .foregroundColor(.white.opacity(Opacity.high))
                     }
                     .frame(maxWidth: .infinity)
@@ -697,7 +697,7 @@ struct CombatView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
-            .background(Color(UIColor.tertiarySystemBackground))
+            .background(AppColors.backgroundTertiary)
             .cornerRadius(CornerRadius.md)
         }
     }
@@ -1716,7 +1716,7 @@ struct CombatCardView: View {
 
             // Тип карты
             Text(cardTypeText)
-                .font(.system(size: 9))
+                .font(.system(size: Sizes.tinyCaption))
                 .foregroundColor(cardTypeColor)
                 .fontWeight(.medium)
 

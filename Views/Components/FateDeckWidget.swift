@@ -143,13 +143,13 @@ struct DrawnFateCardView: View {
                     // Suit icon
                     if let suit = card.suit {
                         Image(systemName: suitIcon(suit))
-                            .font(.system(size: 40))
+                            .font(.system(size: Sizes.iconXL))
                             .foregroundColor(suitColor)
                     }
 
                     // Value
                     Text(card.baseValue >= 0 ? "+\(card.baseValue)" : "\(card.baseValue)")
-                        .font(.system(size: 48, weight: .bold, design: .rounded))
+                        .font(.system(size: Sizes.iconXXL, weight: .bold, design: .rounded))
                         .foregroundColor(card.baseValue >= 0 ? AppColors.success : AppColors.danger)
 
                     // Critical indicator

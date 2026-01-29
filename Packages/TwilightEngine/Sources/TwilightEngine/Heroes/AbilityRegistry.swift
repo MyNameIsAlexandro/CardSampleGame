@@ -15,7 +15,7 @@ public final class AbilityRegistry {
 
     // MARK: - Init
 
-    private init() {
+    public init() {
         // Способности загружаются из ContentPack (hero_abilities.json)
         // Пустой init - данные загружаются через loadFromJSON()
     }

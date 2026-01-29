@@ -21,7 +21,7 @@ public final class HeroRegistry {
 
     // MARK: - Init
 
-    private init() {
+    public init() {
         registerBuiltInHeroes()
     }
 

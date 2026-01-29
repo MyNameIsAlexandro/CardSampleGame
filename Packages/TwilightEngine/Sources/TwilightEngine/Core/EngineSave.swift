@@ -333,7 +333,7 @@ public struct RegionSaveState: Codable {
 
 /// Event log entry for saving
 public struct EventLogEntrySave: Codable {
-    public let id: UUID
+    public let id: String
     public let dayNumber: Int
     public let timestamp: Date
     public let regionName: String

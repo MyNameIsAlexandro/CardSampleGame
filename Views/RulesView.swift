@@ -169,7 +169,7 @@ struct PhaseCard: View {
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(UIColor.tertiarySystemBackground))
+        .background(AppColors.backgroundTertiary)
         .cornerRadius(CornerRadius.md)
     }
 }

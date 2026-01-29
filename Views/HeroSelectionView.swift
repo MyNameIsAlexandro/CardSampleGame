@@ -78,7 +78,7 @@ struct HeroSelectionView: View {
                 }
                 .padding(.bottom, Spacing.xl)
                 .background(
-                    Color(UIColor.systemBackground)
+                    AppColors.backgroundSystem
                         .shadow(radius: 5)
                 )
             }
@@ -146,7 +146,7 @@ struct HeroCard: View {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: CornerRadius.lg)
-                .fill(Color(UIColor.systemBackground))
+                .fill(AppColors.backgroundSystem)
                 .overlay(
                     RoundedRectangle(cornerRadius: CornerRadius.lg)
                         .stroke(isSelected ? AppColors.primary : AppColors.secondary.opacity(Opacity.light), lineWidth: isSelected ? 3 : 1)

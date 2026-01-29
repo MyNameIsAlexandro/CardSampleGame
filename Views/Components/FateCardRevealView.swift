@@ -64,14 +64,14 @@ struct FateCardRevealView: View {
                     // Suit icon
                     if let suit = result.card.suit {
                         Image(systemName: suitIcon(suit))
-                            .font(.system(size: 36))
+                            .font(.system(size: Sizes.largeIcon))
                             .foregroundColor(suitColor)
                             .opacity(showCard ? 1.0 : 0.0)
                     }
 
                     // Value display
                     Text(valueText)
-                        .font(.system(size: 52, weight: .bold, design: .rounded))
+                        .font(.system(size: Sizes.hugeCardValue, weight: .bold, design: .rounded))
                         .foregroundColor(valueColor)
                         .scaleEffect(showValue ? 1.0 : 0.3)
                         .opacity(showValue ? 1.0 : 0.0)

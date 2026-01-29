@@ -230,7 +230,7 @@ public final class ContentManager {
     /// External packs folder name
     private let externalPacksFolderName = "Packs"
 
-    private init() {}
+    public init() {}
 
     // MARK: - Pack Discovery
 

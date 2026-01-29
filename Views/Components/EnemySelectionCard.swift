@@ -50,7 +50,7 @@ struct EnemySelectionCard: View {
             }
         }
         .padding(Spacing.md)
-        .background(Color(UIColor.secondarySystemBackground))
+        .background(AppColors.cardBackground)
         .cornerRadius(CornerRadius.lg)
         .overlay(
             RoundedRectangle(cornerRadius: CornerRadius.lg)

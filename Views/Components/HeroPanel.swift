@@ -149,7 +149,7 @@ struct HeroPanel: View {
 
             // Inner circle
             Circle()
-                .fill(Color(UIColor.systemBackground))
+                .fill(AppColors.backgroundSystem)
                 .frame(width: Sizes.touchTarget, height: Sizes.touchTarget)
 
             // Hero initials or icon
@@ -175,7 +175,7 @@ struct HeroPanel: View {
 
                 if let label = label {
                     Text(label)
-                        .font(.system(size: 9))
+                        .font(.system(size: Sizes.tinyCaption))
                         .foregroundColor(AppColors.muted)
                 }
             }
@@ -310,7 +310,7 @@ struct HeroPanel_Previews: PreviewProvider {
             HeroPanel(engine: previewEngine, showAvatar: false)
                 .padding()
         }
-        .background(Color(UIColor.systemBackground))
+        .background(AppColors.backgroundSystem)
     }
 
     static var previewEngine: TwilightGameEngine {

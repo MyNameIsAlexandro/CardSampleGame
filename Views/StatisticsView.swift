@@ -125,7 +125,7 @@ struct StatCard: View {
         }
         .frame(maxWidth: .infinity)
         .padding()
-        .background(Color(UIColor.tertiarySystemBackground))
+        .background(AppColors.backgroundTertiary)
         .cornerRadius(Spacing.smd)
     }
 }
@@ -182,7 +182,7 @@ struct GameRecordCard: View {
             }
         }
         .padding()
-        .background(Color(UIColor.tertiarySystemBackground))
+        .background(AppColors.backgroundTertiary)
         .cornerRadius(Spacing.smd)
     }
 

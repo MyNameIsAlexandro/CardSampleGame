@@ -5,6 +5,7 @@ import Foundation
 /// - Универсальные карты (доступны всем)
 /// - Сигнатурные карты героя (уникальные карты конкретного персонажа по heroID)
 /// - DLC/Expansion карты
+@available(*, deprecated, message: "Use ContentRegistry")
 public final class CardRegistry {
 
     // MARK: - Singleton
@@ -27,7 +28,7 @@ public final class CardRegistry {
 
     // MARK: - Init
 
-    private init() {
+    public init() {
         // No hardcoded cards - all content comes from ContentPacks
     }
 

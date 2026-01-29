@@ -5,13 +5,13 @@ import Foundation
 
 /// Represents an active curse on the player
 public struct ActiveCurse: Identifiable, Codable {
-    public let id: UUID
+    public let id: String
     public let type: CurseType
     public var duration: Int  // turns remaining
     public let sourceCard: String?  // name of card that applied curse
 
-    public init(id: UUID = UUID(), type: CurseType, duration: Int, sourceCard: String? = nil) {
-        self.id = id
+    public init(id: String? = nil, type: CurseType, duration: Int, sourceCard: String? = nil) {
+        self.id = id ?? "curse_\(type)_\(duration)"
         self.type = type
         self.duration = duration
         self.sourceCard = sourceCard
@@ -22,7 +22,7 @@ public struct ActiveCurse: Identifiable, Codable {
 
 /// Record in the event log
 public struct EventLogEntry: Identifiable, Codable {
-    public let id: UUID
+    public let id: String
     public let dayNumber: Int
     public let timestamp: Date
     public let regionName: String
@@ -32,7 +32,7 @@ public struct EventLogEntry: Identifiable, Codable {
     public let type: EventLogType
 
     public init(
-        id: UUID = UUID(),
+        id: String? = nil,
         dayNumber: Int,
         timestamp: Date = Date(),
         regionName: String,
@@ -41,7 +41,7 @@ public struct EventLogEntry: Identifiable, Codable {
         outcome: String,
         type: EventLogType
     ) {
-        self.id = id
+        self.id = id ?? "log_day\(dayNumber)_\(eventTitle.prefix(10).lowercased().replacingOccurrences(of: " ", with: "_"))"
         self.dayNumber = dayNumber
         self.timestamp = timestamp
         self.regionName = regionName
@@ -77,13 +77,14 @@ public enum EventLogType: String, Codable {
 
 /// Event that occurred at the end of a day (for notifications)
 public struct DayEvent: Identifiable {
-    public let id = UUID()
+    public let id: String
     public let day: Int
     public let title: String
     public let description: String
     public let isNegative: Bool
 
-    public init(day: Int, title: String, description: String, isNegative: Bool) {
+    public init(day: Int, title: String, description: String, isNegative: Bool, id: String? = nil) {
+        self.id = id ?? "day_\(day)_\(title.prefix(10).lowercased().replacingOccurrences(of: " ", with: "_"))"
         self.day = day
         self.title = title
         self.description = description
@@ -95,7 +96,8 @@ public struct DayEvent: Identifiable {
             day: day,
             title: "Напряжение растёт",
             description: "Напряжение мира достигло \(newTension)%",
-            isNegative: true
+            isNegative: true,
+            id: "day_\(day)_tension_increase"
         )
     }
 
@@ -104,7 +106,8 @@ public struct DayEvent: Identifiable {
             day: day,
             title: "Регион деградирует",
             description: "\(regionName) теперь в состоянии \(newState.displayName)",
-            isNegative: true
+            isNegative: true,
+            id: "day_\(day)_region_degraded_\(regionName.prefix(10).lowercased().replacingOccurrences(of: " ", with: "_"))"
         )
     }
 
@@ -113,7 +116,8 @@ public struct DayEvent: Identifiable {
             day: day,
             title: "Мир восстанавливается",
             description: "Силы Яви укрепляются",
-            isNegative: false
+            isNegative: false,
+            id: "day_\(day)_world_improving"
         )
     }
 }
