@@ -18,6 +18,7 @@
 6. [Spec-to-Test Traceability Matrix](#6-spec-to-test-traceability-matrix)
 7. [Writing New Tests](#7-writing-new-tests)
 8. [Test Coverage Goals](#8-test-coverage-goals)
+9. [Encounter System Test Model](#9-encounter-system-test-model)
 
 ---
 
@@ -438,6 +439,44 @@ let fateCards = [
 ]
 engine.setupFateDeck(cards: fateCards)
 ```
+
+---
+
+---
+
+## 9. Encounter System Test Model
+
+> **Подробная документация:** [ENCOUNTER_TEST_MODEL.md](./ENCOUNTER_TEST_MODEL.md)
+> **Карта миграции:** [TEST_MIGRATION_MAP.md](./TEST_MIGRATION_MAP.md)
+
+Encounter System использует **гибридную модель тестирования:** Gate + Layer + Integration + TDD.
+
+### 9.1 Ключевые правила
+
+| Правило | Описание |
+|---------|----------|
+| **Gate < 2s, no RNG** | Gate-тесты выполняются < 2 секунд, используют только детерминированные фикстуры |
+| **Gate = no XCTSkip** | Невозможность проверки = FAIL |
+| **TDD/ = только RED** | GREEN тест в TDD/ = CI failure. Немедленный перенос в LayerTests/ или IntegrationTests/ |
+| **INV-xxx ID** | Каждый gate-инвариант имеет уникальный ID: `INV-ENC-001`, `INV-FATE-001`, `INV-BHV-001` |
+| **Snapshot = атомарная замена** | `apply(snapshot)` заменяет состояние целиком, не merge-ит |
+| **Integration = реальный контент** | IntegrationTests/ используют реальный ContentRegistry, не моки |
+
+### 9.2 Структура тестов
+
+```
+TwilightEngineTests/
+├── GateTests/          # INV-ENC, INV-FATE, INV-BHV инварианты
+├── LayerTests/         # Юнит-тесты по компонентам (EncounterEngine, FateDeck, Behavior, Keyword, Modifier)
+├── IntegrationTests/   # E2E сценарии (Kill path, Pacify path, Flee, Multi-enemy)
+└── TDD/                # Инкубатор (только RED тесты)
+```
+
+### 9.3 Инварианты (сводка)
+
+- **INV-ENC-001..007** — Phase Order, Dual Track Independence, Kill Priority, Transaction Atomicity, Determinism, No External State, One Finish Action
+- **INV-FATE-001..005** — Conservation, Snapshot Isolation, Reshuffle Trigger, Draw Order Determinism, Sticky Card Persistence
+- **INV-BHV-001..004** — Priority Determinism, Unknown Condition Fail, Default Intent Required, Formula Whitelist
 
 ---
 
