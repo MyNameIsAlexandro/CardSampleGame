@@ -194,7 +194,7 @@ public struct DegradationConfig: Codable, Sendable {
 // MARK: - Combat Balance
 
 /// Combat balance configuration.
-public struct CombatBalanceConfig: Codable, Sendable {
+public struct CombatBalanceConfig: Codable, Sendable, Equatable {
     /// Base damage for attacks.
     public let baseDamage: Int
 
@@ -216,6 +216,26 @@ public struct CombatBalanceConfig: Codable, Sendable {
     /// Maximum hand size (optional).
     public let maxHandSize: Int?
 
+    // MARK: - Encounter Combat Fields
+
+    /// Resonance shift on escalation (spirit→physical). Default -5.0.
+    public let escalationResonanceShift: Float?
+
+    /// Surprise damage bonus on escalation. Default 3.
+    public let escalationSurpriseBonus: Int?
+
+    /// Rage shield value on de-escalation (physical→spirit). Default 3.
+    public let deEscalationRageShield: Int?
+
+    /// Match multiplier when card suit matches action alignment. Default 1.5.
+    public let matchMultiplier: Double?
+
+    /// Known multiplier keys for formula validation.
+    public var knownMultiplierKeys: Set<String> {
+        ["heavyAttackMultiplier", "lightAttackMultiplier", "healMultiplier",
+         "escalationSurpriseBonus", "deEscalationRageShield", "matchMultiplier"]
+    }
+
     /// Default combat configuration.
     public static let `default` = CombatBalanceConfig(
         baseDamage: 3,
@@ -224,7 +244,11 @@ public struct CombatBalanceConfig: Codable, Sendable {
         diceMax: 6,
         actionsPerTurn: 3,
         cardsDrawnPerTurn: 5,
-        maxHandSize: 7
+        maxHandSize: 7,
+        escalationResonanceShift: -5.0,
+        escalationSurpriseBonus: 3,
+        deEscalationRageShield: 3,
+        matchMultiplier: 1.5
     )
 }
 

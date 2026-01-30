@@ -174,8 +174,8 @@ public final class EncounterEngine {
         var surpriseBonus = 0
 
         if lastAttackTrack == .spiritual {
-            surpriseBonus = 3
-            let delta: Float = -5.0
+            surpriseBonus = context.balanceConfig?.escalationSurpriseBonus ?? 3
+            let delta: Float = context.balanceConfig?.escalationResonanceShift ?? -5.0
             accumulatedResonanceDelta += delta
             changes.append(.resonanceShifted(delta: delta, newValue: context.worldResonance + accumulatedResonanceDelta))
         }
@@ -204,7 +204,7 @@ public final class EncounterEngine {
         var changes: [EncounterStateChange] = []
 
         if lastAttackTrack == .physical {
-            let shieldValue = 3
+            let shieldValue = context.balanceConfig?.deEscalationRageShield ?? 3
             enemies[idx].rageShield = shieldValue
             changes.append(.rageShieldApplied(enemyId: targetId, value: shieldValue))
         }

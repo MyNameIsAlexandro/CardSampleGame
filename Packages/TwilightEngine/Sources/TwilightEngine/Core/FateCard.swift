@@ -50,6 +50,38 @@ public enum FateEffectType: String, Codable, Hashable {
     case shiftTension
 }
 
+// MARK: - Fate Keyword
+
+/// Keyword that determines context-dependent effects
+public enum FateKeyword: String, Codable, Hashable, CaseIterable {
+    case surge    // Damage boost in combat
+    case focus    // Precision/accuracy bonus
+    case echo     // Repeat/amplify effect
+    case shadow   // Stealth/evasion bonus
+    case ward     // Protection/shield effect
+}
+
+// MARK: - Fate Card Type
+
+/// Type of fate card
+public enum FateCardType: String, Codable, Hashable {
+    case standard
+    case choice
+}
+
+// MARK: - Fate Choice Option
+
+/// Option for choice-type fate cards
+public struct FateChoiceOption: Codable, Equatable, Hashable {
+    public let label: String
+    public let effect: String
+
+    public init(label: String, effect: String) {
+        self.label = label
+        self.effect = effect
+    }
+}
+
 // MARK: - Fate Card
 
 /// A card in the Fate Deck that modifies action outcomes.
@@ -82,6 +114,15 @@ public struct FateCard: Codable, Equatable, Hashable {
     /// Side effects applied when this card is drawn
     public let onDrawEffects: [FateDrawEffect]
 
+    /// Keyword for context-dependent interpretation
+    public let keyword: FateKeyword?
+
+    /// Card type (standard or choice)
+    public let cardType: FateCardType
+
+    /// Choice options (only for choice-type cards)
+    public let choiceOptions: [FateChoiceOption]?
+
     /// Backward-compatible computed property
     public var modifier: Int { baseValue }
 
@@ -96,6 +137,9 @@ public struct FateCard: Codable, Equatable, Hashable {
         case isSticky
         case resonanceRules
         case onDrawEffects
+        case keyword
+        case cardType
+        case choiceOptions
     }
 
     public init(from decoder: Decoder) throws {
@@ -116,6 +160,9 @@ public struct FateCard: Codable, Equatable, Hashable {
         isSticky = try container.decodeIfPresent(Bool.self, forKey: .isSticky) ?? false
         resonanceRules = try container.decodeIfPresent([FateResonanceRule].self, forKey: .resonanceRules) ?? []
         onDrawEffects = try container.decodeIfPresent([FateDrawEffect].self, forKey: .onDrawEffects) ?? []
+        keyword = try container.decodeIfPresent(FateKeyword.self, forKey: .keyword)
+        cardType = try container.decodeIfPresent(FateCardType.self, forKey: .cardType) ?? .standard
+        choiceOptions = try container.decodeIfPresent([FateChoiceOption].self, forKey: .choiceOptions)
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -133,6 +180,13 @@ public struct FateCard: Codable, Equatable, Hashable {
         if !onDrawEffects.isEmpty {
             try container.encode(onDrawEffects, forKey: .onDrawEffects)
         }
+        try container.encodeIfPresent(keyword, forKey: .keyword)
+        if cardType != .standard {
+            try container.encode(cardType, forKey: .cardType)
+        }
+        if let choices = choiceOptions {
+            try container.encode(choices, forKey: .choiceOptions)
+        }
     }
 
     public init(
@@ -144,7 +198,10 @@ public struct FateCard: Codable, Equatable, Hashable {
         nameKey: String? = nil,
         suit: FateCardSuit? = nil,
         resonanceRules: [FateResonanceRule] = [],
-        onDrawEffects: [FateDrawEffect] = []
+        onDrawEffects: [FateDrawEffect] = [],
+        keyword: FateKeyword? = nil,
+        cardType: FateCardType = .standard,
+        choiceOptions: [FateChoiceOption]? = nil
     ) {
         self.id = id
         self.baseValue = modifier
@@ -155,5 +212,8 @@ public struct FateCard: Codable, Equatable, Hashable {
         self.suit = suit
         self.resonanceRules = resonanceRules
         self.onDrawEffects = onDrawEffects
+        self.keyword = keyword
+        self.cardType = cardType
+        self.choiceOptions = choiceOptions
     }
 }

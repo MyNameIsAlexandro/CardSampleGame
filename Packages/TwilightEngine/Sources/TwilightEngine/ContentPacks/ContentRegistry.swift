@@ -827,36 +827,6 @@ public struct BalancePackAccess {
     public func value(for key: String) -> Any? { nil }
 }
 
-/// Stub behavior definition for gate tests
-public struct BehaviorDefinition {
-    public let id: String
-    public let rules: [BehaviorRule]
-    public let intents: [String: BehaviorIntent]
-}
-
-/// Stub behavior rule
-public struct BehaviorRule {
-    public let priority: Int
-    public let condition: String?
-    public let intentId: String
-}
-
-/// Stub behavior intent
-public struct BehaviorIntent {
-    public let type: String
-    public let valueFormula: String?
-}
-
-/// Stub condition parser for gate tests
-public enum ConditionParser {
-    public struct ParsedCondition {}
-
-    public static func parse(_ condition: String) throws -> ParsedCondition {
-        // Stub: always succeeds until real parser implemented
-        return ParsedCondition()
-    }
-}
-
 // MARK: - Testing Support
 
 extension ContentRegistry {
