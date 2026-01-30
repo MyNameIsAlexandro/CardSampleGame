@@ -1917,6 +1917,12 @@ public final class TwilightGameEngine: ObservableObject {
         isInCombat = true
     }
 
+    /// End combat mode so a new battle can be started
+    public func endCombat() {
+        isInCombat = false
+        combatEnemy = nil
+    }
+
     /// Get current combat state for UI
     public var combatState: CombatState? {
         guard isInCombat, let enemy = combatEnemy else { return nil }

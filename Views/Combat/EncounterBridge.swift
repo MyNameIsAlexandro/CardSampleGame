@@ -73,5 +73,8 @@ extension TwilightGameEngine {
         if !result.transaction.worldFlags.isEmpty {
             mergeWorldFlags(result.transaction.worldFlags)
         }
+
+        // Exit combat mode so next battle can start fresh
+        endCombat()
     }
 }
