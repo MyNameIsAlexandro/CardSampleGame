@@ -145,7 +145,7 @@ struct HeroCard: View {
                     .foregroundColor(AppColors.muted)
             }
             .padding(Spacing.sm)
-            .background(AppColors.faith.opacity(0.1))
+            .background(AppColors.faith.opacity(Opacity.faint))
             .cornerRadius(CornerRadius.md)
         }
         .padding()

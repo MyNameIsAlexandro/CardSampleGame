@@ -55,7 +55,7 @@ struct BattleArenaView: View {
                                     isSelected: selectedHeroId == hero.id,
                                     onTap: { selectedHeroId = hero.id }
                                 )
-                                .frame(width: 180, height: 200)
+                                .frame(width: Sizes.cardFrameArenaW, height: Sizes.cardFrameArenaH)
                             }
                         }
                         .padding(.horizontal)

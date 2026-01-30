@@ -103,7 +103,7 @@ struct CombatView: View {
                 .font(.title)
                 .fontWeight(.black)
                 .foregroundColor(dmg.isHero ? AppColors.danger : AppColors.warning)
-                .shadow(color: .black, radius: 2)
+                .shadow(color: AppColors.backgroundSystem, radius: 2)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
                 .id(dmg.id)
                 .position(x: UIScreen.main.bounds.width / 2,

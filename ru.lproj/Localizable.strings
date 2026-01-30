@@ -977,3 +977,8 @@
 "gameover.stats" = "Статистика путешествия";
 "gameover.days.survived" = "Дней прожито: %d";
 "gameover.quests.completed" = "Квестов выполнено: %d";
+
+// MARK: - Fate Card Labels (DS-04)
+"fate.critical" = "КРИТ";
+"fate.deck.empty" = "Нет карт в сбросе";
+"fate.resonance.modifier" = "Резонанс: %@";

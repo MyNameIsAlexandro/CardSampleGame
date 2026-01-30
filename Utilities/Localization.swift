@@ -612,4 +612,9 @@ enum L10n {
     static let gameOverDaysSurvived = "gameover.days.survived"
     static let gameOverQuestsCompleted = "gameover.quests.completed"
 
+    // MARK: - Fate Card Labels (DS-04)
+    static let fateCritical = "fate.critical"
+    static let fateDeckEmpty = "fate.deck.empty"
+    static let fateResonanceModifier = "fate.resonance.modifier"
+
 }

@@ -47,7 +47,7 @@ struct FateCardRevealView: View {
                             endPoint: .bottomTrailing
                         )
                     )
-                    .frame(width: 160, height: 220)
+                    .frame(width: Sizes.cardFrameRevealW, height: Sizes.cardFrameRevealH)
                     .overlay(
                         RoundedRectangle(cornerRadius: CornerRadius.lg)
                             .strokeBorder(suitColor, lineWidth: 2)
@@ -81,7 +81,7 @@ struct FateCardRevealView: View {
 
                     // Critical indicator
                     if result.isCritical {
-                        Text("CRITICAL")
+                        Text(L10n.fateCritical.localized)
                             .font(.caption.bold())
                             .foregroundColor(AppColors.resonancePrav)
                             .padding(.horizontal, Spacing.sm)

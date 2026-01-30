@@ -126,7 +126,7 @@ struct CardView: View {
         .frame(height: Sizes.cardHeightLarge + Sizes.cardHeightMedium)
         .background(AppColors.cardBackground)
         .cornerRadius(CornerRadius.lg)
-        .shadow(color: isSelected ? AppColors.primary.opacity(Opacity.medium) : AppColors.backgroundSystem.opacity(Opacity.faint), radius: isSelected ? 8 : 4)
+        .shadow(isSelected ? AppShadows.lg : AppShadows.md)
         .overlay(
             RoundedRectangle(cornerRadius: CornerRadius.lg)
                 .stroke(isSelected ? AppColors.primary : .clear, lineWidth: 3)
@@ -344,7 +344,7 @@ struct CompactCardView: View {
         .frame(height: Sizes.cardHeightMedium + Sizes.cardHeightMedium)
         .background(AppColors.backgroundSystem)
         .cornerRadius(CornerRadius.xl)
-        .shadow(color: isSelected ? headerColor.opacity(Opacity.medium) : .black.opacity(Opacity.faint), radius: isSelected ? 10 : 5)
+        .shadow(isSelected ? AppShadows.lg : AppShadows.md)
         .overlay(
             RoundedRectangle(cornerRadius: CornerRadius.xl)
                 .stroke(isSelected ? headerColor : Color.clear, lineWidth: 3)
@@ -513,7 +513,7 @@ struct HandCardView: View {
         .frame(width: Sizes.cardWidthSmall + 5, height: Sizes.cardHeightSmall + Spacing.lg - 1)
         .background(AppColors.backgroundSystem)
         .cornerRadius(CornerRadius.md)
-        .shadow(color: isSelected ? headerColor.opacity(Opacity.mediumHigh) : .black.opacity(Opacity.faint), radius: isSelected ? 6 : 3)
+        .shadow(isSelected ? AppShadows.md : AppShadows.sm)
         .overlay(
             RoundedRectangle(cornerRadius: CornerRadius.md)
                 .stroke(isSelected ? headerColor : Color.clear, lineWidth: 2)

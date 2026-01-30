@@ -103,7 +103,7 @@ struct ResonanceWidget: View {
                     Circle()
                         .fill(zoneColor)
                         .frame(width: Sizes.progressThick * 2, height: Sizes.progressThick * 2)
-                        .shadow(color: zoneColor.opacity(Opacity.mediumHigh), radius: 4)
+                        .shadow(color: zoneColor.opacity(Opacity.mediumHigh), radius: AppShadows.md.radius)
                         .offset(x: max(0, min(geo.size.width - Sizes.progressThick * 2, normalizedValue * geo.size.width - Sizes.progressThick)))
                         .animation(.easeInOut(duration: AnimationDuration.slow), value: normalizedValue)
                 }

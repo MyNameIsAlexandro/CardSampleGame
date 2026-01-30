@@ -190,7 +190,7 @@ struct EventView: View {
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: CornerRadius.lg)
-                    .fill(canChoose ? AppColors.cardBackground : AppColors.secondary.opacity(0.1))
+                    .fill(canChoose ? AppColors.cardBackground : AppColors.secondary.opacity(Opacity.faint))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: CornerRadius.lg)

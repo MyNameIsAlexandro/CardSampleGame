@@ -35,10 +35,10 @@ struct GameOverView: View {
 
                 // Icon with scale animation
                 Image(systemName: isVictory ? "sun.max.fill" : "moon.fill")
-                    .font(.system(size: 64))
+                    .font(.system(size: Sizes.iconGameOver))
                     .foregroundColor(isVictory ? AppColors.warning : AppColors.danger)
                     .scaleEffect(iconScale)
-                    .shadow(color: (isVictory ? AppColors.warning : AppColors.danger).opacity(0.5), radius: 20)
+                    .shadow(AppShadows.glow(isVictory ? AppColors.warning : AppColors.danger))
 
                 // Title
                 Text(isVictory

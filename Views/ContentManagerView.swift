@@ -207,7 +207,7 @@ struct ContentManagerView: View {
             }
         }
         .padding()
-        .background(AppColors.danger.opacity(0.1))
+        .background(AppColors.danger.opacity(Opacity.faint))
         .cornerRadius(CornerRadius.md)
     }
 }
@@ -429,7 +429,7 @@ struct PackDetailView: View {
             }
         }
         .padding()
-        .background(Color(.secondarySystemBackground))
+        .background(AppColors.cardBackground)
         .cornerRadius(CornerRadius.lg)
     }
 
@@ -478,7 +478,7 @@ struct PackDetailView: View {
             }
         }
         .padding()
-        .background(Color(.secondarySystemBackground))
+        .background(AppColors.cardBackground)
         .cornerRadius(CornerRadius.lg)
     }
 
@@ -547,7 +547,7 @@ struct PackDetailView: View {
             }
         }
         .padding()
-        .background(Color(.secondarySystemBackground))
+        .background(AppColors.cardBackground)
         .cornerRadius(CornerRadius.lg)
     }
 

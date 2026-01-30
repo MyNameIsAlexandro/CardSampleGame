@@ -64,7 +64,7 @@ struct DualHealthBar: View {
                 .font(.caption2)
                 .fontWeight(.medium)
                 .foregroundColor(color)
-                .frame(width: 40, alignment: .trailing)
+                .frame(width: Sizes.healthBarLabel, alignment: .trailing)
         }
     }
 }

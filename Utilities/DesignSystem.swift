@@ -92,6 +92,34 @@ public enum Sizes {
     public static let cardHeightMedium: CGFloat = 140
     /// 180pt - Card height large
     public static let cardHeightLarge: CGFloat = 180
+
+    // MARK: - Card Frame Sizes (DS-01)
+    /// 44×60 - Tiny card (fate deck widget)
+    public static let cardFrameTinyW: CGFloat = 44
+    public static let cardFrameTinyH: CGFloat = 60
+    /// 70×100 - Small card (combat hand)
+    public static let cardFrameSmallW: CGFloat = 70
+    public static let cardFrameSmallH: CGFloat = 100
+    /// 90×120 - Medium card (mulligan)
+    public static let cardFrameMediumW: CGFloat = 90
+    public static let cardFrameMediumH: CGFloat = 120
+    /// 150×200 - Large card (drawn fate card)
+    public static let cardFrameLargeW: CGFloat = 150
+    public static let cardFrameLargeH: CGFloat = 200
+    /// 160×220 - Reveal card (fate reveal)
+    public static let cardFrameRevealW: CGFloat = 160
+    public static let cardFrameRevealH: CGFloat = 220
+    /// 180×200 - Arena card (battle arena)
+    public static let cardFrameArenaW: CGFloat = 180
+    public static let cardFrameArenaH: CGFloat = 200
+
+    // MARK: - Miscellaneous Sizes (DS-03)
+    /// 64pt - Game over icon
+    public static let iconGameOver: CGFloat = 64
+    /// 8pt - Step indicator dot
+    public static let dotIndicator: CGFloat = 8
+    /// 40pt - Health bar label width
+    public static let healthBarLabel: CGFloat = 40
 }
 
 // MARK: - Corner Radius
@@ -255,6 +283,10 @@ public enum AppShadows {
     public static let md = Shadow(color: Color(red: 0.85, green: 0.65, blue: 0.20).opacity(0.15), radius: 4, x: 0, y: 2)
     /// Large shadow — warm gold tint
     public static let lg = Shadow(color: Color(red: 0.85, green: 0.65, blue: 0.20).opacity(0.2), radius: 8, x: 0, y: 4)
+    /// Color glow — for emphasis elements
+    public static func glow(_ color: Color, radius: CGFloat = 20) -> Shadow {
+        Shadow(color: color.opacity(0.5), radius: radius, x: 0, y: 0)
+    }
 }
 
 /// Shadow configuration
@@ -396,7 +428,7 @@ public enum AppGradient {
         endRadius: 300
     )
     /// Damage flash overlay
-    public static let damageFlash = Color.red.opacity(0.3)
+    public static let damageFlash = AppColors.danger.opacity(0.3)
     /// Heal flash overlay
-    public static let healFlash = Color.green.opacity(0.2)
+    public static let healFlash = AppColors.success.opacity(0.2)
 }

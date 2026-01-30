@@ -23,15 +23,15 @@ struct TutorialOverlayView: View {
                 HStack(spacing: Spacing.xs) {
                     ForEach(0..<steps.count, id: \.self) { index in
                         Circle()
-                            .fill(index == currentStep ? AppColors.primary : AppColors.secondary.opacity(0.3))
-                            .frame(width: 8, height: 8)
+                            .fill(index == currentStep ? AppColors.primary : AppColors.secondary.opacity(Opacity.light))
+                            .frame(width: Sizes.dotIndicator, height: Sizes.dotIndicator)
                     }
                 }
 
                 let step = steps[currentStep]
 
                 Image(systemName: step.icon)
-                    .font(.system(size: 48))
+                    .font(.system(size: Sizes.iconXXL))
                     .foregroundColor(AppColors.primary)
 
                 Text(step.titleKey.localized)

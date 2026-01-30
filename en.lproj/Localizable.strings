@@ -972,3 +972,8 @@
 "gameover.stats" = "Journey Statistics";
 "gameover.days.survived" = "Days survived: %d";
 "gameover.quests.completed" = "Quests completed: %d";
+
+// MARK: - Fate Card Labels (DS-04)
+"fate.critical" = "CRITICAL";
+"fate.deck.empty" = "No cards in discard pile";
+"fate.resonance.modifier" = "Resonance: %@";

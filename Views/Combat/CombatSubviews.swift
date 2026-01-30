@@ -116,7 +116,7 @@ struct MulliganCardView: View {
                 .foregroundColor(AppColors.warning)
             }
         }
-        .frame(width: 90, height: 120)
+        .frame(width: Sizes.cardFrameMediumW, height: Sizes.cardFrameMediumH)
         .padding(Spacing.xs)
         .background(isSelected ? AppColors.danger.opacity(Opacity.light) : AppColors.backgroundTertiary)
         .cornerRadius(CornerRadius.md)
@@ -384,7 +384,7 @@ struct CombatOverView: View {
 
             VStack(spacing: Spacing.lg) {
                 Image(systemName: iconName)
-                    .font(.system(size: 60))
+                    .font(.system(size: Sizes.iconRegion))
                     .foregroundColor(outcomeColor)
 
                 Text(outcomeTitle)
@@ -541,7 +541,7 @@ struct CombatCardView: View {
                 .foregroundColor(isAffordable ? AppColors.warning : AppColors.danger)
             }
         }
-        .frame(width: 70, height: 100)
+        .frame(width: Sizes.cardFrameSmallW, height: Sizes.cardFrameSmallH)
         .padding(Spacing.xxs)
         .background(AppColors.backgroundTertiary)
         .cornerRadius(CornerRadius.md)

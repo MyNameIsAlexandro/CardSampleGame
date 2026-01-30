@@ -182,8 +182,8 @@ struct HeroPanel: View {
         }
         .padding(.horizontal, Spacing.sm)
         .padding(.vertical, Spacing.xxs)
-        .background(color.opacity(0.15))
-        .cornerRadius(Spacing.xs)
+        .background(color.opacity(Opacity.light))
+        .cornerRadius(CornerRadius.sm)
     }
 
     // MARK: - Balance Indicator
@@ -201,8 +201,8 @@ struct HeroPanel: View {
         }
         .padding(.horizontal, Spacing.sm)
         .padding(.vertical, Spacing.xxs)
-        .background(balanceColor.opacity(0.15))
-        .cornerRadius(Spacing.xs)
+        .background(balanceColor.opacity(Opacity.light))
+        .cornerRadius(CornerRadius.sm)
     }
 
     // MARK: - Background

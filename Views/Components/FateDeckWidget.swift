@@ -18,13 +18,13 @@ struct FateDeckWidget: View {
                     if engine.fateDeckDrawCount > 2 {
                         RoundedRectangle(cornerRadius: CornerRadius.sm)
                             .fill(AppColors.cardBack.opacity(Opacity.medium))
-                            .frame(width: 44, height: 60)
+                            .frame(width: Sizes.cardFrameTinyW, height: Sizes.cardFrameTinyH)
                             .offset(x: 3, y: 3)
                     }
                     if engine.fateDeckDrawCount > 1 {
                         RoundedRectangle(cornerRadius: CornerRadius.sm)
                             .fill(AppColors.cardBack.opacity(Opacity.high))
-                            .frame(width: 44, height: 60)
+                            .frame(width: Sizes.cardFrameTinyW, height: Sizes.cardFrameTinyH)
                             .offset(x: 1.5, y: 1.5)
                     }
                     // Top card (back side)
@@ -34,7 +34,7 @@ struct FateDeckWidget: View {
                         // Empty deck placeholder
                         RoundedRectangle(cornerRadius: CornerRadius.sm)
                             .strokeBorder(AppColors.muted.opacity(Opacity.medium), lineWidth: 1)
-                            .frame(width: 44, height: 60)
+                            .frame(width: Sizes.cardFrameTinyW, height: Sizes.cardFrameTinyH)
                             .overlay(
                                 Image(systemName: "arrow.triangle.2.circlepath")
                                     .font(.caption)
@@ -87,14 +87,14 @@ struct FateDeckWidget: View {
                         endPoint: .bottomTrailing
                     )
                 )
-                .frame(width: 44, height: 60)
+                .frame(width: Sizes.cardFrameTinyW, height: Sizes.cardFrameTinyH)
 
             // Pattern on card back
             Image(systemName: "sparkles")
                 .font(.title3)
                 .foregroundColor(AppColors.spirit.opacity(Opacity.mediumHigh))
         }
-        .shadow(color: .black.opacity(Opacity.faint), radius: 2, x: 1, y: 1)
+        .shadow(AppShadows.sm)
     }
 
     private func drawCard() {
@@ -133,7 +133,7 @@ struct DrawnFateCardView: View {
                             endPoint: .bottomTrailing
                         )
                     )
-                    .frame(width: 150, height: 200)
+                    .frame(width: Sizes.cardFrameLargeW, height: Sizes.cardFrameLargeH)
                     .overlay(
                         RoundedRectangle(cornerRadius: CornerRadius.lg)
                             .strokeBorder(suitColor, lineWidth: 2)
@@ -154,7 +154,7 @@ struct DrawnFateCardView: View {
 
                     // Critical indicator
                     if card.isCritical {
-                        Text("CRITICAL")
+                        Text(L10n.fateCritical.localized)
                             .font(.caption.bold())
                             .foregroundColor(AppColors.resonancePrav)
                     }
@@ -166,7 +166,7 @@ struct DrawnFateCardView: View {
             if let rule = card.resonanceRules.first(where: { $0.zone == zone }) {
                 HStack {
                     Image(systemName: "waveform.path")
-                    Text("Resonance: \(rule.modifyValue >= 0 ? "+" : "")\(rule.modifyValue)")
+                    Text(L10n.fateResonanceModifier.localized(with: "\(rule.modifyValue >= 0 ? "+" : "")\(rule.modifyValue)"))
                 }
                 .font(.caption)
                 .foregroundColor(AppColors.spirit)
@@ -223,7 +223,7 @@ struct FateDiscardPileView: View {
         NavigationView {
             List {
                 if engine.fateDeckDiscardCards.isEmpty {
-                    Text("No cards in discard pile")
+                    Text(L10n.fateDeckEmpty.localized)
                         .foregroundColor(AppColors.muted)
                         .italic()
                 } else {
