@@ -1223,11 +1223,27 @@ public final class TwilightGameEngine: ObservableObject {
             regionState: regionStateString
         )
 
-        // Filter out completed one-time events (using definition IDs directly)
+        // Filter by flags, balance, and one-time completion
+        let activeFlags = Set(worldFlags.filter { $0.value }.map { $0.key })
+        let currentBalance = Int(resonanceValue)
+
         let filteredDefinitions = availableDefinitions.filter { eventDef in
-            if eventDef.isOneTime {
-                return !completedEventIds.contains(eventDef.id)
+            // One-time events already completed
+            if eventDef.isOneTime && completedEventIds.contains(eventDef.id) {
+                return false
             }
+            // Required flags
+            let avail = eventDef.availability
+            for flag in avail.requiredFlags {
+                if !activeFlags.contains(flag) { return false }
+            }
+            // Forbidden flags
+            for flag in avail.forbiddenFlags {
+                if activeFlags.contains(flag) { return false }
+            }
+            // Balance range
+            if let min = avail.minBalance, currentBalance < min { return false }
+            if let max = avail.maxBalance, currentBalance > max { return false }
             return true
         }
 
