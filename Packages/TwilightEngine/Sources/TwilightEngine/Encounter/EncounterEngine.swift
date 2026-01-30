@@ -3,8 +3,8 @@ import Foundation
 /// Encounter Engine — processes encounters as pure input→output
 /// Reference: ENCOUNTER_SYSTEM_DESIGN.md
 ///
-/// All methods are stubs (fatalError) until implementation.
-/// Tests are RED TDD — they compile but fail at runtime.
+/// Phases: intent → playerAction → enemyResolution → roundEnd.
+/// State is public private(set); mutations only through performAction().
 public final class EncounterEngine {
 
     // MARK: - State (read-only externally)
@@ -108,7 +108,7 @@ public final class EncounterEngine {
             finishActionUsed = true
             return .ok([])
         case .mulligan:
-            fatalError("Handled above")
+            return .fail(.actionNotAllowed)
         case .resolveFateChoice(let optionIndex):
             return resolveFateChoice(optionIndex: optionIndex)
         }
