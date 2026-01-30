@@ -104,7 +104,18 @@ public final class EncounterEngine {
                 if card.isCritical {
                     damage = 0
                 } else {
-                    damage = max(0, intent.value - card.baseValue - context.hero.armor)
+                    var defenseBonus = 0
+                    if let keyword = card.keyword {
+                        let effect = KeywordInterpreter.resolveWithAlignment(
+                            keyword: keyword,
+                            context: .defense,
+                            baseValue: card.baseValue,
+                            isMatch: isSuitMatch(card.suit, for: .defense),
+                            isMismatch: isSuitMismatch(card.suit, for: .defense)
+                        )
+                        defenseBonus = effect.bonusValue
+                    }
+                    damage = max(0, intent.value - card.baseValue - context.hero.armor - defenseBonus)
                 }
             } else {
                 damage = max(0, intent.value - context.hero.armor)
@@ -166,6 +177,27 @@ public final class EncounterEngine {
         enemies.firstIndex(where: { $0.id == id })
     }
 
+    /// Suit alignment: nav ↔ physical/defense, prav ↔ spiritual, yav ↔ neutral (matches all)
+    private func isSuitMatch(_ suit: FateCardSuit?, for context: ActionContext) -> Bool {
+        guard let suit = suit else { return false }
+        switch (suit, context) {
+        case (.yav, _): return true
+        case (.nav, .combatPhysical), (.nav, .defense): return true
+        case (.prav, .combatSpiritual), (.prav, .dialogue): return true
+        default: return false
+        }
+    }
+
+    private func isSuitMismatch(_ suit: FateCardSuit?, for context: ActionContext) -> Bool {
+        guard let suit = suit else { return false }
+        switch (suit, context) {
+        case (.yav, _): return false
+        case (.nav, .combatSpiritual), (.nav, .dialogue): return true
+        case (.prav, .combatPhysical), (.prav, .defense): return true
+        default: return false
+        }
+    }
+
     private func performPhysicalAttack(targetId: String) -> EncounterActionResult {
         guard let idx = findEnemyIndex(id: targetId) else {
             return .fail(.invalidTarget)
@@ -180,7 +212,23 @@ public final class EncounterEngine {
             changes.append(.resonanceShifted(delta: delta, newValue: context.worldResonance + accumulatedResonanceDelta))
         }
 
-        let damage = max(1, context.hero.strength - enemies[idx].defense + surpriseBonus)
+        var keywordBonus = 0
+        let fateCard = fateDeck.draw()
+        if let card = fateCard {
+            changes.append(.fateDraw(cardId: card.id, value: card.baseValue))
+            if let keyword = card.keyword {
+                let effect = KeywordInterpreter.resolveWithAlignment(
+                    keyword: keyword,
+                    context: .combatPhysical,
+                    baseValue: card.baseValue,
+                    isMatch: isSuitMatch(card.suit, for: .combatPhysical),
+                    isMismatch: isSuitMismatch(card.suit, for: .combatPhysical)
+                )
+                keywordBonus = effect.bonusDamage
+            }
+        }
+
+        let damage = max(1, context.hero.strength - enemies[idx].defense + surpriseBonus + keywordBonus)
         enemies[idx].hp = max(0, enemies[idx].hp - damage)
         lastAttackTrack = .physical
 
@@ -209,7 +257,23 @@ public final class EncounterEngine {
             changes.append(.rageShieldApplied(enemyId: targetId, value: shieldValue))
         }
 
-        let damage = max(1, context.hero.wisdom)
+        var keywordBonus = 0
+        let fateCard = fateDeck.draw()
+        if let card = fateCard {
+            changes.append(.fateDraw(cardId: card.id, value: card.baseValue))
+            if let keyword = card.keyword {
+                let effect = KeywordInterpreter.resolveWithAlignment(
+                    keyword: keyword,
+                    context: .combatSpiritual,
+                    baseValue: card.baseValue,
+                    isMatch: isSuitMatch(card.suit, for: .combatSpiritual),
+                    isMismatch: isSuitMismatch(card.suit, for: .combatSpiritual)
+                )
+                keywordBonus = effect.bonusDamage
+            }
+        }
+
+        let damage = max(1, context.hero.wisdom + keywordBonus)
         let currentWP = enemies[idx].wp!
         enemies[idx].wp = max(0, currentWP - damage)
         lastAttackTrack = .spiritual
