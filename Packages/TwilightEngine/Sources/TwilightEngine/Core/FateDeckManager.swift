@@ -3,7 +3,7 @@ import Foundation
 // MARK: - Fate Draw Result
 
 /// Result of drawing and resolving a Fate Card against world resonance
-public struct FateDrawResult {
+public struct FateDrawResult: Codable, Equatable {
     /// The drawn card
     public let card: FateCard
 

@@ -29,7 +29,7 @@ public enum IntentType: String, Codable, Equatable {
 
 /// Enemy's declared intention for the upcoming turn
 /// Shown to player BEFORE they choose their action (Active Defense)
-public struct EnemyIntent: Equatable {
+public struct EnemyIntent: Equatable, Codable {
     /// What type of action the enemy will perform
     public let type: IntentType
 

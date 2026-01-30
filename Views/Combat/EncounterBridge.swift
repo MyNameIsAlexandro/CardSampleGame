@@ -21,14 +21,19 @@ extension TwilightGameEngine {
         )
 
         let enemyDef = ContentRegistry.shared.getEnemy(id: enemy.id)
+
+        // SET-02: Apply difficulty multipliers
+        let diffRaw = UserDefaults.standard.string(forKey: "gameDifficulty") ?? "normal"
+        let difficulty = DifficultyLevel(rawValue: diffRaw) ?? .normal
+
         let encounterEnemy = EncounterEnemy(
             id: enemy.id,
             name: enemy.name,
-            hp: state.enemyHealth,
-            maxHp: state.enemyMaxHealth,
+            hp: Int(Double(state.enemyHealth) * difficulty.hpMultiplier),
+            maxHp: Int(Double(state.enemyMaxHealth) * difficulty.hpMultiplier),
             wp: state.hasSpiritTrack ? state.enemyWill : nil,
             maxWp: state.hasSpiritTrack ? state.enemyMaxWill : nil,
-            power: state.enemyPower,
+            power: Int(Double(state.enemyPower) * difficulty.powerMultiplier),
             defense: state.enemyDefense,
             behaviorId: enemy.id, // behavior ID matches enemy ID
             lootCardIds: enemyDef?.lootCardIds ?? [],

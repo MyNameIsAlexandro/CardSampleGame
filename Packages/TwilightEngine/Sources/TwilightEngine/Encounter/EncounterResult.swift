@@ -25,14 +25,44 @@ public enum EncounterOutcome: Equatable {
 }
 
 /// How victory was achieved
-public enum VictoryType: Equatable {
+public enum VictoryType: Equatable, Codable {
     case killed
     case pacified
     case custom(String)
+
+    private enum CodingKeys: String, CodingKey {
+        case type, value
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let type = try container.decode(String.self, forKey: .type)
+        switch type {
+        case "killed": self = .killed
+        case "pacified": self = .pacified
+        case "custom":
+            let value = try container.decode(String.self, forKey: .value)
+            self = .custom(value)
+        default: self = .killed
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        switch self {
+        case .killed:
+            try container.encode("killed", forKey: .type)
+        case .pacified:
+            try container.encode("pacified", forKey: .type)
+        case .custom(let value):
+            try container.encode("custom", forKey: .type)
+            try container.encode(value, forKey: .value)
+        }
+    }
 }
 
 /// Per-entity outcome in multi-enemy encounters
-public enum EntityOutcome: String, Equatable {
+public enum EntityOutcome: String, Codable, Equatable {
     case killed
     case pacified
     case escaped

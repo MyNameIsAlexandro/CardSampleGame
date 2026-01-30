@@ -37,6 +37,7 @@ struct CombatView: View {
     @StateObject private var vm = EncounterViewModel()
     @State private var startHP: Int = 0
     @State private var didStart: Bool = false
+    var savedState: EncounterSaveState? = nil
 
     // UX-05: Floating damage numbers
     @State private var floatingDamage: FloatingNumber? = nil
@@ -324,11 +325,17 @@ struct CombatView: View {
     // MARK: - Setup
 
     private func setupEncounter() {
-        guard !didStart, let ctx = engine.makeEncounterContext() else { return }
-        startHP = ctx.hero.hp
-        vm.configure(context: ctx)
-        vm.startEncounter()
-        didStart = true
+        guard !didStart else { return }
+        if let saved = savedState {
+            startHP = saved.context.hero.hp
+            vm.restoreEncounter(from: saved)
+            didStart = true
+        } else if let ctx = engine.makeEncounterContext() {
+            startHP = ctx.hero.hp
+            vm.configure(context: ctx)
+            vm.startEncounter()
+            didStart = true
+        }
     }
 
     // MARK: - Result

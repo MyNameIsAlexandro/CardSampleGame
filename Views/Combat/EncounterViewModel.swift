@@ -104,6 +104,19 @@ final class EncounterViewModel: ObservableObject {
 
     // MARK: - Lifecycle
 
+    /// Get current encounter state for mid-combat save
+    func getSaveState() -> EncounterSaveState? {
+        return engine?.createSaveState()
+    }
+
+    /// Restore encounter from saved state (instead of startEncounter)
+    func restoreEncounter(from state: EncounterSaveState) {
+        engine = EncounterEngine.restore(from: state)
+        syncState()
+        // Skip mulligan on restore - combat already in progress
+        showMulligan = false
+    }
+
     func startEncounter() {
         guard let context = context else { return }
         engine = EncounterEngine(context: context)

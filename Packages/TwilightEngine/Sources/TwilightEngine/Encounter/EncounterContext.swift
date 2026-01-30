@@ -1,7 +1,7 @@
 import Foundation
 
 /// Input context for an encounter — immutable snapshot of world state
-public struct EncounterContext: Equatable {
+public struct EncounterContext: Equatable, Codable {
     public let hero: EncounterHero
     public let enemies: [EncounterEnemy]
     public let fateDeckSnapshot: FateDeckState
@@ -34,7 +34,7 @@ public struct EncounterContext: Equatable {
 }
 
 /// Hero stats snapshot for encounter
-public struct EncounterHero: Equatable {
+public struct EncounterHero: Equatable, Codable {
     public let id: String
     public let hp: Int
     public let maxHp: Int
@@ -57,7 +57,7 @@ public struct EncounterHero: Equatable {
 }
 
 /// Enemy snapshot for encounter (dual-track: HP + WP)
-public struct EncounterEnemy: Equatable {
+public struct EncounterEnemy: Equatable, Codable {
     public let id: String
     public let name: String
     public let hp: Int
@@ -90,7 +90,7 @@ public struct EncounterEnemy: Equatable {
 }
 
 /// Encounter-specific modifiers (environment, curses, etc.)
-public struct EncounterModifier: Equatable {
+public struct EncounterModifier: Equatable, Codable {
     public let id: String
     public let type: String
     public let value: Double
@@ -105,7 +105,7 @@ public struct EncounterModifier: Equatable {
 }
 
 /// Rules governing the encounter
-public struct EncounterRules: Equatable {
+public struct EncounterRules: Equatable, Codable {
     public let maxRounds: Int?
     public let canFlee: Bool
     public let customVictory: String?  // e.g. "survive(5)"

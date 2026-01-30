@@ -17,6 +17,7 @@ struct ContentView: View {
     @AppStorage("hasCompletedTutorial") private var hasCompletedTutorial = false
     @State private var showingTutorial = false
     @State private var ambientPulse = false
+    @State private var resumingCombat = false
 
     // MARK: - Engine-First Architecture
     // Engine is the single source of truth (no legacy GameState)
@@ -313,6 +314,18 @@ struct ContentView: View {
             ContentManagerView(bundledPackURLs: getBundledPackURLs())
         }
         #endif
+        .fullScreenCover(isPresented: $resumingCombat) {
+            if let savedState = engine.pendingEncounterState {
+                CombatView(engine: engine, onCombatEnd: { outcome in
+                    engine.pendingEncounterState = nil
+                    resumingCombat = false
+                    // Auto-save after combat
+                    if let slot = selectedSaveSlot {
+                        saveManager.saveGame(to: slot, engine: engine)
+                    }
+                }, savedState: savedState)
+            }
+        }
         .preferredColorScheme(.dark)
         .fullScreenCover(isPresented: $showingTutorial) {
             TutorialOverlayView {
@@ -402,6 +415,10 @@ struct ContentView: View {
         if saveManager.loadGame(from: slot, engine: engine) {
             selectedHeroId = engine.heroId
             selectedSaveSlot = slot
+            // Check for pending mid-combat save
+            if engine.pendingEncounterState != nil {
+                resumingCombat = true
+            }
             showingWorldMap = true
             showingSaveSlots = false
             showingLoadSlots = false

@@ -1,33 +1,14 @@
 import SwiftUI
+import TwilightEngine
 
-// MARK: - Difficulty Level (SET-02)
+// MARK: - DifficultyLevel UI Extension
 
-enum DifficultyLevel: String, CaseIterable {
-    case easy, normal, hard
-
+extension DifficultyLevel {
     var localizedName: String {
         switch self {
         case .easy: return L10n.settingsDifficultyEasy.localized
         case .normal: return L10n.settingsDifficultyNormal.localized
         case .hard: return L10n.settingsDifficultyHard.localized
-        }
-    }
-
-    /// Enemy HP multiplier
-    var hpMultiplier: Double {
-        switch self {
-        case .easy: return 0.75
-        case .normal: return 1.0
-        case .hard: return 1.5
-        }
-    }
-
-    /// Enemy power multiplier
-    var powerMultiplier: Double {
-        switch self {
-        case .easy: return 0.75
-        case .normal: return 1.0
-        case .hard: return 1.25
         }
     }
 }

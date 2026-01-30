@@ -408,6 +408,8 @@ public final class TwilightGameEngine: ObservableObject {
 
     /// Fate Deck manager for skill checks and event resolution
     public private(set) var fateDeck: FateDeckManager?
+    /// Mid-combat encounter state for save/resume (SAV-03)
+    public var pendingEncounterState: EncounterSaveState?
 
     /// Last fate attack result for UI display
     @Published public private(set) var lastFateAttackResult: FateAttackResult?
@@ -2306,6 +2308,7 @@ public extension TwilightGameEngine {
 
             // Fate deck state (SAV-02)
             fateDeckState: fateDeck?.getState(),
+            encounterState: pendingEncounterState,
 
             // RNG state (Audit A2 - save for deterministic replay)
             rngSeed: WorldRNG.shared.currentSeed(),
@@ -2443,6 +2446,9 @@ public extension TwilightGameEngine {
         if let deckState = save.fateDeckState {
             fateDeck?.restoreState(deckState)
         }
+
+        // Restore mid-combat state (SAV-03)
+        pendingEncounterState = save.encounterState
 
         // Restore RNG state (Audit 1.5 - determinism after load)
         WorldRNG.shared.restoreState(save.rngState)
