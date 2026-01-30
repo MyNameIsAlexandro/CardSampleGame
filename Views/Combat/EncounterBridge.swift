@@ -28,7 +28,8 @@ extension TwilightGameEngine {
             wp: state.hasSpiritTrack ? state.enemyWill : nil,
             maxWp: state.hasSpiritTrack ? state.enemyMaxWill : nil,
             power: state.enemyPower,
-            defense: state.enemyDefense
+            defense: state.enemyDefense,
+            behaviorId: enemy.id // behavior ID matches enemy ID
         )
 
         let fateDeckSnapshot = fateDeck?.getState() ?? FateDeckState(drawPile: [], discardPile: [])
@@ -41,8 +42,17 @@ extension TwilightGameEngine {
             rules: EncounterRules(),
             rngSeed: 42, // TODO: use world RNG seed
             worldResonance: resonanceValue,
-            balanceConfig: ContentRegistry.shared.getBalanceConfig()?.combat
+            balanceConfig: ContentRegistry.shared.getBalanceConfig()?.combat,
+            behaviors: buildBehaviorMap()
         )
+    }
+
+    private func buildBehaviorMap() -> [String: BehaviorDefinition] {
+        var map: [String: BehaviorDefinition] = [:]
+        for behavior in ContentRegistry.shared.allBehaviors {
+            map[behavior.id] = behavior
+        }
+        return map
     }
 
     /// Apply encounter result back to engine state

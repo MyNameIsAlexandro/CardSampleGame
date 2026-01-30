@@ -80,6 +80,26 @@ public final class EncounterEngine {
             return .attack(damage: 1)
         }
         let enemy = enemies[idx]
+
+        // Try behavior-driven intent first
+        let encounterEnemy = context.enemies.first(where: { $0.id == enemyId })
+        if let behaviorId = encounterEnemy?.behaviorId,
+           let behavior = context.behaviors[behaviorId] {
+            let behaviorCtx = BehaviorContext(
+                healthPercent: Double(enemy.hp) / Double(max(1, enemy.maxHp)),
+                turn: currentRound,
+                power: enemy.power,
+                defense: enemy.defense,
+                health: enemy.hp,
+                maxHealth: enemy.maxHp
+            )
+            if let intent = BehaviorEvaluator.evaluate(behavior: behavior, context: behaviorCtx) {
+                currentIntent = intent
+                return intent
+            }
+        }
+
+        // Fallback to hardcoded generator
         let intent = EnemyIntentGenerator.generateIntent(
             enemyPower: enemy.power,
             enemyHealth: enemy.hp,

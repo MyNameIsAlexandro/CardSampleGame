@@ -11,8 +11,9 @@ public struct EncounterContext: Equatable {
     public let rngState: UInt64?
     public let worldResonance: Float
     public let balanceConfig: CombatBalanceConfig?
+    public let behaviors: [String: BehaviorDefinition]
 
-    public init(hero: EncounterHero, enemies: [EncounterEnemy], fateDeckSnapshot: FateDeckState, modifiers: [EncounterModifier], rules: EncounterRules, rngSeed: UInt64, rngState: UInt64? = nil, worldResonance: Float = 0, balanceConfig: CombatBalanceConfig? = nil) {
+    public init(hero: EncounterHero, enemies: [EncounterEnemy], fateDeckSnapshot: FateDeckState, modifiers: [EncounterModifier], rules: EncounterRules, rngSeed: UInt64, rngState: UInt64? = nil, worldResonance: Float = 0, balanceConfig: CombatBalanceConfig? = nil, behaviors: [String: BehaviorDefinition] = [:]) {
         self.hero = hero
         self.enemies = enemies
         self.fateDeckSnapshot = fateDeckSnapshot
@@ -22,6 +23,7 @@ public struct EncounterContext: Equatable {
         self.rngState = rngState
         self.worldResonance = worldResonance
         self.balanceConfig = balanceConfig
+        self.behaviors = behaviors
     }
 }
 
