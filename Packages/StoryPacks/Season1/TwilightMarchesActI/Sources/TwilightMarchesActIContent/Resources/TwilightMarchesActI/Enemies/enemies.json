@@ -16,7 +16,9 @@
     "enemy_type": "beast",
     "rarity": "common",
     "abilities": [],
-    "loot_card_ids": ["beast_hide"],
+    "loot_card_ids": [
+      "beast_hide"
+    ],
     "faith_reward": 2,
     "balance_delta": 0
   },
@@ -38,11 +40,36 @@
     "enemy_type": "spirit",
     "rarity": "uncommon",
     "resonance_behavior": {
-      "deepNav": {"power_delta": 2, "defense_delta": 0, "health_delta": 10, "will_delta": 5},
-      "nav": {"power_delta": 1, "defense_delta": 0, "health_delta": 5, "will_delta": 2},
-      "yav": {"power_delta": 0, "defense_delta": 0, "health_delta": 0, "will_delta": 0},
-      "prav": {"power_delta": -1, "defense_delta": 0, "health_delta": -5, "will_delta": -2},
-      "deepPrav": {"power_delta": -2, "defense_delta": -1, "health_delta": -10, "will_delta": -5}
+      "deepNav": {
+        "power_delta": 2,
+        "defense_delta": 0,
+        "health_delta": 10,
+        "will_delta": 5
+      },
+      "nav": {
+        "power_delta": 1,
+        "defense_delta": 0,
+        "health_delta": 5,
+        "will_delta": 2
+      },
+      "yav": {
+        "power_delta": 0,
+        "defense_delta": 0,
+        "health_delta": 0,
+        "will_delta": 0
+      },
+      "prav": {
+        "power_delta": -1,
+        "defense_delta": 0,
+        "health_delta": -5,
+        "will_delta": -2
+      },
+      "deepPrav": {
+        "power_delta": -2,
+        "defense_delta": -1,
+        "health_delta": -10,
+        "will_delta": -5
+      }
     },
     "abilities": [
       {
@@ -55,10 +82,14 @@
           "en": "Deals extra damage when below half health.",
           "ru": "Наносит дополнительный урон при здоровье ниже половины."
         },
-        "effect": {"bonus_damage": 2}
+        "effect": {
+          "bonus_damage": 2
+        }
       }
     ],
-    "loot_card_ids": ["forest_blessing"],
+    "loot_card_ids": [
+      "forest_blessing"
+    ],
     "faith_reward": 5,
     "balance_delta": 5
   },
@@ -75,6 +106,7 @@
     "health": 15,
     "power": 5,
     "defense": 3,
+    "will": 20,
     "difficulty": 3,
     "enemy_type": "spirit",
     "rarity": "rare",
@@ -89,10 +121,14 @@
           "en": "Reduces all damage taken.",
           "ru": "Уменьшает весь получаемый урон."
         },
-        "effect": {"armor": 2}
+        "effect": {
+          "armor": 2
+        }
       }
     ],
-    "loot_card_ids": ["mountain_blessing"],
+    "loot_card_ids": [
+      "mountain_blessing"
+    ],
     "faith_reward": 8,
     "balance_delta": 10
   },
@@ -144,10 +180,14 @@
           "en": "Applies weakness curse on hit.",
           "ru": "Накладывает проклятие слабости при ударе."
         },
-        "effect": {"apply_curse": "weakness"}
+        "effect": {
+          "apply_curse": "weakness"
+        }
       }
     ],
-    "loot_card_ids": ["witch_knowledge"],
+    "loot_card_ids": [
+      "witch_knowledge"
+    ],
     "faith_reward": 6,
     "balance_delta": -10
   },
@@ -164,6 +204,7 @@
     "health": 25,
     "power": 7,
     "defense": 4,
+    "will": 40,
     "difficulty": 5,
     "enemy_type": "boss",
     "rarity": "legendary",
@@ -178,7 +219,9 @@
           "en": "Regenerates health each turn.",
           "ru": "Восстанавливает здоровье каждый ход."
         },
-        "effect": {"regeneration": 3}
+        "effect": {
+          "regeneration": 3
+        }
       },
       {
         "id": "ancient_armor",
@@ -190,10 +233,15 @@
           "en": "Thick bark reduces damage.",
           "ru": "Толстая кора уменьшает урон."
         },
-        "effect": {"armor": 2}
+        "effect": {
+          "armor": 2
+        }
       }
     ],
-    "loot_card_ids": ["guardian_seal", "ancient_power"],
+    "loot_card_ids": [
+      "guardian_seal",
+      "ancient_power"
+    ],
     "faith_reward": 20,
     "balance_delta": 20
   }

@@ -62,6 +62,10 @@ struct EnemyIntentView: View {
         case .buff: return "arrow.up.circle.fill"
         case .heal: return "heart.fill"
         case .summon: return "person.2.fill"
+        case .prepare: return "clock.arrow.circlepath"
+        case .restoreWP: return "heart.text.square"
+        case .debuff: return "arrow.down.circle"
+        case .defend: return "shield.lefthalf.filled"
         }
     }
 
@@ -73,6 +77,10 @@ struct EnemyIntentView: View {
         case .buff: return L10n.combatIntentBuff.localized
         case .heal: return L10n.combatIntentHeal.localized
         case .summon: return L10n.combatIntentSummon.localized
+        case .prepare: return L10n.combatIntentPrepare.localized
+        case .restoreWP: return L10n.combatIntentRestoreWP.localized
+        case .debuff: return L10n.combatIntentDebuff.localized
+        case .defend: return L10n.combatIntentDefend.localized
         }
     }
 
@@ -84,6 +92,10 @@ struct EnemyIntentView: View {
         case .buff: return AppColors.warning
         case .heal: return AppColors.success
         case .summon: return AppColors.dark
+        case .prepare: return AppColors.muted
+        case .restoreWP: return AppColors.success
+        case .debuff: return AppColors.danger
+        case .defend: return AppColors.primary
         }
     }
 
@@ -101,13 +113,21 @@ struct EnemyIntentView: View {
             return L10n.combatIntentDetailHeal.localized(with: intent.value)
         case .summon:
             return L10n.combatIntentDetailSummon.localized
+        case .prepare:
+            return L10n.combatIntentDetailPrepare.localized
+        case .restoreWP:
+            return L10n.combatIntentDetailRestoreWP.localized(with: intent.value)
+        case .debuff:
+            return L10n.combatIntentDetailDebuff.localized(with: intent.value)
+        case .defend:
+            return L10n.combatIntentDetailDefend.localized(with: intent.value)
         }
     }
 
     private var shouldShowValueBadge: Bool {
         switch intent.type {
-        case .attack, .heal: return true
-        case .ritual, .block, .buff, .summon: return false
+        case .attack, .heal, .restoreWP: return true
+        case .ritual, .block, .buff, .summon, .prepare, .debuff, .defend: return false
         }
     }
 }
@@ -138,6 +158,10 @@ struct EnemyIntentBadge: View {
         case .buff: return "arrow.up.circle.fill"
         case .heal: return "heart.fill"
         case .summon: return "person.2.fill"
+        case .prepare: return "clock.arrow.circlepath"
+        case .restoreWP: return "heart.text.square"
+        case .debuff: return "arrow.down.circle"
+        case .defend: return "shield.lefthalf.filled"
         }
     }
 
@@ -149,6 +173,10 @@ struct EnemyIntentBadge: View {
         case .buff: return AppColors.warning
         case .heal: return AppColors.success
         case .summon: return AppColors.dark
+        case .prepare: return AppColors.muted
+        case .restoreWP: return AppColors.success
+        case .debuff: return AppColors.danger
+        case .defend: return AppColors.primary
         }
     }
 }

@@ -17,6 +17,14 @@ public enum IntentType: String, Codable, Equatable {
     case heal
     /// Summon - calls reinforcements (not implemented yet)
     case summon
+    /// Preparation stance — no immediate effect
+    case prepare
+    /// Restores enemy willpower
+    case restoreWP
+    /// Weakens hero stats
+    case debuff
+    /// Defensive stance — reduces incoming damage
+    case defend
 }
 
 /// Enemy's declared intention for the upcoming turn
@@ -71,6 +79,26 @@ public struct EnemyIntent: Equatable {
     /// Create heal intent
     public static func heal(amount: Int) -> EnemyIntent {
         EnemyIntent(type: .heal, value: amount, description: "intent.heal.\(amount)")
+    }
+
+    /// Create prepare intent
+    public static func prepare(value: Int = 0) -> EnemyIntent {
+        EnemyIntent(type: .prepare, value: value, description: "intent.prepare")
+    }
+
+    /// Create restoreWP intent
+    public static func restoreWP(amount: Int) -> EnemyIntent {
+        EnemyIntent(type: .restoreWP, value: amount, description: "intent.restoreWP.\(amount)")
+    }
+
+    /// Create debuff intent
+    public static func debuff(amount: Int) -> EnemyIntent {
+        EnemyIntent(type: .debuff, value: amount, description: "intent.debuff.\(amount)")
+    }
+
+    /// Create defend intent
+    public static func defend(reduction: Int) -> EnemyIntent {
+        EnemyIntent(type: .defend, value: reduction, description: "intent.defend.\(reduction)")
     }
 }
 

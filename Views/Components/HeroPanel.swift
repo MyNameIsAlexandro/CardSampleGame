@@ -279,7 +279,7 @@ struct HeroPanel: View {
             )
         } else if balance <= 30 {
             return LinearGradient(
-                colors: [AppColors.dark.opacity(Opacity.high), Color.indigo.opacity(Opacity.mediumHigh)],
+                colors: [AppColors.dark.opacity(Opacity.high), AppColors.resonanceNav.opacity(Opacity.mediumHigh)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )

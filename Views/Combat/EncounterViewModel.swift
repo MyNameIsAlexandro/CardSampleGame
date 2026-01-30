@@ -24,11 +24,39 @@ final class EncounterViewModel: ObservableObject {
     @Published var fateDeckDrawCount: Int = 0
     @Published var fateDeckDiscardCount: Int = 0
     @Published var hand: [Card] = []
+    @Published var heroFaith: Int = 0
+    @Published var pendingFateChoice: FateCard? = nil
+    @Published var showFateChoice: Bool = false
+
+    // MARK: - Hero Deck State
+
+    @Published var heroDeckCount: Int = 0
+    @Published var heroDiscardCount: Int = 0
+
+    // MARK: - Mulligan State
+
+    @Published var showMulligan: Bool = false
+    @Published var mulliganSelection: Set<String> = []
+
+    // MARK: - Card Play Feedback
+
+    @Published var insufficientFaithCardId: String? = nil
+    @Published var lastDrawnCardId: String? = nil
+    @Published var lastPlayedCardName: String? = nil
+
+    // MARK: - Phase Animation Lock
+
+    @Published var isProcessingEnemyTurn: Bool = false
 
     // MARK: - Outcome
 
     @Published var encounterResult: EncounterResult?
     @Published var showCombatOver: Bool = false
+
+    // MARK: - Turn Bonuses
+    @Published var turnAttackBonus: Int = 0
+    @Published var turnInfluenceBonus: Int = 0
+    @Published var turnDefenseBonus: Int = 0
 
     // MARK: - Fate Animation
 
@@ -77,14 +105,47 @@ final class EncounterViewModel: ObservableObject {
         // Move to player action
         _ = eng.advancePhase()
         syncState()
+
+        // Show mulligan if player has cards AND pool has replacements
+        if !hand.isEmpty && heroDeckCount > 0 {
+            showMulligan = true
+        }
+    }
+
+    // MARK: - Mulligan
+
+    func toggleMulliganCard(id: String) {
+        if mulliganSelection.contains(id) {
+            mulliganSelection.remove(id)
+        } else {
+            mulliganSelection.insert(id)
+        }
+    }
+
+    func confirmMulligan() {
+        if !mulliganSelection.isEmpty {
+            let result = eng.performAction(.mulligan(cardIds: Array(mulliganSelection)))
+            if result.success {
+                processStateChanges(result.stateChanges)
+            }
+        }
+        mulliganSelection = []
+        showMulligan = false
+        syncState()
+    }
+
+    func skipMulligan() {
+        mulliganSelection = []
+        showMulligan = false
     }
 
     // MARK: - Player Actions
 
     func performAttack() {
-        guard phase == .playerAction, let enemyState = enemy else { return }
+        guard phase == .playerAction, !isProcessingEnemyTurn, let enemyState = enemy else { return }
         fateContext = .attack
         let result = eng.performAction(.attack(targetId: enemyState.id))
+        if !result.success { return }
         lastChanges = result.stateChanges
         processStateChanges(result.stateChanges)
         syncState()
@@ -98,10 +159,11 @@ final class EncounterViewModel: ObservableObject {
     }
 
     func performInfluence() {
-        guard phase == .playerAction, let enemyState = enemy else { return }
+        guard phase == .playerAction, !isProcessingEnemyTurn, let enemyState = enemy else { return }
         guard enemyState.hasSpiritTrack else { return }
         fateContext = .attack
         let result = eng.performAction(.spiritAttack(targetId: enemyState.id))
+        if !result.success { return }
         lastChanges = result.stateChanges
         processStateChanges(result.stateChanges)
         syncState()
@@ -114,8 +176,9 @@ final class EncounterViewModel: ObservableObject {
     }
 
     func performWait() {
-        guard phase == .playerAction else { return }
+        guard phase == .playerAction, !isProcessingEnemyTurn else { return }
         let result = eng.performAction(.wait)
+        if !result.success { return }
         lastChanges = result.stateChanges
         logEntry(L10n.encounterLogPlayerWaits.localized)
         syncState()
@@ -133,16 +196,64 @@ final class EncounterViewModel: ObservableObject {
         }
     }
 
+    func resolveFateChoice(optionIndex: Int) {
+        let result = eng.performAction(.resolveFateChoice(optionIndex: optionIndex))
+        lastChanges = result.stateChanges
+        processStateChanges(result.stateChanges)
+        showFateChoice = false
+        pendingFateChoice = nil
+        syncState()
+        // Resume pending continuation if any
+        if let continuation = pendingContinuation {
+            pendingContinuation = nil
+            continuation()
+        }
+    }
+
     func playCard(_ card: Card) {
-        guard phase == .playerAction else { return }
+        guard phase == .playerAction, !isProcessingEnemyTurn else { return }
+
+        // Pre-check faith affordability for UI feedback
+        if card.faithCost > heroFaith {
+            insufficientFaithCardId = card.id
+            logEntry(L10n.combatFaithInsufficient.localized)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+                if self?.insufficientFaithCardId == card.id {
+                    self?.insufficientFaithCardId = nil
+                }
+            }
+            return
+        }
+
+        let cardName = card.name
         let result = eng.performAction(.useCard(cardId: card.id, targetId: enemy?.id))
+        if !result.success {
+            if result.error == .insufficientFaith {
+                insufficientFaithCardId = card.id
+                logEntry(L10n.combatFaithInsufficient.localized)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+                    if self?.insufficientFaithCardId == card.id {
+                        self?.insufficientFaithCardId = nil
+                    }
+                }
+            }
+            return
+        }
         lastChanges = result.stateChanges
         processStateChanges(result.stateChanges)
         syncState()
+
+        // Show played card name prominently
+        lastPlayedCardName = cardName
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+            if self?.lastPlayedCardName == cardName {
+                self?.lastPlayedCardName = nil
+            }
+        }
     }
 
     func performFlee() {
-        guard phase == .playerAction else { return }
+        guard phase == .playerAction, !isProcessingEnemyTurn else { return }
         _ = eng.performAction(.flee)
         let result = eng.finishEncounter()
         encounterResult = result
@@ -153,13 +264,25 @@ final class EncounterViewModel: ObservableObject {
     // MARK: - Phase Machine
 
     private func advanceAfterPlayerAction() {
+        isProcessingEnemyTurn = true
+
         // Advance to enemy resolution
         _ = eng.advancePhase()
         syncState()
 
         // Check if encounter ended during player action (enemy killed/pacified)
-        if checkEncounterEnd() { return }
+        if checkEncounterEnd() {
+            isProcessingEnemyTurn = false
+            return
+        }
 
+        // Delay enemy resolution so player sees "Ход врага" phase
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self] in
+            self?.resolveEnemyTurn()
+        }
+    }
+
+    private func resolveEnemyTurn() {
         // Resolve enemy action
         if let enemyState = enemy, enemyState.isAlive {
             fateContext = .defense
@@ -171,20 +294,47 @@ final class EncounterViewModel: ObservableObject {
 
         // If defense fate card was drawn, pause for reveal; resume in advanceToNextRound
         if showFateReveal {
-            pendingContinuation = { [weak self] in self?.advanceToNextRound() }
+            pendingContinuation = { [weak self] in
+                self?.delayedAdvanceToNextRound()
+            }
             return
         }
 
-        advanceToNextRound()
+        delayedAdvanceToNextRound()
+    }
+
+    private func delayedAdvanceToNextRound() {
+        // Brief pause after enemy resolution before next round
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            self?.advanceToNextRound()
+        }
     }
 
     private func advanceToNextRound() {
         // Check if encounter ended after enemy action
-        if checkEncounterEnd() { return }
+        if checkEncounterEnd() {
+            isProcessingEnemyTurn = false
+            return
+        }
 
-        // Advance to round end
+        let handBefore = eng.hand.map { $0.id }
+
+        // Advance to round end (draws card here)
         _ = eng.advancePhase()
         syncState()
+
+        // Check for drawn card
+        let handAfter = eng.hand
+        let newCards = handAfter.filter { !handBefore.contains($0.id) }
+        if let drawn = newCards.first {
+            logEntry(L10n.combatCardDrawn.localized(with: drawn.name))
+            lastDrawnCardId = drawn.id
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+                if self?.lastDrawnCardId == drawn.id {
+                    self?.lastDrawnCardId = nil
+                }
+            }
+        }
 
         // Advance to next round intent phase
         _ = eng.advancePhase()
@@ -200,6 +350,8 @@ final class EncounterViewModel: ObservableObject {
         // Advance to player action
         _ = eng.advancePhase()
         syncState()
+
+        isProcessingEnemyTurn = false
     }
 
     private func checkEncounterEnd() -> Bool {
@@ -234,6 +386,13 @@ final class EncounterViewModel: ObservableObject {
         fateDeckDrawCount = eng.fateDeckDrawCount
         fateDeckDiscardCount = eng.fateDeckDiscardCount
         hand = eng.hand
+        heroFaith = eng.heroFaith
+        pendingFateChoice = eng.pendingFateChoice
+        heroDiscardCount = eng.cardDiscardPile.count
+        heroDeckCount = eng.heroCardPoolCount
+        turnAttackBonus = eng.turnAttackBonus
+        turnInfluenceBonus = eng.turnInfluenceBonus
+        turnDefenseBonus = eng.turnDefenseBonus
     }
 
     // MARK: - Log Helpers
@@ -273,6 +432,12 @@ final class EncounterViewModel: ObservableObject {
                 logEntry(L10n.encounterLogRageShield.localized(with: value))
             case .cardPlayed(_, let name):
                 logEntry(L10n.encounterLogCardPlayed.localized(with: name))
+            case .faithChanged(let delta, _):
+                if delta < 0 {
+                    logEntry(L10n.combatFaithSpent.localized(with: -delta))
+                }
+            case .fateChoicePending:
+                showFateChoice = true
             case .cardDrawn:
                 break
             case .encounterEnded:
@@ -299,6 +464,10 @@ final class EncounterViewModel: ObservableObject {
         case .buff: return L10n.combatIntentDetailBuff.localized(with: intent.value)
         case .heal: return L10n.combatIntentDetailHeal.localized(with: intent.value)
         case .summon: return L10n.combatIntentDetailSummon.localized
+        case .prepare: return L10n.combatIntentDetailPrepare.localized
+        case .restoreWP: return L10n.combatIntentDetailRestoreWP.localized(with: intent.value)
+        case .debuff: return L10n.combatIntentDetailDebuff.localized(with: intent.value)
+        case .defend: return L10n.combatIntentDetailDefend.localized(with: intent.value)
         }
     }
 }

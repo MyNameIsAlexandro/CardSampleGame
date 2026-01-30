@@ -22,7 +22,7 @@ struct CardView: View {
                             .fontWeight(.bold)
                             .foregroundColor(AppColors.faith)
                             .padding(Spacing.xs)
-                            .background(Circle().fill(Color.black.opacity(Opacity.mediumHigh)))
+                            .background(Circle().fill(AppColors.backgroundSystem.opacity(Opacity.mediumHigh)))
                     }
                 }
 
@@ -68,7 +68,7 @@ struct CardView: View {
                 }
                 .padding(.horizontal, Spacing.md)
                 .padding(.vertical, Spacing.sm)
-                .background(Color.black.opacity(Opacity.faint))
+                .background(AppColors.backgroundSystem.opacity(Opacity.faint))
             }
 
             // Description
@@ -126,7 +126,7 @@ struct CardView: View {
         .frame(height: Sizes.cardHeightLarge + Sizes.cardHeightMedium)
         .background(AppColors.cardBackground)
         .cornerRadius(CornerRadius.lg)
-        .shadow(color: isSelected ? AppColors.primary.opacity(Opacity.medium) : Color.black.opacity(Opacity.faint), radius: isSelected ? 8 : 4)
+        .shadow(color: isSelected ? AppColors.primary.opacity(Opacity.medium) : AppColors.backgroundSystem.opacity(Opacity.faint), radius: isSelected ? 8 : 4)
         .overlay(
             RoundedRectangle(cornerRadius: CornerRadius.lg)
                 .stroke(isSelected ? AppColors.primary : .clear, lineWidth: 3)
@@ -179,16 +179,16 @@ struct CardView: View {
         case .weapon: return AppColors.danger
         case .spell: return AppColors.primary
         case .armor: return AppColors.secondary
-        case .item: return Color.brown
+        case .item: return AppColors.cardTypeItem
         case .ally: return AppColors.success
         case .blessing: return AppColors.light
         case .monster: return AppColors.danger.opacity(Opacity.high)
-        case .location: return Color.teal
-        case .scenario: return Color.indigo
-        case .curse: return Color.black
-        case .spirit: return Color.cyan
+        case .location: return AppColors.cardTypeLocation
+        case .scenario: return AppColors.cardTypeScenario
+        case .curse: return AppColors.cardTypeCurse
+        case .spirit: return AppColors.cardTypeSpirit
         case .artifact: return AppColors.power
-        case .ritual: return Color.indigo
+        case .ritual: return AppColors.cardTypeRitual
         case .resource: return AppColors.success
         case .attack: return AppColors.danger
         case .defense: return AppColors.defense
@@ -362,16 +362,16 @@ struct CompactCardView: View {
         case .weapon: return AppColors.danger
         case .spell: return AppColors.primary
         case .armor: return AppColors.secondary
-        case .item: return Color.brown
+        case .item: return AppColors.cardTypeItem
         case .ally: return AppColors.success
         case .blessing: return AppColors.light
         case .monster: return AppColors.danger.opacity(Opacity.high)
-        case .location: return Color.teal
-        case .scenario: return Color.indigo
-        case .curse: return Color.black
-        case .spirit: return Color.cyan
+        case .location: return AppColors.cardTypeLocation
+        case .scenario: return AppColors.cardTypeScenario
+        case .curse: return AppColors.cardTypeCurse
+        case .spirit: return AppColors.cardTypeSpirit
         case .artifact: return AppColors.power
-        case .ritual: return Color.indigo
+        case .ritual: return AppColors.cardTypeRitual
         case .resource: return AppColors.success
         case .attack: return AppColors.danger
         case .defense: return AppColors.defense
@@ -531,16 +531,16 @@ struct HandCardView: View {
         case .weapon: return AppColors.danger
         case .spell: return AppColors.primary
         case .armor: return AppColors.secondary
-        case .item: return Color.brown
+        case .item: return AppColors.cardTypeItem
         case .ally: return AppColors.success
         case .blessing: return AppColors.light
         case .monster: return AppColors.danger.opacity(Opacity.high)
-        case .location: return Color.teal
-        case .scenario: return Color.indigo
-        case .curse: return Color.black
-        case .spirit: return Color.cyan
+        case .location: return AppColors.cardTypeLocation
+        case .scenario: return AppColors.cardTypeScenario
+        case .curse: return AppColors.cardTypeCurse
+        case .spirit: return AppColors.cardTypeSpirit
         case .artifact: return AppColors.power
-        case .ritual: return Color.indigo
+        case .ritual: return AppColors.cardTypeRitual
         case .resource: return AppColors.success
         case .attack: return AppColors.danger
         case .defense: return AppColors.defense

@@ -78,9 +78,17 @@ final class INV_BHV_GateTests: XCTestCase {
         )
         let engine = EncounterEngine(context: ctx)
 
-        // First attack spiritual, then physical to trigger escalation
+        // Round 1: spiritual attack
         _ = engine.advancePhase() // intent → playerAction
         _ = engine.performAction(.spiritAttack(targetId: "e1"))
+        _ = engine.advancePhase() // → enemyResolution
+        _ = engine.resolveEnemyAction(enemyId: "e1")
+        _ = engine.advancePhase() // → roundEnd
+        _ = engine.advancePhase() // → intent (round 2)
+        _ = engine.generateIntent(for: "e1")
+
+        // Round 2: physical attack (escalation)
+        _ = engine.advancePhase() // → playerAction
         let result = engine.performAction(.attack(targetId: "e1"))
 
         // Should use custom surprise bonus (7) from balance config

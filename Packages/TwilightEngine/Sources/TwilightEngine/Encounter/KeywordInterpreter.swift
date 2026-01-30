@@ -9,6 +9,7 @@ public enum ActionContext: String, CaseIterable {
     case exploration
     case dialogue
     case defense
+    case skillCheck
 }
 
 // MARK: - Keyword Effect
@@ -44,13 +45,14 @@ public struct KeywordInterpreter {
         keyword: FateKeyword,
         context: ActionContext,
         baseValue: Int = 0,
-        isMatch: Bool = false
+        isMatch: Bool = false,
+        matchMultiplier: Double = 2.0
     ) -> KeywordEffect {
         let base = baseEffect(keyword: keyword, context: context)
         if isMatch {
             return KeywordEffect(
-                bonusDamage: base.bonusDamage * 2,
-                bonusValue: base.bonusValue * 2,
+                bonusDamage: Int(Double(base.bonusDamage) * matchMultiplier),
+                bonusValue: Int(Double(base.bonusValue) * matchMultiplier),
                 special: base.special
             )
         }
@@ -63,12 +65,13 @@ public struct KeywordInterpreter {
         context: ActionContext,
         baseValue: Int = 0,
         isMatch: Bool = false,
-        isMismatch: Bool = false
+        isMismatch: Bool = false,
+        matchMultiplier: Double = 2.0
     ) -> KeywordEffect {
         if isMismatch {
             return KeywordEffect(bonusDamage: 0, bonusValue: 0, special: nil)
         }
-        return resolve(keyword: keyword, context: context, baseValue: baseValue, isMatch: isMatch)
+        return resolve(keyword: keyword, context: context, baseValue: baseValue, isMatch: isMatch, matchMultiplier: matchMultiplier)
     }
 
     // MARK: - Interpretation Matrix
@@ -86,6 +89,8 @@ public struct KeywordInterpreter {
             return KeywordEffect(bonusValue: 1, special: "persuade")
         case (.surge, .defense):
             return KeywordEffect(bonusValue: 1)
+        case (.surge, .skillCheck):
+            return KeywordEffect(bonusValue: 1, special: "discovery")
 
         // Focus — precision/accuracy
         case (.focus, .combatPhysical):
@@ -98,6 +103,8 @@ public struct KeywordInterpreter {
             return KeywordEffect(bonusValue: 2)
         case (.focus, .defense):
             return KeywordEffect(bonusValue: 1, special: "counter")
+        case (.focus, .skillCheck):
+            return KeywordEffect(bonusValue: 2, special: "detail")
 
         // Echo — repeat/amplify
         case (.echo, .combatPhysical):
@@ -110,6 +117,8 @@ public struct KeywordInterpreter {
             return KeywordEffect(bonusValue: 1, special: "echo_voice")
         case (.echo, .defense):
             return KeywordEffect(bonusValue: 2, special: "echo_shield")
+        case (.echo, .skillCheck):
+            return KeywordEffect(bonusValue: 1, special: "echo_find")
 
         // Shadow — stealth/evasion
         case (.shadow, .combatPhysical):
@@ -122,6 +131,8 @@ public struct KeywordInterpreter {
             return KeywordEffect(bonusValue: 1, special: "intimidate")
         case (.shadow, .defense):
             return KeywordEffect(bonusValue: 1, special: "evade")
+        case (.shadow, .skillCheck):
+            return KeywordEffect(bonusValue: 2, special: "stealth")
 
         // Ward — protection/shield
         case (.ward, .combatPhysical):
@@ -134,6 +145,8 @@ public struct KeywordInterpreter {
             return KeywordEffect(bonusValue: 1, special: "composure")
         case (.ward, .defense):
             return KeywordEffect(bonusDamage: 0, bonusValue: 3, special: "fortify")
+        case (.ward, .skillCheck):
+            return KeywordEffect(bonusValue: 1, special: "safe_passage")
         }
     }
 }

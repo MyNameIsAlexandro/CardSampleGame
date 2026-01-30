@@ -81,11 +81,17 @@ final class EncounterIntegrationTests: XCTestCase {
         )
         let engine = EncounterEngine(context: ctx)
 
-        // Spirit attack (diplomacy)
+        // Round 1: Spirit attack (diplomacy)
         _ = engine.advancePhase() // intent → playerAction
         _ = engine.performAction(.spiritAttack(targetId: "guard"))
+        _ = engine.advancePhase() // → enemyResolution
+        _ = engine.resolveEnemyAction(enemyId: "guard")
+        _ = engine.advancePhase() // → roundEnd
+        _ = engine.advancePhase() // → intent (round 2)
+        _ = engine.generateIntent(for: "guard")
 
-        // Physical attack (escalation)
+        // Round 2: Physical attack (escalation)
+        _ = engine.advancePhase() // → playerAction
         let result = engine.performAction(.attack(targetId: "guard"))
 
         // Verify resonance shifted
@@ -100,14 +106,32 @@ final class EncounterIntegrationTests: XCTestCase {
 
     // #19: Multi-enemy — per-entity outcomes
     func testMultiEnemy1vN() {
-        let ctx = EncounterContextFixtures.multiEnemy()
+        // Use 1-HP/1-WP enemies so each dies/pacifies in one hit
+        let ctx = EncounterContext(
+            hero: EncounterHero(id: "test_hero", hp: 100, maxHp: 100, strength: 10, armor: 2, wisdom: 10),
+            enemies: [
+                EncounterEnemy(id: "enemy_1", name: "Bandit A", hp: 1, maxHp: 1, wp: 1, maxWp: 1, power: 3, defense: 0),
+                EncounterEnemy(id: "enemy_2", name: "Bandit B", hp: 1, maxHp: 1, wp: 1, maxWp: 1, power: 4, defense: 0),
+                EncounterEnemy(id: "enemy_3", name: "Bandit C", hp: 1, maxHp: 1, wp: 1, maxWp: 1, power: 5, defense: 0)
+            ],
+            fateDeckSnapshot: FateDeckFixtures.deterministicState(),
+            modifiers: [],
+            rules: EncounterRules(),
+            rngSeed: 42
+        )
         let engine = EncounterEngine(context: ctx)
 
-        // Kill first enemy
+        // Round 1: Kill first enemy
         _ = engine.advancePhase() // intent → playerAction
         _ = engine.performAction(.attack(targetId: "enemy_1"))
+        _ = engine.advancePhase() // → enemyResolution
+        _ = engine.resolveEnemyAction(enemyId: "enemy_2")
+        _ = engine.advancePhase() // → roundEnd
+        _ = engine.advancePhase() // → intent (round 2)
+        _ = engine.generateIntent(for: "enemy_2")
 
-        // Pacify second
+        // Round 2: Pacify second enemy
+        _ = engine.advancePhase() // → playerAction
         _ = engine.performAction(.spiritAttack(targetId: "enemy_2"))
 
         let result = engine.finishEncounter()
@@ -120,14 +144,43 @@ final class EncounterIntegrationTests: XCTestCase {
 
     // #20: All pacified → nonviolent encounter
     func testMultiEnemyAllPacified() {
-        let ctx = EncounterContextFixtures.multiEnemy()
+        // Use 1-WP enemies so each pacifies in one spirit attack
+        let ctx = EncounterContext(
+            hero: EncounterHero(id: "test_hero", hp: 100, maxHp: 100, strength: 5, armor: 2, wisdom: 10),
+            enemies: [
+                EncounterEnemy(id: "enemy_1", name: "Bandit A", hp: 10, maxHp: 10, wp: 1, maxWp: 1, power: 3, defense: 1),
+                EncounterEnemy(id: "enemy_2", name: "Bandit B", hp: 15, maxHp: 15, wp: 1, maxWp: 1, power: 4, defense: 1),
+                EncounterEnemy(id: "enemy_3", name: "Bandit C", hp: 20, maxHp: 20, wp: 1, maxWp: 1, power: 5, defense: 2)
+            ],
+            fateDeckSnapshot: FateDeckFixtures.deterministicState(),
+            modifiers: [],
+            rules: EncounterRules(),
+            rngSeed: 42
+        )
         let engine = EncounterEngine(context: ctx)
 
-        // Spirit attack all enemies
-        _ = engine.advancePhase() // intent → playerAction
-        _ = engine.performAction(.spiritAttack(targetId: "enemy_1"))
-        _ = engine.performAction(.spiritAttack(targetId: "enemy_2"))
-        _ = engine.performAction(.spiritAttack(targetId: "enemy_3"))
+        // Pacify one enemy per round
+        let enemyIds = ["enemy_1", "enemy_2", "enemy_3"]
+        for (i, eid) in enemyIds.enumerated() {
+            if i == 0 {
+                _ = engine.advancePhase() // intent → playerAction
+            }
+            _ = engine.performAction(.spiritAttack(targetId: eid))
+            // Advance to next round if not the last enemy
+            if i < enemyIds.count - 1 {
+                _ = engine.advancePhase() // → enemyResolution
+                // Resolve alive enemies
+                for alive in enemyIds[(i+1)...] {
+                    _ = engine.resolveEnemyAction(enemyId: alive)
+                }
+                _ = engine.advancePhase() // → roundEnd
+                _ = engine.advancePhase() // → intent
+                for alive in enemyIds[(i+1)...] {
+                    _ = engine.generateIntent(for: alive)
+                }
+                _ = engine.advancePhase() // → playerAction
+            }
+        }
 
         let result = engine.finishEncounter()
 
@@ -166,7 +219,8 @@ final class EncounterIntegrationTests: XCTestCase {
             modifiers: [],
             rules: EncounterRules(),
             rngSeed: 42,
-            heroCards: [atkCard]
+            heroCards: [atkCard],
+            heroFaith: 100
         )
         let engine = EncounterEngine(context: ctx)
 

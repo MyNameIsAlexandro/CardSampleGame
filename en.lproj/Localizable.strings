@@ -895,3 +895,38 @@
 "encounter.outcome.continue" = "Continue";
 "encounter.outcome.hp.lost" = "Health lost: %d";
 "encounter.outcome.hp.gained" = "Health restored: %d";
+
+// New intent types
+"combat.intent.prepare" = "Prepare";
+"combat.intent.restoreWP" = "Restore Will";
+"combat.intent.debuff" = "Weaken";
+"combat.intent.defend" = "Defend";
+"combat.intent.detail.prepare" = "Preparing...";
+"combat.intent.detail.restoreWP" = "Restoring %d will";
+"combat.intent.detail.debuff" = "Weakening by %d";
+"combat.intent.detail.defend" = "Defending +%d";
+
+// Faith
+"combat.faith.label" = "Faith";
+"combat.faith.insufficient" = "Not enough Faith";
+"combat.faith.cost" = "Cost: %d faith";
+"combat.faith.spent" = "Spent %d faith";
+
+// Fate choice
+"fate.choice.title" = "Fate's Choice";
+"fate.choice.safe" = "Safe path";
+"fate.choice.risk" = "Risky path";
+"fate.choice.timer" = "%d sec";
+
+// Mulligan
+"combat.mulligan.title" = "Mulligan";
+"combat.mulligan.prompt" = "Choose cards to replace";
+"combat.mulligan.confirm" = "Confirm";
+"combat.mulligan.skip" = "Skip";
+
+// Card draw
+"combat.card.drawn" = "Drew: %@";
+
+// Escalation
+"combat.escalation.surprise" = "Surprise attack!";
+"combat.escalation.rage_shield" = "Rage shield activated";

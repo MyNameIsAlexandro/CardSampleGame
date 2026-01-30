@@ -242,7 +242,13 @@ struct FateDiscardPileView: View {
                     }
                 }
             }
+            .background(AppColors.backgroundSystem)
             .navigationTitle(L10n.combatFateDiscardTitle.localized)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbarBackground(AppColors.backgroundSystem, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .tint(AppColors.primary)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button(L10n.buttonOk.localized) { dismiss() }

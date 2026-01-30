@@ -71,7 +71,12 @@ struct EventView: View {
                 .padding(.vertical)
             }
             .navigationTitle(event.title)
+            .background(AppColors.backgroundSystem)
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbarBackground(AppColors.backgroundSystem, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .tint(AppColors.primary)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(L10n.uiClose.localized) {
@@ -138,7 +143,7 @@ struct EventView: View {
         case .combat: return AppColors.danger
         case .ritual: return AppColors.dark
         case .narrative: return AppColors.primary
-        case .exploration: return Color.cyan
+        case .exploration: return AppColors.info
         case .worldShift: return AppColors.power
         }
     }

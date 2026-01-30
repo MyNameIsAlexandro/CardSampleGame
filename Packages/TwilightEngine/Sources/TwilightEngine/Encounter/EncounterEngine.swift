@@ -28,6 +28,11 @@ public final class EncounterEngine {
     public private(set) var turnAttackBonus: Int = 0
     public private(set) var turnDefenseBonus: Int = 0
     public private(set) var turnInfluenceBonus: Int = 0
+    public private(set) var heroFaith: Int = 0
+    public private(set) var pendingFateChoice: FateCard?
+    public var heroCardPoolCount: Int { cardPool().count }
+    public var heroCardsTotal: Int { context.heroCards.count }
+    private var finishActionUsed: Bool = false
 
     private let context: EncounterContext
     private let rng: WorldRNG
@@ -52,16 +57,26 @@ public final class EncounterEngine {
         self.fateDeck.restoreState(context.fateDeckSnapshot)
         self.hand = Array(context.heroCards.prefix(3))
         self.cardDiscardPile = []
+        self.heroFaith = context.heroFaith
     }
 
     // MARK: - Actions
 
     public func performAction(_ action: PlayerAction) -> EncounterActionResult {
         // Mulligan is allowed before combat loop starts (any phase)
-        if case .mulligan = action {
+        if case .mulligan(let cardIds) = action {
             if mulliganDone { return .fail(.mulliganAlreadyDone) }
             mulliganDone = true
-            return .ok([])
+            var changes: [EncounterStateChange] = []
+            let toDiscard = hand.filter { cardIds.contains($0.id) }
+            hand.removeAll { cardIds.contains($0.id) }
+            cardDiscardPile.append(contentsOf: toDiscard)
+            let available = cardPool()
+            for card in available.prefix(toDiscard.count) {
+                hand.append(card)
+                changes.append(.cardDrawn(cardId: card.id))
+            }
+            return .ok(changes)
         }
 
         guard currentPhase == .playerAction else {
@@ -69,17 +84,33 @@ public final class EncounterEngine {
         }
         switch action {
         case .attack(let targetId):
-            return performPhysicalAttack(targetId: targetId)
+            if finishActionUsed { return .fail(.actionNotAllowed) }
+            let result = performPhysicalAttack(targetId: targetId)
+            if result.success { finishActionUsed = true }
+            return result
         case .spiritAttack(let targetId):
-            return performSpiritAttack(targetId: targetId)
+            if finishActionUsed { return .fail(.actionNotAllowed) }
+            let result = performSpiritAttack(targetId: targetId)
+            if result.success { finishActionUsed = true }
+            return result
         case .wait:
+            if finishActionUsed { return .fail(.actionNotAllowed) }
+            finishActionUsed = true
             return .ok([])
         case .useCard(let cardId, _):
-            return playCard(cardId: cardId)
-        case .defend, .flee:
+            return playCard(cardId: cardId) // card play is NOT a finish action
+        case .defend:
+            if finishActionUsed { return .fail(.actionNotAllowed) }
+            finishActionUsed = true
+            return .ok([])
+        case .flee:
+            if finishActionUsed { return .fail(.actionNotAllowed) }
+            finishActionUsed = true
             return .ok([])
         case .mulligan:
             fatalError("Handled above")
+        case .resolveFateChoice(let optionIndex):
+            return resolveFateChoice(optionIndex: optionIndex)
         }
     }
 
@@ -93,8 +124,17 @@ public final class EncounterEngine {
             turnAttackBonus = 0
             turnDefenseBonus = 0
             turnInfluenceBonus = 0
+            finishActionUsed = false
             currentPhase = .roundEnd
         case .roundEnd:
+            // Draw card at end of round (up to maxHandSize)
+            let maxHand = context.balanceConfig?.maxHandSize ?? 7
+            if hand.count < maxHand {
+                let available = cardPool()
+                if let card = available.first {
+                    hand.append(card)
+                }
+            }
             currentPhase = .intent
             currentRound += 1
         }
@@ -117,7 +157,9 @@ public final class EncounterEngine {
                 power: enemy.power,
                 defense: enemy.defense,
                 health: enemy.hp,
-                maxHealth: enemy.maxHp
+                maxHealth: enemy.maxHp,
+                worldResonance: effectiveResonance,
+                lastPlayerAction: lastAttackTrack.map { $0 == .physical ? "physical" : "spiritual" }
             )
             if let intent = BehaviorEvaluator.evaluate(behavior: behavior, context: behaviorCtx) {
                 currentIntent = intent
@@ -163,7 +205,8 @@ public final class EncounterEngine {
                             context: .defense,
                             baseValue: card.baseValue,
                             isMatch: isSuitMatch(card.suit, for: .defense),
-                            isMismatch: isSuitMismatch(card.suit, for: .defense)
+                            isMismatch: isSuitMismatch(card.suit, for: .defense),
+                            matchMultiplier: matchMultiplier
                         )
                         defenseBonus = effect.bonusValue
                     }
@@ -199,6 +242,26 @@ public final class EncounterEngine {
 
         case .summon:
             break // not yet implemented
+
+        case .prepare:
+            break // stance — no immediate effect
+
+        case .restoreWP:
+            if let idx = findEnemyIndex(id: enemyId), let currentWP = enemies[idx].wp {
+                let maxWP = enemies[idx].maxWp ?? currentWP
+                let restored = min(intent.value, maxWP - currentWP)
+                enemies[idx].wp = currentWP + restored
+                changes.append(.enemyWPChanged(enemyId: enemyId, delta: restored, newValue: currentWP + restored))
+            }
+
+        case .debuff:
+            // Reduce hero effective strength this round via negative attack bonus
+            turnAttackBonus -= intent.value
+
+        case .defend:
+            if let idx = findEnemyIndex(id: enemyId) {
+                enemies[idx].defense += intent.value
+            }
         }
 
         currentIntent = nil
@@ -254,10 +317,35 @@ public final class EncounterEngine {
         guard let cardIndex = hand.firstIndex(where: { $0.id == cardId }) else {
             return .fail(.invalidTarget)
         }
-        let card = hand.remove(at: cardIndex)
+        let card = hand[cardIndex]
+
+        // Faith cost with resonance modifier
+        let baseCost = card.faithCost
+        var adjustedCost = baseCost
+        if baseCost > 0 {
+            let zone = ResonanceEngine.zone(for: effectiveResonance)
+            if let realm = card.realm {
+                switch (realm, zone) {
+                case (.nav, .prav), (.nav, .deepPrav): adjustedCost += 1
+                case (.prav, .nav), (.prav, .deepNav): adjustedCost += 1
+                case (.nav, .nav), (.nav, .deepNav): adjustedCost = max(0, adjustedCost - 1)
+                case (.prav, .prav), (.prav, .deepPrav): adjustedCost = max(0, adjustedCost - 1)
+                default: break
+                }
+            }
+            if adjustedCost > heroFaith {
+                return .fail(.insufficientFaith)
+            }
+            heroFaith -= adjustedCost
+        }
+
+        hand.remove(at: cardIndex)
         cardDiscardPile.append(card)
 
         var changes: [EncounterStateChange] = []
+        if adjustedCost > 0 {
+            changes.append(.faithChanged(delta: -adjustedCost, newValue: heroFaith))
+        }
         changes.append(.cardPlayed(cardId: card.id, name: card.name))
 
         for ability in card.abilities {
@@ -284,19 +372,23 @@ public final class EncounterEngine {
                     hand.append(drawn)
                     changes.append(.cardDrawn(cardId: drawn.id))
                 }
-            case .gainFaith:
-                break // faith not tracked in encounter engine
+            case .gainFaith(let amount):
+                heroFaith += amount
+                changes.append(.faithChanged(delta: amount, newValue: heroFaith))
             default:
                 break
             }
         }
 
-        // Fallback: if card has no abilities but has power, treat as attack bonus
-        if card.abilities.isEmpty, let power = card.power, power > 0 {
+        // Apply base stats as bonuses (cards have dual combat/diplomacy values)
+        if let power = card.power, power > 0 {
             turnAttackBonus += power
         }
-        if card.abilities.isEmpty, let def = card.defense, def > 0 {
+        if let def = card.defense, def > 0 {
             turnDefenseBonus += def
+        }
+        if let wis = card.wisdom, wis > 0 {
+            turnInfluenceBonus += wis
         }
 
         return .ok(changes)
@@ -308,10 +400,39 @@ public final class EncounterEngine {
         context.worldResonance + accumulatedResonanceDelta
     }
 
+    private var matchMultiplier: Double {
+        context.balanceConfig?.matchMultiplier ?? 1.5
+    }
+
     private func drawFate() -> FateDrawResult? {
         let result = fateDeck.drawAndResolve(worldResonance: effectiveResonance)
         lastFateDrawResult = result
+        if let result = result, result.card.cardType == .choice {
+            pendingFateChoice = result.card
+        }
         return result
+    }
+
+    private func cardPool() -> [Card] {
+        context.heroCards.filter { c in
+            !hand.contains(where: { $0.id == c.id }) &&
+            !cardDiscardPile.contains(where: { $0.id == c.id })
+        }
+    }
+
+    private func resolveFateChoice(optionIndex: Int) -> EncounterActionResult {
+        guard let choice = pendingFateChoice else {
+            return .fail(.actionNotAllowed)
+        }
+        guard let options = choice.choiceOptions, optionIndex < options.count else {
+            return .fail(.invalidTarget)
+        }
+        pendingFateChoice = nil
+        // Apply the chosen option's effect as a value modifier
+        // Safe option (index 0) typically has lower/no bonus
+        // Risk option (index 1) typically has higher bonus but possible penalty
+        let bonusValue = optionIndex == 0 ? 0 : choice.baseValue
+        return .ok([.fateDraw(cardId: choice.id, value: bonusValue)])
     }
 
     private func findEnemyIndex(id: String) -> Int? {
@@ -363,7 +484,8 @@ public final class EncounterEngine {
                     context: .combatPhysical,
                     baseValue: fateResult.effectiveValue,
                     isMatch: isSuitMatch(fateResult.card.suit, for: .combatPhysical),
-                    isMismatch: isSuitMismatch(fateResult.card.suit, for: .combatPhysical)
+                    isMismatch: isSuitMismatch(fateResult.card.suit, for: .combatPhysical),
+                    matchMultiplier: matchMultiplier
                 )
                 keywordBonus = effect.bonusDamage
             }
@@ -408,13 +530,14 @@ public final class EncounterEngine {
                     context: .combatSpiritual,
                     baseValue: fateResult.effectiveValue,
                     isMatch: isSuitMatch(fateResult.card.suit, for: .combatSpiritual),
-                    isMismatch: isSuitMismatch(fateResult.card.suit, for: .combatSpiritual)
+                    isMismatch: isSuitMismatch(fateResult.card.suit, for: .combatSpiritual),
+                    matchMultiplier: matchMultiplier
                 )
                 keywordBonus = effect.bonusDamage
             }
         }
 
-        let damage = max(1, context.hero.wisdom + turnInfluenceBonus + keywordBonus - enemies[idx].rageShield)
+        let damage = max(1, context.hero.wisdom + turnInfluenceBonus + keywordBonus - enemies[idx].rageShield - enemies[idx].spiritDefense)
         let currentWP = enemies[idx].wp ?? 0
         let newWP = max(0, currentWP - damage)
         enemies[idx].wp = newWP
@@ -442,6 +565,7 @@ public struct EncounterEnemyState: Equatable {
     public let maxWp: Int?
     public var power: Int
     public var defense: Int
+    public var spiritDefense: Int
     public var rageShield: Int
     public var outcome: EntityOutcome?
 
@@ -458,6 +582,7 @@ public struct EncounterEnemyState: Equatable {
         self.maxWp = enemy.maxWp
         self.power = enemy.power
         self.defense = enemy.defense
+        self.spiritDefense = enemy.spiritDefense
         self.rageShield = 0
         self.outcome = nil
     }

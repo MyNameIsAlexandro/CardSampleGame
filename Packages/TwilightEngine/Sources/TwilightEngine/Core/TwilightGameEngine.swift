@@ -1050,6 +1050,10 @@ public final class TwilightGameEngine: ObservableObject {
         var changes: [StateChange] = []
         let events: [String] = []
 
+        // Clear any leftover event from the previous region
+        currentEventId = nil
+        currentEvent = nil
+
         // Update current region
         currentRegionId = regionId
         changes.append(.regionChanged(regionId: regionId))
@@ -1638,6 +1642,9 @@ public final class TwilightGameEngine: ObservableObject {
             case .summon:
                 // Not implemented yet
                 break
+
+            case .prepare, .restoreWP, .debuff, .defend:
+                break // handled by EncounterEngine
             }
 
             // Reset for next turn

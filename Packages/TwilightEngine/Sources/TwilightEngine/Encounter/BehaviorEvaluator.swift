@@ -10,6 +10,8 @@ public struct BehaviorContext {
     public let defense: Int
     public let health: Int
     public let maxHealth: Int
+    public let worldResonance: Float?
+    public let lastPlayerAction: String?
 
     public init(
         healthPercent: Double,
@@ -17,7 +19,9 @@ public struct BehaviorContext {
         power: Int,
         defense: Int,
         health: Int,
-        maxHealth: Int
+        maxHealth: Int,
+        worldResonance: Float? = nil,
+        lastPlayerAction: String? = nil
     ) {
         self.healthPercent = healthPercent
         self.turn = turn
@@ -25,6 +29,8 @@ public struct BehaviorContext {
         self.defense = defense
         self.health = health
         self.maxHealth = maxHealth
+        self.worldResonance = worldResonance
+        self.lastPlayerAction = lastPlayerAction
     }
 }
 
@@ -45,6 +51,19 @@ public struct BehaviorEvaluator {
                 return makeIntent(from: rule, context: context)
             }
         }
+
+        // Default intent fallback
+        if let intentStr = behavior.defaultIntent,
+           let intentType = IntentType(rawValue: intentStr) {
+            let value: Int
+            if let formula = behavior.defaultValue {
+                value = Int(resolveFormulaToken(formula, context: context))
+            } else {
+                value = context.power
+            }
+            return makeIntentFromType(intentType, value: value)
+        }
+
         return nil
     }
 
@@ -79,6 +98,15 @@ public struct BehaviorEvaluator {
             return Double(context.turn)
         case "turn_mod3":
             return Double(context.turn % 3)
+        case "world_resonance":
+            return Double(context.worldResonance ?? 0)
+        case "last_player_action":
+            // 1.0 = physical, 2.0 = spiritual, 0.0 = none
+            switch context.lastPlayerAction {
+            case "physical": return 1.0
+            case "spiritual": return 2.0
+            default: return 0.0
+            }
         default:
             return 0
         }
@@ -115,6 +143,29 @@ public struct BehaviorEvaluator {
             return .heal(amount: value)
         case .summon:
             return .attack(damage: value) // fallback
+        case .prepare:
+            return .prepare(value: value)
+        case .restoreWP:
+            return .restoreWP(amount: value)
+        case .debuff:
+            return .debuff(amount: value)
+        case .defend:
+            return .defend(reduction: value)
+        }
+    }
+
+    private static func makeIntentFromType(_ type: IntentType, value: Int) -> EnemyIntent {
+        switch type {
+        case .attack: return .attack(damage: value)
+        case .ritual: return .ritual(resonanceShift: -value)
+        case .block: return .block(reduction: value)
+        case .buff: return .buff(amount: value)
+        case .heal: return .heal(amount: value)
+        case .summon: return .attack(damage: value)
+        case .prepare: return .prepare(value: value)
+        case .restoreWP: return .restoreWP(amount: value)
+        case .debuff: return .debuff(amount: value)
+        case .defend: return .defend(reduction: value)
         }
     }
 

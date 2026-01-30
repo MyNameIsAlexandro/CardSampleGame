@@ -535,4 +535,39 @@ enum L10n {
     static let combatIntentDetailHeal = "combat.intent.detail.heal"
     static let combatIntentDetailSummon = "combat.intent.detail.summon"
 
+    // New intent types
+    static let combatIntentPrepare = "combat.intent.prepare"
+    static let combatIntentRestoreWP = "combat.intent.restoreWP"
+    static let combatIntentDebuff = "combat.intent.debuff"
+    static let combatIntentDefend = "combat.intent.defend"
+    static let combatIntentDetailPrepare = "combat.intent.detail.prepare"
+    static let combatIntentDetailRestoreWP = "combat.intent.detail.restoreWP"
+    static let combatIntentDetailDebuff = "combat.intent.detail.debuff"
+    static let combatIntentDetailDefend = "combat.intent.detail.defend"
+
+    // Faith
+    static let combatFaithLabel = "combat.faith.label"
+    static let combatFaithInsufficient = "combat.faith.insufficient"
+    static let combatFaithCost = "combat.faith.cost"
+    static let combatFaithSpent = "combat.faith.spent"
+
+    // Fate choice
+    static let fateChoiceTitle = "fate.choice.title"
+    static let fateChoiceSafe = "fate.choice.safe"
+    static let fateChoiceRisk = "fate.choice.risk"
+    static let fateChoiceTimer = "fate.choice.timer"
+
+    // Mulligan
+    static let combatMulliganTitle = "combat.mulligan.title"
+    static let combatMulliganPrompt = "combat.mulligan.prompt"
+    static let combatMulliganConfirm = "combat.mulligan.confirm"
+    static let combatMulliganSkip = "combat.mulligan.skip"
+
+    // Card draw
+    static let combatCardDrawn = "combat.card.drawn"
+
+    // Escalation
+    static let combatEscalationSurprise = "combat.escalation.surprise"
+    static let combatEscalationRageShield = "combat.escalation.rage_shield"
+
 }

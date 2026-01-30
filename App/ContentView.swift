@@ -45,6 +45,9 @@ struct ContentView: View {
 
     var body: some View {
         NavigationView {
+            ZStack {
+                AppColors.backgroundSystem.ignoresSafeArea()
+
             if showingBattleArena {
                 BattleArenaView(engine: engine, onExit: {
                     showingBattleArena = false
@@ -70,6 +73,7 @@ struct ContentView: View {
             } else {
                 characterSelectionView
             }
+            } // ZStack
         }
     }
 
@@ -100,8 +104,8 @@ struct ContentView: View {
                                 Image(systemName: "shippingbox.fill")
                                     .font(.title3)
                                     .padding(8)
-                                    .background(Color.purple.opacity(0.2))
-                                    .foregroundColor(.purple)
+                                    .background(AppColors.dark.opacity(0.2))
+                                    .foregroundColor(AppColors.dark)
                                     .cornerRadius(8)
                             }
                             #endif
@@ -110,16 +114,16 @@ struct ContentView: View {
                                 Image(systemName: "chart.bar.fill")
                                     .font(.title3)
                                     .padding(8)
-                                    .background(Color.orange.opacity(0.2))
-                                    .foregroundColor(.orange)
+                                    .background(AppColors.warning.opacity(0.2))
+                                    .foregroundColor(AppColors.warning)
                                     .cornerRadius(8)
                             }
                             Button(action: { showingRules = true }) {
                                 Image(systemName: "book.fill")
                                     .font(.title3)
                                     .padding(8)
-                                    .background(Color.blue.opacity(0.2))
-                                    .foregroundColor(.blue)
+                                    .background(AppColors.info.opacity(0.2))
+                                    .foregroundColor(AppColors.info)
                                     .cornerRadius(8)
                             }
                         }
@@ -162,9 +166,9 @@ struct ContentView: View {
                                     .fixedSize(horizontal: false, vertical: true)
 
                                 HStack(spacing: 24) {
-                                    StatDisplay(icon: "heart.fill", label: L10n.statHealth.localized, value: hero.baseStats.health, color: .red)
-                                    StatDisplay(icon: "bolt.fill", label: L10n.statPower.localized, value: hero.baseStats.strength, color: .orange)
-                                    StatDisplay(icon: "shield.fill", label: L10n.statDefense.localized, value: hero.baseStats.constitution, color: .blue)
+                                    StatDisplay(icon: "heart.fill", label: L10n.statHealth.localized, value: hero.baseStats.health, color: AppColors.health)
+                                    StatDisplay(icon: "bolt.fill", label: L10n.statPower.localized, value: hero.baseStats.strength, color: AppColors.power)
+                                    StatDisplay(icon: "shield.fill", label: L10n.statDefense.localized, value: hero.baseStats.constitution, color: AppColors.defense)
                                 }
 
                                 // Hero special ability
@@ -178,7 +182,7 @@ struct ContentView: View {
                                         Text(hero.specialAbility.name.localized)
                                             .font(.subheadline)
                                             .fontWeight(.bold)
-                                            .foregroundColor(.orange)
+                                            .foregroundColor(AppColors.power)
                                     }
                                     Text(hero.specialAbility.description.localized)
                                         .font(.caption)
@@ -188,7 +192,7 @@ struct ContentView: View {
                                 .padding(.vertical, 4)
                             }
                             .padding()
-                            .background(Color(UIColor.secondarySystemBackground))
+                            .background(AppColors.cardBackground)
                             .cornerRadius(12)
                             .padding(.horizontal)
                         }
@@ -204,7 +208,7 @@ struct ContentView: View {
                     Rectangle()
                         .fill(
                             LinearGradient(
-                                gradient: Gradient(colors: [Color.clear, Color(UIColor.systemBackground)]),
+                                gradient: Gradient(colors: [Color.clear, AppColors.backgroundSystem]),
                                 startPoint: .top,
                                 endPoint: .bottom
                             )
@@ -224,7 +228,7 @@ struct ContentView: View {
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
                                 .padding()
-                                .background(Color.green)
+                                .background(AppColors.success)
                                 .cornerRadius(12)
                             }
                         }
@@ -242,7 +246,7 @@ struct ContentView: View {
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(selectedHeroId == nil ? Color.gray : Color.blue)
+                            .background(selectedHeroId == nil ? AppColors.secondary : AppColors.primary)
                             .cornerRadius(12)
                         }
                         .disabled(selectedHeroId == nil)
@@ -264,10 +268,11 @@ struct ContentView: View {
                     }
                     .padding(.horizontal)
                     .padding(.bottom, 12)
-                    .background(Color(UIColor.systemBackground))
+                    .background(AppColors.backgroundSystem)
                 }
             }
         }
+        .background(AppColors.backgroundSystem)
         .navigationBarHidden(true)
         .sheet(isPresented: $showingRules) {
             RulesView()
@@ -280,6 +285,7 @@ struct ContentView: View {
             ContentManagerView(bundledPackURLs: getBundledPackURLs())
         }
         #endif
+        .preferredColorScheme(.dark)
     }
 
     var saveSlotSelectionView: some View {
@@ -291,7 +297,7 @@ struct ContentView: View {
                         Image(systemName: "chevron.left")
                         Text(L10n.uiBack.localized)
                     }
-                    .foregroundColor(.blue)
+                    .foregroundColor(AppColors.primary)
                 }
                 Spacer()
                 VStack(alignment: .trailing, spacing: 4) {
@@ -324,6 +330,7 @@ struct ContentView: View {
                 .padding()
             }
         }
+        .background(AppColors.backgroundSystem)
         .navigationBarHidden(true)
     }
 
@@ -392,7 +399,7 @@ struct ContentView: View {
                         Image(systemName: "chevron.left")
                         Text(L10n.uiBack.localized)
                     }
-                    .foregroundColor(.blue)
+                    .foregroundColor(AppColors.primary)
                 }
                 Spacer()
                 Text(L10n.uiContinueGame.localized)
@@ -429,6 +436,7 @@ struct ContentView: View {
                 .padding()
             }
         }
+        .background(AppColors.backgroundSystem)
         .navigationBarHidden(true)
     }
 }
@@ -475,7 +483,7 @@ struct SaveSlotCard: View {
                 if saveData != nil {
                     Button(action: { showingDeleteAlert = true }) {
                         Image(systemName: "trash")
-                            .foregroundColor(.red)
+                            .foregroundColor(AppColors.danger)
                     }
                 }
             }
@@ -489,11 +497,11 @@ struct SaveSlotCard: View {
 
                     HStack(spacing: 16) {
                         Label("\(save.playerHealth)/\(save.playerMaxHealth)", systemImage: "heart.fill")
-                            .foregroundColor(.red)
+                            .foregroundColor(AppColors.danger)
                         Label("\(save.playerFaith)", systemImage: "sparkles")
-                            .foregroundColor(.yellow)
+                            .foregroundColor(AppColors.faith)
                         Label("\(save.playerBalance)", systemImage: "scale.3d")
-                            .foregroundColor(.purple)
+                            .foregroundColor(AppColors.dark)
                     }
                     .font(.subheadline)
 
@@ -515,7 +523,7 @@ struct SaveSlotCard: View {
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 10)
-                                .background(Color.blue)
+                                .background(AppColors.primary)
                                 .cornerRadius(8)
                         }
 
@@ -523,10 +531,10 @@ struct SaveSlotCard: View {
                             Text(L10n.uiNewGame.localized)
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
-                                .foregroundColor(.blue)
+                                .foregroundColor(AppColors.primary)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 10)
-                                .background(Color.blue.opacity(0.1))
+                                .background(AppColors.primary.opacity(0.1))
                                 .cornerRadius(8)
                         }
                     }
@@ -549,7 +557,7 @@ struct SaveSlotCard: View {
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 10)
-                            .background(Color.green)
+                            .background(AppColors.success)
                             .cornerRadius(8)
                     }
                 }
@@ -558,7 +566,7 @@ struct SaveSlotCard: View {
             }
         }
         .padding()
-        .background(Color(UIColor.secondarySystemBackground))
+        .background(AppColors.cardBackground)
         .cornerRadius(12)
         .alert(L10n.uiDeleteSave.localized, isPresented: $showingDeleteAlert) {
             Button(L10n.uiCancel.localized, role: .cancel) { }
@@ -601,7 +609,7 @@ struct LoadSlotCard: View {
                     .font(.headline)
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .foregroundColor(.blue)
+                    .foregroundColor(AppColors.primary)
             }
 
             VStack(alignment: .leading, spacing: 8) {
@@ -611,11 +619,11 @@ struct LoadSlotCard: View {
 
                 HStack(spacing: 16) {
                     Label("\(saveData.playerHealth)/\(saveData.playerMaxHealth)", systemImage: "heart.fill")
-                        .foregroundColor(.red)
+                        .foregroundColor(AppColors.danger)
                     Label("\(saveData.playerFaith)", systemImage: "sparkles")
-                        .foregroundColor(.yellow)
+                        .foregroundColor(AppColors.faith)
                     Label("\(saveData.playerBalance)", systemImage: "scale.3d")
-                        .foregroundColor(.purple)
+                        .foregroundColor(AppColors.dark)
                 }
                 .font(.subheadline)
 
@@ -629,7 +637,7 @@ struct LoadSlotCard: View {
             }
         }
         .padding()
-        .background(Color(UIColor.secondarySystemBackground))
+        .background(AppColors.cardBackground)
         .cornerRadius(12)
         .onTapGesture {
             onLoad()
@@ -665,7 +673,7 @@ struct HeroSelectionCard: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
-            .background(Color.purple.opacity(0.8))
+            .background(AppColors.dark.opacity(0.8))
             .foregroundColor(.white)
 
             // Stats
@@ -674,17 +682,17 @@ struct HeroSelectionCard: View {
                 .foregroundColor(.secondary)
 
             HStack(spacing: 12) {
-                StatMini(icon: "heart.fill", value: hero.baseStats.health, color: .red)
-                StatMini(icon: "bolt.fill", value: hero.baseStats.strength, color: .orange)
-                StatMini(icon: "shield.fill", value: hero.baseStats.constitution, color: .blue)
+                StatMini(icon: "heart.fill", value: hero.baseStats.health, color: AppColors.health)
+                StatMini(icon: "bolt.fill", value: hero.baseStats.strength, color: AppColors.power)
+                StatMini(icon: "shield.fill", value: hero.baseStats.constitution, color: AppColors.defense)
             }
             .padding(.bottom, 8)
         }
-        .background(Color(UIColor.systemBackground))
+        .background(AppColors.backgroundSystem)
         .cornerRadius(16)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(isSelected ? Color.blue : Color.gray.opacity(0.3), lineWidth: isSelected ? 3 : 1)
+                .stroke(isSelected ? AppColors.primary : AppColors.secondary.opacity(0.3), lineWidth: isSelected ? 3 : 1)
         )
         .shadow(radius: isSelected ? 8 : 2)
         .scaleEffect(isSelected ? 1.02 : 1.0)

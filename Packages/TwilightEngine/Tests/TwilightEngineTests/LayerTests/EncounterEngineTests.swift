@@ -91,12 +91,18 @@ final class EncounterEngineTests: XCTestCase {
     func testEscalationResonanceShift() {
         let ctx = EncounterContextFixtures.dualTrack(enemyHP: 100, enemyWP: 100)
         let engine = EncounterEngine(context: ctx)
+
+        // Round 1: spirit attack
         _ = engine.advancePhase() // intent → playerAction
-
-        // Spirit attack first
         _ = engine.performAction(.spiritAttack(targetId: "test_enemy"))
+        _ = engine.advancePhase() // → enemyResolution
+        _ = engine.resolveEnemyAction(enemyId: "test_enemy")
+        _ = engine.advancePhase() // → roundEnd
+        _ = engine.advancePhase() // → intent (round 2)
+        _ = engine.generateIntent(for: "test_enemy")
 
-        // Physical attack (escalation)
+        // Round 2: physical attack (escalation)
+        _ = engine.advancePhase() // → playerAction
         let result = engine.performAction(.attack(targetId: "test_enemy"))
 
         // Should emit resonance shift
@@ -111,13 +117,19 @@ final class EncounterEngineTests: XCTestCase {
     func testEscalationSurpriseDamage() {
         let ctx = EncounterContextFixtures.dualTrack(enemyHP: 100, enemyWP: 100)
         let engine = EncounterEngine(context: ctx)
+
+        // Round 1: spirit attack (establish diplomacy)
         _ = engine.advancePhase() // intent → playerAction
-
-        // Spirit attack first (establish diplomacy)
         _ = engine.performAction(.spiritAttack(targetId: "test_enemy"))
-        let hpBefore = engine.enemies[0].hp
+        _ = engine.advancePhase() // → enemyResolution
+        _ = engine.resolveEnemyAction(enemyId: "test_enemy")
+        _ = engine.advancePhase() // → roundEnd
+        _ = engine.advancePhase() // → intent (round 2)
+        _ = engine.generateIntent(for: "test_enemy")
 
-        // Physical attack (escalation → surprise bonus)
+        // Round 2: physical attack (escalation → surprise bonus)
+        _ = engine.advancePhase() // → playerAction
+        let hpBefore = engine.enemies[0].hp
         _ = engine.performAction(.attack(targetId: "test_enemy"))
 
         let damage = hpBefore - engine.enemies[0].hp
@@ -128,12 +140,18 @@ final class EncounterEngineTests: XCTestCase {
     func testDeEscalationRageShield() {
         let ctx = EncounterContextFixtures.dualTrack(enemyHP: 100, enemyWP: 100)
         let engine = EncounterEngine(context: ctx)
+
+        // Round 1: physical attack first
         _ = engine.advancePhase() // intent → playerAction
-
-        // Physical attack first
         _ = engine.performAction(.attack(targetId: "test_enemy"))
+        _ = engine.advancePhase() // → enemyResolution
+        _ = engine.resolveEnemyAction(enemyId: "test_enemy")
+        _ = engine.advancePhase() // → roundEnd
+        _ = engine.advancePhase() // → intent (round 2)
+        _ = engine.generateIntent(for: "test_enemy")
 
-        // Spirit attack (de-escalation)
+        // Round 2: spirit attack (de-escalation)
+        _ = engine.advancePhase() // → playerAction
         let result = engine.performAction(.spiritAttack(targetId: "test_enemy"))
 
         let hasShield = result.stateChanges.contains { change in

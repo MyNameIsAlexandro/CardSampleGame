@@ -13,6 +13,7 @@ public struct Card: Identifiable, Codable, Hashable, Sendable {
     public var defense: Int?
     public var health: Int?
     public var will: Int?
+    public var wisdom: Int?
     public var cost: Int?
 
     // Abilities and traits
@@ -43,6 +44,7 @@ public struct Card: Identifiable, Codable, Hashable, Sendable {
         defense: Int? = nil,
         health: Int? = nil,
         will: Int? = nil,
+        wisdom: Int? = nil,
         cost: Int? = nil,
         abilities: [CardAbility] = [],
         traits: [String] = [],
@@ -66,6 +68,7 @@ public struct Card: Identifiable, Codable, Hashable, Sendable {
         self.defense = defense
         self.health = health
         self.will = will
+        self.wisdom = wisdom
         self.cost = cost
         self.abilities = abilities
         self.traits = traits
@@ -79,6 +82,36 @@ public struct Card: Identifiable, Codable, Hashable, Sendable {
         self.regionRequirement = regionRequirement
         self.faithCost = faithCost
     }
+
+    /// Create a copy with a unique instance ID (for duplicate cards in deck)
+    public func withInstanceId(_ newId: String) -> Card {
+        Card(
+            id: newId,
+            name: name,
+            type: type,
+            rarity: rarity,
+            description: description,
+            imageURL: imageURL,
+            power: power,
+            defense: defense,
+            health: health,
+            will: will,
+            wisdom: wisdom,
+            cost: cost,
+            abilities: abilities,
+            traits: traits,
+            damageType: damageType,
+            range: range,
+            balance: balance,
+            realm: realm,
+            curseType: curseType,
+            expansionSet: expansionSet,
+            role: role,
+            regionRequirement: regionRequirement,
+            faithCost: faithCost
+        )
+    }
+
 
     /// Calculate adjusted cost based on player's Light/Dark balance
     /// See EXPLORATION_CORE_DESIGN.md, section 23.4

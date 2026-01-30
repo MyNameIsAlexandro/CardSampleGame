@@ -90,7 +90,12 @@ struct StatisticsView: View {
                 }
                 .padding()
             }
+            .background(AppColors.backgroundSystem)
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbarBackground(AppColors.backgroundSystem, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .tint(AppColors.primary)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { dismiss() }) {

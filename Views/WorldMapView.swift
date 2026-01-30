@@ -67,8 +67,13 @@ struct WorldMapView: View {
                     }
                 }
             }
+            .background(AppColors.backgroundSystem)
             .navigationTitle(L10n.tmGameTitle.localized)
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbarBackground(AppColors.backgroundSystem, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .tint(AppColors.primary)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     if onExit != nil {
@@ -453,8 +458,13 @@ struct EngineRegionDetailView: View {
                     .padding()
                 }
             }
+            .background(AppColors.backgroundSystem)
             .navigationTitle(region.name)
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbarBackground(AppColors.backgroundSystem, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .tint(AppColors.primary)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(L10n.uiClose.localized) {
@@ -742,7 +752,7 @@ struct EngineRegionDetailView: View {
                     actionButton(
                         title: canTravel ? L10n.actionTravelTo.localized(with: travelCost, dayWord) : L10n.actionRegionFar.localized,
                         icon: canTravel ? "arrow.right.circle.fill" : "xmark.circle",
-                        color: canTravel ? .blue : .gray,
+                        color: canTravel ? AppColors.primary : AppColors.secondary,
                         enabled: canTravel
                     ) {
                         selectedAction = .travel
@@ -783,7 +793,7 @@ struct EngineRegionDetailView: View {
                     actionButton(
                         title: L10n.actionRestHeal.localized(with: 3),
                         icon: "bed.double.fill",
-                        color: .green,
+                        color: AppColors.success,
                         enabled: region.canRest
                     ) {
                         selectedAction = .rest
@@ -794,7 +804,7 @@ struct EngineRegionDetailView: View {
                     actionButton(
                         title: L10n.actionTradeName.localized,
                         icon: "cart.fill",
-                        color: .orange,
+                        color: AppColors.warning,
                         enabled: region.canTrade
                     ) {
                         selectedAction = .trade
@@ -806,7 +816,7 @@ struct EngineRegionDetailView: View {
                         actionButton(
                             title: L10n.actionAnchorCost.localized(with: 5, 20),
                             icon: "hammer.fill",
-                            color: .purple,
+                            color: AppColors.dark,
                             enabled: engine.canAffordFaith(5)
                         ) {
                             selectedAction = .strengthenAnchor
@@ -819,7 +829,7 @@ struct EngineRegionDetailView: View {
                     actionButton(
                         title: L10n.actionExploreName.localized,
                         icon: "magnifyingglass",
-                        color: .cyan,
+                        color: AppColors.info,
                         enabled: hasEvents
                     ) {
                         selectedAction = .explore
@@ -846,9 +856,9 @@ struct EngineRegionDetailView: View {
                 Spacer()
             }
             .padding()
-            .foregroundColor(enabled ? .white : AppColors.secondary)
-            .background(enabled ? color : AppColors.secondary.opacity(Opacity.light))
-            .cornerRadius(Spacing.smd)
+            .foregroundColor(enabled ? .white : AppColors.muted)
+            .background(enabled ? color : AppColors.cardBackground)
+            .cornerRadius(CornerRadius.md)
         }
         .disabled(!enabled)
     }
@@ -1067,8 +1077,14 @@ struct EngineEventLogView: View {
                     }
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(AppColors.backgroundSystem)
             .navigationTitle(L10n.journalTitle.localized)
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbarBackground(AppColors.backgroundSystem, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .tint(AppColors.primary)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(L10n.uiClose.localized) {

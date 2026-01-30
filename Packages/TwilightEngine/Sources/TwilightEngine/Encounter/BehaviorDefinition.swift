@@ -6,10 +6,14 @@ import Foundation
 public struct BehaviorDefinition: Codable, Equatable {
     public let id: String
     public let rules: [BehaviorRule]
+    public let defaultIntent: String?
+    public let defaultValue: String?
 
-    public init(id: String, rules: [BehaviorRule]) {
+    public init(id: String, rules: [BehaviorRule], defaultIntent: String? = nil, defaultValue: String? = nil) {
         self.id = id
         self.rules = rules
+        self.defaultIntent = defaultIntent
+        self.defaultValue = defaultValue
     }
 }
 

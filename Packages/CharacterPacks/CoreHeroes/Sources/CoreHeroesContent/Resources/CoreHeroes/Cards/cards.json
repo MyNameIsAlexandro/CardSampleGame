@@ -15,6 +15,7 @@
     "balance": "neutral",
     "power": 3,
     "defense": null,
+    "wisdom": 2,
     "health": null,
     "realm": "yav"
   },
@@ -34,6 +35,7 @@
     "balance": "neutral",
     "power": null,
     "defense": 2,
+    "wisdom": 2,
     "health": null,
     "realm": "yav"
   },
@@ -55,13 +57,16 @@
         "name_ru": "Исцеление",
         "description": "Restore 2 health",
         "description_ru": "Восстановить 2 здоровья",
-        "effect": {"heal": 2}
+        "effect": {
+          "heal": 2
+        }
       }
     ],
     "faith_cost": 0,
     "balance": "light",
     "power": null,
     "defense": null,
+    "wisdom": 2,
     "health": null,
     "realm": "yav"
   },
@@ -83,13 +88,16 @@
         "name_ru": "Взять карту",
         "description": "Draw 1 card",
         "description_ru": "Взять 1 карту",
-        "effect": {"draw_cards": 1}
+        "effect": {
+          "draw_cards": 1
+        }
       }
     ],
     "faith_cost": 0,
     "balance": "neutral",
     "power": null,
     "defense": null,
+    "wisdom": 1,
     "health": null,
     "realm": "yav"
   },
@@ -103,7 +111,9 @@
     "description_ru": "Мощный удар, питаемый яростью. Наносит 5 урона.",
     "icon": "flame",
     "expansion_set": "baseSet",
-    "ownership": {"class_specific": "warrior"},
+    "ownership": {
+      "class_specific": "warrior"
+    },
     "abilities": [
       {
         "id": "rage_damage",
@@ -111,13 +121,19 @@
         "name_ru": "Ярость",
         "description": "Deals 5 damage",
         "description_ru": "Наносит 5 урона",
-        "effect": {"damage": {"amount": 5, "type": "physical"}}
+        "effect": {
+          "damage": {
+            "amount": 5,
+            "type": "physical"
+          }
+        }
       }
     ],
     "faith_cost": 2,
     "balance": "neutral",
     "power": 5,
     "defense": null,
+    "wisdom": 1,
     "health": null,
     "realm": "yav"
   },
@@ -131,12 +147,15 @@
     "description_ru": "Снаряд магической энергии. Наносит 3 урона.",
     "icon": "wand.and.stars",
     "expansion_set": "baseSet",
-    "ownership": {"class_specific": "mage"},
+    "ownership": {
+      "class_specific": "mage"
+    },
     "abilities": [],
     "faith_cost": 1,
     "balance": "neutral",
     "power": 3,
     "defense": null,
+    "wisdom": 2,
     "health": null,
     "realm": "yav"
   },
@@ -150,12 +169,15 @@
     "description_ru": "Магический щит. Блокирует 3 урона.",
     "icon": "sparkles",
     "expansion_set": "baseSet",
-    "ownership": {"class_specific": "mage"},
+    "ownership": {
+      "class_specific": "mage"
+    },
     "abilities": [],
     "faith_cost": 1,
     "balance": "light",
     "power": null,
     "defense": 3,
+    "wisdom": 3,
     "health": null,
     "realm": "yav"
   },
@@ -169,7 +191,9 @@
     "description_ru": "Сосредоточься. Получи 2 веры.",
     "icon": "figure.mind.and.body",
     "expansion_set": "baseSet",
-    "ownership": {"class_specific": "mage"},
+    "ownership": {
+      "class_specific": "mage"
+    },
     "abilities": [
       {
         "id": "gain_faith",
@@ -177,13 +201,16 @@
         "name_ru": "Медитация",
         "description": "Gain 2 faith",
         "description_ru": "Получить 2 веры",
-        "effect": {"gain_faith": 2}
+        "effect": {
+          "gain_faith": 2
+        }
       }
     ],
     "faith_cost": 0,
     "balance": "light",
     "power": null,
     "defense": null,
+    "wisdom": 3,
     "health": null,
     "realm": "prav"
   },
@@ -197,12 +224,15 @@
     "description_ru": "Точно нацеленная стрела. Наносит 2 урона на расстоянии.",
     "icon": "target",
     "expansion_set": "baseSet",
-    "ownership": {"class_specific": "ranger"},
+    "ownership": {
+      "class_specific": "ranger"
+    },
     "abilities": [],
     "faith_cost": 0,
     "balance": "neutral",
     "power": 2,
     "defense": null,
+    "wisdom": 1,
     "health": null,
     "realm": "yav"
   },
@@ -216,7 +246,9 @@
     "description_ru": "Установить ловушку. Враг получает 3 урона в следующем ходу.",
     "icon": "exclamationmark.triangle",
     "expansion_set": "baseSet",
-    "ownership": {"class_specific": "ranger"},
+    "ownership": {
+      "class_specific": "ranger"
+    },
     "abilities": [
       {
         "id": "trap_damage",
@@ -224,13 +256,19 @@
         "name_ru": "Ловушка",
         "description": "Deal 3 damage next turn",
         "description_ru": "Нанести 3 урона в следующем ходу",
-        "effect": {"damage": {"amount": 3, "type": "physical"}}
+        "effect": {
+          "damage": {
+            "amount": 3,
+            "type": "physical"
+          }
+        }
       }
     ],
     "faith_cost": 1,
     "balance": "neutral",
     "power": null,
     "defense": null,
+    "wisdom": null,
     "health": null,
     "realm": "yav"
   },
@@ -244,7 +282,9 @@
     "description_ru": "Выследить добычу. Возьми 2 карты.",
     "icon": "pawprint",
     "expansion_set": "baseSet",
-    "ownership": {"class_specific": "ranger"},
+    "ownership": {
+      "class_specific": "ranger"
+    },
     "abilities": [
       {
         "id": "draw_cards",
@@ -252,13 +292,16 @@
         "name_ru": "Выслеживание",
         "description": "Draw 2 cards",
         "description_ru": "Взять 2 карты",
-        "effect": {"draw_cards": 2}
+        "effect": {
+          "draw_cards": 2
+        }
       }
     ],
     "faith_cost": 1,
     "balance": "neutral",
     "power": null,
     "defense": null,
+    "wisdom": 1,
     "health": null,
     "realm": "yav"
   },
@@ -272,7 +315,9 @@
     "description_ru": "Луч святого света. Наносит 2 урона, лечит 1.",
     "icon": "sun.max",
     "expansion_set": "baseSet",
-    "ownership": {"class_specific": "priest"},
+    "ownership": {
+      "class_specific": "priest"
+    },
     "abilities": [
       {
         "id": "heal",
@@ -280,13 +325,16 @@
         "name_ru": "Свет",
         "description": "Heal 1",
         "description_ru": "Лечит 1",
-        "effect": {"heal": 1}
+        "effect": {
+          "heal": 1
+        }
       }
     ],
     "faith_cost": 1,
     "balance": "light",
     "power": 2,
     "defense": null,
+    "wisdom": 3,
     "health": null,
     "realm": "prav"
   },
@@ -300,7 +348,9 @@
     "description_ru": "Даровать благословение. Восстановить 3 здоровья.",
     "icon": "hands.sparkles",
     "expansion_set": "baseSet",
-    "ownership": {"class_specific": "priest"},
+    "ownership": {
+      "class_specific": "priest"
+    },
     "abilities": [
       {
         "id": "heal",
@@ -308,13 +358,16 @@
         "name_ru": "Благословение",
         "description": "Heal 3 health",
         "description_ru": "Восстановить 3 здоровья",
-        "effect": {"heal": 3}
+        "effect": {
+          "heal": 3
+        }
       }
     ],
     "faith_cost": 2,
     "balance": "light",
     "power": null,
     "defense": null,
+    "wisdom": 3,
     "health": null,
     "realm": "prav"
   },
@@ -328,12 +381,15 @@
     "description_ru": "Божественная кара. Наносит 4 урона тёмным врагам.",
     "icon": "bolt",
     "expansion_set": "baseSet",
-    "ownership": {"class_specific": "priest"},
+    "ownership": {
+      "class_specific": "priest"
+    },
     "abilities": [],
     "faith_cost": 2,
     "balance": "light",
     "power": 4,
     "defense": null,
+    "wisdom": 4,
     "health": null,
     "realm": "prav"
   },
@@ -347,12 +403,15 @@
     "description_ru": "Атака из тени. Наносит 3 урона, +2 если враг на полном здоровье.",
     "icon": "arrow.down.right",
     "expansion_set": "baseSet",
-    "ownership": {"class_specific": "shadow"},
+    "ownership": {
+      "class_specific": "shadow"
+    },
     "abilities": [],
     "faith_cost": 0,
     "balance": "dark",
     "power": 3,
     "defense": null,
+    "wisdom": null,
     "health": null,
     "realm": "nav"
   },
@@ -366,7 +425,9 @@
     "description_ru": "Переместиться сквозь тени. Взять карту и получить 1 защиту.",
     "icon": "figure.walk",
     "expansion_set": "baseSet",
-    "ownership": {"class_specific": "shadow"},
+    "ownership": {
+      "class_specific": "shadow"
+    },
     "abilities": [
       {
         "id": "draw",
@@ -374,13 +435,16 @@
         "name_ru": "Тень",
         "description": "Draw 1 card",
         "description_ru": "Взять 1 карту",
-        "effect": {"draw_cards": 1}
+        "effect": {
+          "draw_cards": 1
+        }
       }
     ],
     "faith_cost": 1,
     "balance": "dark",
     "power": null,
     "defense": 1,
+    "wisdom": 1,
     "health": null,
     "realm": "nav"
   },
@@ -394,7 +458,9 @@
     "description_ru": "Отравленное оружие. Наносит 2 урона и накладывает слабость.",
     "icon": "drop.triangle",
     "expansion_set": "baseSet",
-    "ownership": {"class_specific": "shadow"},
+    "ownership": {
+      "class_specific": "shadow"
+    },
     "abilities": [
       {
         "id": "poison",
@@ -402,13 +468,19 @@
         "name_ru": "Яд",
         "description": "Apply weakness",
         "description_ru": "Наложить слабость",
-        "effect": {"apply_curse": {"type": "weakness", "duration": 2}}
+        "effect": {
+          "apply_curse": {
+            "type": "weakness",
+            "duration": 2
+          }
+        }
       }
     ],
     "faith_cost": 2,
     "balance": "dark",
     "power": 2,
     "defense": null,
+    "wisdom": null,
     "health": null,
     "realm": "nav"
   }

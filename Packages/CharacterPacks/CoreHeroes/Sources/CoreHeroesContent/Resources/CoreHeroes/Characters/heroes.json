@@ -20,7 +20,16 @@
       "max_faith": 15,
       "starting_balance": 50
     },
-    "starting_deck_card_ids": ["strike_basic", "strike_basic", "defend_basic", "rage_strike"],
+    "starting_deck_card_ids": [
+      "strike_basic",
+      "strike_basic",
+      "defend_basic",
+      "rage_strike",
+      "defend_basic",
+      "heal_basic",
+      "strike_basic",
+      "draw_basic"
+    ],
     "availability": "always_available"
   },
   {
@@ -44,7 +53,16 @@
       "max_faith": 25,
       "starting_balance": 50
     },
-    "starting_deck_card_ids": ["arcane_bolt", "arcane_bolt", "shield_spell", "meditation"],
+    "starting_deck_card_ids": [
+      "arcane_bolt",
+      "arcane_bolt",
+      "shield_spell",
+      "meditation",
+      "heal_basic",
+      "draw_basic",
+      "arcane_bolt",
+      "shield_spell"
+    ],
     "availability": "always_available"
   },
   {
@@ -68,7 +86,16 @@
       "max_faith": 18,
       "starting_balance": 50
     },
-    "starting_deck_card_ids": ["precise_shot", "precise_shot", "trap", "tracking"],
+    "starting_deck_card_ids": [
+      "precise_shot",
+      "precise_shot",
+      "trap",
+      "tracking",
+      "defend_basic",
+      "draw_basic",
+      "precise_shot",
+      "heal_basic"
+    ],
     "availability": "always_available"
   },
   {
@@ -92,7 +119,16 @@
       "max_faith": 30,
       "starting_balance": 60
     },
-    "starting_deck_card_ids": ["holy_light", "holy_light", "blessing", "smite"],
+    "starting_deck_card_ids": [
+      "holy_light",
+      "holy_light",
+      "blessing",
+      "smite",
+      "heal_basic",
+      "draw_basic",
+      "holy_light",
+      "blessing"
+    ],
     "availability": "always_available"
   },
   {
@@ -116,7 +152,16 @@
       "max_faith": 20,
       "starting_balance": 40
     },
-    "starting_deck_card_ids": ["backstab", "backstab", "shadow_step", "poison_blade"],
+    "starting_deck_card_ids": [
+      "backstab",
+      "backstab",
+      "shadow_step",
+      "poison_blade",
+      "defend_basic",
+      "draw_basic",
+      "backstab",
+      "heal_basic"
+    ],
     "availability": "always_available"
   }
 ]

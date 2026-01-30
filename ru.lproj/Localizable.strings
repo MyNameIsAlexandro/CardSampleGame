@@ -900,3 +900,38 @@
 "encounter.outcome.continue" = "Продолжить";
 "encounter.outcome.hp.lost" = "Потеряно здоровья: %d";
 "encounter.outcome.hp.gained" = "Восстановлено здоровья: %d";
+
+// New intent types
+"combat.intent.prepare" = "Подготовка";
+"combat.intent.restoreWP" = "Восстановление воли";
+"combat.intent.debuff" = "Ослабление";
+"combat.intent.defend" = "Защита";
+"combat.intent.detail.prepare" = "Готовится...";
+"combat.intent.detail.restoreWP" = "Восстанавливает %d воли";
+"combat.intent.detail.debuff" = "Ослабляет на %d";
+"combat.intent.detail.defend" = "Защищается +%d";
+
+// Faith
+"combat.faith.label" = "Вера";
+"combat.faith.insufficient" = "Недостаточно веры";
+"combat.faith.cost" = "Стоимость: %d веры";
+"combat.faith.spent" = "Потрачено %d веры";
+
+// Fate choice
+"fate.choice.title" = "Выбор судьбы";
+"fate.choice.safe" = "Безопасный путь";
+"fate.choice.risk" = "Рискованный путь";
+"fate.choice.timer" = "%d сек";
+
+// Mulligan
+"combat.mulligan.title" = "Замена карт";
+"combat.mulligan.prompt" = "Выберите карты для замены";
+"combat.mulligan.confirm" = "Подтвердить";
+"combat.mulligan.skip" = "Пропустить";
+
+// Card draw
+"combat.card.drawn" = "Вытянута: %@";
+
+// Escalation
+"combat.escalation.surprise" = "Внезапная атака!";
+"combat.escalation.rage_shield" = "Щит ярости активирован";

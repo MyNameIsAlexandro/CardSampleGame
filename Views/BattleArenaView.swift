@@ -105,6 +105,7 @@ struct BattleArenaView: View {
             }
             .background(AppColors.backgroundSystem)
         }
+        .background(AppColors.backgroundSystem.ignoresSafeArea())
         .navigationBarHidden(true)
         .fullScreenCover(isPresented: $showingCombat) {
             CombatView(

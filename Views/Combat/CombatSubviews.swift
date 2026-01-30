@@ -1,6 +1,154 @@
 import SwiftUI
 import TwilightEngine
 
+// MARK: - Mulligan Overlay
+
+/// Full-screen overlay shown at combat start to swap initial hand cards.
+struct MulliganOverlay: View {
+    let hand: [Card]
+    let selection: Set<String>
+    let onToggle: (String) -> Void
+    let onConfirm: () -> Void
+    let onSkip: () -> Void
+
+    var body: some View {
+        VStack(spacing: Spacing.xl) {
+            Spacer()
+
+            VStack(spacing: Spacing.lg) {
+                Text(L10n.combatMulliganTitle.localized)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(AppColors.primary)
+
+                Text(L10n.combatMulliganPrompt.localized)
+                    .font(.subheadline)
+                    .foregroundColor(AppColors.secondary)
+
+                // Card selection
+                HStack(spacing: Spacing.md) {
+                    ForEach(hand) { card in
+                        MulliganCardView(
+                            card: card,
+                            isSelected: selection.contains(card.id)
+                        )
+                        .onTapGesture { onToggle(card.id) }
+                    }
+                }
+                .padding(.vertical, Spacing.md)
+
+                // Action buttons
+                HStack(spacing: Spacing.lg) {
+                    Button(action: onSkip) {
+                        Text(L10n.combatMulliganSkip.localized)
+                            .font(.headline)
+                            .foregroundColor(AppColors.secondary)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(AppColors.backgroundTertiary)
+                            .cornerRadius(CornerRadius.lg)
+                    }
+
+                    if !selection.isEmpty {
+                        Button(action: onConfirm) {
+                            Text(L10n.combatMulliganConfirm.localized)
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(AppColors.primary)
+                                .cornerRadius(CornerRadius.lg)
+                        }
+                    }
+                }
+                .padding(.horizontal, Spacing.lg)
+            }
+            .padding(Spacing.xl)
+            .background(AppColors.backgroundTertiary)
+            .cornerRadius(CornerRadius.xl)
+            .padding(.horizontal, Spacing.lg)
+
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(AppColors.backgroundSystem)
+    }
+}
+
+/// Card view for mulligan selection — shows highlight border when selected.
+struct MulliganCardView: View {
+    let card: Card
+    let isSelected: Bool
+
+    var body: some View {
+        VStack(spacing: Spacing.xxs) {
+            Text(card.name)
+                .font(.caption)
+                .fontWeight(.bold)
+                .lineLimit(2)
+                .multilineTextAlignment(.center)
+
+            VStack(spacing: Spacing.xxxs) {
+                if let power = card.power, power > 0 {
+                    Label("+\(power)", systemImage: "flame.fill")
+                        .font(.caption2)
+                        .foregroundColor(AppColors.danger)
+                }
+                if let wisdom = card.wisdom, wisdom > 0 {
+                    Label("+\(wisdom)", systemImage: "bubble.left.fill")
+                        .font(.caption2)
+                        .foregroundColor(AppColors.info)
+                }
+                if let def = card.defense, def > 0 {
+                    Label("+\(def)", systemImage: "shield.fill")
+                        .font(.caption2)
+                        .foregroundColor(AppColors.primary)
+                }
+            }
+
+            if card.faithCost > 0 {
+                HStack(spacing: Spacing.xxxs) {
+                    Image(systemName: "sparkles")
+                        .font(.caption2)
+                    Text("\(card.faithCost)")
+                        .font(.caption2)
+                }
+                .foregroundColor(AppColors.warning)
+            }
+        }
+        .frame(width: 90, height: 120)
+        .padding(Spacing.xs)
+        .background(isSelected ? AppColors.danger.opacity(Opacity.light) : AppColors.backgroundTertiary)
+        .cornerRadius(CornerRadius.md)
+        .overlay(
+            RoundedRectangle(cornerRadius: CornerRadius.md)
+                .stroke(isSelected ? AppColors.danger : AppColors.muted.opacity(Opacity.light), lineWidth: isSelected ? 2 : 1)
+        )
+    }
+}
+
+// MARK: - Hero Deck Indicator
+
+/// Shows hero card deck count and discard count above the hand.
+struct HeroDeckIndicator: View {
+    let deckCount: Int
+    let discardCount: Int
+
+    var body: some View {
+        HStack(spacing: Spacing.md) {
+            Label("\(deckCount)", systemImage: "rectangle.portrait.on.rectangle.portrait")
+                .font(.caption2)
+                .foregroundColor(AppColors.secondary)
+
+            Label("\(discardCount)", systemImage: "tray")
+                .font(.caption2)
+                .foregroundColor(AppColors.muted)
+        }
+        .padding(.horizontal)
+        .padding(.top, Spacing.xs)
+    }
+}
+
 // MARK: - Enemy Panel
 
 /// Shows enemy intent, name, and dual health bars
@@ -191,6 +339,7 @@ struct ActionBar: View {
 struct FateDeckBar: View {
     let drawCount: Int
     let discardCount: Int
+    var faith: Int = 0
     let onFlee: () -> Void
 
     var body: some View {
@@ -202,6 +351,10 @@ struct FateDeckBar: View {
             Label("\(discardCount)", systemImage: "tray.full.fill")
                 .font(.caption)
                 .foregroundColor(AppColors.muted)
+
+            Label("\(faith)", systemImage: "sparkles")
+                .font(.caption)
+                .foregroundColor(AppColors.warning)
 
             Spacer()
 
@@ -263,7 +416,7 @@ struct CombatOverView: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.black.opacity(Opacity.mediumHigh))
+        .background(AppColors.backgroundSystem.opacity(Opacity.mediumHigh))
     }
 
     private var iconName: String {
@@ -308,6 +461,9 @@ struct CombatOverView: View {
 /// Horizontal scrollable row of playable combat cards
 struct CardHandView: View {
     let cards: [Card]
+    var heroFaith: Int = 0
+    var insufficientFaithCardId: String? = nil
+    var lastDrawnCardId: String? = nil
     let isEnabled: Bool
     let onPlay: (Card) -> Void
 
@@ -316,9 +472,19 @@ struct CardHandView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: Spacing.sm) {
                     ForEach(cards) { card in
-                        CombatCardView(card: card)
+                        let isAffordable = card.faithCost <= heroFaith || card.faithCost == 0
+                        let isNewlyDrawn = lastDrawnCardId == card.id
+                        let isInsufficientShake = insufficientFaithCardId == card.id
+
+                        CombatCardView(card: card, isAffordable: isAffordable)
                             .onTapGesture { if isEnabled { onPlay(card) } }
-                            .opacity(isEnabled ? Opacity.opaque : Opacity.medium)
+                            .opacity(isEnabled ? (isAffordable ? Opacity.opaque : Opacity.medium) : Opacity.medium)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: CornerRadius.md)
+                                    .stroke(isNewlyDrawn ? AppColors.success : Color.clear, lineWidth: 2)
+                            )
+                            .offset(x: isInsufficientShake ? -4 : 0)
+                            .animation(.default.speed(6).repeatCount(3, autoreverses: true), value: isInsufficientShake)
                     }
                 }
                 .padding(.horizontal, Spacing.md)
@@ -328,9 +494,10 @@ struct CardHandView: View {
     }
 }
 
-/// Compact combat card (60×90) showing name, effect, and cost
+/// Compact combat card (60x90) showing name, effect, and cost
 struct CombatCardView: View {
     let card: Card
+    var isAffordable: Bool = true
 
     var body: some View {
         VStack(spacing: Spacing.xxs) {
@@ -340,31 +507,47 @@ struct CombatCardView: View {
                 .lineLimit(2)
                 .multilineTextAlignment(.center)
 
-            if let power = card.power, power > 0 {
-                Label("+\(power)", systemImage: "flame.fill")
-                    .font(.caption)
-                    .foregroundColor(AppColors.danger)
-            } else if let def = card.defense, def > 0 {
-                Label("+\(def)", systemImage: "shield.fill")
-                    .font(.caption)
-                    .foregroundColor(AppColors.primary)
-            } else if let firstAbility = card.abilities.first {
-                abilityLabel(firstAbility.effect)
+            // Combat & Diplomacy stats
+            VStack(spacing: Spacing.xxxs) {
+                if let power = card.power, power > 0 {
+                    Label("+\(power)", systemImage: "flame.fill")
+                        .font(.caption2)
+                        .foregroundColor(AppColors.danger)
+                }
+                if let wisdom = card.wisdom, wisdom > 0 {
+                    Label("+\(wisdom)", systemImage: "bubble.left.fill")
+                        .font(.caption2)
+                        .foregroundColor(AppColors.info)
+                }
+                if let def = card.defense, def > 0 {
+                    Label("+\(def)", systemImage: "shield.fill")
+                        .font(.caption2)
+                        .foregroundColor(AppColors.primary)
+                }
+                if (card.power ?? 0) == 0 && (card.wisdom ?? 0) == 0 && (card.defense ?? 0) == 0 {
+                    if let firstAbility = card.abilities.first {
+                        abilityLabel(firstAbility.effect)
+                    }
+                }
             }
 
-            if let cost = card.cost, cost > 0 {
-                Text("\(cost)")
-                    .font(.caption2)
-                    .foregroundColor(AppColors.warning)
+            if card.faithCost > 0 {
+                HStack(spacing: Spacing.xxxs) {
+                    Image(systemName: "sparkles")
+                        .font(.caption2)
+                    Text("\(card.faithCost)")
+                        .font(.caption2)
+                }
+                .foregroundColor(isAffordable ? AppColors.warning : AppColors.danger)
             }
         }
-        .frame(width: 60, height: 90)
+        .frame(width: 70, height: 100)
         .padding(Spacing.xxs)
         .background(AppColors.backgroundTertiary)
         .cornerRadius(CornerRadius.md)
         .overlay(
             RoundedRectangle(cornerRadius: CornerRadius.md)
-                .stroke(AppColors.muted.opacity(Opacity.light), lineWidth: 1)
+                .stroke(isAffordable ? AppColors.muted.opacity(Opacity.light) : AppColors.danger.opacity(Opacity.medium), lineWidth: 1)
         )
     }
 
@@ -420,7 +603,7 @@ struct CombatLogView: View {
     let entries: [String]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: Spacing.xxxs) {
             ForEach(Array(entries.suffix(5).enumerated()), id: \.offset) { _, entry in
                 Text(entry)
                     .font(.caption2)

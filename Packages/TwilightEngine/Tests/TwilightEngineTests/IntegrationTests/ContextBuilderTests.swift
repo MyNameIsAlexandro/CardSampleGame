@@ -58,9 +58,17 @@ final class ContextBuilderTests: XCTestCase {
         XCTAssertEqual(ctx.worldResonance, -80.0)
         let engine = EncounterEngine(context: ctx)
 
-        // Escalation from spirit→physical should shift resonance
+        // Round 1: spirit attack
         _ = engine.advancePhase() // → playerAction
         _ = engine.performAction(.spiritAttack(targetId: "e1"))
+        _ = engine.advancePhase() // → enemyResolution
+        _ = engine.resolveEnemyAction(enemyId: "e1")
+        _ = engine.advancePhase() // → roundEnd
+        _ = engine.advancePhase() // → intent (round 2)
+        _ = engine.generateIntent(for: "e1")
+
+        // Round 2: physical attack (escalation)
+        _ = engine.advancePhase() // → playerAction
         let result = engine.performAction(.attack(targetId: "e1"))
 
         let shift = result.stateChanges.compactMap { change -> Float? in

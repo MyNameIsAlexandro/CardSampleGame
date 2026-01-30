@@ -37,7 +37,8 @@ final class CombatCardPlayTests: XCTestCase {
             modifiers: [],
             rules: EncounterRules(),
             rngSeed: 42,
-            heroCards: heroCards
+            heroCards: heroCards,
+            heroFaith: 100
         )
         let eng = EncounterEngine(context: ctx)
         // Advance to playerAction phase
@@ -184,7 +185,8 @@ final class CombatCardPlayTests: XCTestCase {
             modifiers: [],
             rules: EncounterRules(),
             rngSeed: 42,
-            heroCards: [healCard]
+            heroCards: [healCard],
+            heroFaith: 100
         )
         let eng = EncounterEngine(context: ctx)
         _ = eng.advancePhase() // → playerAction

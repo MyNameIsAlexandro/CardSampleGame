@@ -82,14 +82,23 @@ final class EncounterFateFlowTests: XCTestCase {
     func testDeckCountsSyncAfterMultipleDraws() {
         let ctx = EncounterContextFixtures.standard()
         let engine = EncounterEngine(context: ctx)
-        _ = engine.advancePhase() // intent → playerAction
 
         let total = engine.fateDeckDrawCount + engine.fateDeckDiscardCount
 
-        // Draw 3 times via attacks
-        _ = engine.performAction(.attack(targetId: "test_enemy"))
-        _ = engine.performAction(.attack(targetId: "test_enemy"))
-        _ = engine.performAction(.attack(targetId: "test_enemy"))
+        // Draw 3 times via attacks across 3 rounds (one finish action per round)
+        // Skip enemy resolution to avoid defense fate draws contaminating the count
+        for round in 0..<3 {
+            if round == 0 {
+                _ = engine.advancePhase() // intent → playerAction
+            }
+            _ = engine.performAction(.attack(targetId: "test_enemy"))
+            if round < 2 {
+                _ = engine.advancePhase() // → enemyResolution
+                _ = engine.advancePhase() // → roundEnd (skip resolveEnemyAction)
+                _ = engine.advancePhase() // → intent
+                _ = engine.advancePhase() // → playerAction
+            }
+        }
 
         let newTotal = engine.fateDeckDrawCount + engine.fateDeckDiscardCount
         XCTAssertEqual(newTotal, total, "Total cards stay constant (draw + discard)")
@@ -101,12 +110,22 @@ final class EncounterFateFlowTests: XCTestCase {
     func testLastFateDrawResultUpdatesEachDraw() {
         let ctx = EncounterContextFixtures.standard()
         let engine = EncounterEngine(context: ctx)
-        _ = engine.advancePhase() // intent → playerAction
 
+        // Round 1: attack
+        _ = engine.advancePhase() // intent → playerAction
         _ = engine.performAction(.attack(targetId: "test_enemy"))
         let first = engine.lastFateDrawResult
         XCTAssertNotNil(first)
 
+        // Advance to round 2
+        _ = engine.advancePhase() // → enemyResolution
+        _ = engine.resolveEnemyAction(enemyId: "test_enemy")
+        _ = engine.advancePhase() // → roundEnd
+        _ = engine.advancePhase() // → intent
+        _ = engine.generateIntent(for: "test_enemy")
+        _ = engine.advancePhase() // → playerAction
+
+        // Round 2: attack
         _ = engine.performAction(.attack(targetId: "test_enemy"))
         let second = engine.lastFateDrawResult
         XCTAssertNotNil(second)

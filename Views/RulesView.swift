@@ -63,7 +63,7 @@ struct RulesView: View {
                     // Resources
                     RuleSection(
                         icon: "star.fill",
-                        color: Color.pink,
+                        color: AppColors.cardTypeResource,
                         title: L10n.rulesResourcesTitle.localized,
                         content: L10n.rulesResourcesContent.localized
                     )
@@ -95,7 +95,7 @@ struct RulesView: View {
                     // Tips
                     RuleSection(
                         icon: "lightbulb.fill",
-                        color: Color.cyan,
+                        color: AppColors.info,
                         title: L10n.rulesTipsTitle.localized,
                         content: L10n.rulesTipsContent.localized
                     )
@@ -103,7 +103,12 @@ struct RulesView: View {
                 .padding()
             }
             .navigationTitle(L10n.rulesTitle.localized)
-            .navigationBarTitleDisplayMode(.large)
+            .background(AppColors.backgroundSystem)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbarBackground(AppColors.backgroundSystem, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .tint(AppColors.primary)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { dismiss() }) {

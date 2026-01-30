@@ -19,7 +19,7 @@ struct HeroSelectionView: View {
                 // Заголовок
                 VStack(spacing: Spacing.sm) {
                     Text("Выберите героя")
-                        .font(.largeTitle)
+                        .font(AppTypography.largeTitle)
                         .fontWeight(.bold)
 
                     Text("Каждый герой имеет уникальные характеристики и способности")
@@ -79,10 +79,15 @@ struct HeroSelectionView: View {
                 .padding(.bottom, Spacing.xl)
                 .background(
                     AppColors.backgroundSystem
-                        .shadow(radius: 5)
+                        .shadow(AppShadows.md)
                 )
             }
-            .background(AppColors.cardBackground)
+            .background(AppColors.backgroundSystem)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbarBackground(AppColors.backgroundSystem, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .tint(AppColors.primary)
             .navigationBarHidden(true)
         }
     }

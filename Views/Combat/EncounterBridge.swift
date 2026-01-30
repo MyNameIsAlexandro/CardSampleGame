@@ -32,10 +32,36 @@ extension TwilightGameEngine {
             behaviorId: enemy.id // behavior ID matches enemy ID
         )
 
-        let fateDeckSnapshot = fateDeck?.getState() ?? FateDeckState(drawPile: [], discardPile: [])
+        // Fate deck: use engine state, or load fresh from content registry if empty
+        var fateDeckSnapshot = fateDeck?.getState() ?? FateDeckState(drawPile: [], discardPile: [])
+        if fateDeckSnapshot.drawPile.isEmpty && fateDeckSnapshot.discardPile.isEmpty {
+            let allFateCards = ContentRegistry.shared.getAllFateCards()
+            if !allFateCards.isEmpty {
+                fateDeckSnapshot = FateDeckState(drawPile: allFateCards, discardPile: [])
+                // Also initialize the engine's fateDeck so it persists
+                setupFateDeck(cards: allFateCards)
+            }
+        }
 
-        // Resolve hero cards from player's current hand/deck
-        let heroCards = playerHand + playerDeck
+        // Resolve hero cards from player's current hand/deck/discard (full pool)
+        let heroCards = playerHand + playerDeck + playerDiscard
+
+        // Assign unique instance IDs to duplicate cards
+        var idCounts: [String: Int] = [:]
+        let uniqueHeroCards = heroCards.map { card -> Card in
+            let count = (idCounts[card.id] ?? 0) + 1
+            idCounts[card.id] = count
+            if count > 1 {
+                return card.withInstanceId("\(card.id)_\(count)")
+            }
+            return card
+        }
+
+        #if DEBUG
+        print("[EncounterBridge] heroCards=\(heroCards.count) (hand=\(playerHand.count), deck=\(playerDeck.count), discard=\(playerDiscard.count))")
+        print("[EncounterBridge] fateDeck drawPile=\(fateDeckSnapshot.drawPile.count), discardPile=\(fateDeckSnapshot.discardPile.count)")
+        print("[EncounterBridge] heroFaith=\(playerFaith)")
+        #endif
 
         return EncounterContext(
             hero: encounterHero,
@@ -47,7 +73,8 @@ extension TwilightGameEngine {
             worldResonance: resonanceValue,
             balanceConfig: ContentRegistry.shared.getBalanceConfig()?.combat,
             behaviors: buildBehaviorMap(),
-            heroCards: heroCards
+            heroCards: uniqueHeroCards,
+            heroFaith: playerFaith
         )
     }
 
@@ -71,7 +98,16 @@ extension TwilightGameEngine {
         }
 
         // Restore fate deck state
-        fateDeck?.restoreState(result.updatedFateDeck)
+        if let fd = fateDeck {
+            fd.restoreState(result.updatedFateDeck)
+        } else {
+            // Initialize fateDeck if it was nil
+            let cards = result.updatedFateDeck.drawPile + result.updatedFateDeck.discardPile
+            if !cards.isEmpty {
+                setupFateDeck(cards: cards)
+                fateDeck?.restoreState(result.updatedFateDeck)
+            }
+        }
 
         // Apply world flags
         if !result.transaction.worldFlags.isEmpty {

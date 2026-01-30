@@ -54,6 +54,7 @@
 		RW00000100000000000000001 /* ResonanceWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = RW00000200000000000000001 /* ResonanceWidget.swift */; };
 		DHB0000100000000000000001 /* DualHealthBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = DHB0000200000000000000001 /* DualHealthBar.swift */; };
 		FDW0000100000000000000001 /* FateDeckWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDW0000200000000000000001 /* FateDeckWidget.swift */; };
+		FCCS000100000000000000001 /* FateCardChoiceSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCCS000200000000000000001 /* FateCardChoiceSheet.swift */; };
 		BAV0000100000000000000001 /* BattleArenaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAV0000200000000000000001 /* BattleArenaView.swift */; };
 		ESC0000100000000000000001 /* EnemySelectionCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = ESC0000200000000000000001 /* EnemySelectionCard.swift */; };
 		CM00000100000000000000001 /* ContentManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CM00000200000000000000001 /* ContentManagerView.swift */; };
@@ -116,6 +117,7 @@
 		RW00000200000000000000001 /* ResonanceWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/Components/ResonanceWidget.swift; sourceTree = SOURCE_ROOT; };
 		DHB0000200000000000000001 /* DualHealthBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/Components/DualHealthBar.swift; sourceTree = SOURCE_ROOT; };
 		FDW0000200000000000000001 /* FateDeckWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/Components/FateDeckWidget.swift; sourceTree = SOURCE_ROOT; };
+		FCCS000200000000000000001 /* FateCardChoiceSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/Components/FateCardChoiceSheet.swift; sourceTree = SOURCE_ROOT; };
 		BAV0000200000000000000001 /* BattleArenaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BattleArenaView.swift; sourceTree = "<group>"; };
 		ESC0000200000000000000001 /* EnemySelectionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemySelectionCard.swift; sourceTree = "<group>"; };
 		CM00000200000000000000001 /* ContentManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentManagerView.swift; sourceTree = "<group>"; };
@@ -285,6 +287,7 @@
 				RW00000200000000000000001 /* ResonanceWidget.swift */,
 				DHB0000200000000000000001 /* DualHealthBar.swift */,
 				FDW0000200000000000000001 /* FateDeckWidget.swift */,
+				FCCS000200000000000000001 /* FateCardChoiceSheet.swift */,
 				ESC0000200000000000000001 /* EnemySelectionCard.swift */,
 				EIV000020000000000000001 /* EnemyIntentView.swift */,
 				FRV000020000000000000001 /* FateCardRevealView.swift */,
@@ -434,6 +437,7 @@
 				RW00000100000000000000001 /* ResonanceWidget.swift in Sources */,
 				DHB0000100000000000000001 /* DualHealthBar.swift in Sources */,
 				FDW0000100000000000000001 /* FateDeckWidget.swift in Sources */,
+				FCCS000100000000000000001 /* FateCardChoiceSheet.swift in Sources */,
 				BAV0000100000000000000001 /* BattleArenaView.swift in Sources */,
 				ESC0000100000000000000001 /* EnemySelectionCard.swift in Sources */,
 				AA0000130000000000000001 /* CardView.swift in Sources */,

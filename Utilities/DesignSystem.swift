@@ -114,91 +114,107 @@ public enum CornerRadius {
 
 // MARK: - App Colors
 
-/// Semantic color palette for the app
+/// Semantic color palette — Dark Slavic Fantasy theme
 public enum AppColors {
     // MARK: - Primary Actions
-    /// Primary action color (buttons, links)
-    public static let primary = Color.blue
-    /// Secondary action color
-    public static let secondary = Color.gray
+    /// Primary action color — ancient gold
+    public static let primary = Color(red: 0.85, green: 0.65, blue: 0.20)
+    /// Secondary action color — muted lavender-grey
+    public static let secondary = Color(red: 0.45, green: 0.40, blue: 0.50)
 
     // MARK: - Game States
-    /// Success/positive state
-    public static let success = Color.green
-    /// Warning state
-    public static let warning = Color.orange
-    /// Danger/negative state
-    public static let danger = Color.red
-    /// Info state
-    public static let info = Color.blue
+    /// Success/positive — forest green
+    public static let success = Color(red: 0.25, green: 0.70, blue: 0.35)
+    /// Warning — amber
+    public static let warning = Color(red: 0.90, green: 0.60, blue: 0.15)
+    /// Danger/negative — blood red
+    public static let danger = Color(red: 0.80, green: 0.20, blue: 0.20)
+    /// Info — twilight blue
+    public static let info = Color(red: 0.30, green: 0.50, blue: 0.80)
 
     // MARK: - Twilight Marches Theme
-    /// Light alignment
-    public static let light = Color.yellow
-    /// Dark alignment
-    public static let dark = Color.purple
-    /// Neutral alignment
-    public static let neutral = Color.gray
+    /// Light alignment — warm sunlight gold
+    public static let light = Color(red: 0.95, green: 0.85, blue: 0.50)
+    /// Dark alignment — deep violet
+    public static let dark = Color(red: 0.40, green: 0.20, blue: 0.55)
+    /// Neutral alignment — stone grey
+    public static let neutral = Color(red: 0.50, green: 0.48, blue: 0.45)
 
     // MARK: - Resonance
     /// Nav (dark world) resonance color
-    public static let resonanceNav = Color.purple
+    public static let resonanceNav = Color(red: 0.50, green: 0.20, blue: 0.65)
     /// Prav (light world) resonance color
-    public static let resonancePrav = Color(red: 0.85, green: 0.7, blue: 0.2)
+    public static let resonancePrav = Color(red: 0.85, green: 0.70, blue: 0.20)
     /// Yav (neutral) resonance color
-    public static let resonanceYav = Color.gray
+    public static let resonanceYav = Color(red: 0.50, green: 0.48, blue: 0.45)
     /// Spirit/Will track color
-    public static let spirit = Color(red: 0.3, green: 0.5, blue: 0.9)
+    public static let spirit = Color(red: 0.30, green: 0.50, blue: 0.90)
 
     // MARK: - Resources
-    /// Health color
-    public static let health = Color.red
-    /// Faith color
-    public static let faith = Color.yellow
-    /// Power/Attack color
-    public static let power = Color.orange
-    /// Defense/Shield color
-    public static let defense = Color.blue
+    /// Health — dark blood
+    public static let health = Color(red: 0.75, green: 0.15, blue: 0.15)
+    /// Faith — golden faith
+    public static let faith = Color(red: 0.90, green: 0.75, blue: 0.25)
+    /// Power/Attack — ember orange
+    public static let power = Color(red: 0.85, green: 0.40, blue: 0.15)
+    /// Defense/Shield — steel blue
+    public static let defense = Color(red: 0.30, green: 0.45, blue: 0.70)
 
     // MARK: - Backgrounds
-    /// System background
-    public static let backgroundSystem = Color(UIColor.systemBackground)
-    /// Tertiary system background
-    public static let backgroundTertiary = Color(UIColor.tertiarySystemBackground)
+    /// System background — deep night purple-black
+    public static let backgroundSystem = Color(red: 0.08, green: 0.06, blue: 0.10)
+    /// Tertiary background — slightly lighter
+    public static let backgroundTertiary = Color(red: 0.12, green: 0.10, blue: 0.15)
 
     // MARK: - UI Elements
-    /// Card background
-    public static let cardBackground = Color(UIColor.secondarySystemBackground)
-    /// Card back (fate deck)
-    public static let cardBack = Color(red: 0.15, green: 0.25, blue: 0.4)
+    /// Card background — card surface
+    public static let cardBackground = Color(red: 0.14, green: 0.12, blue: 0.18)
+    /// Card back (fate deck) — deep midnight
+    public static let cardBack = Color(red: 0.12, green: 0.18, blue: 0.30)
     /// Overlay background
-    public static let overlay = Color.black.opacity(0.5)
-    /// Highlight color
-    public static let highlight = Color.blue
-    /// Muted text
-    public static let muted = Color.secondary
+    public static let overlay = Color.black.opacity(0.7)
+    /// Highlight — bright gold
+    public static let highlight = Color(red: 0.90, green: 0.75, blue: 0.30)
+    /// Muted text — dusty grey
+    public static let muted = Color(red: 0.55, green: 0.50, blue: 0.55)
 
     // MARK: - Rarity Colors
-    /// Common rarity
-    public static let rarityCommon = Color.gray
-    /// Uncommon rarity
-    public static let rarityUncommon = Color.green
-    /// Rare rarity
-    public static let rarityRare = Color.blue
-    /// Epic rarity
-    public static let rarityEpic = Color.purple
-    /// Legendary rarity
-    public static let rarityLegendary = Color.orange
+    /// Common — weathered stone
+    public static let rarityCommon = Color(red: 0.55, green: 0.52, blue: 0.50)
+    /// Uncommon — emerald
+    public static let rarityUncommon = Color(red: 0.20, green: 0.65, blue: 0.35)
+    /// Rare — sapphire
+    public static let rarityRare = Color(red: 0.25, green: 0.45, blue: 0.80)
+    /// Epic — amethyst
+    public static let rarityEpic = Color(red: 0.55, green: 0.25, blue: 0.75)
+    /// Legendary — legendary gold
+    public static let rarityLegendary = Color(red: 0.90, green: 0.65, blue: 0.15)
+
+    // MARK: - Card Type Colors
+    /// Item card — warm brown
+    public static let cardTypeItem = Color(red: 0.60, green: 0.40, blue: 0.20)
+    /// Location card — teal
+    public static let cardTypeLocation = Color(red: 0.20, green: 0.55, blue: 0.60)
+    /// Scenario card — indigo
+    public static let cardTypeScenario = Color(red: 0.40, green: 0.30, blue: 0.75)
+    /// Curse card — dark curse
+    public static let cardTypeCurse = Color(red: 0.25, green: 0.10, blue: 0.10)
+    /// Spirit card — cyan
+    public static let cardTypeSpirit = Color(red: 0.30, green: 0.75, blue: 0.85)
+    /// Ritual card — indigo
+    public static let cardTypeRitual = Color(red: 0.40, green: 0.30, blue: 0.75)
+    /// Resource/pink accent
+    public static let cardTypeResource = Color(red: 0.75, green: 0.35, blue: 0.55)
 
     // MARK: - Region States
     /// Visited region
-    public static let regionVisited = Color.green.opacity(0.3)
+    public static let regionVisited = Color(red: 0.25, green: 0.70, blue: 0.35).opacity(0.3)
     /// Available region
-    public static let regionAvailable = Color.blue.opacity(0.3)
+    public static let regionAvailable = Color(red: 0.85, green: 0.65, blue: 0.20).opacity(0.3)
     /// Locked region
-    public static let regionLocked = Color.gray.opacity(0.3)
+    public static let regionLocked = Color(red: 0.50, green: 0.48, blue: 0.45).opacity(0.3)
     /// Current region
-    public static let regionCurrent = Color.blue
+    public static let regionCurrent = Color(red: 0.85, green: 0.65, blue: 0.20)
 }
 
 // MARK: - Typography
@@ -206,15 +222,15 @@ public enum AppColors {
 /// Font styles for the app
 public enum AppTypography {
     /// Large title
-    public static let largeTitle = Font.largeTitle
+    public static let largeTitle = Font.largeTitle.weight(.bold)
     /// Title 1
-    public static let title1 = Font.title
+    public static let title1 = Font.title.weight(.bold)
     /// Title 2
-    public static let title2 = Font.title2
+    public static let title2 = Font.title2.weight(.semibold)
     /// Title 3
-    public static let title3 = Font.title3
+    public static let title3 = Font.title3.weight(.semibold)
     /// Headline
-    public static let headline = Font.headline
+    public static let headline = Font.headline.weight(.semibold)
     /// Body
     public static let body = Font.body
     /// Callout
@@ -233,12 +249,12 @@ public enum AppTypography {
 
 /// Shadow styles
 public enum AppShadows {
-    /// Small shadow
-    public static let sm = Shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
-    /// Medium shadow
-    public static let md = Shadow(color: .black.opacity(0.15), radius: 4, x: 0, y: 2)
-    /// Large shadow
-    public static let lg = Shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
+    /// Small shadow — warm gold tint
+    public static let sm = Shadow(color: Color(red: 0.85, green: 0.65, blue: 0.20).opacity(0.1), radius: 2, x: 0, y: 1)
+    /// Medium shadow — warm gold tint
+    public static let md = Shadow(color: Color(red: 0.85, green: 0.65, blue: 0.20).opacity(0.15), radius: 4, x: 0, y: 2)
+    /// Large shadow — warm gold tint
+    public static let lg = Shadow(color: Color(red: 0.85, green: 0.65, blue: 0.20).opacity(0.2), radius: 8, x: 0, y: 4)
 }
 
 /// Shadow configuration

@@ -46,7 +46,12 @@ struct ContentManagerView: View {
                 .padding()
             }
             .navigationTitle(L10n.contentManagerTitle.localized)
+            .background(AppColors.backgroundSystem)
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbarBackground(AppColors.backgroundSystem, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .tint(AppColors.primary)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(L10n.back.localized) {
@@ -180,7 +185,7 @@ struct ContentManagerView: View {
             }
         }
         .padding()
-        .background(Color(.systemGray6))
+        .background(AppColors.backgroundTertiary)
         .cornerRadius(CornerRadius.lg)
     }
 
@@ -259,7 +264,7 @@ struct PackRowView: View {
                 actionButtons
             }
             .padding()
-            .background(Color(.secondarySystemBackground))
+            .background(AppColors.cardBackground)
             .cornerRadius(CornerRadius.lg)
         }
         .buttonStyle(.plain)
@@ -360,7 +365,12 @@ struct PackDetailView: View {
                 .padding()
             }
             .navigationTitle(pack.displayName)
+            .background(AppColors.backgroundSystem)
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbarBackground(AppColors.backgroundSystem, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .tint(AppColors.primary)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(L10n.contentManagerDone.localized) {

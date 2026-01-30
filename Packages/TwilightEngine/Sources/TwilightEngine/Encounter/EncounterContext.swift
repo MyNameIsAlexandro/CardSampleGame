@@ -13,8 +13,9 @@ public struct EncounterContext: Equatable {
     public let balanceConfig: CombatBalanceConfig?
     public let behaviors: [String: BehaviorDefinition]
     public let heroCards: [Card]
+    public let heroFaith: Int
 
-    public init(hero: EncounterHero, enemies: [EncounterEnemy], fateDeckSnapshot: FateDeckState, modifiers: [EncounterModifier], rules: EncounterRules, rngSeed: UInt64, rngState: UInt64? = nil, worldResonance: Float = 0, balanceConfig: CombatBalanceConfig? = nil, behaviors: [String: BehaviorDefinition] = [:], heroCards: [Card] = []) {
+    public init(hero: EncounterHero, enemies: [EncounterEnemy], fateDeckSnapshot: FateDeckState, modifiers: [EncounterModifier], rules: EncounterRules, rngSeed: UInt64, rngState: UInt64? = nil, worldResonance: Float = 0, balanceConfig: CombatBalanceConfig? = nil, behaviors: [String: BehaviorDefinition] = [:], heroCards: [Card] = [], heroFaith: Int = 0) {
         self.hero = hero
         self.enemies = enemies
         self.fateDeckSnapshot = fateDeckSnapshot
@@ -26,6 +27,7 @@ public struct EncounterContext: Equatable {
         self.balanceConfig = balanceConfig
         self.behaviors = behaviors
         self.heroCards = heroCards
+        self.heroFaith = heroFaith
     }
 }
 
@@ -62,9 +64,10 @@ public struct EncounterEnemy: Equatable {
     public let maxWp: Int?
     public let power: Int
     public let defense: Int
+    public let spiritDefense: Int
     public let behaviorId: String?
 
-    public init(id: String, name: String, hp: Int, maxHp: Int, wp: Int? = nil, maxWp: Int? = nil, power: Int = 0, defense: Int = 0, behaviorId: String? = nil) {
+    public init(id: String, name: String, hp: Int, maxHp: Int, wp: Int? = nil, maxWp: Int? = nil, power: Int = 0, defense: Int = 0, spiritDefense: Int = 0, behaviorId: String? = nil) {
         self.id = id
         self.name = name
         self.hp = hp
@@ -73,6 +76,7 @@ public struct EncounterEnemy: Equatable {
         self.maxWp = maxWp
         self.power = power
         self.defense = defense
+        self.spiritDefense = spiritDefense
         self.behaviorId = behaviorId
     }
 }

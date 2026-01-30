@@ -583,6 +583,7 @@ private struct PackCardDefinition: Codable {
     public let power: Int?
     public let defense: Int?
     public let health: Int?
+    public let wisdom: Int?
     public let realm: Realm?
     public let curseType: CurseType?
 
@@ -625,6 +626,7 @@ private struct PackCardDefinition: Codable {
             power: power,
             defense: defense,
             health: health,
+            wisdom: wisdom,
             realm: realm,
             curseType: curseType
         )

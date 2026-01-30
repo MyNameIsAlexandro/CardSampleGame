@@ -9,6 +9,7 @@ public enum PlayerAction: Equatable {
     case wait
     case mulligan(cardIds: [String])
     case useCard(cardId: String, targetId: String?)
+    case resolveFateChoice(optionIndex: Int)
 }
 
 /// Result of performing an action within the encounter
@@ -39,6 +40,7 @@ public enum EncounterError: String, Equatable, Error {
     case invalidTarget
     case mulliganAlreadyDone
     case encounterOver
+    case insufficientFaith
 }
 
 /// State changes emitted by encounter actions
@@ -53,5 +55,7 @@ public enum EncounterStateChange: Equatable {
     case fateDraw(cardId: String, value: Int)
     case cardPlayed(cardId: String, name: String)
     case cardDrawn(cardId: String)
+    case faithChanged(delta: Int, newValue: Int)
+    case fateChoicePending(cardId: String)
     case encounterEnded(outcome: EncounterOutcome)
 }

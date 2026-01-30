@@ -151,6 +151,7 @@ public struct StandardCardDefinition: CardDefinition, Codable {
     public let power: Int?
     public let defense: Int?
     public let health: Int?
+    public let wisdom: Int?
     public let realm: Realm?
     public let curseType: CurseType?
 
@@ -170,6 +171,7 @@ public struct StandardCardDefinition: CardDefinition, Codable {
         power: Int? = nil,
         defense: Int? = nil,
         health: Int? = nil,
+        wisdom: Int? = nil,
         realm: Realm? = nil,
         curseType: CurseType? = nil
     ) {
@@ -188,6 +190,7 @@ public struct StandardCardDefinition: CardDefinition, Codable {
         self.power = power
         self.defense = defense
         self.health = health
+        self.wisdom = wisdom
         self.realm = realm
         self.curseType = curseType
     }
@@ -203,6 +206,7 @@ public struct StandardCardDefinition: CardDefinition, Codable {
             power: power,
             defense: defense,
             health: health,
+            wisdom: wisdom,
             abilities: abilities,
             balance: balance,
             realm: realm,

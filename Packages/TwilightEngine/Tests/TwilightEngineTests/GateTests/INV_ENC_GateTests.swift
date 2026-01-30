@@ -48,11 +48,17 @@ final class INV_ENC_GateTests: XCTestCase {
         let ctx = EncounterContextFixtures.weakEnemy()
         let engine = EncounterEngine(context: ctx)
 
-        // Act: spirit attack to reduce WP to 0
+        // Round 1: spirit attack to reduce WP to 0
         _ = engine.advancePhase() // intent → playerAction
         _ = engine.performAction(.spiritAttack(targetId: "weak_enemy"))
+        _ = engine.advancePhase() // → enemyResolution
+        _ = engine.resolveEnemyAction(enemyId: "weak_enemy")
+        _ = engine.advancePhase() // → roundEnd
+        _ = engine.advancePhase() // → intent (round 2)
+        _ = engine.generateIntent(for: "weak_enemy")
 
-        // Act: physical attack to reduce HP to 0
+        // Round 2: physical attack to reduce HP to 0
+        _ = engine.advancePhase() // → playerAction
         let result = engine.performAction(.attack(targetId: "weak_enemy"))
 
         // Assert: outcome is killed (not pacified)
@@ -137,12 +143,9 @@ final class INV_ENC_GateTests: XCTestCase {
         let first = engine.performAction(.attack(targetId: "test_enemy"))
         XCTAssertTrue(first.success, "First action must succeed")
 
-        // Second attack in same playerAction phase
+        // Second attack in same playerAction phase → blocked
         let second = engine.performAction(.attack(targetId: "test_enemy"))
-        // Note: current engine allows multiple actions per turn (cards + finish action).
-        // This test documents the current behavior. If One-Finish-Action is enforced later,
-        // this assertion should flip to XCTAssertFalse.
-        // For now, verify the engine does not crash on second action.
-        XCTAssertNotNil(second, "Engine must not crash on second action")
+        XCTAssertFalse(second.success, "Second finish action must be rejected")
+        XCTAssertEqual(second.error, .actionNotAllowed, "Error must be .actionNotAllowed")
     }
 }
