@@ -199,6 +199,7 @@ public final class EncounterEngine {
                     damage = 0
                 } else {
                     var defenseBonus = 0
+                    var preventFailure = false
                     if let keyword = card.keyword {
                         let effect = KeywordInterpreter.resolveWithAlignment(
                             keyword: keyword,
@@ -209,8 +210,13 @@ public final class EncounterEngine {
                             matchMultiplier: matchMultiplier
                         )
                         defenseBonus = effect.bonusValue
+                        // Ward (fortify): prevent failure — cap damage at 0
+                        if effect.special == "fortify" { preventFailure = true }
+                        // Shadow (evade): halve incoming damage
+                        if effect.special == "evade" { defenseBonus += intent.value / 2 }
                     }
-                    damage = max(0, intent.value - fateResult.effectiveValue - context.hero.armor - turnDefenseBonus - defenseBonus)
+                    let raw = intent.value - fateResult.effectiveValue - context.hero.armor - turnDefenseBonus - defenseBonus
+                    damage = preventFailure ? 0 : max(0, raw)
                 }
             } else {
                 damage = max(0, intent.value - context.hero.armor - turnDefenseBonus)
@@ -475,6 +481,9 @@ public final class EncounterEngine {
         }
 
         var keywordBonus = 0
+        var ignoreArmor = false
+        var vampirism = false
+        var echoCardReturn = false
         let fateResult = drawFate()
         if let fateResult = fateResult {
             changes.append(.fateDraw(cardId: fateResult.card.id, value: fateResult.effectiveValue))
@@ -488,14 +497,35 @@ public final class EncounterEngine {
                     matchMultiplier: matchMultiplier
                 )
                 keywordBonus = effect.bonusDamage
+                // Keyword special effects
+                switch effect.special {
+                case "ignore_armor": ignoreArmor = true
+                case "ambush": vampirism = true
+                case "echo_strike": echoCardReturn = true
+                default: break
+                }
             }
         }
 
-        let damage = max(1, context.hero.strength + turnAttackBonus - enemies[idx].defense + surpriseBonus + keywordBonus)
+        let armor = ignoreArmor ? 0 : enemies[idx].defense
+        let damage = max(1, context.hero.strength + turnAttackBonus - armor + surpriseBonus + keywordBonus)
         enemies[idx].hp = max(0, enemies[idx].hp - damage)
         lastAttackTrack = .physical
 
         changes.append(.enemyHPChanged(enemyId: targetId, delta: -damage, newValue: enemies[idx].hp))
+
+        // Shadow (ambush): vampirism — heal hero for portion of damage dealt
+        if vampirism {
+            let heal = max(1, damage / 2)
+            heroHP = min(context.hero.maxHp, heroHP + heal)
+            changes.append(.playerHPChanged(delta: heal, newValue: heroHP))
+        }
+
+        // Echo: return last played card to hand
+        if echoCardReturn, let lastCard = cardDiscardPile.last {
+            cardDiscardPile.removeLast()
+            hand.append(lastCard)
+        }
 
         if enemies[idx].hp == 0 {
             enemies[idx].outcome = .killed
@@ -521,6 +551,8 @@ public final class EncounterEngine {
         }
 
         var keywordBonus = 0
+        var resonancePush = false
+        var echoCardReturn = false
         let fateResult = drawFate()
         if let fateResult = fateResult {
             changes.append(.fateDraw(cardId: fateResult.card.id, value: fateResult.effectiveValue))
@@ -534,7 +566,20 @@ public final class EncounterEngine {
                     matchMultiplier: matchMultiplier
                 )
                 keywordBonus = effect.bonusDamage
+                switch effect.special {
+                case "resonance_push": resonancePush = true
+                case "will_pierce": keywordBonus += 1 // Focus: extra WP pierce
+                case "echo_prayer": echoCardReturn = true
+                default: break
+                }
             }
+        }
+
+        // Surge (resonance_push): shift resonance toward Prav on spirit attack
+        if resonancePush {
+            let delta: Float = 3.0
+            accumulatedResonanceDelta += delta
+            changes.append(.resonanceShifted(delta: delta, newValue: context.worldResonance + accumulatedResonanceDelta))
         }
 
         let damage = max(1, context.hero.wisdom + turnInfluenceBonus + keywordBonus - enemies[idx].rageShield - enemies[idx].spiritDefense)
@@ -545,6 +590,12 @@ public final class EncounterEngine {
         lastAttackTrack = .spiritual
 
         changes.append(.enemyWPChanged(enemyId: targetId, delta: -damage, newValue: newWP))
+
+        // Echo: return last played card to hand
+        if echoCardReturn, let lastCard = cardDiscardPile.last {
+            cardDiscardPile.removeLast()
+            hand.append(lastCard)
+        }
 
         if newWP == 0 && enemies[idx].hp > 0 {
             enemies[idx].outcome = .pacified

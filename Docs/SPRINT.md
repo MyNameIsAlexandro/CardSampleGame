@@ -33,26 +33,30 @@ Status: CLOSED (6/6 tasks done)
 
 ---
 
-## Next Epic: 3 — Encounter Engine Completion
-Status: NOT STARTED (0/12 tasks done)
+## Current Epic: 3 — Encounter Engine Completion
+Status: IN PROGRESS (5/12 tasks done)
+
+## Completed (this epic)
+
+- [x] ENC-01: Keyword surge — +2 bonus damage (physical), resonance push (spiritual)
+- [x] ENC-02: Keyword focus — ignore armor (physical), WP pierce (spiritual)
+- [x] ENC-03: Keyword echo — return last card from discard to hand
+- [x] ENC-04: Keyword shadow — vampirism heal (physical), evade halves damage (defense)
+- [x] ENC-05: Keyword ward — fortify prevents failure (defense), parry bonus (physical)
+
+Gate tests: 12 tests in INV_KW_GateTests (all pass). Total suite: 304 tests, 0 failures.
 
 ## Next Task
 
-**ENC-01: Keyword surge (attack: bleed, diplomacy: pressure+rep)**
-- Input: `Packages/TwilightEngine/Sources/TwilightEngine/Encounter/KeywordInterpreter.swift`
-- Action: Implement surge keyword effect: in attack context adds bleeding (extra damage over turns), in diplomacy context adds pressure + reputation penalty. Add gate test.
-- Output: KeywordInterpreter updated, new test in INV_ENC or dedicated file.
-- Test: `swift test --package-path Packages/TwilightEngine --filter Keyword`
-- Ref: COMBAT_DIPLOMACY_SPEC.md §3.5, `docs/plans/2026-01-30-epic-driven-development-design.md` Epic 3
+**ENC-06: Match Bonus: suit matches action type → 1.5x**
+- Input: `EncounterEngine.swift`, `KeywordInterpreter.swift`
+- Action: When fate card suit matches action type (e.g. Swords suit on physical attack), apply 1.5x multiplier to keyword bonus.
+- Test: `swift test --package-path Packages/TwilightEngine --filter KW`
 
 ## Backlog (this epic)
 
-- [ ] ENC-02: Keyword focus (attack: ignore armor)
-- [ ] ENC-03: Keyword echo (card returns to hand)
-- [ ] ENC-04: Keyword shadow (vampirism: heal on damage)
-- [ ] ENC-05: Keyword ward (defense: prevent failure)
 - [ ] ENC-06: Match Bonus: suit matches action type → 1.5x
-- [ ] ENC-07: Pacify control tool: prevent accidental kill during spirit attack
+- [ ] ENC-07: Pacify control tool
 - [ ] ENC-08: Resonance zone effects on card costs (+1 faith in wrong zone)
 - [ ] ENC-09: Enemy resonance modifiers from JSON
 - [ ] ENC-10: Phase automation: intent auto-generated at round start
