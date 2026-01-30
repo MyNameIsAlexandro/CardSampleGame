@@ -27,8 +27,8 @@ final class EncounterViewModel: ObservableObject {
     // MARK: - Fate Animation
 
     @Published var showFateReveal: Bool = false
-    @Published var lastFateCardId: String?
-    @Published var lastFateValue: Int = 0
+    @Published var lastFateResult: FateDrawResult?
+    @Published var fateContext: FateContext = .attack
 
     // MARK: - Private
 
@@ -68,6 +68,7 @@ final class EncounterViewModel: ObservableObject {
 
     func performAttack() {
         guard phase == .playerAction, let enemyState = enemy else { return }
+        fateContext = .attack
         let result = engine.performAction(.attack(targetId: enemyState.id))
         lastChanges = result.stateChanges
         processStateChanges(result.stateChanges)
@@ -78,6 +79,7 @@ final class EncounterViewModel: ObservableObject {
     func performInfluence() {
         guard phase == .playerAction, let enemyState = enemy else { return }
         guard enemyState.hasSpiritTrack else { return }
+        fateContext = .attack
         let result = engine.performAction(.spiritAttack(targetId: enemyState.id))
         lastChanges = result.stateChanges
         processStateChanges(result.stateChanges)
@@ -92,6 +94,11 @@ final class EncounterViewModel: ObservableObject {
         logEntry("Вы выжидаете.")
         syncState()
         advanceAfterPlayerAction()
+    }
+
+    func dismissFateReveal() {
+        showFateReveal = false
+        lastFateResult = nil
     }
 
     func performFlee() {
@@ -115,6 +122,7 @@ final class EncounterViewModel: ObservableObject {
 
         // Resolve enemy action
         if let enemyState = enemy, enemyState.isAlive {
+            fateContext = .defense
             let result = engine.resolveEnemyAction(enemyId: enemyState.id)
             lastChanges = result.stateChanges
             processStateChanges(result.stateChanges)
@@ -193,8 +201,10 @@ final class EncounterViewModel: ObservableObject {
             case .enemyPacified(let enemyId):
                 logEntry("Враг \(enemyId) усмирён!")
             case .fateDraw(let cardId, let value):
-                lastFateCardId = cardId
-                lastFateValue = value
+                if let result = engine.lastFateDrawResult {
+                    lastFateResult = result
+                    showFateReveal = true
+                }
                 logEntry("Карта судьбы: \(cardId) (\(value >= 0 ? "+" : "")\(value))")
             case .resonanceShifted(let delta, _):
                 logEntry("Резонанс: \(delta >= 0 ? "+" : "")\(String(format: "%.0f", delta))")

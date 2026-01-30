@@ -17,6 +17,7 @@ public final class EncounterEngine {
     public private(set) var isFinished: Bool
     public private(set) var mulliganDone: Bool
     public private(set) var lastAttackTrack: AttackTrack?
+    public private(set) var lastFateDrawResult: FateDrawResult?
 
     private let context: EncounterContext
     private let rng: WorldRNG
@@ -118,11 +119,12 @@ public final class EncounterEngine {
 
         switch intent.type {
         case .attack:
-            let fateCard = fateDeck.draw()
+            let fateResult = drawFate()
             var damage: Int
-            if let card = fateCard {
-                changes.append(.fateDraw(cardId: card.id, value: card.baseValue))
-                if card.isCritical {
+            if let fateResult = fateResult {
+                let card = fateResult.card
+                changes.append(.fateDraw(cardId: card.id, value: fateResult.effectiveValue))
+                if fateResult.isCritical {
                     damage = 0
                 } else {
                     var defenseBonus = 0
@@ -136,7 +138,7 @@ public final class EncounterEngine {
                         )
                         defenseBonus = effect.bonusValue
                     }
-                    damage = max(0, intent.value - card.baseValue - context.hero.armor - defenseBonus)
+                    damage = max(0, intent.value - fateResult.effectiveValue - context.hero.armor - defenseBonus)
                 }
             } else {
                 damage = max(0, intent.value - context.hero.armor)
@@ -219,6 +221,16 @@ public final class EncounterEngine {
 
     // MARK: - Private
 
+    private var effectiveResonance: Float {
+        context.worldResonance + accumulatedResonanceDelta
+    }
+
+    private func drawFate() -> FateDrawResult? {
+        let result = fateDeck.drawAndResolve(worldResonance: effectiveResonance)
+        lastFateDrawResult = result
+        return result
+    }
+
     private func findEnemyIndex(id: String) -> Int? {
         enemies.firstIndex(where: { $0.id == id })
     }
@@ -259,16 +271,16 @@ public final class EncounterEngine {
         }
 
         var keywordBonus = 0
-        let fateCard = fateDeck.draw()
-        if let card = fateCard {
-            changes.append(.fateDraw(cardId: card.id, value: card.baseValue))
-            if let keyword = card.keyword {
+        let fateResult = drawFate()
+        if let fateResult = fateResult {
+            changes.append(.fateDraw(cardId: fateResult.card.id, value: fateResult.effectiveValue))
+            if let keyword = fateResult.card.keyword {
                 let effect = KeywordInterpreter.resolveWithAlignment(
                     keyword: keyword,
                     context: .combatPhysical,
-                    baseValue: card.baseValue,
-                    isMatch: isSuitMatch(card.suit, for: .combatPhysical),
-                    isMismatch: isSuitMismatch(card.suit, for: .combatPhysical)
+                    baseValue: fateResult.effectiveValue,
+                    isMatch: isSuitMatch(fateResult.card.suit, for: .combatPhysical),
+                    isMismatch: isSuitMismatch(fateResult.card.suit, for: .combatPhysical)
                 )
                 keywordBonus = effect.bonusDamage
             }
@@ -304,16 +316,16 @@ public final class EncounterEngine {
         }
 
         var keywordBonus = 0
-        let fateCard = fateDeck.draw()
-        if let card = fateCard {
-            changes.append(.fateDraw(cardId: card.id, value: card.baseValue))
-            if let keyword = card.keyword {
+        let fateResult = drawFate()
+        if let fateResult = fateResult {
+            changes.append(.fateDraw(cardId: fateResult.card.id, value: fateResult.effectiveValue))
+            if let keyword = fateResult.card.keyword {
                 let effect = KeywordInterpreter.resolveWithAlignment(
                     keyword: keyword,
                     context: .combatSpiritual,
-                    baseValue: card.baseValue,
-                    isMatch: isSuitMatch(card.suit, for: .combatSpiritual),
-                    isMismatch: isSuitMismatch(card.suit, for: .combatSpiritual)
+                    baseValue: fateResult.effectiveValue,
+                    isMatch: isSuitMatch(fateResult.card.suit, for: .combatSpiritual),
+                    isMismatch: isSuitMismatch(fateResult.card.suit, for: .combatSpiritual)
                 )
                 keywordBonus = effect.bonusDamage
             }

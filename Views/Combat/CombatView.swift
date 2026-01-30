@@ -105,6 +105,16 @@ struct CombatView: View {
                 }
             }
         }
+        .sheet(isPresented: $vm.showFateReveal) {
+            if let result = vm.lastFateResult {
+                FateCardRevealView(
+                    result: result,
+                    context: vm.fateContext,
+                    worldResonance: engine.resonanceValue,
+                    onDismiss: { vm.dismissFateReveal() }
+                )
+            }
+        }
     }
 
     // MARK: - Setup
