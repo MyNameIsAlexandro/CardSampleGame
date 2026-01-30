@@ -21,6 +21,8 @@ final class EncounterViewModel: ObservableObject {
     @Published var isFinished: Bool = false
     @Published var lastChanges: [EncounterStateChange] = []
     @Published var combatLog: [String] = []
+    @Published var fateDeckDrawCount: Int = 0
+    @Published var fateDeckDiscardCount: Int = 0
 
     // MARK: - Outcome
 
@@ -214,6 +216,8 @@ final class EncounterViewModel: ObservableObject {
         heroHP = engine.heroHP
         enemy = engine.enemies.first
         isFinished = engine.isFinished
+        fateDeckDrawCount = engine.fateDeckDrawCount
+        fateDeckDiscardCount = engine.fateDeckDiscardCount
     }
 
     // MARK: - Log Helpers

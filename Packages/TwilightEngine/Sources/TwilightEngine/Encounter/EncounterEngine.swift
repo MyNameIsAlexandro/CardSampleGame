@@ -18,6 +18,8 @@ public final class EncounterEngine {
     public private(set) var mulliganDone: Bool
     public private(set) var lastAttackTrack: AttackTrack?
     public private(set) var lastFateDrawResult: FateDrawResult?
+    public var fateDeckDrawCount: Int { fateDeck.drawPile.count }
+    public var fateDeckDiscardCount: Int { fateDeck.discardPile.count }
 
     private let context: EncounterContext
     private let rng: WorldRNG

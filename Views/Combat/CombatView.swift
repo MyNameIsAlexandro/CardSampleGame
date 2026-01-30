@@ -93,8 +93,8 @@ struct CombatView: View {
 
             // Fate deck bar + flee
             FateDeckBar(
-                drawCount: engine.fateDeckDrawCount,
-                discardCount: engine.fateDeckDiscardCount,
+                drawCount: vm.fateDeckDrawCount,
+                discardCount: vm.fateDeckDiscardCount,
                 onFlee: { vm.performFlee() }
             )
         }
