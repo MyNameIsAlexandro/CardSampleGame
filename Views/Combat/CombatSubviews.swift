@@ -110,14 +110,14 @@ struct HeroHealthBar: View {
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     Capsule()
-                        .fill(Color.gray.opacity(0.3))
+                        .fill(AppColors.secondary.opacity(Opacity.light))
                     Capsule()
                         .fill(barColor)
                         .frame(width: geo.size.width * fraction)
                         .animation(.easeInOut(duration: 0.3), value: currentHP)
                 }
             }
-            .frame(height: 10)
+            .frame(height: Sizes.progressThick + 2)
 
             Text("\(currentHP)/\(maxHP)")
                 .font(.caption)
@@ -150,7 +150,7 @@ struct ActionBar: View {
             actionButton(
                 title: L10n.encounterActionInfluence.localized,
                 icon: "bubble.left.fill",
-                color: Color.blue,
+                color: AppColors.primary,
                 action: onInfluence
             )
             .disabled(!hasSpiritTrack)
@@ -263,7 +263,7 @@ struct CombatOverView: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.black.opacity(0.6))
+        .background(Color.black.opacity(Opacity.mediumHigh))
     }
 
     private var iconName: String {

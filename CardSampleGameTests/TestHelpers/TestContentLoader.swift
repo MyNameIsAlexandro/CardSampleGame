@@ -306,8 +306,6 @@ enum TestContentLoader {
     /// Сбросить состояние (для изолированных тестов)
     static func reset() {
         ContentRegistry.shared.unloadAllPacks()
-        CardRegistry.shared.clear()
-        AbilityRegistry.shared.clear()
         isLoaded = false
     }
 }

@@ -25,6 +25,7 @@ final class CodeHygieneTests: XCTestCase {
         "ExplorationModels.swift",      // 872 lines - exploration domain models
         "TwilightGameEngine.swift",     // 2247 lines - main engine
         "ContentRegistry.swift",        // 844 lines - registry
+        "FateCard.swift",               // 8 cohesive fate card types
         "JSONContentProvider.swift",    // 969 lines - JSON loading
         // PackValidator.swift moved to PackAuthoring module
         // Files with many related types (>5 types)

@@ -374,8 +374,8 @@ final class ContentValidationTests: XCTestCase {
             referencedCardIds.formUnion(hero.startingDeckCardIDs)
         }
 
-        // Find unknown cards - need to check global CardRegistry too
-        let allKnownCards = allCardIds.union(Set(CardRegistry.shared.allCards.map { $0.id }))
+        // Find unknown cards - check ContentRegistry too
+        let allKnownCards = allCardIds.union(Set(ContentRegistry.shared.getAllCards().map { $0.id }))
         let unknownCards = referencedCardIds.subtracting(allKnownCards)
 
         if !unknownCards.isEmpty {

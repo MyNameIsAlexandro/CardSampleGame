@@ -836,6 +836,9 @@ public struct BalancePackAccess {
 
     public var allKeys: [String] { [] }
 
+    /// Returns a balance value for the given key.
+    /// - Parameter key: The balance configuration key.
+    /// - Returns: The value, or nil if not found.
     public func value(for key: String) -> Any? { nil }
 }
 
