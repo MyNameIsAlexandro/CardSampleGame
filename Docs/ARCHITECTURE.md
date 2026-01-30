@@ -1,7 +1,7 @@
 # Architecture Map
 
 > Strategic context for Claude sessions. Max 500 lines.
-> Updated when an epic closes. Last update: Epic 6 (all epics complete).
+> Updated when an epic closes. Last update: Epic 7 (encounter module complete).
 
 ## Core Principle
 
@@ -42,6 +42,15 @@
          │  Intent auto-generated at init +    │
          │    each roundEnd→intent transition  │
          │                                     │
+         │  Player actions (all implemented):  │
+         │  ├─ Attack (physical, fate+keyword) │
+         │  ├─ Influence (spirit/WP damage)    │
+         │  ├─ Defend (+3 defense bonus)       │
+         │  ├─ Wait (skip turn)                │
+         │  ├─ Flee (fate check, canFlee rule) │
+         │  ├─ UseCard (faith cost, abilities) │
+         │  └─ Mulligan (pre-combat swap)      │
+         │                                     │
          │  Uses:                              │
          │  ├─ BehaviorEvaluator (enemy AI)    │
          │  ├─ KeywordInterpreter (fate fx)    │
@@ -65,6 +74,27 @@
          │  Enemy resonance modifiers:         │
          │  └─ resonanceBehavior[zone] →       │
          │     powerDelta / defenseDelta       │
+         │                                     │
+         │  Flee system:                       │
+         │  ├─ canFlee rule in EncounterRules  │
+         │  ├─ Fate card draw: ≥5 escape       │
+         │  └─ <5: fail + punishment damage    │
+         │                                     │
+         │  Loot system:                       │
+         │  ├─ lootCardIds on EncounterEnemy   │
+         │  ├─ faithReward per enemy           │
+         │  ├─ Collected on victory (kill/pac) │
+         │  └─ Applied via EncounterBridge     │
+         │                                     │
+         │  Summon system:                     │
+         │  ├─ .summon intent with enemyId     │
+         │  ├─ summonPool dict on context      │
+         │  └─ Max 4 enemies cap               │
+         │                                     │
+         │  Multi-enemy:                       │
+         │  ├─ Engine: enemies[] array          │
+         │  ├─ VM: selectedTargetId for target │
+         │  └─ Per-entity outcomes tracked     │
          └────────────────────────────────────┘
                           │
          ┌────────────────▼───────────────────┐
@@ -84,6 +114,7 @@
 - **Save**: `EngineSave` captures full state, restored via `loadGame()`
 - **RNG**: `WorldRNG.shared` — seeded, deterministic xorshift64
 - **End conditions**: tension ≥ 100 → defeat, HP ≤ 0 → defeat, quest flag → victory
+- **Loot helpers**: `applyFaithDelta()`, `addToDeck()` — called by EncounterBridge
 
 ### EncounterEngine
 - **Created**: `EncounterEngine(context: EncounterContext)`
@@ -93,6 +124,17 @@
 - **Result**: `finishEncounter() -> EncounterResult`
 - **Integration**: `TwilightGameEngine.applyEncounterResult()`
 - **Dual track**: physical (HP) + spiritual (WP), pacify when WP=0
+- **Defend**: +3 `turnDefenseBonus`, cleared at `advancePhase()` (enemyResolution→roundEnd)
+- **Flee**: checks `rules.canFlee`, draws fate card (≥5 succeed, <5 fail + punishment)
+- **Loot**: `finishEncounter()` collects `lootCardIds` + `faithReward` from defeated enemies
+- **Summon**: `.summon` intent resolves via `context.summonPool[id]`, capped at 4 enemies
+
+### EncounterContext
+- **Hero**: EncounterHero (hp, maxHp, strength, armor, wisdom)
+- **Enemies**: `[EncounterEnemy]` — each has lootCardIds, faithReward, behaviorId, resonanceBehavior
+- **Rules**: `EncounterRules` (maxRounds, canFlee, customVictory)
+- **Summon pool**: `[String: EncounterEnemy]` — enemies available for summon
+- **RNG seed**: `WorldRNG.shared.next()` per encounter (unique per battle)
 
 ### KeywordInterpreter
 - **Entry**: `resolveWithAlignment(keyword:context:isMatch:isMismatch:matchMultiplier:)`
@@ -116,6 +158,7 @@
 - **Structure**: FateCard with baseValue, suit (nav/yav/prav), keyword, isCritical
 - **Flow**: draw → apply resonance modifiers → resolve keyword → check match → discard
 - **Critical**: isCritical=true in defense → 0 damage
+- **Flee check**: fate draw determines escape success (value ≥ 5)
 
 ### World Degradation
 - **Tension**: starts 30, escalates every 3 days by `3 + (day / 10)`
@@ -133,27 +176,37 @@ User taps "Explore" in region
   → EventView shows event with choices
   → If choice triggers combat:
     → engine.makeEncounterContext() builds context
+      ├─ RNG seed from WorldRNG.shared.next()
+      ├─ lootCardIds + faithReward from EnemyDefinition
+      └─ summonPool (if applicable)
     → EncounterViewModel creates EncounterEngine
     → CombatView displays encounter
       ├─ ResonanceWidget (top)
-      ├─ EnemyPanel + DualHealthBar + EnemyIntentBadge
+      ├─ EnemyPanel(s) + DualHealthBar + EnemyIntentBadge
       ├─ HeroHealthBar
-      ├─ ActionBar (Attack / Influence / Wait / Flee)
+      ├─ ActionBar (Attack / Influence / Defend / Wait / Flee)
       ├─ FateCardRevealView (overlay on draw)
       └─ FateDeckWidget (bottom)
     → On finish: engine.applyEncounterResult()
+      ├─ HP delta applied
+      ├─ Resonance delta applied
+      ├─ Faith reward applied (applyFaithDelta)
+      ├─ Loot cards added to deck (addToDeck via CardFactory)
+      ├─ World flags merged
+      └─ Fate deck state restored
 ```
 
 ## Architectural Debt: RESOLVED
 
-All 6 audit findings from the original report have been addressed:
+All audit findings have been addressed across 7 epics:
 
 1. ~~RNG split~~ — WorldRNG 100% normalized, deterministic (Epic 1)
 2. ~~Access control~~ — all `public private(set)`, no unprotected state (Epic 2)
 3. ~~Keyword stubs~~ — all 5 keywords with specials in 3 combat paths (Epic 3)
-4. ~~Red gate tests~~ — 336 tests, 0 failures, 0 skips (Epic 4)
+4. ~~Red gate tests~~ — 347 tests, 0 failures, 0 skips (Epic 4)
 5. ~~World degradation~~ — single source of truth in DegradationRules (Epic 5)
 6. ~~Legacy combat UI~~ — CombatView fully on EncounterViewModel (Epic 6)
+7. ~~Encounter stubs~~ — defend, flee, loot, summon, multi-enemy all implemented (Epic 7)
 
 ## Gate Tests
 
@@ -163,7 +216,8 @@ All 6 audit findings from the original report have been addressed:
 | INV_TXN_GateTests | 8 | Contract tests, save round-trip |
 | INV_KW_GateTests | 32 | Keywords, match, pacify, resonance, enemy mods, phases, critical, integration |
 | INV_WLD_GateTests | 12 | Degradation, tension, anchors, 30-day simulation |
-| **Total** | **56** | |
+| INV_ENC7_GateTests | 11 | Defend, flee rules, loot, RNG seed, summon |
+| **Total** | **67** | |
 
 ## File Layout
 
@@ -197,9 +251,11 @@ Packages/
       FateDeckManager.swift      — Draw/discard/shuffle
       WorldRNG.swift             — Deterministic xorshift64
       EngineSave.swift           — Full state serialization
+      EnemyIntent.swift          — Intent types + summonEnemyId
     Encounter/
-      EncounterEngine.swift      — Combat state machine
-      EncounterContext.swift      — Context snapshot (hero, enemies, deck)
+      EncounterEngine.swift      — Combat state machine (all actions)
+      EncounterContext.swift      — Context snapshot + summonPool
+      EncounterResult.swift      — Outcome + lootCardIds + faithDelta
       KeywordInterpreter.swift   — Keyword → effect matrix
       BehaviorEvaluator.swift    — Enemy AI from JSON behaviors
       PlayerAction.swift         — Action enum + result types
@@ -207,11 +263,11 @@ Packages/
       DegradationRules.swift     — Region degradation config
       TwilightMarchesConfig.swift — Pressure, anchors, balance
     Data/Definitions/
-      EnemyDefinition.swift      — Enemy stats + resonanceBehavior
+      EnemyDefinition.swift      — Enemy stats + lootCardIds + faithReward
     ContentPacks/
       ContentRegistry.swift      — Content loading + queries
   TwilightEngine/Tests/
-    GateTests/                   — 56 gate tests (4 files)
+    GateTests/                   — 67 gate tests (5 files)
     LayerTests/                  — Component integration tests
     Helpers/                     — Test fixtures
 ```
