@@ -2,7 +2,7 @@ import SwiftUI
 import TwilightEngine
 
 /// New encounter-powered combat screen.
-/// Layout: ResonanceWidget → EnemyPanel → RoundInfoBar → ActionBar → FateDeckBar
+/// Layout: ResonanceWidget → EnemyPanel → HeroHealthBar → RoundInfoBar → CombatLog → ActionBar → FateDeckBar
 /// Overlays: CombatOverView
 struct CombatView: View {
     @ObservedObject var engine: TwilightGameEngine
@@ -56,7 +56,7 @@ struct CombatView: View {
 
     private var mainContent: some View {
         VStack(spacing: 0) {
-            // Resonance widget
+            // Resonance widget (compact)
             ResonanceWidget(engine: engine, compact: true)
                 .padding(.horizontal)
                 .padding(.top, Spacing.sm)
@@ -70,10 +70,16 @@ struct CombatView: View {
             // Round info
             RoundInfoBar(round: vm.round, phase: vm.phase)
 
+            // Hero health bar
+            HeroHealthBar(currentHP: vm.heroHP, maxHP: vm.heroMaxHP)
+                .padding(.horizontal)
+                .padding(.vertical, Spacing.xs)
+
             Spacer()
 
             // Combat log
             CombatLogView(entries: vm.combatLog)
+                .padding(.bottom, Spacing.xs)
 
             // Action buttons
             ActionBar(
@@ -83,9 +89,9 @@ struct CombatView: View {
                 onInfluence: { vm.performInfluence() },
                 onWait: { vm.performWait() }
             )
-            .padding(.vertical, Spacing.sm)
+            .padding(.bottom, Spacing.sm)
 
-            // Fate deck bar
+            // Fate deck bar + flee
             FateDeckBar(
                 drawCount: engine.fateDeckDrawCount,
                 discardCount: engine.fateDeckDiscardCount,
@@ -93,7 +99,6 @@ struct CombatView: View {
             )
         }
         .overlay {
-            // Combat over overlay
             if vm.showCombatOver, let result = vm.encounterResult {
                 CombatOverView(result: result) {
                     applyResultAndDismiss(result: result)

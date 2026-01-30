@@ -85,6 +85,49 @@ struct RoundInfoBar: View {
     }
 }
 
+// MARK: - Hero Health Bar
+
+struct HeroHealthBar: View {
+    let currentHP: Int
+    let maxHP: Int
+
+    private var fraction: CGFloat {
+        maxHP > 0 ? CGFloat(currentHP) / CGFloat(maxHP) : 0
+    }
+
+    private var barColor: Color {
+        if fraction > 0.5 { return AppColors.success }
+        if fraction > 0.25 { return AppColors.warning }
+        return AppColors.danger
+    }
+
+    var body: some View {
+        HStack(spacing: Spacing.sm) {
+            Image(systemName: "heart.fill")
+                .foregroundColor(barColor)
+                .font(.subheadline)
+
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(Color.gray.opacity(0.3))
+                    Capsule()
+                        .fill(barColor)
+                        .frame(width: geo.size.width * fraction)
+                        .animation(.easeInOut(duration: 0.3), value: currentHP)
+                }
+            }
+            .frame(height: 10)
+
+            Text("\(currentHP)/\(maxHP)")
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(AppColors.secondary)
+                .monospacedDigit()
+        }
+    }
+}
+
 // MARK: - Action Bar
 
 /// Three equal-weight action buttons: Attack, Influence, Wait

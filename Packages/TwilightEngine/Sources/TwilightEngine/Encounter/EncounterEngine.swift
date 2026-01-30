@@ -116,7 +116,8 @@ public final class EncounterEngine {
         }
         var changes: [EncounterStateChange] = []
 
-        if intent.type == .attack {
+        switch intent.type {
+        case .attack:
             let fateCard = fateDeck.draw()
             var damage: Int
             if let card = fateCard {
@@ -142,6 +143,31 @@ public final class EncounterEngine {
             }
             heroHP -= damage
             changes.append(.playerHPChanged(delta: -damage, newValue: heroHP))
+
+        case .ritual:
+            let delta = Float(intent.value) // negative = toward Nav
+            accumulatedResonanceDelta += delta
+            changes.append(.resonanceShifted(delta: delta, newValue: context.worldResonance + accumulatedResonanceDelta))
+
+        case .block:
+            if let idx = enemies.firstIndex(where: { $0.isAlive }) {
+                enemies[idx].defense += intent.value
+            }
+
+        case .buff:
+            if let idx = enemies.firstIndex(where: { $0.isAlive }) {
+                enemies[idx].power += intent.value
+            }
+
+        case .heal:
+            if let idx = enemies.firstIndex(where: { $0.isAlive }) {
+                let healed = min(intent.value, enemies[idx].maxHp - enemies[idx].hp)
+                enemies[idx].hp += healed
+                changes.append(.enemyHPChanged(enemyId: enemies[idx].id, delta: healed, newValue: enemies[idx].hp))
+            }
+
+        case .summon:
+            break // not yet implemented
         }
 
         currentIntent = nil
