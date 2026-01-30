@@ -66,8 +66,9 @@ public struct EncounterEnemy: Equatable {
     public let defense: Int
     public let spiritDefense: Int
     public let behaviorId: String?
+    public let resonanceBehavior: [String: EnemyModifier]?
 
-    public init(id: String, name: String, hp: Int, maxHp: Int, wp: Int? = nil, maxWp: Int? = nil, power: Int = 0, defense: Int = 0, spiritDefense: Int = 0, behaviorId: String? = nil) {
+    public init(id: String, name: String, hp: Int, maxHp: Int, wp: Int? = nil, maxWp: Int? = nil, power: Int = 0, defense: Int = 0, spiritDefense: Int = 0, behaviorId: String? = nil, resonanceBehavior: [String: EnemyModifier]? = nil) {
         self.id = id
         self.name = name
         self.hp = hp
@@ -78,6 +79,7 @@ public struct EncounterEnemy: Equatable {
         self.defense = defense
         self.spiritDefense = spiritDefense
         self.behaviorId = behaviorId
+        self.resonanceBehavior = resonanceBehavior
     }
 }
 

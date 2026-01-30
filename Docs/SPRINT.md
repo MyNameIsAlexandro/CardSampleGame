@@ -34,7 +34,7 @@ Status: CLOSED (6/6 tasks done)
 ---
 
 ## Current Epic: 3 — Encounter Engine Completion
-Status: IN PROGRESS (8/12 tasks done)
+Status: IN PROGRESS (9/12 tasks done)
 
 ## Completed (this epic)
 
@@ -49,13 +49,15 @@ Status: IN PROGRESS (8/12 tasks done)
 
 - [x] ENC-08: Resonance zone card costs — already implemented, added 4 e2e gate tests
 
-Gate tests: 23 tests in INV_KW_GateTests (all pass).
+- [x] ENC-09: Enemy resonance modifiers — wired resonanceBehavior into defense/power, 2 gate tests
+
+Gate tests: 25 tests in INV_KW_GateTests (all pass).
 
 ## Next Task
 
-**ENC-09: Enemy resonance modifiers from JSON**
-- Input: `EncounterEngine.swift`, enemy definitions
-- Action: Enemies shift resonance each round based on JSON-defined modifier.
+**ENC-10: Phase automation: intent auto-generated at round start**
+- Input: `EncounterEngine.swift`
+- Action: Auto-generate enemy intents when advancing to intent phase.
 - Test: `swift test --package-path Packages/TwilightEngine --filter KW`
 
 ## Backlog (this epic)

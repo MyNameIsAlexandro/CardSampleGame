@@ -355,6 +355,66 @@ final class INV_KW_GateTests: XCTestCase {
         XCTAssertEqual(faithBefore - engine.heroFaith, 2, "Card in Yav zone should cost base (2)")
     }
 
+    // MARK: - ENC-09: Enemy resonance modifiers
+
+    /// Enemy with +2 defense in Prav zone takes less damage from physical attack
+    func testResonanceModifier_enemyDefenseBoostInPravZone() {
+        // Baseline: no resonance behavior, resonance=0 (yav)
+        let fateCard = FateCard(id: "f1", modifier: 0, name: "Fate", suit: nil, keyword: nil)
+        let deck = FateDeckManager(cards: [fateCard])
+        let ctxBase = EncounterContext(
+            hero: EncounterHero(id: "hero", hp: 50, maxHp: 100, strength: 5, armor: 2, wisdom: 5, willDefense: 1),
+            enemies: [EncounterEnemy(id: "enemy", name: "E", hp: 50, maxHp: 50, power: 10, defense: 3)],
+            fateDeckSnapshot: deck.getState(), modifiers: [], rules: EncounterRules(), rngSeed: 42
+        )
+        let engineBase = EncounterEngine(context: ctxBase)
+        _ = startAndAttack(engineBase)
+        let hpBase = engineBase.enemies[0].hp
+
+        // With resonance behavior: +2 defense in prav zone, resonance=50 (prav)
+        let deck2 = FateDeckManager(cards: [fateCard])
+        let ctxMod = EncounterContext(
+            hero: EncounterHero(id: "hero", hp: 50, maxHp: 100, strength: 5, armor: 2, wisdom: 5, willDefense: 1),
+            enemies: [EncounterEnemy(id: "enemy", name: "E", hp: 50, maxHp: 50, power: 10, defense: 3,
+                resonanceBehavior: ["prav": EnemyModifier(defenseDelta: 2)])],
+            fateDeckSnapshot: deck2.getState(), modifiers: [], rules: EncounterRules(), rngSeed: 42,
+            worldResonance: 50
+        )
+        let engineMod = EncounterEngine(context: ctxMod)
+        _ = startAndAttack(engineMod)
+        let hpMod = engineMod.enemies[0].hp
+
+        XCTAssertGreaterThan(hpMod, hpBase,
+            "Enemy with +2 defense in prav zone should take less damage")
+    }
+
+    /// Enemy resonance modifier not applied in wrong zone
+    func testResonanceModifier_notAppliedInWrongZone() {
+        let fateCard = FateCard(id: "f1", modifier: 0, name: "Fate", suit: nil, keyword: nil)
+        let deck1 = FateDeckManager(cards: [fateCard])
+        let deck2 = FateDeckManager(cards: [fateCard])
+        // Enemy has prav modifier but resonance is in nav zone
+        let ctxBase = EncounterContext(
+            hero: EncounterHero(id: "hero", hp: 50, maxHp: 100, strength: 5, armor: 2, wisdom: 5, willDefense: 1),
+            enemies: [EncounterEnemy(id: "enemy", name: "E", hp: 50, maxHp: 50, power: 10, defense: 3)],
+            fateDeckSnapshot: deck1.getState(), modifiers: [], rules: EncounterRules(), rngSeed: 42,
+            worldResonance: -50
+        )
+        let ctxMod = EncounterContext(
+            hero: EncounterHero(id: "hero", hp: 50, maxHp: 100, strength: 5, armor: 2, wisdom: 5, willDefense: 1),
+            enemies: [EncounterEnemy(id: "enemy", name: "E", hp: 50, maxHp: 50, power: 10, defense: 3,
+                resonanceBehavior: ["prav": EnemyModifier(defenseDelta: 5)])],
+            fateDeckSnapshot: deck2.getState(), modifiers: [], rules: EncounterRules(), rngSeed: 42,
+            worldResonance: -50 // nav zone, not prav
+        )
+        let engineBase = EncounterEngine(context: ctxBase)
+        let engineMod = EncounterEngine(context: ctxMod)
+        _ = startAndAttack(engineBase)
+        _ = startAndAttack(engineMod)
+        XCTAssertEqual(engineBase.enemies[0].hp, engineMod.enemies[0].hp,
+            "Prav modifier should not apply in Nav zone")
+    }
+
     /// Yav suit always matches — never nullified
     func testYavSuit_alwaysMatches_neverNullified() {
         let ctxYavPhys = makeContext(keyword: .surge, suit: .yav)

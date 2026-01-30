@@ -168,8 +168,9 @@ public final class EncounterEngine {
         }
 
         // Fallback to hardcoded generator
+        let resMod = resonanceModifier(for: enemy)
         let intent = EnemyIntentGenerator.generateIntent(
-            enemyPower: enemy.power,
+            enemyPower: max(0, enemy.power + resMod.powerDelta),
             enemyHealth: enemy.hp,
             enemyMaxHealth: enemy.maxHp,
             turnNumber: currentRound,
@@ -410,6 +411,13 @@ public final class EncounterEngine {
         context.balanceConfig?.matchMultiplier ?? 1.5
     }
 
+    /// Returns the resonance-based stat modifier for an enemy in the current zone
+    private func resonanceModifier(for enemy: EncounterEnemyState) -> EnemyModifier {
+        guard let behaviors = enemy.resonanceBehavior else { return EnemyModifier() }
+        let zone = ResonanceEngine.zone(for: effectiveResonance)
+        return behaviors[zone.rawValue] ?? EnemyModifier()
+    }
+
     private func drawFate() -> FateDrawResult? {
         let result = fateDeck.drawAndResolve(worldResonance: effectiveResonance)
         lastFateDrawResult = result
@@ -507,7 +515,8 @@ public final class EncounterEngine {
             }
         }
 
-        let armor = ignoreArmor ? 0 : enemies[idx].defense
+        let resMod = resonanceModifier(for: enemies[idx])
+        let armor = ignoreArmor ? 0 : max(0, enemies[idx].defense + resMod.defenseDelta)
         let damage = max(1, context.hero.strength + turnAttackBonus - armor + surpriseBonus + keywordBonus)
         enemies[idx].hp = max(0, enemies[idx].hp - damage)
         lastAttackTrack = .physical
@@ -619,6 +628,7 @@ public struct EncounterEnemyState: Equatable {
     public var spiritDefense: Int
     public var rageShield: Int
     public var outcome: EntityOutcome?
+    public let resonanceBehavior: [String: EnemyModifier]?
 
     public var hasSpiritTrack: Bool { wp != nil }
     public var isAlive: Bool { hp > 0 }
@@ -636,6 +646,7 @@ public struct EncounterEnemyState: Equatable {
         self.spiritDefense = enemy.spiritDefense
         self.rageShield = 0
         self.outcome = nil
+        self.resonanceBehavior = enemy.resonanceBehavior
     }
 }
 
