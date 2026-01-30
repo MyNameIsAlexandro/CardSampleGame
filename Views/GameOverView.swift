@@ -6,6 +6,9 @@ struct GameOverView: View {
     let engine: TwilightGameEngine
     let onReturnToMenu: () -> Void
 
+    @State private var showContent = false
+    @State private var iconScale: CGFloat = 0.3
+
     private var isVictory: Bool {
         if case .victory = result { return true }
         return false
@@ -20,13 +23,22 @@ struct GameOverView: View {
         ZStack {
             AppColors.backgroundSystem.ignoresSafeArea()
 
+            // UX-08: Victory glow / defeat vignette
+            if isVictory {
+                AppGradient.victoryGlow.ignoresSafeArea()
+            } else {
+                AppGradient.defeatVignette.ignoresSafeArea()
+            }
+
             VStack(spacing: Spacing.xl) {
                 Spacer()
 
-                // Icon
+                // Icon with scale animation
                 Image(systemName: isVictory ? "sun.max.fill" : "moon.fill")
                     .font(.system(size: 64))
                     .foregroundColor(isVictory ? AppColors.warning : AppColors.danger)
+                    .scaleEffect(iconScale)
+                    .shadow(color: (isVictory ? AppColors.warning : AppColors.danger).opacity(0.5), radius: 20)
 
                 // Title
                 Text(isVictory
@@ -35,6 +47,7 @@ struct GameOverView: View {
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .foregroundColor(isVictory ? AppColors.warning : AppColors.danger)
+                    .opacity(showContent ? 1 : 0)
 
                 // Message / Reason
                 if isVictory {
@@ -43,12 +56,14 @@ struct GameOverView: View {
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, Spacing.xl)
+                        .opacity(showContent ? 1 : 0)
                 } else if let reason = defeatReason {
                     Text(L10n.gameOverDefeatReason.localized(with: reason))
                         .font(.body)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, Spacing.xl)
+                        .opacity(showContent ? 1 : 0)
                 }
 
                 // Stats
@@ -63,11 +78,15 @@ struct GameOverView: View {
                 .padding()
                 .background(AppColors.cardBackground)
                 .cornerRadius(CornerRadius.lg)
+                .opacity(showContent ? 1 : 0)
 
                 Spacer()
 
                 // Return to menu button
-                Button(action: onReturnToMenu) {
+                Button(action: {
+                    HapticManager.shared.play(.light)
+                    onReturnToMenu()
+                }) {
                     Text(L10n.gameOverReturnToMenu.localized)
                         .font(.title3)
                         .fontWeight(.bold)
@@ -79,6 +98,24 @@ struct GameOverView: View {
                 }
                 .padding(.horizontal, Spacing.lg)
                 .padding(.bottom, Spacing.xl)
+                .opacity(showContent ? 1 : 0)
+            }
+        }
+        .onAppear {
+            // Staged entrance animation (UX-08)
+            withAnimation(AppAnimation.bouncy.delay(0.2)) {
+                iconScale = 1.0
+            }
+            withAnimation(AppAnimation.standard.delay(0.6)) {
+                showContent = true
+            }
+            // Haptic + sound
+            if isVictory {
+                HapticManager.shared.play(.success)
+                SoundManager.shared.play(.victory)
+            } else {
+                HapticManager.shared.play(.error)
+                SoundManager.shared.play(.defeat)
             }
         }
     }

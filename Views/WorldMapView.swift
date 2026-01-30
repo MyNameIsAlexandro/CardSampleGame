@@ -11,6 +11,7 @@ struct WorldMapView: View {
     @State private var selectedRegion: EngineRegionState?
     @State private var showingExitConfirmation = false
     @State private var showingGameOver = false
+    @State private var showingTravelTransition = false
     @State private var showingEventLog = false
     @State private var showingDayEvent = false
     @State private var currentDayEvent: DayEvent?
@@ -138,9 +139,34 @@ struct WorldMapView: View {
                     }
                 }
             }
+            // UX-10: Travel transition overlay
+            .overlay {
+                if showingTravelTransition {
+                    ZStack {
+                        AppColors.backgroundSystem.opacity(Opacity.high)
+                            .ignoresSafeArea()
+                        VStack(spacing: Spacing.md) {
+                            Image(systemName: "figure.walk")
+                                .font(.system(size: 40))
+                                .foregroundColor(AppColors.primary)
+                            ProgressView()
+                                .tint(AppColors.primary)
+                        }
+                    }
+                    .transition(.opacity)
+                }
+            }
             .onChange(of: engine.isGameOver) { isOver in
                 if isOver {
                     showingGameOver = true
+                }
+            }
+            .onChange(of: engine.currentRegionId) { _ in
+                // UX-10: Show travel flash
+                HapticManager.shared.play(.light)
+                withAnimation(.easeIn(duration: 0.15)) { showingTravelTransition = true }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    withAnimation(.easeOut(duration: 0.3)) { showingTravelTransition = false }
                 }
             }
             .onChange(of: engine.currentDay) { newDay in

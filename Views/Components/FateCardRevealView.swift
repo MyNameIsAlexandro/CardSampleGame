@@ -19,6 +19,7 @@ struct FateCardRevealView: View {
     @State private var showCard = false
     @State private var showValue = false
     @State private var showEffects = false
+    @State private var flipAngle: Double = 180  // UX-07: 3D flip
 
     var body: some View {
         VStack(spacing: Spacing.lg) {
@@ -53,6 +54,8 @@ struct FateCardRevealView: View {
                     )
                     .scaleEffect(showCard ? 1.0 : 0.5)
                     .opacity(showCard ? 1.0 : 0.0)
+                    .rotation3DEffect(.degrees(flipAngle), axis: (x: 0, y: 1, z: 0))
+                    .opacity(flipAngle > 90 ? 0 : 1)
 
                 VStack(spacing: Spacing.md) {
                     // Card name
@@ -199,7 +202,12 @@ struct FateCardRevealView: View {
             showCard = true
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + AnimationDuration.normal) {
+        // UX-07: 3D flip after card appears
+        withAnimation(.easeInOut(duration: AnimationDuration.slow).delay(0.1)) {
+            flipAngle = 0
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + AnimationDuration.normal + 0.15) {
             withAnimation(.spring(response: AnimationDuration.normal, dampingFraction: 0.6)) {
                 showValue = true
             }

@@ -38,6 +38,10 @@ struct CombatView: View {
     @State private var startHP: Int = 0
     @State private var didStart: Bool = false
 
+    // UX-05: Floating damage numbers
+    @State private var floatingDamage: FloatingNumber? = nil
+    @State private var showDamageFlash: Bool = false
+
     var body: some View {
         ZStack {
             AppColors.backgroundSystem
@@ -71,6 +75,74 @@ struct CombatView: View {
             }
         }
         .onAppear { setupEncounter() }
+        .overlay(damageFlashOverlay)
+        .overlay(floatingDamageOverlay)
+        .onChange(of: vm.lastChanges) { changes in
+            for change in changes {
+                switch change {
+                case .playerHPChanged(let delta, _) where delta < 0:
+                    showFloatingDamage(value: -delta, isHero: true)
+                    triggerDamageFlash()
+                case .enemyHPChanged(_, let delta, _) where delta < 0:
+                    showFloatingDamage(value: -delta, isHero: false)
+                case .enemyWPChanged(_, let delta, _) where delta < 0:
+                    showFloatingDamage(value: -delta, isHero: false)
+                default:
+                    break
+                }
+            }
+        }
+    }
+
+    // MARK: - UX-05: Floating Damage Numbers
+
+    @ViewBuilder
+    private var floatingDamageOverlay: some View {
+        if let dmg = floatingDamage {
+            Text("-\(dmg.value)")
+                .font(.title)
+                .fontWeight(.black)
+                .foregroundColor(dmg.isHero ? AppColors.danger : AppColors.warning)
+                .shadow(color: .black, radius: 2)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+                .id(dmg.id)
+                .position(x: UIScreen.main.bounds.width / 2,
+                          y: dmg.isHero ? UIScreen.main.bounds.height * 0.55 : UIScreen.main.bounds.height * 0.2)
+        }
+    }
+
+    // MARK: - UX-06: Damage Flash
+
+    @ViewBuilder
+    private var damageFlashOverlay: some View {
+        if showDamageFlash {
+            AppGradient.damageFlash
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
+                .transition(.opacity)
+        }
+    }
+
+    private func showFloatingDamage(value: Int, isHero: Bool) {
+        withAnimation(AppAnimation.snap) {
+            floatingDamage = FloatingNumber(value: value, isHero: isHero)
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            withAnimation(.easeOut(duration: 0.3)) {
+                floatingDamage = nil
+            }
+        }
+    }
+
+    private func triggerDamageFlash() {
+        withAnimation(.easeIn(duration: 0.05)) {
+            showDamageFlash = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            withAnimation(.easeOut(duration: 0.2)) {
+                showDamageFlash = false
+            }
+        }
     }
 
     // MARK: - Main Layout
@@ -283,5 +355,17 @@ struct CombatView: View {
         }
 
         onCombatEnd(outcome)
+    }
+}
+
+// MARK: - Floating Number Model
+
+private struct FloatingNumber: Equatable {
+    let id = UUID()
+    let value: Int
+    let isHero: Bool
+
+    static func == (lhs: FloatingNumber, rhs: FloatingNumber) -> Bool {
+        lhs.id == rhs.id
     }
 }

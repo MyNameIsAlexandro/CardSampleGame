@@ -160,6 +160,8 @@ final class EncounterViewModel: ObservableObject {
         fateContext = .attack
         let result = eng.performAction(.attack(targetId: target.id))
         if !result.success { return }
+        HapticManager.shared.play(.medium)
+        SoundManager.shared.play(.attackHit)
         lastChanges = result.stateChanges
         processStateChanges(result.stateChanges)
         syncState()
@@ -178,6 +180,8 @@ final class EncounterViewModel: ObservableObject {
         fateContext = .attack
         let result = eng.performAction(.spiritAttack(targetId: target.id))
         if !result.success { return }
+        HapticManager.shared.play(.medium)
+        SoundManager.shared.play(.influence)
         lastChanges = result.stateChanges
         processStateChanges(result.stateChanges)
         syncState()
@@ -193,6 +197,7 @@ final class EncounterViewModel: ObservableObject {
         guard phase == .playerAction, !isProcessingEnemyTurn else { return }
         let result = eng.performAction(.wait)
         if !result.success { return }
+        HapticManager.shared.play(.light)
         lastChanges = result.stateChanges
         logEntry(L10n.encounterLogPlayerWaits.localized)
         syncState()
@@ -230,6 +235,8 @@ final class EncounterViewModel: ObservableObject {
         // Pre-check faith affordability for UI feedback
         if card.faithCost > heroFaith {
             insufficientFaithCardId = card.id
+            HapticManager.shared.play(.error)
+            SoundManager.shared.play(.attackBlock)
             logEntry(L10n.combatFaithInsufficient.localized)
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
                 if self?.insufficientFaithCardId == card.id {
@@ -257,6 +264,8 @@ final class EncounterViewModel: ObservableObject {
         processStateChanges(result.stateChanges)
         syncState()
 
+        HapticManager.shared.play(.medium)
+        SoundManager.shared.play(.cardPlay)
         // Show played card name prominently
         lastPlayedCardName = cardName
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
@@ -272,6 +281,7 @@ final class EncounterViewModel: ObservableObject {
         if !fleeResult.success {
             if fleeResult.error == .fleeNotAllowed {
                 logEntry(L10n.encounterLogFleeBlocked.localized)
+                HapticManager.shared.play(.error)
             }
             return
         }
@@ -279,9 +289,12 @@ final class EncounterViewModel: ObservableObject {
         syncState()
 
         if eng.fleeSucceeded {
+            SoundManager.shared.play(.flee)
+            HapticManager.shared.play(.success)
             finishWithResult()
         } else {
             // Failed flee: enemy still gets their turn
+            HapticManager.shared.play(.warning)
             logEntry(L10n.encounterLogFleeFailed.localized)
             advanceAfterPlayerAction()
         }
@@ -402,6 +415,15 @@ final class EncounterViewModel: ObservableObject {
         encounterResult = result
         isFinished = true
         showCombatOver = true
+
+        // Victory/defeat feedback
+        if case .victory = result.outcome {
+            HapticManager.shared.play(.success)
+            SoundManager.shared.play(.victory)
+        } else {
+            HapticManager.shared.play(.error)
+            SoundManager.shared.play(.defeat)
+        }
     }
 
     // MARK: - State Sync
@@ -435,19 +457,27 @@ final class EncounterViewModel: ObservableObject {
                 logEntry(L10n.encounterLogWillDamage.localized(with: -delta, newValue))
             case .playerHPChanged(let delta, let newValue):
                 if delta < 0 {
+                    HapticManager.shared.play(.heavy)
+                    SoundManager.shared.play(.damageTaken)
                     logEntry(L10n.encounterLogPlayerTakesDamage.localized(with: -delta, newValue))
                 }
             case .enemyKilled(let enemyId):
                 let name = eng.enemies.first(where: { $0.id == enemyId })?.name ?? enemyId
+                HapticManager.shared.play(.heavy)
+                SoundManager.shared.play(.enemyDefeated)
                 logEntry(L10n.encounterLogEnemySlain.localized(with: name))
             case .enemyPacified(let enemyId):
                 let name = eng.enemies.first(where: { $0.id == enemyId })?.name ?? enemyId
+                HapticManager.shared.play(.success)
+                SoundManager.shared.play(.enemyDefeated)
                 logEntry(L10n.encounterLogEnemyPacified.localized(with: name))
             case .fateDraw(_, let value):
                 let cardName: String
                 if let result = eng.lastFateDrawResult {
                     lastFateResult = result
                     showFateReveal = true
+                    SoundManager.shared.play(result.isCritical ? .fateCritical : .fateReveal)
+                    HapticManager.shared.play(result.isCritical ? .heavy : .light)
                     cardName = result.card.name
                 } else {
                     cardName = "?"

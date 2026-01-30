@@ -60,6 +60,8 @@
 		GOV0000100000000000000001 /* GameOverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = GOV0000200000000000000001 /* GameOverView.swift */; };
 		TOV0000100000000000000001 /* TutorialOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = TOV0000200000000000000001 /* TutorialOverlayView.swift */; };
 		STV0000100000000000000001 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = STV0000200000000000000001 /* SettingsView.swift */; };
+		HAP0000100000000000000001 /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = HAP0000200000000000000001 /* HapticManager.swift */; };
+		SND0000100000000000000001 /* SoundManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = SND0000200000000000000001 /* SoundManager.swift */; };
 		CM00000100000000000000001 /* ContentManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CM00000200000000000000001 /* ContentManagerView.swift */; };
 		CM00000300000000000000001 /* ContentManagerVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = CM00000400000000000000001 /* ContentManagerVM.swift */; };
 		CMT0000100000000000000001 /* ContentManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CMT0000200000000000000001 /* ContentManagerTests.swift */; };
@@ -126,6 +128,8 @@
 		GOV0000200000000000000001 /* GameOverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameOverView.swift; sourceTree = "<group>"; };
 		TOV0000200000000000000001 /* TutorialOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorialOverlayView.swift; sourceTree = "<group>"; };
 		STV0000200000000000000001 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		HAP0000200000000000000001 /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
+		SND0000200000000000000001 /* SoundManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundManager.swift; sourceTree = "<group>"; };
 		CM00000200000000000000001 /* ContentManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentManagerView.swift; sourceTree = "<group>"; };
 		CM00000400000000000000001 /* ContentManagerVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModels/ContentManagerVM.swift; sourceTree = SOURCE_ROOT; };
 		CMT0000200000000000000001 /* ContentManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentManagerTests.swift; sourceTree = "<group>"; };
@@ -174,6 +178,7 @@
 				AA0000280000000000000001 /* Views */,
 				VM00000000000001 /* ViewModels */,
 				UT00000000000100 /* Utilities */,
+				MGR0000000000000000000001 /* Managers */,
 				AA0000450000000000000001 /* Localizable.strings */,
 			);
 			path = .;
@@ -323,6 +328,15 @@
 			path = ViewModels;
 			sourceTree = "<group>";
 		};
+		MGR0000000000000000000001 /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				HAP0000200000000000000001 /* HapticManager.swift */,
+				SND0000200000000000000001 /* SoundManager.swift */,
+			);
+			path = Managers;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -452,6 +466,8 @@
 				GOV0000100000000000000001 /* GameOverView.swift in Sources */,
 				TOV0000100000000000000001 /* TutorialOverlayView.swift in Sources */,
 				STV0000100000000000000001 /* SettingsView.swift in Sources */,
+				HAP0000100000000000000001 /* HapticManager.swift in Sources */,
+				SND0000100000000000000001 /* SoundManager.swift in Sources */,
 				AA0000130000000000000001 /* CardView.swift in Sources */,
 				AA0000150000000000000001 /* PlayerHandView.swift in Sources */,
 				AA0000480000000000000001 /* RulesView.swift in Sources */,

@@ -50,7 +50,7 @@ struct TutorialOverlayView: View {
                 VStack(spacing: Spacing.sm) {
                     Button(action: {
                         if currentStep < steps.count - 1 {
-                            withAnimation { currentStep += 1 }
+                            withAnimation(AppAnimation.gentle) { currentStep += 1 }
                         } else {
                             onComplete()
                         }

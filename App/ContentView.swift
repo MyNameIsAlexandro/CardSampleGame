@@ -16,6 +16,7 @@ struct ContentView: View {
     @State private var selectedSaveSlot: Int?
     @AppStorage("hasCompletedTutorial") private var hasCompletedTutorial = false
     @State private var showingTutorial = false
+    @State private var ambientPulse = false
 
     // MARK: - Engine-First Architecture
     // Engine is the single source of truth (no legacy GameState)
@@ -50,6 +51,13 @@ struct ContentView: View {
         NavigationView {
             ZStack {
                 AppColors.backgroundSystem.ignoresSafeArea()
+
+                // UX-11: Ambient background pulse
+                AppGradient.ambientDark
+                    .ignoresSafeArea()
+                    .opacity(ambientPulse ? 0.6 : 0.3)
+                    .animation(.easeInOut(duration: 4).repeatForever(autoreverses: true), value: ambientPulse)
+                    .onAppear { ambientPulse = true }
 
             if showingBattleArena {
                 BattleArenaView(engine: engine, onExit: {

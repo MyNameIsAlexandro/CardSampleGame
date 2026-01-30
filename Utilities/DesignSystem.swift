@@ -347,3 +347,56 @@ public enum Opacity {
     /// 1.0 - Fully opaque
     public static let opaque: Double = 1.0
 }
+
+// MARK: - Animation Presets (UX-12)
+
+/// Reusable animation curves
+public enum AppAnimation {
+    /// Snappy spring for UI interactions (buttons, cards)
+    public static let snap = Animation.spring(response: 0.3, dampingFraction: 0.7)
+    /// Gentle spring for content transitions
+    public static let gentle = Animation.spring(response: 0.5, dampingFraction: 0.8)
+    /// Bouncy spring for emphasis (loot, rewards)
+    public static let bouncy = Animation.spring(response: 0.4, dampingFraction: 0.5)
+    /// Quick ease for value changes (health bars, counters)
+    public static let quick = Animation.easeInOut(duration: AnimationDuration.fast)
+    /// Standard ease for transitions
+    public static let standard = Animation.easeInOut(duration: AnimationDuration.normal)
+    /// Slow ease for dramatic reveals
+    public static let dramatic = Animation.easeInOut(duration: AnimationDuration.slow)
+    /// Shake animation for errors/damage
+    public static let shake = Animation.default.speed(6).repeatCount(3, autoreverses: true)
+}
+
+// MARK: - Gradient Presets (UX-12)
+
+/// Reusable gradients for the dark Slavic fantasy theme
+public enum AppGradient {
+    /// Dark ambient background pulse gradient
+    public static let ambientDark = LinearGradient(
+        colors: [
+            AppColors.backgroundSystem,
+            Color(red: 0.08, green: 0.06, blue: 0.14)
+        ],
+        startPoint: .top,
+        endPoint: .bottom
+    )
+    /// Victory glow — warm gold radial
+    public static let victoryGlow = RadialGradient(
+        colors: [AppColors.warning.opacity(0.3), Color.clear],
+        center: .center,
+        startRadius: 20,
+        endRadius: 200
+    )
+    /// Defeat vignette — dark red edges
+    public static let defeatVignette = RadialGradient(
+        colors: [Color.clear, AppColors.danger.opacity(0.4)],
+        center: .center,
+        startRadius: 100,
+        endRadius: 300
+    )
+    /// Damage flash overlay
+    public static let damageFlash = Color.red.opacity(0.3)
+    /// Heal flash overlay
+    public static let healFlash = Color.green.opacity(0.2)
+}
