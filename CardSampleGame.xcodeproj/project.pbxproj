@@ -65,6 +65,25 @@
 		CM00000100000000000000001 /* ContentManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CM00000200000000000000001 /* ContentManagerView.swift */; };
 		CM00000300000000000000001 /* ContentManagerVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = CM00000400000000000000001 /* ContentManagerVM.swift */; };
 		CMT0000100000000000000001 /* ContentManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CMT0000200000000000000001 /* ContentManagerTests.swift */; };
+		PEB0010000000000PE000001 /* PackEditorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0010000000000PE000001 /* PackEditorApp.swift */; };
+		PEB0020000000000PE000001 /* PackEditorState.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0020000000000PE000001 /* PackEditorState.swift */; };
+		PEB0030000000000PE000001 /* ContentSidebar.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0030000000000PE000001 /* ContentSidebar.swift */; };
+		PEB0040000000000PE000001 /* EntityListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0040000000000PE000001 /* EntityListView.swift */; };
+		PEB0050000000000PE000001 /* EditorToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0050000000000PE000001 /* EditorToolbar.swift */; };
+		PEB0060000000000PE000001 /* LocalizedTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0060000000000PE000001 /* LocalizedTextField.swift */; };
+		PEB0070000000000PE000001 /* ValidationBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0070000000000PE000001 /* ValidationBadge.swift */; };
+		PEB0080000000000PE000001 /* EnemyEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0080000000000PE000001 /* EnemyEditor.swift */; };
+		PEB0090000000000PE000001 /* CardEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0090000000000PE000001 /* CardEditor.swift */; };
+		PEB0100000000000PE000001 /* EventEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0100000000000PE000001 /* EventEditor.swift */; };
+		PEB0110000000000PE000001 /* RegionEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0110000000000PE000001 /* RegionEditor.swift */; };
+		PEB0120000000000PE000001 /* HeroEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0120000000000PE000001 /* HeroEditor.swift */; };
+		PEB0130000000000PE000001 /* FateCardEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0130000000000PE000001 /* FateCardEditor.swift */; };
+		PEB0140000000000PE000001 /* QuestEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0140000000000PE000001 /* QuestEditor.swift */; };
+		PEB0150000000000PE000001 /* BalanceEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0150000000000PE000001 /* BalanceEditor.swift */; };
+		PEB0160000000000PE000001 /* SimulationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0160000000000PE000001 /* SimulationView.swift */; };
+		PEB0170000000000PE000001 /* CombatSimulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0170000000000PE000001 /* CombatSimulator.swift */; };
+		PEFB010000000000PE000001 /* TwilightEngine in Frameworks */ = {isa = PBXBuildFile; productRef = PEPKG10000000000PE000001 /* TwilightEngine */; };
+		PEFB020000000000PE000001 /* PackAuthoring in Frameworks */ = {isa = PBXBuildFile; productRef = PEPKG20000000000PE000001 /* PackAuthoring */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -133,6 +152,24 @@
 		CM00000200000000000000001 /* ContentManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentManagerView.swift; sourceTree = "<group>"; };
 		CM00000400000000000000001 /* ContentManagerVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModels/ContentManagerVM.swift; sourceTree = SOURCE_ROOT; };
 		CMT0000200000000000000001 /* ContentManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentManagerTests.swift; sourceTree = "<group>"; };
+		PEF0010000000000PE000001 /* PackEditorApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackEditorApp.swift; sourceTree = "<group>"; };
+		PEF0020000000000PE000001 /* PackEditorState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackEditorState.swift; sourceTree = "<group>"; };
+		PEF0030000000000PE000001 /* ContentSidebar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentSidebar.swift; sourceTree = "<group>"; };
+		PEF0040000000000PE000001 /* EntityListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntityListView.swift; sourceTree = "<group>"; };
+		PEF0050000000000PE000001 /* EditorToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorToolbar.swift; sourceTree = "<group>"; };
+		PEF0060000000000PE000001 /* LocalizedTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizedTextField.swift; sourceTree = "<group>"; };
+		PEF0070000000000PE000001 /* ValidationBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidationBadge.swift; sourceTree = "<group>"; };
+		PEF0080000000000PE000001 /* EnemyEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemyEditor.swift; sourceTree = "<group>"; };
+		PEF0090000000000PE000001 /* CardEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardEditor.swift; sourceTree = "<group>"; };
+		PEF0100000000000PE000001 /* EventEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventEditor.swift; sourceTree = "<group>"; };
+		PEF0110000000000PE000001 /* RegionEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionEditor.swift; sourceTree = "<group>"; };
+		PEF0120000000000PE000001 /* HeroEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroEditor.swift; sourceTree = "<group>"; };
+		PEF0130000000000PE000001 /* FateCardEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FateCardEditor.swift; sourceTree = "<group>"; };
+		PEF0140000000000PE000001 /* QuestEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestEditor.swift; sourceTree = "<group>"; };
+		PEF0150000000000PE000001 /* BalanceEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceEditor.swift; sourceTree = "<group>"; };
+		PEF0160000000000PE000001 /* SimulationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimulationView.swift; sourceTree = "<group>"; };
+		PEF0170000000000PE000001 /* CombatSimulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombatSimulator.swift; sourceTree = "<group>"; };
+		PEP0010000000000PE000001 /* PackEditor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PackEditor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -157,6 +194,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		PEK0010000000000PE000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				PEFB010000000000PE000001 /* TwilightEngine in Frameworks */,
+				PEFB020000000000PE000001 /* PackAuthoring in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -164,6 +210,7 @@
 			isa = PBXGroup;
 			children = (
 				AA0000250000000000000001 /* . */,
+				PEG0010000000000PE000001 /* PackEditor */,
 				BB0003000000000000000001 /* CardSampleGameTests */,
 				AA0000260000000000000001 /* Products */,
 			);
@@ -189,6 +236,7 @@
 			children = (
 				AA0000210000000000000001 /* CardSampleGame.app */,
 				BB0000010000000000000001 /* CardSampleGameTests.xctest */,
+				PEP0010000000000PE000001 /* PackEditor.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -337,6 +385,78 @@
 			path = Managers;
 			sourceTree = "<group>";
 		};
+		PEG0010000000000PE000001 /* PackEditor */ = {
+			isa = PBXGroup;
+			children = (
+				PEF0010000000000PE000001 /* PackEditorApp.swift */,
+				PEG0020000000000PE000001 /* Models */,
+				PEG0030000000000PE000001 /* Views */,
+				PEG0040000000000PE000001 /* Toolbar */,
+			);
+			path = PackEditor;
+			sourceTree = "<group>";
+		};
+		PEG0020000000000PE000001 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				PEF0020000000000PE000001 /* PackEditorState.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		PEG0030000000000PE000001 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				PEF0030000000000PE000001 /* ContentSidebar.swift */,
+				PEF0040000000000PE000001 /* EntityListView.swift */,
+				PEG0050000000000PE000001 /* Shared */,
+				PEG0060000000000PE000001 /* Editors */,
+				PEG0070000000000PE000001 /* Simulation */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		PEG0040000000000PE000001 /* Toolbar */ = {
+			isa = PBXGroup;
+			children = (
+				PEF0050000000000PE000001 /* EditorToolbar.swift */,
+			);
+			path = Toolbar;
+			sourceTree = "<group>";
+		};
+		PEG0050000000000PE000001 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				PEF0060000000000PE000001 /* LocalizedTextField.swift */,
+				PEF0070000000000PE000001 /* ValidationBadge.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		PEG0060000000000PE000001 /* Editors */ = {
+			isa = PBXGroup;
+			children = (
+				PEF0080000000000PE000001 /* EnemyEditor.swift */,
+				PEF0090000000000PE000001 /* CardEditor.swift */,
+				PEF0100000000000PE000001 /* EventEditor.swift */,
+				PEF0110000000000PE000001 /* RegionEditor.swift */,
+				PEF0120000000000PE000001 /* HeroEditor.swift */,
+				PEF0130000000000PE000001 /* FateCardEditor.swift */,
+				PEF0140000000000PE000001 /* QuestEditor.swift */,
+				PEF0150000000000PE000001 /* BalanceEditor.swift */,
+			);
+			path = Editors;
+			sourceTree = "<group>";
+		};
+		PEG0070000000000PE000001 /* Simulation */ = {
+			isa = PBXGroup;
+			children = (
+				PEF0160000000000PE000001 /* SimulationView.swift */,
+				PEF0170000000000PE000001 /* CombatSimulator.swift */,
+			);
+			path = Simulation;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -386,6 +506,27 @@
 			productReference = BB0000010000000000000001 /* CardSampleGameTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		PET0010000000000PE000001 /* PackEditor */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = PEC0010000000000PE000001 /* Build configuration list for PBXNativeTarget "PackEditor" */;
+			buildPhases = (
+				PES0010000000000PE000001 /* Sources */,
+				PEK0010000000000PE000001 /* Frameworks */,
+				PER0010000000000PE000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PackEditor;
+			packageProductDependencies = (
+				PEPKG10000000000PE000001 /* TwilightEngine */,
+				PEPKG20000000000PE000001 /* PackAuthoring */,
+			);
+			productName = PackEditor;
+			productReference = PEP0010000000000PE000001 /* PackEditor.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -402,6 +543,9 @@
 					BB0000030000000000000001 = {
 						CreatedOnToolsVersion = 15.0;
 						TestTargetID = AA0000300000000000000001;
+					};
+					PET0010000000000PE000001 = {
+						CreatedOnToolsVersion = 15.0;
 					};
 				};
 			};
@@ -426,6 +570,7 @@
 			targets = (
 				AA0000300000000000000001 /* CardSampleGame */,
 				BB0000030000000000000001 /* CardSampleGameTests */,
+				PET0010000000000PE000001 /* PackEditor */,
 			);
 		};
 /* End PBXProject section */
@@ -441,6 +586,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		BB0000060000000000000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		PER0010000000000PE000001 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -509,6 +661,30 @@
 				C80DC6128F371177237472A1 /* ConditionValidatorTests.swift in Sources */,
 				0869558992AD64C9C9AC00CB /* LocalizationValidatorTests.swift in Sources */,
 				8B5C529E75755A127084F62A /* SourcePathResolver.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		PES0010000000000PE000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				PEB0010000000000PE000001 /* PackEditorApp.swift in Sources */,
+				PEB0020000000000PE000001 /* PackEditorState.swift in Sources */,
+				PEB0030000000000PE000001 /* ContentSidebar.swift in Sources */,
+				PEB0040000000000PE000001 /* EntityListView.swift in Sources */,
+				PEB0050000000000PE000001 /* EditorToolbar.swift in Sources */,
+				PEB0060000000000PE000001 /* LocalizedTextField.swift in Sources */,
+				PEB0070000000000PE000001 /* ValidationBadge.swift in Sources */,
+				PEB0080000000000PE000001 /* EnemyEditor.swift in Sources */,
+				PEB0090000000000PE000001 /* CardEditor.swift in Sources */,
+				PEB0100000000000PE000001 /* EventEditor.swift in Sources */,
+				PEB0110000000000PE000001 /* RegionEditor.swift in Sources */,
+				PEB0120000000000PE000001 /* HeroEditor.swift in Sources */,
+				PEB0130000000000PE000001 /* FateCardEditor.swift in Sources */,
+				PEB0140000000000PE000001 /* QuestEditor.swift in Sources */,
+				PEB0150000000000PE000001 /* BalanceEditor.swift in Sources */,
+				PEB0160000000000PE000001 /* SimulationView.swift in Sources */,
+				PEB0170000000000PE000001 /* CombatSimulator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -752,6 +928,56 @@
 			};
 			name = Release;
 		};
+		PED0010000000000PE000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSMainStoryboardFile = "";
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.cardgame.packeditor;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		PED0020000000000PE000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSMainStoryboardFile = "";
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.cardgame.packeditor;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -778,6 +1004,15 @@
 			buildConfigurations = (
 				BB0000070000000000000001 /* Debug */,
 				BB0000080000000000000001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		PEC0010000000000PE000001 /* Build configuration list for PBXNativeTarget "PackEditor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				PED0010000000000PE000001 /* Debug */,
+				PED0020000000000PE000001 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -825,6 +1060,14 @@
 			productName = TwilightMarchesActIContent;
 		};
 		PKG0023000000000000000001 /* PackAuthoring */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PackAuthoring;
+		};
+		PEPKG10000000000PE000001 /* TwilightEngine */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TwilightEngine;
+		};
+		PEPKG20000000000PE000001 /* PackAuthoring */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = PackAuthoring;
 		};
