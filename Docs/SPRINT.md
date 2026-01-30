@@ -34,7 +34,7 @@ Status: CLOSED (6/6 tasks done)
 ---
 
 ## Current Epic: 3 — Encounter Engine Completion
-Status: IN PROGRESS (6/12 tasks done)
+Status: IN PROGRESS (7/12 tasks done)
 
 ## Completed (this epic)
 
@@ -45,13 +45,15 @@ Status: IN PROGRESS (6/12 tasks done)
 - [x] ENC-05: Keyword ward — fortify prevents failure (defense), parry bonus (physical)
 - [x] ENC-06: Match Bonus — already implemented (isSuitMatch/Mismatch + matchMultiplier 1.5x), added 5 e2e gate tests
 
-Gate tests: 17 tests in INV_KW_GateTests (all pass).
+- [x] ENC-07: Pacify control — already safe (spirit attack only touches WP), added 2 gate tests
+
+Gate tests: 19 tests in INV_KW_GateTests (all pass).
 
 ## Next Task
 
-**ENC-07: Pacify control tool: prevent accidental kill during spirit attack**
+**ENC-08: Resonance zone effects on card costs (+1 faith in wrong zone)**
 - Input: `EncounterEngine.swift`
-- Action: Spirit attack should not reduce enemy HP below 1 (pacify protection).
+- Action: Cards cost +1 faith when resonance zone opposes card alignment.
 - Test: `swift test --package-path Packages/TwilightEngine --filter KW`
 
 ## Backlog (this epic)

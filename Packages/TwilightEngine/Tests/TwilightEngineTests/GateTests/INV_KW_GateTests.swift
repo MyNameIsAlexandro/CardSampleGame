@@ -247,6 +247,40 @@ final class INV_KW_GateTests: XCTestCase {
             "3x match multiplier should triple spiritual bonus damage")
     }
 
+    // MARK: - ENC-07: Pacify control (spirit attack never kills)
+
+    /// Spirit attack reduces WP but never touches HP
+    func testSpiritAttack_neverReducesHP() {
+        let ctx = makeContext(keyword: .surge)
+        let engine = EncounterEngine(context: ctx)
+        let hpBefore = engine.enemies[0].hp
+        _ = startAndSpiritAttack(engine)
+        XCTAssertEqual(engine.enemies[0].hp, hpBefore, "Spirit attack must never reduce HP")
+    }
+
+    /// Enemy with WP=0 after spirit attack is pacified, not killed
+    func testSpiritAttack_pacifiesWhenWPDepleted() {
+        // Create enemy with very low WP so one hit depletes it
+        let fateCard = FateCard(id: "kw_card", modifier: 2, name: "KW Card", suit: nil, keyword: .surge)
+        let deck = FateDeckManager(cards: [fateCard])
+        let ctx = EncounterContext(
+            hero: EncounterHero(id: "hero", hp: 50, maxHp: 100, strength: 5, armor: 2, wisdom: 20, willDefense: 1),
+            enemies: [
+                EncounterEnemy(id: "enemy", name: "Enemy", hp: 50, maxHp: 50, wp: 1, maxWp: 1, power: 10, defense: 3)
+            ],
+            fateDeckSnapshot: deck.getState(),
+            modifiers: [],
+            rules: EncounterRules(),
+            rngSeed: 42
+        )
+        let engine = EncounterEngine(context: ctx)
+        let result = startAndSpiritAttack(engine)
+        XCTAssertTrue(result.success)
+        XCTAssertEqual(engine.enemies[0].wp, 0)
+        XCTAssertEqual(engine.enemies[0].hp, 50, "HP must remain untouched")
+        XCTAssertEqual(engine.enemies[0].outcome, .pacified, "Enemy should be pacified, not killed")
+    }
+
     /// Yav suit always matches — never nullified
     func testYavSuit_alwaysMatches_neverNullified() {
         let ctxYavPhys = makeContext(keyword: .surge, suit: .yav)
