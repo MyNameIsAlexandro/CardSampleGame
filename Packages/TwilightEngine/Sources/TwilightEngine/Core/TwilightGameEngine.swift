@@ -1985,6 +1985,19 @@ public final class TwilightGameEngine: ObservableObject {
         publishedWorldFlags = newFlags
     }
 
+    /// Merge world flags (add or update individual keys)
+    public func mergeWorldFlags(_ flags: [String: Bool]) {
+        for (key, value) in flags {
+            worldFlags[key] = value
+        }
+        publishedWorldFlags = worldFlags
+    }
+
+    /// Adjust resonance by delta, clamped to -100..+100
+    public func adjustResonance(by delta: Float) {
+        resonanceValue = max(-100, min(100, resonanceValue + delta))
+    }
+
     /// Set completed event IDs from save (definition IDs)
     public func setCompletedEventIds(_ ids: Set<String>) {
         completedEventIds = ids
@@ -2452,8 +2465,8 @@ public extension TwilightGameEngine {
         setupRegionsFromRegistry()
     }
 
-    /// Set player health directly (for testing)
-    func setPlayerHealth(_ health: Int) {
+    /// Set player health directly
+    public func setPlayerHealth(_ health: Int) {
         playerHealth = min(playerMaxHealth, max(0, health))
     }
 

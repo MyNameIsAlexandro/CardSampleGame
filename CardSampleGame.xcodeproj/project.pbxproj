@@ -26,6 +26,11 @@
 		BB0004110000000000000001 /* AuditGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0004120000000000000001 /* AuditGateTests.swift */; };
 		C80DC6128F371177237472A1 /* ConditionValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72352D1C9BABFA97F62257B /* ConditionValidatorTests.swift */; };
 		CC0000020000000000000001 /* CombatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000010000000000000001 /* CombatView.swift */; };
+		CB0000010000000000000001 /* EncounterBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0000020000000000000001 /* EncounterBridge.swift */; };
+		CB0000030000000000000001 /* EncounterViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0000040000000000000001 /* EncounterViewModel.swift */; };
+		CB0000050000000000000001 /* CombatSubviews.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0000060000000000000001 /* CombatSubviews.swift */; };
+		EIV000010000000000000001 /* EnemyIntentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EIV000020000000000000001 /* EnemyIntentView.swift */; };
+		FRV000010000000000000001 /* FateCardRevealView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FRV000020000000000000001 /* FateCardRevealView.swift */; };
 		CT00000000000010 /* PackLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CT00000000000001 /* PackLoaderTests.swift */; };
 		CT00000000000020 /* ContentRegistryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CT00000000000002 /* ContentRegistryTests.swift */; };
 		DS00000000000010 /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DS00000000000001 /* DesignSystem.swift */; };
@@ -88,7 +93,12 @@
 		BB0000010000000000000001 /* CardSampleGameTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CardSampleGameTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB0001160000000000000001 /* SaveLoadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveLoadTests.swift; sourceTree = "<group>"; };
 		BB0004120000000000000001 /* AuditGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditGateTests.swift; sourceTree = "<group>"; };
-		CC0000010000000000000001 /* CombatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CombatView.swift; path = CombatView.swift; sourceTree = "<group>"; };
+		CC0000010000000000000001 /* CombatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombatView.swift; sourceTree = "<group>"; };
+		CB0000020000000000000001 /* EncounterBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncounterBridge.swift; sourceTree = "<group>"; };
+		CB0000040000000000000001 /* EncounterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncounterViewModel.swift; sourceTree = "<group>"; };
+		CB0000060000000000000001 /* CombatSubviews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombatSubviews.swift; sourceTree = "<group>"; };
+		EIV000020000000000000001 /* EnemyIntentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemyIntentView.swift; sourceTree = "<group>"; };
+		FRV000020000000000000001 /* FateCardRevealView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FateCardRevealView.swift; sourceTree = "<group>"; };
 		CT00000000000001 /* PackLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackLoaderTests.swift; sourceTree = "<group>"; };
 		CT00000000000002 /* ContentRegistryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentRegistryTests.swift; sourceTree = "<group>"; };
 		D72352D1C9BABFA97F62257B /* ConditionValidatorTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConditionValidatorTests.swift; sourceTree = "<group>"; };
@@ -189,7 +199,7 @@
 				GG0002020000000000000001 /* HeroSelectionView.swift */,
 				43D4E3FBE4DC34B63B61E061 /* EventView.swift */,
 				6BEC0AA856AB6706612208E1 /* WorldMapView.swift */,
-				CC0000010000000000000001 /* CombatView.swift */,
+				COMBATGRP000001 /* Combat */,
 				BAV0000200000000000000001 /* BattleArenaView.swift */,
 				CM00000200000000000000001 /* ContentManagerView.swift */,
 			);
@@ -277,8 +287,21 @@
 				DHB0000200000000000000001 /* DualHealthBar.swift */,
 				FDW0000200000000000000001 /* FateDeckWidget.swift */,
 				ESC0000200000000000000001 /* EnemySelectionCard.swift */,
+				EIV000020000000000000001 /* EnemyIntentView.swift */,
+				FRV000020000000000000001 /* FateCardRevealView.swift */,
 			);
 			path = Components;
+			sourceTree = "<group>";
+		};
+		COMBATGRP000001 /* Combat */ = {
+			isa = PBXGroup;
+			children = (
+				CC0000010000000000000001 /* CombatView.swift */,
+				CB0000020000000000000001 /* EncounterBridge.swift */,
+				CB0000040000000000000001 /* EncounterViewModel.swift */,
+				CB0000060000000000000001 /* CombatSubviews.swift */,
+			);
+			path = Combat;
 			sourceTree = "<group>";
 		};
 		VM00000000000001 /* ViewModels */ = {
@@ -422,6 +445,11 @@
 				01D384D3F190A3976183B126 /* EventView.swift in Sources */,
 				8F035EDB750B2C0441F077B0 /* WorldMapView.swift in Sources */,
 				CC0000020000000000000001 /* CombatView.swift in Sources */,
+				CB0000010000000000000001 /* EncounterBridge.swift in Sources */,
+				CB0000030000000000000001 /* EncounterViewModel.swift in Sources */,
+				CB0000050000000000000001 /* CombatSubviews.swift in Sources */,
+				EIV000010000000000000001 /* EnemyIntentView.swift in Sources */,
+				FRV000010000000000000001 /* FateCardRevealView.swift in Sources */,
 				GG0002010000000000000001 /* HeroSelectionView.swift in Sources */,
 				CM00000100000000000000001 /* ContentManagerView.swift in Sources */,
 				CM00000300000000000000001 /* ContentManagerVM.swift in Sources */,
