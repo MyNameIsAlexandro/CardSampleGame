@@ -1,7 +1,7 @@
 # Architecture Map
 
 > Strategic context for Claude sessions. Max 500 lines.
-> Updated when an epic closes. Last update: Epic 9 (UI/UX polish).
+> Updated when an epic closes. Last update: Epic 10 (design system audit).
 
 ## Core Principle
 
@@ -215,7 +215,7 @@ User taps "Explore" in region
 
 ## Architectural Debt: RESOLVED
 
-All audit findings have been addressed across 8 epics:
+All audit findings have been addressed across 10 epics:
 
 1. ~~RNG split~~ — WorldRNG 100% normalized, deterministic (Epic 1)
 2. ~~Access control~~ — all `public private(set)`, no unprotected state (Epic 2)
@@ -226,6 +226,7 @@ All audit findings have been addressed across 8 epics:
 7. ~~Encounter stubs~~ — defend, flee, loot, summon, multi-enemy all implemented (Epic 7)
 8. ~~Save safety~~ — fate deck persistence, auto-save, game over, tutorial, settings (Epic 8)
 9. ~~UI/UX polish~~ — haptics, sound, floating damage, damage flash, 3D card flip, travel transition, ambient menu, game over animations (Epic 9)
+10. ~~Design system audit~~ — full token compliance, CardSizes/AppShadows.glow, localized fate strings, 38 violations fixed across 14 files (Epic 10)
 
 ### Remaining Debt
 - **SAV-03**: Mid-combat save — requires full EncounterEngine serialization (deferred)
@@ -270,7 +271,7 @@ Managers/
   HapticManager.swift          — Singleton, 7 haptic types (UIFeedbackGenerator)
   SoundManager.swift           — AVAudioPlayer, 20 effects, 3 music tracks
 Utilities/
-  DesignSystem.swift           — AppColors, Spacing, Typography, AppAnimation, AppGradient
+  DesignSystem.swift           — AppColors, Spacing, Sizes, CardSizes, CornerRadius, AppShadows, AppAnimation, AppGradient, Opacity
   Localization.swift           — L10n keys
 Packages/
   TwilightEngine/Sources/TwilightEngine/
