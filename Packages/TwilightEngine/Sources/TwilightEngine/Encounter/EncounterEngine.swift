@@ -47,6 +47,16 @@ public final class EncounterEngine {
     // MARK: - Actions
 
     public func performAction(_ action: PlayerAction) -> EncounterActionResult {
+        // Mulligan is allowed before combat loop starts (any phase)
+        if case .mulligan = action {
+            if mulliganDone { return .fail(.mulliganAlreadyDone) }
+            mulliganDone = true
+            return .ok([])
+        }
+
+        guard currentPhase == .playerAction else {
+            return .fail(.actionNotAllowed)
+        }
         switch action {
         case .attack(let targetId):
             return performPhysicalAttack(targetId: targetId)
@@ -54,12 +64,10 @@ public final class EncounterEngine {
             return performSpiritAttack(targetId: targetId)
         case .wait:
             return .ok([])
-        case .mulligan:
-            if mulliganDone { return .fail(.mulliganAlreadyDone) }
-            mulliganDone = true
-            return .ok([])
         case .defend, .flee, .useCard:
             return .ok([])
+        case .mulligan:
+            fatalError("Handled above")
         }
     }
 
@@ -107,13 +115,17 @@ public final class EncounterEngine {
             enemyPower: enemy.power,
             enemyHealth: enemy.hp,
             enemyMaxHealth: enemy.maxHp,
-            turnNumber: currentRound
+            turnNumber: currentRound,
+            rng: rng
         )
         currentIntent = intent
         return intent
     }
 
     public func resolveEnemyAction(enemyId: String) -> EncounterActionResult {
+        guard currentPhase == .enemyResolution else {
+            return .fail(.actionNotAllowed)
+        }
         guard let intent = currentIntent else {
             return .fail(.actionNotAllowed)
         }
@@ -154,20 +166,20 @@ public final class EncounterEngine {
             changes.append(.resonanceShifted(delta: delta, newValue: context.worldResonance + accumulatedResonanceDelta))
 
         case .block:
-            if let idx = enemies.firstIndex(where: { $0.isAlive }) {
+            if let idx = findEnemyIndex(id: enemyId) {
                 enemies[idx].defense += intent.value
             }
 
         case .buff:
-            if let idx = enemies.firstIndex(where: { $0.isAlive }) {
+            if let idx = findEnemyIndex(id: enemyId) {
                 enemies[idx].power += intent.value
             }
 
         case .heal:
-            if let idx = enemies.firstIndex(where: { $0.isAlive }) {
+            if let idx = findEnemyIndex(id: enemyId) {
                 let healed = min(intent.value, enemies[idx].maxHp - enemies[idx].hp)
                 enemies[idx].hp += healed
-                changes.append(.enemyHPChanged(enemyId: enemies[idx].id, delta: healed, newValue: enemies[idx].hp))
+                changes.append(.enemyHPChanged(enemyId: enemyId, delta: healed, newValue: enemies[idx].hp))
             }
 
         case .summon:
@@ -333,14 +345,16 @@ public final class EncounterEngine {
             }
         }
 
-        let damage = max(1, context.hero.wisdom + keywordBonus)
-        let currentWP = enemies[idx].wp!
-        enemies[idx].wp = max(0, currentWP - damage)
+        let damage = max(1, context.hero.wisdom + keywordBonus - enemies[idx].rageShield)
+        let currentWP = enemies[idx].wp ?? 0
+        let newWP = max(0, currentWP - damage)
+        enemies[idx].wp = newWP
+        enemies[idx].rageShield = 0
         lastAttackTrack = .spiritual
 
-        changes.append(.enemyWPChanged(enemyId: targetId, delta: -damage, newValue: enemies[idx].wp!))
+        changes.append(.enemyWPChanged(enemyId: targetId, delta: -damage, newValue: newWP))
 
-        if enemies[idx].wp! == 0 && enemies[idx].hp > 0 {
+        if newWP == 0 && enemies[idx].hp > 0 {
             enemies[idx].outcome = .pacified
             changes.append(.enemyPacified(enemyId: targetId))
         }
@@ -364,7 +378,7 @@ public struct EncounterEnemyState: Equatable {
 
     public var hasSpiritTrack: Bool { wp != nil }
     public var isAlive: Bool { hp > 0 }
-    public var isPacified: Bool { wp != nil && wp! <= 0 && hp > 0 }
+    public var isPacified: Bool { wp.map { $0 <= 0 } ?? false && hp > 0 }
 
     public init(from enemy: EncounterEnemy) {
         self.id = enemy.id

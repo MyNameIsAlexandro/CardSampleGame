@@ -16,6 +16,7 @@ final class INV_ENC_GateTests: XCTestCase {
         let initialWP = engine.enemies[0].wp
 
         // Act: physical attack
+        _ = engine.advancePhase() // intent → playerAction
         _ = engine.performAction(.attack(targetId: "test_enemy"))
 
         // Assert: HP changed, WP unchanged
@@ -33,6 +34,7 @@ final class INV_ENC_GateTests: XCTestCase {
         let initialWP = engine.enemies[0].wp!
 
         // Act: spirit attack
+        _ = engine.advancePhase() // intent → playerAction
         _ = engine.performAction(.spiritAttack(targetId: "test_enemy"))
 
         // Assert: WP changed, HP unchanged
@@ -47,6 +49,7 @@ final class INV_ENC_GateTests: XCTestCase {
         let engine = EncounterEngine(context: ctx)
 
         // Act: spirit attack to reduce WP to 0
+        _ = engine.advancePhase() // intent → playerAction
         _ = engine.performAction(.spiritAttack(targetId: "weak_enemy"))
 
         // Act: physical attack to reduce HP to 0

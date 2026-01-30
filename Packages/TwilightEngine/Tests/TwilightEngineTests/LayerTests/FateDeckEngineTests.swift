@@ -11,6 +11,7 @@ final class FateDeckEngineTests: XCTestCase {
         let engine = EncounterEngine(context: ctx)
 
         // Wait should not draw
+        _ = engine.advancePhase() // intent → playerAction
         let result = engine.performAction(.wait)
 
         // No fate draw in state changes
@@ -32,6 +33,8 @@ final class FateDeckEngineTests: XCTestCase {
         let intent = engine.generateIntent(for: "test_enemy")
         XCTAssertEqual(intent.type, .attack, "Default intent should be attack")
 
+        _ = engine.advancePhase() // intent → playerAction
+        _ = engine.advancePhase() // playerAction → enemyResolution
         let result = engine.resolveEnemyAction(enemyId: "test_enemy")
         XCTAssertTrue(result.success, "Enemy resolution should succeed")
 

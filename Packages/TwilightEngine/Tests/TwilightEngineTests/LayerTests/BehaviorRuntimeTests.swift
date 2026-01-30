@@ -14,6 +14,7 @@ final class BehaviorRuntimeTests: XCTestCase {
         let intent1 = engine.generateIntent(for: "test_enemy")
 
         // Damage enemy significantly
+        _ = engine.advancePhase() // intent → playerAction
         _ = engine.performAction(.attack(targetId: "test_enemy"))
 
         // Round 2: low HP enemy → intent may change (heal/flee)

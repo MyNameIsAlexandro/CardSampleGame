@@ -37,8 +37,14 @@ final class EncounterViewModel: ObservableObject {
 
     // MARK: - Private
 
-    private var engine: EncounterEngine!
+    private var engine: EncounterEngine?
     private var context: EncounterContext?
+
+    /// Non-nil engine; callers must ensure startEncounter() was called.
+    private var eng: EncounterEngine {
+        guard let engine else { fatalError("EncounterEngine not initialized — call startEncounter() first") }
+        return engine
+    }
 
     /// Continuation point after fate reveal is dismissed.
     private var pendingContinuation: (() -> Void)?
@@ -62,13 +68,13 @@ final class EncounterViewModel: ObservableObject {
 
         // Auto-advance: generate first intent
         if let enemyState = enemy {
-            let intent = engine.generateIntent(for: enemyState.id)
+            let intent = eng.generateIntent(for: enemyState.id)
             currentIntent = intent
             logEntry(L10n.encounterLogEnemyPrepares.localized(with: intent.description))
         }
 
         // Move to player action
-        _ = engine.advancePhase()
+        _ = eng.advancePhase()
         syncState()
     }
 
@@ -77,7 +83,7 @@ final class EncounterViewModel: ObservableObject {
     func performAttack() {
         guard phase == .playerAction, let enemyState = enemy else { return }
         fateContext = .attack
-        let result = engine.performAction(.attack(targetId: enemyState.id))
+        let result = eng.performAction(.attack(targetId: enemyState.id))
         lastChanges = result.stateChanges
         processStateChanges(result.stateChanges)
         syncState()
@@ -94,7 +100,7 @@ final class EncounterViewModel: ObservableObject {
         guard phase == .playerAction, let enemyState = enemy else { return }
         guard enemyState.hasSpiritTrack else { return }
         fateContext = .attack
-        let result = engine.performAction(.spiritAttack(targetId: enemyState.id))
+        let result = eng.performAction(.spiritAttack(targetId: enemyState.id))
         lastChanges = result.stateChanges
         processStateChanges(result.stateChanges)
         syncState()
@@ -108,7 +114,7 @@ final class EncounterViewModel: ObservableObject {
 
     func performWait() {
         guard phase == .playerAction else { return }
-        let result = engine.performAction(.wait)
+        let result = eng.performAction(.wait)
         lastChanges = result.stateChanges
         logEntry(L10n.encounterLogPlayerWaits.localized)
         syncState()
@@ -128,8 +134,8 @@ final class EncounterViewModel: ObservableObject {
 
     func performFlee() {
         guard phase == .playerAction else { return }
-        _ = engine.performAction(.flee)
-        let result = engine.finishEncounter()
+        _ = eng.performAction(.flee)
+        let result = eng.finishEncounter()
         encounterResult = result
         showCombatOver = true
         isFinished = true
@@ -139,7 +145,7 @@ final class EncounterViewModel: ObservableObject {
 
     private func advanceAfterPlayerAction() {
         // Advance to enemy resolution
-        _ = engine.advancePhase()
+        _ = eng.advancePhase()
         syncState()
 
         // Check if encounter ended during player action (enemy killed/pacified)
@@ -148,7 +154,7 @@ final class EncounterViewModel: ObservableObject {
         // Resolve enemy action
         if let enemyState = enemy, enemyState.isAlive {
             fateContext = .defense
-            let result = engine.resolveEnemyAction(enemyId: enemyState.id)
+            let result = eng.resolveEnemyAction(enemyId: enemyState.id)
             lastChanges = result.stateChanges
             processStateChanges(result.stateChanges)
             syncState()
@@ -168,22 +174,22 @@ final class EncounterViewModel: ObservableObject {
         if checkEncounterEnd() { return }
 
         // Advance to round end
-        _ = engine.advancePhase()
+        _ = eng.advancePhase()
         syncState()
 
         // Advance to next round intent phase
-        _ = engine.advancePhase()
+        _ = eng.advancePhase()
         syncState()
 
         // Generate next intent
         if let enemyState = enemy, enemyState.isAlive {
-            let intent = engine.generateIntent(for: enemyState.id)
+            let intent = eng.generateIntent(for: enemyState.id)
             currentIntent = intent
             logEntry(L10n.encounterLogRoundEnemyPrepares.localized(with: round, intent.description))
         }
 
         // Advance to player action
-        _ = engine.advancePhase()
+        _ = eng.advancePhase()
         syncState()
     }
 
@@ -202,7 +208,7 @@ final class EncounterViewModel: ObservableObject {
     }
 
     private func finishWithResult() {
-        let result = engine.finishEncounter()
+        let result = eng.finishEncounter()
         encounterResult = result
         isFinished = true
         showCombatOver = true
@@ -211,13 +217,13 @@ final class EncounterViewModel: ObservableObject {
     // MARK: - State Sync
 
     private func syncState() {
-        phase = engine.currentPhase
-        round = engine.currentRound
-        heroHP = engine.heroHP
-        enemy = engine.enemies.first
-        isFinished = engine.isFinished
-        fateDeckDrawCount = engine.fateDeckDrawCount
-        fateDeckDiscardCount = engine.fateDeckDiscardCount
+        phase = eng.currentPhase
+        round = eng.currentRound
+        heroHP = eng.heroHP
+        enemy = eng.enemies.first
+        isFinished = eng.isFinished
+        fateDeckDrawCount = eng.fateDeckDrawCount
+        fateDeckDiscardCount = eng.fateDeckDiscardCount
     }
 
     // MARK: - Log Helpers
@@ -238,7 +244,7 @@ final class EncounterViewModel: ObservableObject {
             case .enemyPacified(let enemyId):
                 logEntry(L10n.encounterLogEnemyPacified.localized(with: enemyId))
             case .fateDraw(let cardId, let value):
-                if let result = engine.lastFateDrawResult {
+                if let result = eng.lastFateDrawResult {
                     lastFateResult = result
                     showFateReveal = true
                 }

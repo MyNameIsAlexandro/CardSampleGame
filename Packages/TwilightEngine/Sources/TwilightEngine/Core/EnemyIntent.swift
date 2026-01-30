@@ -50,48 +50,27 @@ public struct EnemyIntent: Equatable {
 
     /// Create attack intent
     public static func attack(damage: Int) -> EnemyIntent {
-        EnemyIntent(
-            type: .attack,
-            value: damage,
-            description: "Атака на \(damage)"
-        )
+        EnemyIntent(type: .attack, value: damage, description: "intent.attack.\(damage)")
     }
 
     /// Create ritual intent (shifts resonance toward Nav)
     public static func ritual(resonanceShift: Int) -> EnemyIntent {
-        EnemyIntent(
-            type: .ritual,
-            value: resonanceShift,
-            description: "Ритуал Нави",
-            secondaryValue: resonanceShift
-        )
+        EnemyIntent(type: .ritual, value: resonanceShift, description: "intent.ritual", secondaryValue: resonanceShift)
     }
 
     /// Create block intent
     public static func block(reduction: Int) -> EnemyIntent {
-        EnemyIntent(
-            type: .block,
-            value: reduction,
-            description: "Защита +\(reduction)"
-        )
+        EnemyIntent(type: .block, value: reduction, description: "intent.block.\(reduction)")
     }
 
     /// Create buff intent
     public static func buff(amount: Int) -> EnemyIntent {
-        EnemyIntent(
-            type: .buff,
-            value: amount,
-            description: "Усиление +\(amount)"
-        )
+        EnemyIntent(type: .buff, value: amount, description: "intent.buff.\(amount)")
     }
 
     /// Create heal intent
     public static func heal(amount: Int) -> EnemyIntent {
-        EnemyIntent(
-            type: .heal,
-            value: amount,
-            description: "Лечение \(amount)"
-        )
+        EnemyIntent(type: .heal, value: amount, description: "intent.heal.\(amount)")
     }
 }
 
@@ -111,18 +90,15 @@ public struct EnemyIntentGenerator {
         enemyPower: Int,
         enemyHealth: Int,
         enemyMaxHealth: Int,
-        turnNumber: Int
+        turnNumber: Int,
+        rng: WorldRNG? = nil
     ) -> EnemyIntent {
-        // Simple AI logic:
-        // - If health < 30% and turn > 2, consider healing or blocking
-        // - Every 3rd turn, consider ritual
-        // - Otherwise, attack
-
+        let rng = rng ?? WorldRNG.shared
         let healthPercent = Double(enemyHealth) / Double(max(1, enemyMaxHealth))
 
         // Low health - defensive options
         if healthPercent < 0.3 && turnNumber > 2 {
-            let roll = WorldRNG.shared.nextInt(in: 0...2)
+            let roll = rng.nextInt(in: 0...2)
             if roll == 0 {
                 return .block(reduction: 3)
             } else if roll == 1 && enemyHealth < enemyMaxHealth {
@@ -132,7 +108,7 @@ public struct EnemyIntentGenerator {
 
         // Ritual on turns 3, 6, 9, etc.
         if turnNumber > 0 && turnNumber % 3 == 0 {
-            let roll = WorldRNG.shared.nextInt(in: 0...2)
+            let roll = rng.nextInt(in: 0...2)
             if roll == 0 {
                 return .ritual(resonanceShift: -5)
             }

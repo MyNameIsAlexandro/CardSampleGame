@@ -10,6 +10,7 @@ final class EncounterFateFlowTests: XCTestCase {
     func testPhysicalAttackSetsFateDrawResult() {
         let ctx = EncounterContextFixtures.standard()
         let engine = EncounterEngine(context: ctx)
+        _ = engine.advancePhase() // intent → playerAction
 
         XCTAssertNil(engine.lastFateDrawResult, "No fate draw before any action")
 
@@ -34,6 +35,7 @@ final class EncounterFateFlowTests: XCTestCase {
     func testSpiritAttackSetsFateDrawResult() {
         let ctx = EncounterContextFixtures.standard() // enemy has wp=30
         let engine = EncounterEngine(context: ctx)
+        _ = engine.advancePhase() // intent → playerAction
 
         let result = engine.performAction(.spiritAttack(targetId: "test_enemy"))
 
@@ -65,6 +67,7 @@ final class EncounterFateFlowTests: XCTestCase {
     func testWaitDoesNotDrawFate() {
         let ctx = EncounterContextFixtures.standard()
         let engine = EncounterEngine(context: ctx)
+        _ = engine.advancePhase() // intent → playerAction
 
         let initialDraw = engine.fateDeckDrawCount
         let result = engine.performAction(.wait)
@@ -79,6 +82,7 @@ final class EncounterFateFlowTests: XCTestCase {
     func testDeckCountsSyncAfterMultipleDraws() {
         let ctx = EncounterContextFixtures.standard()
         let engine = EncounterEngine(context: ctx)
+        _ = engine.advancePhase() // intent → playerAction
 
         let total = engine.fateDeckDrawCount + engine.fateDeckDiscardCount
 
@@ -97,6 +101,7 @@ final class EncounterFateFlowTests: XCTestCase {
     func testLastFateDrawResultUpdatesEachDraw() {
         let ctx = EncounterContextFixtures.standard()
         let engine = EncounterEngine(context: ctx)
+        _ = engine.advancePhase() // intent → playerAction
 
         _ = engine.performAction(.attack(targetId: "test_enemy"))
         let first = engine.lastFateDrawResult
@@ -115,14 +120,13 @@ final class EncounterFateFlowTests: XCTestCase {
     func testFateDrawResultHasEffectiveValue() {
         let ctx = EncounterContextFixtures.standard()
         let engine = EncounterEngine(context: ctx)
+        _ = engine.advancePhase() // intent → playerAction
 
         _ = engine.performAction(.attack(targetId: "test_enemy"))
         let result = engine.lastFateDrawResult!
 
         // effectiveValue should be at least baseValue (resonance may add to it)
         XCTAssertNotNil(result.card, "Card should be present")
-        // effectiveValue is baseValue + resonance rule bonus (if matched)
-        // With worldResonance=0 (yav zone), rules may or may not match
         XCTAssertTrue(result.effectiveValue >= result.card.baseValue - 5,
                        "Effective value should be reasonable")
     }

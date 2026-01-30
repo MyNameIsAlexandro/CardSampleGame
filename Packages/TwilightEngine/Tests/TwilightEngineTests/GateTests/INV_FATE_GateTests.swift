@@ -14,6 +14,8 @@ final class INV_FATE_GateTests: XCTestCase {
 
         // Perform attack to trigger fate draw in enemy resolution
         _ = engine.generateIntent(for: "test_enemy")
+        _ = engine.advancePhase() // intent → playerAction
+        _ = engine.advancePhase() // playerAction → enemyResolution
         _ = engine.resolveEnemyAction(enemyId: "test_enemy")
 
         let result = engine.finishEncounter()
@@ -28,6 +30,7 @@ final class INV_FATE_GateTests: XCTestCase {
         let ctx = EncounterContextFixtures.standard()
         let engine = EncounterEngine(context: ctx)
 
+        _ = engine.advancePhase() // intent → playerAction
         let result = engine.performAction(.wait)
 
         let hasDraw = result.stateChanges.contains { change in

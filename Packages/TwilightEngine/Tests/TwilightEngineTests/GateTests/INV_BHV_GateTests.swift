@@ -79,6 +79,7 @@ final class INV_BHV_GateTests: XCTestCase {
         let engine = EncounterEngine(context: ctx)
 
         // First attack spiritual, then physical to trigger escalation
+        _ = engine.advancePhase() // intent → playerAction
         _ = engine.performAction(.spiritAttack(targetId: "e1"))
         let result = engine.performAction(.attack(targetId: "e1"))
 

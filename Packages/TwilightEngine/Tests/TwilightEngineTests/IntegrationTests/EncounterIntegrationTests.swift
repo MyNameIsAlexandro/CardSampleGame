@@ -22,8 +22,10 @@ final class EncounterIntegrationTests: XCTestCase {
         var rounds = 0
         while engine.enemies[0].isAlive && rounds < 10 {
             _ = engine.generateIntent(for: "beast")
+            _ = engine.advancePhase() // intent → playerAction
             _ = engine.performAction(.attack(targetId: "beast"))
             if engine.enemies[0].isAlive {
+                _ = engine.advancePhase() // playerAction → enemyResolution
                 _ = engine.resolveEnemyAction(enemyId: "beast")
                 _ = engine.advancePhase() // roundEnd
             }
@@ -51,8 +53,10 @@ final class EncounterIntegrationTests: XCTestCase {
         var rounds = 0
         while !(engine.enemies[0].isPacified) && rounds < 10 {
             _ = engine.generateIntent(for: "spirit")
+            _ = engine.advancePhase() // intent → playerAction
             _ = engine.performAction(.spiritAttack(targetId: "spirit"))
             if !(engine.enemies[0].isPacified) {
+                _ = engine.advancePhase() // playerAction → enemyResolution
                 _ = engine.resolveEnemyAction(enemyId: "spirit")
                 _ = engine.advancePhase()
             }
@@ -78,6 +82,7 @@ final class EncounterIntegrationTests: XCTestCase {
         let engine = EncounterEngine(context: ctx)
 
         // Spirit attack (diplomacy)
+        _ = engine.advancePhase() // intent → playerAction
         _ = engine.performAction(.spiritAttack(targetId: "guard"))
 
         // Physical attack (escalation)
@@ -99,6 +104,7 @@ final class EncounterIntegrationTests: XCTestCase {
         let engine = EncounterEngine(context: ctx)
 
         // Kill first enemy
+        _ = engine.advancePhase() // intent → playerAction
         _ = engine.performAction(.attack(targetId: "enemy_1"))
 
         // Pacify second
@@ -118,6 +124,7 @@ final class EncounterIntegrationTests: XCTestCase {
         let engine = EncounterEngine(context: ctx)
 
         // Spirit attack all enemies
+        _ = engine.advancePhase() // intent → playerAction
         _ = engine.performAction(.spiritAttack(targetId: "enemy_1"))
         _ = engine.performAction(.spiritAttack(targetId: "enemy_2"))
         _ = engine.performAction(.spiritAttack(targetId: "enemy_3"))
