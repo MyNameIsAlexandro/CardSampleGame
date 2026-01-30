@@ -171,19 +171,97 @@ final class INV_KW_GateTests: XCTestCase {
         }
     }
 
-    /// Match multiplier doubles bonusDamage
+    /// Match multiplier doubles bonusDamage (unit level)
     func testMatchMultiplier_doublesDamage() {
         let base = KeywordInterpreter.resolve(keyword: .surge, context: .combatPhysical, isMatch: false)
         let matched = KeywordInterpreter.resolve(keyword: .surge, context: .combatPhysical, isMatch: true)
         XCTAssertEqual(matched.bonusDamage, base.bonusDamage * 2, "Match should double bonus damage")
     }
 
-    /// Mismatch nullifies keyword
+    /// Mismatch nullifies keyword (unit level)
     func testMismatch_nullifiesKeyword() {
         let effect = KeywordInterpreter.resolveWithAlignment(
             keyword: .surge, context: .combatPhysical, isMismatch: true
         )
         XCTAssertEqual(effect.bonusDamage, 0)
         XCTAssertNil(effect.special)
+    }
+
+    // MARK: - ENC-06: Match Bonus (end-to-end)
+
+    /// Nav suit on physical attack = match → more damage than no suit
+    func testMatchBonus_navSurge_physicalAttack_moreDamage() {
+        let ctxNoSuit = makeContext(keyword: .surge, suit: nil)
+        let ctxNav = makeContext(keyword: .surge, suit: .nav)
+
+        let engineNoSuit = EncounterEngine(context: ctxNoSuit)
+        let engineNav = EncounterEngine(context: ctxNav)
+
+        _ = startAndAttack(engineNoSuit)
+        _ = startAndAttack(engineNav)
+
+        // Nav matches combatPhysical → keyword bonus multiplied by 1.5x
+        // No suit → no match → base keyword bonus
+        XCTAssertLessThan(engineNav.enemies[0].hp, engineNoSuit.enemies[0].hp,
+            "Nav suit should deal more damage on physical attack (match bonus)")
+    }
+
+    /// Prav suit on physical attack = mismatch → keyword nullified, less damage
+    func testMismatchPenalty_pravSurge_physicalAttack_lessDamage() {
+        let ctxNoSuit = makeContext(keyword: .surge, suit: nil)
+        let ctxPrav = makeContext(keyword: .surge, suit: .prav)
+
+        let engineNoSuit = EncounterEngine(context: ctxNoSuit)
+        let enginePrav = EncounterEngine(context: ctxPrav)
+
+        _ = startAndAttack(engineNoSuit)
+        _ = startAndAttack(enginePrav)
+
+        // Prav mismatches combatPhysical → keyword nullified (0 bonus)
+        // No suit → base keyword bonus (2)
+        XCTAssertGreaterThan(enginePrav.enemies[0].hp, engineNoSuit.enemies[0].hp,
+            "Prav suit should deal less damage on physical attack (mismatch nullifies keyword)")
+    }
+
+    /// Prav suit on spirit attack = match → at least as much WP damage (Int truncation may hide 1.5x on small values)
+    func testMatchBonus_pravFocus_spiritAttack_notWorse() {
+        let ctxNoSuit = makeContext(keyword: .focus, suit: nil)
+        let ctxPrav = makeContext(keyword: .focus, suit: .prav)
+
+        let engineNoSuit = EncounterEngine(context: ctxNoSuit)
+        let enginePrav = EncounterEngine(context: ctxPrav)
+
+        _ = startAndSpiritAttack(engineNoSuit)
+        _ = startAndSpiritAttack(enginePrav)
+
+        // Prav matches combatSpiritual → bonus >= no-suit (Int(1*1.5)=1 same as base, but never worse)
+        XCTAssertLessThanOrEqual(enginePrav.enemies[0].wp!, engineNoSuit.enemies[0].wp!,
+            "Prav match should not reduce WP damage on spirit attack")
+    }
+
+    /// Match multiplier scales bonusDamage in spiritual context (unit level with 3.0x to avoid truncation)
+    func testMatchMultiplier_spiritualContext_scales() {
+        let base = KeywordInterpreter.resolve(keyword: .surge, context: .combatSpiritual, isMatch: false)
+        let matched = KeywordInterpreter.resolve(keyword: .surge, context: .combatSpiritual, isMatch: true, matchMultiplier: 3.0)
+        XCTAssertEqual(matched.bonusDamage, base.bonusDamage * 3,
+            "3x match multiplier should triple spiritual bonus damage")
+    }
+
+    /// Yav suit always matches — never nullified
+    func testYavSuit_alwaysMatches_neverNullified() {
+        let ctxYavPhys = makeContext(keyword: .surge, suit: .yav)
+        let ctxYavSpir = makeContext(keyword: .surge, suit: .yav)
+
+        let enginePhys = EncounterEngine(context: ctxYavPhys)
+        let engineSpir = EncounterEngine(context: ctxYavSpir)
+
+        let resultPhys = startAndAttack(enginePhys)
+        let resultSpir = startAndSpiritAttack(engineSpir)
+
+        // Yav matches everything — both should succeed with keyword effects
+        XCTAssertTrue(resultPhys.success)
+        XCTAssertTrue(resultSpir.success)
+        XCTAssertLessThan(enginePhys.enemies[0].hp, 50, "Yav should match physical (damage dealt)")
+        XCTAssertLessThan(engineSpir.enemies[0].wp!, 30, "Yav should match spiritual (WP dealt)")
     }
 }

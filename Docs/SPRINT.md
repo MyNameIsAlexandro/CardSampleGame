@@ -34,7 +34,7 @@ Status: CLOSED (6/6 tasks done)
 ---
 
 ## Current Epic: 3 — Encounter Engine Completion
-Status: IN PROGRESS (5/12 tasks done)
+Status: IN PROGRESS (6/12 tasks done)
 
 ## Completed (this epic)
 
@@ -43,19 +43,19 @@ Status: IN PROGRESS (5/12 tasks done)
 - [x] ENC-03: Keyword echo — return last card from discard to hand
 - [x] ENC-04: Keyword shadow — vampirism heal (physical), evade halves damage (defense)
 - [x] ENC-05: Keyword ward — fortify prevents failure (defense), parry bonus (physical)
+- [x] ENC-06: Match Bonus — already implemented (isSuitMatch/Mismatch + matchMultiplier 1.5x), added 5 e2e gate tests
 
-Gate tests: 12 tests in INV_KW_GateTests (all pass). Total suite: 304 tests, 0 failures.
+Gate tests: 17 tests in INV_KW_GateTests (all pass).
 
 ## Next Task
 
-**ENC-06: Match Bonus: suit matches action type → 1.5x**
-- Input: `EncounterEngine.swift`, `KeywordInterpreter.swift`
-- Action: When fate card suit matches action type (e.g. Swords suit on physical attack), apply 1.5x multiplier to keyword bonus.
+**ENC-07: Pacify control tool: prevent accidental kill during spirit attack**
+- Input: `EncounterEngine.swift`
+- Action: Spirit attack should not reduce enemy HP below 1 (pacify protection).
 - Test: `swift test --package-path Packages/TwilightEngine --filter KW`
 
 ## Backlog (this epic)
 
-- [ ] ENC-06: Match Bonus: suit matches action type → 1.5x
 - [ ] ENC-07: Pacify control tool
 - [ ] ENC-08: Resonance zone effects on card costs (+1 faith in wrong zone)
 - [ ] ENC-09: Enemy resonance modifiers from JSON
