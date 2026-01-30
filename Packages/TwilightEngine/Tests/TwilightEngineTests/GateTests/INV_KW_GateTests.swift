@@ -440,6 +440,45 @@ final class INV_KW_GateTests: XCTestCase {
         XCTAssertNotNil(engine.currentIntent, "Intent should be auto-generated at new round")
     }
 
+    // MARK: - ENC-11: Critical defense
+
+    /// Critical fate card in defense = 0 damage
+    func testCriticalDefense_zeroDamage() {
+        let critCard = FateCard(id: "crit", modifier: 0, isCritical: true, name: "CRIT")
+        let deck = FateDeckManager(cards: [critCard])
+        let ctx = EncounterContext(
+            hero: EncounterHero(id: "hero", hp: 30, maxHp: 100, strength: 5, armor: 0, wisdom: 5, willDefense: 0),
+            enemies: [EncounterEnemy(id: "enemy", name: "E", hp: 50, maxHp: 50, power: 20, defense: 3)],
+            fateDeckSnapshot: deck.getState(), modifiers: [], rules: EncounterRules(), rngSeed: 42
+        )
+        let engine = EncounterEngine(context: ctx)
+        // Intent already auto-generated; advance to playerAction, skip, then resolve enemy
+        _ = engine.advancePhase() // → playerAction
+        _ = engine.performAction(.wait)
+        _ = engine.advancePhase() // → enemyResolution
+        let result = engine.resolveEnemyAction(enemyId: "enemy")
+        XCTAssertTrue(result.success)
+        XCTAssertEqual(engine.heroHP, 30, "Critical defense should block all damage")
+    }
+
+    /// Non-critical fate card in defense allows damage through
+    func testNonCriticalDefense_damageApplied() {
+        let normalCard = FateCard(id: "norm", modifier: 1, name: "Norm")
+        let deck = FateDeckManager(cards: [normalCard])
+        let ctx = EncounterContext(
+            hero: EncounterHero(id: "hero", hp: 30, maxHp: 100, strength: 5, armor: 0, wisdom: 5, willDefense: 0),
+            enemies: [EncounterEnemy(id: "enemy", name: "E", hp: 50, maxHp: 50, power: 20, defense: 3)],
+            fateDeckSnapshot: deck.getState(), modifiers: [], rules: EncounterRules(), rngSeed: 42
+        )
+        let engine = EncounterEngine(context: ctx)
+        _ = engine.advancePhase() // → playerAction
+        _ = engine.performAction(.wait)
+        _ = engine.advancePhase() // → enemyResolution
+        let result = engine.resolveEnemyAction(enemyId: "enemy")
+        XCTAssertTrue(result.success)
+        XCTAssertLessThan(engine.heroHP, 30, "Non-critical defense should allow damage")
+    }
+
     /// Yav suit always matches — never nullified
     func testYavSuit_alwaysMatches_neverNullified() {
         let ctxYavPhys = makeContext(keyword: .surge, suit: .yav)

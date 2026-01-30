@@ -34,7 +34,7 @@ Status: CLOSED (6/6 tasks done)
 ---
 
 ## Current Epic: 3 — Encounter Engine Completion
-Status: IN PROGRESS (10/12 tasks done)
+Status: IN PROGRESS (11/12 tasks done)
 
 ## Completed (this epic)
 
@@ -53,13 +53,15 @@ Status: IN PROGRESS (10/12 tasks done)
 
 - [x] ENC-10: Phase automation — auto-generate intents at init and roundEnd→intent, 2 gate tests
 
-Gate tests: 27 tests in INV_KW_GateTests (all pass). Total suite: 317 tests, 0 failures.
+- [x] ENC-11: Critical defense — already implemented, added 2 gate tests (crit=0 damage, non-crit=damage)
+
+Gate tests: 29 tests in INV_KW_GateTests (all pass).
 
 ## Next Task
 
-**ENC-11: Critical defense: CRIT fate card = 0 damage**
+**ENC-12: Integration test: full encounter from context to result**
 - Input: `EncounterEngine.swift`
-- Action: Verify critical fate draw in defense blocks all damage.
+- Action: Test a complete encounter loop: init → attack → resolve → round end → victory.
 - Test: `swift test --package-path Packages/TwilightEngine --filter KW`
 
 ## Backlog (this epic)
