@@ -115,7 +115,8 @@ public struct EnemyDefinition: GameDefinition {
             description: description.resolved,
             power: power,
             defense: defense,
-            health: health
+            health: health,
+            will: will
         )
     }
 }
