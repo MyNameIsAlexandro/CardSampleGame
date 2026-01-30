@@ -540,6 +540,37 @@ final class INV_KW_GateTests: XCTestCase {
         XCTAssertEqual(result.transaction.worldFlags["nonviolent"], true)
     }
 
+    // MARK: - TST-06: Determinism simulation
+
+    /// 100 encounters with same seed produce identical results
+    func testDeterminism_100runs_identicalOutcome() {
+        var hpResults: [Int] = []
+        var enemyHpResults: [Int] = []
+
+        for _ in 0..<100 {
+            let fateCard = FateCard(id: "f1", modifier: 2, name: "Fate", suit: .nav, keyword: .surge)
+            let deck = FateDeckManager(cards: [fateCard])
+            let ctx = EncounterContext(
+                hero: EncounterHero(id: "hero", hp: 100, maxHp: 100, strength: 8, armor: 3, wisdom: 5, willDefense: 1),
+                enemies: [EncounterEnemy(id: "enemy", name: "E", hp: 30, maxHp: 30, power: 6, defense: 2)],
+                fateDeckSnapshot: deck.getState(), modifiers: [], rules: EncounterRules(), rngSeed: 77
+            )
+            let engine = EncounterEngine(context: ctx)
+            _ = engine.advancePhase() // → playerAction
+            _ = engine.performAction(.attack(targetId: "enemy"))
+            _ = engine.advancePhase() // → enemyResolution
+            _ = engine.resolveEnemyAction(enemyId: "enemy")
+            hpResults.append(engine.heroHP)
+            enemyHpResults.append(engine.enemies[0].hp)
+        }
+
+        // All 100 runs must produce identical results
+        let uniqueHero = Set(hpResults)
+        let uniqueEnemy = Set(enemyHpResults)
+        XCTAssertEqual(uniqueHero.count, 1, "Hero HP must be identical across 100 seeded runs")
+        XCTAssertEqual(uniqueEnemy.count, 1, "Enemy HP must be identical across 100 seeded runs")
+    }
+
     /// Yav suit always matches — never nullified
     func testYavSuit_alwaysMatches_neverNullified() {
         let ctxYavPhys = makeContext(keyword: .surge, suit: .yav)

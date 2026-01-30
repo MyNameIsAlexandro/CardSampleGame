@@ -3,70 +3,29 @@
 > Read this file at the start of every Claude session.
 > Take the **Next Task**, complete it, update status, commit.
 
-## Current Epic: 2 — Transaction Integrity
-Status: CLOSED (6/6 tasks done)
+---
 
-## Audit Result (TXN-01)
+## Current Epic: 4 — Test Foundation Closure
+Status: CLOSED (7/7 tasks done)
 
-**Finding: access control already locked down.**
-- All 30+ `@Published` properties in TwilightGameEngine: `public private(set)`
-- All stored properties in EncounterEngine: `public private(set)`
-- `public var` in EngineRegionState/EngineAnchorState are struct fields (value types — copies don't affect engine)
-- Computed properties are read-only by nature
-- No `internal var` or unprotected stored properties on engine classes
+## Audit Result (TST-01)
 
-**fatalError audit:**
-- `EncounterEngine.swift:111` — mulligan case in playerAction switch → replaced with `.fail(.actionNotAllowed)`
-- `HeroRegistry.swift:308` — missing ability ID → valid data integrity check (pack corrupt), kept
-- `PackLoader.swift:549` — same pattern, valid data integrity check, kept
-- `EncounterEngine.swift:6` — outdated comment "all stubs (fatalError)" → updated
-- TODOs: 3 minor (playerArmor, gameDuration, rulesExtension) — non-blocking
+**Finding: test foundation already solid.**
+- 324 tests, 0 failures, 0 skips across entire TwilightEngine package
+- Zero `XCTSkip` calls in any test file (enforced by AuditGateTests)
+- All gate tests (INV_RNG, INV_TXN, INV_KW) pass in < 2s
+- No broken dependencies on ContentRegistry, BalancePack, or ConditionParser
+- TST-06 determinism: 100 runs with same seed → identical outcome (gate test added)
 
 ## Completed
 
-- [x] TXN-01: Audit public var — all already `public private(set)`
-- [x] TXN-02: N/A — access control already closed
-- [x] TXN-03: N/A — EncounterEngine already locked
-- [x] TXN-04: Contract tests — 4 tests (rest/explore/skipTurn/actionResult)
-- [x] TXN-05: Save round-trip — 4 tests (player/world/events/RNG state)
-- [x] TXN-06: fatalError cleanup — 1 replaced, 2 kept (valid), 1 comment updated
-
----
-
-## Current Epic: 3 — Encounter Engine Completion
-Status: CLOSED (12/12 tasks done)
-
-## Completed (this epic)
-
-- [x] ENC-01: Keyword surge — +2 bonus damage (physical), resonance push (spiritual)
-- [x] ENC-02: Keyword focus — ignore armor (physical), WP pierce (spiritual)
-- [x] ENC-03: Keyword echo — return last card from discard to hand
-- [x] ENC-04: Keyword shadow — vampirism heal (physical), evade halves damage (defense)
-- [x] ENC-05: Keyword ward — fortify prevents failure (defense), parry bonus (physical)
-- [x] ENC-06: Match Bonus — already implemented (isSuitMatch/Mismatch + matchMultiplier 1.5x), added 5 e2e gate tests
-
-- [x] ENC-07: Pacify control — already safe (spirit attack only touches WP), added 2 gate tests
-
-- [x] ENC-08: Resonance zone card costs — already implemented, added 4 e2e gate tests
-
-- [x] ENC-09: Enemy resonance modifiers — wired resonanceBehavior into defense/power, 2 gate tests
-
-- [x] ENC-10: Phase automation — auto-generate intents at init and roundEnd→intent, 2 gate tests
-
-- [x] ENC-11: Critical defense — already implemented, added 2 gate tests (crit=0 damage, non-crit=damage)
-
-- [x] ENC-12: Integration test — full encounter loops (physical kill + spirit pacify), 2 gate tests
-
-Gate tests: 31 tests in INV_KW_GateTests (all pass). Total suite: 323 tests, 0 failures.
-
-## Backlog (this epic)
-
-All tasks complete.
-- [ ] ENC-08: Resonance zone effects on card costs (+1 faith in wrong zone)
-- [ ] ENC-09: Enemy resonance modifiers from JSON
-- [ ] ENC-10: Phase automation: intent auto-generated at round start
-- [ ] ENC-11: Critical defense: CRIT fate card = 0 damage
-- [ ] ENC-12: Integration test: full encounter from context to result
+- [x] TST-01: Audit — 0 red, 0 skipped across 324 tests
+- [x] TST-02: ContentRegistry dependencies — all resolved, tests pass
+- [x] TST-03: BalancePack dependencies — all resolved, tests pass
+- [x] TST-04: ConditionParser dependencies — all resolved, tests pass
+- [x] TST-05: XCTSkip — zero instances (AuditGateTests enforces)
+- [x] TST-06: Determinism simulation — 100 runs, identical results (gate test)
+- [x] TST-07: Final run — 324 tests, 0 red, 0 skip, CI-ready
 
 ---
 
@@ -75,12 +34,11 @@ All tasks complete.
 1. ~~Epic 1: RNG Normalization~~ CLOSED — 100% WorldRNG, 4 gate tests
 2. ~~Epic 2: Transaction Integrity~~ CLOSED — access locked, 8 gate tests, fatalError cleanup
 3. ~~Epic 3: Encounter Engine Completion~~ CLOSED — 12 tasks, 31 gate tests, 323 total
+4. ~~Epic 4: Test Foundation Closure~~ CLOSED — 0 red, 0 skip, 324 tests, determinism verified
 
 ## Future Epics
 
-4. **Epic 4: Test Foundation Closure** (next)
-
-5. Epic 5: World Consistency
+5. **Epic 5: World Consistency** (next)
 6. Epic 6: Encounter UI Integration
 
 Full details: `docs/plans/2026-01-30-epic-driven-development-design.md`
