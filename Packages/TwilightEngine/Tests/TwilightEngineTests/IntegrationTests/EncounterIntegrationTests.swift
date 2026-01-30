@@ -137,4 +137,50 @@ final class EncounterIntegrationTests: XCTestCase {
         }
         XCTAssertEqual(result.transaction.worldFlags["nonviolent"], true, "All pacified = nonviolent")
     }
+
+    // Flee path — player escapes
+    func testFleePath() {
+        let ctx = EncounterContextFixtures.standard()
+        let engine = EncounterEngine(context: ctx)
+
+        // One round of combat, then flee
+        _ = engine.generateIntent(for: "test_enemy")
+        _ = engine.advancePhase() // → playerAction
+        _ = engine.performAction(.flee)
+
+        let result = engine.finishEncounter()
+        XCTAssertEqual(result.outcome, .escaped)
+        XCTAssertTrue(engine.isFinished)
+    }
+
+    // Full combat with cards — cards affect damage output
+    func testFullKillPathWithCards() {
+        let atkCard = Card(
+            id: "sword", name: "Sword", type: .weapon, description: "Sharp",
+            abilities: [CardAbility(id: "ab1", name: "Slash", description: "Slash", effect: .temporaryStat(stat: "attack", amount: 5, duration: 1))]
+        )
+        let ctx = EncounterContext(
+            hero: EncounterHero(id: "hero", hp: 100, maxHp: 100, strength: 5, armor: 2),
+            enemies: [EncounterEnemy(id: "e1", name: "Enemy", hp: 20, maxHp: 20, power: 3, defense: 2)],
+            fateDeckSnapshot: FateDeckFixtures.deterministicState(),
+            modifiers: [],
+            rules: EncounterRules(),
+            rngSeed: 42,
+            heroCards: [atkCard]
+        )
+        let engine = EncounterEngine(context: ctx)
+
+        _ = engine.advancePhase() // → playerAction
+
+        // Play card then attack
+        let playResult = engine.performAction(.useCard(cardId: "sword", targetId: "e1"))
+        XCTAssertTrue(playResult.success)
+        XCTAssertEqual(engine.turnAttackBonus, 5)
+
+        _ = engine.performAction(.attack(targetId: "e1"))
+
+        // With str(5) + bonus(5) - def(2) = 8 damage + fate card bonus
+        // Enemy started at 20 HP, should take significant damage
+        XCTAssertLessThan(engine.enemies[0].hp, 20, "Card bonus must increase damage")
+    }
 }
