@@ -1179,3 +1179,32 @@
 "combat.mulligan.hint" = "Выберите до 5 карт для обмена";
 "combat.mulligan.confirm" = "Заменить";
 "combat.mulligan.skip" = "Оставить руку";
+
+// MARK: - Encounter Combat (new system)
+"encounter.log.enemy.prepares" = "Враг готовит: %@";
+"encounter.log.round.enemy.prepares" = "Ход %d: Враг готовит %@";
+"encounter.log.player.waits" = "Вы выжидаете.";
+"encounter.log.body.damage" = "Урон телу: %d (HP: %d)";
+"encounter.log.will.damage" = "Урон воле: %d (WP: %d)";
+"encounter.log.player.takes.damage" = "Вы получили %d урона (HP: %d)";
+"encounter.log.enemy.slain" = "Враг %@ повержен!";
+"encounter.log.enemy.pacified" = "Враг %@ усмирён!";
+"encounter.log.fate.draw" = "Карта судьбы: %@ (%@)";
+"encounter.log.resonance.shift" = "Резонанс: %@";
+"encounter.log.rage.shield" = "Щит ярости: +%d";
+"encounter.phase.intent" = "Замысел врага";
+"encounter.phase.player.action" = "Ваш ход";
+"encounter.phase.enemy.resolution" = "Ход врага";
+"encounter.phase.round.end" = "Конец раунда";
+"encounter.round.label" = "Ход %d";
+"encounter.action.attack" = "Атака";
+"encounter.action.influence" = "Влияние";
+"encounter.action.wait" = "Ждать";
+"encounter.action.flee" = "Бежать";
+"encounter.outcome.victory" = "Победа!";
+"encounter.outcome.pacified" = "Усмирение";
+"encounter.outcome.defeat" = "Поражение";
+"encounter.outcome.escaped" = "Побег";
+"encounter.outcome.continue" = "Продолжить";
+"encounter.outcome.hp.lost" = "Потеряно здоровья: %d";
+"encounter.outcome.hp.gained" = "Восстановлено здоровья: %d";

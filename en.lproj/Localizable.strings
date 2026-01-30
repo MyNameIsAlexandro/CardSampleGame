@@ -1174,3 +1174,32 @@
 "combat.mulligan.hint" = "Select up to 5 cards to swap";
 "combat.mulligan.confirm" = "Replace";
 "combat.mulligan.skip" = "Keep Hand";
+
+// MARK: - Encounter Combat (new system)
+"encounter.log.enemy.prepares" = "Enemy prepares: %@";
+"encounter.log.round.enemy.prepares" = "Round %d: Enemy prepares %@";
+"encounter.log.player.waits" = "You wait.";
+"encounter.log.body.damage" = "Body damage: %d (HP: %d)";
+"encounter.log.will.damage" = "Will damage: %d (WP: %d)";
+"encounter.log.player.takes.damage" = "You took %d damage (HP: %d)";
+"encounter.log.enemy.slain" = "Enemy %@ slain!";
+"encounter.log.enemy.pacified" = "Enemy %@ pacified!";
+"encounter.log.fate.draw" = "Fate card: %@ (%@)";
+"encounter.log.resonance.shift" = "Resonance: %@";
+"encounter.log.rage.shield" = "Rage shield: +%d";
+"encounter.phase.intent" = "Enemy Intent";
+"encounter.phase.player.action" = "Your Turn";
+"encounter.phase.enemy.resolution" = "Enemy Turn";
+"encounter.phase.round.end" = "Round End";
+"encounter.round.label" = "Round %d";
+"encounter.action.attack" = "Attack";
+"encounter.action.influence" = "Influence";
+"encounter.action.wait" = "Wait";
+"encounter.action.flee" = "Flee";
+"encounter.outcome.victory" = "Victory!";
+"encounter.outcome.pacified" = "Pacified";
+"encounter.outcome.defeat" = "Defeat";
+"encounter.outcome.escaped" = "Escaped";
+"encounter.outcome.continue" = "Continue";
+"encounter.outcome.hp.lost" = "Health lost: %d";
+"encounter.outcome.hp.gained" = "Health restored: %d";

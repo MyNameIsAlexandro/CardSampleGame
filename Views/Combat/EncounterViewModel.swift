@@ -64,7 +64,7 @@ final class EncounterViewModel: ObservableObject {
         if let enemyState = enemy {
             let intent = engine.generateIntent(for: enemyState.id)
             currentIntent = intent
-            logEntry("Враг готовит: \(intent.description)")
+            logEntry(L10n.encounterLogEnemyPrepares.localized(with: intent.description))
         }
 
         // Move to player action
@@ -110,7 +110,7 @@ final class EncounterViewModel: ObservableObject {
         guard phase == .playerAction else { return }
         let result = engine.performAction(.wait)
         lastChanges = result.stateChanges
-        logEntry("Вы выжидаете.")
+        logEntry(L10n.encounterLogPlayerWaits.localized)
         syncState()
         advanceAfterPlayerAction()
     }
@@ -179,7 +179,7 @@ final class EncounterViewModel: ObservableObject {
         if let enemyState = enemy, enemyState.isAlive {
             let intent = engine.generateIntent(for: enemyState.id)
             currentIntent = intent
-            logEntry("Ход \(round): Враг готовит \(intent.description)")
+            logEntry(L10n.encounterLogRoundEnemyPrepares.localized(with: round, intent.description))
         }
 
         // Advance to player action
@@ -226,27 +226,29 @@ final class EncounterViewModel: ObservableObject {
         for change in changes {
             switch change {
             case .enemyHPChanged(_, let delta, let newValue):
-                logEntry("Урон телу: \(-delta) (HP: \(newValue))")
+                logEntry(L10n.encounterLogBodyDamage.localized(with: -delta, newValue))
             case .enemyWPChanged(_, let delta, let newValue):
-                logEntry("Урон воле: \(-delta) (WP: \(newValue))")
+                logEntry(L10n.encounterLogWillDamage.localized(with: -delta, newValue))
             case .playerHPChanged(let delta, let newValue):
                 if delta < 0 {
-                    logEntry("Вы получили \(-delta) урона (HP: \(newValue))")
+                    logEntry(L10n.encounterLogPlayerTakesDamage.localized(with: -delta, newValue))
                 }
             case .enemyKilled(let enemyId):
-                logEntry("Враг \(enemyId) повержен!")
+                logEntry(L10n.encounterLogEnemySlain.localized(with: enemyId))
             case .enemyPacified(let enemyId):
-                logEntry("Враг \(enemyId) усмирён!")
+                logEntry(L10n.encounterLogEnemyPacified.localized(with: enemyId))
             case .fateDraw(let cardId, let value):
                 if let result = engine.lastFateDrawResult {
                     lastFateResult = result
                     showFateReveal = true
                 }
-                logEntry("Карта судьбы: \(cardId) (\(value >= 0 ? "+" : "")\(value))")
+                let sign = value >= 0 ? "+" : ""
+                logEntry(L10n.encounterLogFateDraw.localized(with: cardId, "\(sign)\(value)"))
             case .resonanceShifted(let delta, _):
-                logEntry("Резонанс: \(delta >= 0 ? "+" : "")\(String(format: "%.0f", delta))")
+                let sign = delta >= 0 ? "+" : ""
+                logEntry(L10n.encounterLogResonanceShift.localized(with: "\(sign)\(String(format: "%.0f", delta))"))
             case .rageShieldApplied(_, let value):
-                logEntry("Щит ярости: +\(value)")
+                logEntry(L10n.encounterLogRageShield.localized(with: value))
             case .encounterEnded:
                 break
             }

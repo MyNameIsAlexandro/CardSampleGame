@@ -818,6 +818,37 @@ enum L10n {
     static let combatFateDefenseGood = "combat.fate.defense.good"
     static let combatFateDefenseWeak = "combat.fate.defense.weak"
 
+    // Encounter combat log
+    static let encounterLogEnemyPrepares = "encounter.log.enemy.prepares"
+    static let encounterLogRoundEnemyPrepares = "encounter.log.round.enemy.prepares"
+    static let encounterLogPlayerWaits = "encounter.log.player.waits"
+    static let encounterLogBodyDamage = "encounter.log.body.damage"
+    static let encounterLogWillDamage = "encounter.log.will.damage"
+    static let encounterLogPlayerTakesDamage = "encounter.log.player.takes.damage"
+    static let encounterLogEnemySlain = "encounter.log.enemy.slain"
+    static let encounterLogEnemyPacified = "encounter.log.enemy.pacified"
+    static let encounterLogFateDraw = "encounter.log.fate.draw"
+    static let encounterLogResonanceShift = "encounter.log.resonance.shift"
+    static let encounterLogRageShield = "encounter.log.rage.shield"
+
+    // Encounter UI
+    static let encounterPhaseIntent = "encounter.phase.intent"
+    static let encounterPhasePlayerAction = "encounter.phase.player.action"
+    static let encounterPhaseEnemyResolution = "encounter.phase.enemy.resolution"
+    static let encounterPhaseRoundEnd = "encounter.phase.round.end"
+    static let encounterRoundLabel = "encounter.round.label"
+    static let encounterActionAttack = "encounter.action.attack"
+    static let encounterActionInfluence = "encounter.action.influence"
+    static let encounterActionWait = "encounter.action.wait"
+    static let encounterActionFlee = "encounter.action.flee"
+    static let encounterOutcomeVictory = "encounter.outcome.victory"
+    static let encounterOutcomePacified = "encounter.outcome.pacified"
+    static let encounterOutcomeDefeat = "encounter.outcome.defeat"
+    static let encounterOutcomeEscaped = "encounter.outcome.escaped"
+    static let encounterOutcomeContinue = "encounter.outcome.continue"
+    static let encounterOutcomeHpLost = "encounter.outcome.hp.lost"
+    static let encounterOutcomeHpGained = "encounter.outcome.hp.gained"
+
     // Resonance zone names (for FateCardRevealView)
     static let resonanceDeepNav = "resonance.deep.nav"
     static let resonanceNav = "resonance.nav"

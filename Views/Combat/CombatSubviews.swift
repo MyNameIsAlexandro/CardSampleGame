@@ -51,7 +51,7 @@ struct RoundInfoBar: View {
 
     var body: some View {
         HStack {
-            Label("Ход \(round)", systemImage: "clock")
+            Label(L10n.encounterRoundLabel.localized(with: round), systemImage: "clock")
                 .font(.subheadline)
                 .fontWeight(.semibold)
 
@@ -69,10 +69,10 @@ struct RoundInfoBar: View {
 
     private var phaseLabel: String {
         switch phase {
-        case .intent: return "Замысел врага"
-        case .playerAction: return "Ваш ход"
-        case .enemyResolution: return "Ход врага"
-        case .roundEnd: return "Конец раунда"
+        case .intent: return L10n.encounterPhaseIntent.localized
+        case .playerAction: return L10n.encounterPhasePlayerAction.localized
+        case .enemyResolution: return L10n.encounterPhaseEnemyResolution.localized
+        case .roundEnd: return L10n.encounterPhaseRoundEnd.localized
         }
     }
 
@@ -141,14 +141,14 @@ struct ActionBar: View {
     var body: some View {
         HStack(spacing: Spacing.md) {
             actionButton(
-                title: "Атака",
+                title: L10n.encounterActionAttack.localized,
                 icon: "flame.fill",
                 color: AppColors.danger,
                 action: onAttack
             )
 
             actionButton(
-                title: "Влияние",
+                title: L10n.encounterActionInfluence.localized,
                 icon: "bubble.left.fill",
                 color: Color.blue,
                 action: onInfluence
@@ -157,7 +157,7 @@ struct ActionBar: View {
             .opacity(hasSpiritTrack ? 1.0 : 0.4)
 
             actionButton(
-                title: "Ждать",
+                title: L10n.encounterActionWait.localized,
                 icon: "hourglass",
                 color: AppColors.secondary,
                 action: onWait
@@ -208,7 +208,7 @@ struct FateDeckBar: View {
             Button(action: onFlee) {
                 HStack(spacing: Spacing.xxs) {
                     Image(systemName: "figure.walk")
-                    Text("Бежать")
+                    Text(L10n.encounterActionFlee.localized)
                 }
                 .font(.caption)
                 .foregroundColor(AppColors.muted)
@@ -245,7 +245,7 @@ struct CombatOverView: View {
                     .multilineTextAlignment(.center)
 
                 Button(action: onDismiss) {
-                    Text("Продолжить")
+                    Text(L10n.encounterOutcomeContinue.localized)
                         .font(.headline)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
@@ -285,19 +285,19 @@ struct CombatOverView: View {
 
     private var outcomeTitle: String {
         switch result.outcome {
-        case .victory(.pacified): return "Усмирение"
-        case .victory: return "Победа!"
-        case .defeat: return "Поражение"
-        case .escaped: return "Побег"
+        case .victory(.pacified): return L10n.encounterOutcomePacified.localized
+        case .victory: return L10n.encounterOutcomeVictory.localized
+        case .defeat: return L10n.encounterOutcomeDefeat.localized
+        case .escaped: return L10n.encounterOutcomeEscaped.localized
         }
     }
 
     private var outcomeSummary: String {
         let hp = result.transaction.hpDelta
         if hp < 0 {
-            return "Потеряно здоровья: \(-hp)"
+            return L10n.encounterOutcomeHpLost.localized(with: -hp)
         } else if hp > 0 {
-            return "Восстановлено здоровья: \(hp)"
+            return L10n.encounterOutcomeHpGained.localized(with: hp)
         }
         return ""
     }
