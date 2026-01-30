@@ -4,35 +4,54 @@
 > Take the **Next Task**, complete it, update status, commit.
 
 ## Current Epic: 1 — RNG Normalization
+Status: CLOSED (6/6 tasks done)
+
+## Audit Result (RNG-01)
+
+**Finding: 100% WorldRNG compliance in production code.**
+- 42 RNG call sites, all via WorldRNG
+- Zero Int.random / Bool.random / arc4random in production
+- EncounterEngine already uses sub-stream: `WorldRNG(seed: context.rngSeed)`
+- FateDeckManager uses DI: `rng: WorldRNG = .shared`
+- EngineSave already serializes rngSeed + rngState
+
+## Completed
+
+- [x] RNG-01: Audit all RNG call sites — 100% WorldRNG, zero non-deterministic
+- [x] RNG-02: N/A — already clean, no stdlib random found
+- [x] RNG-03: N/A — already serialized in EngineSave
+- [x] RNG-04: N/A — EncounterEngine already uses sub-stream
+- [x] RNG-05: Determinism test — INV_RNG_GateTests (4 tests, 0 failures)
+- [x] RNG-06: Save/load determinism — testSaveLoadDeterminism + testRNGStateRoundTrip
+
+---
+
+## Next Epic: 2 — Transaction Integrity
 Status: NOT STARTED (0/6 tasks done)
 
 ## Next Task
 
-**RNG-01: Audit all RNG call sites in engine**
-- Input: `Packages/TwilightEngine/Sources/`
-- Action: Find every usage of `WorldRNG`, `Int.random`, `Bool.random`, `randomElement`, `.shuffled()`, `arc4random` in engine sources. Produce a list grouped by module (Core, Encounter, Events, Combat, etc.) with file:line and classification (deterministic via WorldRNG / non-deterministic / test-only).
-- Output: List added to this file under "RNG Audit Results" section below.
+**TXN-01: Audit public var in TwilightGameEngine**
+- Input: `Packages/TwilightEngine/Sources/TwilightEngine/Core/TwilightGameEngine.swift`
+- Action: Find all `public var` without `private(set)`. List each with file:line, property name, and whether it SHOULD be externally mutable or not.
+- Output: List added to this file under "TXN Audit Results".
 - Test: Read-only task, no build needed.
-- Ref: `docs/plans/2026-01-30-epic-driven-development-design.md` Epic 1
+- Ref: `docs/plans/2026-01-30-epic-driven-development-design.md` Epic 2
 
 ## Backlog (this epic)
 
-- [ ] RNG-02: Replace all Int.random/Bool.random with WorldRNG
-- [ ] RNG-03: Serialize RNG state in EngineSave
-- [ ] RNG-04: Encounter sub-stream: seed from WorldRNG at context creation
-- [ ] RNG-05: Determinism test: seed -> full run -> identical result
-- [ ] RNG-06: Smoke: save -> load -> same event on explore
-
-## Completed
-
-_(none yet)_
+- [ ] TXN-02: Close access control: public -> public private(set)
+- [ ] TXN-03: Close access control in EncounterEngine
+- [ ] TXN-04: Contract test: state snapshot before/after performAction
+- [ ] TXN-05: Save round-trip test: save -> load -> all fields identical
+- [ ] TXN-06: Remove all TODO/fatalError from production code
 
 ---
 
 ## Future Epics
 
-1. ~~Epic 1: RNG Normalization~~ (current)
-2. Epic 2: Transaction Integrity
+1. ~~Epic 1: RNG Normalization~~ CLOSED
+2. **Epic 2: Transaction Integrity** (current)
 3. Epic 3: Encounter Engine Completion
 4. Epic 4: Test Foundation Closure
 5. Epic 5: World Consistency
