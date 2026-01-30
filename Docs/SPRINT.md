@@ -7,7 +7,7 @@
 
 ## ALL EPICS COMPLETE
 
-Total: 8 epics, 57 tasks, 350 engine tests (0 failures), simulator build clean.
+Total: 9 epics, 69 tasks, 350 engine tests (0 failures), simulator build clean.
 
 ---
 
@@ -21,6 +21,7 @@ Total: 8 epics, 57 tasks, 350 engine tests (0 failures), simulator build clean.
 6. ~~Epic 6: Encounter UI Integration~~ CLOSED — CombatView + EncounterViewModel + all widgets, simulator build clean
 7. ~~Epic 7: Encounter Module Completion~~ CLOSED — defend, flee, loot, multi-enemy, summon, RNG seed, 11 gate tests
 8. ~~Epic 8: Save Safety + Onboarding + Settings~~ CLOSED — fate deck persistence, game over, auto-save, tutorial, settings, 3 gate tests
+9. ~~Epic 9: UI/UX Polish~~ CLOSED — HapticManager, SoundManager, floating damage, damage flash, 3D card flip, travel transition, ambient menu, game over animations, AppAnimation + AppGradient tokens
 
 ## Remaining Debt
 
@@ -49,3 +50,4 @@ Full details:
 - Epics 1-6: `docs/plans/2026-01-30-epic-driven-development-design.md`
 - Epic 7: `docs/plans/2026-01-30-encounter-completion-design.md`
 - Epic 8: `docs/plans/2026-01-30-save-onboarding-design.md`
+- Epic 9: `Docs/plans/2026-01-30-ui-ux-polish-design.md`

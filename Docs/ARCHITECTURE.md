@@ -1,7 +1,7 @@
 # Architecture Map
 
 > Strategic context for Claude sessions. Max 500 lines.
-> Updated when an epic closes. Last update: Epic 8 (save safety + onboarding + settings).
+> Updated when an epic closes. Last update: Epic 9 (UI/UX polish).
 
 ## Core Principle
 
@@ -17,6 +17,7 @@
 │  SettingsView EngineRegion   EncounterVM     │
 │  TutorialView  DetailView    (Observable)    │
 │  GameOverView                                │
+│       HapticManager  SoundManager            │
 └──────────────────┬───────────────┬──────────┘
                    │               │
          ┌─────────▼───────────────▼──────────┐
@@ -224,6 +225,7 @@ All audit findings have been addressed across 8 epics:
 6. ~~Legacy combat UI~~ — CombatView fully on EncounterViewModel (Epic 6)
 7. ~~Encounter stubs~~ — defend, flee, loot, summon, multi-enemy all implemented (Epic 7)
 8. ~~Save safety~~ — fate deck persistence, auto-save, game over, tutorial, settings (Epic 8)
+9. ~~UI/UX polish~~ — haptics, sound, floating damage, damage flash, 3D card flip, travel transition, ambient menu, game over animations (Epic 9)
 
 ### Remaining Debt
 - **SAV-03**: Mid-combat save — requires full EncounterEngine serialization (deferred)
@@ -252,20 +254,23 @@ Views/
   SettingsView.swift           — Settings + DifficultyLevel enum
   BattleArenaView.swift        — Quick battle entry point
   Combat/
-    CombatView.swift           — Combat screen (EncounterViewModel)
+    CombatView.swift           — Combat screen + floating damage + damage flash
     CombatSubviews.swift       — EnemyPanel, ActionBar, CombatLog
-    EncounterViewModel.swift   — Bridges EncounterEngine to SwiftUI
+    EncounterViewModel.swift   — Bridges EncounterEngine to SwiftUI + haptic/sound
     EncounterBridge.swift      — Context builder + result applier
   Components/
     DualHealthBar.swift        — HP + WP bars
     EnemyIntentView.swift      — Intent icons + badge
-    FateCardRevealView.swift   — Animated fate reveal
+    FateCardRevealView.swift   — Animated fate reveal + 3D card flip
     FateDeckWidget.swift       — Deck pile + discard
     ResonanceWidget.swift      — Resonance gauge
     EnemySelectionCard.swift   — Enemy picker card
   EventView.swift              — Event choice screen
+Managers/
+  HapticManager.swift          — Singleton, 7 haptic types (UIFeedbackGenerator)
+  SoundManager.swift           — AVAudioPlayer, 20 effects, 3 music tracks
 Utilities/
-  DesignSystem.swift           — AppColors, Spacing, Typography tokens
+  DesignSystem.swift           — AppColors, Spacing, Typography, AppAnimation, AppGradient
   Localization.swift           — L10n keys
 Packages/
   TwilightEngine/Sources/TwilightEngine/
