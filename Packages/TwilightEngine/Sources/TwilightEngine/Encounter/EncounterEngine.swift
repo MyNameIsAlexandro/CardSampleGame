@@ -58,6 +58,7 @@ public final class EncounterEngine {
         self.hand = Array(context.heroCards.prefix(3))
         self.cardDiscardPile = []
         self.heroFaith = context.heroFaith
+        autoGenerateIntents()
     }
 
     // MARK: - Actions
@@ -137,6 +138,7 @@ public final class EncounterEngine {
             }
             currentPhase = .intent
             currentRound += 1
+            autoGenerateIntents()
         }
         return currentPhase
     }
@@ -402,6 +404,12 @@ public final class EncounterEngine {
     }
 
     // MARK: - Private
+
+    private func autoGenerateIntents() {
+        for enemy in enemies where enemy.isAlive && enemy.outcome == nil {
+            _ = generateIntent(for: enemy.id)
+        }
+    }
 
     private var effectiveResonance: Float {
         context.worldResonance + accumulatedResonanceDelta

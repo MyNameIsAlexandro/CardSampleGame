@@ -62,18 +62,15 @@ final class EncounterEngineTests: XCTestCase {
         XCTAssertEqual(engine.heroHP, hpBefore, "Critical defense should block all damage")
     }
 
-    // #6: Intent generated in intent phase
+    // #6: Intent auto-generated at init (intent phase)
     func testIntentGeneratedInIntentPhase() {
         let ctx = EncounterContextFixtures.standard()
         let engine = EncounterEngine(context: ctx)
 
         XCTAssertEqual(engine.currentPhase, .intent)
-        XCTAssertNil(engine.currentIntent)
-
-        let intent = engine.generateIntent(for: "test_enemy")
-
-        XCTAssertNotNil(engine.currentIntent)
-        XCTAssertGreaterThan(intent.value, 0, "Intent should have a value")
+        // Intent is now auto-generated at init
+        XCTAssertNotNil(engine.currentIntent, "Intent should be auto-generated at init")
+        XCTAssertGreaterThan(engine.currentIntent!.value, 0, "Intent should have a value")
     }
 
     // #7: Intent visible before player action

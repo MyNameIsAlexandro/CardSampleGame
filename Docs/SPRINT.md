@@ -34,7 +34,7 @@ Status: CLOSED (6/6 tasks done)
 ---
 
 ## Current Epic: 3 — Encounter Engine Completion
-Status: IN PROGRESS (9/12 tasks done)
+Status: IN PROGRESS (10/12 tasks done)
 
 ## Completed (this epic)
 
@@ -51,13 +51,15 @@ Status: IN PROGRESS (9/12 tasks done)
 
 - [x] ENC-09: Enemy resonance modifiers — wired resonanceBehavior into defense/power, 2 gate tests
 
-Gate tests: 25 tests in INV_KW_GateTests (all pass).
+- [x] ENC-10: Phase automation — auto-generate intents at init and roundEnd→intent, 2 gate tests
+
+Gate tests: 27 tests in INV_KW_GateTests (all pass). Total suite: 317 tests, 0 failures.
 
 ## Next Task
 
-**ENC-10: Phase automation: intent auto-generated at round start**
+**ENC-11: Critical defense: CRIT fate card = 0 damage**
 - Input: `EncounterEngine.swift`
-- Action: Auto-generate enemy intents when advancing to intent phase.
+- Action: Verify critical fate draw in defense blocks all damage.
 - Test: `swift test --package-path Packages/TwilightEngine --filter KW`
 
 ## Backlog (this epic)
