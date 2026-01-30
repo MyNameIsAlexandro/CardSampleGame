@@ -1411,6 +1411,7 @@ final class EncounterFateFlowTests: XCTestCase {
     func testPhysicalAttackSetsFateDrawResult() {
         let ctx = EncounterContextFixtures.standard()
         let engine = EncounterEngine(context: ctx)
+        _ = engine.advancePhase() // intent → playerAction
 
         XCTAssertNil(engine.lastFateDrawResult, "No fate draw before any action")
 
@@ -1435,6 +1436,7 @@ final class EncounterFateFlowTests: XCTestCase {
     func testSpiritAttackSetsFateDrawResult() {
         let ctx = EncounterContextFixtures.standard() // enemy has wp=30
         let engine = EncounterEngine(context: ctx)
+        _ = engine.advancePhase() // intent → playerAction
 
         let result = engine.performAction(.spiritAttack(targetId: "test_enemy"))
 
@@ -1466,6 +1468,7 @@ final class EncounterFateFlowTests: XCTestCase {
     func testWaitDoesNotDrawFate() {
         let ctx = EncounterContextFixtures.standard()
         let engine = EncounterEngine(context: ctx)
+        _ = engine.advancePhase() // intent → playerAction
 
         let initialDraw = engine.fateDeckDrawCount
         let result = engine.performAction(.wait)
@@ -1480,6 +1483,7 @@ final class EncounterFateFlowTests: XCTestCase {
     func testDeckCountsSyncAfterMultipleDraws() {
         let ctx = EncounterContextFixtures.standard()
         let engine = EncounterEngine(context: ctx)
+        _ = engine.advancePhase() // intent → playerAction
 
         let total = engine.fateDeckDrawCount + engine.fateDeckDiscardCount
 
@@ -1498,6 +1502,7 @@ final class EncounterFateFlowTests: XCTestCase {
     func testLastFateDrawResultUpdatesEachDraw() {
         let ctx = EncounterContextFixtures.standard()
         let engine = EncounterEngine(context: ctx)
+        _ = engine.advancePhase() // intent → playerAction
 
         _ = engine.performAction(.attack(targetId: "test_enemy"))
         let first = engine.lastFateDrawResult
@@ -1516,14 +1521,13 @@ final class EncounterFateFlowTests: XCTestCase {
     func testFateDrawResultHasEffectiveValue() {
         let ctx = EncounterContextFixtures.standard()
         let engine = EncounterEngine(context: ctx)
+        _ = engine.advancePhase() // intent → playerAction
 
         _ = engine.performAction(.attack(targetId: "test_enemy"))
         let result = engine.lastFateDrawResult!
 
         // effectiveValue should be at least baseValue (resonance may add to it)
         XCTAssertNotNil(result.card, "Card should be present")
-        // effectiveValue is baseValue + resonance rule bonus (if matched)
-        // With worldResonance=0 (yav zone), rules may or may not match
         XCTAssertTrue(result.effectiveValue >= result.card.baseValue - 5,
                        "Effective value should be reasonable")
     }
@@ -4909,8 +4913,10 @@ final class EncounterIntegrationTests: XCTestCase {
         var rounds = 0
         while engine.enemies[0].isAlive && rounds < 10 {
             _ = engine.generateIntent(for: "beast")
+            _ = engine.advancePhase() // intent → playerAction
             _ = engine.performAction(.attack(targetId: "beast"))
             if engine.enemies[0].isAlive {
+                _ = engine.advancePhase() // playerAction → enemyResolution
                 _ = engine.resolveEnemyAction(enemyId: "beast")
                 _ = engine.advancePhase() // roundEnd
             }
@@ -4938,8 +4944,10 @@ final class EncounterIntegrationTests: XCTestCase {
         var rounds = 0
         while !(engine.enemies[0].isPacified) && rounds < 10 {
             _ = engine.generateIntent(for: "spirit")
+            _ = engine.advancePhase() // intent → playerAction
             _ = engine.performAction(.spiritAttack(targetId: "spirit"))
             if !(engine.enemies[0].isPacified) {
+                _ = engine.advancePhase() // playerAction → enemyResolution
                 _ = engine.resolveEnemyAction(enemyId: "spirit")
                 _ = engine.advancePhase()
             }
@@ -4965,6 +4973,7 @@ final class EncounterIntegrationTests: XCTestCase {
         let engine = EncounterEngine(context: ctx)
 
         // Spirit attack (diplomacy)
+        _ = engine.advancePhase() // intent → playerAction
         _ = engine.performAction(.spiritAttack(targetId: "guard"))
 
         // Physical attack (escalation)
@@ -4986,6 +4995,7 @@ final class EncounterIntegrationTests: XCTestCase {
         let engine = EncounterEngine(context: ctx)
 
         // Kill first enemy
+        _ = engine.advancePhase() // intent → playerAction
         _ = engine.performAction(.attack(targetId: "enemy_1"))
 
         // Pacify second
@@ -5005,6 +5015,7 @@ final class EncounterIntegrationTests: XCTestCase {
         let engine = EncounterEngine(context: ctx)
 
         // Spirit attack all enemies
+        _ = engine.advancePhase() // intent → playerAction
         _ = engine.performAction(.spiritAttack(targetId: "enemy_1"))
         _ = engine.performAction(.spiritAttack(targetId: "enemy_2"))
         _ = engine.performAction(.spiritAttack(targetId: "enemy_3"))
@@ -5040,6 +5051,7 @@ final class BehaviorRuntimeTests: XCTestCase {
         let intent1 = engine.generateIntent(for: "test_enemy")
 
         // Damage enemy significantly
+        _ = engine.advancePhase() // intent → playerAction
         _ = engine.performAction(.attack(targetId: "test_enemy"))
 
         // Round 2: low HP enemy → intent may change (heal/flee)
@@ -5087,6 +5099,10 @@ final class EncounterEngineTests: XCTestCase {
 
         let hpBefore = engine.heroHP
 
+        // Advance to enemyResolution phase
+        _ = engine.advancePhase() // intent → playerAction
+        _ = engine.advancePhase() // playerAction → enemyResolution
+
         // Resolve enemy attack with fate-based defense
         _ = engine.resolveEnemyAction(enemyId: "test_enemy")
 
@@ -5110,6 +5126,8 @@ final class EncounterEngineTests: XCTestCase {
 
         _ = engine.generateIntent(for: "e1")
         let hpBefore = engine.heroHP
+        _ = engine.advancePhase() // intent → playerAction
+        _ = engine.advancePhase() // playerAction → enemyResolution
         _ = engine.resolveEnemyAction(enemyId: "e1")
 
         // Critical defense → 0 damage
@@ -5145,6 +5163,7 @@ final class EncounterEngineTests: XCTestCase {
     func testEscalationResonanceShift() {
         let ctx = EncounterContextFixtures.dualTrack(enemyHP: 100, enemyWP: 100)
         let engine = EncounterEngine(context: ctx)
+        _ = engine.advancePhase() // intent → playerAction
 
         // Spirit attack first
         _ = engine.performAction(.spiritAttack(targetId: "test_enemy"))
@@ -5164,6 +5183,7 @@ final class EncounterEngineTests: XCTestCase {
     func testEscalationSurpriseDamage() {
         let ctx = EncounterContextFixtures.dualTrack(enemyHP: 100, enemyWP: 100)
         let engine = EncounterEngine(context: ctx)
+        _ = engine.advancePhase() // intent → playerAction
 
         // Spirit attack first (establish diplomacy)
         _ = engine.performAction(.spiritAttack(targetId: "test_enemy"))
@@ -5180,6 +5200,7 @@ final class EncounterEngineTests: XCTestCase {
     func testDeEscalationRageShield() {
         let ctx = EncounterContextFixtures.dualTrack(enemyHP: 100, enemyWP: 100)
         let engine = EncounterEngine(context: ctx)
+        _ = engine.advancePhase() // intent → playerAction
 
         // Physical attack first
         _ = engine.performAction(.attack(targetId: "test_enemy"))
@@ -5192,7 +5213,8 @@ final class EncounterEngineTests: XCTestCase {
             return false
         }
         XCTAssertTrue(hasShield, "De-escalation must apply rage shield")
-        XCTAssertGreaterThan(engine.enemies[0].rageShield, 0, "Rage shield value must be > 0")
+        // Rage shield is consumed during the spirit attack damage calculation
+        XCTAssertEqual(engine.enemies[0].rageShield, 0, "Rage shield consumed after spirit attack")
     }
 
     // #12: WP=0 + HP>0 → pacified
@@ -5206,6 +5228,7 @@ final class EncounterEngineTests: XCTestCase {
             rngSeed: 42
         )
         let engine = EncounterEngine(context: ctx)
+        _ = engine.advancePhase() // intent → playerAction
 
         let result = engine.performAction(.spiritAttack(targetId: "e1"))
 
@@ -5260,6 +5283,7 @@ final class FateDeckEngineTests: XCTestCase {
         let engine = EncounterEngine(context: ctx)
 
         // Wait should not draw
+        _ = engine.advancePhase() // intent → playerAction
         let result = engine.performAction(.wait)
 
         // No fate draw in state changes
@@ -5281,6 +5305,8 @@ final class FateDeckEngineTests: XCTestCase {
         let intent = engine.generateIntent(for: "test_enemy")
         XCTAssertEqual(intent.type, .attack, "Default intent should be attack")
 
+        _ = engine.advancePhase() // intent → playerAction
+        _ = engine.advancePhase() // playerAction → enemyResolution
         let result = engine.resolveEnemyAction(enemyId: "test_enemy")
         XCTAssertTrue(result.success, "Enemy resolution should succeed")
 
@@ -5499,6 +5525,7 @@ final class INV_BHV_GateTests: XCTestCase {
         let engine = EncounterEngine(context: ctx)
 
         // First attack spiritual, then physical to trigger escalation
+        _ = engine.advancePhase() // intent → playerAction
         _ = engine.performAction(.spiritAttack(targetId: "e1"))
         let result = engine.performAction(.attack(targetId: "e1"))
 
@@ -5641,6 +5668,7 @@ final class INV_ENC_GateTests: XCTestCase {
         let initialWP = engine.enemies[0].wp
 
         // Act: physical attack
+        _ = engine.advancePhase() // intent → playerAction
         _ = engine.performAction(.attack(targetId: "test_enemy"))
 
         // Assert: HP changed, WP unchanged
@@ -5658,6 +5686,7 @@ final class INV_ENC_GateTests: XCTestCase {
         let initialWP = engine.enemies[0].wp!
 
         // Act: spirit attack
+        _ = engine.advancePhase() // intent → playerAction
         _ = engine.performAction(.spiritAttack(targetId: "test_enemy"))
 
         // Assert: WP changed, HP unchanged
@@ -5672,6 +5701,7 @@ final class INV_ENC_GateTests: XCTestCase {
         let engine = EncounterEngine(context: ctx)
 
         // Act: spirit attack to reduce WP to 0
+        _ = engine.advancePhase() // intent → playerAction
         _ = engine.performAction(.spiritAttack(targetId: "weak_enemy"))
 
         // Act: physical attack to reduce HP to 0
@@ -5707,6 +5737,8 @@ final class INV_FATE_GateTests: XCTestCase {
 
         // Perform attack to trigger fate draw in enemy resolution
         _ = engine.generateIntent(for: "test_enemy")
+        _ = engine.advancePhase() // intent → playerAction
+        _ = engine.advancePhase() // playerAction → enemyResolution
         _ = engine.resolveEnemyAction(enemyId: "test_enemy")
 
         let result = engine.finishEncounter()
@@ -5721,6 +5753,7 @@ final class INV_FATE_GateTests: XCTestCase {
         let ctx = EncounterContextFixtures.standard()
         let engine = EncounterEngine(context: ctx)
 
+        _ = engine.advancePhase() // intent → playerAction
         let result = engine.performAction(.wait)
 
         let hasDraw = result.stateChanges.contains { change in

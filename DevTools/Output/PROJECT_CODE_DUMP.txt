@@ -3101,6 +3101,14 @@ enum L10n {
     static let combatIntentHeal = "combat.intent.heal"
     static let combatIntentSummon = "combat.intent.summon"
 
+    // Enemy intent detail descriptions
+    static let combatIntentDetailAttack = "combat.intent.detail.attack"
+    static let combatIntentDetailRitual = "combat.intent.detail.ritual"
+    static let combatIntentDetailBlock = "combat.intent.detail.block"
+    static let combatIntentDetailBuff = "combat.intent.detail.buff"
+    static let combatIntentDetailHeal = "combat.intent.detail.heal"
+    static let combatIntentDetailSummon = "combat.intent.detail.summon"
+
     // Combat phase names (Active Defense)
     static let combatPhasePreparation = "combat.phase.preparation"
     static let combatPhaseEnemyIntent = "combat.phase.enemy.intent"
@@ -3650,48 +3658,27 @@ public struct EnemyIntent: Equatable {
 
     /// Create attack intent
     public static func attack(damage: Int) -> EnemyIntent {
-        EnemyIntent(
-            type: .attack,
-            value: damage,
-            description: "Атака на \(damage)"
-        )
+        EnemyIntent(type: .attack, value: damage, description: "intent.attack.\(damage)")
     }
 
     /// Create ritual intent (shifts resonance toward Nav)
     public static func ritual(resonanceShift: Int) -> EnemyIntent {
-        EnemyIntent(
-            type: .ritual,
-            value: resonanceShift,
-            description: "Ритуал Нави",
-            secondaryValue: resonanceShift
-        )
+        EnemyIntent(type: .ritual, value: resonanceShift, description: "intent.ritual", secondaryValue: resonanceShift)
     }
 
     /// Create block intent
     public static func block(reduction: Int) -> EnemyIntent {
-        EnemyIntent(
-            type: .block,
-            value: reduction,
-            description: "Защита +\(reduction)"
-        )
+        EnemyIntent(type: .block, value: reduction, description: "intent.block.\(reduction)")
     }
 
     /// Create buff intent
     public static func buff(amount: Int) -> EnemyIntent {
-        EnemyIntent(
-            type: .buff,
-            value: amount,
-            description: "Усиление +\(amount)"
-        )
+        EnemyIntent(type: .buff, value: amount, description: "intent.buff.\(amount)")
     }
 
     /// Create heal intent
     public static func heal(amount: Int) -> EnemyIntent {
-        EnemyIntent(
-            type: .heal,
-            value: amount,
-            description: "Лечение \(amount)"
-        )
+        EnemyIntent(type: .heal, value: amount, description: "intent.heal.\(amount)")
     }
 }
 
@@ -3711,18 +3698,15 @@ public struct EnemyIntentGenerator {
         enemyPower: Int,
         enemyHealth: Int,
         enemyMaxHealth: Int,
-        turnNumber: Int
+        turnNumber: Int,
+        rng: WorldRNG? = nil
     ) -> EnemyIntent {
-        // Simple AI logic:
-        // - If health < 30% and turn > 2, consider healing or blocking
-        // - Every 3rd turn, consider ritual
-        // - Otherwise, attack
-
+        let rng = rng ?? WorldRNG.shared
         let healthPercent = Double(enemyHealth) / Double(max(1, enemyMaxHealth))
 
         // Low health - defensive options
         if healthPercent < 0.3 && turnNumber > 2 {
-            let roll = WorldRNG.shared.nextInt(in: 0...2)
+            let roll = rng.nextInt(in: 0...2)
             if roll == 0 {
                 return .block(reduction: 3)
             } else if roll == 1 && enemyHealth < enemyMaxHealth {
@@ -3732,7 +3716,7 @@ public struct EnemyIntentGenerator {
 
         // Ritual on turns 3, 6, 9, etc.
         if turnNumber > 0 && turnNumber % 3 == 0 {
-            let roll = WorldRNG.shared.nextInt(in: 0...2)
+            let roll = rng.nextInt(in: 0...2)
             if roll == 0 {
                 return .ritual(resonanceShift: -5)
             }
@@ -18059,6 +18043,16 @@ public final class EncounterEngine {
     // MARK: - Actions
 
     public func performAction(_ action: PlayerAction) -> EncounterActionResult {
+        // Mulligan is allowed before combat loop starts (any phase)
+        if case .mulligan = action {
+            if mulliganDone { return .fail(.mulliganAlreadyDone) }
+            mulliganDone = true
+            return .ok([])
+        }
+
+        guard currentPhase == .playerAction else {
+            return .fail(.actionNotAllowed)
+        }
         switch action {
         case .attack(let targetId):
             return performPhysicalAttack(targetId: targetId)
@@ -18066,12 +18060,10 @@ public final class EncounterEngine {
             return performSpiritAttack(targetId: targetId)
         case .wait:
             return .ok([])
-        case .mulligan:
-            if mulliganDone { return .fail(.mulliganAlreadyDone) }
-            mulliganDone = true
-            return .ok([])
         case .defend, .flee, .useCard:
             return .ok([])
+        case .mulligan:
+            fatalError("Handled above")
         }
     }
 
@@ -18119,13 +18111,17 @@ public final class EncounterEngine {
             enemyPower: enemy.power,
             enemyHealth: enemy.hp,
             enemyMaxHealth: enemy.maxHp,
-            turnNumber: currentRound
+            turnNumber: currentRound,
+            rng: rng
         )
         currentIntent = intent
         return intent
     }
 
     public func resolveEnemyAction(enemyId: String) -> EncounterActionResult {
+        guard currentPhase == .enemyResolution else {
+            return .fail(.actionNotAllowed)
+        }
         guard let intent = currentIntent else {
             return .fail(.actionNotAllowed)
         }
@@ -18166,20 +18162,20 @@ public final class EncounterEngine {
             changes.append(.resonanceShifted(delta: delta, newValue: context.worldResonance + accumulatedResonanceDelta))
 
         case .block:
-            if let idx = enemies.firstIndex(where: { $0.isAlive }) {
+            if let idx = findEnemyIndex(id: enemyId) {
                 enemies[idx].defense += intent.value
             }
 
         case .buff:
-            if let idx = enemies.firstIndex(where: { $0.isAlive }) {
+            if let idx = findEnemyIndex(id: enemyId) {
                 enemies[idx].power += intent.value
             }
 
         case .heal:
-            if let idx = enemies.firstIndex(where: { $0.isAlive }) {
+            if let idx = findEnemyIndex(id: enemyId) {
                 let healed = min(intent.value, enemies[idx].maxHp - enemies[idx].hp)
                 enemies[idx].hp += healed
-                changes.append(.enemyHPChanged(enemyId: enemies[idx].id, delta: healed, newValue: enemies[idx].hp))
+                changes.append(.enemyHPChanged(enemyId: enemyId, delta: healed, newValue: enemies[idx].hp))
             }
 
         case .summon:
@@ -18345,14 +18341,16 @@ public final class EncounterEngine {
             }
         }
 
-        let damage = max(1, context.hero.wisdom + keywordBonus)
-        let currentWP = enemies[idx].wp!
-        enemies[idx].wp = max(0, currentWP - damage)
+        let damage = max(1, context.hero.wisdom + keywordBonus - enemies[idx].rageShield)
+        let currentWP = enemies[idx].wp ?? 0
+        let newWP = max(0, currentWP - damage)
+        enemies[idx].wp = newWP
+        enemies[idx].rageShield = 0
         lastAttackTrack = .spiritual
 
-        changes.append(.enemyWPChanged(enemyId: targetId, delta: -damage, newValue: enemies[idx].wp!))
+        changes.append(.enemyWPChanged(enemyId: targetId, delta: -damage, newValue: newWP))
 
-        if enemies[idx].wp! == 0 && enemies[idx].hp > 0 {
+        if newWP == 0 && enemies[idx].hp > 0 {
             enemies[idx].outcome = .pacified
             changes.append(.enemyPacified(enemyId: targetId))
         }
@@ -18376,7 +18374,7 @@ public struct EncounterEnemyState: Equatable {
 
     public var hasSpiritTrack: Bool { wp != nil }
     public var isAlive: Bool { hp > 0 }
-    public var isPacified: Bool { wp != nil && wp! <= 0 && hp > 0 }
+    public var isPacified: Bool { wp.map { $0 <= 0 } ?? false && hp > 0 }
 
     public init(from enemy: EncounterEnemy) {
         self.id = enemy.id
@@ -31866,8 +31864,14 @@ final class EncounterViewModel: ObservableObject {
 
     // MARK: - Private
 
-    private var engine: EncounterEngine!
+    private var engine: EncounterEngine?
     private var context: EncounterContext?
+
+    /// Non-nil engine; callers must ensure startEncounter() was called.
+    private var eng: EncounterEngine {
+        guard let engine else { fatalError("EncounterEngine not initialized — call startEncounter() first") }
+        return engine
+    }
 
     /// Continuation point after fate reveal is dismissed.
     private var pendingContinuation: (() -> Void)?
@@ -31891,13 +31895,13 @@ final class EncounterViewModel: ObservableObject {
 
         // Auto-advance: generate first intent
         if let enemyState = enemy {
-            let intent = engine.generateIntent(for: enemyState.id)
+            let intent = eng.generateIntent(for: enemyState.id)
             currentIntent = intent
             logEntry(L10n.encounterLogEnemyPrepares.localized(with: intent.description))
         }
 
         // Move to player action
-        _ = engine.advancePhase()
+        _ = eng.advancePhase()
         syncState()
     }
 
@@ -31906,7 +31910,7 @@ final class EncounterViewModel: ObservableObject {
     func performAttack() {
         guard phase == .playerAction, let enemyState = enemy else { return }
         fateContext = .attack
-        let result = engine.performAction(.attack(targetId: enemyState.id))
+        let result = eng.performAction(.attack(targetId: enemyState.id))
         lastChanges = result.stateChanges
         processStateChanges(result.stateChanges)
         syncState()
@@ -31923,7 +31927,7 @@ final class EncounterViewModel: ObservableObject {
         guard phase == .playerAction, let enemyState = enemy else { return }
         guard enemyState.hasSpiritTrack else { return }
         fateContext = .attack
-        let result = engine.performAction(.spiritAttack(targetId: enemyState.id))
+        let result = eng.performAction(.spiritAttack(targetId: enemyState.id))
         lastChanges = result.stateChanges
         processStateChanges(result.stateChanges)
         syncState()
@@ -31937,7 +31941,7 @@ final class EncounterViewModel: ObservableObject {
 
     func performWait() {
         guard phase == .playerAction else { return }
-        let result = engine.performAction(.wait)
+        let result = eng.performAction(.wait)
         lastChanges = result.stateChanges
         logEntry(L10n.encounterLogPlayerWaits.localized)
         syncState()
@@ -31957,8 +31961,8 @@ final class EncounterViewModel: ObservableObject {
 
     func performFlee() {
         guard phase == .playerAction else { return }
-        _ = engine.performAction(.flee)
-        let result = engine.finishEncounter()
+        _ = eng.performAction(.flee)
+        let result = eng.finishEncounter()
         encounterResult = result
         showCombatOver = true
         isFinished = true
@@ -31968,7 +31972,7 @@ final class EncounterViewModel: ObservableObject {
 
     private func advanceAfterPlayerAction() {
         // Advance to enemy resolution
-        _ = engine.advancePhase()
+        _ = eng.advancePhase()
         syncState()
 
         // Check if encounter ended during player action (enemy killed/pacified)
@@ -31977,7 +31981,7 @@ final class EncounterViewModel: ObservableObject {
         // Resolve enemy action
         if let enemyState = enemy, enemyState.isAlive {
             fateContext = .defense
-            let result = engine.resolveEnemyAction(enemyId: enemyState.id)
+            let result = eng.resolveEnemyAction(enemyId: enemyState.id)
             lastChanges = result.stateChanges
             processStateChanges(result.stateChanges)
             syncState()
@@ -31997,22 +32001,22 @@ final class EncounterViewModel: ObservableObject {
         if checkEncounterEnd() { return }
 
         // Advance to round end
-        _ = engine.advancePhase()
+        _ = eng.advancePhase()
         syncState()
 
         // Advance to next round intent phase
-        _ = engine.advancePhase()
+        _ = eng.advancePhase()
         syncState()
 
         // Generate next intent
         if let enemyState = enemy, enemyState.isAlive {
-            let intent = engine.generateIntent(for: enemyState.id)
+            let intent = eng.generateIntent(for: enemyState.id)
             currentIntent = intent
             logEntry(L10n.encounterLogRoundEnemyPrepares.localized(with: round, intent.description))
         }
 
         // Advance to player action
-        _ = engine.advancePhase()
+        _ = eng.advancePhase()
         syncState()
     }
 
@@ -32031,7 +32035,7 @@ final class EncounterViewModel: ObservableObject {
     }
 
     private func finishWithResult() {
-        let result = engine.finishEncounter()
+        let result = eng.finishEncounter()
         encounterResult = result
         isFinished = true
         showCombatOver = true
@@ -32040,13 +32044,13 @@ final class EncounterViewModel: ObservableObject {
     // MARK: - State Sync
 
     private func syncState() {
-        phase = engine.currentPhase
-        round = engine.currentRound
-        heroHP = engine.heroHP
-        enemy = engine.enemies.first
-        isFinished = engine.isFinished
-        fateDeckDrawCount = engine.fateDeckDrawCount
-        fateDeckDiscardCount = engine.fateDeckDiscardCount
+        phase = eng.currentPhase
+        round = eng.currentRound
+        heroHP = eng.heroHP
+        enemy = eng.enemies.first
+        isFinished = eng.isFinished
+        fateDeckDrawCount = eng.fateDeckDrawCount
+        fateDeckDiscardCount = eng.fateDeckDiscardCount
     }
 
     // MARK: - Log Helpers
@@ -32067,7 +32071,7 @@ final class EncounterViewModel: ObservableObject {
             case .enemyPacified(let enemyId):
                 logEntry(L10n.encounterLogEnemyPacified.localized(with: enemyId))
             case .fateDraw(let cardId, let value):
-                if let result = engine.lastFateDrawResult {
+                if let result = eng.lastFateDrawResult {
                     lastFateResult = result
                     showFateReveal = true
                 }
@@ -32200,7 +32204,7 @@ struct EnemyIntentView: View {
                     .font(.caption.bold())
                     .foregroundColor(intentColor)
 
-                Text(intent.description)
+                Text(intentDetail)
                     .font(.caption2)
                     .foregroundColor(AppColors.muted)
             }
@@ -32259,6 +32263,23 @@ struct EnemyIntentView: View {
         case .buff: return AppColors.warning
         case .heal: return AppColors.success
         case .summon: return AppColors.dark
+        }
+    }
+
+    private var intentDetail: String {
+        switch intent.type {
+        case .attack:
+            return L10n.combatIntentDetailAttack.localized(with: intent.value)
+        case .ritual:
+            return L10n.combatIntentDetailRitual.localized
+        case .block:
+            return L10n.combatIntentDetailBlock.localized(with: intent.value)
+        case .buff:
+            return L10n.combatIntentDetailBuff.localized(with: intent.value)
+        case .heal:
+            return L10n.combatIntentDetailHeal.localized(with: intent.value)
+        case .summon:
+            return L10n.combatIntentDetailSummon.localized
         }
     }
 
