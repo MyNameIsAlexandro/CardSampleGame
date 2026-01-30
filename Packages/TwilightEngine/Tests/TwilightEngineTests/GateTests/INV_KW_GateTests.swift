@@ -479,6 +479,67 @@ final class INV_KW_GateTests: XCTestCase {
         XCTAssertLessThan(engine.heroHP, 30, "Non-critical defense should allow damage")
     }
 
+    // MARK: - ENC-12: Integration test
+
+    /// Full encounter: init → attack rounds → enemy killed → victory
+    func testFullEncounter_physicalVictory() {
+        let fateCard = FateCard(id: "f1", modifier: 1, name: "Fate")
+        let deck = FateDeckManager(cards: [fateCard])
+        let ctx = EncounterContext(
+            hero: EncounterHero(id: "hero", hp: 100, maxHp: 100, strength: 10, armor: 5, wisdom: 5, willDefense: 1),
+            enemies: [EncounterEnemy(id: "enemy", name: "Weak", hp: 5, maxHp: 5, power: 1, defense: 0)],
+            fateDeckSnapshot: deck.getState(), modifiers: [], rules: EncounterRules(), rngSeed: 42
+        )
+        let engine = EncounterEngine(context: ctx)
+
+        // Round 1: intent auto-generated → advance to playerAction → attack → resolve enemy → roundEnd
+        XCTAssertEqual(engine.currentPhase, .intent)
+        XCTAssertNotNil(engine.currentIntent)
+
+        _ = engine.advancePhase() // → playerAction
+        let attackResult = engine.performAction(.attack(targetId: "enemy"))
+        XCTAssertTrue(attackResult.success)
+        XCTAssertEqual(engine.enemies[0].hp, 0, "10 strength vs 0 defense should kill 5hp enemy")
+        XCTAssertEqual(engine.enemies[0].outcome, .killed)
+
+        _ = engine.advancePhase() // → enemyResolution
+        _ = engine.resolveEnemyAction(enemyId: "enemy")
+        _ = engine.advancePhase() // → roundEnd
+
+        // Finish encounter
+        let result = engine.finishEncounter()
+        XCTAssertTrue(engine.isFinished)
+        XCTAssertEqual(result.outcome, .victory(.killed))
+        XCTAssertEqual(result.perEntityOutcomes["enemy"], .killed)
+    }
+
+    /// Full encounter: spirit attack → pacify → nonviolent victory
+    func testFullEncounter_pacifyVictory() {
+        let fateCard = FateCard(id: "f1", modifier: 1, name: "Fate")
+        let deck = FateDeckManager(cards: [fateCard])
+        let ctx = EncounterContext(
+            hero: EncounterHero(id: "hero", hp: 100, maxHp: 100, strength: 5, armor: 5, wisdom: 20, willDefense: 1),
+            enemies: [EncounterEnemy(id: "enemy", name: "Spirit", hp: 50, maxHp: 50, wp: 1, maxWp: 1, power: 1, defense: 0)],
+            fateDeckSnapshot: deck.getState(), modifiers: [], rules: EncounterRules(), rngSeed: 42
+        )
+        let engine = EncounterEngine(context: ctx)
+
+        _ = engine.advancePhase() // → playerAction
+        let spiritResult = engine.performAction(.spiritAttack(targetId: "enemy"))
+        XCTAssertTrue(spiritResult.success)
+        XCTAssertEqual(engine.enemies[0].wp, 0)
+        XCTAssertEqual(engine.enemies[0].outcome, .pacified)
+        XCTAssertEqual(engine.enemies[0].hp, 50, "HP untouched")
+
+        _ = engine.advancePhase() // → enemyResolution
+        _ = engine.resolveEnemyAction(enemyId: "enemy")
+        _ = engine.advancePhase() // → roundEnd
+
+        let result = engine.finishEncounter()
+        XCTAssertEqual(result.outcome, .victory(.pacified))
+        XCTAssertEqual(result.transaction.worldFlags["nonviolent"], true)
+    }
+
     /// Yav suit always matches — never nullified
     func testYavSuit_alwaysMatches_neverNullified() {
         let ctxYavPhys = makeContext(keyword: .surge, suit: .yav)

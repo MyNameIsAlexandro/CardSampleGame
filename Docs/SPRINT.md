@@ -34,7 +34,7 @@ Status: CLOSED (6/6 tasks done)
 ---
 
 ## Current Epic: 3 — Encounter Engine Completion
-Status: IN PROGRESS (11/12 tasks done)
+Status: CLOSED (12/12 tasks done)
 
 ## Completed (this epic)
 
@@ -55,18 +55,13 @@ Status: IN PROGRESS (11/12 tasks done)
 
 - [x] ENC-11: Critical defense — already implemented, added 2 gate tests (crit=0 damage, non-crit=damage)
 
-Gate tests: 29 tests in INV_KW_GateTests (all pass).
+- [x] ENC-12: Integration test — full encounter loops (physical kill + spirit pacify), 2 gate tests
 
-## Next Task
-
-**ENC-12: Integration test: full encounter from context to result**
-- Input: `EncounterEngine.swift`
-- Action: Test a complete encounter loop: init → attack → resolve → round end → victory.
-- Test: `swift test --package-path Packages/TwilightEngine --filter KW`
+Gate tests: 31 tests in INV_KW_GateTests (all pass). Total suite: 323 tests, 0 failures.
 
 ## Backlog (this epic)
 
-- [ ] ENC-07: Pacify control tool
+All tasks complete.
 - [ ] ENC-08: Resonance zone effects on card costs (+1 faith in wrong zone)
 - [ ] ENC-09: Enemy resonance modifiers from JSON
 - [ ] ENC-10: Phase automation: intent auto-generated at round start
@@ -79,11 +74,12 @@ Gate tests: 29 tests in INV_KW_GateTests (all pass).
 
 1. ~~Epic 1: RNG Normalization~~ CLOSED — 100% WorldRNG, 4 gate tests
 2. ~~Epic 2: Transaction Integrity~~ CLOSED — access locked, 8 gate tests, fatalError cleanup
+3. ~~Epic 3: Encounter Engine Completion~~ CLOSED — 12 tasks, 31 gate tests, 323 total
 
 ## Future Epics
 
-3. **Epic 3: Encounter Engine Completion** (current)
-4. Epic 4: Test Foundation Closure
+4. **Epic 4: Test Foundation Closure** (next)
+
 5. Epic 5: World Consistency
 6. Epic 6: Encounter UI Integration
 
