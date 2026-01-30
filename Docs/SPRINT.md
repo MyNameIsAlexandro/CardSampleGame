@@ -7,7 +7,7 @@
 
 ## ALL EPICS COMPLETE
 
-Total: 11 epics, 87 tasks, 358 engine tests (0 failures), simulator build clean.
+Total: 12 epics, 101 tasks, 358 engine tests (0 failures), iOS + macOS builds clean.
 
 ---
 
@@ -24,6 +24,7 @@ Total: 11 epics, 87 tasks, 358 engine tests (0 failures), simulator build clean.
 9. ~~Epic 9: UI/UX Polish~~ CLOSED — HapticManager, SoundManager, floating damage, damage flash, 3D card flip, travel transition, ambient menu, game over animations, AppAnimation + AppGradient tokens
 10. ~~Epic 10: Design System Audit~~ CLOSED — 38 violations fixed across 14 files, CardSizes tokens, AppShadows.glow, localized fate strings (en+ru), full token compliance
 11. ~~Epic 11: Debt Closure~~ CLOSED — mid-combat save (SAV-03), difficulty wiring (SET-02), Codable on 11 types, EncounterEngine snapshot/restore, view-layer resume, 8 gate tests
+12. ~~Epic 12: Pack Editor~~ CLOSED — macOS SwiftUI content authoring tool, 17 source files, 8 editors (enemy/card/event/region/hero/fate/quest/balance), combat simulator with Charts histogram, validate + compile toolbar, NavigationSplitView
 
 ## Remaining Debt
 
@@ -45,7 +46,8 @@ None — all debt items resolved.
 
 - **Engine tests**: 358 (0 failures, 0 skips)
 - **Gate tests**: 78 across 7 files
-- **Simulator**: builds clean (iPhone 17 Pro)
+- **iOS Simulator**: builds clean (iPhone 17 Pro)
+- **macOS**: builds clean (PackEditor)
 - **Architecture**: Engine-First, all state via performAction(), deterministic RNG
 
 Full details:
@@ -55,3 +57,4 @@ Full details:
 - Epic 9: `Docs/plans/2026-01-30-ui-ux-polish-design.md`
 - Epic 10: `Docs/plans/2026-01-31-design-system-audit-design.md`
 - Epic 11: `Docs/plans/2026-01-31-debt-closure-design.md` (plan file)
+- Epic 12: `Docs/plans/2026-01-31-pack-editor-design.md` (plan file)

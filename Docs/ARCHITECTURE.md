@@ -1,7 +1,7 @@
 # Architecture Map
 
 > Strategic context for Claude sessions. Max 500 lines.
-> Updated when an epic closes. Last update: Epic 11 (debt closure).
+> Updated when an epic closes. Last update: Epic 12 (pack editor).
 
 ## Core Principle
 
@@ -11,13 +11,22 @@
 
 ```
 ┌─────────────────────────────────────────────┐
-│                   SwiftUI                    │
+│              SwiftUI (iOS App)               │
 │  ContentView → WorldMapView → CombatView    │
 │       │            │              │          │
 │  SettingsView EngineRegion   EncounterVM     │
 │  TutorialView  DetailView    (Observable)    │
 │  GameOverView                                │
 │       HapticManager  SoundManager            │
+└──────────────────┬───────────────┬──────────┘
+                   │               │
+┌──────────────────┴───────────────┴──────────┐
+│           PackEditor (macOS App)             │
+│  NavigationSplitView: sidebar→list→detail   │
+│  8 editors: Enemy, Card, Event, Region,     │
+│    Hero, FateCard, Quest, Balance            │
+│  CombatSimulator (N runs, win rate, histo)  │
+│  PackValidator + PackCompiler toolbar       │
 └──────────────────┬───────────────┬──────────┘
                    │               │
          ┌─────────▼───────────────▼──────────┐
@@ -183,6 +192,17 @@
 - **Difficulty**: `DifficultyLevel` enum in engine package (easy/normal/hard) with HP/power multipliers
 - **Difficulty wiring**: `EncounterBridge` reads `UserDefaults("gameDifficulty")`, applies multipliers to enemy hp/power
 
+### Pack Editor (macOS)
+- **Target**: `PackEditor` — separate macOS app in same Xcode project
+- **Architecture**: NavigationSplitView (sidebar → entity list → detail editor)
+- **Open**: NSOpenPanel → pack source folder → PackLoader reads JSON
+- **Save**: JSONEncoder writes back to original JSON paths
+- **Validate**: PackValidator runs 6-phase validation, results in sheet
+- **Compile**: PackCompiler → .pack binary, NSSavePanel for output
+- **Simulate**: CombatSimulator runs N encounters via EncounterEngine with simple AI
+- **Editors**: 8 read-only display forms (Enemy, Card, Event, Region, Hero, FateCard, Quest, Balance)
+- **Dependencies**: TwilightEngine, PackAuthoring (both support macOS 13+)
+
 ### World Degradation
 - **Tension**: starts 30, escalates every 3 days by `3 + (day / 10)`
 - **Thresholds**: 50 (30% degrade), 75 (50% + event), 90 (70% + anchor weaken)
@@ -234,6 +254,7 @@ All audit findings have been addressed across 10 epics:
 9. ~~UI/UX polish~~ — haptics, sound, floating damage, damage flash, 3D card flip, travel transition, ambient menu, game over animations (Epic 9)
 10. ~~Design system audit~~ — full token compliance, CardSizes/AppShadows.glow, localized fate strings, 38 violations fixed across 14 files (Epic 10)
 11. ~~Debt closure~~ — mid-combat save (SAV-03) + difficulty wiring (SET-02), Codable on 11 types, snapshot/restore, view-layer resume, 8 gate tests (Epic 11)
+12. ~~Pack editor~~ — macOS SwiftUI content authoring tool, 8 editors, combat simulator, validate/compile toolbar, 17 source files (Epic 12)
 
 ### Remaining Debt
 None — all debt items resolved.
@@ -310,4 +331,20 @@ Packages/
     GateTests/                   — 78 gate tests (7 files)
     LayerTests/                  — Component integration tests
     Helpers/                     — Test fixtures
+PackEditor/                      — macOS content authoring tool
+  PackEditorApp.swift            — @main, NavigationSplitView
+  Models/
+    PackEditorState.swift        — Central state: load/save/dirty tracking
+  Views/
+    ContentSidebar.swift         — Category list with icons + counts
+    EntityListView.swift         — Searchable entity list
+    Editors/                     — 8 editors (Enemy, Card, Event, Region, Hero, FateCard, Quest, Balance)
+    Simulation/
+      CombatSimulator.swift      — N-run combat simulation engine
+      SimulationView.swift       — Config + results + Charts histogram
+    Shared/
+      LocalizedTextField.swift   — EN/RU side-by-side text fields
+      ValidationBadge.swift      — Error/warning/info badges
+  Toolbar/
+    EditorToolbar.swift          — Save, Validate, Compile buttons
 ```
