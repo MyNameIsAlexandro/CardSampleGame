@@ -47,7 +47,7 @@
 		PKG0022000000000000000001 /* PackAuthoring in Frameworks */ = {isa = PBXBuildFile; productRef = PKG0023000000000000000001 /* PackAuthoring */; };
 		TH00000300000000000000001 /* TestContentLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = TH00000200000000000000001 /* TestContentLoader.swift */; };
 		UT00000000000010 /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = UT00000000000001 /* Localization.swift */; };
-		UT00000000000020 /* AccessibilityIdentifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = UT00000000000002 /* AccessibilityIdentifiers.swift */; };
+
 		UT00000000000030 /* SafeImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = UT00000000000003 /* SafeImage.swift */; };
 		UT00000000000040 /* AssetRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = UT00000000000004 /* AssetRegistry.swift */; };
 		VWC00101000000000000001 /* HeroPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = VWC00102000000000000001 /* HeroPanel.swift */; };
@@ -109,7 +109,7 @@
 		HR00000000000001 /* HeroRegistryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroRegistryTests.swift; sourceTree = "<group>"; };
 		TH00000200000000000000001 /* TestContentLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestContentLoader.swift; sourceTree = "<group>"; };
 		UT00000000000001 /* Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Localization.swift; sourceTree = "<group>"; };
-		UT00000000000002 /* AccessibilityIdentifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityIdentifiers.swift; sourceTree = "<group>"; };
+
 		UT00000000000003 /* SafeImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafeImage.swift; sourceTree = "<group>"; };
 		UT00000000000004 /* AssetRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetRegistry.swift; sourceTree = "<group>"; };
 		VWC00102000000000000001 /* HeroPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/Components/HeroPanel.swift; sourceTree = SOURCE_ROOT; };
@@ -271,7 +271,6 @@
 			isa = PBXGroup;
 			children = (
 				UT00000000000001 /* Localization.swift */,
-				UT00000000000002 /* AccessibilityIdentifiers.swift */,
 				UT00000000000003 /* SafeImage.swift */,
 				UT00000000000004 /* AssetRegistry.swift */,
 				DS00000000000001 /* DesignSystem.swift */,
@@ -454,7 +453,6 @@
 				CM00000100000000000000001 /* ContentManagerView.swift in Sources */,
 				CM00000300000000000000001 /* ContentManagerVM.swift in Sources */,
 				UT00000000000010 /* Localization.swift in Sources */,
-				UT00000000000020 /* AccessibilityIdentifiers.swift in Sources */,
 				UT00000000000030 /* SafeImage.swift in Sources */,
 				UT00000000000040 /* AssetRegistry.swift in Sources */,
 				DS00000000000010 /* DesignSystem.swift in Sources */,

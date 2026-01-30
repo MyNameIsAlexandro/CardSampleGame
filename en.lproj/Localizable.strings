@@ -4,7 +4,6 @@
 */
 
 // MARK: - Main Screen
-"game.title" = "Card Adventure Game";
 "character.select.title" = "Select Your Character";
 "character.stats" = "Character Stats";
 "character.abilities" = "Abilities";
@@ -12,35 +11,13 @@
 "button.select.hero.first" = "Select a Hero";
 
 // MARK: - Game Board
-"turn.label" = "Turn %d";
-"button.next.phase" = "Next Phase";
-"button.explore" = "Explore";
-"button.roll.dice" = "Roll Dice";
-"dice.result" = "Result: %d";
-"dice.roll.title" = "Dice Roll";
-"dice.roll.message" = "You rolled: %d";
 "button.ok" = "OK";
 
 // MARK: - Game Phases
-"phase.setup" = "Setup";
 "phase.exploration" = "Exploration";
 "phase.encounter" = "Encounter";
 "phase.combat" = "Combat";
 "phase.end.turn" = "End Turn";
-"phase.game.over" = "Game Over";
-
-// MARK: - Encounter
-"encounter.active" = "Active Encounter";
-
-// MARK: - Deck
-"deck.encounters" = "Encounters";
-"deck.locations" = "Locations";
-"deck.cards" = "%d cards";
-
-// MARK: - Player Hand
-"player.hand.title" = "Your Hand";
-"player.discard.pile" = "Discard: %d";
-"player.deck.remaining" = "Deck: %d";
 
 // MARK: - Card Types
 "card.type.character" = "Character";
@@ -57,12 +34,6 @@
 "stat.health" = "Health";
 "stat.power" = "Power";
 "stat.defense" = "Defense";
-"stat.strength" = "Strength";
-"stat.dexterity" = "Dexterity";
-"stat.constitution" = "Constitution";
-"stat.intelligence" = "Intelligence";
-"stat.wisdom" = "Wisdom";
-"stat.charisma" = "Charisma";
 
 // MARK: - Rarity
 "rarity.common" = "Common";
@@ -71,24 +42,8 @@
 "rarity.epic" = "Epic";
 "rarity.legendary" = "Legendary";
 
-// MARK: - Damage Types
-"damage.physical" = "Physical";
-"damage.fire" = "Fire";
-"damage.cold" = "Cold";
-"damage.lightning" = "Lightning";
-"damage.poison" = "Poison";
-"damage.acid" = "Acid";
-"damage.holy" = "Holy";
-"damage.shadow" = "Shadow";
-
-// MARK: - Actions
-"action.play" = "Play";
-"action.discard" = "Discard";
-"action.examine" = "Examine";
-
 // MARK: - Rules
 "rules.title" = "How to Play";
-"rules.button" = "Rules";
 
 // Rules Sections
 "rules.objective.title" = "Game Objective";
@@ -241,18 +196,10 @@
 "tm.game.subtitle" = "Dark Slavic Legends";
 
 // Realms
-"tm.realm.yav" = "Yav - World of the Living";
-"tm.realm.nav" = "Nav - World of the Dead";
-"tm.realm.prav" = "Prav - World of the Gods";
 
 // Balance
-"tm.balance.light" = "Light";
-"tm.balance.neutral" = "Neutral";
-"tm.balance.dark" = "Dark";
 
 // Resources
-"tm.resource.faith" = "Faith";
-"tm.resource.balance" = "Balance";
 
 // Characters
 "tm.char.veleslava.name" = "Veleslava";
@@ -335,13 +282,6 @@
 "tm.curse.madness.desc" = "Reality warps and twists before your eyes.";
 
 // Curse Types
-"tm.curse.type.blindness" = "Blindness";
-"tm.curse.type.muteness" = "Muteness";
-"tm.curse.type.weakness" = "Weakness";
-"tm.curse.type.forgetfulness" = "Forgetfulness";
-"tm.curse.type.sickness" = "Sickness";
-"tm.curse.type.madness" = "Madness";
-"tm.curse.type.transformation" = "Transformation";
 
 // Curse Abilities
 "tm.ability.mark.of.nav" = "Mark of Nav";
@@ -411,7 +351,6 @@
 
 // Region Info
 "region.reputation" = "Reputation: %d";
-"region.current.location" = "Current Location";
 
 // Region Actions
 "action.travel" = "Travel";
@@ -424,64 +363,25 @@
 // MARK: - Combat UI (Engine-First Migration)
 
 // Combat phases
-"combat.title" = "Combat";
 "combat.turn.number" = "Turn %d";
 "combat.actions.remaining" = "Actions: %d";
-"combat.phase.player.turn" = "Your Turn";
-"combat.phase.enemy.turn" = "Enemy Turn";
-"combat.phase.end.turn" = "End Turn";
-"combat.phase.over" = "Combat Over";
 
 // Combat actions
-"combat.action.attack" = "Attack";
-"combat.action.end.turn" = "End Turn";
-"combat.action.flee" = "Flee";
 "combat.action.play.card" = "Play Card";
 
 // Combat stats
-"combat.stat.hp" = "HP";
 "combat.stat.attack" = "Attack";
-"combat.stat.defense" = "Defense";
-"combat.stat.strength" = "Strength";
 
 // Combat messages
 "combat.message.victory" = "Victory!";
-"combat.message.defeat" = "Defeat";
-"combat.message.fled" = "You fled";
-"combat.message.hit" = "Hit!";
-"combat.message.miss" = "Miss!";
-"combat.message.damage" = "%d damage";
 
 // Combat log
-"combat.log.title" = "Combat Log";
-"combat.log.battle.start" = "Battle started with %@";
-"combat.log.actions.per.turn" = "You have %d actions per turn";
-"combat.log.enemy.attacks" = "%@ attacks!";
-"combat.log.spirit.attacks" = "%@ attacks the enemy";
-"combat.log.meditation" = "Meditation (+%d faith)";
-"combat.log.turn.separator" = "--- Turn %d ---";
 
 // Combat card effects
-"combat.effect.heal" = "Heal +%d";
-"combat.effect.damage" = "Damage %d";
-"combat.effect.draw.cards" = "Cards drawn: %d";
-"combat.effect.gain.faith" = "Faith +%d";
-"combat.effect.spend.faith" = "Faith -%d";
-"combat.effect.remove.curse" = "Curse removed";
-"combat.effect.bonus.dice" = "Bonus dice: +%d";
-"combat.effect.shift.balance" = "Balance shifted toward %@";
-"combat.effect.summon.spirit" = "Spirit summoned (Power: %d)";
-"combat.effect.sacrifice" = "Sacrifice";
 
 // Combat attack breakdown
-"combat.attack.roll" = "Roll: %d + %d = %d";
-"combat.damage.calc" = "Damage: %d (base) + %d (bonus) = %d";
-"combat.damage.base" = "Base damage: %d";
 
 // Hand UI in combat
-"combat.your.hand" = "Your Hand";
-"combat.tap.to.play" = "Tap to play";
-"combat.not.enough.faith" = "Not enough faith";
 
 // NOTE: JSON content (regions, anchors, quests, challenges, events) now uses
 // inline localized strings in JSON files. See Resources/Content/*.json
@@ -494,8 +394,6 @@
 "ui.slot.selection" = "Select Slot";
 "ui.continue.game" = "Continue Game";
 "ui.slot.number" = "Slot %d";
-"ui.turn.number" = "Turn: %d";
-"ui.victories" = "Victories: %d";
 "ui.load" = "Load";
 "ui.new.game" = "New Game";
 "ui.empty.slot" = "Empty Slot";
@@ -523,10 +421,6 @@
 "event.reputation.change" = "Reputation: %@%d";
 "event.receive.card" = "Receive a card";
 "event.receive.curse" = "Receive a curse";
-"event.choice.made" = "Choice made.";
-"event.combat.victory.message" = "Victory! You have won the battle.";
-"event.combat.defeat.message" = "Defeat... You have lost the battle.";
-"event.combat.fled.message" = "You fled from the battle.";
 
 // UI Common
 "ui.close" = "Close";
@@ -541,7 +435,6 @@
 "stats.title" = "Statistics";
 "stats.game.name" = "Twilight Marches";
 "stats.general" = "General Statistics";
-"stats.leaderboard" = "Leaderboard";
 "stats.history" = "Game History";
 "stats.no.saves" = "No saved games yet";
 "stats.start.hint" = "Start a new game to see statistics";
@@ -549,28 +442,12 @@
 "stats.resources" = "Resources";
 "stats.progress" = "Progress";
 "stats.games.count" = "Games";
-"stats.best.result" = "Best Result";
 "stats.longest.survival" = "Longest";
 "stats.turns.count" = "%d turns";
-"stats.victories.label" = "victories";
-"stats.turns.label" = "turns";
 
 // CombatView additional
-"combat.vs" = "VS";
-"combat.attack.roll" = "Attack Roll:";
-"combat.damage.calc.title" = "Damage Calculation:";
-"combat.base.value" = "Base: %d";
-"combat.total.damage" = "= %d";
 
 // Combat UI labels (Audit v2.1 Item 5)
-"combat.shield" = "Shield";
-"combat.defend" = "Defend";
-"combat.fallen" = "You have fallen in battle...";
-"combat.stats.turns" = "Turns";
-"combat.stats.damage.dealt" = "Damage Dealt";
-"combat.stats.damage.taken" = "Damage Taken";
-"combat.stats.cards.played" = "Cards Played";
-"combat.attack.vs.defense" = "Attack %d vs Defense %d";
 
 // MARK: - WorldMapView (Full localization - Audit v2.1)
 
@@ -595,15 +472,12 @@
 "region.desc.breach" = "Nav is actively penetrating the region. Very dangerous. Anchor needs restoration.";
 
 // Combat modifiers
-"combat.modifiers" = "Combat Modifiers";
-"enemy.strength" = "Enemy Strength:";
 "enemy.defense" = "Enemy Defense:";
 "enemy.health" = "Enemy Health:";
 
 // Anchor
 "anchor.of.yav" = "Anchor of Yav";
 "anchor.integrity" = "Integrity:";
-"anchor.influence" = "Influence:";
 
 // Balance names
 "balance.light" = "Light";
@@ -618,11 +492,8 @@
 "action.region.far" = "Region is far";
 "action.move.to.region.hint" = "Move to region to interact with it";
 "action.region.not.directly.accessible" = "Region not directly accessible - go to adjacent region first";
-"action.rest.with.health" = "Rest (+%d ❤️)";
-"action.strengthen.anchor.cost" = "Strengthen anchor (-%d ✨, +%d%%)";
 
 // Quest
-"active.quests.in.region" = "Active quests in region";
 "quest.progress" = "Progress:";
 
 // Journal
@@ -631,20 +502,12 @@
 
 // Confirmations
 "confirmation.title" = "Confirmation";
-"confirm.travel.to" = "Travel to region '%@'? This will take %d %@.";
 "confirm.rest" = "Rest here? You will restore %d health.";
 "confirm.trade" = "Trading system is not yet implemented.";
 "confirm.strengthen.anchor" = "Strengthen anchor? This costs %d faith and adds %d%% integrity.";
 "confirm.explore" = "Explore region? This will take a day.";
-"location.unknown" = "Unknown";
 
 // Log entries
-"log.event.rest" = "Rest";
-"log.choice.rest" = "Decided to rest";
-"log.outcome.health.restored" = "Health restored";
-"log.event.strengthen.anchor" = "Anchor strengthening";
-"log.choice.faith.spent" = "Faith spent";
-"log.outcome.anchor.strengthened" = "Anchor strengthened";
 
 // Warnings
 "warning.title" = "Warning";
@@ -655,26 +518,10 @@
 // MARK: - HeroSelectionView / HeroPanel
 
 "hero.class.default" = "Wanderer";
-"hero.select.title" = "Select Hero";
-"hero.select.subtitle" = "Each class has unique stats and abilities";
-"hero.start.game" = "Start game as %@";
-"hero.select.class" = "Select hero class";
-"hero.path" = "Path: %@";
-"path.light" = "Light";
-"path.dark" = "Dark";
-"path.balance" = "Balance";
 
 // MARK: - GameBoardView
 
 "enemy.defeated" = "Enemy defeated!";
-"returning.to.event" = "Returning to event...";
-"roll.result" = "Roll: %d + Strength: %d = %d\nEnemy Defense: %d\nDamage: %d";
-"enemy.attacks.you" = "Enemy attacks you for %d damage!\nYour health: %d";
-"marketplace" = "Marketplace";
-"no.cards.for.purchase" = "No cards available for purchase";
-"victory.message" = "You protected the lands from darkness!";
-"defeat.message" = "Darkness has prevailed...";
-"button.buy" = "Buy";
 
 // MARK: - CardView
 
@@ -689,20 +536,10 @@
 // MARK: - GameBoardView (Full localization - Audit v2.1)
 
 // Combat alerts
-"combat.alert.success" = "Success!";
-"combat.alert.fail" = "Failed";
-"combat.roll.result.success" = "Roll: %d + Strength: %d = %d\nEnemy Defense: %d\nDamage: %d";
-"combat.roll.result.fail" = "Roll: %d + Strength: %d = %d\nEnemy Defense: %d\nEnemy attacks you!";
-"combat.enemy.attack.title" = "Enemy Attack!";
-"combat.enemy.attack.message" = "Enemy attacks you for %d damage!\nYour health: %d";
 
 // Pause menu
-"world.map" = "World Map";
 
 // Stats display
-"stats.encounters.defeated" = "Encounters defeated";
-"stats.turns.made" = "Turns made";
-"stats.turns.survived" = "Turns survived";
 
 // Card types for market
 "card.type.resource" = "Resource";
@@ -711,11 +548,6 @@
 "card.type.special" = "Special";
 
 // Phase progress bar labels
-"phase.progress.exploration" = "Exploration";
-"phase.progress.encounter" = "Encounter";
-"phase.progress.player.turn" = "Player Turn";
-"phase.progress.enemy.turn" = "Enemy Turn";
-"phase.progress.end.turn" = "End Turn";
 
 // MARK: - Models/ExplorationModels - RegionState
 "region.state.stable" = "Stable";
@@ -750,12 +582,6 @@
 "event.type.exploration" = "Exploration";
 "event.type.world.shift" = "World Shift";
 
-// MARK: - Models/Player - Balance path
-"balance.path.dark" = "Path of Darkness";
-"balance.path.neutral" = "Neutral";
-"balance.path.light" = "Path of Light";
-"balance.path.unknown" = "Unknown";
-
 // MARK: - CardGameApp - Loading messages
 "loading.default" = "Loading...";
 "loading.search.packs" = "Searching for content packs...";
@@ -767,10 +593,6 @@
 "app.title" = "Twilight Marches";
 
 // MARK: - Content Cache
-"loading.validating.cache" = "Validating cache...";
-"loading.from.cache" = "Loading from cache...";
-"loading.saving.cache" = "Saving to cache...";
-"loading.from.cache.indicator" = "Fast load from cache";
 "loading.summary" = "%d content items loaded";
 
 // MARK: - Loading Items
@@ -784,14 +606,6 @@
 "loading.item.localization" = "Languages";
 
 // MARK: - ViewModels/GameViewModel
-"default.player.name" = "Hero";
-"region.unknown" = "Unknown";
-"journal.entry.rest" = "Rest";
-"journal.entry.rest.choice" = "Decided to rest";
-"journal.entry.rest.outcome" = "Health restored";
-"journal.entry.anchor" = "Strengthening anchor";
-"journal.entry.anchor.choice" = "Spent faith";
-"journal.entry.anchor.outcome" = "Anchor strengthened";
 "choice.made" = "Choice made";
 
 // MARK: - WorldMapView - Region descriptions
@@ -801,10 +615,8 @@
 
 // MARK: - WorldMapView - Actions
 "action.travel.to" = "Travel (%d %@)";
-"action.travel.far" = "Region too far";
 "action.rest.heal" = "Rest (+%d ❤️)";
 "action.trade.name" = "Trade";
-"action.strengthen.anchor.cost" = "Strengthen anchor (-%d ✨, +20%%)";
 "action.explore.region" = "Explore";
 "day.word.1" = "day";
 "day.word.234" = "days";
@@ -860,14 +672,6 @@
 "curse.blood.curse" = "Blood Curse";
 "curse.seal.of.nav" = "Seal of Nav";
 
-// MARK: - DayEvent notifications
-"dayevent.tension.title" = "Tension Rising";
-"dayevent.tension.description" = "Nav's influence is growing. World tension: %d%%";
-"dayevent.region.degraded.title" = "Region Degrading";
-"dayevent.region.degraded.description" = "%@ transitions to state: %@";
-"dayevent.world.improving.title" = "World Recovering";
-"dayevent.world.improving.description" = "Yav's influence strengthens, tension is subsiding";
-
 // MARK: - Missing translations (added programmatically)
 "phase.player.turn" = "Player Turn";
 "phase.enemy.turn" = "Enemy Turn";
@@ -878,120 +682,17 @@
 "rules.actions.title" = "Actions";
 "rules.actions.content" = "Each turn you have limited actions. Use them wisely";
 "ui.menu.button" = "Menu";
-"ui.pause.menu" = "Pause";
-"ui.resume" = "Resume";
-"ui.save.game" = "Save Game";
-"ui.rules" = "Rules";
 "ui.exit" = "Exit";
-"ui.roll" = "Roll";
-"ui.encounters" = "Encounters";
-"ui.your.deck" = "Your Deck";
-"ui.discard" = "Discard";
-"ui.active.encounter" = "Active Encounter";
-"ui.explore" = "Explore";
-"ui.deck.info" = "Deck Info";
-"ui.hand.title" = "Your Hand";
-"ui.game.saved" = "Game Saved";
 "ui.progress.saved" = "Progress Saved";
-"ui.victory.title" = "Victory!";
-"ui.defeat.title" = "Defeat";
-"ui.encounters.defeated" = "Encounters Defeated";
-"ui.turns.taken" = "Turns Taken";
-"ui.turns.survived" = "Turns Survived";
-"ui.return.menu" = "Return to Menu";
-"tooltip.health" = "Health - your life force";
-"tooltip.faith" = "Faith - spiritual power for abilities";
 "tooltip.balance" = "Balance between Light and Dark";
-"tooltip.next.phase" = "Proceed to next phase";
-
-// MARK: - World log messages
-"log.tension.increased" = "World tension increased to %d%% (+%d)";
-"log.anchor.resists" = "Anchor in %@ resists Nav's influence (%d%% integrity)";
-"log.region.degraded" = "%@ degraded to %@";
-"log.world.change" = "World Change";
-"log.world" = "World";
-
-// MARK: - Travel log messages
-"log.travel.title" = "Travel";
-"log.travel.choice" = "Traveled to %@";
-"log.travel.outcome.day" = "Arrived in %d day";
-"log.travel.outcome.days" = "Arrived in %d days";
 
 // MARK: - Combat UI strings
 "combat.turns.stats" = "Turns: %d, damage dealt: %d, damage taken: %d";
-"combat.action.cost" = "(-1 action)";
-"combat.monster.defeated" = "%@ defeated!";
-"combat.continue" = "Continue";
-"combat.return" = "Return";
-"combat.hit.result" = "✅ HIT!";
-"combat.miss.result" = "❌ MISS!";
-"combat.dice.roll" = "🎲 DICE ROLL";
-"combat.defense.value" = "🛡️ Defense: %d";
-"combat.damage.value" = "💥 Damage: %d";
-
-// MARK: - Combat log messages
-"combat.log.battle.start.enemy" = "Battle started! Enemy: %@";
-"combat.log.actions.info" = "You have %d actions per turn";
-"combat.log.hit" = "⚔️ HIT! Roll: %d vs %d. Damage: %d (Enemy HP: %d)";
-"combat.log.miss" = "⚔️ MISS! (%d vs %d)";
-"combat.log.cover" = "🛡️ Cover! +%d to shield (total: %d)";
-"combat.log.strength.bonus" = "   💪 Strength bonus: +%d";
-"combat.log.insufficient.faith" = "❌ Insufficient faith for %@ (need: %d, have: %d)";
-"combat.log.faith.spent" = "💫 Spent %d faith";
-"combat.log.shield.card" = "🛡️ %@: +%d to shield (total: %d)";
-"combat.log.attack.bonus" = "⚔️ %@: +%d to next attack damage";
-"combat.log.spell.cast" = "✨ Spell: %@";
-"combat.log.card.played" = "🃏 Played: %@";
-"combat.log.heal.effect" = "   💚 Heal +%d HP";
-"combat.log.damage.effect" = "   💥 Damage %d (Enemy HP: %d)";
-"combat.log.draw.cards" = "   🃏 Cards drawn: %d";
-"combat.log.faith.gained" = "   ✨ Faith +%d";
-"combat.log.curse.removed" = "   🌟 Curse removed";
-"combat.log.bonus.dice" = "   🎲 +%d dice to next attack";
-"combat.log.reroll" = "   🔄 Reroll: +1 die (best result)";
-"combat.log.balance.shift" = "   ⚖️ Balance shifted towards %@ by %d";
-"combat.log.curse.damage" = "   💀 Curse %@: %d damage to enemy";
-"combat.log.spirit.summoned" = "   👻 Spirit summoned from %@ (power: %d)";
-"combat.log.spirit.attack" = "   👻 Spirit attacks! Damage: %d";
 
 // MARK: - Realm names
-"realm.yav" = "Yav";
-"realm.nav" = "Nav";
-"realm.prav" = "Prav";
 "balance.light" = "Light";
 "balance.dark" = "Dark";
 "balance.neutral" = "Balance";
-
-// MARK: - Hero Classes
-"hero.class.warrior" = "Warrior";
-"hero.class.mage" = "Mage";
-"hero.class.ranger" = "Ranger";
-"hero.class.priest" = "Priest";
-"hero.class.shadow" = "Shadow";
-
-"hero.class.warrior.desc" = "Master of melee combat. High strength and survivability.";
-"hero.class.mage.desc" = "Wields magic. Powerful spells, but fragile.";
-"hero.class.ranger.desc" = "Scout and hunter. Balanced characteristics.";
-"hero.class.priest.desc" = "Servant of Light. Healing and protection from darkness.";
-"hero.class.shadow.desc" = "Agent of Nav. Dark magic and stealth.";
-
-"hero.ability.warrior" = "Rage: +2 damage when HP below 50%";
-"hero.ability.mage" = "Meditation: +1 faith at end of turn";
-"hero.ability.ranger" = "Tracking: +1 die on first attack";
-"hero.ability.priest" = "Blessing: -1 damage from darkness";
-"hero.ability.shadow" = "Ambush: +3 damage vs full HP enemies";
-
-// MARK: - Hero Ability Definitions
-"ability.warrior.rage.name" = "Rage";
-"ability.warrior.rage.desc" = "+2 damage when HP below 50%";
-"ability.mage.meditation.name" = "Meditation";
-"ability.mage.meditation.desc" = "+1 faith at end of each turn";
-"ability.ranger.tracking.name" = "Tracking";
-"ability.ranger.tracking.desc" = "+1 attack die on first attack in combat";
-"ability.priest.blessing.name" = "Blessing";
-"ability.priest.blessing.desc" = "-1 damage from dark sources";
-"ability.shadow.ambush.name" = "Ambush";
-"ability.shadow.ambush.desc" = "+3 damage vs enemies with full health";
 
 // MARK: - Curse Definitions (Config)
 "curse.weakness.name" = "Weakness";
@@ -1029,7 +730,6 @@
 "error.invalid.target" = "Invalid target";
 
 // MARK: - Save format labels
-"ui.engine.format" = "New format";
 "ui.no.saves" = "No saves";
 
 // MARK: - Save Compatibility Errors (Epic 7)
@@ -1121,9 +821,6 @@
 "resonance.zone.deep.prav" = "Deep Prav";
 
 // MARK: - Fate Combat
-"combat.fate.draw" = "Fate Card";
-"combat.fate.effort" = "Effort";
-"combat.fate.effort.hint" = "Discard cards for +1 to attack";
 "combat.fate.deck.count" = "Deck: %d";
 "combat.fate.discard.count" = "Discard: %d";
 "combat.fate.discard.title" = "Played Fate Cards";
@@ -1166,20 +863,8 @@
 "combat.intent.detail.summon" = "Reinforcements";
 
 // Combat phase names (Active Defense)
-"combat.phase.preparation" = "Preparation";
-"combat.phase.enemy.intent" = "Enemy Intent";
-"combat.phase.player.action" = "Your Action";
-"combat.phase.fate.reveal" = "Fate Reveal";
-"combat.phase.enemy.resolution" = "Enemy Resolution";
-"combat.phase.defense.fate" = "Defense";
 
 // Combat actions (Active Defense)
-"combat.action.attack.fate" = "Attack";
-"combat.action.wait" = "Wait";
-"combat.mulligan.title" = "Choose Cards to Replace";
-"combat.mulligan.hint" = "Select up to 5 cards to swap";
-"combat.mulligan.confirm" = "Replace";
-"combat.mulligan.skip" = "Keep Hand";
 
 // MARK: - Encounter Combat (new system)
 "encounter.log.enemy.prepares" = "Enemy prepares: %@";
