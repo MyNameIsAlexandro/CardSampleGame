@@ -1,7 +1,7 @@
 # Architecture Map
 
 > Strategic context for Claude sessions. Max 500 lines.
-> Updated when an epic closes. Last update: Epic 7 (encounter module complete).
+> Updated when an epic closes. Last update: Epic 8 (save safety + onboarding + settings).
 
 ## Core Principle
 
@@ -13,9 +13,10 @@
 ┌─────────────────────────────────────────────┐
 │                   SwiftUI                    │
 │  ContentView → WorldMapView → CombatView    │
-│                    │              │          │
-│              EngineRegion    EncounterVM     │
-│              DetailView      (ObservableObject)
+│       │            │              │          │
+│  SettingsView EngineRegion   EncounterVM     │
+│  TutorialView  DetailView    (Observable)    │
+│  GameOverView                                │
 └──────────────────┬───────────────┬──────────┘
                    │               │
          ┌─────────▼───────────────▼──────────┐
@@ -111,7 +112,9 @@
 ### TwilightGameEngine
 - **Entry**: `performAction(_ action: GameAction) -> ActionResult`
 - **State**: all `@Published public private(set)` properties
-- **Save**: `EngineSave` captures full state, restored via `loadGame()`
+- **Save**: `EngineSave` captures full state + fate deck, restored via `loadGame()`
+- **Auto-save**: every 3 days + after combat (via WorldMapView onChange observers)
+- **Game Over**: `isGameOver` / `gameResult` → `GameOverView` fullScreenCover → menu
 - **RNG**: `WorldRNG.shared` — seeded, deterministic xorshift64
 - **End conditions**: tension ≥ 100 → defeat, HP ≤ 0 → defeat, quest flag → victory
 - **Loot helpers**: `applyFaithDelta()`, `addToDeck()` — called by EncounterBridge
@@ -159,6 +162,19 @@
 - **Flow**: draw → apply resonance modifiers → resolve keyword → check match → discard
 - **Critical**: isCritical=true in defense → 0 damage
 - **Flee check**: fate draw determines escape success (value ≥ 5)
+- **Persistence**: `FateDeckState` (draw/discard piles) saved in `EngineSave.fateDeckState`
+
+### Save System
+- **SaveManager**: singleton, UserDefaults/JSON, 3 slots
+- **EngineSave**: full state + fate deck, backward-compatible Codable
+- **Auto-save**: every 3 days + after combat ends (WorldMapView → onAutoSave callback)
+- **Manual save**: on exit to menu (ContentView onExit)
+- **Game Over**: `GameOverView` fullScreenCover, returns to menu via onExit
+
+### Settings & Onboarding
+- **Tutorial**: `@AppStorage("hasCompletedTutorial")`, 4-step overlay on first game start
+- **Settings**: `SettingsView` — difficulty, language (iOS settings link), reset tutorial/data
+- **Difficulty**: `DifficultyLevel` enum (easy/normal/hard) with HP/power multipliers
 
 ### World Degradation
 - **Tension**: starts 30, escalates every 3 days by `3 + (day / 10)`
@@ -198,7 +214,7 @@ User taps "Explore" in region
 
 ## Architectural Debt: RESOLVED
 
-All audit findings have been addressed across 7 epics:
+All audit findings have been addressed across 8 epics:
 
 1. ~~RNG split~~ — WorldRNG 100% normalized, deterministic (Epic 1)
 2. ~~Access control~~ — all `public private(set)`, no unprotected state (Epic 2)
@@ -207,6 +223,11 @@ All audit findings have been addressed across 7 epics:
 5. ~~World degradation~~ — single source of truth in DegradationRules (Epic 5)
 6. ~~Legacy combat UI~~ — CombatView fully on EncounterViewModel (Epic 6)
 7. ~~Encounter stubs~~ — defend, flee, loot, summon, multi-enemy all implemented (Epic 7)
+8. ~~Save safety~~ — fate deck persistence, auto-save, game over, tutorial, settings (Epic 8)
+
+### Remaining Debt
+- **SAV-03**: Mid-combat save — requires full EncounterEngine serialization (deferred)
+- **SET-02**: Difficulty multipliers defined but not yet wired into EncounterBridge
 
 ## Gate Tests
 
@@ -217,14 +238,18 @@ All audit findings have been addressed across 7 epics:
 | INV_KW_GateTests | 32 | Keywords, match, pacify, resonance, enemy mods, phases, critical, integration |
 | INV_WLD_GateTests | 12 | Degradation, tension, anchors, 30-day simulation |
 | INV_ENC7_GateTests | 11 | Defend, flee rules, loot, RNG seed, summon |
-| **Total** | **67** | |
+| INV_SAV8_GateTests | 3 | Fate deck save/load, round-trip, backward compat |
+| **Total** | **70** | |
 
 ## File Layout
 
 ```
-App/ContentView.swift          — Root navigation
+App/ContentView.swift          — Root navigation + auto-save + tutorial trigger
 Views/
-  WorldMapView.swift           — Region map + detail sheets
+  WorldMapView.swift           — Region map + detail sheets + game over + auto-save
+  GameOverView.swift           — Victory/defeat screen + return to menu
+  TutorialOverlayView.swift    — 4-step first-run tutorial
+  SettingsView.swift           — Settings + DifficultyLevel enum
   BattleArenaView.swift        — Quick battle entry point
   Combat/
     CombatView.swift           — Combat screen (EncounterViewModel)
@@ -250,7 +275,7 @@ Packages/
       FateCard.swift             — Fate card model + suits + keywords
       FateDeckManager.swift      — Draw/discard/shuffle
       WorldRNG.swift             — Deterministic xorshift64
-      EngineSave.swift           — Full state serialization
+      EngineSave.swift           — Full state serialization + fate deck
       EnemyIntent.swift          — Intent types + summonEnemyId
     Encounter/
       EncounterEngine.swift      — Combat state machine (all actions)
@@ -267,7 +292,7 @@ Packages/
     ContentPacks/
       ContentRegistry.swift      — Content loading + queries
   TwilightEngine/Tests/
-    GateTests/                   — 67 gate tests (5 files)
+    GateTests/                   — 70 gate tests (6 files)
     LayerTests/                  — Component integration tests
     Helpers/                     — Test fixtures
 ```

@@ -7,7 +7,7 @@
 
 ## ALL EPICS COMPLETE
 
-Total: 7 epics, 49 tasks, 347 engine tests (0 failures), simulator build clean.
+Total: 8 epics, 57 tasks, 350 engine tests (0 failures), simulator build clean.
 
 ---
 
@@ -20,6 +20,12 @@ Total: 7 epics, 49 tasks, 347 engine tests (0 failures), simulator build clean.
 5. ~~Epic 5: World Consistency~~ CLOSED — degradation, tension, anchors, 12 gate tests, 30-day simulation
 6. ~~Epic 6: Encounter UI Integration~~ CLOSED — CombatView + EncounterViewModel + all widgets, simulator build clean
 7. ~~Epic 7: Encounter Module Completion~~ CLOSED — defend, flee, loot, multi-enemy, summon, RNG seed, 11 gate tests
+8. ~~Epic 8: Save Safety + Onboarding + Settings~~ CLOSED — fate deck persistence, game over, auto-save, tutorial, settings, 3 gate tests
+
+## Remaining Debt
+
+- **SAV-03**: Mid-combat save — requires full EncounterEngine serialization (deferred)
+- **SET-02**: Difficulty multipliers defined but not yet wired into EncounterBridge
 
 ## Gate Test Files
 
@@ -30,14 +36,16 @@ Total: 7 epics, 49 tasks, 347 engine tests (0 failures), simulator build clean.
 | INV_KW_GateTests | 32 | Keywords, match/mismatch, pacify, resonance costs, enemy mods, phase automation, critical defense, integration, determinism |
 | INV_WLD_GateTests | 12 | Degradation rules, state chains, tension game-over, escalation formula, 30-day simulation |
 | INV_ENC7_GateTests | 11 | Defend, flee rules, loot distribution, RNG seed, summon |
+| INV_SAV8_GateTests | 3 | Fate deck save/load, round-trip, backward compatibility |
 
 ## Final Stats
 
-- **Engine tests**: 347 (0 failures, 0 skips)
-- **Gate tests**: 67 across 5 files
+- **Engine tests**: 350 (0 failures, 0 skips)
+- **Gate tests**: 70 across 6 files
 - **Simulator**: builds clean (iPhone 17 Pro)
 - **Architecture**: Engine-First, all state via performAction(), deterministic RNG
 
 Full details:
 - Epics 1-6: `docs/plans/2026-01-30-epic-driven-development-design.md`
 - Epic 7: `docs/plans/2026-01-30-encounter-completion-design.md`
+- Epic 8: `docs/plans/2026-01-30-save-onboarding-design.md`
