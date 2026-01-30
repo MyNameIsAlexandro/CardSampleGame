@@ -34,7 +34,7 @@ Status: CLOSED (6/6 tasks done)
 ---
 
 ## Current Epic: 3 — Encounter Engine Completion
-Status: IN PROGRESS (7/12 tasks done)
+Status: IN PROGRESS (8/12 tasks done)
 
 ## Completed (this epic)
 
@@ -47,13 +47,15 @@ Status: IN PROGRESS (7/12 tasks done)
 
 - [x] ENC-07: Pacify control — already safe (spirit attack only touches WP), added 2 gate tests
 
-Gate tests: 19 tests in INV_KW_GateTests (all pass).
+- [x] ENC-08: Resonance zone card costs — already implemented, added 4 e2e gate tests
+
+Gate tests: 23 tests in INV_KW_GateTests (all pass).
 
 ## Next Task
 
-**ENC-08: Resonance zone effects on card costs (+1 faith in wrong zone)**
-- Input: `EncounterEngine.swift`
-- Action: Cards cost +1 faith when resonance zone opposes card alignment.
+**ENC-09: Enemy resonance modifiers from JSON**
+- Input: `EncounterEngine.swift`, enemy definitions
+- Action: Enemies shift resonance each round based on JSON-defined modifier.
 - Test: `swift test --package-path Packages/TwilightEngine --filter KW`
 
 ## Backlog (this epic)

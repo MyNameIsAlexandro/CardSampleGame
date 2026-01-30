@@ -281,6 +281,80 @@ final class INV_KW_GateTests: XCTestCase {
         XCTAssertEqual(engine.enemies[0].outcome, .pacified, "Enemy should be pacified, not killed")
     }
 
+    // MARK: - ENC-08: Resonance zone card cost modifier
+
+    /// Helper: create context with a card that has realm and faith cost
+    private func makeCardContext(realm: Realm, faithCost: Int = 2, resonance: Float = 0) -> EncounterContext {
+        let card = Card(
+            id: "realm_card", name: "Realm Card", type: .spell, description: "Test",
+            abilities: [CardAbility(id: "a1", name: "Hit", description: "dmg", effect: .damage(amount: 1, type: .physical))],
+            realm: realm, faithCost: faithCost
+        )
+        let fateCard = FateCard(id: "fate1", modifier: 1, name: "Fate", suit: nil, keyword: nil)
+        let deck = FateDeckManager(cards: [fateCard])
+        return EncounterContext(
+            hero: EncounterHero(id: "hero", hp: 50, maxHp: 100, strength: 5, armor: 2, wisdom: 5, willDefense: 1),
+            enemies: [
+                EncounterEnemy(id: "enemy", name: "Enemy", hp: 50, maxHp: 50, wp: 30, maxWp: 30, power: 10, defense: 3)
+            ],
+            fateDeckSnapshot: deck.getState(),
+            modifiers: [],
+            rules: EncounterRules(),
+            rngSeed: 42,
+            worldResonance: resonance,
+            heroCards: [card],
+            heroFaith: 10
+        )
+    }
+
+    /// Nav card in Prav zone costs +1 faith
+    func testResonanceCost_navCardInPravZone_costIncrease() {
+        let ctx = makeCardContext(realm: .nav, faithCost: 2, resonance: 50) // prav zone
+        let engine = EncounterEngine(context: ctx)
+        _ = engine.generateIntent(for: "enemy")
+        _ = engine.advancePhase()
+        let faithBefore = engine.heroFaith
+        let result = engine.performAction(.useCard(cardId: "realm_card", targetId: "enemy"))
+        XCTAssertTrue(result.success)
+        XCTAssertEqual(faithBefore - engine.heroFaith, 3, "Nav card in Prav zone should cost 2+1=3")
+    }
+
+    /// Prav card in Nav zone costs +1 faith
+    func testResonanceCost_pravCardInNavZone_costIncrease() {
+        let ctx = makeCardContext(realm: .prav, faithCost: 2, resonance: -50) // nav zone
+        let engine = EncounterEngine(context: ctx)
+        _ = engine.generateIntent(for: "enemy")
+        _ = engine.advancePhase()
+        let faithBefore = engine.heroFaith
+        let result = engine.performAction(.useCard(cardId: "realm_card", targetId: "enemy"))
+        XCTAssertTrue(result.success)
+        XCTAssertEqual(faithBefore - engine.heroFaith, 3, "Prav card in Nav zone should cost 2+1=3")
+    }
+
+    /// Nav card in Nav zone costs -1 faith (discount)
+    func testResonanceCost_navCardInNavZone_costDiscount() {
+        let ctx = makeCardContext(realm: .nav, faithCost: 2, resonance: -50) // nav zone
+        let engine = EncounterEngine(context: ctx)
+        _ = engine.generateIntent(for: "enemy")
+        _ = engine.advancePhase()
+        let faithBefore = engine.heroFaith
+        let result = engine.performAction(.useCard(cardId: "realm_card", targetId: "enemy"))
+        XCTAssertTrue(result.success)
+        XCTAssertEqual(faithBefore - engine.heroFaith, 1, "Nav card in Nav zone should cost 2-1=1")
+    }
+
+    /// Card in Yav zone (neutral) has no cost modifier
+    func testResonanceCost_cardInYavZone_noCostChange() {
+        let ctx = makeCardContext(realm: .nav, faithCost: 2, resonance: 0) // yav zone
+        let engine = EncounterEngine(context: ctx)
+        _ = engine.generateIntent(for: "enemy")
+        _ = engine.advancePhase()
+        let faithBefore = engine.heroFaith
+        let result = engine.performAction(.useCard(cardId: "realm_card", targetId: "enemy"))
+        XCTAssertTrue(result.success)
+        XCTAssertEqual(faithBefore - engine.heroFaith, 2, "Card in Yav zone should cost base (2)")
+    }
+
     /// Yav suit always matches — never nullified
     func testYavSuit_alwaysMatches_neverNullified() {
         let ctxYavPhys = makeContext(keyword: .surge, suit: .yav)
