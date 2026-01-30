@@ -57,6 +57,9 @@
 		FCCS000100000000000000001 /* FateCardChoiceSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCCS000200000000000000001 /* FateCardChoiceSheet.swift */; };
 		BAV0000100000000000000001 /* BattleArenaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAV0000200000000000000001 /* BattleArenaView.swift */; };
 		ESC0000100000000000000001 /* EnemySelectionCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = ESC0000200000000000000001 /* EnemySelectionCard.swift */; };
+		GOV0000100000000000000001 /* GameOverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = GOV0000200000000000000001 /* GameOverView.swift */; };
+		TOV0000100000000000000001 /* TutorialOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = TOV0000200000000000000001 /* TutorialOverlayView.swift */; };
+		STV0000100000000000000001 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = STV0000200000000000000001 /* SettingsView.swift */; };
 		CM00000100000000000000001 /* ContentManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CM00000200000000000000001 /* ContentManagerView.swift */; };
 		CM00000300000000000000001 /* ContentManagerVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = CM00000400000000000000001 /* ContentManagerVM.swift */; };
 		CMT0000100000000000000001 /* ContentManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CMT0000200000000000000001 /* ContentManagerTests.swift */; };
@@ -120,6 +123,9 @@
 		FCCS000200000000000000001 /* FateCardChoiceSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/Components/FateCardChoiceSheet.swift; sourceTree = SOURCE_ROOT; };
 		BAV0000200000000000000001 /* BattleArenaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BattleArenaView.swift; sourceTree = "<group>"; };
 		ESC0000200000000000000001 /* EnemySelectionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemySelectionCard.swift; sourceTree = "<group>"; };
+		GOV0000200000000000000001 /* GameOverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameOverView.swift; sourceTree = "<group>"; };
+		TOV0000200000000000000001 /* TutorialOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorialOverlayView.swift; sourceTree = "<group>"; };
+		STV0000200000000000000001 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		CM00000200000000000000001 /* ContentManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentManagerView.swift; sourceTree = "<group>"; };
 		CM00000400000000000000001 /* ContentManagerVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModels/ContentManagerVM.swift; sourceTree = SOURCE_ROOT; };
 		CMT0000200000000000000001 /* ContentManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentManagerTests.swift; sourceTree = "<group>"; };
@@ -204,6 +210,9 @@
 				COMBATGRP000001 /* Combat */,
 				BAV0000200000000000000001 /* BattleArenaView.swift */,
 				CM00000200000000000000001 /* ContentManagerView.swift */,
+				GOV0000200000000000000001 /* GameOverView.swift */,
+				TOV0000200000000000000001 /* TutorialOverlayView.swift */,
+				STV0000200000000000000001 /* SettingsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -440,6 +449,9 @@
 				FCCS000100000000000000001 /* FateCardChoiceSheet.swift in Sources */,
 				BAV0000100000000000000001 /* BattleArenaView.swift in Sources */,
 				ESC0000100000000000000001 /* EnemySelectionCard.swift in Sources */,
+				GOV0000100000000000000001 /* GameOverView.swift in Sources */,
+				TOV0000100000000000000001 /* TutorialOverlayView.swift in Sources */,
+				STV0000100000000000000001 /* SettingsView.swift in Sources */,
 				AA0000130000000000000001 /* CardView.swift in Sources */,
 				AA0000150000000000000001 /* PlayerHandView.swift in Sources */,
 				AA0000480000000000000001 /* RulesView.swift in Sources */,

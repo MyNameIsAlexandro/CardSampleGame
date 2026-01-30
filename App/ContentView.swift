@@ -9,10 +9,13 @@ struct ContentView: View {
     @State private var showingSaveSlots = false
     @State private var showingLoadSlots = false  // New: for "Continue" flow
     @State private var showingStatistics = false
+    @State private var showingSettings = false
     @State private var showingContentManager = false
     @State private var showingBattleArena = false
     @State private var selectedHeroId: String?
     @State private var selectedSaveSlot: Int?
+    @AppStorage("hasCompletedTutorial") private var hasCompletedTutorial = false
+    @State private var showingTutorial = false
 
     // MARK: - Engine-First Architecture
     // Engine is the single source of truth (no legacy GameState)
@@ -64,6 +67,12 @@ struct ContentView: View {
                         showingWorldMap = false
                         showingSaveSlots = false
                         showingLoadSlots = false
+                    },
+                    onAutoSave: {
+                        // Auto-save to current slot (SAV-04)
+                        if let slot = selectedSaveSlot {
+                            saveManager.saveGame(to: slot, engine: engine)
+                        }
                     }
                 )
             } else if showingSaveSlots {
@@ -110,6 +119,14 @@ struct ContentView: View {
                             }
                             #endif
 
+                            Button(action: { showingSettings = true }) {
+                                Image(systemName: "gearshape.fill")
+                                    .font(.title3)
+                                    .padding(8)
+                                    .background(AppColors.secondary.opacity(0.2))
+                                    .foregroundColor(AppColors.secondary)
+                                    .cornerRadius(8)
+                            }
                             Button(action: { showingStatistics = true }) {
                                 Image(systemName: "chart.bar.fill")
                                     .font(.title3)
@@ -280,12 +297,21 @@ struct ContentView: View {
         .sheet(isPresented: $showingStatistics) {
             StatisticsView()
         }
+        .sheet(isPresented: $showingSettings) {
+            SettingsView()
+        }
         #if DEBUG
         .sheet(isPresented: $showingContentManager) {
             ContentManagerView(bundledPackURLs: getBundledPackURLs())
         }
         #endif
         .preferredColorScheme(.dark)
+        .fullScreenCover(isPresented: $showingTutorial) {
+            TutorialOverlayView {
+                hasCompletedTutorial = true
+                showingTutorial = false
+            }
+        }
     }
 
     var saveSlotSelectionView: some View {
@@ -357,6 +383,11 @@ struct ContentView: View {
 
         showingWorldMap = true
         showingSaveSlots = false
+
+        // Show tutorial on first game (TUT-01)
+        if !hasCompletedTutorial {
+            showingTutorial = true
+        }
     }
 
     func loadGame(from slot: Int) {

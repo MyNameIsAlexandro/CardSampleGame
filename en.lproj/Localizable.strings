@@ -936,3 +936,39 @@
 // Escalation
 "combat.escalation.surprise" = "Surprise attack!";
 "combat.escalation.rage_shield" = "Rage shield activated";
+
+// Settings (SET-01/02)
+"settings.title" = "Settings";
+"settings.difficulty" = "Difficulty";
+"settings.difficulty.easy" = "Easy";
+"settings.difficulty.normal" = "Normal";
+"settings.difficulty.hard" = "Hard";
+"settings.language" = "Language";
+"settings.reset.tutorial" = "Reset Tutorial";
+"settings.reset.all.data" = "Reset All Data";
+"settings.reset.confirm" = "This will show the tutorial again on next game start.";
+"settings.reset.all.confirm" = "This will delete all saves and reset all settings. This cannot be undone.";
+"settings.done" = "Done";
+
+// Tutorial (TUT-01/02)
+"tutorial.welcome.title" = "Welcome, Wanderer";
+"tutorial.welcome.body" = "The world is fading. Darkness spreads through the regions. Only you can restore the balance.";
+"tutorial.map.title" = "The World Map";
+"tutorial.map.body" = "Tap a region to explore it. Each region has its own state — stable, borderland, or breach. Travel between connected regions.";
+"tutorial.combat.title" = "Combat";
+"tutorial.combat.body" = "When you encounter enemies, choose to Attack, Influence, Defend, or Flee. Enemies have physical HP and spiritual Willpower.";
+"tutorial.fate.title" = "Fate Cards";
+"tutorial.fate.body" = "Fate cards modify your actions. Each card has a suit (Nav, Yav, Prav) that interacts with the world's resonance.";
+"tutorial.next" = "Next";
+"tutorial.finish" = "Begin Journey";
+"tutorial.skip" = "Skip";
+
+// Game Over (SAV-01)
+"gameover.victory.title" = "Victory!";
+"gameover.defeat.title" = "Defeat";
+"gameover.victory.message" = "The world is saved. Your journey ends in triumph.";
+"gameover.defeat.reason" = "Reason: %@";
+"gameover.return.to.menu" = "Return to Menu";
+"gameover.stats" = "Journey Statistics";
+"gameover.days.survived" = "Days survived: %d";
+"gameover.quests.completed" = "Quests completed: %d";

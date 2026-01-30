@@ -58,6 +58,9 @@ public struct EngineSave: Codable {
     // MARK: - World Flags
     public let worldFlags: [String: Bool]
 
+    // MARK: - Fate Deck State (SAV-02)
+    public let fateDeckState: FateDeckState?
+
     // MARK: - RNG State (Audit A2 - determinism after load)
     public let rngSeed: UInt64
     public let rngState: UInt64
@@ -100,6 +103,7 @@ public struct EngineSave: Codable {
         completedEventIds: [String] = [],
         eventLog: [EventLogEntrySave] = [],
         worldFlags: [String: Bool] = [:],
+        fateDeckState: FateDeckState? = nil,
         rngSeed: UInt64,
         rngState: UInt64
     ) {
@@ -133,6 +137,7 @@ public struct EngineSave: Codable {
         self.completedEventIds = completedEventIds
         self.eventLog = eventLog
         self.worldFlags = worldFlags
+        self.fateDeckState = fateDeckState
         self.rngSeed = rngSeed
         self.rngState = rngState
     }
@@ -149,7 +154,7 @@ public struct EngineSave: Codable {
         case currentRegionId, regions
         case mainQuestStage, activeQuestIds, completedQuestIds, questStages
         case completedEventIds, eventLog
-        case worldFlags, rngSeed, rngState
+        case worldFlags, fateDeckState, rngSeed, rngState
     }
 
     public init(from decoder: Decoder) throws {
@@ -184,6 +189,7 @@ public struct EngineSave: Codable {
         completedEventIds = try c.decode([String].self, forKey: .completedEventIds)
         eventLog = try c.decode([EventLogEntrySave].self, forKey: .eventLog)
         worldFlags = try c.decode([String: Bool].self, forKey: .worldFlags)
+        fateDeckState = try c.decodeIfPresent(FateDeckState.self, forKey: .fateDeckState)
         rngSeed = try c.decode(UInt64.self, forKey: .rngSeed)
         rngState = try c.decode(UInt64.self, forKey: .rngState)
     }

@@ -576,4 +576,40 @@ enum L10n {
     static let combatEscalationSurprise = "combat.escalation.surprise"
     static let combatEscalationRageShield = "combat.escalation.rage_shield"
 
+    // Settings (SET-01/02)
+    static let settingsTitle = "settings.title"
+    static let settingsDifficulty = "settings.difficulty"
+    static let settingsDifficultyEasy = "settings.difficulty.easy"
+    static let settingsDifficultyNormal = "settings.difficulty.normal"
+    static let settingsDifficultyHard = "settings.difficulty.hard"
+    static let settingsLanguage = "settings.language"
+    static let settingsResetTutorial = "settings.reset.tutorial"
+    static let settingsResetAllData = "settings.reset.all.data"
+    static let settingsResetConfirm = "settings.reset.confirm"
+    static let settingsResetAllConfirm = "settings.reset.all.confirm"
+    static let settingsDone = "settings.done"
+
+    // Tutorial (TUT-01/02)
+    static let tutorialWelcomeTitle = "tutorial.welcome.title"
+    static let tutorialWelcomeBody = "tutorial.welcome.body"
+    static let tutorialMapTitle = "tutorial.map.title"
+    static let tutorialMapBody = "tutorial.map.body"
+    static let tutorialCombatTitle = "tutorial.combat.title"
+    static let tutorialCombatBody = "tutorial.combat.body"
+    static let tutorialFateTitle = "tutorial.fate.title"
+    static let tutorialFateBody = "tutorial.fate.body"
+    static let tutorialNext = "tutorial.next"
+    static let tutorialFinish = "tutorial.finish"
+    static let tutorialSkip = "tutorial.skip"
+
+    // Game Over (SAV-01)
+    static let gameOverVictoryTitle = "gameover.victory.title"
+    static let gameOverDefeatTitle = "gameover.defeat.title"
+    static let gameOverVictoryMessage = "gameover.victory.message"
+    static let gameOverDefeatReason = "gameover.defeat.reason"
+    static let gameOverReturnToMenu = "gameover.return.to.menu"
+    static let gameOverStats = "gameover.stats"
+    static let gameOverDaysSurvived = "gameover.days.survived"
+    static let gameOverQuestsCompleted = "gameover.quests.completed"
+
 }

@@ -2304,6 +2304,9 @@ public extension TwilightGameEngine {
             // World flags
             worldFlags: publishedWorldFlags,
 
+            // Fate deck state (SAV-02)
+            fateDeckState: fateDeck?.getState(),
+
             // RNG state (Audit A2 - save for deterministic replay)
             rngSeed: WorldRNG.shared.currentSeed(),
             rngState: WorldRNG.shared.currentState()
@@ -2435,6 +2438,11 @@ public extension TwilightGameEngine {
         // Restore world flags
         publishedWorldFlags = save.worldFlags
         worldFlags = save.worldFlags
+
+        // Restore fate deck state (SAV-02)
+        if let deckState = save.fateDeckState {
+            fateDeck?.restoreState(deckState)
+        }
 
         // Restore RNG state (Audit 1.5 - determinism after load)
         WorldRNG.shared.restoreState(save.rngState)

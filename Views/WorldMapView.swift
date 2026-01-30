@@ -6,18 +6,21 @@ struct WorldMapView: View {
     // Engine is the ONLY source of truth for UI
     @ObservedObject var engine: TwilightGameEngine
     var onExit: (() -> Void)? = nil
+    var onAutoSave: (() -> Void)? = nil
 
     @State private var selectedRegion: EngineRegionState?
     @State private var showingExitConfirmation = false
+    @State private var showingGameOver = false
     @State private var showingEventLog = false
     @State private var showingDayEvent = false
     @State private var currentDayEvent: DayEvent?
 
     // MARK: - Initialization (Engine-First only)
 
-    init(engine: TwilightGameEngine, onExit: (() -> Void)? = nil) {
+    init(engine: TwilightGameEngine, onExit: (() -> Void)? = nil, onAutoSave: (() -> Void)? = nil) {
         self.engine = engine
         self.onExit = onExit
+        self.onAutoSave = onAutoSave
     }
 
     var body: some View {
@@ -125,6 +128,31 @@ struct WorldMapView: View {
             } message: {
                 if let event = currentDayEvent {
                     Text(L10n.dayNumber.localized(with: event.day) + "\n\n\(event.description)")
+                }
+            }
+            .fullScreenCover(isPresented: $showingGameOver) {
+                if let result = engine.gameResult {
+                    GameOverView(result: result, engine: engine) {
+                        showingGameOver = false
+                        onExit?()
+                    }
+                }
+            }
+            .onChange(of: engine.isGameOver) { isOver in
+                if isOver {
+                    showingGameOver = true
+                }
+            }
+            .onChange(of: engine.currentDay) { newDay in
+                // Auto-save every 3 days (SAV-04)
+                if newDay > 1 && newDay % 3 == 1 {
+                    onAutoSave?()
+                }
+            }
+            .onChange(of: engine.isInCombat) { inCombat in
+                // Auto-save after combat ends (SAV-04)
+                if !inCombat {
+                    onAutoSave?()
                 }
             }
             .onChange(of: engine.lastDayEvent?.id) { _ in

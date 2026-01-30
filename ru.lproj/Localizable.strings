@@ -941,3 +941,39 @@
 // Escalation
 "combat.escalation.surprise" = "Внезапная атака!";
 "combat.escalation.rage_shield" = "Щит ярости активирован";
+
+// Settings (SET-01/02)
+"settings.title" = "Настройки";
+"settings.difficulty" = "Сложность";
+"settings.difficulty.easy" = "Легко";
+"settings.difficulty.normal" = "Нормально";
+"settings.difficulty.hard" = "Сложно";
+"settings.language" = "Язык";
+"settings.reset.tutorial" = "Сбросить обучение";
+"settings.reset.all.data" = "Сбросить все данные";
+"settings.reset.confirm" = "Обучение будет показано при следующем запуске игры.";
+"settings.reset.all.confirm" = "Все сохранения и настройки будут удалены. Это действие необратимо.";
+"settings.done" = "Готово";
+
+// Tutorial (TUT-01/02)
+"tutorial.welcome.title" = "Добро пожаловать, Странник";
+"tutorial.welcome.body" = "Мир угасает. Тьма проникает в регионы. Только вы способны восстановить равновесие.";
+"tutorial.map.title" = "Карта мира";
+"tutorial.map.body" = "Нажмите на регион, чтобы исследовать его. Каждый регион имеет состояние — стабильный, пограничный или брешь. Перемещайтесь между связанными регионами.";
+"tutorial.combat.title" = "Бой";
+"tutorial.combat.body" = "Встретив врагов, выбирайте: Атака, Воздействие, Защита или Побег. У врагов есть HP и духовная сила воли.";
+"tutorial.fate.title" = "Карты судьбы";
+"tutorial.fate.body" = "Карты судьбы модифицируют ваши действия. У каждой карты есть масть (Навь, Явь, Правь), которая взаимодействует с резонансом мира.";
+"tutorial.next" = "Далее";
+"tutorial.finish" = "Начать путешествие";
+"tutorial.skip" = "Пропустить";
+
+// Game Over (SAV-01)
+"gameover.victory.title" = "Победа!";
+"gameover.defeat.title" = "Поражение";
+"gameover.victory.message" = "Мир спасён. Ваше путешествие завершилось триумфом.";
+"gameover.defeat.reason" = "Причина: %@";
+"gameover.return.to.menu" = "Вернуться в меню";
+"gameover.stats" = "Статистика путешествия";
+"gameover.days.survived" = "Дней прожито: %d";
+"gameover.quests.completed" = "Квестов выполнено: %d";

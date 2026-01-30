@@ -125,6 +125,13 @@ class SaveManager: ObservableObject {
         UserDefaults.standard.removeObject(forKey: "twilight_marches_saves")
     }
 
+    /// Delete all saves
+    func deleteAllSaves() {
+        saveSlots.removeAll()
+        persistSaves()
+        UserDefaults.standard.removeObject(forKey: "twilight_marches_saves")
+    }
+
     /// Check if slot has a save
     func hasSave(in slot: Int) -> Bool {
         return saveSlots[slot] != nil
