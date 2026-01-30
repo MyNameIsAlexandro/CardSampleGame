@@ -2472,7 +2472,7 @@ public extension TwilightGameEngine {
     }
 
     /// Set player health directly
-    public func setPlayerHealth(_ health: Int) {
+    func setPlayerHealth(_ health: Int) {
         playerHealth = min(playerMaxHealth, max(0, health))
     }
 
