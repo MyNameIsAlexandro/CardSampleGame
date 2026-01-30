@@ -7,7 +7,7 @@
 
 ## ALL EPICS COMPLETE
 
-Total: 10 epics, 79 tasks, 350 engine tests (0 failures), simulator build clean.
+Total: 11 epics, 87 tasks, 358 engine tests (0 failures), simulator build clean.
 
 ---
 
@@ -23,11 +23,11 @@ Total: 10 epics, 79 tasks, 350 engine tests (0 failures), simulator build clean.
 8. ~~Epic 8: Save Safety + Onboarding + Settings~~ CLOSED — fate deck persistence, game over, auto-save, tutorial, settings, 3 gate tests
 9. ~~Epic 9: UI/UX Polish~~ CLOSED — HapticManager, SoundManager, floating damage, damage flash, 3D card flip, travel transition, ambient menu, game over animations, AppAnimation + AppGradient tokens
 10. ~~Epic 10: Design System Audit~~ CLOSED — 38 violations fixed across 14 files, CardSizes tokens, AppShadows.glow, localized fate strings (en+ru), full token compliance
+11. ~~Epic 11: Debt Closure~~ CLOSED — mid-combat save (SAV-03), difficulty wiring (SET-02), Codable on 11 types, EncounterEngine snapshot/restore, view-layer resume, 8 gate tests
 
 ## Remaining Debt
 
-- **SAV-03**: Mid-combat save — requires full EncounterEngine serialization (deferred)
-- **SET-02**: Difficulty multipliers defined but not yet wired into EncounterBridge
+None — all debt items resolved.
 
 ## Gate Test Files
 
@@ -39,11 +39,12 @@ Total: 10 epics, 79 tasks, 350 engine tests (0 failures), simulator build clean.
 | INV_WLD_GateTests | 12 | Degradation rules, state chains, tension game-over, escalation formula, 30-day simulation |
 | INV_ENC7_GateTests | 11 | Defend, flee rules, loot distribution, RNG seed, summon |
 | INV_SAV8_GateTests | 3 | Fate deck save/load, round-trip, backward compatibility |
+| INV_DEBT11_GateTests | 8 | VictoryType Codable, EncounterSaveState round-trip, snapshot/restore, backward compat, difficulty |
 
 ## Final Stats
 
-- **Engine tests**: 350 (0 failures, 0 skips)
-- **Gate tests**: 70 across 6 files
+- **Engine tests**: 358 (0 failures, 0 skips)
+- **Gate tests**: 78 across 7 files
 - **Simulator**: builds clean (iPhone 17 Pro)
 - **Architecture**: Engine-First, all state via performAction(), deterministic RNG
 
@@ -53,3 +54,4 @@ Full details:
 - Epic 8: `docs/plans/2026-01-30-save-onboarding-design.md`
 - Epic 9: `Docs/plans/2026-01-30-ui-ux-polish-design.md`
 - Epic 10: `Docs/plans/2026-01-31-design-system-audit-design.md`
+- Epic 11: `Docs/plans/2026-01-31-debt-closure-design.md` (plan file)

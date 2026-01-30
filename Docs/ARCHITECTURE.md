@@ -1,7 +1,7 @@
 # Architecture Map
 
 > Strategic context for Claude sessions. Max 500 lines.
-> Updated when an epic closes. Last update: Epic 10 (design system audit).
+> Updated when an epic closes. Last update: Epic 11 (debt closure).
 
 ## Core Principle
 
@@ -113,7 +113,8 @@
 ### TwilightGameEngine
 - **Entry**: `performAction(_ action: GameAction) -> ActionResult`
 - **State**: all `@Published public private(set)` properties
-- **Save**: `EngineSave` captures full state + fate deck, restored via `loadGame()`
+- **Save**: `EngineSave` captures full state + fate deck + optional encounter state, restored via `loadGame()`
+- **Mid-combat save**: `pendingEncounterState: EncounterSaveState?` — saved/restored in EngineSave
 - **Auto-save**: every 3 days + after combat (via WorldMapView onChange observers)
 - **Game Over**: `isGameOver` / `gameResult` → `GameOverView` fullScreenCover → menu
 - **RNG**: `WorldRNG.shared` — seeded, deterministic xorshift64
@@ -132,6 +133,8 @@
 - **Flee**: checks `rules.canFlee`, draws fate card (≥5 succeed, <5 fail + punishment)
 - **Loot**: `finishEncounter()` collects `lootCardIds` + `faithReward` from defeated enemies
 - **Summon**: `.summon` intent resolves via `context.summonPool[id]`, capped at 4 enemies
+- **Snapshot**: `createSaveState() -> EncounterSaveState` captures all mutable state
+- **Restore**: `EncounterEngine.restore(from: EncounterSaveState)` rebuilds engine from snapshot
 
 ### EncounterContext
 - **Hero**: EncounterHero (hp, maxHp, strength, armor, wisdom)
@@ -167,7 +170,9 @@
 
 ### Save System
 - **SaveManager**: singleton, UserDefaults/JSON, 3 slots
-- **EngineSave**: full state + fate deck, backward-compatible Codable
+- **EngineSave**: full state + fate deck + encounter state, backward-compatible Codable
+- **Mid-combat save**: `EncounterSaveState` in `EngineSave.encounterState` (optional, nil = no active combat)
+- **Resume**: ContentView detects `pendingEncounterState`, presents CombatView with saved state
 - **Auto-save**: every 3 days + after combat ends (WorldMapView → onAutoSave callback)
 - **Manual save**: on exit to menu (ContentView onExit)
 - **Game Over**: `GameOverView` fullScreenCover, returns to menu via onExit
@@ -175,7 +180,8 @@
 ### Settings & Onboarding
 - **Tutorial**: `@AppStorage("hasCompletedTutorial")`, 4-step overlay on first game start
 - **Settings**: `SettingsView` — difficulty, language (iOS settings link), reset tutorial/data
-- **Difficulty**: `DifficultyLevel` enum (easy/normal/hard) with HP/power multipliers
+- **Difficulty**: `DifficultyLevel` enum in engine package (easy/normal/hard) with HP/power multipliers
+- **Difficulty wiring**: `EncounterBridge` reads `UserDefaults("gameDifficulty")`, applies multipliers to enemy hp/power
 
 ### World Degradation
 - **Tension**: starts 30, escalates every 3 days by `3 + (day / 10)`
@@ -227,10 +233,10 @@ All audit findings have been addressed across 10 epics:
 8. ~~Save safety~~ — fate deck persistence, auto-save, game over, tutorial, settings (Epic 8)
 9. ~~UI/UX polish~~ — haptics, sound, floating damage, damage flash, 3D card flip, travel transition, ambient menu, game over animations (Epic 9)
 10. ~~Design system audit~~ — full token compliance, CardSizes/AppShadows.glow, localized fate strings, 38 violations fixed across 14 files (Epic 10)
+11. ~~Debt closure~~ — mid-combat save (SAV-03) + difficulty wiring (SET-02), Codable on 11 types, snapshot/restore, view-layer resume, 8 gate tests (Epic 11)
 
 ### Remaining Debt
-- **SAV-03**: Mid-combat save — requires full EncounterEngine serialization (deferred)
-- **SET-02**: Difficulty multipliers defined but not yet wired into EncounterBridge
+None — all debt items resolved.
 
 ## Gate Tests
 
@@ -242,23 +248,24 @@ All audit findings have been addressed across 10 epics:
 | INV_WLD_GateTests | 12 | Degradation, tension, anchors, 30-day simulation |
 | INV_ENC7_GateTests | 11 | Defend, flee rules, loot, RNG seed, summon |
 | INV_SAV8_GateTests | 3 | Fate deck save/load, round-trip, backward compat |
-| **Total** | **70** | |
+| INV_DEBT11_GateTests | 8 | VictoryType Codable, EncounterSaveState round-trip, snapshot/restore, backward compat, difficulty |
+| **Total** | **78** | |
 
 ## File Layout
 
 ```
-App/ContentView.swift          — Root navigation + auto-save + tutorial trigger
+App/ContentView.swift          — Root navigation + auto-save + tutorial + combat resume
 Views/
   WorldMapView.swift           — Region map + detail sheets + game over + auto-save
   GameOverView.swift           — Victory/defeat screen + return to menu
   TutorialOverlayView.swift    — 4-step first-run tutorial
-  SettingsView.swift           — Settings + DifficultyLevel enum
+  SettingsView.swift           — Settings + difficulty picker
   BattleArenaView.swift        — Quick battle entry point
   Combat/
     CombatView.swift           — Combat screen + floating damage + damage flash
     CombatSubviews.swift       — EnemyPanel, ActionBar, CombatLog
     EncounterViewModel.swift   — Bridges EncounterEngine to SwiftUI + haptic/sound
-    EncounterBridge.swift      — Context builder + result applier
+    EncounterBridge.swift      — Context builder + result applier + difficulty multipliers
   Components/
     DualHealthBar.swift        — HP + WP bars
     EnemyIntentView.swift      — Intent icons + badge
@@ -281,11 +288,13 @@ Packages/
       FateCard.swift             — Fate card model + suits + keywords
       FateDeckManager.swift      — Draw/discard/shuffle
       WorldRNG.swift             — Deterministic xorshift64
-      EngineSave.swift           — Full state serialization + fate deck
+      EngineSave.swift           — Full state serialization + fate deck + encounter state
       EnemyIntent.swift          — Intent types + summonEnemyId
+      DifficultyLevel.swift      — Easy/normal/hard with HP/power multipliers
     Encounter/
       EncounterEngine.swift      — Combat state machine (all actions)
-      EncounterContext.swift      — Context snapshot + summonPool
+      EncounterContext.swift      — Context snapshot + summonPool (Codable)
+      EncounterSaveState.swift   — Mid-combat serializable snapshot
       EncounterResult.swift      — Outcome + lootCardIds + faithDelta
       KeywordInterpreter.swift   — Keyword → effect matrix
       BehaviorEvaluator.swift    — Enemy AI from JSON behaviors
@@ -298,7 +307,7 @@ Packages/
     ContentPacks/
       ContentRegistry.swift      — Content loading + queries
   TwilightEngine/Tests/
-    GateTests/                   — 70 gate tests (6 files)
+    GateTests/                   — 78 gate tests (7 files)
     LayerTests/                  — Component integration tests
     Helpers/                     — Test fixtures
 ```
