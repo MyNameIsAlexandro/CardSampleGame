@@ -1163,6 +1163,12 @@
 "combat.intent.buff" = "Усиление";
 "combat.intent.heal" = "Лечение";
 "combat.intent.summon" = "Призыв";
+"combat.intent.detail.attack" = "Урон %d";
+"combat.intent.detail.ritual" = "Сдвиг резонанса к Нави";
+"combat.intent.detail.block" = "Защита +%d";
+"combat.intent.detail.buff" = "Сила +%d";
+"combat.intent.detail.heal" = "Восстановление %d ОЗ";
+"combat.intent.detail.summon" = "Подкрепление";
 
 // Combat phase names (Active Defense)
 "combat.phase.preparation" = "Подготовка";

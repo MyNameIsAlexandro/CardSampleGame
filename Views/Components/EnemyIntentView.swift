@@ -25,7 +25,7 @@ struct EnemyIntentView: View {
                     .font(.caption.bold())
                     .foregroundColor(intentColor)
 
-                Text(intent.description)
+                Text(intentDetail)
                     .font(.caption2)
                     .foregroundColor(AppColors.muted)
             }
@@ -84,6 +84,23 @@ struct EnemyIntentView: View {
         case .buff: return AppColors.warning
         case .heal: return AppColors.success
         case .summon: return AppColors.dark
+        }
+    }
+
+    private var intentDetail: String {
+        switch intent.type {
+        case .attack:
+            return L10n.combatIntentDetailAttack.localized(with: intent.value)
+        case .ritual:
+            return L10n.combatIntentDetailRitual.localized
+        case .block:
+            return L10n.combatIntentDetailBlock.localized(with: intent.value)
+        case .buff:
+            return L10n.combatIntentDetailBuff.localized(with: intent.value)
+        case .heal:
+            return L10n.combatIntentDetailHeal.localized(with: intent.value)
+        case .summon:
+            return L10n.combatIntentDetailSummon.localized
         }
     }
 

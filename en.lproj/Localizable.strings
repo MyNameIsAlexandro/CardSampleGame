@@ -1158,6 +1158,12 @@
 "combat.intent.buff" = "Buff";
 "combat.intent.heal" = "Heal";
 "combat.intent.summon" = "Summon";
+"combat.intent.detail.attack" = "Damage %d";
+"combat.intent.detail.ritual" = "Resonance shift toward Nav";
+"combat.intent.detail.block" = "Defense +%d";
+"combat.intent.detail.buff" = "Power +%d";
+"combat.intent.detail.heal" = "Restore %d HP";
+"combat.intent.detail.summon" = "Reinforcements";
 
 // Combat phase names (Active Defense)
 "combat.phase.preparation" = "Preparation";

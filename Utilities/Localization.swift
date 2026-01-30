@@ -864,6 +864,14 @@ enum L10n {
     static let combatIntentHeal = "combat.intent.heal"
     static let combatIntentSummon = "combat.intent.summon"
 
+    // Enemy intent detail descriptions
+    static let combatIntentDetailAttack = "combat.intent.detail.attack"
+    static let combatIntentDetailRitual = "combat.intent.detail.ritual"
+    static let combatIntentDetailBlock = "combat.intent.detail.block"
+    static let combatIntentDetailBuff = "combat.intent.detail.buff"
+    static let combatIntentDetailHeal = "combat.intent.detail.heal"
+    static let combatIntentDetailSummon = "combat.intent.detail.summon"
+
     // Combat phase names (Active Defense)
     static let combatPhasePreparation = "combat.phase.preparation"
     static let combatPhaseEnemyIntent = "combat.phase.enemy.intent"
