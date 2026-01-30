@@ -42,16 +42,21 @@ public struct EnemyIntent: Equatable {
     /// Optional secondary value (e.g., resonance shift amount for rituals)
     public let secondaryValue: Int?
 
+    /// Enemy ID to summon (only used with .summon type)
+    public let summonEnemyId: String?
+
     public init(
         type: IntentType,
         value: Int,
         description: String,
-        secondaryValue: Int? = nil
+        secondaryValue: Int? = nil,
+        summonEnemyId: String? = nil
     ) {
         self.type = type
         self.value = value
         self.description = description
         self.secondaryValue = secondaryValue
+        self.summonEnemyId = summonEnemyId
     }
 
     // MARK: - Factory Methods
@@ -99,6 +104,11 @@ public struct EnemyIntent: Equatable {
     /// Create defend intent
     public static func defend(reduction: Int) -> EnemyIntent {
         EnemyIntent(type: .defend, value: reduction, description: "intent.defend.\(reduction)")
+    }
+
+    /// Create summon intent
+    public static func summon(enemyId: String) -> EnemyIntent {
+        EnemyIntent(type: .summon, value: 0, description: "intent.summon", summonEnemyId: enemyId)
     }
 }
 

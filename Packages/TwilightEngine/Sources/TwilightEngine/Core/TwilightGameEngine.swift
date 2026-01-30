@@ -2510,6 +2510,16 @@ public extension TwilightGameEngine {
         playerFaith = min(playerMaxFaith, max(0, faith))
     }
 
+    /// Apply faith delta from encounter rewards
+    func applyFaithDelta(_ delta: Int) {
+        playerFaith = min(playerMaxFaith, max(0, playerFaith + delta))
+    }
+
+    /// Add a card to the player's deck (loot reward)
+    func addToDeck(_ card: Card) {
+        _playerDeck.append(card)
+    }
+
     /// Set player balance directly (for testing)
     func setPlayerBalance(_ balance: Int) {
         playerBalance = min(100, max(0, balance))

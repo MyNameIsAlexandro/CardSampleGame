@@ -879,6 +879,12 @@
 "encounter.log.resonance.shift" = "Resonance: %@";
 "encounter.log.rage.shield" = "Rage shield: +%d";
 "encounter.log.card.played" = "Played: %@";
+"encounter.log.player.defends" = "Defending (+%d defense)";
+"encounter.log.flee.blocked" = "Cannot flee from this encounter!";
+"encounter.log.flee.failed" = "Failed to escape!";
+"encounter.log.flee.success" = "Escaped successfully!";
+"encounter.log.flee.damage" = "Failed escape — took %d damage";
+"encounter.log.enemy.summoned" = "%@ joins the battle!";
 "encounter.phase.intent" = "Enemy Intent";
 "encounter.phase.player.action" = "Your Turn";
 "encounter.phase.enemy.resolution" = "Enemy Turn";

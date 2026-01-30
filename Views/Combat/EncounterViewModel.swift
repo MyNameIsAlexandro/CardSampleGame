@@ -16,8 +16,12 @@ final class EncounterViewModel: ObservableObject {
     @Published var round: Int = 1
     @Published var heroHP: Int = 0
     @Published var heroMaxHP: Int = 0
-    @Published var enemy: EncounterEnemyState?
+    @Published var enemies: [EncounterEnemyState] = []
+    @Published var selectedTargetId: String?
     @Published var currentIntent: EnemyIntent?
+
+    /// Primary enemy (first alive, or first) for backward-compatible UI
+    var enemy: EncounterEnemyState? { enemies.first(where: { $0.isAlive }) ?? enemies.first }
     @Published var isFinished: Bool = false
     @Published var lastChanges: [EncounterStateChange] = []
     @Published var combatLog: [String] = []
@@ -68,6 +72,16 @@ final class EncounterViewModel: ObservableObject {
 
     private var engine: EncounterEngine?
     private var context: EncounterContext?
+
+    /// The currently selected target enemy (defaults to first alive)
+    var selectedTarget: EncounterEnemyState? {
+        if let id = selectedTargetId { return enemies.first(where: { $0.id == id && $0.isAlive }) }
+        return enemies.first(where: { $0.isAlive })
+    }
+
+    func selectTarget(_ id: String) {
+        selectedTargetId = id
+    }
 
     /// Non-nil engine; callers must ensure startEncounter() was called.
     private var eng: EncounterEngine {
@@ -142,9 +156,9 @@ final class EncounterViewModel: ObservableObject {
     // MARK: - Player Actions
 
     func performAttack() {
-        guard phase == .playerAction, !isProcessingEnemyTurn, let enemyState = enemy else { return }
+        guard phase == .playerAction, !isProcessingEnemyTurn, let target = selectedTarget else { return }
         fateContext = .attack
-        let result = eng.performAction(.attack(targetId: enemyState.id))
+        let result = eng.performAction(.attack(targetId: target.id))
         if !result.success { return }
         lastChanges = result.stateChanges
         processStateChanges(result.stateChanges)
@@ -159,10 +173,10 @@ final class EncounterViewModel: ObservableObject {
     }
 
     func performInfluence() {
-        guard phase == .playerAction, !isProcessingEnemyTurn, let enemyState = enemy else { return }
-        guard enemyState.hasSpiritTrack else { return }
+        guard phase == .playerAction, !isProcessingEnemyTurn, let target = selectedTarget else { return }
+        guard target.hasSpiritTrack else { return }
         fateContext = .attack
-        let result = eng.performAction(.spiritAttack(targetId: enemyState.id))
+        let result = eng.performAction(.spiritAttack(targetId: target.id))
         if !result.success { return }
         lastChanges = result.stateChanges
         processStateChanges(result.stateChanges)
@@ -254,11 +268,23 @@ final class EncounterViewModel: ObservableObject {
 
     func performFlee() {
         guard phase == .playerAction, !isProcessingEnemyTurn else { return }
-        _ = eng.performAction(.flee)
-        let result = eng.finishEncounter()
-        encounterResult = result
-        showCombatOver = true
-        isFinished = true
+        let fleeResult = eng.performAction(.flee)
+        if !fleeResult.success {
+            if fleeResult.error == .fleeNotAllowed {
+                logEntry(L10n.encounterLogFleeBlocked.localized)
+            }
+            return
+        }
+        processStateChanges(fleeResult.stateChanges)
+        syncState()
+
+        if eng.fleeSucceeded {
+            finishWithResult()
+        } else {
+            // Failed flee: enemy still gets their turn
+            logEntry(L10n.encounterLogFleeFailed.localized)
+            advanceAfterPlayerAction()
+        }
     }
 
     // MARK: - Phase Machine
@@ -283,8 +309,8 @@ final class EncounterViewModel: ObservableObject {
     }
 
     private func resolveEnemyTurn() {
-        // Resolve enemy action
-        if let enemyState = enemy, enemyState.isAlive {
+        // Resolve enemy actions for all alive enemies
+        for enemyState in enemies where enemyState.isAlive && enemyState.outcome == nil {
             fateContext = .defense
             let result = eng.resolveEnemyAction(enemyId: enemyState.id)
             lastChanges = result.stateChanges
@@ -340,11 +366,13 @@ final class EncounterViewModel: ObservableObject {
         _ = eng.advancePhase()
         syncState()
 
-        // Generate next intent
-        if let enemyState = enemy, enemyState.isAlive {
+        // Generate intents for all alive enemies (show primary enemy's intent)
+        for enemyState in enemies where enemyState.isAlive && enemyState.outcome == nil {
             let intent = eng.generateIntent(for: enemyState.id)
-            currentIntent = intent
-            logEntry(L10n.encounterLogRoundEnemyPrepares.localized(with: round, localizedIntentDetail(intent)))
+            if enemyState.id == (selectedTarget?.id ?? enemies.first(where: { $0.isAlive })?.id) {
+                currentIntent = intent
+                logEntry(L10n.encounterLogRoundEnemyPrepares.localized(with: round, localizedIntentDetail(intent)))
+            }
         }
 
         // Advance to player action
@@ -356,7 +384,8 @@ final class EncounterViewModel: ObservableObject {
 
     private func checkEncounterEnd() -> Bool {
         // Check victory: all enemies dead or pacified
-        if let e = enemy, (!e.isAlive || e.isPacified) {
+        let allDown = enemies.allSatisfy { !$0.isAlive || $0.isPacified }
+        if !enemies.isEmpty && allDown {
             finishWithResult()
             return true
         }
@@ -381,7 +410,7 @@ final class EncounterViewModel: ObservableObject {
         phase = eng.currentPhase
         round = eng.currentRound
         heroHP = eng.heroHP
-        enemy = eng.enemies.first
+        enemies = eng.enemies
         isFinished = eng.isFinished
         fateDeckDrawCount = eng.fateDeckDrawCount
         fateDeckDiscardCount = eng.fateDeckDiscardCount
@@ -438,6 +467,16 @@ final class EncounterViewModel: ObservableObject {
                 }
             case .fateChoicePending:
                 showFateChoice = true
+            case .playerDefended(let bonus):
+                logEntry(L10n.encounterLogPlayerDefends.localized(with: bonus))
+            case .fleeAttempt(let success, let damage):
+                if success {
+                    logEntry(L10n.encounterLogFleeSuccess.localized)
+                } else {
+                    logEntry(L10n.encounterLogFleeDamage.localized(with: damage))
+                }
+            case .enemySummoned(_, let enemyName):
+                logEntry(L10n.encounterLogEnemySummoned.localized(with: enemyName))
             case .cardDrawn:
                 break
             case .encounterEnded:

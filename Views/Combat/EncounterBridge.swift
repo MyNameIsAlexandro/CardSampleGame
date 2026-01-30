@@ -15,11 +15,12 @@ extension TwilightGameEngine {
             hp: playerHealth,
             maxHp: playerMaxHealth,
             strength: playerStrength,
-            armor: 0, // TODO: derive from equipment
+            armor: 0, // No equipment system yet; armor comes from cards in combat
             wisdom: playerWisdom,
             willDefense: 0
         )
 
+        let enemyDef = ContentRegistry.shared.getEnemy(id: enemy.id)
         let encounterEnemy = EncounterEnemy(
             id: enemy.id,
             name: enemy.name,
@@ -29,7 +30,9 @@ extension TwilightGameEngine {
             maxWp: state.hasSpiritTrack ? state.enemyMaxWill : nil,
             power: state.enemyPower,
             defense: state.enemyDefense,
-            behaviorId: enemy.id // behavior ID matches enemy ID
+            behaviorId: enemy.id, // behavior ID matches enemy ID
+            lootCardIds: enemyDef?.lootCardIds ?? [],
+            faithReward: enemyDef?.faithReward ?? 0
         )
 
         // Fate deck: use engine state, or load fresh from content registry if empty
@@ -69,7 +72,7 @@ extension TwilightGameEngine {
             fateDeckSnapshot: fateDeckSnapshot,
             modifiers: [],
             rules: EncounterRules(),
-            rngSeed: 42, // TODO: use world RNG seed
+            rngSeed: WorldRNG.shared.next(),
             worldResonance: resonanceValue,
             balanceConfig: ContentRegistry.shared.getBalanceConfig()?.combat,
             behaviors: buildBehaviorMap(),
@@ -106,6 +109,18 @@ extension TwilightGameEngine {
             if !cards.isEmpty {
                 setupFateDeck(cards: cards)
                 fateDeck?.restoreState(result.updatedFateDeck)
+            }
+        }
+
+        // Apply faith reward
+        if result.transaction.faithDelta > 0 {
+            applyFaithDelta(result.transaction.faithDelta)
+        }
+
+        // Apply loot: add cards to player's deck
+        for cardId in result.transaction.lootCardIds {
+            if let card = CardFactory.shared.getCard(id: cardId) {
+                addToDeck(card)
             }
         }
 

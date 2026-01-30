@@ -34,6 +34,8 @@ public final class EncounterEngine {
     public var heroCardsTotal: Int { context.heroCards.count }
     private var finishActionUsed: Bool = false
 
+    public private(set) var fleeSucceeded: Bool = false
+
     private let context: EncounterContext
     private let rng: WorldRNG
     private var fateDeck: FateDeckManager
@@ -103,11 +105,36 @@ public final class EncounterEngine {
         case .defend:
             if finishActionUsed { return .fail(.actionNotAllowed) }
             finishActionUsed = true
-            return .ok([])
+            let defendBonus = 3
+            turnDefenseBonus += defendBonus
+            return .ok([.playerDefended(bonus: defendBonus)])
         case .flee:
             if finishActionUsed { return .fail(.actionNotAllowed) }
+            guard context.rules.canFlee else { return .fail(.fleeNotAllowed) }
             finishActionUsed = true
-            return .ok([])
+            // Draw fate card: value >= 5 = escape, < 5 = fail + enemy gets free hit
+            let fateResult = drawFate()
+            var changes: [EncounterStateChange] = []
+            let fateValue = fateResult?.effectiveValue ?? 5 // no deck = auto-succeed
+            if let fateResult = fateResult {
+                changes.append(.fateDraw(cardId: fateResult.card.id, value: fateResult.effectiveValue))
+            }
+            if fateValue >= 5 {
+                fleeSucceeded = true
+                changes.append(.fleeAttempt(success: true, damage: 0))
+            } else {
+                // Failed flee: first alive enemy deals damage
+                let punishDamage: Int
+                if let attacker = enemies.first(where: { $0.isAlive }) {
+                    punishDamage = max(1, attacker.power - context.hero.armor)
+                } else {
+                    punishDamage = 0
+                }
+                heroHP -= punishDamage
+                changes.append(.fleeAttempt(success: false, damage: punishDamage))
+                changes.append(.playerHPChanged(delta: -punishDamage, newValue: heroHP))
+            }
+            return .ok(changes)
         case .mulligan:
             return .fail(.actionNotAllowed)
         case .resolveFateChoice(let optionIndex):
@@ -250,7 +277,14 @@ public final class EncounterEngine {
             }
 
         case .summon:
-            break // not yet implemented
+            let maxEnemies = 4
+            if let summonId = intent.summonEnemyId,
+               enemies.count < maxEnemies,
+               let template = context.summonPool[summonId] {
+                let newEnemy = EncounterEnemyState(from: template)
+                enemies.append(newEnemy)
+                changes.append(.enemySummoned(enemyId: newEnemy.id, enemyName: newEnemy.name))
+            }
 
         case .prepare:
             break // stance — no immediate effect
@@ -290,7 +324,9 @@ public final class EncounterEngine {
         let allPacified = enemies.allSatisfy { $0.isPacified }
         let anyKilled = enemies.contains { $0.outcome == .killed }
 
-        if allPacified && !anyKilled {
+        if fleeSucceeded {
+            outcome = .escaped
+        } else if allPacified && !anyKilled {
             outcome = .victory(.pacified)
         } else if allDead || anyKilled {
             outcome = .victory(.killed)
@@ -305,10 +341,22 @@ public final class EncounterEngine {
             worldFlags["nonviolent"] = true
         }
 
+        // Collect loot from defeated enemies (killed or pacified)
+        var lootIds: [String] = []
+        var faithReward: Int = 0
+        if case .victory = outcome {
+            for enemy in enemies where enemy.outcome == .killed || enemy.outcome == .pacified {
+                lootIds.append(contentsOf: enemy.lootCardIds)
+                faithReward += enemy.faithReward
+            }
+        }
+
         let transaction = EncounterTransaction(
             hpDelta: heroHP - context.hero.hp,
+            faithDelta: faithReward,
             resonanceDelta: accumulatedResonanceDelta,
-            worldFlags: worldFlags
+            worldFlags: worldFlags,
+            lootCardIds: lootIds
         )
 
         return EncounterResult(
@@ -404,6 +452,11 @@ public final class EncounterEngine {
     }
 
     // MARK: - Private
+
+    /// Override current intent for testing purposes
+    public func overrideIntentForTest(_ intent: EnemyIntent) {
+        currentIntent = intent
+    }
 
     private func autoGenerateIntents() {
         for enemy in enemies where enemy.isAlive && enemy.outcome == nil {
@@ -637,6 +690,8 @@ public struct EncounterEnemyState: Equatable {
     public var rageShield: Int
     public var outcome: EntityOutcome?
     public let resonanceBehavior: [String: EnemyModifier]?
+    public let lootCardIds: [String]
+    public let faithReward: Int
 
     public var hasSpiritTrack: Bool { wp != nil }
     public var isAlive: Bool { hp > 0 }
@@ -655,6 +710,8 @@ public struct EncounterEnemyState: Equatable {
         self.rageShield = 0
         self.outcome = nil
         self.resonanceBehavior = enemy.resonanceBehavior
+        self.lootCardIds = enemy.lootCardIds
+        self.faithReward = enemy.faithReward
     }
 }
 

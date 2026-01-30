@@ -7,7 +7,7 @@
 
 ## ALL EPICS COMPLETE
 
-Total: 6 epics, 42 tasks, 336 engine tests (0 failures), simulator build clean.
+Total: 7 epics, 49 tasks, 347 engine tests (0 failures), simulator build clean.
 
 ---
 
@@ -19,6 +19,7 @@ Total: 6 epics, 42 tasks, 336 engine tests (0 failures), simulator build clean.
 4. ~~Epic 4: Test Foundation Closure~~ CLOSED — 0 red, 0 skip, determinism verified (100 runs)
 5. ~~Epic 5: World Consistency~~ CLOSED — degradation, tension, anchors, 12 gate tests, 30-day simulation
 6. ~~Epic 6: Encounter UI Integration~~ CLOSED — CombatView + EncounterViewModel + all widgets, simulator build clean
+7. ~~Epic 7: Encounter Module Completion~~ CLOSED — defend, flee, loot, multi-enemy, summon, RNG seed, 11 gate tests
 
 ## Gate Test Files
 
@@ -28,12 +29,15 @@ Total: 6 epics, 42 tasks, 336 engine tests (0 failures), simulator build clean.
 | INV_TXN_GateTests | 8 | Contract tests, save round-trip |
 | INV_KW_GateTests | 32 | Keywords, match/mismatch, pacify, resonance costs, enemy mods, phase automation, critical defense, integration, determinism |
 | INV_WLD_GateTests | 12 | Degradation rules, state chains, tension game-over, escalation formula, 30-day simulation |
+| INV_ENC7_GateTests | 11 | Defend, flee rules, loot distribution, RNG seed, summon |
 
 ## Final Stats
 
-- **Engine tests**: 336 (0 failures, 0 skips)
-- **Gate tests**: 56 across 4 files
+- **Engine tests**: 347 (0 failures, 0 skips)
+- **Gate tests**: 67 across 5 files
 - **Simulator**: builds clean (iPhone 17 Pro)
 - **Architecture**: Engine-First, all state via performAction(), deterministic RNG
 
-Full details: `docs/plans/2026-01-30-epic-driven-development-design.md`
+Full details:
+- Epics 1-6: `docs/plans/2026-01-30-epic-driven-development-design.md`
+- Epic 7: `docs/plans/2026-01-30-encounter-completion-design.md`

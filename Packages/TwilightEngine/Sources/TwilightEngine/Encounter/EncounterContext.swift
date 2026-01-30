@@ -14,8 +14,9 @@ public struct EncounterContext: Equatable {
     public let behaviors: [String: BehaviorDefinition]
     public let heroCards: [Card]
     public let heroFaith: Int
+    public let summonPool: [String: EncounterEnemy]
 
-    public init(hero: EncounterHero, enemies: [EncounterEnemy], fateDeckSnapshot: FateDeckState, modifiers: [EncounterModifier], rules: EncounterRules, rngSeed: UInt64, rngState: UInt64? = nil, worldResonance: Float = 0, balanceConfig: CombatBalanceConfig? = nil, behaviors: [String: BehaviorDefinition] = [:], heroCards: [Card] = [], heroFaith: Int = 0) {
+    public init(hero: EncounterHero, enemies: [EncounterEnemy], fateDeckSnapshot: FateDeckState, modifiers: [EncounterModifier], rules: EncounterRules, rngSeed: UInt64, rngState: UInt64? = nil, worldResonance: Float = 0, balanceConfig: CombatBalanceConfig? = nil, behaviors: [String: BehaviorDefinition] = [:], heroCards: [Card] = [], heroFaith: Int = 0, summonPool: [String: EncounterEnemy] = [:]) {
         self.hero = hero
         self.enemies = enemies
         self.fateDeckSnapshot = fateDeckSnapshot
@@ -28,6 +29,7 @@ public struct EncounterContext: Equatable {
         self.behaviors = behaviors
         self.heroCards = heroCards
         self.heroFaith = heroFaith
+        self.summonPool = summonPool
     }
 }
 
@@ -67,8 +69,10 @@ public struct EncounterEnemy: Equatable {
     public let spiritDefense: Int
     public let behaviorId: String?
     public let resonanceBehavior: [String: EnemyModifier]?
+    public let lootCardIds: [String]
+    public let faithReward: Int
 
-    public init(id: String, name: String, hp: Int, maxHp: Int, wp: Int? = nil, maxWp: Int? = nil, power: Int = 0, defense: Int = 0, spiritDefense: Int = 0, behaviorId: String? = nil, resonanceBehavior: [String: EnemyModifier]? = nil) {
+    public init(id: String, name: String, hp: Int, maxHp: Int, wp: Int? = nil, maxWp: Int? = nil, power: Int = 0, defense: Int = 0, spiritDefense: Int = 0, behaviorId: String? = nil, resonanceBehavior: [String: EnemyModifier]? = nil, lootCardIds: [String] = [], faithReward: Int = 0) {
         self.id = id
         self.name = name
         self.hp = hp
@@ -80,6 +84,8 @@ public struct EncounterEnemy: Equatable {
         self.spiritDefense = spiritDefense
         self.behaviorId = behaviorId
         self.resonanceBehavior = resonanceBehavior
+        self.lootCardIds = lootCardIds
+        self.faithReward = faithReward
     }
 }
 

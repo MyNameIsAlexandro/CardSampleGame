@@ -884,6 +884,12 @@
 "encounter.log.resonance.shift" = "Резонанс: %@";
 "encounter.log.rage.shield" = "Щит ярости: +%d";
 "encounter.log.card.played" = "Разыграна: %@";
+"encounter.log.player.defends" = "Защита (+%d к защите)";
+"encounter.log.flee.blocked" = "Бегство невозможно!";
+"encounter.log.flee.failed" = "Побег не удался!";
+"encounter.log.flee.success" = "Успешный побег!";
+"encounter.log.flee.damage" = "Провал побега — получено %d урона";
+"encounter.log.enemy.summoned" = "%@ вступает в бой!";
 "encounter.phase.intent" = "Замысел врага";
 "encounter.phase.player.action" = "Ваш ход";
 "encounter.phase.enemy.resolution" = "Ход врага";

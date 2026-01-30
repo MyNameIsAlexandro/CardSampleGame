@@ -41,6 +41,7 @@ public enum EncounterError: String, Equatable, Error {
     case mulliganAlreadyDone
     case encounterOver
     case insufficientFaith
+    case fleeNotAllowed
 }
 
 /// State changes emitted by encounter actions
@@ -57,5 +58,8 @@ public enum EncounterStateChange: Equatable {
     case cardDrawn(cardId: String)
     case faithChanged(delta: Int, newValue: Int)
     case fateChoicePending(cardId: String)
+    case playerDefended(bonus: Int)
+    case fleeAttempt(success: Bool, damage: Int)
+    case enemySummoned(enemyId: String, enemyName: String)
     case encounterEnded(outcome: EncounterOutcome)
 }
