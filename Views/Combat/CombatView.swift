@@ -77,6 +77,13 @@ struct CombatView: View {
 
             Spacer()
 
+            // Player card hand
+            CardHandView(
+                cards: vm.hand,
+                isEnabled: vm.phase == .playerAction && !vm.isFinished,
+                onPlay: { vm.playCard($0) }
+            )
+
             // Combat log
             CombatLogView(entries: vm.combatLog)
                 .padding(.bottom, Spacing.xs)

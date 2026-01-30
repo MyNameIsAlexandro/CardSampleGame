@@ -878,6 +878,7 @@
 "encounter.log.fate.draw" = "Fate card: %@ (%@)";
 "encounter.log.resonance.shift" = "Resonance: %@";
 "encounter.log.rage.shield" = "Rage shield: +%d";
+"encounter.log.card.played" = "Played: %@";
 "encounter.phase.intent" = "Enemy Intent";
 "encounter.phase.player.action" = "Your Turn";
 "encounter.phase.enemy.resolution" = "Enemy Turn";

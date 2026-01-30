@@ -21,6 +21,14 @@ public final class EncounterEngine {
     public var fateDeckDrawCount: Int { fateDeck.drawPile.count }
     public var fateDeckDiscardCount: Int { fateDeck.discardPile.count }
 
+    // MARK: - Card Hand State
+
+    public private(set) var hand: [Card] = []
+    public private(set) var cardDiscardPile: [Card] = []
+    public private(set) var turnAttackBonus: Int = 0
+    public private(set) var turnDefenseBonus: Int = 0
+    public private(set) var turnInfluenceBonus: Int = 0
+
     private let context: EncounterContext
     private let rng: WorldRNG
     private var fateDeck: FateDeckManager
@@ -42,6 +50,8 @@ public final class EncounterEngine {
         }
         self.fateDeck = FateDeckManager(cards: [], rng: rng)
         self.fateDeck.restoreState(context.fateDeckSnapshot)
+        self.hand = Array(context.heroCards.prefix(3))
+        self.cardDiscardPile = []
     }
 
     // MARK: - Actions
@@ -64,7 +74,9 @@ public final class EncounterEngine {
             return performSpiritAttack(targetId: targetId)
         case .wait:
             return .ok([])
-        case .defend, .flee, .useCard:
+        case .useCard(let cardId, _):
+            return playCard(cardId: cardId)
+        case .defend, .flee:
             return .ok([])
         case .mulligan:
             fatalError("Handled above")
@@ -78,6 +90,9 @@ public final class EncounterEngine {
         case .playerAction:
             currentPhase = .enemyResolution
         case .enemyResolution:
+            turnAttackBonus = 0
+            turnDefenseBonus = 0
+            turnInfluenceBonus = 0
             currentPhase = .roundEnd
         case .roundEnd:
             currentPhase = .intent
@@ -152,10 +167,10 @@ public final class EncounterEngine {
                         )
                         defenseBonus = effect.bonusValue
                     }
-                    damage = max(0, intent.value - fateResult.effectiveValue - context.hero.armor - defenseBonus)
+                    damage = max(0, intent.value - fateResult.effectiveValue - context.hero.armor - turnDefenseBonus - defenseBonus)
                 }
             } else {
-                damage = max(0, intent.value - context.hero.armor)
+                damage = max(0, intent.value - context.hero.armor - turnDefenseBonus)
             }
             heroHP -= damage
             changes.append(.playerHPChanged(delta: -damage, newValue: heroHP))
@@ -233,6 +248,60 @@ public final class EncounterEngine {
         )
     }
 
+    // MARK: - Card Play
+
+    private func playCard(cardId: String) -> EncounterActionResult {
+        guard let cardIndex = hand.firstIndex(where: { $0.id == cardId }) else {
+            return .fail(.invalidTarget)
+        }
+        let card = hand.remove(at: cardIndex)
+        cardDiscardPile.append(card)
+
+        var changes: [EncounterStateChange] = []
+        changes.append(.cardPlayed(cardId: card.id, name: card.name))
+
+        for ability in card.abilities {
+            switch ability.effect {
+            case .damage(let amount, _):
+                turnAttackBonus += amount
+            case .heal(let amount):
+                let healed = min(amount, context.hero.maxHp - heroHP)
+                heroHP += healed
+                changes.append(.playerHPChanged(delta: healed, newValue: heroHP))
+            case .temporaryStat(let stat, let amount, _):
+                switch stat {
+                case "attack", "strength": turnAttackBonus += amount
+                case "defense", "armor": turnDefenseBonus += amount
+                case "influence", "wisdom": turnInfluenceBonus += amount
+                default: break
+                }
+            case .drawCards(let count):
+                let remaining = context.heroCards.filter { c in
+                    !hand.contains(where: { $0.id == c.id }) &&
+                    !cardDiscardPile.contains(where: { $0.id == c.id })
+                }
+                for drawn in remaining.prefix(count) {
+                    hand.append(drawn)
+                    changes.append(.cardDrawn(cardId: drawn.id))
+                }
+            case .gainFaith:
+                break // faith not tracked in encounter engine
+            default:
+                break
+            }
+        }
+
+        // Fallback: if card has no abilities but has power, treat as attack bonus
+        if card.abilities.isEmpty, let power = card.power, power > 0 {
+            turnAttackBonus += power
+        }
+        if card.abilities.isEmpty, let def = card.defense, def > 0 {
+            turnDefenseBonus += def
+        }
+
+        return .ok(changes)
+    }
+
     // MARK: - Private
 
     private var effectiveResonance: Float {
@@ -300,7 +369,7 @@ public final class EncounterEngine {
             }
         }
 
-        let damage = max(1, context.hero.strength - enemies[idx].defense + surpriseBonus + keywordBonus)
+        let damage = max(1, context.hero.strength + turnAttackBonus - enemies[idx].defense + surpriseBonus + keywordBonus)
         enemies[idx].hp = max(0, enemies[idx].hp - damage)
         lastAttackTrack = .physical
 
@@ -345,7 +414,7 @@ public final class EncounterEngine {
             }
         }
 
-        let damage = max(1, context.hero.wisdom + keywordBonus - enemies[idx].rageShield)
+        let damage = max(1, context.hero.wisdom + turnInfluenceBonus + keywordBonus - enemies[idx].rageShield)
         let currentWP = enemies[idx].wp ?? 0
         let newWP = max(0, currentWP - damage)
         enemies[idx].wp = newWP

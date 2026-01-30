@@ -492,6 +492,7 @@ enum L10n {
     static let encounterLogFateDraw = "encounter.log.fate.draw"
     static let encounterLogResonanceShift = "encounter.log.resonance.shift"
     static let encounterLogRageShield = "encounter.log.rage.shield"
+    static let encounterLogCardPlayed = "encounter.log.card.played"
 
     // Encounter UI
     static let encounterPhaseIntent = "encounter.phase.intent"

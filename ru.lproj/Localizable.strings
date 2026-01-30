@@ -883,6 +883,7 @@
 "encounter.log.fate.draw" = "Карта судьбы: %@ (%@)";
 "encounter.log.resonance.shift" = "Резонанс: %@";
 "encounter.log.rage.shield" = "Щит ярости: +%d";
+"encounter.log.card.played" = "Разыграна: %@";
 "encounter.phase.intent" = "Замысел врага";
 "encounter.phase.player.action" = "Ваш ход";
 "encounter.phase.enemy.resolution" = "Ход врага";

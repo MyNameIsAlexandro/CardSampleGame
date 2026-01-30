@@ -303,6 +303,117 @@ struct CombatOverView: View {
     }
 }
 
+// MARK: - Card Hand View
+
+/// Horizontal scrollable row of playable combat cards
+struct CardHandView: View {
+    let cards: [Card]
+    let isEnabled: Bool
+    let onPlay: (Card) -> Void
+
+    var body: some View {
+        if !cards.isEmpty {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: Spacing.sm) {
+                    ForEach(cards) { card in
+                        CombatCardView(card: card)
+                            .onTapGesture { if isEnabled { onPlay(card) } }
+                            .opacity(isEnabled ? Opacity.opaque : Opacity.medium)
+                    }
+                }
+                .padding(.horizontal, Spacing.md)
+            }
+            .padding(.vertical, Spacing.xs)
+        }
+    }
+}
+
+/// Compact combat card (60×90) showing name, effect, and cost
+struct CombatCardView: View {
+    let card: Card
+
+    var body: some View {
+        VStack(spacing: Spacing.xxs) {
+            Text(card.name)
+                .font(.caption2)
+                .fontWeight(.bold)
+                .lineLimit(2)
+                .multilineTextAlignment(.center)
+
+            if let power = card.power, power > 0 {
+                Label("+\(power)", systemImage: "flame.fill")
+                    .font(.caption)
+                    .foregroundColor(AppColors.danger)
+            } else if let def = card.defense, def > 0 {
+                Label("+\(def)", systemImage: "shield.fill")
+                    .font(.caption)
+                    .foregroundColor(AppColors.primary)
+            } else if let firstAbility = card.abilities.first {
+                abilityLabel(firstAbility.effect)
+            }
+
+            if let cost = card.cost, cost > 0 {
+                Text("\(cost)")
+                    .font(.caption2)
+                    .foregroundColor(AppColors.warning)
+            }
+        }
+        .frame(width: 60, height: 90)
+        .padding(Spacing.xxs)
+        .background(AppColors.backgroundTertiary)
+        .cornerRadius(CornerRadius.md)
+        .overlay(
+            RoundedRectangle(cornerRadius: CornerRadius.md)
+                .stroke(AppColors.muted.opacity(Opacity.light), lineWidth: 1)
+        )
+    }
+
+    @ViewBuilder
+    private func abilityLabel(_ effect: AbilityEffect) -> some View {
+        switch effect {
+        case .damage(let amount, _):
+            Label("+\(amount)", systemImage: "flame.fill")
+                .font(.caption)
+                .foregroundColor(AppColors.danger)
+        case .heal(let amount):
+            Label("+\(amount)", systemImage: "heart.fill")
+                .font(.caption)
+                .foregroundColor(AppColors.success)
+        case .temporaryStat(let stat, let amount, _):
+            Label("+\(amount)", systemImage: statIcon(stat))
+                .font(.caption)
+                .foregroundColor(statColor(stat))
+        case .drawCards(let count):
+            Label("+\(count)", systemImage: "rectangle.on.rectangle")
+                .font(.caption)
+                .foregroundColor(AppColors.primary)
+        default:
+            Text(card.description)
+                .font(.caption2)
+                .foregroundColor(AppColors.muted)
+                .lineLimit(2)
+        }
+    }
+
+    private func statIcon(_ stat: String) -> String {
+        switch stat {
+        case "attack", "strength": return "flame.fill"
+        case "defense", "armor": return "shield.fill"
+        case "influence", "wisdom": return "bubble.left.fill"
+        default: return "star.fill"
+        }
+    }
+
+    private func statColor(_ stat: String) -> Color {
+        switch stat {
+        case "attack", "strength": return AppColors.danger
+        case "defense", "armor": return AppColors.primary
+        case "influence", "wisdom": return AppColors.success
+        default: return AppColors.muted
+        }
+    }
+}
+
 // MARK: - Combat Log View
 
 struct CombatLogView: View {

@@ -23,6 +23,7 @@ final class EncounterViewModel: ObservableObject {
     @Published var combatLog: [String] = []
     @Published var fateDeckDrawCount: Int = 0
     @Published var fateDeckDiscardCount: Int = 0
+    @Published var hand: [Card] = []
 
     // MARK: - Outcome
 
@@ -132,6 +133,14 @@ final class EncounterViewModel: ObservableObject {
         }
     }
 
+    func playCard(_ card: Card) {
+        guard phase == .playerAction else { return }
+        let result = eng.performAction(.useCard(cardId: card.id, targetId: enemy?.id))
+        lastChanges = result.stateChanges
+        processStateChanges(result.stateChanges)
+        syncState()
+    }
+
     func performFlee() {
         guard phase == .playerAction else { return }
         _ = eng.performAction(.flee)
@@ -224,6 +233,7 @@ final class EncounterViewModel: ObservableObject {
         isFinished = eng.isFinished
         fateDeckDrawCount = eng.fateDeckDrawCount
         fateDeckDiscardCount = eng.fateDeckDiscardCount
+        hand = eng.hand
     }
 
     // MARK: - Log Helpers
@@ -261,6 +271,10 @@ final class EncounterViewModel: ObservableObject {
                 logEntry(L10n.encounterLogResonanceShift.localized(with: "\(sign)\(String(format: "%.0f", delta))"))
             case .rageShieldApplied(_, let value):
                 logEntry(L10n.encounterLogRageShield.localized(with: value))
+            case .cardPlayed(_, let name):
+                logEntry(L10n.encounterLogCardPlayed.localized(with: name))
+            case .cardDrawn:
+                break
             case .encounterEnded:
                 break
             }

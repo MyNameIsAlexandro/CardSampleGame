@@ -34,6 +34,9 @@ extension TwilightGameEngine {
 
         let fateDeckSnapshot = fateDeck?.getState() ?? FateDeckState(drawPile: [], discardPile: [])
 
+        // Resolve hero cards from player's current hand/deck
+        let heroCards = playerHand + playerDeck
+
         return EncounterContext(
             hero: encounterHero,
             enemies: [encounterEnemy],
@@ -43,7 +46,8 @@ extension TwilightGameEngine {
             rngSeed: 42, // TODO: use world RNG seed
             worldResonance: resonanceValue,
             balanceConfig: ContentRegistry.shared.getBalanceConfig()?.combat,
-            behaviors: buildBehaviorMap()
+            behaviors: buildBehaviorMap(),
+            heroCards: heroCards
         )
     }
 

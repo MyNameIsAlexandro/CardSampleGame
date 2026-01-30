@@ -51,5 +51,7 @@ public enum EncounterStateChange: Equatable {
     case resonanceShifted(delta: Float, newValue: Float)
     case rageShieldApplied(enemyId: String, value: Int)
     case fateDraw(cardId: String, value: Int)
+    case cardPlayed(cardId: String, name: String)
+    case cardDrawn(cardId: String)
     case encounterEnded(outcome: EncounterOutcome)
 }
