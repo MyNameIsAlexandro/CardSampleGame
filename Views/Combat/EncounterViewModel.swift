@@ -5,6 +5,9 @@ import TwilightEngine
 
 /// Bridges EncounterEngine (pure state machine) with SwiftUI reactivity.
 /// Owns the engine, mirrors state into @Published properties, drives phase loop.
+///
+/// The phase loop pauses whenever a Fate Card is drawn, showing FateCardRevealView.
+/// On dismiss the loop resumes from where it left off.
 final class EncounterViewModel: ObservableObject {
 
     // MARK: - Mirrored State
@@ -34,6 +37,9 @@ final class EncounterViewModel: ObservableObject {
 
     private var engine: EncounterEngine!
     private var context: EncounterContext?
+
+    /// Continuation point after fate reveal is dismissed.
+    private var pendingContinuation: (() -> Void)?
 
     // MARK: - Init
 
@@ -73,7 +79,13 @@ final class EncounterViewModel: ObservableObject {
         lastChanges = result.stateChanges
         processStateChanges(result.stateChanges)
         syncState()
-        advanceAfterPlayerAction()
+
+        // If fate card was drawn, pause for reveal; otherwise continue
+        if showFateReveal {
+            pendingContinuation = { [weak self] in self?.advanceAfterPlayerAction() }
+        } else {
+            advanceAfterPlayerAction()
+        }
     }
 
     func performInfluence() {
@@ -84,7 +96,12 @@ final class EncounterViewModel: ObservableObject {
         lastChanges = result.stateChanges
         processStateChanges(result.stateChanges)
         syncState()
-        advanceAfterPlayerAction()
+
+        if showFateReveal {
+            pendingContinuation = { [weak self] in self?.advanceAfterPlayerAction() }
+        } else {
+            advanceAfterPlayerAction()
+        }
     }
 
     func performWait() {
@@ -99,6 +116,12 @@ final class EncounterViewModel: ObservableObject {
     func dismissFateReveal() {
         showFateReveal = false
         lastFateResult = nil
+
+        // Resume the paused phase loop
+        if let continuation = pendingContinuation {
+            pendingContinuation = nil
+            continuation()
+        }
     }
 
     func performFlee() {
@@ -129,6 +152,16 @@ final class EncounterViewModel: ObservableObject {
             syncState()
         }
 
+        // If defense fate card was drawn, pause for reveal; resume in advanceToNextRound
+        if showFateReveal {
+            pendingContinuation = { [weak self] in self?.advanceToNextRound() }
+            return
+        }
+
+        advanceToNextRound()
+    }
+
+    private func advanceToNextRound() {
         // Check if encounter ended after enemy action
         if checkEncounterEnd() { return }
 
