@@ -1,11 +1,12 @@
 === DUMP GENERATED ===
 Source: /Users/abondarenko/Library/Mobile Documents/com~apple~CloudDocs/XCode/CardSampleGame
 
-=== FILE STRUCTURE (Relevant Files) ===
+=== FILE STRUCTURE ===
 ViewModels/
 en.lproj/
 App/
 .claude/
+    settings.json
     settings.local.json
 Models/
 Docs/
@@ -33,14 +34,13 @@ Packages/
                             Localization/
                                 en.json
                                 ru.json
-            .swiftpm/
-                xcode/
-                    xcuserdata/
-                        abondarenko.xcuserdatad/
-                            xcschemes/
     TwilightEngine/
         Tests/
+            PackAuthoringTests/
             TwilightEngineTests/
+                IntegrationTests/
+                LayerTests/
+                GateTests/
                 Helpers/
         Sources/
             TwilightEngine/
@@ -52,6 +52,7 @@ Packages/
                 Runtime/
                 ContentPacks/
                 Models/
+                Encounter/
                 Utilities/
                 Quest/
                 Events/
@@ -62,18 +63,8 @@ Packages/
                 Migration/
                 Story/
                 Localization/
+            PackAuthoring/
             PackCompilerTool/
-        .swiftpm/
-            xcode/
-                package.xcworkspace/
-                    xcuserdata/
-                        abondarenko.xcuserdatad/
-                xcuserdata/
-                    abondarenko.xcuserdatad/
-                        xcschemes/
-                xcshareddata/
-                    xcschemes/
-            configuration/
     StoryPacks/
         Season1/
             TwilightMarchesActI/
@@ -83,6 +74,7 @@ Packages/
                             TwilightMarchesActI/
                                 manifest.json
                                 Cards/
+                                    fate_deck_core.json
                                     story_rewards.json
                                 Balance/
                                     balance.json
@@ -95,16 +87,13 @@ Packages/
                                     en.json
                                     ru.json
                                 Enemies/
+                                    behaviors.json
                                     enemies.json
-                .swiftpm/
-                    xcode/
-                        xcuserdata/
-                            abondarenko.xcuserdatad/
-                                xcschemes/
 .github/
     workflows/
 ru.lproj/
 Views/
+    Combat/
     Components/
 CardSampleGameTests/
     Unit/
@@ -115,6 +104,17 @@ CardSampleGameTests/
     GateTests/
 
 === FILE CONTENTS ===
+
+// ==========================================
+// FILE: .claude/settings.json
+// ==========================================
+
+{
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true
+  }
+}
+
 
 // ==========================================
 // FILE: .claude/settings.local.json
@@ -179,7 +179,15 @@ CardSampleGameTests/
       "Bash(cd:*)",
       "Bash(wc:*)",
       "Bash(__NEW_LINE_3f6ecd24ffb37c1a__ python3 -c \"\nimport re\n\nwith open\\(''Phase3ContractTests.swift'', ''r''\\) as f:\n    content = f.read\\(\\)\n\nlines = content.split\\(''\\\\n''\\)\ni = 0\nwhile i < len\\(lines\\):\n    line = lines[i]\n    m = re.match\\(r''^\\(\\\\s+func test\\\\w+\\\\\\(\\\\\\)\\)\\\\s+throws\\\\s+\\\\{'', line\\)\n    if m:\n        brace_count = 1\n        j = i + 1\n        has_try = False\n        while j < len\\(lines\\) and brace_count > 0:\n            for ch in lines[j]:\n                if ch == ''{'': brace_count += 1\n                elif ch == ''}'': brace_count -= 1\n            if '' try '' in lines[j] or lines[j].strip\\(\\).startswith\\(''try ''\\):\n                has_try = True\n            j += 1\n        if not has_try:\n            lines[i] = m.group\\(1\\) + '' {''\n    i += 1\n\nwith open\\(''Phase3ContractTests.swift'', ''w''\\) as f:\n    f.write\\(''\\\\n''.join\\(lines\\)\\)\n\")",
-      "Bash(for i in 1 2 3)"
+      "Bash(for i in 1 2 3)",
+      "Bash(xargs:*)",
+      "Bash(git status:*)",
+      "Bash(git mv:*)",
+      "Bash(tree:*)",
+      "Bash(cat:*)",
+      "Bash(\"/Users/abondarenko/Library/Mobile Documents/com~apple~CloudDocs/XCode/CardSampleGame/Packages/StoryPacks/Season1/TwilightMarchesActI/Sources/TwilightMarchesActIContent/Resources/TwilightMarchesActI/Cards/fate_deck_core.json\")",
+      "Bash(git show:*)",
+      "Bash(git rm:*)"
     ]
   }
 }
@@ -1088,10 +1096,444 @@ CardSampleGameTests/
   "quests_path": "Campaign/quests.json",
   "anchors_path": "Campaign/anchors.json",
   "enemies_path": "Enemies/enemies.json",
+  "behaviors_path": "Enemies/behaviors.json",
   "cards_path": "Cards/story_rewards.json",
+  "fate_deck_path": "Cards/fate_deck_core.json",
   "balance_path": "Balance/balance.json",
   "localization_path": "Localization"
 }
+
+
+// ==========================================
+// FILE: Packages/StoryPacks/Season1/TwilightMarchesActI/Sources/TwilightMarchesActIContent/Resources/TwilightMarchesActI/Cards/fate_deck_core.json
+// ==========================================
+
+[
+  {
+    "id": "fate_nav_whisper_a",
+    "name": "Misfortune",
+    "name_key": "card_nav_whisper_name",
+    "base_value": -1,
+    "suit": "nav",
+    "is_critical": false,
+    "is_sticky": false,
+    "keyword": "shadow",
+    "resonance_rules": [
+      {
+        "zone": "deepNav",
+        "modify_value": -1,
+        "visual_effect": "shadow_pulse"
+      },
+      {
+        "zone": "nav",
+        "modify_value": -1,
+        "visual_effect": "shadow_creep"
+      },
+      {
+        "zone": "prav",
+        "modify_value": 1
+      },
+      {
+        "zone": "deepPrav",
+        "modify_value": 1
+      }
+    ],
+    "on_draw_effects": [
+      {
+        "type": "shiftResonance",
+        "value": -5
+      }
+    ]
+  },
+  {
+    "id": "fate_nav_whisper_b",
+    "name": "Misfortune",
+    "name_key": "card_nav_whisper_name",
+    "base_value": -1,
+    "suit": "nav",
+    "is_critical": false,
+    "is_sticky": false,
+    "keyword": "shadow",
+    "resonance_rules": [
+      {
+        "zone": "deepNav",
+        "modify_value": -1,
+        "visual_effect": "shadow_pulse"
+      },
+      {
+        "zone": "nav",
+        "modify_value": -1,
+        "visual_effect": "shadow_creep"
+      },
+      {
+        "zone": "prav",
+        "modify_value": 1
+      },
+      {
+        "zone": "deepPrav",
+        "modify_value": 1
+      }
+    ],
+    "on_draw_effects": [
+      {
+        "type": "shiftResonance",
+        "value": -5
+      }
+    ]
+  },
+  {
+    "id": "fate_yav_balance_a",
+    "name": "Neutral Fate",
+    "name_key": "card_yav_balance_name",
+    "base_value": 0,
+    "suit": "yav",
+    "is_critical": false,
+    "is_sticky": false,
+    "keyword": "echo",
+    "resonance_rules": [
+      {
+        "zone": "deepNav",
+        "modify_value": -1,
+        "visual_effect": "shadow_flicker"
+      },
+      {
+        "zone": "deepPrav",
+        "modify_value": 1,
+        "visual_effect": "light_flicker"
+      }
+    ],
+    "on_draw_effects": [
+      {
+        "type": "shiftResonance",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "id": "fate_yav_balance_b",
+    "name": "Neutral Fate",
+    "name_key": "card_yav_balance_name",
+    "base_value": 0,
+    "suit": "yav",
+    "is_critical": false,
+    "is_sticky": false,
+    "keyword": "focus",
+    "resonance_rules": [
+      {
+        "zone": "deepNav",
+        "modify_value": -1,
+        "visual_effect": "shadow_flicker"
+      },
+      {
+        "zone": "deepPrav",
+        "modify_value": 1,
+        "visual_effect": "light_flicker"
+      }
+    ],
+    "on_draw_effects": [
+      {
+        "type": "shiftResonance",
+        "value": -1
+      }
+    ]
+  },
+  {
+    "id": "fate_yav_calm_a",
+    "name": "Calm Winds",
+    "name_key": "card_yav_calm_name",
+    "base_value": 0,
+    "suit": "yav",
+    "is_critical": false,
+    "is_sticky": false,
+    "keyword": "ward",
+    "resonance_rules": [
+      {
+        "zone": "deepNav",
+        "modify_value": -1
+      },
+      {
+        "zone": "nav",
+        "modify_value": 0
+      },
+      {
+        "zone": "prav",
+        "modify_value": 0
+      },
+      {
+        "zone": "deepPrav",
+        "modify_value": 1
+      }
+    ],
+    "on_draw_effects": [
+      {
+        "type": "shiftTension",
+        "value": -1
+      }
+    ]
+  },
+  {
+    "id": "fate_yav_calm_b",
+    "name": "Calm Winds",
+    "name_key": "card_yav_calm_name",
+    "base_value": 0,
+    "suit": "yav",
+    "is_critical": false,
+    "is_sticky": false,
+    "keyword": "focus",
+    "resonance_rules": [
+      {
+        "zone": "deepNav",
+        "modify_value": -1
+      },
+      {
+        "zone": "nav",
+        "modify_value": 0
+      },
+      {
+        "zone": "prav",
+        "modify_value": 0
+      },
+      {
+        "zone": "deepPrav",
+        "modify_value": 1
+      }
+    ],
+    "on_draw_effects": [
+      {
+        "type": "shiftTension",
+        "value": -1
+      }
+    ]
+  },
+  {
+    "id": "fate_prav_light_a",
+    "name": "Fortune",
+    "name_key": "card_prav_light_name",
+    "base_value": 1,
+    "suit": "prav",
+    "is_critical": false,
+    "is_sticky": false,
+    "keyword": "surge",
+    "resonance_rules": [
+      {
+        "zone": "deepPrav",
+        "modify_value": 1,
+        "visual_effect": "light_shimmer"
+      },
+      {
+        "zone": "prav",
+        "modify_value": 1
+      },
+      {
+        "zone": "nav",
+        "modify_value": -1
+      },
+      {
+        "zone": "deepNav",
+        "modify_value": -1
+      }
+    ],
+    "on_draw_effects": [
+      {
+        "type": "shiftResonance",
+        "value": 5
+      }
+    ]
+  },
+  {
+    "id": "fate_prav_light_b",
+    "name": "Fortune",
+    "name_key": "card_prav_light_name",
+    "base_value": 1,
+    "suit": "prav",
+    "is_critical": false,
+    "is_sticky": false,
+    "keyword": "surge",
+    "resonance_rules": [
+      {
+        "zone": "deepPrav",
+        "modify_value": 1,
+        "visual_effect": "light_shimmer"
+      },
+      {
+        "zone": "prav",
+        "modify_value": 1
+      },
+      {
+        "zone": "nav",
+        "modify_value": -1
+      },
+      {
+        "zone": "deepNav",
+        "modify_value": -1
+      }
+    ],
+    "on_draw_effects": [
+      {
+        "type": "shiftResonance",
+        "value": 5
+      }
+    ]
+  },
+  {
+    "id": "fate_prav_light_c",
+    "name": "Fortune",
+    "name_key": "card_prav_light_name",
+    "base_value": 1,
+    "suit": "prav",
+    "is_critical": false,
+    "is_sticky": false,
+    "keyword": "ward",
+    "resonance_rules": [
+      {
+        "zone": "deepPrav",
+        "modify_value": 1,
+        "visual_effect": "light_shimmer"
+      },
+      {
+        "zone": "prav",
+        "modify_value": 1
+      },
+      {
+        "zone": "nav",
+        "modify_value": -1
+      },
+      {
+        "zone": "deepNav",
+        "modify_value": -1
+      }
+    ],
+    "on_draw_effects": [
+      {
+        "type": "shiftResonance",
+        "value": 3
+      }
+    ]
+  },
+  {
+    "id": "fate_prav_blessing",
+    "name": "Great Fortune",
+    "name_key": "card_prav_blessing_name",
+    "base_value": 2,
+    "suit": "prav",
+    "is_critical": false,
+    "is_sticky": false,
+    "keyword": "surge",
+    "resonance_rules": [
+      {
+        "zone": "deepPrav",
+        "modify_value": 2,
+        "visual_effect": "light_burst"
+      },
+      {
+        "zone": "prav",
+        "modify_value": 1,
+        "visual_effect": "light_shimmer"
+      },
+      {
+        "zone": "nav",
+        "modify_value": -1,
+        "visual_effect": "shadow_flicker"
+      },
+      {
+        "zone": "deepNav",
+        "modify_value": -2,
+        "visual_effect": "shadow_pulse"
+      }
+    ],
+    "on_draw_effects": [
+      {
+        "type": "shiftResonance",
+        "value": 5
+      },
+      {
+        "type": "shiftTension",
+        "value": -2
+      }
+    ]
+  },
+  {
+    "id": "fate_crit",
+    "name": "Critical Success",
+    "name_key": "card_fate_crit_name",
+    "base_value": 3,
+    "suit": "prav",
+    "is_critical": true,
+    "is_sticky": false,
+    "keyword": "surge",
+    "resonance_rules": [
+      {
+        "zone": "deepPrav",
+        "modify_value": 1,
+        "visual_effect": "light_explosion"
+      },
+      {
+        "zone": "prav",
+        "modify_value": 0
+      },
+      {
+        "zone": "nav",
+        "modify_value": -1,
+        "visual_effect": "shadow_flicker"
+      },
+      {
+        "zone": "deepNav",
+        "modify_value": -2,
+        "visual_effect": "shadow_pulse"
+      }
+    ],
+    "on_draw_effects": [
+      {
+        "type": "shiftResonance",
+        "value": 10
+      },
+      {
+        "type": "shiftTension",
+        "value": -3
+      }
+    ]
+  },
+  {
+    "id": "fate_curse_navi",
+    "name": "Curse of the Navi",
+    "name_key": "card_curse_navi_name",
+    "base_value": -2,
+    "suit": "nav",
+    "is_critical": false,
+    "is_sticky": true,
+    "keyword": "shadow",
+    "resonance_rules": [
+      {
+        "zone": "deepNav",
+        "modify_value": -2,
+        "visual_effect": "shadow_pulse"
+      },
+      {
+        "zone": "nav",
+        "modify_value": -1,
+        "visual_effect": "shadow_creep"
+      },
+      {
+        "zone": "prav",
+        "modify_value": 1
+      },
+      {
+        "zone": "deepPrav",
+        "modify_value": 2
+      }
+    ],
+    "on_draw_effects": [
+      {
+        "type": "shiftResonance",
+        "value": -10
+      },
+      {
+        "type": "shiftTension",
+        "value": 5
+      }
+    ]
+  }
+]
 
 
 // ==========================================
@@ -2947,6 +3389,153 @@ CardSampleGameTests/
 
 
 // ==========================================
+// FILE: Packages/StoryPacks/Season1/TwilightMarchesActI/Sources/TwilightMarchesActIContent/Resources/TwilightMarchesActI/Enemies/behaviors.json
+// ==========================================
+
+[
+  {
+    "id": "wild_beast",
+    "rules": [
+      {
+        "conditions": [
+          { "type": "health_percent", "operator": "<", "value": 0.3 }
+        ],
+        "intentType": "buff",
+        "valueFormula": "power * 0.5"
+      },
+      {
+        "conditions": [],
+        "intentType": "attack",
+        "valueFormula": "power"
+      }
+    ]
+  },
+  {
+    "id": "leshy",
+    "rules": [
+      {
+        "conditions": [
+          { "type": "health_percent", "operator": "<", "value": 0.5 },
+          { "type": "turn", "operator": ">", "value": 2 }
+        ],
+        "intentType": "heal",
+        "valueFormula": "power"
+      },
+      {
+        "conditions": [
+          { "type": "turn_mod3", "operator": "==", "value": 0 }
+        ],
+        "intentType": "ritual",
+        "valueFormula": "5"
+      },
+      {
+        "conditions": [],
+        "intentType": "attack",
+        "valueFormula": "power"
+      }
+    ]
+  },
+  {
+    "id": "mountain_spirit",
+    "rules": [
+      {
+        "conditions": [
+          { "type": "turn", "operator": "==", "value": 1 }
+        ],
+        "intentType": "block",
+        "valueFormula": "defense"
+      },
+      {
+        "conditions": [
+          { "type": "health_percent", "operator": "<", "value": 0.4 }
+        ],
+        "intentType": "block",
+        "valueFormula": "defense"
+      },
+      {
+        "conditions": [],
+        "intentType": "attack",
+        "valueFormula": "power"
+      }
+    ]
+  },
+  {
+    "id": "risen_dead",
+    "rules": [
+      {
+        "conditions": [],
+        "intentType": "attack",
+        "valueFormula": "power"
+      }
+    ]
+  },
+  {
+    "id": "swamp_hag",
+    "rules": [
+      {
+        "conditions": [
+          { "type": "turn_mod3", "operator": "==", "value": 0 }
+        ],
+        "intentType": "ritual",
+        "valueFormula": "8"
+      },
+      {
+        "conditions": [
+          { "type": "health_percent", "operator": "<", "value": 0.3 }
+        ],
+        "intentType": "buff",
+        "valueFormula": "power * 0.5"
+      },
+      {
+        "conditions": [],
+        "intentType": "attack",
+        "valueFormula": "power"
+      }
+    ]
+  },
+  {
+    "id": "leshy_guardian_boss",
+    "rules": [
+      {
+        "conditions": [
+          { "type": "turn", "operator": "==", "value": 1 }
+        ],
+        "intentType": "buff",
+        "valueFormula": "3"
+      },
+      {
+        "conditions": [
+          { "type": "health_percent", "operator": "<", "value": 0.3 }
+        ],
+        "intentType": "heal",
+        "valueFormula": "3"
+      },
+      {
+        "conditions": [
+          { "type": "turn_mod3", "operator": "==", "value": 0 },
+          { "type": "turn", "operator": ">", "value": 1 }
+        ],
+        "intentType": "ritual",
+        "valueFormula": "10"
+      },
+      {
+        "conditions": [
+          { "type": "health_percent", "operator": "<", "value": 0.5 }
+        ],
+        "intentType": "attack",
+        "valueFormula": "power * 1.5"
+      },
+      {
+        "conditions": [],
+        "intentType": "attack",
+        "valueFormula": "power"
+      }
+    ]
+  }
+]
+
+
+// ==========================================
 // FILE: Packages/StoryPacks/Season1/TwilightMarchesActI/Sources/TwilightMarchesActIContent/Resources/TwilightMarchesActI/Enemies/enemies.json
 // ==========================================
 
@@ -2979,15 +3568,23 @@ CardSampleGameTests/
       "ru": "Леший"
     },
     "description": {
-      "en": "Ancient forest guardian whose anger grows with the corruption.",
-      "ru": "Древний страж леса, чей гнев растёт вместе с порчей."
+      "en": "Ancient forest guardian whose anger grows with the corruption. His spirit is bound to the resonance of the world.",
+      "ru": "Древний страж леса, чей гнев растёт вместе с порчей. Его дух связан с резонансом мира."
     },
-    "health": 12,
+    "health": 50,
     "power": 4,
     "defense": 2,
+    "will": 30,
     "difficulty": 2,
     "enemy_type": "spirit",
     "rarity": "uncommon",
+    "resonance_behavior": {
+      "deepNav": {"power_delta": 2, "defense_delta": 0, "health_delta": 10, "will_delta": 5},
+      "nav": {"power_delta": 1, "defense_delta": 0, "health_delta": 5, "will_delta": 2},
+      "yav": {"power_delta": 0, "defense_delta": 0, "health_delta": 0, "will_delta": 0},
+      "prav": {"power_delta": -1, "defense_delta": 0, "health_delta": -5, "will_delta": -2},
+      "deepPrav": {"power_delta": -2, "defense_delta": -1, "health_delta": -10, "will_delta": -5}
+    },
     "abilities": [
       {
         "id": "forest_rage",
