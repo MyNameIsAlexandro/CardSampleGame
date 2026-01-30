@@ -70,7 +70,7 @@ final class EncounterViewModel: ObservableObject {
         if let enemyState = enemy {
             let intent = eng.generateIntent(for: enemyState.id)
             currentIntent = intent
-            logEntry(L10n.encounterLogEnemyPrepares.localized(with: intent.description))
+            logEntry(L10n.encounterLogEnemyPrepares.localized(with: localizedIntentDetail(intent)))
         }
 
         // Move to player action
@@ -185,7 +185,7 @@ final class EncounterViewModel: ObservableObject {
         if let enemyState = enemy, enemyState.isAlive {
             let intent = eng.generateIntent(for: enemyState.id)
             currentIntent = intent
-            logEntry(L10n.encounterLogRoundEnemyPrepares.localized(with: round, intent.description))
+            logEntry(L10n.encounterLogRoundEnemyPrepares.localized(with: round, localizedIntentDetail(intent)))
         }
 
         // Advance to player action
@@ -240,16 +240,22 @@ final class EncounterViewModel: ObservableObject {
                     logEntry(L10n.encounterLogPlayerTakesDamage.localized(with: -delta, newValue))
                 }
             case .enemyKilled(let enemyId):
-                logEntry(L10n.encounterLogEnemySlain.localized(with: enemyId))
+                let name = eng.enemies.first(where: { $0.id == enemyId })?.name ?? enemyId
+                logEntry(L10n.encounterLogEnemySlain.localized(with: name))
             case .enemyPacified(let enemyId):
-                logEntry(L10n.encounterLogEnemyPacified.localized(with: enemyId))
-            case .fateDraw(let cardId, let value):
+                let name = eng.enemies.first(where: { $0.id == enemyId })?.name ?? enemyId
+                logEntry(L10n.encounterLogEnemyPacified.localized(with: name))
+            case .fateDraw(_, let value):
+                let cardName: String
                 if let result = eng.lastFateDrawResult {
                     lastFateResult = result
                     showFateReveal = true
+                    cardName = result.card.name
+                } else {
+                    cardName = "?"
                 }
                 let sign = value >= 0 ? "+" : ""
-                logEntry(L10n.encounterLogFateDraw.localized(with: cardId, "\(sign)\(value)"))
+                logEntry(L10n.encounterLogFateDraw.localized(with: cardName, "\(sign)\(value)"))
             case .resonanceShifted(let delta, _):
                 let sign = delta >= 0 ? "+" : ""
                 logEntry(L10n.encounterLogResonanceShift.localized(with: "\(sign)\(String(format: "%.0f", delta))"))
@@ -265,6 +271,20 @@ final class EncounterViewModel: ObservableObject {
         combatLog.append(text)
         if combatLog.count > 10 {
             combatLog.removeFirst()
+        }
+    }
+
+    // MARK: - Intent Localization
+
+    /// Localize intent for combat log (mirrors EnemyIntentView.intentDetail)
+    private func localizedIntentDetail(_ intent: EnemyIntent) -> String {
+        switch intent.type {
+        case .attack: return L10n.combatIntentDetailAttack.localized(with: intent.value)
+        case .ritual: return L10n.combatIntentDetailRitual.localized
+        case .block: return L10n.combatIntentDetailBlock.localized(with: intent.value)
+        case .buff: return L10n.combatIntentDetailBuff.localized(with: intent.value)
+        case .heal: return L10n.combatIntentDetailHeal.localized(with: intent.value)
+        case .summon: return L10n.combatIntentDetailSummon.localized
         }
     }
 }
