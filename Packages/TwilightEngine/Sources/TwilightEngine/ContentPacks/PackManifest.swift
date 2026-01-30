@@ -141,6 +141,9 @@ public struct PackManifest: Codable {
     /// Path to balance configuration
     public let balancePath: String?
 
+    /// Path to behaviors JSON file (enemy AI behaviors)
+    public let behaviorsPath: String?
+
     /// Path to localization files
     public let localizationPath: String?
 
@@ -191,6 +194,7 @@ public struct PackManifest: Codable {
         case enemiesPath = "enemies_path"
         case fateDeckPath = "fate_deck_path"
         case balancePath = "balance_path"
+        case behaviorsPath = "behaviors_path"
         case localizationPath = "localization_path"
     }
 
@@ -241,6 +245,7 @@ public struct PackManifest: Codable {
         enemiesPath: String? = nil,
         fateDeckPath: String? = nil,
         balancePath: String? = nil,
+        behaviorsPath: String? = nil,
         localizationPath: String? = nil
     ) {
         self.packId = packId
@@ -283,6 +288,7 @@ public struct PackManifest: Codable {
         self.enemiesPath = enemiesPath
         self.fateDeckPath = fateDeckPath
         self.balancePath = balancePath
+        self.behaviorsPath = behaviorsPath
         self.localizationPath = localizationPath
     }
 

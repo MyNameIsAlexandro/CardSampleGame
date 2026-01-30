@@ -24,6 +24,7 @@ public final class ContentRegistry {
     private var mergedCards: [String: StandardCardDefinition] = [:]
     private var mergedEnemies: [String: EnemyDefinition] = [:]
     private var mergedFateCards: [String: FateCard] = [:]
+    private var mergedBehaviors: [String: BehaviorDefinition] = [:]
 
     /// Active balance configuration (from highest priority pack)
     private var activeBalanceConfig: BalanceConfiguration?
@@ -641,6 +642,11 @@ public final class ContentRegistry {
             mergedFateCards[id] = card
         }
 
+        // Merge behaviors
+        for (id, behavior) in pack.behaviors {
+            mergedBehaviors[id] = behavior
+        }
+
         // Update balance config if pack provides one
         if let balanceConfig = pack.balanceConfig {
             activeBalanceConfig = balanceConfig
@@ -667,6 +673,7 @@ public final class ContentRegistry {
         mergedCards.removeAll()
         mergedEnemies.removeAll()
         mergedFateCards.removeAll()
+        mergedBehaviors.removeAll()
         activeBalanceConfig = nil
     }
 
@@ -811,11 +818,16 @@ extension ContentRegistry {
     /// Convenience property for balance pack (stub until behaviors system)
     public var balancePack: BalancePackAccess { BalancePackAccess(config: getBalanceConfig()) }
 
-    /// Stub: All behavior IDs (empty until behavior system implemented)
-    public var allBehaviorIds: [String] { [] }
+    /// All registered behavior IDs
+    public var allBehaviorIds: [String] { Array(mergedBehaviors.keys) }
 
-    /// Stub: All behaviors (empty until behavior system implemented)
-    public var allBehaviors: [BehaviorDefinition] { [] }
+    /// All registered behaviors
+    public var allBehaviors: [BehaviorDefinition] { Array(mergedBehaviors.values) }
+
+    /// Get behavior by ID
+    public func getBehavior(id: String) -> BehaviorDefinition? {
+        mergedBehaviors[id]
+    }
 }
 
 /// Stub balance pack access for gate tests
@@ -845,7 +857,8 @@ extension ContentRegistry {
         heroes: [String: StandardHeroDefinition] = [:],
         cards: [String: StandardCardDefinition] = [:],
         enemies: [String: EnemyDefinition] = [:],
-        fateCards: [String: FateCard] = [:]
+        fateCards: [String: FateCard] = [:],
+        behaviors: [String: BehaviorDefinition] = [:]
     ) {
         mergedRegions = regions
         mergedEvents = events
@@ -854,6 +867,7 @@ extension ContentRegistry {
         mergedCards = cards
         mergedEnemies = enemies
         mergedFateCards = fateCards
+        mergedBehaviors = behaviors
     }
 
     /// Load a mock pack for testing (simulates real pack loading)

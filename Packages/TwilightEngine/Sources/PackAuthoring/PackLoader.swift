@@ -96,6 +96,14 @@ public enum PackLoader {
             #endif
         }
 
+        // Load behaviors
+        if let behaviorsPath = manifest.behaviorsPath {
+            pack.behaviors = try loadBehaviors(from: url.appendingPathComponent(behaviorsPath))
+            #if DEBUG
+            print("PackLoader: Loaded \(pack.behaviors.count) behaviors from \(behaviorsPath)")
+            #endif
+        }
+
         // Load fate deck cards
         if let fateDeckPath = manifest.fateDeckPath {
             pack.fateCards = try loadFateCards(from: url.appendingPathComponent(fateDeckPath))
@@ -293,6 +301,16 @@ public enum PackLoader {
         }
 
         return enemies
+    }
+
+    /// Load behavior definitions from JSON
+    private static func loadBehaviors(from url: URL) throws -> [String: BehaviorDefinition] {
+        var behaviors: [String: BehaviorDefinition] = [:]
+        let defs = try loadJSONArray(BehaviorDefinition.self, from: url)
+        for def in defs {
+            behaviors[def.id] = def
+        }
+        return behaviors
     }
 
     /// Load fate cards from JSON

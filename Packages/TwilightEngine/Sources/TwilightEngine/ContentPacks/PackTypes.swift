@@ -231,6 +231,7 @@ public struct LoadedPack {
     public var cards: [String: StandardCardDefinition] = [:]
     public var enemies: [String: EnemyDefinition] = [:]
     public var fateCards: [String: FateCard] = [:]
+    public var behaviors: [String: BehaviorDefinition] = [:]
 
     /// Balance configuration (if pack provides one)
     public var balanceConfig: BalanceConfiguration?
