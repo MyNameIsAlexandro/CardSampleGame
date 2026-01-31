@@ -524,6 +524,15 @@ final class EncounterViewModel: ObservableObject {
                 break
             case .encounterEnded:
                 break
+            case .weaknessTriggered(let enemyId, let keyword):
+                let name = eng.enemies.first(where: { $0.id == enemyId })?.name ?? enemyId
+                logEntry(L10n.combatWeaknessTriggered.localized(with: name, keyword))
+            case .resistanceTriggered(let enemyId, let keyword):
+                let name = eng.enemies.first(where: { $0.id == enemyId })?.name ?? enemyId
+                logEntry(L10n.combatResistanceTriggered.localized(with: name, keyword))
+            case .abilityTriggered(let enemyId, _, let effect):
+                let name = eng.enemies.first(where: { $0.id == enemyId })?.name ?? enemyId
+                logEntry(L10n.combatAbilityTriggered.localized(with: name, effect))
             }
         }
     }

@@ -71,8 +71,11 @@ public struct EncounterEnemy: Equatable, Codable {
     public let resonanceBehavior: [String: EnemyModifier]?
     public let lootCardIds: [String]
     public let faithReward: Int
+    public let weaknesses: [String]
+    public let strengths: [String]
+    public let abilities: [EnemyAbility]
 
-    public init(id: String, name: String, hp: Int, maxHp: Int, wp: Int? = nil, maxWp: Int? = nil, power: Int = 0, defense: Int = 0, spiritDefense: Int = 0, behaviorId: String? = nil, resonanceBehavior: [String: EnemyModifier]? = nil, lootCardIds: [String] = [], faithReward: Int = 0) {
+    public init(id: String, name: String, hp: Int, maxHp: Int, wp: Int? = nil, maxWp: Int? = nil, power: Int = 0, defense: Int = 0, spiritDefense: Int = 0, behaviorId: String? = nil, resonanceBehavior: [String: EnemyModifier]? = nil, lootCardIds: [String] = [], faithReward: Int = 0, weaknesses: [String] = [], strengths: [String] = [], abilities: [EnemyAbility] = []) {
         self.id = id
         self.name = name
         self.hp = hp
@@ -86,6 +89,9 @@ public struct EncounterEnemy: Equatable, Codable {
         self.resonanceBehavior = resonanceBehavior
         self.lootCardIds = lootCardIds
         self.faithReward = faithReward
+        self.weaknesses = weaknesses
+        self.strengths = strengths
+        self.abilities = abilities
     }
 }
 

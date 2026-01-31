@@ -1081,3 +1081,15 @@
 "enemy.type.demon" = "Демоны";
 "enemy.type.human" = "Люди";
 "enemy.type.boss" = "Боссы";
+
+// MARK: - EC-01/EC-02: Weakness/Strength & Enemy Abilities
+"combat.weakness_triggered" = "%@ уязвим к %@! +50%% урона!";
+"combat.resistance_triggered" = "%@ сопротивляется %@! -33%% урона.";
+"combat.ability_triggered" = "%@ использует %@!";
+"combat.regeneration" = "%@ восстанавливает %d HP!";
+
+// EC-04: Mid-Combat Save
+"combat.save_exit_title" = "Сохранить и выйти";
+"combat.save_exit_message" = "Прогресс боя будет сохранён. Вы сможете продолжить с карты мира.";
+"combat.save_exit_confirm" = "Сохранить и выйти";
+"combat.save_exit_cancel" = "Отмена";

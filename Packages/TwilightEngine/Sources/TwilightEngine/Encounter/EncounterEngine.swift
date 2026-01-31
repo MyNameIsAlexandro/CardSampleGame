@@ -155,6 +155,17 @@ public final class EncounterEngine {
             finishActionUsed = false
             currentPhase = .roundEnd
         case .roundEnd:
+            // EC-02: Enemy ability triggers at round end
+            for i in enemies.indices where enemies[i].isAlive {
+                for ability in enemies[i].abilities {
+                    if case .regeneration(let amount) = ability.effect {
+                        let healed = min(amount, enemies[i].maxHp - enemies[i].hp)
+                        if healed > 0 {
+                            enemies[i].hp += healed
+                        }
+                    }
+                }
+            }
             // Draw card at end of round (up to maxHandSize)
             let maxHand = context.balanceConfig?.maxHandSize ?? 7
             if hand.count < maxHand {
@@ -191,8 +202,9 @@ public final class EncounterEngine {
                 lastPlayerAction: lastAttackTrack.map { $0 == .physical ? "physical" : "spiritual" }
             )
             if let intent = BehaviorEvaluator.evaluate(behavior: behavior, context: behaviorCtx) {
-                currentIntent = intent
-                return intent
+                let modified = applyAbilityModifiers(to: intent, enemy: enemy)
+                currentIntent = modified
+                return modified
             }
         }
 
@@ -205,8 +217,27 @@ public final class EncounterEngine {
             turnNumber: currentRound,
             rng: rng
         )
-        currentIntent = intent
-        return intent
+        let modified = applyAbilityModifiers(to: intent, enemy: enemy)
+        currentIntent = modified
+        return modified
+    }
+
+    // EC-02: Apply enemy ability modifiers to generated intent
+    private func applyAbilityModifiers(to intent: EnemyIntent, enemy: EncounterEnemyState) -> EnemyIntent {
+        var modified = intent
+        for ability in enemy.abilities {
+            switch ability.effect {
+            case .bonusDamage(let bonus):
+                if case .attack = modified.type {
+                    modified = .attack(damage: modified.value + bonus)
+                }
+            case .armor:
+                break // Armor is handled in damage calc, not intent
+            default:
+                break
+            }
+        }
+        return modified
     }
 
     public func resolveEnemyAction(enemyId: String) -> EncounterActionResult {
@@ -576,9 +607,28 @@ public final class EncounterEngine {
             }
         }
 
+        // EC-01: Weakness/Strength modifiers
+        var weaknessMultiplier: Double = 1.0
+        if let fateResult = fateResult, let keyword = fateResult.card.keyword {
+            let kw = keyword.rawValue.lowercased()
+            if enemies[idx].weaknesses.contains(kw) {
+                weaknessMultiplier = 1.5
+                changes.append(.weaknessTriggered(enemyId: targetId, keyword: kw))
+            } else if enemies[idx].strengths.contains(kw) {
+                weaknessMultiplier = 0.67
+                changes.append(.resistanceTriggered(enemyId: targetId, keyword: kw))
+            }
+        }
+
+        // EC-02: Ability armor bonus
         let resMod = resonanceModifier(for: enemies[idx])
-        let armor = ignoreArmor ? 0 : max(0, enemies[idx].defense + resMod.defenseDelta)
-        let damage = max(1, context.hero.strength + turnAttackBonus - armor + surpriseBonus + keywordBonus)
+        let abilityArmor = enemies[idx].abilities.reduce(0) { sum, ab in
+            if case .armor(let val) = ab.effect { return sum + val }
+            return sum
+        }
+        let armor = ignoreArmor ? 0 : max(0, enemies[idx].defense + resMod.defenseDelta + abilityArmor)
+        let rawDamage = context.hero.strength + turnAttackBonus - armor + surpriseBonus + keywordBonus
+        let damage = max(1, Int(Double(rawDamage) * weaknessMultiplier))
         enemies[idx].hp = max(0, enemies[idx].hp - damage)
         lastAttackTrack = .physical
 
@@ -652,7 +702,21 @@ public final class EncounterEngine {
             changes.append(.resonanceShifted(delta: delta, newValue: context.worldResonance + accumulatedResonanceDelta))
         }
 
-        let damage = max(1, context.hero.wisdom + turnInfluenceBonus + keywordBonus - enemies[idx].rageShield - enemies[idx].spiritDefense)
+        // EC-01: Weakness/Strength modifiers
+        var weaknessMultiplier: Double = 1.0
+        if let fateResult = fateResult, let keyword = fateResult.card.keyword {
+            let kw = keyword.rawValue.lowercased()
+            if enemies[idx].weaknesses.contains(kw) {
+                weaknessMultiplier = 1.5
+                changes.append(.weaknessTriggered(enemyId: targetId, keyword: kw))
+            } else if enemies[idx].strengths.contains(kw) {
+                weaknessMultiplier = 0.67
+                changes.append(.resistanceTriggered(enemyId: targetId, keyword: kw))
+            }
+        }
+
+        let rawDamage = context.hero.wisdom + turnInfluenceBonus + keywordBonus - enemies[idx].rageShield - enemies[idx].spiritDefense
+        let damage = max(1, Int(Double(rawDamage) * weaknessMultiplier))
         let currentWP = enemies[idx].wp ?? 0
         let newWP = max(0, currentWP - damage)
         enemies[idx].wp = newWP
@@ -751,6 +815,9 @@ public struct EncounterEnemyState: Equatable, Codable {
     public let resonanceBehavior: [String: EnemyModifier]?
     public let lootCardIds: [String]
     public let faithReward: Int
+    public let weaknesses: [String]
+    public let strengths: [String]
+    public let abilities: [EnemyAbility]
 
     public var hasSpiritTrack: Bool { wp != nil }
     public var isAlive: Bool { hp > 0 }
@@ -771,6 +838,9 @@ public struct EncounterEnemyState: Equatable, Codable {
         self.resonanceBehavior = enemy.resonanceBehavior
         self.lootCardIds = enemy.lootCardIds
         self.faithReward = enemy.faithReward
+        self.weaknesses = enemy.weaknesses
+        self.strengths = enemy.strengths
+        self.abilities = enemy.abilities
     }
 }
 

@@ -42,6 +42,7 @@ struct CombatView: View {
     // UX-05: Floating damage numbers
     @State private var floatingDamage: FloatingNumber? = nil
     @State private var showDamageFlash: Bool = false
+    @State private var showSaveExitConfirm: Bool = false
 
     var body: some View {
         ZStack {
@@ -150,10 +151,20 @@ struct CombatView: View {
 
     private var mainContent: some View {
         VStack(spacing: 0) {
-            // Resonance widget (compact)
-            ResonanceWidget(engine: engine, compact: true)
-                .padding(.horizontal)
-                .padding(.top, Spacing.sm)
+            // Resonance widget (compact) + Save & Exit
+            HStack {
+                ResonanceWidget(engine: engine, compact: true)
+                Spacer()
+                Button {
+                    showSaveExitConfirm = true
+                } label: {
+                    Image(systemName: "rectangle.portrait.and.arrow.right")
+                        .font(.body)
+                        .foregroundColor(AppColors.muted)
+                }
+            }
+            .padding(.horizontal)
+            .padding(.top, Spacing.sm)
 
             // Enemy panel: intent + name + dual health bars
             EnemyPanel(
@@ -320,6 +331,14 @@ struct CombatView: View {
                 }
             }
         }
+        .alert(L10n.combatSaveExitTitle.localized, isPresented: $showSaveExitConfirm) {
+            Button(L10n.combatSaveExitConfirm.localized, role: .destructive) {
+                saveAndExit()
+            }
+            Button(L10n.combatSaveExitCancel.localized, role: .cancel) {}
+        } message: {
+            Text(L10n.combatSaveExitMessage.localized)
+        }
     }
 
     // MARK: - Setup
@@ -336,6 +355,15 @@ struct CombatView: View {
             vm.startEncounter()
             didStart = true
         }
+    }
+
+    // MARK: - Save & Exit
+
+    private func saveAndExit() {
+        if let state = vm.getSaveState() {
+            engine.pendingEncounterState = state
+        }
+        onCombatEnd(.fled)
     }
 
     // MARK: - Result

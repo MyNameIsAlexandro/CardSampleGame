@@ -62,4 +62,7 @@ public enum EncounterStateChange: Equatable {
     case fleeAttempt(success: Bool, damage: Int)
     case enemySummoned(enemyId: String, enemyName: String)
     case encounterEnded(outcome: EncounterOutcome)
+    case weaknessTriggered(enemyId: String, keyword: String)
+    case resistanceTriggered(enemyId: String, keyword: String)
+    case abilityTriggered(enemyId: String, abilityId: String, effect: String)
 }

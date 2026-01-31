@@ -656,4 +656,16 @@ enum L10n {
     static let achievementsCategoryKnowledge = "achievements.category.knowledge"
     static let achievementsCategoryMastery = "achievements.category.mastery"
 
+    // MARK: - EC-01/EC-02: Weakness/Strength & Enemy Abilities
+    static let combatWeaknessTriggered = "combat.weakness_triggered"
+    static let combatResistanceTriggered = "combat.resistance_triggered"
+    static let combatAbilityTriggered = "combat.ability_triggered"
+    static let combatRegeneration = "combat.regeneration"
+
+    // MARK: - EC-04: Mid-Combat Save
+    static let combatSaveExitTitle = "combat.save_exit_title"
+    static let combatSaveExitMessage = "combat.save_exit_message"
+    static let combatSaveExitConfirm = "combat.save_exit_confirm"
+    static let combatSaveExitCancel = "combat.save_exit_cancel"
+
 }

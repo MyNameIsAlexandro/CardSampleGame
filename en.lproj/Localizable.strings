@@ -1076,3 +1076,15 @@
 "enemy.type.demon" = "Demons";
 "enemy.type.human" = "Humans";
 "enemy.type.boss" = "Bosses";
+
+// MARK: - EC-01/EC-02: Weakness/Strength & Enemy Abilities
+"combat.weakness_triggered" = "%@ is weak to %@! +50%% damage!";
+"combat.resistance_triggered" = "%@ resists %@! -33%% damage.";
+"combat.ability_triggered" = "%@ uses %@!";
+"combat.regeneration" = "%@ regenerates %d HP!";
+
+// EC-04: Mid-Combat Save
+"combat.save_exit_title" = "Save & Exit";
+"combat.save_exit_message" = "Your combat progress will be saved. You can resume from the world map.";
+"combat.save_exit_confirm" = "Save & Exit";
+"combat.save_exit_cancel" = "Cancel";

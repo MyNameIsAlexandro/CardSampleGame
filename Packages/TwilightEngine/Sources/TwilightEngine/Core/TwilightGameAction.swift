@@ -54,7 +54,7 @@ public enum TwilightGameAction: TimedAction, Equatable {
     /// Enemy resolves their intent with automatic Defense Fate card
     case combatEnemyResolveWithFate
 
-    // MARK: - Legacy Combat Actions (kept for compatibility)
+    // MARK: - Legacy Combat (Deprecated — use EncounterEngine)
 
     /// Perform basic attack in combat (Unified Resolution via Fate Deck)
     case combatAttack(effortCards: Int, bonusDamage: Int)

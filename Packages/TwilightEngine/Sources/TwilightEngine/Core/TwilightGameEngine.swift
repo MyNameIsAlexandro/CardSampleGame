@@ -1664,6 +1664,8 @@ public final class TwilightGameEngine: ObservableObject {
             _playerDeck.removeFirst(drawCount)
             combatActionsRemaining = 3
 
+        // MARK: - Legacy Combat (Deprecated — use EncounterEngine)
+
         case .combatAttack(let effortCards, let bonusDamage):
             guard combatActionsRemaining > 0 else { break }
             combatActionsRemaining -= 1
@@ -1926,7 +1928,7 @@ public final class TwilightGameEngine: ObservableObject {
         return changes
     }
 
-    // MARK: - Combat Setup Methods
+    // MARK: - Legacy Combat (Deprecated — use EncounterEngine)
 
     /// Setup enemy for combat
     public func setupCombatEnemy(_ enemy: Card) {

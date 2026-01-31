@@ -37,7 +37,10 @@ extension TwilightGameEngine {
             defense: state.enemyDefense,
             behaviorId: enemy.id, // behavior ID matches enemy ID
             lootCardIds: enemyDef?.lootCardIds ?? [],
-            faithReward: enemyDef?.faithReward ?? 0
+            faithReward: enemyDef?.faithReward ?? 0,
+            weaknesses: enemyDef?.weaknesses ?? [],
+            strengths: enemyDef?.strengths ?? [],
+            abilities: enemyDef?.abilities ?? []
         )
 
         // Fate deck: use engine state, or load fresh from content registry if empty
