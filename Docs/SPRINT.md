@@ -7,7 +7,7 @@
 
 ## ALL EPICS COMPLETE
 
-Total: 14 epics, 123 tasks, 368 engine tests + 219 app tests (0 failures), iOS + macOS builds clean.
+Total: 14 epics, 123 tasks, 606 SPM tests + 96 PackEditorKit tests = 702+ total (0 failures), iOS + macOS builds clean.
 
 ---
 
@@ -36,7 +36,7 @@ Total: 14 epics, 123 tasks, 368 engine tests + 219 app tests (0 failures), iOS +
 - EC-03: Behavior content (6 patterns, already wired)
 - EC-04: Mid-combat Save & Exit UI
 - EC-05: Legacy combat code deprecated
-- EC-06: 19 new tests (587 total, 0 failures)
+- EC-06: 19 new tests (702+ total, 0 failures)
 
 ## Epic 13: Post-Game System — CLOSED (2026-01-31)
 
@@ -57,7 +57,7 @@ Total: 14 epics, 123 tasks, 368 engine tests + 219 app tests (0 failures), iOS +
 - 6 bestiary fields: bestiaryName, category, lore, tactics, habitat, weakness
 - 60 localization keys (30 en + 30 ru)
 
-**Test results**: 577 total (358 engine + 219 app), 0 failures
+**Test results**: 702+ total (606 SPM + 96 PackEditorKit), 0 failures
 - 13 new gate tests in AuditGateTests
 - Coverage: persistence, progression, achievement unlock, statistics tracking
 
@@ -88,7 +88,7 @@ Total: 14 epics, 123 tasks, 368 engine tests + 219 app tests (0 failures), iOS +
 
 **Final metrics**:
 - Engine tests: 335 → 439
-- Total tests: 658 (439 engine + 219 app), 0 failures
+- Total tests: 702+ (606 SPM + 96 PackEditorKit), 0 failures
 - Coverage: ~97% of engine source files (up from 87%)
 
 ## Remaining Debt
@@ -111,8 +111,9 @@ None — all debt items resolved.
 
 ## Final Stats
 
-- **Engine tests**: 368 (0 failures, 0 skips)
-- **App tests**: 219 (0 failures)
+- **SPM tests**: 606 (0 failures, 0 skips)
+- **PackEditorKit tests**: 96 (0 failures)
+- **Total tests**: 702+
 - **Gate tests**: 98 across 9 files
 - **iOS Simulator**: builds clean (iPhone 17 Pro)
 - **macOS**: builds clean (PackEditor)
@@ -128,3 +129,9 @@ Full details:
 - Epic 12: `Docs/plans/2026-01-31-pack-editor-design.md` (plan file)
 - Epic 13: `Docs/plans/2026-01-31-post-game-system-design.md` (plan file)
 - Epic 14: `Docs/plans/2026-01-31-encounter-completion-design.md`
+
+## Milestone: PackEditor v2.3.0
+
+- PackEditorKit extracted as standalone SPM package (96 tests)
+- Fate Deck, Resonance, EnemyIntent systems fully integrated
+- Total test coverage: 606 SPM + 96 PackEditorKit = 702+ tests

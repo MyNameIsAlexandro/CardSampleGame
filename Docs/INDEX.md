@@ -6,7 +6,7 @@
 > Все участники проекта обязаны следовать данной карте.
 
 **Проект:** ECHO: Legends of the Veil (раб. назв. «Грань Миров»)
-**Последнее обновление:** 27 января 2026
+**Последнее обновление:** 31 января 2026
 
 ---
 
@@ -32,6 +32,7 @@
 | [PROJECT_BIBLE.md](./Design/PROJECT_BIBLE.md) | Единая точка входа: идея, механики, архитектура |
 | [GAME_DESIGN_DOCUMENT.md](./Design/GAME_DESIGN_DOCUMENT.md) | Полный GDD |
 | [EXPLORATION_CORE_DESIGN.md](./Design/EXPLORATION_CORE_DESIGN.md) | Дизайн механик исследования |
+| [ENCOUNTER_SYSTEM_DESIGN.md](./Design/ENCOUNTER_SYSTEM_DESIGN.md) | Дизайн системы энкаунтеров |
 
 ### Technical/ — Техническая документация
 Архитектура движка и реализация.
@@ -178,5 +179,5 @@ CardSampleGame/
 ## Контакты и ресурсы
 
 - **Репозиторий:** github.com/MyNameIsAlexandro/CardSampleGame
-- **Тесты:** 199 Xcode + 141 SPM = 340 passed, 0 failed
+- **Тесты:** 606+ SPM tests + Xcode tests (all passing)
 - **Build:** SUCCESS

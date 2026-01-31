@@ -436,7 +436,44 @@ protocol ProgressionPathProtocol {
 - ✅ Нельзя быть эффективным во всём
 - ✅ Прогресс влияет на доступные решения и финалы
 
-### 3.8 Victory / Defeat Engine
+### 3.8 Encounter System
+
+**Идея:** Data-driven AI поведение врагов.
+
+| Компонент | Ответственность |
+|-----------|-----------------|
+| `BehaviorDefinition` | Декларативное описание паттернов AI |
+| `ConditionParser` | Разбор условий активации поведений |
+| `KeywordInterpreter` | Интерпретация ключевых слов действий |
+
+Поведения врагов описываются в JSON и интерпретируются движком без хардкода логики.
+
+### 3.9 Fate / Resonance System
+
+**Идея:** Двухтрековый бой с колодой судьбы.
+
+| Компонент | Ответственность |
+|-----------|-----------------|
+| `FateCard` | Определение карты судьбы (атака/защита/навык) |
+| `FateDeckManager` | Управление колодой судьбы (тасовка, вытягивание, сброс) |
+| `ResonanceEngine` | Расчёт резонанса между картами и стихиями |
+| `EnemyIntent` | Отображение намерений врага перед ходом |
+
+Dual-track combat: физический урон + духовный резонанс. Карты судьбы вытягиваются из общей колоды и влияют на оба трека.
+
+### 3.10 Player Progression
+
+**Идея:** Пост-игровая прогрессия и коллекционирование.
+
+| Компонент | Ответственность |
+|-----------|-----------------|
+| `PlayerProfile` | Мета-профиль игрока между запусками |
+| `AchievementEngine` | Система достижений и наград |
+| `BestiaryTracker` | Коллекция встреченных врагов |
+
+Прогрессия сохраняется между прохождениями и открывает новый контент.
+
+### 3.11 Victory / Defeat Engine
 
 **Идея:** Финал — функция состояния мира и пути игрока.
 
@@ -880,6 +917,11 @@ PackAuthoring/                      # Authoring tools (separate target)
 ├── PackLoader.swift                # Load/validate JSON packs
 ├── PackCompiler.swift              # Compile JSON → binary .pack
 └── PackValidator.swift             # Cross-reference validation
+
+PackEditorKit/                      # Editor & simulation toolkit (96 tests)
+├── PackStore.swift                 # CRUD operations for pack content
+├── ContentCategory.swift           # Content category abstraction
+└── CombatSimulator.swift           # In-editor combat simulation
 
 PackCompilerTool/                   # CLI for pack development
 └── main.swift                      # imports PackAuthoring
