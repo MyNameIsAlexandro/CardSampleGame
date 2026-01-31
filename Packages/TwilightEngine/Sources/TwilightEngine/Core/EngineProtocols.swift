@@ -5,6 +5,25 @@ import Foundation
 // The engine is the "processor", the game content is the "cartridge".
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// MARK: - Core Engine Types
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/// Engine game phase enum
+public enum EngineGamePhase: String, Codable {
+    case setup
+    case playing
+    case paused
+    case ended
+}
+
+/// Game end result
+public enum GameEndResult: Equatable {
+    case victory(endingId: String)
+    case defeat(reason: String)
+    case abandoned
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // MARK: - 1. Time System
 // ═══════════════════════════════════════════════════════════════════════════════
 

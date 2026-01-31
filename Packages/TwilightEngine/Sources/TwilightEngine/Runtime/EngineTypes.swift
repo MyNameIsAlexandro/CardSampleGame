@@ -123,4 +123,4 @@ public struct DayEvent: Identifiable {
 }
 
 // MARK: - Game End Result
-// Note: GameEndResult is defined in Core/GameLoop.swift
+// Note: GameEndResult is defined in Core/EngineProtocols.swift
