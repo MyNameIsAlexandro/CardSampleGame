@@ -5,27 +5,38 @@ import PackEditorKit
 struct RegionEditor: View {
     @Binding var region: RegionDefinition
 
+    private var anchorIdBinding: Binding<String> {
+        Binding<String>(
+            get: { region.anchorId ?? "" },
+            set: { region.anchorId = $0.isEmpty ? nil : $0 }
+        )
+    }
+
     var body: some View {
         Form {
             Section("Identity") {
                 LabeledContent("ID", value: region.id)
-                LabeledContent("Title (EN)", value: region.title.displayString)
-                LabeledContent("Description", value: region.description.displayString)
-                LabeledContent("Type", value: region.regionType)
+                LocalizedTextField(label: "Title", text: $region.title)
+                    .validated(region.title.displayString.isEmpty ? .error("Title is required") : nil)
+                LocalizedTextField(label: "Description", text: $region.description)
+                TextField("Region Type", text: $region.regionType)
+                    .validated(region.regionType.isEmpty ? .error("Region type is required") : nil)
             }
 
             Section("Settings") {
-                LabeledContent("Initially Discovered", value: region.initiallyDiscovered ? "Yes" : "No")
-                LabeledContent("Initial State", value: region.initialState.rawValue)
-                LabeledContent("Degradation Weight", value: "\(region.degradationWeight)")
-                if let anchorId = region.anchorId {
-                    LabeledContent("Anchor", value: anchorId)
+                Toggle("Initially Discovered", isOn: $region.initiallyDiscovered)
+                Picker("Initial State", selection: $region.initialState) {
+                    ForEach(RegionStateType.allCases, id: \.self) { state in
+                        Text(state.rawValue).tag(state)
+                    }
                 }
+                IntField(label: "Degradation Weight", value: $region.degradationWeight)
+                TextField("Anchor ID", text: anchorIdBinding)
             }
 
             Section("Connections") {
-                LabeledContent("Neighbors", value: region.neighborIds.joined(separator: ", "))
-                LabeledContent("Event Pools", value: region.eventPoolIds.joined(separator: ", "))
+                StringListEditor(label: "Neighbors", items: $region.neighborIds)
+                StringListEditor(label: "Event Pools", items: $region.eventPoolIds)
             }
         }
         .formStyle(.grouped)

@@ -11,50 +11,50 @@ public struct EventDefinition: GameDefinition {
     // MARK: - Identity
 
     /// Unique event identifier (e.g., "event_forest_whispers")
-    public let id: String
+    public var id: String
 
     // MARK: - Localized Content
 
     /// Event title (supports inline LocalizedString or StringKey)
-    public let title: LocalizableText
+    public var title: LocalizableText
 
     /// Event body/narrative text (supports inline LocalizedString or StringKey)
-    public let body: LocalizableText
+    public var body: LocalizableText
 
     // MARK: - Type Classification
 
     /// Event kind: inline or mini-game
-    public let eventKind: EventKind
+    public var eventKind: EventKind
 
     // MARK: - Availability
 
     /// Conditions for this event to appear
-    public let availability: Availability
+    public var availability: Availability
 
     /// Event pool IDs this event belongs to
-    public let poolIds: [String]
+    public var poolIds: [String]
 
     /// Weight for random selection (higher = more likely)
-    public let weight: Int
+    public var weight: Int
 
     // MARK: - Behavior Flags
 
     /// If true, event can only occur once per playthrough
-    public let isOneTime: Bool
+    public var isOneTime: Bool
 
     /// If true, event resolves instantly (0 time cost)
-    public let isInstant: Bool
+    public var isInstant: Bool
 
     /// Cooldown in turns before event can reoccur (0 = no cooldown)
-    public let cooldown: Int
+    public var cooldown: Int
 
     // MARK: - Content
 
     /// Choices available in this event (for inline events)
-    public let choices: [ChoiceDefinition]
+    public var choices: [ChoiceDefinition]
 
     /// Mini-game challenge (for mini-game events)
-    public let miniGameChallenge: MiniGameChallengeDefinition?
+    public var miniGameChallenge: MiniGameChallengeDefinition?
 
     // MARK: - Initialization
 
@@ -182,25 +182,25 @@ public struct ChoiceDefinition: Codable, Hashable, Identifiable {
     // MARK: - Identity
 
     /// Unique choice identifier within the event
-    public let id: String
+    public var id: String
 
     // MARK: - Localized Content
 
     /// Choice button text (supports inline LocalizedString or StringKey)
-    public let label: LocalizableText
+    public var label: LocalizableText
 
     /// Optional choice tooltip/description (supports inline LocalizedString or StringKey)
-    public let tooltip: LocalizableText?
+    public var tooltip: LocalizableText?
 
     // MARK: - Requirements
 
     /// Conditions for this choice to be available
-    public let requirements: ChoiceRequirements?
+    public var requirements: ChoiceRequirements?
 
     // MARK: - Consequences
 
     /// Outcomes when this choice is selected
-    public let consequences: ChoiceConsequences
+    public var consequences: ChoiceConsequences
 
     // MARK: - Initialization
 
@@ -224,19 +224,19 @@ public struct ChoiceDefinition: Codable, Hashable, Identifiable {
 /// Requirements that must be met to select a choice
 public struct ChoiceRequirements: Codable, Hashable {
     /// Minimum resource values required
-    public let minResources: [String: Int]
+    public var minResources: [String: Int]
 
     /// Flags that must be set
-    public let requiredFlags: [String]
+    public var requiredFlags: [String]
 
     /// Flags that must NOT be set
-    public let forbiddenFlags: [String]
+    public var forbiddenFlags: [String]
 
     /// Minimum balance required (nil = no minimum)
-    public let minBalance: Int?
+    public var minBalance: Int?
 
     /// Maximum balance allowed (nil = no maximum)
-    public let maxBalance: Int?
+    public var maxBalance: Int?
 
     public init(
         minResources: [String: Int] = [:],
@@ -309,28 +309,28 @@ public struct ChoiceRequirements: Codable, Hashable {
 /// Outcomes that occur when a choice is selected
 public struct ChoiceConsequences: Codable, Hashable {
     /// Resource changes (costs and gains)
-    public let resourceChanges: [String: Int]
+    public var resourceChanges: [String: Int]
 
     /// Flags to set
-    public let setFlags: [String]
+    public var setFlags: [String]
 
     /// Flags to clear
-    public let clearFlags: [String]
+    public var clearFlags: [String]
 
     /// Balance change (-100 to +100)
-    public let balanceDelta: Int
+    public var balanceDelta: Int
 
     /// Region state change (if any)
-    public let regionStateChange: RegionStateChange?
+    public var regionStateChange: RegionStateChange?
 
     /// Quest progress trigger
-    public let questProgress: QuestProgressTrigger?
+    public var questProgress: QuestProgressTrigger?
 
     /// Follow-up event to trigger (if any)
-    public let triggerEventId: String?
+    public var triggerEventId: String?
 
     /// Narrative result key (for UI display)
-    public let resultKey: String?
+    public var resultKey: String?
 
     public init(
         resourceChanges: [String: Int] = [:],
@@ -361,13 +361,13 @@ public struct ChoiceConsequences: Codable, Hashable {
 /// Region state change triggered by choice
 public struct RegionStateChange: Codable, Hashable {
     /// Target region ID (nil = current region)
-    public let regionId: String?
+    public var regionId: String?
 
     /// New state to set
-    public let newState: RegionStateType?
+    public var newState: RegionStateType?
 
     /// State transition (degrade/restore)
-    public let transition: StateTransition?
+    public var transition: StateTransition?
 
     public enum StateTransition: String, Codable, Hashable {
         case degrade
@@ -377,9 +377,9 @@ public struct RegionStateChange: Codable, Hashable {
 
 /// Quest progress trigger
 public struct QuestProgressTrigger: Codable, Hashable {
-    public let questId: String
-    public let objectiveId: String?
-    public let action: QuestAction
+    public var questId: String
+    public var objectiveId: String?
+    public var action: QuestAction
 
     public enum QuestAction: String, Codable, Hashable {
         case advance      // Move to next objective

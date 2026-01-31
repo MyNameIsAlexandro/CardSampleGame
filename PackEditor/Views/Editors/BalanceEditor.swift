@@ -7,85 +7,50 @@ struct BalanceEditor: View {
 
     var body: some View {
         Form {
+            // MARK: - Resources
             Section("Resources") {
-                LabeledContent("Starting Health", value: "\(config.resources.startingHealth)")
-                LabeledContent("Max Health", value: "\(config.resources.maxHealth)")
-                LabeledContent("Starting Faith", value: "\(config.resources.startingFaith)")
-                LabeledContent("Max Faith", value: "\(config.resources.maxFaith)")
-                LabeledContent("Starting Supplies", value: "\(config.resources.startingSupplies)")
-                LabeledContent("Max Supplies", value: "\(config.resources.maxSupplies)")
-                LabeledContent("Starting Gold", value: "\(config.resources.startingGold)")
-                LabeledContent("Max Gold", value: "\(config.resources.maxGold)")
-                if let restHeal = config.resources.restHealAmount {
-                    LabeledContent("Rest Heal Amount", value: "\(restHeal)")
-                }
-                if let startingBalance = config.resources.startingBalance {
-                    LabeledContent("Starting Balance", value: "\(startingBalance)")
-                }
+                IntField(label: "Starting Health", value: $config.resources.startingHealth)
+                IntField(label: "Max Health", value: $config.resources.maxHealth)
+                IntField(label: "Starting Faith", value: $config.resources.startingFaith)
+                IntField(label: "Max Faith", value: $config.resources.maxFaith)
+                IntField(label: "Starting Supplies", value: $config.resources.startingSupplies)
+                IntField(label: "Max Supplies", value: $config.resources.maxSupplies)
+                IntField(label: "Starting Gold", value: $config.resources.startingGold)
+                IntField(label: "Max Gold", value: $config.resources.maxGold)
+                IntField(label: "Rest Heal Amount", value: optionalIntBinding($config.resources.restHealAmount))
+                IntField(label: "Starting Balance", value: optionalIntBinding($config.resources.startingBalance))
             }
 
+            // MARK: - Pressure
             Section("Pressure") {
-                LabeledContent("Starting Pressure", value: "\(config.pressure.startingPressure)")
-                LabeledContent("Min Pressure", value: "\(config.pressure.minPressure)")
-                LabeledContent("Max Pressure", value: "\(config.pressure.maxPressure)")
-                LabeledContent("Pressure Per Turn", value: "\(config.pressure.pressurePerTurn)")
-                if let interval = config.pressure.tensionTickInterval {
-                    LabeledContent("Tension Tick Interval", value: "\(interval)")
-                }
-                if let interval = config.pressure.escalationInterval {
-                    LabeledContent("Escalation Interval", value: "\(interval)")
-                }
+                IntField(label: "Starting Pressure", value: $config.pressure.startingPressure)
+                IntField(label: "Min Pressure", value: $config.pressure.minPressure)
+                IntField(label: "Max Pressure", value: $config.pressure.maxPressure)
+                IntField(label: "Pressure Per Turn", value: $config.pressure.pressurePerTurn)
+                IntField(label: "Tension Tick Interval", value: optionalIntBinding($config.pressure.tensionTickInterval))
+                IntField(label: "Escalation Interval", value: optionalIntBinding($config.pressure.escalationInterval))
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Thresholds").fontWeight(.semibold)
-                    HStack {
-                        Text("Warning")
-                        Spacer()
-                        Text("\(config.pressure.thresholds.warning)").foregroundStyle(.secondary)
-                    }
-                    HStack {
-                        Text("Critical")
-                        Spacer()
-                        Text("\(config.pressure.thresholds.critical)").foregroundStyle(.secondary)
-                    }
-                    HStack {
-                        Text("Catastrophic")
-                        Spacer()
-                        Text("\(config.pressure.thresholds.catastrophic)").foregroundStyle(.secondary)
-                    }
+                    IntField(label: "Warning", value: $config.pressure.thresholds.warning)
+                    IntField(label: "Critical", value: $config.pressure.thresholds.critical)
+                    IntField(label: "Catastrophic", value: $config.pressure.thresholds.catastrophic)
                 }
                 .padding(.vertical, 4)
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Degradation").fontWeight(.semibold)
-                    HStack {
-                        Text("Warning Chance")
-                        Spacer()
-                        Text(String(format: "%.1f%%", config.pressure.degradation.warningChance * 100)).foregroundStyle(.secondary)
-                    }
-                    HStack {
-                        Text("Critical Chance")
-                        Spacer()
-                        Text(String(format: "%.1f%%", config.pressure.degradation.criticalChance * 100)).foregroundStyle(.secondary)
-                    }
-                    if let catastrophicChance = config.pressure.degradation.catastrophicChance {
-                        HStack {
-                            Text("Catastrophic Chance")
-                            Spacer()
-                            Text(String(format: "%.1f%%", catastrophicChance * 100)).foregroundStyle(.secondary)
-                        }
-                    }
-                    HStack {
-                        Text("Anchor Decay Chance")
-                        Spacer()
-                        Text(String(format: "%.1f%%", config.pressure.degradation.anchorDecayChance * 100)).foregroundStyle(.secondary)
-                    }
+                    TextField("Warning Chance", value: $config.pressure.degradation.warningChance, format: .number)
+                    TextField("Critical Chance", value: $config.pressure.degradation.criticalChance, format: .number)
+                    TextField("Catastrophic Chance", value: optionalDoubleBinding($config.pressure.degradation.catastrophicChance), format: .number)
+                    TextField("Anchor Decay Chance", value: $config.pressure.degradation.anchorDecayChance, format: .number)
                 }
                 .padding(.vertical, 4)
             }
 
+            // MARK: - Combat (read-only, optional struct)
             if let combat = config.combat {
-                Section("Combat") {
+                Section("Combat (read-only)") {
                     LabeledContent("Base Damage", value: "\(combat.baseDamage)")
                     LabeledContent("Power Modifier", value: String(format: "%.2f", combat.powerModifier))
                     LabeledContent("Defense Reduction", value: String(format: "%.2f", combat.defenseReduction))
@@ -116,39 +81,32 @@ struct BalanceEditor: View {
                 }
             }
 
+            // MARK: - Time
             Section("Time") {
-                LabeledContent("Starting Time", value: "\(config.time.startingTime)")
-                if let maxDays = config.time.maxDays {
-                    LabeledContent("Max Days", value: "\(maxDays)")
-                }
-                LabeledContent("Travel Cost", value: "\(config.time.travelCost)")
-                LabeledContent("Explore Cost", value: "\(config.time.exploreCost)")
-                LabeledContent("Rest Cost", value: "\(config.time.restCost)")
-                if let strengthenCost = config.time.strengthenAnchorCost {
-                    LabeledContent("Strengthen Anchor Cost", value: "\(strengthenCost)")
-                }
-                if let instantCost = config.time.instantCost {
-                    LabeledContent("Instant Cost", value: "\(instantCost)")
-                }
+                IntField(label: "Starting Time", value: $config.time.startingTime)
+                IntField(label: "Max Days", value: optionalIntBinding($config.time.maxDays))
+                IntField(label: "Travel Cost", value: $config.time.travelCost)
+                IntField(label: "Explore Cost", value: $config.time.exploreCost)
+                IntField(label: "Rest Cost", value: $config.time.restCost)
+                IntField(label: "Strengthen Anchor Cost", value: optionalIntBinding($config.time.strengthenAnchorCost))
+                IntField(label: "Instant Cost", value: optionalIntBinding($config.time.instantCost))
             }
 
+            // MARK: - Anchor
             Section("Anchor") {
-                LabeledContent("Max Integrity", value: "\(config.anchor.maxIntegrity)")
-                LabeledContent("Strengthen Amount", value: "\(config.anchor.strengthenAmount)")
-                LabeledContent("Strengthen Cost", value: "\(config.anchor.strengthenCost)")
-                LabeledContent("Stable Threshold", value: "\(config.anchor.stableThreshold)")
-                LabeledContent("Breach Threshold", value: "\(config.anchor.breachThreshold)")
-                LabeledContent("Decay Per Turn", value: "\(config.anchor.decayPerTurn)")
+                IntField(label: "Max Integrity", value: $config.anchor.maxIntegrity)
+                IntField(label: "Strengthen Amount", value: $config.anchor.strengthenAmount)
+                IntField(label: "Strengthen Cost", value: $config.anchor.strengthenCost)
+                IntField(label: "Stable Threshold", value: $config.anchor.stableThreshold)
+                IntField(label: "Breach Threshold", value: $config.anchor.breachThreshold)
+                IntField(label: "Decay Per Turn", value: $config.anchor.decayPerTurn)
             }
 
+            // MARK: - End Conditions
             Section("End Conditions") {
-                LabeledContent("Death Health", value: "\(config.endConditions.deathHealth)")
-                if let pressureLoss = config.endConditions.pressureLoss {
-                    LabeledContent("Pressure Loss", value: "\(pressureLoss)")
-                }
-                if let breachLoss = config.endConditions.breachLoss {
-                    LabeledContent("Breach Loss", value: "\(breachLoss)")
-                }
+                IntField(label: "Death Health", value: $config.endConditions.deathHealth)
+                IntField(label: "Pressure Loss", value: optionalIntBinding($config.endConditions.pressureLoss))
+                IntField(label: "Breach Loss", value: optionalIntBinding($config.endConditions.breachLoss))
                 if !config.endConditions.victoryQuests.isEmpty {
                     LabeledContent("Victory Quests", value: config.endConditions.victoryQuests.joined(separator: ", "))
                 }
@@ -160,8 +118,9 @@ struct BalanceEditor: View {
                 }
             }
 
+            // MARK: - Balance System (read-only, optional struct)
             if let balanceSystem = config.balanceSystem {
-                Section("Balance System") {
+                Section("Balance System (read-only)") {
                     LabeledContent("Min", value: "\(balanceSystem.min)")
                     LabeledContent("Max", value: "\(balanceSystem.max)")
                     LabeledContent("Initial", value: "\(balanceSystem.initial)")
@@ -171,5 +130,23 @@ struct BalanceEditor: View {
             }
         }
         .formStyle(.grouped)
+    }
+
+    // MARK: - Helper Bindings
+
+    /// Converts an optional Int binding to a non-optional Int binding (nil ↔ 0).
+    private func optionalIntBinding(_ source: Binding<Int?>) -> Binding<Int> {
+        Binding<Int>(
+            get: { source.wrappedValue ?? 0 },
+            set: { newValue in source.wrappedValue = newValue == 0 ? nil : newValue }
+        )
+    }
+
+    /// Converts an optional Double binding to a non-optional Double binding (nil ↔ 0.0).
+    private func optionalDoubleBinding(_ source: Binding<Double?>) -> Binding<Double> {
+        Binding<Double>(
+            get: { source.wrappedValue ?? 0.0 },
+            set: { newValue in source.wrappedValue = newValue == 0.0 ? nil : newValue }
+        )
     }
 }

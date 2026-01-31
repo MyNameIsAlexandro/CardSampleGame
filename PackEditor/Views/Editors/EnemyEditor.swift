@@ -5,66 +5,132 @@ import PackEditorKit
 struct EnemyEditor: View {
     @Binding var enemy: EnemyDefinition
 
+    private var enemyTypeBinding: Binding<String> {
+        Binding<String>(
+            get: { enemy.enemyType.rawValue },
+            set: { if let t = EnemyType(rawValue: $0) { enemy.enemyType = t } }
+        )
+    }
+
+    private var rarityBinding: Binding<String> {
+        Binding<String>(
+            get: { enemy.rarity.rawValue },
+            set: { if let r = CardRarity(rawValue: $0) { enemy.rarity = r } }
+        )
+    }
+
+    private var willBinding: Binding<Int> {
+        Binding<Int>(
+            get: { enemy.will ?? 0 },
+            set: { enemy.will = $0 == 0 ? nil : $0 }
+        )
+    }
+
+    // MARK: - Resonance Helpers
+
+    private var resonanceKeys: [String] {
+        (enemy.resonanceBehavior ?? [:]).keys.sorted()
+    }
+
+    private func modifierBinding(for key: String) -> Binding<EnemyModifier> {
+        Binding(
+            get: { enemy.resonanceBehavior?[key] ?? EnemyModifier() },
+            set: { enemy.resonanceBehavior?[key] = $0 }
+        )
+    }
+
     var body: some View {
         Form {
             Section("Identity") {
                 LabeledContent("ID", value: enemy.id)
-                LabeledContent("Name (EN)", value: enemy.name.displayString)
-                LabeledContent("Type", value: enemy.enemyType.rawValue)
-                LabeledContent("Rarity", value: enemy.rarity.rawValue)
-                LabeledContent("Difficulty", value: "\(enemy.difficulty)")
+                LocalizedTextField(label: "Name", text: $enemy.name)
+                    .validated(enemy.name.displayString.isEmpty ? .error("Name is required") : nil)
+                LocalizedTextField(label: "Description", text: $enemy.description)
+                TextField("Enemy Type", text: enemyTypeBinding)
+                TextField("Rarity", text: rarityBinding)
+                IntField(label: "Difficulty", value: $enemy.difficulty)
             }
 
             Section("Stats") {
-                LabeledContent("Health", value: "\(enemy.health)")
-                LabeledContent("Power", value: "\(enemy.power)")
-                LabeledContent("Defense", value: "\(enemy.defense)")
-                if let will = enemy.will {
-                    LabeledContent("Will", value: "\(will)")
-                }
-                LabeledContent("Faith Reward", value: "\(enemy.faithReward)")
-                LabeledContent("Balance Delta", value: "\(enemy.balanceDelta)")
+                IntField(label: "Health", value: $enemy.health)
+                    .validated(enemy.health <= 0 ? .error("Health must be positive") : nil)
+                IntField(label: "Power", value: $enemy.power)
+                IntField(label: "Defense", value: $enemy.defense)
+                IntField(label: "Will", value: willBinding)
+                IntField(label: "Faith Reward", value: $enemy.faithReward)
+                IntField(label: "Balance Delta", value: $enemy.balanceDelta)
             }
 
             Section("Loot") {
-                if enemy.lootCardIds.isEmpty {
-                    Text("No loot cards").foregroundStyle(.secondary)
-                } else {
-                    ForEach(enemy.lootCardIds, id: \.self) { cardId in
-                        Text(cardId)
-                    }
-                }
+                StringListEditor(label: "Loot Card IDs", items: $enemy.lootCardIds)
             }
 
             Section("Resonance Behavior") {
-                if let behaviors = enemy.resonanceBehavior, !behaviors.isEmpty {
-                    ForEach(behaviors.keys.sorted(), id: \.self) { zone in
-                        if let mod = behaviors[zone] {
-                            HStack {
-                                Text(zone).fontWeight(.medium).frame(width: 80, alignment: .leading)
-                                Text("P:\(mod.powerDelta)").frame(width: 50)
-                                Text("D:\(mod.defenseDelta)").frame(width: 50)
-                                Text("H:\(mod.healthDelta)").frame(width: 50)
-                                Text("W:\(mod.willDelta)").frame(width: 50)
-                            }
-                            .font(.caption)
-                        }
+                if enemy.resonanceBehavior == nil {
+                    Text("No resonance modifiers").foregroundStyle(.secondary)
+                    Button("Add Zone") {
+                        enemy.resonanceBehavior = [:]
                     }
                 } else {
-                    Text("No resonance modifiers").foregroundStyle(.secondary)
+                    ForEach(resonanceKeys, id: \.self) { zone in
+                        VStack(alignment: .leading, spacing: 6) {
+                            LabeledContent("Zone", value: zone)
+                            IntField(label: "Power Delta", value: Binding(
+                                get: { modifierBinding(for: zone).wrappedValue.powerDelta },
+                                set: { modifierBinding(for: zone).wrappedValue.powerDelta = $0 }
+                            ))
+                            IntField(label: "Defense Delta", value: Binding(
+                                get: { modifierBinding(for: zone).wrappedValue.defenseDelta },
+                                set: { modifierBinding(for: zone).wrappedValue.defenseDelta = $0 }
+                            ))
+                            IntField(label: "Health Delta", value: Binding(
+                                get: { modifierBinding(for: zone).wrappedValue.healthDelta },
+                                set: { modifierBinding(for: zone).wrappedValue.healthDelta = $0 }
+                            ))
+                            IntField(label: "Will Delta", value: Binding(
+                                get: { modifierBinding(for: zone).wrappedValue.willDelta },
+                                set: { modifierBinding(for: zone).wrappedValue.willDelta = $0 }
+                            ))
+                            Button(role: .destructive) {
+                                enemy.resonanceBehavior?.removeValue(forKey: zone)
+                            } label: {
+                                Label("Remove Zone", systemImage: "minus.circle")
+                            }
+                        }
+                        .padding(.vertical, 4)
+                    }
+                    Button("Add Zone") {
+                        enemy.resonanceBehavior?["newZone"] = EnemyModifier()
+                    }
                 }
             }
 
             Section("Abilities (\(enemy.abilities.count))") {
-                if enemy.abilities.isEmpty {
-                    Text("No abilities").foregroundStyle(.secondary)
-                } else {
-                    ForEach(enemy.abilities) { ability in
-                        VStack(alignment: .leading) {
-                            Text(ability.name.displayString).fontWeight(.medium)
-                            Text(ability.description.displayString).font(.caption).foregroundStyle(.secondary)
+                ForEach(enemy.abilities.indices, id: \.self) { index in
+                    VStack(alignment: .leading, spacing: 6) {
+                        TextField("ID", text: $enemy.abilities[index].id)
+                        LocalizedTextField(label: "Name", text: $enemy.abilities[index].name)
+                        LocalizedTextField(label: "Description", text: $enemy.abilities[index].description)
+                        LabeledContent("Effect", value: String(describing: enemy.abilities[index].effect))
+                        Button(role: .destructive) {
+                            enemy.abilities.remove(at: index)
+                        } label: {
+                            Label("Remove Ability", systemImage: "minus.circle")
                         }
                     }
+                    .padding(.vertical, 4)
+                }
+                Button {
+                    enemy.abilities.append(
+                        EnemyAbility(
+                            id: "ability_new",
+                            name: .inline(LocalizedString(en: "New Ability", ru: "Новая способность")),
+                            description: .inline(LocalizedString(en: "Description", ru: "Описание")),
+                            effect: .bonusDamage(0)
+                        )
+                    )
+                } label: {
+                    Label("Add Ability", systemImage: "plus.circle")
                 }
             }
         }

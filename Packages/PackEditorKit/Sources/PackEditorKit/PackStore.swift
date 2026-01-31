@@ -109,6 +109,7 @@ public class PackStore {
 
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        encoder.keyEncodingStrategy = .convertToSnakeCase
 
         if let path = manifest.regionsPath {
             let data = try encoder.encode(Array(regions.values))
@@ -144,6 +145,194 @@ public class PackStore {
         }
 
         isDirty = false
+    }
+
+    // MARK: - Add Entity
+
+    @discardableResult
+    public func addEntity(for category: ContentCategory) -> String? {
+        let uuid = UUID().uuidString.prefix(8).lowercased()
+
+        switch category {
+        case .enemies:
+            let id = "enemy_new_\(uuid)"
+            enemies[id] = EnemyDefinition(
+                id: id,
+                name: .inline(LocalizedString(en: "New Enemy", ru: "Новый враг")),
+                description: .inline(LocalizedString(en: "Description", ru: "Описание")),
+                health: 10, power: 2, defense: 0
+            )
+            isDirty = true
+            return id
+
+        case .cards:
+            let id = "card_new_\(uuid)"
+            cards[id] = StandardCardDefinition(
+                id: id,
+                name: .inline(LocalizedString(en: "New Card", ru: "Новая карта")),
+                cardType: .item,
+                description: .inline(LocalizedString(en: "Description", ru: "Описание"))
+            )
+            isDirty = true
+            return id
+
+        case .events:
+            let id = "event_new_\(uuid)"
+            events[id] = EventDefinition(
+                id: id,
+                title: .inline(LocalizedString(en: "New Event", ru: "Новое событие")),
+                body: .inline(LocalizedString(en: "Event body", ru: "Текст события"))
+            )
+            isDirty = true
+            return id
+
+        case .regions:
+            let id = "region_new_\(uuid)"
+            regions[id] = RegionDefinition(
+                id: id,
+                title: .inline(LocalizedString(en: "New Region", ru: "Новый регион")),
+                description: .inline(LocalizedString(en: "Description", ru: "Описание")),
+                regionType: "default",
+                neighborIds: []
+            )
+            isDirty = true
+            return id
+
+        case .heroes:
+            let id = "hero_new_\(uuid)"
+            heroes[id] = StandardHeroDefinition(
+                id: id,
+                name: .inline(LocalizedString(en: "New Hero", ru: "Новый герой")),
+                description: .inline(LocalizedString(en: "Description", ru: "Описание")),
+                icon: "🛡️",
+                baseStats: HeroStats(
+                    health: 20, maxHealth: 20,
+                    strength: 3, dexterity: 3, constitution: 3,
+                    intelligence: 3, wisdom: 3, charisma: 3,
+                    faith: 5, maxFaith: 10, startingBalance: 0
+                ),
+                specialAbility: HeroAbility(
+                    id: "\(id)_ability",
+                    name: .inline(LocalizedString(en: "New Ability", ru: "Новая способность")),
+                    description: .inline(LocalizedString(en: "Ability description", ru: "Описание способности")),
+                    icon: "⚡",
+                    type: .passive,
+                    trigger: .always,
+                    condition: nil,
+                    effects: [],
+                    cooldown: 0,
+                    cost: nil
+                )
+            )
+            isDirty = true
+            return id
+
+        case .fateCards:
+            let id = "fate_new_\(uuid)"
+            fateCards[id] = FateCard(
+                id: id, modifier: 0, name: "New Fate Card"
+            )
+            isDirty = true
+            return id
+
+        case .quests:
+            let id = "quest_new_\(uuid)"
+            quests[id] = QuestDefinition(
+                id: id,
+                title: .inline(LocalizedString(en: "New Quest", ru: "Новый квест")),
+                description: .inline(LocalizedString(en: "Description", ru: "Описание")),
+                objectives: []
+            )
+            isDirty = true
+            return id
+
+        case .balance:
+            return nil // singleton
+        }
+    }
+
+    // MARK: - Duplicate Entity
+
+    @discardableResult
+    public func duplicateEntity(id: String, for category: ContentCategory) -> String? {
+        let uuid = UUID().uuidString.prefix(8).lowercased()
+
+        switch category {
+        case .enemies:
+            guard var copy = enemies[id] else { return nil }
+            let newId = "\(id)_copy_\(uuid)"
+            copy.id = newId
+            enemies[newId] = copy
+            isDirty = true
+            return newId
+
+        case .cards:
+            guard var copy = cards[id] else { return nil }
+            let newId = "\(id)_copy_\(uuid)"
+            copy.id = newId
+            cards[newId] = copy
+            isDirty = true
+            return newId
+
+        case .events:
+            guard var copy = events[id] else { return nil }
+            let newId = "\(id)_copy_\(uuid)"
+            copy.id = newId
+            events[newId] = copy
+            isDirty = true
+            return newId
+
+        case .regions:
+            guard var copy = regions[id] else { return nil }
+            let newId = "\(id)_copy_\(uuid)"
+            copy.id = newId
+            regions[newId] = copy
+            isDirty = true
+            return newId
+
+        case .heroes:
+            guard var copy = heroes[id] else { return nil }
+            let newId = "\(id)_copy_\(uuid)"
+            copy.id = newId
+            heroes[newId] = copy
+            isDirty = true
+            return newId
+
+        case .fateCards:
+            guard var copy = fateCards[id] else { return nil }
+            let newId = "\(id)_copy_\(uuid)"
+            copy.id = newId
+            fateCards[newId] = copy
+            isDirty = true
+            return newId
+
+        case .quests:
+            guard var copy = quests[id] else { return nil }
+            let newId = "\(id)_copy_\(uuid)"
+            copy.id = newId
+            quests[newId] = copy
+            isDirty = true
+            return newId
+
+        case .balance:
+            return nil
+        }
+    }
+
+    // MARK: - Delete Entity
+
+    public func deleteEntity(id: String, for category: ContentCategory) {
+        switch category {
+        case .enemies: enemies.removeValue(forKey: id)
+        case .cards: cards.removeValue(forKey: id)
+        case .events: events.removeValue(forKey: id)
+        case .regions: regions.removeValue(forKey: id)
+        case .heroes: heroes.removeValue(forKey: id)
+        case .fateCards: fateCards.removeValue(forKey: id)
+        case .quests: quests.removeValue(forKey: id)
+        case .balance: return // can't delete singleton
+        }
+        isDirty = true
     }
 
     // MARK: - Validate

@@ -82,6 +82,10 @@
 		PEB0040000000000PE000001 /* EntityListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0040000000000PE000001 /* EntityListView.swift */; };
 		PEB0050000000000PE000001 /* EditorToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0050000000000PE000001 /* EditorToolbar.swift */; };
 		PEB0060000000000PE000001 /* LocalizedTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0060000000000PE000001 /* LocalizedTextField.swift */; };
+		PEB0060100000000PE000001 /* IntField.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0060100000000PE000001 /* IntField.swift */; };
+		PEB0060200000000PE000001 /* StringListEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0060200000000PE000001 /* StringListEditor.swift */; };
+		PEB0060300000000PE000001 /* OptionalSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0060300000000PE000001 /* OptionalSection.swift */; };
+		PEB0060400000000PE000001 /* FieldValidation.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0060400000000PE000001 /* FieldValidation.swift */; };
 		PEB0070000000000PE000001 /* ValidationBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0070000000000PE000001 /* ValidationBadge.swift */; };
 		PEB0080000000000PE000001 /* EnemyEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0080000000000PE000001 /* EnemyEditor.swift */; };
 		PEB0090000000000PE000001 /* CardEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0090000000000PE000001 /* CardEditor.swift */; };
@@ -180,6 +184,10 @@
 		PEF0040000000000PE000001 /* EntityListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntityListView.swift; sourceTree = "<group>"; };
 		PEF0050000000000PE000001 /* EditorToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorToolbar.swift; sourceTree = "<group>"; };
 		PEF0060000000000PE000001 /* LocalizedTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizedTextField.swift; sourceTree = "<group>"; };
+		PEF0060100000000PE000001 /* IntField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntField.swift; sourceTree = "<group>"; };
+		PEF0060200000000PE000001 /* StringListEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringListEditor.swift; sourceTree = "<group>"; };
+		PEF0060300000000PE000001 /* OptionalSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionalSection.swift; sourceTree = "<group>"; };
+		PEF0060400000000PE000001 /* FieldValidation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FieldValidation.swift; sourceTree = "<group>"; };
 		PEF0070000000000PE000001 /* ValidationBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidationBadge.swift; sourceTree = "<group>"; };
 		PEF0080000000000PE000001 /* EnemyEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemyEditor.swift; sourceTree = "<group>"; };
 		PEF0090000000000PE000001 /* CardEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardEditor.swift; sourceTree = "<group>"; };
@@ -462,6 +470,10 @@
 			isa = PBXGroup;
 			children = (
 				PEF0060000000000PE000001 /* LocalizedTextField.swift */,
+				PEF0060100000000PE000001 /* IntField.swift */,
+				PEF0060200000000PE000001 /* StringListEditor.swift */,
+				PEF0060300000000PE000001 /* OptionalSection.swift */,
+				PEF0060400000000PE000001 /* FieldValidation.swift */,
 				PEF0070000000000PE000001 /* ValidationBadge.swift */,
 			);
 			path = Shared;
@@ -721,6 +733,10 @@
 				PEB0040000000000PE000001 /* EntityListView.swift in Sources */,
 				PEB0050000000000PE000001 /* EditorToolbar.swift in Sources */,
 				PEB0060000000000PE000001 /* LocalizedTextField.swift in Sources */,
+				PEB0060100000000PE000001 /* IntField.swift in Sources */,
+				PEB0060200000000PE000001 /* StringListEditor.swift in Sources */,
+				PEB0060300000000PE000001 /* OptionalSection.swift in Sources */,
+				PEB0060400000000PE000001 /* FieldValidation.swift in Sources */,
 				PEB0070000000000PE000001 /* ValidationBadge.swift in Sources */,
 				PEB0080000000000PE000001 /* EnemyEditor.swift in Sources */,
 				PEB0090000000000PE000001 /* CardEditor.swift in Sources */,

@@ -2,17 +2,17 @@ import Foundation
 
 /// Structure with hero stats
 public struct HeroStats: Codable, Equatable {
-    public let health: Int
-    public let maxHealth: Int
-    public let strength: Int
-    public let dexterity: Int
-    public let constitution: Int
-    public let intelligence: Int
-    public let wisdom: Int
-    public let charisma: Int
-    public let faith: Int
-    public let maxFaith: Int
-    public let startingBalance: Int
+    public var health: Int
+    public var maxHealth: Int
+    public var strength: Int
+    public var dexterity: Int
+    public var constitution: Int
+    public var intelligence: Int
+    public var wisdom: Int
+    public var charisma: Int
+    public var faith: Int
+    public var maxFaith: Int
+    public var startingBalance: Int
 
     public init(
         health: Int,
@@ -79,14 +79,14 @@ public enum HeroAvailability: Codable, Equatable {
 
 /// Standard hero definition implementation
 public struct StandardHeroDefinition: HeroDefinition, Codable {
-    public let id: String
-    public let name: LocalizableText
-    public let description: LocalizableText
-    public let icon: String
-    public let baseStats: HeroStats
-    public let specialAbility: HeroAbility
-    public let startingDeckCardIDs: [String]
-    public let availability: HeroAvailability
+    public var id: String
+    public var name: LocalizableText
+    public var description: LocalizableText
+    public var icon: String
+    public var baseStats: HeroStats
+    public var specialAbility: HeroAbility
+    public var startingDeckCardIDs: [String]
+    public var availability: HeroAvailability
 
     public init(
         id: String,

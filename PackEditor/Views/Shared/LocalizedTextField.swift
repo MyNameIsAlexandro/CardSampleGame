@@ -1,124 +1,65 @@
 import SwiftUI
+import TwilightEngine
 
-/// A component for editing localized text with separate English and Russian fields.
-///
-/// Displays two text input fields side by side (or stacked on small screens) for editing
-/// `LocalizedString` content. The component works with `Binding<String>` for each language
-/// to allow mutation of immutable `LocalizableText` structures.
-///
-/// Example usage:
-/// ```swift
-/// @State private var enText = "Hello"
-/// @State private var ruText = "Привет"
-///
-/// LocalizedTextField(
-///     label: "Greeting",
-///     en: $enText,
-///     ru: $ruText
-/// )
-/// ```
+/// Edits a `LocalizableText` value.
+/// For inline strings: shows EN/RU text fields side by side.
+/// For key-based strings: shows the key as read-only.
 struct LocalizedTextField: View {
-    /// Label displayed above the text fields
     let label: String
-
-    /// Binding to the English text value
-    @Binding var en: String
-
-    /// Binding to the Russian text value
-    @Binding var ru: String
-
-    /// If true, uses TextEditor for multiline input; otherwise uses TextField
+    @Binding var text: LocalizableText
     var multiline: Bool = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // Label
-            Text(label)
-                .font(.headline)
-                .foregroundColor(.secondary)
-
-            // Two-column layout for EN and RU fields
-            HStack(spacing: 16) {
-                // English field
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 4) {
-                        Text("🇺🇸")
-                            .font(.body)
-                        Text("English")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+        switch text {
+        case .inline:
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("EN").font(.caption2).foregroundStyle(.secondary)
+                        if multiline {
+                            TextEditor(text: enBinding)
+                                .font(.body)
+                                .frame(minHeight: 60)
+                        } else {
+                            TextField(label, text: enBinding)
+                        }
                     }
-
-                    if multiline {
-                        TextEditor(text: $en)
-                            .font(.system(.body, design: .monospaced))
-                            .frame(minHeight: 80)
-                            .border(Color.gray.opacity(0.3), width: 1)
-                            .cornerRadius(4)
-                    } else {
-                        TextField("Enter English text", text: $en)
-                            .textFieldStyle(.roundedBorder)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("RU").font(.caption2).foregroundStyle(.secondary)
+                        if multiline {
+                            TextEditor(text: ruBinding)
+                                .font(.body)
+                                .frame(minHeight: 60)
+                        } else {
+                            TextField(label, text: ruBinding)
+                        }
                     }
                 }
-                .frame(maxWidth: .infinity)
-
-                // Russian field
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 4) {
-                        Text("🇷🇺")
-                            .font(.body)
-                        Text("Русский")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-
-                    if multiline {
-                        TextEditor(text: $ru)
-                            .font(.system(.body, design: .monospaced))
-                            .frame(minHeight: 80)
-                            .border(Color.gray.opacity(0.3), width: 1)
-                            .cornerRadius(4)
-                    } else {
-                        TextField("Enter Russian text", text: $ru)
-                            .textFieldStyle(.roundedBorder)
-                    }
-                }
-                .frame(maxWidth: .infinity)
             }
+        case .key:
+            LabeledContent(label, value: text.displayString)
         }
     }
-}
 
-// MARK: - Preview
-
-private struct LocalizedTextFieldPreview: View {
-    @State private var enText = "Hello, World!"
-    @State private var ruText = "Привет, мир!"
-    @State private var enMultiline = "Line 1\nLine 2\nLine 3"
-    @State private var ruMultiline = "Строка 1\nСтрока 2\nСтрока 3"
-
-    var body: some View {
-        VStack(spacing: 32) {
-            LocalizedTextField(
-                label: "Single Line Example",
-                en: $enText,
-                ru: $ruText
-            )
-
-            LocalizedTextField(
-                label: "Multiline Example",
-                en: $enMultiline,
-                ru: $ruMultiline,
-                multiline: true
-            )
-
-            Spacer()
-        }
-        .padding()
-        .frame(width: 600, height: 400)
+    private var enBinding: Binding<String> {
+        Binding(
+            get: { text.inlineString?.en ?? "" },
+            set: { newValue in
+                if let ls = text.inlineString {
+                    text = .inline(LocalizedString(en: newValue, ru: ls.ru))
+                }
+            }
+        )
     }
-}
 
-#Preview {
-    LocalizedTextFieldPreview()
+    private var ruBinding: Binding<String> {
+        Binding(
+            get: { text.inlineString?.ru ?? "" },
+            set: { newValue in
+                if let ls = text.inlineString {
+                    text = .inline(LocalizedString(en: ls.en, ru: newValue))
+                }
+            }
+        )
+    }
 }

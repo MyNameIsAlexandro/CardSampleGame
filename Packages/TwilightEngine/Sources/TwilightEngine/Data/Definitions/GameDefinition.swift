@@ -39,28 +39,28 @@ public enum LocalizationKeyValidator {
 /// Reference: Docs/EVENT_MODULE_ARCHITECTURE.md, Section 2.3
 public struct Availability: Codable, Hashable {
     /// Required flags that must be set
-    public let requiredFlags: [String]
+    public var requiredFlags: [String]
 
     /// Forbidden flags that must NOT be set
-    public let forbiddenFlags: [String]
+    public var forbiddenFlags: [String]
 
     /// Minimum pressure/tension required
-    public let minPressure: Int?
+    public var minPressure: Int?
 
     /// Maximum pressure/tension allowed
-    public let maxPressure: Int?
+    public var maxPressure: Int?
 
     /// Minimum balance value required
-    public let minBalance: Int?
+    public var minBalance: Int?
 
     /// Maximum balance value allowed
-    public let maxBalance: Int?
+    public var maxBalance: Int?
 
     /// Specific region states where this is available
-    public let regionStates: [String]?
+    public var regionStates: [String]?
 
     /// Specific region IDs where this is available
-    public let regionIds: [String]?
+    public var regionIds: [String]?
 
     public init(
         requiredFlags: [String] = [],

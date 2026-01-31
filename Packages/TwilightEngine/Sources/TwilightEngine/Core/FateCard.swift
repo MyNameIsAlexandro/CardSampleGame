@@ -16,13 +16,13 @@ public enum FateCardSuit: String, Codable, Hashable {
 /// same Nav card in deepPrav zone gets modifyValue=+1 (neutralized by light).
 public struct FateResonanceRule: Codable, Equatable, Hashable {
     /// Which resonance zone activates this rule
-    public let zone: ResonanceZone
+    public var zone: ResonanceZone
 
     /// Value added to baseValue when this rule activates
-    public let modifyValue: Int
+    public var modifyValue: Int
 
     /// Optional visual effect hint for UI (e.g. "shadow_pulse", "light_shimmer")
-    public let visualEffect: String?
+    public var visualEffect: String?
 
     public init(zone: ResonanceZone, modifyValue: Int, visualEffect: String? = nil) {
         self.zone = zone
@@ -35,8 +35,8 @@ public struct FateResonanceRule: Codable, Equatable, Hashable {
 
 /// Side effect triggered when a Fate Card is drawn
 public struct FateDrawEffect: Codable, Equatable, Hashable {
-    public let type: FateEffectType
-    public let value: Int
+    public var type: FateEffectType
+    public var value: Int
 
     public init(type: FateEffectType, value: Int) {
         self.type = type
@@ -73,8 +73,8 @@ public enum FateCardType: String, Codable, Hashable {
 
 /// Option for choice-type fate cards
 public struct FateChoiceOption: Codable, Equatable, Hashable {
-    public let label: String
-    public let effect: String
+    public var label: String
+    public var effect: String
 
     public init(label: String, effect: String) {
         self.label = label
@@ -88,40 +88,40 @@ public struct FateChoiceOption: Codable, Equatable, Hashable {
 /// v2.0: Resonance-aware with suit, dynamic rules, and side effects.
 public struct FateCard: Codable, Equatable, Hashable {
     /// Unique card identifier
-    public let id: String
+    public var id: String
 
     /// Display name (fallback if nameKey not found in localization)
-    public let name: String
+    public var name: String
 
     /// Localization key for card name (e.g. "card_nav_whisper_name")
-    public let nameKey: String?
+    public var nameKey: String?
 
     /// Base outcome modifier (-2..+3)
-    public let baseValue: Int
+    public var baseValue: Int
 
     /// Alignment suit (nil = neutral/unaligned)
-    public let suit: FateCardSuit?
+    public var suit: FateCardSuit?
 
     /// Whether this is a critical success card
-    public let isCritical: Bool
+    public var isCritical: Bool
 
     /// Sticky cards (curses) return to discard after reshuffle instead of being removed
-    public let isSticky: Bool
+    public var isSticky: Bool
 
     /// Dynamic modifiers based on world resonance zone
-    public let resonanceRules: [FateResonanceRule]
+    public var resonanceRules: [FateResonanceRule]
 
     /// Side effects applied when this card is drawn
-    public let onDrawEffects: [FateDrawEffect]
+    public var onDrawEffects: [FateDrawEffect]
 
     /// Keyword for context-dependent interpretation
-    public let keyword: FateKeyword?
+    public var keyword: FateKeyword?
 
     /// Card type (standard or choice)
-    public let cardType: FateCardType
+    public var cardType: FateCardType
 
     /// Choice options (only for choice-type cards)
-    public let choiceOptions: [FateChoiceOption]?
+    public var choiceOptions: [FateChoiceOption]?
 
     /// Backward-compatible computed property
     public var modifier: Int { baseValue }

@@ -10,10 +10,10 @@ public struct LocalizedString: Codable, Hashable {
     // MARK: - Supported Languages
 
     /// English text
-    public let en: String
+    public var en: String
 
     /// Russian text
-    public let ru: String
+    public var ru: String
 
     // MARK: - Localized Access
 

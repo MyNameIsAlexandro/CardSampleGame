@@ -10,39 +10,39 @@ public struct QuestDefinition: GameDefinition {
     // MARK: - Identity
 
     /// Unique quest identifier (e.g., "quest_main_act1")
-    public let id: String
+    public var id: String
 
     // MARK: - Localized Content
 
     /// Quest title (supports inline LocalizedString or StringKey)
-    public let title: LocalizableText
+    public var title: LocalizableText
 
     /// Quest description (supports inline LocalizedString or StringKey)
-    public let description: LocalizableText
+    public var description: LocalizableText
 
     // MARK: - Structure
 
     /// Ordered list of objectives (stages)
-    public let objectives: [ObjectiveDefinition]
+    public var objectives: [ObjectiveDefinition]
 
     /// Quest kind classification
-    public let questKind: QuestKind
+    public var questKind: QuestKind
 
     // MARK: - Availability
 
     /// Conditions for this quest to become available
-    public let availability: Availability
+    public var availability: Availability
 
     /// If true, quest starts automatically when available
-    public let autoStart: Bool
+    public var autoStart: Bool
 
     // MARK: - Rewards
 
     /// Rewards given on quest completion
-    public let completionRewards: QuestCompletionRewards
+    public var completionRewards: QuestCompletionRewards
 
     /// Penalties on quest failure
-    public let failurePenalties: QuestCompletionRewards
+    public var failurePenalties: QuestCompletionRewards
 
     // MARK: - Initialization
 
@@ -86,34 +86,34 @@ public struct ObjectiveDefinition: Codable, Hashable, Identifiable {
     // MARK: - Identity
 
     /// Unique objective identifier within the quest
-    public let id: String
+    public var id: String
 
     // MARK: - Localized Content
 
     /// Objective description (supports inline LocalizedString or StringKey)
-    public let description: LocalizableText
+    public var description: LocalizableText
 
     /// Objective hint (supports inline LocalizedString or StringKey, optional)
-    public let hint: LocalizableText?
+    public var hint: LocalizableText?
 
     // MARK: - Completion Conditions
 
     /// Condition type for completion
-    public let completionCondition: CompletionCondition
+    public var completionCondition: CompletionCondition
 
     /// Target value for progress-based objectives
-    public let targetValue: Int
+    public var targetValue: Int
 
     // MARK: - Flow Control
 
     /// If true, this objective is optional
-    public let isOptional: Bool
+    public var isOptional: Bool
 
     /// Next objective ID (nil = quest complete)
-    public let nextObjectiveId: String?
+    public var nextObjectiveId: String?
 
     /// Alternative objective IDs (for branching)
-    public let alternativeNextIds: [String]
+    public var alternativeNextIds: [String]
 
     // MARK: - Initialization
 
@@ -279,16 +279,16 @@ public enum CompletionCondition: Codable, Hashable {
 /// Rewards/penalties for quest completion (Engine-specific, distinct from legacy QuestRewards)
 public struct QuestCompletionRewards: Codable, Hashable {
     /// Resource changes
-    public let resourceChanges: [String: Int]
+    public var resourceChanges: [String: Int]
 
     /// Flags to set
-    public let setFlags: [String]
+    public var setFlags: [String]
 
     /// Cards to add to deck
-    public let cardIds: [String]
+    public var cardIds: [String]
 
     /// Balance change
-    public let balanceDelta: Int
+    public var balanceDelta: Int
 
     public init(
         resourceChanges: [String: Int] = [:],

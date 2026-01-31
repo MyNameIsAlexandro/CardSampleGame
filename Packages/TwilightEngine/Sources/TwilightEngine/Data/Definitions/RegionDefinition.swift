@@ -10,45 +10,45 @@ public struct RegionDefinition: GameDefinition {
     // MARK: - Identity
 
     /// Unique region identifier (e.g., "region_01", "market_square")
-    public let id: String
+    public var id: String
 
     // MARK: - Localized Content
 
     /// Region name (supports inline LocalizedString or StringKey)
-    public let title: LocalizableText
+    public var title: LocalizableText
 
     /// Region description (supports inline LocalizedString or StringKey)
-    public let description: LocalizableText
+    public var description: LocalizableText
 
     // MARK: - Type
 
     /// Region type string — must match a RegionType rawValue
     /// This determines visual representation and gameplay effects
-    public let regionType: String
+    public var regionType: String
 
     // MARK: - Connections
 
     /// IDs of neighboring regions (for travel)
-    public let neighborIds: [String]
+    public var neighborIds: [String]
 
     /// Whether this region is initially discovered
-    public let initiallyDiscovered: Bool
+    public var initiallyDiscovered: Bool
 
     // MARK: - Content
 
     /// ID of the anchor in this region (nil if no anchor)
-    public let anchorId: String?
+    public var anchorId: String?
 
     /// Event pool IDs for this region
-    public let eventPoolIds: [String]
+    public var eventPoolIds: [String]
 
     // MARK: - Initial State
 
     /// Initial region state: "stable", "borderland", or "breach"
-    public let initialState: RegionStateType
+    public var initialState: RegionStateType
 
     /// Weight for random degradation selection (higher = more likely to degrade)
-    public let degradationWeight: Int
+    public var degradationWeight: Int
 
     // MARK: - Initialization
 

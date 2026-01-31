@@ -134,26 +134,26 @@ extension CardOwnership: Codable {
 
 /// Стандартная реализация определения карты
 public struct StandardCardDefinition: CardDefinition, Codable {
-    public let id: String
-    public let name: LocalizableText
-    public let cardType: CardType
-    public let rarity: CardRarity
-    public let description: LocalizableText
-    public let icon: String
-    public let expansionSet: ExpansionSet
-    public let ownership: CardOwnership
-    public let abilities: [CardAbility]
-    public let faithCost: Int
-    public let balance: CardBalance?
-    public let role: CardRole?
+    public var id: String
+    public var name: LocalizableText
+    public var cardType: CardType
+    public var rarity: CardRarity
+    public var description: LocalizableText
+    public var icon: String
+    public var expansionSet: ExpansionSet
+    public var ownership: CardOwnership
+    public var abilities: [CardAbility]
+    public var faithCost: Int
+    public var balance: CardBalance?
+    public var role: CardRole?
 
     // Дополнительные параметры
-    public let power: Int?
-    public let defense: Int?
-    public let health: Int?
-    public let wisdom: Int?
-    public let realm: Realm?
-    public let curseType: CurseType?
+    public var power: Int?
+    public var defense: Int?
+    public var health: Int?
+    public var wisdom: Int?
+    public var realm: Realm?
+    public var curseType: CurseType?
 
     public init(
         id: String,

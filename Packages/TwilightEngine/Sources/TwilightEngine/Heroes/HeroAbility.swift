@@ -4,34 +4,34 @@ import Foundation
 /// Defines unique actions and passive effects of the hero
 public struct HeroAbility: Codable, Equatable {
     /// Unique ability identifier
-    public let id: String
+    public var id: String
 
     /// Ability name (supports inline LocalizedString or StringKey)
-    public let name: LocalizableText
+    public var name: LocalizableText
 
     /// Description for UI (supports inline LocalizedString or StringKey)
-    public let description: LocalizableText
+    public var description: LocalizableText
 
     /// Icon (SF Symbol or emoji)
-    public let icon: String
+    public var icon: String
 
     /// Ability type
-    public let type: HeroAbilityType
+    public var type: HeroAbilityType
 
     /// Activation trigger (for passives)
-    public let trigger: AbilityTrigger
+    public var trigger: AbilityTrigger
 
     /// Activation condition
-    public let condition: AbilityCondition?
+    public var condition: AbilityCondition?
 
     /// Ability effects
-    public let effects: [HeroAbilityEffect]
+    public var effects: [HeroAbilityEffect]
 
     /// Cooldown (in turns, 0 = no cooldown)
-    public let cooldown: Int
+    public var cooldown: Int
 
     /// Activation cost (for active abilities)
-    public let cost: AbilityCost?
+    public var cost: AbilityCost?
 
     public init(
         id: String,
@@ -111,9 +111,9 @@ public enum AbilityTrigger: String, Codable, CaseIterable {
 
 /// Ability activation condition
 public struct AbilityCondition: Codable, Equatable {
-    public let type: AbilityConditionType
-    public let value: Int?
-    public let stringValue: String?
+    public var type: AbilityConditionType
+    public var value: Int?
+    public var stringValue: String?
 
     public init(type: AbilityConditionType, value: Int? = nil, stringValue: String? = nil) {
         self.type = type
@@ -157,9 +157,9 @@ public enum AbilityConditionType: String, Codable, CaseIterable {
 
 /// Hero ability effect
 public struct HeroAbilityEffect: Codable, Equatable {
-    public let type: HeroAbilityEffectType
-    public let value: Int
-    public let description: String?
+    public var type: HeroAbilityEffectType
+    public var value: Int
+    public var description: String?
 
     public init(type: HeroAbilityEffectType, value: Int, description: String? = nil) {
         self.type = type
@@ -221,8 +221,8 @@ public enum HeroAbilityEffectType: String, Codable, CaseIterable {
 
 /// Ability activation cost
 public struct AbilityCost: Codable, Equatable {
-    public let type: AbilityCostType
-    public let value: Int
+    public var type: AbilityCostType
+    public var value: Int
 
     public init(type: AbilityCostType, value: Int) {
         self.type = type

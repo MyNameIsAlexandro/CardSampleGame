@@ -10,81 +10,81 @@ public struct EnemyDefinition: GameDefinition {
     // MARK: - Identity
 
     /// Unique enemy identifier (defined in content pack)
-    public let id: String
+    public var id: String
 
     // MARK: - Localized Content
 
     /// Enemy name (supports inline LocalizedString or StringKey)
-    public let name: LocalizableText
+    public var name: LocalizableText
 
     /// Enemy description (supports inline LocalizedString or StringKey)
-    public let description: LocalizableText
+    public var description: LocalizableText
 
     // MARK: - Stats
 
     /// Base health points
-    public let health: Int
+    public var health: Int
 
     /// Base attack power
-    public let power: Int
+    public var power: Int
 
     /// Base defense
-    public let defense: Int
+    public var defense: Int
 
     /// Difficulty rating (1-5, affects scaling)
-    public let difficulty: Int
+    public var difficulty: Int
 
     // MARK: - Classification
 
     /// Enemy type classification
-    public let enemyType: EnemyType
+    public var enemyType: EnemyType
 
     /// Card rarity for loot/display
-    public let rarity: CardRarity
+    public var rarity: CardRarity
 
     // MARK: - Spirit
 
     /// Spirit/Resolve stat (optional — not all enemies have Will)
-    public let will: Int?
+    public var will: Int?
 
     /// Per-zone stat modifiers keyed by ResonanceZone raw value
-    public let resonanceBehavior: [String: EnemyModifier]?
+    public var resonanceBehavior: [String: EnemyModifier]?
 
     // MARK: - Abilities
 
     /// Special abilities this enemy has
-    public let abilities: [EnemyAbility]
+    public var abilities: [EnemyAbility]
 
     // MARK: - Loot & Rewards
 
     /// Cards that can drop when defeated
-    public let lootCardIds: [String]
+    public var lootCardIds: [String]
 
     /// Faith reward when defeated
-    public let faithReward: Int
+    public var faithReward: Int
 
     /// Balance change when defeated
-    public let balanceDelta: Int
+    public var balanceDelta: Int
 
     // MARK: - Bestiary Content (Epic 13)
 
     /// Lore flavor text (Witcher-style scholar quote)
-    public let lore: LocalizableText?
+    public var lore: LocalizableText?
 
     /// Tactical recommendation for Nav faction
-    public let tacticsNav: LocalizableText?
+    public var tacticsNav: LocalizableText?
 
     /// Tactical recommendation for Yav faction
-    public let tacticsYav: LocalizableText?
+    public var tacticsYav: LocalizableText?
 
     /// Tactical recommendation for Prav faction
-    public let tacticsPrav: LocalizableText?
+    public var tacticsPrav: LocalizableText?
 
     /// Keyword vulnerabilities (e.g. ["fire", "silver"])
-    public let weaknesses: [String]?
+    public var weaknesses: [String]?
 
     /// Keyword resistances
-    public let strengths: [String]?
+    public var strengths: [String]?
 
     // Note: No explicit CodingKeys needed - JSONDecoder uses .convertFromSnakeCase
     // which automatically converts enemy_type → enemyType, faith_reward → faithReward, etc.
@@ -157,10 +157,10 @@ public struct EnemyDefinition: GameDefinition {
 
 /// Stat modifier applied to an enemy based on the current ResonanceZone
 public struct EnemyModifier: Codable, Equatable, Hashable {
-    public let powerDelta: Int
-    public let defenseDelta: Int
-    public let healthDelta: Int
-    public let willDelta: Int
+    public var powerDelta: Int
+    public var defenseDelta: Int
+    public var healthDelta: Int
+    public var willDelta: Int
 
     public init(powerDelta: Int = 0, defenseDelta: Int = 0, healthDelta: Int = 0, willDelta: Int = 0) {
         self.powerDelta = powerDelta
@@ -184,10 +184,10 @@ public enum EnemyType: String, Codable, Hashable {
 // MARK: - Enemy Ability
 
 public struct EnemyAbility: Codable, Hashable, Identifiable {
-    public let id: String
-    public let name: LocalizableText
-    public let description: LocalizableText
-    public let effect: EnemyAbilityEffect
+    public var id: String
+    public var name: LocalizableText
+    public var description: LocalizableText
+    public var effect: EnemyAbilityEffect
 
     public init(
         id: String,

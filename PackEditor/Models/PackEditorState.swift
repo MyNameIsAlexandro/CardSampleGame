@@ -110,6 +110,31 @@ class PackEditorState: ObservableObject {
         }
     }
 
+    // MARK: - Add / Delete Entity
+
+    func addEntity() {
+        guard let category = selectedCategory else { return }
+        if let newId = store.addEntity(for: category) {
+            selectedEntityId = newId
+            objectWillChange.send()
+        }
+    }
+
+    func duplicateSelectedEntity() {
+        guard let category = selectedCategory, let id = selectedEntityId else { return }
+        if let newId = store.duplicateEntity(id: id, for: category) {
+            selectedEntityId = newId
+            objectWillChange.send()
+        }
+    }
+
+    func deleteSelectedEntity() {
+        guard let category = selectedCategory, let id = selectedEntityId else { return }
+        store.deleteEntity(id: id, for: category)
+        selectedEntityId = nil
+        objectWillChange.send()
+    }
+
     // MARK: - Validate
 
     func validate() {

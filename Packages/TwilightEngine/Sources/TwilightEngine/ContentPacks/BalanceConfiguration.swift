@@ -8,37 +8,37 @@ public struct BalanceConfiguration: Codable, Sendable {
     // MARK: - Resources
 
     /// Resource system configuration (health, faith, supplies, gold).
-    public let resources: ResourceBalanceConfig
+    public var resources: ResourceBalanceConfig
 
     // MARK: - Pressure/Tension
 
     /// Pressure system configuration (tension, escalation).
-    public let pressure: PressureBalanceConfig
+    public var pressure: PressureBalanceConfig
 
     // MARK: - Combat
 
     /// Combat system configuration (optional).
-    public let combat: CombatBalanceConfig?
+    public var combat: CombatBalanceConfig?
 
     // MARK: - Time
 
     /// Time system configuration (day/night cycle, action costs).
-    public let time: TimeBalanceConfig
+    public var time: TimeBalanceConfig
 
     // MARK: - Anchors
 
     /// Anchor system configuration (integrity, strengthening).
-    public let anchor: AnchorBalanceConfig
+    public var anchor: AnchorBalanceConfig
 
     // MARK: - End Conditions
 
     /// Game end conditions (victory/defeat triggers).
-    public let endConditions: EndConditionConfig
+    public var endConditions: EndConditionConfig
 
     // MARK: - Balance System (optional)
 
     /// Light/Dark balance system configuration.
-    public let balanceSystem: BalanceSystemConfig?
+    public var balanceSystem: BalanceSystemConfig?
 
     // MARK: - Defaults
 
@@ -59,34 +59,34 @@ public struct BalanceConfiguration: Codable, Sendable {
 /// Resource balance configuration (health, faith, supplies, gold).
 public struct ResourceBalanceConfig: Codable, Sendable {
     /// Starting health value.
-    public let startingHealth: Int
+    public var startingHealth: Int
 
     /// Maximum health cap.
-    public let maxHealth: Int
+    public var maxHealth: Int
 
     /// Starting faith value.
-    public let startingFaith: Int
+    public var startingFaith: Int
 
     /// Maximum faith cap.
-    public let maxFaith: Int
+    public var maxFaith: Int
 
     /// Starting supplies value.
-    public let startingSupplies: Int
+    public var startingSupplies: Int
 
     /// Maximum supplies cap.
-    public let maxSupplies: Int
+    public var maxSupplies: Int
 
     /// Starting gold value.
-    public let startingGold: Int
+    public var startingGold: Int
 
     /// Maximum gold cap.
-    public let maxGold: Int
+    public var maxGold: Int
 
     /// Health restored when resting (optional, default 3).
-    public let restHealAmount: Int?
+    public var restHealAmount: Int?
 
     /// Starting balance value for Light/Dark system (optional).
-    public let startingBalance: Int?
+    public var startingBalance: Int?
 
     /// Default resource configuration.
     public static let `default` = ResourceBalanceConfig(
@@ -108,28 +108,28 @@ public struct ResourceBalanceConfig: Codable, Sendable {
 /// Pressure system balance configuration.
 public struct PressureBalanceConfig: Codable, Sendable {
     /// Starting pressure level.
-    public let startingPressure: Int
+    public var startingPressure: Int
 
     /// Minimum pressure value.
-    public let minPressure: Int
+    public var minPressure: Int
 
     /// Maximum pressure value.
-    public let maxPressure: Int
+    public var maxPressure: Int
 
     /// Pressure gain per turn.
-    public let pressurePerTurn: Int
+    public var pressurePerTurn: Int
 
     /// Days between tension ticks (when tension increases automatically).
-    public let tensionTickInterval: Int?
+    public var tensionTickInterval: Int?
 
     /// Escalation interval (alias for tensionTickInterval).
-    public let escalationInterval: Int?
+    public var escalationInterval: Int?
 
     /// Pressure thresholds for escalation levels.
-    public let thresholds: PressureThresholds
+    public var thresholds: PressureThresholds
 
     /// Degradation settings for regions and anchors.
-    public let degradation: DegradationConfig
+    public var degradation: DegradationConfig
 
     /// Get the effective tick interval (tensionTickInterval or escalationInterval).
     public var effectiveTickInterval: Int {
@@ -152,13 +152,13 @@ public struct PressureBalanceConfig: Codable, Sendable {
 /// Pressure thresholds for escalation levels.
 public struct PressureThresholds: Codable, Sendable {
     /// Threshold for warning level (increased event danger).
-    public let warning: Int
+    public var warning: Int
 
     /// Threshold for critical level.
-    public let critical: Int
+    public var critical: Int
 
     /// Threshold for catastrophic level (game loss).
-    public let catastrophic: Int
+    public var catastrophic: Int
 
     /// Default thresholds.
     public static let `default` = PressureThresholds(
@@ -171,16 +171,16 @@ public struct PressureThresholds: Codable, Sendable {
 /// Degradation configuration for regions and anchors.
 public struct DegradationConfig: Codable, Sendable {
     /// Chance for region degradation at warning level.
-    public let warningChance: Double
+    public var warningChance: Double
 
     /// Chance for region degradation at critical level.
-    public let criticalChance: Double
+    public var criticalChance: Double
 
     /// Chance for degradation at catastrophic level (optional).
-    public let catastrophicChance: Double?
+    public var catastrophicChance: Double?
 
     /// Base chance for anchor integrity loss per turn.
-    public let anchorDecayChance: Double
+    public var anchorDecayChance: Double
 
     /// Default degradation configuration.
     public static let `default` = DegradationConfig(
@@ -196,39 +196,39 @@ public struct DegradationConfig: Codable, Sendable {
 /// Combat balance configuration.
 public struct CombatBalanceConfig: Codable, Sendable, Equatable {
     /// Base damage for attacks.
-    public let baseDamage: Int
+    public var baseDamage: Int
 
     /// Damage modifier per power point.
-    public let powerModifier: Double
+    public var powerModifier: Double
 
     /// Defense damage reduction factor.
-    public let defenseReduction: Double
+    public var defenseReduction: Double
 
     /// Maximum dice value (optional).
-    public let diceMax: Int?
+    public var diceMax: Int?
 
     /// Actions allowed per turn (optional).
-    public let actionsPerTurn: Int?
+    public var actionsPerTurn: Int?
 
     /// Cards drawn per turn (optional).
-    public let cardsDrawnPerTurn: Int?
+    public var cardsDrawnPerTurn: Int?
 
     /// Maximum hand size (optional).
-    public let maxHandSize: Int?
+    public var maxHandSize: Int?
 
     // MARK: - Encounter Combat Fields
 
     /// Resonance shift on escalation (spirit→physical). Default -5.0.
-    public let escalationResonanceShift: Float?
+    public var escalationResonanceShift: Float?
 
     /// Surprise damage bonus on escalation. Default 3.
-    public let escalationSurpriseBonus: Int?
+    public var escalationSurpriseBonus: Int?
 
     /// Rage shield value on de-escalation (physical→spirit). Default 3.
-    public let deEscalationRageShield: Int?
+    public var deEscalationRageShield: Int?
 
     /// Match multiplier when card suit matches action alignment. Default 1.5.
-    public let matchMultiplier: Double?
+    public var matchMultiplier: Double?
 
     /// Known multiplier keys for formula validation.
     public var knownMultiplierKeys: Set<String> {
@@ -257,25 +257,25 @@ public struct CombatBalanceConfig: Codable, Sendable, Equatable {
 /// Time system balance configuration.
 public struct TimeBalanceConfig: Codable, Sendable {
     /// Starting time of day.
-    public let startingTime: Int
+    public var startingTime: Int
 
     /// Maximum days for campaign (optional).
-    public let maxDays: Int?
+    public var maxDays: Int?
 
     /// Time cost for travel action.
-    public let travelCost: Int
+    public var travelCost: Int
 
     /// Time cost for exploration action.
-    public let exploreCost: Int
+    public var exploreCost: Int
 
     /// Time cost for rest action.
-    public let restCost: Int
+    public var restCost: Int
 
     /// Time cost for strengthening anchor (optional).
-    public let strengthenAnchorCost: Int?
+    public var strengthenAnchorCost: Int?
 
     /// Time cost for instant actions (optional).
-    public let instantCost: Int?
+    public var instantCost: Int?
 
     /// Default time configuration.
     public static let `default` = TimeBalanceConfig(
@@ -294,22 +294,22 @@ public struct TimeBalanceConfig: Codable, Sendable {
 /// End condition configuration for victory and defeat.
 public struct EndConditionConfig: Codable, Sendable {
     /// Health threshold for death (game over).
-    public let deathHealth: Int
+    public var deathHealth: Int
 
     /// Pressure threshold for loss (optional).
-    public let pressureLoss: Int?
+    public var pressureLoss: Int?
 
     /// Breach count for loss (optional).
-    public let breachLoss: Int?
+    public var breachLoss: Int?
 
     /// Quest IDs that trigger victory.
-    public let victoryQuests: [String]
+    public var victoryQuests: [String]
 
     /// Flag set when main quest completes (optional).
-    public let mainQuestCompleteFlag: String?
+    public var mainQuestCompleteFlag: String?
 
     /// Flag set when critical anchor destroyed (optional).
-    public let criticalAnchorDestroyedFlag: String?
+    public var criticalAnchorDestroyedFlag: String?
 
     /// Default end condition configuration.
     public static let `default` = EndConditionConfig(
@@ -327,22 +327,22 @@ public struct EndConditionConfig: Codable, Sendable {
 /// Anchor system balance configuration.
 public struct AnchorBalanceConfig: Codable, Sendable {
     /// Maximum anchor integrity.
-    public let maxIntegrity: Int
+    public var maxIntegrity: Int
 
     /// Amount to strengthen per action.
-    public let strengthenAmount: Int
+    public var strengthenAmount: Int
 
     /// Faith cost to strengthen anchor.
-    public let strengthenCost: Int
+    public var strengthenCost: Int
 
     /// Integrity threshold for stable status.
-    public let stableThreshold: Int
+    public var stableThreshold: Int
 
     /// Integrity threshold for breach.
-    public let breachThreshold: Int
+    public var breachThreshold: Int
 
     /// Base decay rate per turn in threatened regions.
-    public let decayPerTurn: Int
+    public var decayPerTurn: Int
 
     /// Default anchor configuration.
     public static let `default` = AnchorBalanceConfig(
@@ -360,19 +360,19 @@ public struct AnchorBalanceConfig: Codable, Sendable {
 /// Light/Dark balance system configuration.
 public struct BalanceSystemConfig: Codable, Sendable {
     /// Minimum balance value.
-    public let min: Int
+    public var min: Int
 
     /// Maximum balance value.
-    public let max: Int
+    public var max: Int
 
     /// Initial balance value.
-    public let initial: Int
+    public var initial: Int
 
     /// Threshold for light alignment.
-    public let lightThreshold: Int
+    public var lightThreshold: Int
 
     /// Threshold for dark alignment.
-    public let darkThreshold: Int
+    public var darkThreshold: Int
 
     /// Default balance system configuration.
     public static let `default` = BalanceSystemConfig(
