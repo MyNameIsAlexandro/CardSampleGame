@@ -228,49 +228,54 @@ public enum PackLoader {
         AbilityRegistry.shared.loadFromJSON(at: url)
     }
 
-    /// Load heroes from path (file or directory)
+    /// Load heroes from path (file or directory).
+    /// Tries StandardHeroDefinition (editor format) first, falls back to PackHeroDefinition (legacy).
     private static func loadHeroes(from url: URL) throws -> [String: StandardHeroDefinition] {
         var heroes: [String: StandardHeroDefinition] = [:]
 
-        if isDirectory(url) {
-            let files = try jsonFiles(in: url)
-            for file in files {
+        func loadFromFile(_ file: URL) throws {
+            if let standard = try? loadJSONArray(StandardHeroDefinition.self, from: file) {
+                for hero in standard { heroes[hero.id] = hero }
+            } else {
                 let fileHeroes = try loadJSONArray(PackHeroDefinition.self, from: file)
                 for hero in fileHeroes {
                     let standard = hero.toStandard()
                     heroes[standard.id] = standard
                 }
             }
+        }
+
+        if isDirectory(url) {
+            for file in try jsonFiles(in: url) { try loadFromFile(file) }
         } else {
-            let fileHeroes = try loadJSONArray(PackHeroDefinition.self, from: url)
-            for hero in fileHeroes {
-                let standard = hero.toStandard()
-                heroes[standard.id] = standard
-            }
+            try loadFromFile(url)
         }
 
         return heroes
     }
 
     /// Load cards from path (file or directory) with localization
+    /// Load cards from path (file or directory).
+    /// Tries StandardCardDefinition (editor format) first, falls back to PackCardDefinition (legacy).
     private static func loadCards(from url: URL) throws -> [String: StandardCardDefinition] {
         var cards: [String: StandardCardDefinition] = [:]
 
-        if isDirectory(url) {
-            let files = try jsonFiles(in: url)
-            for file in files {
+        func loadFromFile(_ file: URL) throws {
+            if let standard = try? loadJSONArray(StandardCardDefinition.self, from: file) {
+                for card in standard { cards[card.id] = card }
+            } else {
                 let fileCards = try loadJSONArray(PackCardDefinition.self, from: file)
                 for card in fileCards {
                     let standard = card.toStandard()
                     cards[standard.id] = standard
                 }
             }
+        }
+
+        if isDirectory(url) {
+            for file in try jsonFiles(in: url) { try loadFromFile(file) }
         } else {
-            let fileCards = try loadJSONArray(PackCardDefinition.self, from: url)
-            for card in fileCards {
-                let standard = card.toStandard()
-                cards[standard.id] = standard
-            }
+            try loadFromFile(url)
         }
 
         return cards

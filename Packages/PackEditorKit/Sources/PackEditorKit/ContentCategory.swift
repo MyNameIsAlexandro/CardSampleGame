@@ -9,6 +9,8 @@ public enum ContentCategory: String, CaseIterable, Identifiable, Sendable {
     case heroes = "Heroes"
     case fateCards = "Fate Cards"
     case quests = "Quests"
+    case behaviors = "Behaviors"
+    case anchors = "Anchors"
     case balance = "Balance"
 
     public var id: String { rawValue }
@@ -22,6 +24,8 @@ public enum ContentCategory: String, CaseIterable, Identifiable, Sendable {
         case .heroes: return "person.fill"
         case .fateCards: return "sparkles.rectangle.stack.fill"
         case .quests: return "flag.fill"
+        case .behaviors: return "brain"
+        case .anchors: return "mappin.and.ellipse"
         case .balance: return "slider.horizontal.3"
         }
     }

@@ -20,51 +20,51 @@ public struct AnchorDefinition: GameDefinition {
     // MARK: - Identity
 
     /// Unique anchor identifier (e.g., "anchor_forest_shrine")
-    public let id: String
+    public var id: String
 
     // MARK: - Localized Content
 
     /// Anchor name (supports inline LocalizedString or StringKey)
-    public let title: LocalizableText
+    public var title: LocalizableText
 
     /// Anchor description (supports inline LocalizedString or StringKey)
-    public let description: LocalizableText
+    public var description: LocalizableText
 
     // MARK: - Location
 
     /// ID of the region where this anchor is located
-    public let regionId: String
+    public var regionId: String
 
     // MARK: - Type & Influence
 
     /// Anchor type (e.g., "chapel", "shrine", "sacred_tree")
-    public let anchorType: String
+    public var anchorType: String
 
     /// Initial influence: "light", "neutral", or "dark"
-    public let initialInfluence: AnchorInfluence
+    public var initialInfluence: AnchorInfluence
 
     /// Power level (radius of influence, 1-10)
-    public let power: Int
+    public var power: Int
 
     // MARK: - Mechanics
 
     /// Maximum integrity value (0-100)
-    public let maxIntegrity: Int
+    public var maxIntegrity: Int
 
     /// Initial integrity value
-    public let initialIntegrity: Int
+    public var initialIntegrity: Int
 
     /// Integrity gained per "strengthen" action
-    public let strengthenAmount: Int
+    public var strengthenAmount: Int
 
     /// Resource cost to strengthen (e.g., ["faith": 5])
-    public let strengthenCost: ResourceTransaction
+    public var strengthenCost: ResourceTransaction
 
     // MARK: - Effects
 
     /// Resistance chance calculation: integrity / resistanceDivisor
     /// Default: 100 (so 50 integrity = 50% resistance)
-    public let resistanceDivisor: Int
+    public var resistanceDivisor: Int
 
     // MARK: - Initialization
 

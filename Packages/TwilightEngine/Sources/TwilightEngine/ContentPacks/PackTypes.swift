@@ -218,9 +218,9 @@ public enum PackLoadError: Error, LocalizedError {
 
 /// Represents a successfully loaded pack
 public struct LoadedPack {
-    public let manifest: PackManifest
-    public let sourceURL: URL
-    public let loadedAt: Date
+    public var manifest: PackManifest
+    public var sourceURL: URL
+    public var loadedAt: Date
 
     /// Content provided by this pack (indexed by ID)
     public var regions: [String: RegionDefinition] = [:]

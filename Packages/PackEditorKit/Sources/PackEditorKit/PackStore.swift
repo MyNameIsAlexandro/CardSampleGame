@@ -12,6 +12,14 @@ public class PackStore {
     public private(set) var packURL: URL?
     public var isDirty: Bool = false
 
+    /// Editable manifest accessor
+    public var manifest: PackManifest? {
+        get { loadedPack?.manifest }
+        set {
+            if let newValue { loadedPack?.manifest = newValue }
+        }
+    }
+
     // MARK: - Content Dictionaries
 
     public var enemies: [String: EnemyDefinition] = [:]
@@ -22,6 +30,7 @@ public class PackStore {
     public var fateCards: [String: FateCard] = [:]
     public var quests: [String: QuestDefinition] = [:]
     public var behaviors: [String: BehaviorDefinition] = [:]
+    public var anchors: [String: AnchorDefinition] = [:]
     public var balanceConfig: BalanceConfiguration?
 
     // MARK: - Validation
@@ -50,6 +59,8 @@ public class PackStore {
         case .heroes: return heroes.count
         case .fateCards: return fateCards.count
         case .quests: return quests.count
+        case .behaviors: return behaviors.count
+        case .anchors: return anchors.count
         case .balance: return balanceConfig != nil ? 1 : 0
         }
     }
@@ -63,6 +74,8 @@ public class PackStore {
         case .heroes: return heroes.keys.sorted()
         case .fateCards: return fateCards.keys.sorted()
         case .quests: return quests.keys.sorted()
+        case .behaviors: return behaviors.keys.sorted()
+        case .anchors: return anchors.keys.sorted()
         case .balance: return balanceConfig != nil ? ["balance"] : []
         }
     }
@@ -76,6 +89,8 @@ public class PackStore {
         case .heroes: return heroes[id]?.name.displayString ?? id
         case .fateCards: return fateCards[id]?.name ?? id
         case .quests: return quests[id]?.title.displayString ?? id
+        case .behaviors: return id
+        case .anchors: return anchors[id]?.title.displayString ?? id
         case .balance: return "Balance Configuration"
         }
     }
@@ -96,8 +111,10 @@ public class PackStore {
         self.fateCards = pack.fateCards
         self.quests = pack.quests
         self.behaviors = pack.behaviors
+        self.anchors = pack.anchors
         self.balanceConfig = pack.balanceConfig
         self.isDirty = false
+        self.loadEntityOrder()
     }
 
     // MARK: - Save Pack
@@ -139,6 +156,14 @@ public class PackStore {
             let data = try encoder.encode(Array(fateCards.values))
             try data.write(to: url.appendingPathComponent(path))
         }
+        if let path = manifest.behaviorsPath {
+            let data = try encoder.encode(Array(behaviors.values))
+            try data.write(to: url.appendingPathComponent(path))
+        }
+        if let path = manifest.anchorsPath {
+            let data = try encoder.encode(Array(anchors.values))
+            try data.write(to: url.appendingPathComponent(path))
+        }
         if let path = manifest.balancePath, let config = balanceConfig {
             let data = try encoder.encode(config)
             try data.write(to: url.appendingPathComponent(path))
@@ -150,27 +175,72 @@ public class PackStore {
     // MARK: - Add Entity
 
     @discardableResult
-    public func addEntity(for category: ContentCategory) -> String? {
+    public func addEntity(for category: ContentCategory, template: String? = nil) -> String? {
         let uuid = UUID().uuidString.prefix(8).lowercased()
 
         switch category {
         case .enemies:
             let id = "enemy_new_\(uuid)"
-            enemies[id] = EnemyDefinition(
-                id: id,
-                name: .inline(LocalizedString(en: "New Enemy", ru: "Новый враг")),
-                description: .inline(LocalizedString(en: "Description", ru: "Описание")),
-                health: 10, power: 2, defense: 0
-            )
+            let effectiveTemplate = template ?? "beast"
+            switch effectiveTemplate {
+            case "undead":
+                enemies[id] = EnemyDefinition(
+                    id: id,
+                    name: .inline(LocalizedString(en: "New Undead", ru: "Новая нежить")),
+                    description: .inline(LocalizedString(en: "Description", ru: "Описание")),
+                    health: 15, power: 3, defense: 1,
+                    enemyType: .undead, rarity: .uncommon,
+                    will: 5
+                )
+            case "boss":
+                enemies[id] = EnemyDefinition(
+                    id: id,
+                    name: .inline(LocalizedString(en: "New Boss", ru: "Новый босс")),
+                    description: .inline(LocalizedString(en: "Description", ru: "Описание")),
+                    health: 30, power: 5, defense: 3,
+                    difficulty: 3,
+                    enemyType: .boss, rarity: .epic
+                )
+            default: // "beast"
+                enemies[id] = EnemyDefinition(
+                    id: id,
+                    name: .inline(LocalizedString(en: "New Beast", ru: "Новый зверь")),
+                    description: .inline(LocalizedString(en: "Description", ru: "Описание")),
+                    health: 10, power: 2, defense: 0,
+                    enemyType: .beast, rarity: .common
+                )
+            }
             isDirty = true
             return id
 
         case .cards:
             let id = "card_new_\(uuid)"
+            let effectiveTemplate = template ?? "item"
+            let cardType: CardType
+            let nameEN: String
+            let nameRU: String
+            switch effectiveTemplate {
+            case "attack":
+                cardType = .weapon
+                nameEN = "New Attack"
+                nameRU = "Новая атака"
+            case "defense":
+                cardType = .armor
+                nameEN = "New Defense"
+                nameRU = "Новая защита"
+            case "spell":
+                cardType = .spell
+                nameEN = "New Spell"
+                nameRU = "Новое заклинание"
+            default: // "item"
+                cardType = .item
+                nameEN = "New Item"
+                nameRU = "Новый предмет"
+            }
             cards[id] = StandardCardDefinition(
                 id: id,
-                name: .inline(LocalizedString(en: "New Card", ru: "Новая карта")),
-                cardType: .item,
+                name: .inline(LocalizedString(en: nameEN, ru: nameRU)),
+                cardType: cardType,
                 description: .inline(LocalizedString(en: "Description", ru: "Описание"))
             )
             isDirty = true
@@ -188,13 +258,44 @@ public class PackStore {
 
         case .regions:
             let id = "region_new_\(uuid)"
-            regions[id] = RegionDefinition(
-                id: id,
-                title: .inline(LocalizedString(en: "New Region", ru: "Новый регион")),
-                description: .inline(LocalizedString(en: "Description", ru: "Описание")),
-                regionType: "default",
-                neighborIds: []
-            )
+            let effectiveTemplate = template ?? "default"
+            switch effectiveTemplate {
+            case "settlement":
+                regions[id] = RegionDefinition(
+                    id: id,
+                    title: .inline(LocalizedString(en: "New Settlement", ru: "Новое поселение")),
+                    description: .inline(LocalizedString(en: "Description", ru: "Описание")),
+                    regionType: "settlement",
+                    neighborIds: [],
+                    initialState: .stable
+                )
+            case "wilderness":
+                regions[id] = RegionDefinition(
+                    id: id,
+                    title: .inline(LocalizedString(en: "New Wilderness", ru: "Новая глушь")),
+                    description: .inline(LocalizedString(en: "Description", ru: "Описание")),
+                    regionType: "wilderness",
+                    neighborIds: [],
+                    initialState: .stable
+                )
+            case "dungeon":
+                regions[id] = RegionDefinition(
+                    id: id,
+                    title: .inline(LocalizedString(en: "New Dungeon", ru: "Новое подземелье")),
+                    description: .inline(LocalizedString(en: "Description", ru: "Описание")),
+                    regionType: "dungeon",
+                    neighborIds: [],
+                    initialState: .borderland
+                )
+            default:
+                regions[id] = RegionDefinition(
+                    id: id,
+                    title: .inline(LocalizedString(en: "New Region", ru: "Новый регион")),
+                    description: .inline(LocalizedString(en: "Description", ru: "Описание")),
+                    regionType: "default",
+                    neighborIds: []
+                )
+            }
             isDirty = true
             return id
 
@@ -242,6 +343,28 @@ public class PackStore {
                 title: .inline(LocalizedString(en: "New Quest", ru: "Новый квест")),
                 description: .inline(LocalizedString(en: "Description", ru: "Описание")),
                 objectives: []
+            )
+            isDirty = true
+            return id
+
+        case .behaviors:
+            let id = "behavior_new_\(uuid)"
+            behaviors[id] = BehaviorDefinition(
+                id: id,
+                rules: [],
+                defaultIntent: "attack",
+                defaultValue: "1"
+            )
+            isDirty = true
+            return id
+
+        case .anchors:
+            let id = "anchor_new_\(uuid)"
+            anchors[id] = AnchorDefinition(
+                id: id,
+                title: .inline(LocalizedString(en: "New Anchor", ru: "Новый якорь")),
+                description: .inline(LocalizedString(en: "Description", ru: "Описание")),
+                regionId: ""
             )
             isDirty = true
             return id
@@ -314,6 +437,22 @@ public class PackStore {
             isDirty = true
             return newId
 
+        case .behaviors:
+            guard var copy = behaviors[id] else { return nil }
+            let newId = "\(id)_copy_\(uuid)"
+            copy.id = newId
+            behaviors[newId] = copy
+            isDirty = true
+            return newId
+
+        case .anchors:
+            guard var copy = anchors[id] else { return nil }
+            let newId = "\(id)_copy_\(uuid)"
+            copy.id = newId
+            anchors[newId] = copy
+            isDirty = true
+            return newId
+
         case .balance:
             return nil
         }
@@ -330,9 +469,141 @@ public class PackStore {
         case .heroes: heroes.removeValue(forKey: id)
         case .fateCards: fateCards.removeValue(forKey: id)
         case .quests: quests.removeValue(forKey: id)
+        case .behaviors: behaviors.removeValue(forKey: id)
+        case .anchors: anchors.removeValue(forKey: id)
         case .balance: return // can't delete singleton
         }
         isDirty = true
+    }
+
+    // MARK: - Save Manifest
+
+    public func saveManifest() throws {
+        guard let url = packURL, let manifest = loadedPack?.manifest else {
+            throw PackStoreError.noPackLoaded
+        }
+        try manifest.save(to: url)
+        isDirty = false
+    }
+
+    // MARK: - Import Entity
+
+    /// Import an entity from JSON data into the given category.
+    /// Returns the imported entity's ID, or nil if decoding fails.
+    @discardableResult
+    public func importEntity(json: Data, for category: ContentCategory) throws -> String? {
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+
+        switch category {
+        case .enemies:
+            let entity = try decoder.decode(EnemyDefinition.self, from: json)
+            enemies[entity.id] = entity
+            isDirty = true
+            return entity.id
+        case .cards:
+            let entity = try decoder.decode(StandardCardDefinition.self, from: json)
+            cards[entity.id] = entity
+            isDirty = true
+            return entity.id
+        case .events:
+            let entity = try decoder.decode(EventDefinition.self, from: json)
+            events[entity.id] = entity
+            isDirty = true
+            return entity.id
+        case .regions:
+            let entity = try decoder.decode(RegionDefinition.self, from: json)
+            regions[entity.id] = entity
+            isDirty = true
+            return entity.id
+        case .heroes:
+            let entity = try decoder.decode(StandardHeroDefinition.self, from: json)
+            heroes[entity.id] = entity
+            isDirty = true
+            return entity.id
+        case .fateCards:
+            let entity = try decoder.decode(FateCard.self, from: json)
+            fateCards[entity.id] = entity
+            isDirty = true
+            return entity.id
+        case .quests:
+            let entity = try decoder.decode(QuestDefinition.self, from: json)
+            quests[entity.id] = entity
+            isDirty = true
+            return entity.id
+        case .behaviors:
+            let entity = try decoder.decode(BehaviorDefinition.self, from: json)
+            behaviors[entity.id] = entity
+            isDirty = true
+            return entity.id
+        case .anchors:
+            let entity = try decoder.decode(AnchorDefinition.self, from: json)
+            anchors[entity.id] = entity
+            isDirty = true
+            return entity.id
+        case .balance:
+            return nil
+        }
+    }
+
+    // MARK: - Export Entity
+
+    /// Export a single entity as JSON data.
+    public func exportEntityJSON(id: String, for category: ContentCategory) -> Data? {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        encoder.keyEncodingStrategy = .convertToSnakeCase
+
+        switch category {
+        case .enemies: return try? encoder.encode(enemies[id])
+        case .cards: return try? encoder.encode(cards[id])
+        case .events: return try? encoder.encode(events[id])
+        case .regions: return try? encoder.encode(regions[id])
+        case .heroes: return try? encoder.encode(heroes[id])
+        case .fateCards: return try? encoder.encode(fateCards[id])
+        case .quests: return try? encoder.encode(quests[id])
+        case .behaviors: return try? encoder.encode(behaviors[id])
+        case .anchors: return try? encoder.encode(anchors[id])
+        case .balance: return try? encoder.encode(balanceConfig)
+        }
+    }
+
+    // MARK: - Entity Order (Drag-Reorder)
+
+    /// Custom entity ordering per category. If nil for a category, alphabetical sort is used.
+    public var entityOrder: [ContentCategory: [String]] = [:]
+
+    /// Returns ordered entity IDs — custom order if available, otherwise alphabetical.
+    public func orderedEntityIds(for category: ContentCategory) -> [String] {
+        if let order = entityOrder[category] {
+            // Filter to only IDs that still exist, append any new ones
+            let existingIds = Set(entityIds(for: category))
+            let ordered = order.filter { existingIds.contains($0) }
+            let remaining = entityIds(for: category).filter { !order.contains($0) }
+            return ordered + remaining
+        }
+        return entityIds(for: category)
+    }
+
+    /// Save entity order to _editor_order.json in pack directory.
+    public func saveEntityOrder() throws {
+        guard let url = packURL else { throw PackStoreError.noPackLoaded }
+        let orderURL = url.appendingPathComponent("_editor_order.json")
+        let dict = Dictionary(uniqueKeysWithValues: entityOrder.map { ($0.key.rawValue, $0.value) })
+        let data = try JSONEncoder().encode(dict)
+        try data.write(to: orderURL)
+    }
+
+    /// Load entity order from _editor_order.json in pack directory.
+    public func loadEntityOrder() {
+        guard let url = packURL else { return }
+        let orderURL = url.appendingPathComponent("_editor_order.json")
+        guard let data = try? Data(contentsOf: orderURL),
+              let dict = try? JSONDecoder().decode([String: [String]].self, from: data) else { return }
+        entityOrder = Dictionary(uniqueKeysWithValues: dict.compactMap { key, value in
+            guard let cat = ContentCategory(rawValue: key) else { return nil }
+            return (cat, value)
+        })
     }
 
     // MARK: - Validate

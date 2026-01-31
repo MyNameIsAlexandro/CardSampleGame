@@ -20,5 +20,11 @@
   "locales": ["en", "ru"],
   "regions_path": "Regions/regions.json",
   "events_path": "Events/events.json",
-  "enemies_path": "Enemies/enemies.json"
+  "enemies_path": "Enemies/enemies.json",
+  "cards_path": "Cards/cards.json",
+  "heroes_path": "Heroes/heroes.json",
+  "fate_deck_path": "FateDeck/fate_deck.json",
+  "quests_path": "Quests/quests.json",
+  "behaviors_path": "Behaviors/behaviors.json",
+  "anchors_path": "Anchors/anchors.json"
 }

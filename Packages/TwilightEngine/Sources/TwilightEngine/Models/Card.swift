@@ -136,10 +136,10 @@ public struct Card: Identifiable, Codable, Hashable, Sendable {
 }
 
 public struct CardAbility: Identifiable, Hashable, Sendable {
-    public let id: String
-    public let name: String
-    public let description: String
-    public let effect: AbilityEffect
+    public var id: String
+    public var name: String
+    public var description: String
+    public var effect: AbilityEffect
 
     public init(
         id: String,

@@ -1,0 +1,16 @@
+[
+  {
+    "id": "test_card_1",
+    "name": "Test Sword",
+    "name_ru": "Тестовый меч",
+    "card_type": "weapon",
+    "rarity": "common",
+    "description": "A basic sword",
+    "description_ru": "Базовый меч",
+    "icon": "⚔️",
+    "expansion_set": "baseSet",
+    "ownership": "universal",
+    "abilities": [],
+    "faith_cost": 0
+  }
+]

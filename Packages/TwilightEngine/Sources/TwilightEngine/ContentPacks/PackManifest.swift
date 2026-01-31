@@ -8,144 +8,144 @@ public struct PackManifest: Codable {
     // MARK: - Identity
 
     /// Unique pack identifier (e.g., "my-campaign-act1")
-    public let packId: String
+    public var packId: String
 
     /// Human-readable display name
-    public let displayName: LocalizedString
+    public var displayName: LocalizedString
 
     /// Pack description
-    public let description: LocalizedString
+    public var description: LocalizedString
 
     /// Pack version
-    public let version: SemanticVersion
+    public var version: SemanticVersion
 
     /// Type of content this pack provides
-    public let packType: PackType
+    public var packType: PackType
 
     // MARK: - Compatibility
 
     /// Minimum required Core engine version
-    public let coreVersionMin: SemanticVersion
+    public var coreVersionMin: SemanticVersion
 
     /// Maximum tested Core version (nil = any future version)
-    public let coreVersionMax: SemanticVersion?
+    public var coreVersionMax: SemanticVersion?
 
     /// Required dependencies on other packs
-    public let dependencies: [PackDependency]
+    public var dependencies: [PackDependency]
 
     /// Capabilities this pack requires from Core (for rules extensions)
-    public let requiredCapabilities: [String]
+    public var requiredCapabilities: [String]
 
     // MARK: - Content Entry Points
 
     /// Starting region ID for campaign packs
-    public let entryRegionId: String?
+    public var entryRegionId: String?
 
     /// Starting quest ID for campaign packs
-    public let entryQuestId: String?
+    public var entryQuestId: String?
 
     /// Recommended hero IDs for this campaign
-    public let recommendedHeroes: [String]
+    public var recommendedHeroes: [String]
 
     // MARK: - Character Pack Fields
 
     /// List of hero IDs provided by this pack (for character packs)
-    public let heroIds: [String]?
+    public var heroIds: [String]?
 
     // MARK: - Story Pack Fields
 
     /// Minimum number of heroes required to play this story
-    public let minHeroesRequired: Int?
+    public var minHeroesRequired: Int?
 
     /// Maximum number of heroes supported
-    public let maxHeroesSupported: Int?
+    public var maxHeroesSupported: Int?
 
     /// Difficulty rating (1-5)
-    public let difficultyRating: Int?
+    public var difficultyRating: Int?
 
     /// Estimated playtime in minutes
-    public let estimatedPlaytimeMinutes: Int?
+    public var estimatedPlaytimeMinutes: Int?
 
     /// Mission type: "campaign" for multi-session, "standalone" for single-session
-    public let missionType: MissionType?
+    public var missionType: MissionType?
 
     // MARK: - Grouping & Organization
 
     /// Season this pack belongs to (e.g., "season1", "season2")
-    public let season: String?
+    public var season: String?
 
     /// Campaign ID for multi-part stories (e.g., "dark-forest")
-    public let campaignId: String?
+    public var campaignId: String?
 
     /// Order within campaign (1 = Act I, 2 = Act II, etc.)
-    public let campaignOrder: Int?
+    public var campaignOrder: Int?
 
     /// Bundle ID for purchasing (e.g., "dark-forest-complete")
-    public let bundleId: String?
+    public var bundleId: String?
 
     /// Packs required to play this one (for story continuity)
-    public let requiresPacks: [String]?
+    public var requiresPacks: [String]?
 
     /// Localized season display name (e.g., "Season 1: Twilight")
-    public let seasonDisplayName: LocalizedString?
+    public var seasonDisplayName: LocalizedString?
 
     /// Localized campaign display name (e.g., "The Dark Forest")
-    public let campaignDisplayName: LocalizedString?
+    public var campaignDisplayName: LocalizedString?
 
     // MARK: - Metadata
 
     /// Pack author/publisher
-    public let author: String
+    public var author: String
 
     /// License identifier
-    public let license: String?
+    public var license: String?
 
     /// Release date
-    public let releaseDate: Date?
+    public var releaseDate: Date?
 
     /// Supported locales
-    public let supportedLocales: [String]
+    public var supportedLocales: [String]
 
     /// File checksums for integrity verification
-    public let checksums: [String: String]?
+    public var checksums: [String: String]?
 
     // MARK: - Content Paths (relative to pack root)
 
     /// Path to regions content
-    public let regionsPath: String?
+    public var regionsPath: String?
 
     /// Path to events content
-    public let eventsPath: String?
+    public var eventsPath: String?
 
     /// Path to quests content
-    public let questsPath: String?
+    public var questsPath: String?
 
     /// Path to anchors content
-    public let anchorsPath: String?
+    public var anchorsPath: String?
 
     /// Path to heroes content
-    public let heroesPath: String?
+    public var heroesPath: String?
 
     /// Path to hero abilities content
-    public let abilitiesPath: String?
+    public var abilitiesPath: String?
 
     /// Path to cards content
-    public let cardsPath: String?
+    public var cardsPath: String?
 
     /// Path to enemies content
-    public let enemiesPath: String?
+    public var enemiesPath: String?
 
     /// Path to fate deck cards content
-    public let fateDeckPath: String?
+    public var fateDeckPath: String?
 
     /// Path to balance configuration
-    public let balancePath: String?
+    public var balancePath: String?
 
     /// Path to behaviors JSON file (enemy AI behaviors)
-    public let behaviorsPath: String?
+    public var behaviorsPath: String?
 
     /// Path to localization files
-    public let localizationPath: String?
+    public var localizationPath: String?
 
     // MARK: - Coding Keys
 

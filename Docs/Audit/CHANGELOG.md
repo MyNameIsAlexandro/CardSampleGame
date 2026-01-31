@@ -6,6 +6,52 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [2.3.0] - 2026-01-31 - PackEditor: Full Read-Write CRUD + ManifestEditor + Import/Export
+
+### Summary
+
+PackEditor macOS app now supports full read-write editing of all 10 content categories, manifest editing, entity import/export via clipboard, drag-reorder, JSON preview, and compilation to .pack binary. Added 82 unit tests for PackEditorKit. User guides in RU and EN.
+
+---
+
+### Features
+
+#### PackEditorKit Library
+- **PackStore** — CRUD operations for all 10 categories (enemies, cards, events, regions, heroes, fateCards, quests, behaviors, anchors, balance)
+- **Templates** — Pre-built templates for enemies (beast/undead/boss), cards (attack/defense/spell/item), regions (settlement/wilderness/dungeon)
+- **Import/Export** — `importEntity(json:for:)` and `exportEntityJSON(id:for:)` for clipboard/file workflows
+- **Manifest editing** — `saveManifest()` writes manifest.json back to pack directory
+- **Entity ordering** — `orderedEntityIds(for:)` with `_editor_order.json` persistence for drag-reorder
+- **Validation** — PackValidator integration with summary
+
+#### PackEditor App (macOS)
+- **10 specialized editors** — EnemyEditor, CardEditor, EventEditor, RegionEditor, HeroEditor, FateCardEditor, QuestEditor, BehaviorEditor, AnchorEditor, BalanceEditor
+- **ManifestEditor** — Edit pack metadata (identity, compatibility, story settings, organization, content paths)
+- **JSON Preview** — View any entity as formatted JSON with copy button
+- **Import from Clipboard** — Paste JSON entities via "+" menu
+- **Export to Clipboard** — Copy selected entity as JSON
+- **Drag & Reorder** — Manual entity ordering in list view
+- **Global Search** — Search across all categories
+- **Shared components** — LocalizedTextField, IntField, StringListEditor, DictEditor, FieldValidation, ValidationBadge
+
+#### Documentation
+- **PACK_EDITOR_GUIDE.md** — User guide (Russian)
+- **PACK_EDITOR_GUIDE_EN.md** — User guide (English)
+- **INDEX.md** — Updated with PackEditor guide links
+
+### Tests
+
+**PackEditorKit: 82 tests (all passing)**
+- PackStore CRUD for all categories
+- Template creation
+- isDirty lifecycle
+- Save round-trip for all entity types
+- Legacy card format backward compatibility
+- JSON encoding round-trip
+- Edge cases (duplicate, delete nonexistent, empty state)
+
+---
+
 ## [2.2.0] - 2026-01-27 - PackAuthoring Extraction & UUID→String Migration
 
 ### Summary

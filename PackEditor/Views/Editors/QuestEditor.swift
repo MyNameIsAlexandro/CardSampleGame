@@ -68,18 +68,14 @@ struct QuestEditor: View {
                 IntField(label: "Balance Delta", value: $quest.completionRewards.balanceDelta)
                 StringListEditor(label: "Set Flags", items: $quest.completionRewards.setFlags)
                 StringListEditor(label: "Card IDs", items: $quest.completionRewards.cardIds)
-                if !quest.completionRewards.resourceChanges.isEmpty {
-                    LabeledContent("Resource Changes", value: resourceChangesDescription(quest.completionRewards.resourceChanges))
-                }
+                DictEditor(label: "Resource Change", dict: $quest.completionRewards.resourceChanges)
             }
 
             Section("Failure Penalties") {
                 IntField(label: "Balance Delta", value: $quest.failurePenalties.balanceDelta)
                 StringListEditor(label: "Set Flags", items: $quest.failurePenalties.setFlags)
                 StringListEditor(label: "Card IDs", items: $quest.failurePenalties.cardIds)
-                if !quest.failurePenalties.resourceChanges.isEmpty {
-                    LabeledContent("Resource Changes", value: resourceChangesDescription(quest.failurePenalties.resourceChanges))
-                }
+                DictEditor(label: "Resource Change", dict: $quest.failurePenalties.resourceChanges)
             }
         }
         .formStyle(.grouped)

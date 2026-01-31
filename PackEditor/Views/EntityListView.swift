@@ -10,22 +10,44 @@ struct EntityListView: View {
     var body: some View {
         if let category = state.selectedCategory {
             let ids = filteredIds(for: category)
-            List(ids, id: \.self, selection: $state.selectedEntityId) { id in
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(state.entityName(for: id, in: category))
-                        .fontWeight(.medium)
-                    Text(id)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+            List(selection: $state.selectedEntityId) {
+                ForEach(ids, id: \.self) { id in
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(state.entityName(for: id, in: category))
+                            .fontWeight(.medium)
+                        Text(id)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .tag(id)
                 }
-                .tag(id)
+                .onMove { from, to in
+                    guard searchText.isEmpty else { return }
+                    state.moveEntities(for: category, from: from, to: to)
+                }
             }
             .searchable(text: $searchText, prompt: "Filter \(category.rawValue.lowercased())")
             .navigationSplitViewColumnWidth(min: 200, ideal: 250)
             .toolbar {
                 ToolbarItemGroup(placement: .primaryAction) {
-                    Button {
-                        state.addEntity()
+                    Menu {
+                        if let templates = templateOptions(for: category) {
+                            ForEach(templates, id: \.0) { (key, label) in
+                                Button(label) {
+                                    state.addEntity(template: key)
+                                }
+                            }
+                        } else {
+                            Button("New") {
+                                state.addEntity()
+                            }
+                        }
+
+                        Divider()
+
+                        Button("Import from Clipboard") {
+                            _ = state.importEntityFromClipboard()
+                        }
                     } label: {
                         Image(systemName: "plus")
                     }
@@ -39,6 +61,14 @@ struct EntityListView: View {
                     }
                     .disabled(state.selectedEntityId == nil || category == .balance)
                     .help("Duplicate selected entity")
+
+                    Button {
+                        state.exportSelectedEntityToClipboard()
+                    } label: {
+                        Image(systemName: "square.and.arrow.up")
+                    }
+                    .disabled(state.selectedEntityId == nil)
+                    .help("Export selected entity to clipboard")
 
                     Button {
                         showDeleteConfirmation = true
@@ -65,8 +95,17 @@ struct EntityListView: View {
         }
     }
 
+    private func templateOptions(for category: ContentCategory) -> [(String, String)]? {
+        switch category {
+        case .enemies: return [("beast", "Beast"), ("undead", "Undead"), ("boss", "Boss")]
+        case .cards: return [("attack", "Attack"), ("defense", "Defense"), ("spell", "Spell"), ("item", "Item")]
+        case .regions: return [("settlement", "Settlement"), ("wilderness", "Wilderness"), ("dungeon", "Dungeon")]
+        default: return nil
+        }
+    }
+
     private func filteredIds(for category: ContentCategory) -> [String] {
-        let allIds = state.entityIds(for: category)
+        let allIds = state.orderedEntityIds(for: category)
         guard !searchText.isEmpty else { return allIds }
         return allIds.filter { id in
             id.localizedCaseInsensitiveContains(searchText) ||

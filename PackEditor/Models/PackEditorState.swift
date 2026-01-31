@@ -15,6 +15,22 @@ class PackEditorState: ObservableObject {
     @Published var selectedCategory: ContentCategory? = nil
     @Published var selectedEntityId: String? = nil
     @Published var showValidation: Bool = false
+    @Published var globalSearchText: String = ""
+
+    var globalSearchResults: [(category: ContentCategory, id: String, name: String)] {
+        guard !globalSearchText.isEmpty else { return [] }
+        let query = globalSearchText.lowercased()
+        var results: [(ContentCategory, String, String)] = []
+        for category in ContentCategory.allCases {
+            for id in store.entityIds(for: category) {
+                let name = store.entityName(for: id, in: category)
+                if id.lowercased().contains(query) || name.lowercased().contains(query) {
+                    results.append((category, id, name))
+                }
+            }
+        }
+        return results
+    }
 
     // MARK: - Forwarded Properties
 
@@ -56,9 +72,17 @@ class PackEditorState: ObservableObject {
         get { store.behaviors }
         set { store.behaviors = newValue }
     }
+    var anchors: [String: AnchorDefinition] {
+        get { store.anchors }
+        set { store.anchors = newValue }
+    }
     var balanceConfig: BalanceConfiguration? {
         get { store.balanceConfig }
         set { store.balanceConfig = newValue }
+    }
+    var manifest: PackManifest? {
+        get { store.manifest }
+        set { store.manifest = newValue }
     }
     var validationSummary: PackValidator.ValidationSummary? { store.validationSummary }
     var packTitle: String { store.packTitle }
@@ -112,9 +136,9 @@ class PackEditorState: ObservableObject {
 
     // MARK: - Add / Delete Entity
 
-    func addEntity() {
+    func addEntity(template: String? = nil) {
         guard let category = selectedCategory else { return }
-        if let newId = store.addEntity(for: category) {
+        if let newId = store.addEntity(for: category, template: template) {
             selectedEntityId = newId
             objectWillChange.send()
         }
@@ -132,6 +156,57 @@ class PackEditorState: ObservableObject {
         guard let category = selectedCategory, let id = selectedEntityId else { return }
         store.deleteEntity(id: id, for: category)
         selectedEntityId = nil
+        objectWillChange.send()
+    }
+
+    // MARK: - Save Manifest
+
+    func saveManifest() {
+        do {
+            try store.saveManifest()
+            objectWillChange.send()
+        } catch {
+            print("PackEditor: Failed to save manifest: \(error)")
+        }
+    }
+
+    // MARK: - Import / Export Entity
+
+    @discardableResult
+    func importEntityFromClipboard() -> String? {
+        guard let category = selectedCategory,
+              let string = NSPasteboard.general.string(forType: .string),
+              let data = string.data(using: .utf8) else { return nil }
+        do {
+            let id = try store.importEntity(json: data, for: category)
+            if let id { selectedEntityId = id }
+            objectWillChange.send()
+            return id
+        } catch {
+            print("PackEditor: Import failed: \(error)")
+            return nil
+        }
+    }
+
+    func exportSelectedEntityToClipboard() {
+        guard let category = selectedCategory, let id = selectedEntityId else { return }
+        guard let data = store.exportEntityJSON(id: id, for: category),
+              let string = String(data: data, encoding: .utf8) else { return }
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(string, forType: .string)
+    }
+
+    // MARK: - Entity Ordering
+
+    func orderedEntityIds(for category: ContentCategory) -> [String] {
+        store.orderedEntityIds(for: category)
+    }
+
+    func moveEntities(for category: ContentCategory, from source: IndexSet, to destination: Int) {
+        var order = store.orderedEntityIds(for: category)
+        order.move(fromOffsets: source, toOffset: destination)
+        store.entityOrder[category] = order
+        try? store.saveEntityOrder()
         objectWillChange.send()
     }
 

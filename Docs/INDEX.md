@@ -41,6 +41,8 @@
 | [ENGINE_ARCHITECTURE.md](./Technical/ENGINE_ARCHITECTURE.md) | Архитектура движка, слои, инварианты | **ЗАКОН** |
 | [EVENT_MODULE_ARCHITECTURE.md](./Technical/EVENT_MODULE_ARCHITECTURE.md) | Событийная система, Inline/MiniGame | **МОДУЛЬ** |
 | [CONTENT_PACK_GUIDE.md](./Technical/CONTENT_PACK_GUIDE.md) | Руководство по созданию паков | **GUIDE** |
+| [PACK_EDITOR_GUIDE.md](./Technical/PACK_EDITOR_GUIDE.md) | Руководство пользователя PackEditor (RU) | **GUIDE** |
+| [PACK_EDITOR_GUIDE_EN.md](./Technical/PACK_EDITOR_GUIDE_EN.md) | PackEditor User Guide (EN) | **GUIDE** |
 
 ### Specs/ — Спецификации форматов
 Формальные спецификации Content Pack форматов.

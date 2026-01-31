@@ -86,6 +86,11 @@
 		PEB0060200000000PE000001 /* StringListEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0060200000000PE000001 /* StringListEditor.swift */; };
 		PEB0060300000000PE000001 /* OptionalSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0060300000000PE000001 /* OptionalSection.swift */; };
 		PEB0060400000000PE000001 /* FieldValidation.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0060400000000PE000001 /* FieldValidation.swift */; };
+		PEB0060500000000PE000001 /* DictEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0060500000000PE000001 /* DictEditor.swift */; };
+		PEB0160100000000PE000001 /* BehaviorEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0160100000000PE000001 /* BehaviorEditor.swift */; };
+		PEB0170000000000PE000001 /* AnchorEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0170000000000PE000001 /* AnchorEditor.swift */; };
+		PEB0180000000000PE000001 /* JSONPreviewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0180000000000PE000001 /* JSONPreviewSheet.swift */; };
+		PEB0190000000000PE000001 /* ManifestEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0190000000000PE000001 /* ManifestEditor.swift */; };
 		PEB0070000000000PE000001 /* ValidationBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0070000000000PE000001 /* ValidationBadge.swift */; };
 		PEB0080000000000PE000001 /* EnemyEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0080000000000PE000001 /* EnemyEditor.swift */; };
 		PEB0090000000000PE000001 /* CardEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0090000000000PE000001 /* CardEditor.swift */; };
@@ -188,6 +193,11 @@
 		PEF0060200000000PE000001 /* StringListEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringListEditor.swift; sourceTree = "<group>"; };
 		PEF0060300000000PE000001 /* OptionalSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionalSection.swift; sourceTree = "<group>"; };
 		PEF0060400000000PE000001 /* FieldValidation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FieldValidation.swift; sourceTree = "<group>"; };
+		PEF0060500000000PE000001 /* DictEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictEditor.swift; sourceTree = "<group>"; };
+		PEF0160100000000PE000001 /* BehaviorEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BehaviorEditor.swift; sourceTree = "<group>"; };
+		PEF0170000000000PE000001 /* AnchorEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnchorEditor.swift; sourceTree = "<group>"; };
+		PEF0190000000000PE000001 /* ManifestEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManifestEditor.swift; sourceTree = "<group>"; };
+		PEF0180000000000PE000001 /* JSONPreviewSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONPreviewSheet.swift; sourceTree = "<group>"; };
 		PEF0070000000000PE000001 /* ValidationBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidationBadge.swift; sourceTree = "<group>"; };
 		PEF0080000000000PE000001 /* EnemyEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemyEditor.swift; sourceTree = "<group>"; };
 		PEF0090000000000PE000001 /* CardEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardEditor.swift; sourceTree = "<group>"; };
@@ -474,6 +484,8 @@
 				PEF0060200000000PE000001 /* StringListEditor.swift */,
 				PEF0060300000000PE000001 /* OptionalSection.swift */,
 				PEF0060400000000PE000001 /* FieldValidation.swift */,
+				PEF0060500000000PE000001 /* DictEditor.swift */,
+				PEF0180000000000PE000001 /* JSONPreviewSheet.swift */,
 				PEF0070000000000PE000001 /* ValidationBadge.swift */,
 			);
 			path = Shared;
@@ -489,6 +501,9 @@
 				PEF0120000000000PE000001 /* HeroEditor.swift */,
 				PEF0130000000000PE000001 /* FateCardEditor.swift */,
 				PEF0140000000000PE000001 /* QuestEditor.swift */,
+				PEF0160100000000PE000001 /* BehaviorEditor.swift */,
+				PEF0190000000000PE000001 /* ManifestEditor.swift */,
+				PEF0170000000000PE000001 /* AnchorEditor.swift */,
 				PEF0150000000000PE000001 /* BalanceEditor.swift */,
 			);
 			path = Editors;
@@ -737,6 +752,11 @@
 				PEB0060200000000PE000001 /* StringListEditor.swift in Sources */,
 				PEB0060300000000PE000001 /* OptionalSection.swift in Sources */,
 				PEB0060400000000PE000001 /* FieldValidation.swift in Sources */,
+				PEB0060500000000PE000001 /* DictEditor.swift in Sources */,
+				PEB0160100000000PE000001 /* BehaviorEditor.swift in Sources */,
+				PEB0190000000000PE000001 /* ManifestEditor.swift in Sources */,
+				PEB0170000000000PE000001 /* AnchorEditor.swift in Sources */,
+				PEB0180000000000PE000001 /* JSONPreviewSheet.swift in Sources */,
 				PEB0070000000000PE000001 /* ValidationBadge.swift in Sources */,
 				PEB0080000000000PE000001 /* EnemyEditor.swift in Sources */,
 				PEB0090000000000PE000001 /* CardEditor.swift in Sources */,

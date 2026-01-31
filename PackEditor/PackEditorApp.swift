@@ -74,6 +74,7 @@ struct ContentView: View {
 struct EditorDetailView: View {
     @EnvironmentObject var state: PackEditorState
     @Environment(\.undoManager) var undoManager
+    @State private var showJSONPreview = false
 
     var body: some View {
         ScrollView {
@@ -134,6 +135,22 @@ struct EditorDetailView: View {
                         label: "Edit Quest"
                     ))
                 }
+            case .behaviors:
+                if let id = state.selectedEntityId, state.behaviors[id] != nil {
+                    BehaviorEditor(behavior: undoBinding(
+                        get: { state.behaviors[id]! },
+                        set: { state.behaviors[id] = $0 },
+                        label: "Edit Behavior"
+                    ))
+                }
+            case .anchors:
+                if let id = state.selectedEntityId, state.anchors[id] != nil {
+                    AnchorEditor(anchor: undoBinding(
+                        get: { state.anchors[id]! },
+                        set: { state.anchors[id] = $0 },
+                        label: "Edit Anchor"
+                    ))
+                }
             case .balance:
                 if state.balanceConfig != nil {
                     BalanceEditor(config: undoBinding(
@@ -143,11 +160,67 @@ struct EditorDetailView: View {
                     ))
                 }
             case .none:
-                Text("Select a category")
-                    .foregroundStyle(.secondary)
+                if state.manifest != nil {
+                    ManifestEditor(manifest: Binding(
+                        get: { state.manifest! },
+                        set: {
+                            state.manifest = $0
+                            state.isDirty = true
+                        }
+                    ))
+                } else {
+                    Text("Select a category")
+                        .foregroundStyle(.secondary)
+                }
             }
         }
         .padding()
+        .toolbar {
+            ToolbarItem(placement: .automatic) {
+                Button {
+                    showJSONPreview = true
+                } label: {
+                    Image(systemName: "curlybraces")
+                }
+                .disabled(state.selectedEntityId == nil && state.selectedCategory != .balance)
+                .help("View as JSON")
+            }
+        }
+        .sheet(isPresented: $showJSONPreview) {
+            jsonPreviewContent
+        }
+    }
+
+    @ViewBuilder
+    private var jsonPreviewContent: some View {
+        if let id = state.selectedEntityId {
+            switch state.selectedCategory {
+            case .enemies:
+                if let e = state.enemies[id] { JSONPreviewSheet(title: id, value: e) }
+            case .cards:
+                if let c = state.cards[id] { JSONPreviewSheet(title: id, value: c) }
+            case .events:
+                if let e = state.events[id] { JSONPreviewSheet(title: id, value: e) }
+            case .regions:
+                if let r = state.regions[id] { JSONPreviewSheet(title: id, value: r) }
+            case .heroes:
+                if let h = state.heroes[id] { JSONPreviewSheet(title: id, value: h) }
+            case .fateCards:
+                if let f = state.fateCards[id] { JSONPreviewSheet(title: id, value: f) }
+            case .quests:
+                if let q = state.quests[id] { JSONPreviewSheet(title: id, value: q) }
+            case .behaviors:
+                if let b = state.behaviors[id] { JSONPreviewSheet(title: id, value: b) }
+            case .anchors:
+                if let a = state.anchors[id] { JSONPreviewSheet(title: id, value: a) }
+            case .balance:
+                if let c = state.balanceConfig { JSONPreviewSheet(title: "Balance", value: c) }
+            case .none:
+                Text("No entity selected")
+            }
+        } else if state.selectedCategory == .balance, let c = state.balanceConfig {
+            JSONPreviewSheet(title: "Balance", value: c)
+        }
     }
 
     /// Creates a Binding that registers undo actions on every set.

@@ -42,15 +42,24 @@ struct CardEditor: View {
             }
 
             Section("Abilities (\(card.abilities.count))") {
-                if card.abilities.isEmpty {
-                    Text("No abilities").foregroundStyle(.secondary)
-                } else {
-                    ForEach(card.abilities) { ability in
-                        VStack(alignment: .leading) {
-                            Text(ability.name).fontWeight(.medium)
-                            Text(ability.description).font(.caption).foregroundStyle(.secondary)
+                ForEach(card.abilities.indices, id: \.self) { index in
+                    DisclosureGroup(card.abilities[index].name.isEmpty ? "Ability \(index)" : card.abilities[index].name) {
+                        TextField("ID", text: $card.abilities[index].id)
+                        TextField("Name", text: $card.abilities[index].name)
+                        TextField("Description", text: $card.abilities[index].description)
+                        LabeledContent("Effect", value: String(describing: card.abilities[index].effect))
+                        Button(role: .destructive) {
+                            card.abilities.remove(at: index)
+                        } label: {
+                            Label("Remove Ability", systemImage: "minus.circle.fill")
                         }
+                        .foregroundStyle(.red)
                     }
+                }
+                Button {
+                    card.abilities.append(CardAbility(id: "new_ability", name: "New Ability", description: "", effect: .custom("none")))
+                } label: {
+                    Label("Add Ability", systemImage: "plus.circle")
                 }
             }
         }
