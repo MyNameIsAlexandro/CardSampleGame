@@ -53,14 +53,14 @@ struct GameOverView: View {
                 if isVictory {
                     Text(L10n.gameOverVictoryMessage.localized)
                         .font(.body)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, Spacing.xl)
                         .opacity(showContent ? 1 : 0)
                 } else if let reason = defeatReason {
                     Text(L10n.gameOverDefeatReason.localized(with: reason))
                         .font(.body)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, Spacing.xl)
                         .opacity(showContent ? 1 : 0)
@@ -73,7 +73,7 @@ struct GameOverView: View {
 
                     Text(L10n.gameOverDaysSurvived.localized(with: engine.currentDay))
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
                 }
                 .padding()
                 .background(AppColors.cardBackground)
@@ -90,7 +90,7 @@ struct GameOverView: View {
                     Text(L10n.gameOverReturnToMenu.localized)
                         .font(.title3)
                         .fontWeight(.bold)
-                        .foregroundColor(.white)
+                        .foregroundColor(AppColors.backgroundSystem)
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(AppColors.primary)

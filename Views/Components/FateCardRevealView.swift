@@ -128,7 +128,7 @@ struct FateCardRevealView: View {
             }) {
                 Text(L10n.buttonOk.localized)
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundColor(AppColors.backgroundSystem)
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(AppColors.primary)

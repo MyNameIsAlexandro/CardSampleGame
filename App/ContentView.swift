@@ -111,7 +111,7 @@ struct ContentView: View {
                                     .lineLimit(2)
                                 Text(L10n.tmGameSubtitle.localized)
                                     .font(.caption2)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(AppColors.muted)
                                     .lineLimit(1)
                                     .minimumScaleFactor(0.8)
                             }
@@ -158,7 +158,7 @@ struct ContentView: View {
 
                         Text(L10n.characterSelectTitle.localized)
                             .font(.title2)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(AppColors.muted)
 
                         // Hero cards scroll (data-driven from HeroRegistry)
                         ScrollView(.horizontal, showsIndicators: false) {
@@ -188,7 +188,7 @@ struct ContentView: View {
 
                                 Text(hero.description.localized)
                                     .font(.body)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(AppColors.muted)
                                     .fixedSize(horizontal: false, vertical: true)
 
                                 HStack(spacing: 24) {
@@ -212,7 +212,7 @@ struct ContentView: View {
                                     }
                                     Text(hero.specialAbility.description.localized)
                                         .font(.caption)
-                                        .foregroundColor(.secondary)
+                                        .foregroundColor(AppColors.muted)
                                         .fixedSize(horizontal: false, vertical: true)
                                 }
                                 .padding(.vertical, 4)
@@ -355,7 +355,7 @@ struct ContentView: View {
                        let hero = HeroRegistry.shared.hero(id: heroId) {
                         Text(hero.name.localized)
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(AppColors.muted)
                     }
                 }
             }
@@ -482,9 +482,9 @@ struct ContentView: View {
                         VStack(spacing: 12) {
                             Image(systemName: "tray")
                                 .font(.largeTitle)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(AppColors.muted)
                             Text(L10n.uiNoSaves.localized)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(AppColors.muted)
                         }
                         .padding(.top, 40)
                     }
@@ -513,7 +513,7 @@ struct StatDisplay: View {
                 .fontWeight(.bold)
             Text(label)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(AppColors.muted)
         }
     }
 }
@@ -557,17 +557,17 @@ struct SaveSlotCard: View {
                         Label("\(save.playerFaith)", systemImage: "sparkles")
                             .foregroundColor(AppColors.faith)
                         Label("\(save.playerBalance)", systemImage: "scale.3d")
-                            .foregroundColor(AppColors.dark)
+                            .foregroundColor(AppColors.info)
                     }
                     .font(.subheadline)
 
                     Text(L10n.dayNumber.localized(with: save.currentDay))
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
 
                     Text(formatDate(save.savedAt))
                         .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
 
                     Divider()
 
@@ -576,7 +576,7 @@ struct SaveSlotCard: View {
                             Text(L10n.uiLoad.localized)
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
-                                .foregroundColor(.white)
+                                .foregroundColor(AppColors.backgroundSystem)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 10)
                                 .background(AppColors.primary)
@@ -600,11 +600,11 @@ struct SaveSlotCard: View {
                 VStack(spacing: 12) {
                     Image(systemName: "square.dashed")
                         .font(.largeTitle)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
 
                     Text(L10n.uiEmptySlot.localized)
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.muted)
 
                     Button(action: onNewGame) {
                         Text(L10n.uiStartNewGame.localized)
@@ -685,11 +685,11 @@ struct LoadSlotCard: View {
 
                 Text(L10n.dayNumber.localized(with: saveData.currentDay))
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(AppColors.muted)
 
                 Text(formatDate(saveData.savedAt))
                     .font(.caption2)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(AppColors.muted)
             }
         }
         .padding()
@@ -735,7 +735,7 @@ struct HeroSelectionCard: View {
             // Stats
             Text(L10n.cardTypeCharacter.localized)
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundColor(AppColors.muted)
 
             HStack(spacing: 12) {
                 StatMini(icon: "heart.fill", value: hero.baseStats.health, color: AppColors.health)

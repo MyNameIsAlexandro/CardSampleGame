@@ -66,7 +66,7 @@ struct HeroSelectionView: View {
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(AppColors.primary)
-                            .foregroundColor(.white)
+                            .foregroundColor(AppColors.backgroundSystem)
                             .cornerRadius(CornerRadius.lg)
                         }
                         .padding(.horizontal)

@@ -148,45 +148,45 @@ public enum AppColors {
     /// Primary action color — ancient gold
     public static let primary = Color(red: 0.85, green: 0.65, blue: 0.20)
     /// Secondary action color — muted lavender-grey
-    public static let secondary = Color(red: 0.45, green: 0.40, blue: 0.50)
+    public static let secondary = Color(red: 0.58, green: 0.53, blue: 0.63)
 
     // MARK: - Game States
     /// Success/positive — forest green
-    public static let success = Color(red: 0.25, green: 0.70, blue: 0.35)
+    public static let success = Color(red: 0.20, green: 0.62, blue: 0.30)
     /// Warning — amber
     public static let warning = Color(red: 0.90, green: 0.60, blue: 0.15)
     /// Danger/negative — blood red
-    public static let danger = Color(red: 0.80, green: 0.20, blue: 0.20)
+    public static let danger = Color(red: 0.90, green: 0.35, blue: 0.35)
     /// Info — twilight blue
-    public static let info = Color(red: 0.30, green: 0.50, blue: 0.80)
+    public static let info = Color(red: 0.40, green: 0.60, blue: 0.90)
 
     // MARK: - Twilight Marches Theme
     /// Light alignment — warm sunlight gold
     public static let light = Color(red: 0.95, green: 0.85, blue: 0.50)
     /// Dark alignment — deep violet
-    public static let dark = Color(red: 0.40, green: 0.20, blue: 0.55)
+    public static let dark = Color(red: 0.65, green: 0.45, blue: 0.80)
     /// Neutral alignment — stone grey
-    public static let neutral = Color(red: 0.50, green: 0.48, blue: 0.45)
+    public static let neutral = Color(red: 0.62, green: 0.60, blue: 0.57)
 
     // MARK: - Resonance
     /// Nav (dark world) resonance color
-    public static let resonanceNav = Color(red: 0.50, green: 0.20, blue: 0.65)
+    public static let resonanceNav = Color(red: 0.68, green: 0.45, blue: 0.85)
     /// Prav (light world) resonance color
     public static let resonancePrav = Color(red: 0.85, green: 0.70, blue: 0.20)
     /// Yav (neutral) resonance color
-    public static let resonanceYav = Color(red: 0.50, green: 0.48, blue: 0.45)
+    public static let resonanceYav = Color(red: 0.62, green: 0.60, blue: 0.57)
     /// Spirit/Will track color
-    public static let spirit = Color(red: 0.30, green: 0.50, blue: 0.90)
+    public static let spirit = Color(red: 0.40, green: 0.58, blue: 0.95)
 
     // MARK: - Resources
     /// Health — dark blood
-    public static let health = Color(red: 0.75, green: 0.15, blue: 0.15)
+    public static let health = Color(red: 0.90, green: 0.35, blue: 0.35)
     /// Faith — golden faith
     public static let faith = Color(red: 0.90, green: 0.75, blue: 0.25)
     /// Power/Attack — ember orange
-    public static let power = Color(red: 0.85, green: 0.40, blue: 0.15)
+    public static let power = Color(red: 0.90, green: 0.48, blue: 0.20)
     /// Defense/Shield — steel blue
-    public static let defense = Color(red: 0.30, green: 0.45, blue: 0.70)
+    public static let defense = Color(red: 0.40, green: 0.55, blue: 0.80)
 
     // MARK: - Backgrounds
     /// System background — deep night purple-black
@@ -204,35 +204,35 @@ public enum AppColors {
     /// Highlight — bright gold
     public static let highlight = Color(red: 0.90, green: 0.75, blue: 0.30)
     /// Muted text — dusty grey
-    public static let muted = Color(red: 0.55, green: 0.50, blue: 0.55)
+    public static let muted = Color(red: 0.65, green: 0.60, blue: 0.65)
 
     // MARK: - Rarity Colors
     /// Common — weathered stone
-    public static let rarityCommon = Color(red: 0.55, green: 0.52, blue: 0.50)
+    public static let rarityCommon = Color(red: 0.65, green: 0.62, blue: 0.60)
     /// Uncommon — emerald
     public static let rarityUncommon = Color(red: 0.20, green: 0.65, blue: 0.35)
     /// Rare — sapphire
-    public static let rarityRare = Color(red: 0.25, green: 0.45, blue: 0.80)
+    public static let rarityRare = Color(red: 0.35, green: 0.55, blue: 0.90)
     /// Epic — amethyst
-    public static let rarityEpic = Color(red: 0.55, green: 0.25, blue: 0.75)
+    public static let rarityEpic = Color(red: 0.70, green: 0.42, blue: 0.90)
     /// Legendary — legendary gold
     public static let rarityLegendary = Color(red: 0.90, green: 0.65, blue: 0.15)
 
     // MARK: - Card Type Colors
     /// Item card — warm brown
-    public static let cardTypeItem = Color(red: 0.60, green: 0.40, blue: 0.20)
+    public static let cardTypeItem = Color(red: 0.70, green: 0.50, blue: 0.30)
     /// Location card — teal
-    public static let cardTypeLocation = Color(red: 0.20, green: 0.55, blue: 0.60)
+    public static let cardTypeLocation = Color(red: 0.30, green: 0.65, blue: 0.70)
     /// Scenario card — indigo
-    public static let cardTypeScenario = Color(red: 0.40, green: 0.30, blue: 0.75)
+    public static let cardTypeScenario = Color(red: 0.58, green: 0.48, blue: 0.92)
     /// Curse card — dark curse
-    public static let cardTypeCurse = Color(red: 0.25, green: 0.10, blue: 0.10)
+    public static let cardTypeCurse = Color(red: 0.80, green: 0.45, blue: 0.45)
     /// Spirit card — cyan
     public static let cardTypeSpirit = Color(red: 0.30, green: 0.75, blue: 0.85)
     /// Ritual card — indigo
-    public static let cardTypeRitual = Color(red: 0.40, green: 0.30, blue: 0.75)
+    public static let cardTypeRitual = Color(red: 0.58, green: 0.48, blue: 0.92)
     /// Resource/pink accent
-    public static let cardTypeResource = Color(red: 0.75, green: 0.35, blue: 0.55)
+    public static let cardTypeResource = Color(red: 0.82, green: 0.45, blue: 0.62)
 
     // MARK: - Region States
     /// Visited region
@@ -240,7 +240,7 @@ public enum AppColors {
     /// Available region
     public static let regionAvailable = Color(red: 0.85, green: 0.65, blue: 0.20).opacity(0.3)
     /// Locked region
-    public static let regionLocked = Color(red: 0.50, green: 0.48, blue: 0.45).opacity(0.3)
+    public static let regionLocked = Color(red: 0.62, green: 0.60, blue: 0.57).opacity(0.3)
     /// Current region
     public static let regionCurrent = Color(red: 0.85, green: 0.65, blue: 0.20)
 }
@@ -328,7 +328,7 @@ public extension View {
     /// Apply primary button style
     func primaryButtonStyle() -> some View {
         self
-            .foregroundColor(.white)
+            .foregroundColor(AppColors.backgroundSystem)
             .buttonPadding()
             .background(AppColors.primary)
             .cornerRadius(CornerRadius.md)

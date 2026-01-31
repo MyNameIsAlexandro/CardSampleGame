@@ -632,7 +632,7 @@ struct EngineRegionDetailView: View {
                 }) {
                     Text(L10n.buttonGreat.localized)
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundColor(AppColors.backgroundSystem)
                         .frame(minWidth: Sizes.buttonMinWidth)
                         .padding()
                         .background(AppColors.primary)
@@ -682,7 +682,7 @@ struct EngineRegionDetailView: View {
                     }
                     .font(.caption)
                     .fontWeight(.bold)
-                    .foregroundColor(.white)
+                    .foregroundColor(AppColors.backgroundSystem)
                     .padding(.horizontal, Spacing.smd)
                     .padding(.vertical, Spacing.xs)
                     .background(AppColors.primary)

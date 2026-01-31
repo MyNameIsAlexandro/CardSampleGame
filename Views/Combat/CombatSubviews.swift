@@ -53,7 +53,7 @@ struct MulliganOverlay: View {
                         Button(action: onConfirm) {
                             Text(L10n.combatMulliganConfirm.localized)
                                 .font(.headline)
-                                .foregroundColor(.white)
+                                .foregroundColor(AppColors.backgroundSystem)
                                 .frame(maxWidth: .infinity)
                                 .padding()
                                 .background(AppColors.primary)
@@ -400,7 +400,7 @@ struct CombatOverView: View {
                 Button(action: onDismiss) {
                     Text(L10n.encounterOutcomeContinue.localized)
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundColor(AppColors.backgroundSystem)
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(AppColors.primary)

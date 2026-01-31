@@ -40,7 +40,7 @@ struct TutorialOverlayView: View {
 
                 Text(step.bodyKey.localized)
                     .font(.body)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(AppColors.muted)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, Spacing.xl)
 
@@ -60,7 +60,7 @@ struct TutorialOverlayView: View {
                              : L10n.tutorialFinish.localized)
                             .font(.title3)
                             .fontWeight(.bold)
-                            .foregroundColor(.white)
+                            .foregroundColor(AppColors.backgroundSystem)
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(AppColors.primary)
@@ -71,7 +71,7 @@ struct TutorialOverlayView: View {
                         Button(action: onComplete) {
                             Text(L10n.tutorialSkip.localized)
                                 .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(AppColors.muted)
                         }
                     }
                 }

@@ -59,7 +59,7 @@ struct SettingsView: View {
                                 .foregroundColor(.primary)
                             Spacer()
                             Image(systemName: "arrow.up.forward.app")
-                                .foregroundColor(.secondary)
+                                .foregroundColor(AppColors.muted)
                         }
                     }
                 }
