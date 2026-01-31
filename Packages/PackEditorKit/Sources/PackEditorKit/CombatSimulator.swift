@@ -1,43 +1,22 @@
 import Foundation
 import TwilightEngine
 
-// MARK: - Configuration
+/// Runs N combat simulations concurrently and aggregates statistics.
+public final class CombatSimulator {
 
-struct SimulationConfig {
-    let heroDefinition: StandardHeroDefinition
-    let enemyDefinitions: [EnemyDefinition]
-    let simulationCount: Int
-    let startingResonance: Float
-}
+    public init() {}
 
-// MARK: - Result
-
-struct SimulationResult {
-    let totalRuns: Int
-    let wins: Int
-    let losses: Int
-    var winRate: Double { Double(wins) / Double(totalRuns) }
-    let avgRounds: Double
-    let avgHPRemaining: Double  // for wins only
-    let avgResonanceDelta: Double
-    let longestFight: Int
-    let roundDistribution: [Int: Int]  // round number -> count of fights ending on that round
-}
-
-// MARK: - Simulator
-
-final class CombatSimulator {
-
-    /// Run N combat simulations and aggregate statistics.
-    /// `progress` is called on the main actor with the number of completed runs.
-    static func run(config: SimulationConfig, progress: @escaping (Int) -> Void) async -> SimulationResult {
+    /// Run batch combat simulations.
+    /// `progress` is called with the number of completed runs.
+    public static func run(
+        config: SimulationConfig,
+        progress: @escaping @Sendable (Int) -> Void
+    ) async -> SimulationResult {
         let count = config.simulationCount
 
-        // Build shared immutable pieces
         let hero = buildHero(from: config.heroDefinition)
         let enemies = config.enemyDefinitions.map { buildEnemy(from: $0) }
 
-        // Collect per-run data concurrently
         let results: [(won: Bool, rounds: Int, hpRemaining: Int, resonanceDelta: Float)] = await withTaskGroup(
             of: (won: Bool, rounds: Int, hpRemaining: Int, resonanceDelta: Float).self,
             returning: [(won: Bool, rounds: Int, hpRemaining: Int, resonanceDelta: Float)].self
@@ -58,7 +37,6 @@ final class CombatSimulator {
             collected.reserveCapacity(count)
             for await result in group {
                 collected.append(result)
-                // Report progress on main actor
                 let done = collected.count
                 Task { @MainActor in progress(done) }
             }
@@ -124,40 +102,27 @@ final class CombatSimulator {
         let engine = EncounterEngine(context: context)
         let maxSafetyRounds = 200
 
-        // Engine starts in .intent phase with intents already generated (autoGenerateIntents in init).
-        // Advance to playerAction.
         _ = engine.advancePhase() // intent -> playerAction
 
         while !engine.isFinished && engine.currentRound <= maxSafetyRounds {
-            // --- Player Action Phase ---
-            let action = pickAIAction(engine: engine, hero: hero, enemies: enemies)
+            let action = pickAIAction(engine: engine, hero: hero)
             _ = engine.performAction(action)
 
-            // Check if fight ended (hero killed or all enemies dead after attack)
             if engine.heroHP <= 0 || engine.enemies.allSatisfy({ !$0.isAlive }) {
                 break
             }
 
-            // playerAction -> enemyResolution
-            _ = engine.advancePhase()
+            _ = engine.advancePhase() // playerAction -> enemyResolution
 
-            // --- Enemy Resolution Phase ---
             for enemy in engine.enemies where enemy.isAlive && enemy.outcome == nil {
                 _ = engine.resolveEnemyAction(enemyId: enemy.id)
             }
 
-            if engine.heroHP <= 0 {
-                break
-            }
+            if engine.heroHP <= 0 { break }
 
-            // enemyResolution -> roundEnd
-            _ = engine.advancePhase()
-
-            // roundEnd -> intent (increments round, auto-generates intents)
-            _ = engine.advancePhase()
-
-            // intent -> playerAction
-            _ = engine.advancePhase()
+            _ = engine.advancePhase() // enemyResolution -> roundEnd
+            _ = engine.advancePhase() // roundEnd -> intent
+            _ = engine.advancePhase() // intent -> playerAction
         }
 
         let result = engine.finishEncounter()
@@ -177,31 +142,22 @@ final class CombatSimulator {
 
     // MARK: - Simple AI
 
-    /// Picks a player action using a basic heuristic:
-    /// - If hero HP < 30% of max: defend
-    /// - If an alive enemy has a spirit track (wp != nil): alternate attack/spiritAttack
-    /// - Otherwise: attack the first alive enemy
     private static func pickAIAction(
         engine: EncounterEngine,
-        hero: EncounterHero,
-        enemies: [EncounterEnemy]
+        hero: EncounterHero
     ) -> PlayerAction {
 
         let hpPercent = Double(engine.heroHP) / Double(max(1, hero.maxHp))
 
-        // Defend when low HP
         if hpPercent < 0.3 {
             return .defend
         }
 
-        // Find first alive enemy
         guard let target = engine.enemies.first(where: { $0.isAlive && $0.outcome == nil }) else {
             return .wait
         }
 
-        // If enemy has a spirit track, alternate between physical and spirit attacks
         if target.wp != nil {
-            // Use spirit attack on odd rounds, physical on even
             if engine.currentRound % 2 == 1 {
                 return .spiritAttack(targetId: target.id)
             } else {

@@ -92,7 +92,7 @@
 		PEB0140000000000PE000001 /* QuestEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0140000000000PE000001 /* QuestEditor.swift */; };
 		PEB0150000000000PE000001 /* BalanceEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0150000000000PE000001 /* BalanceEditor.swift */; };
 		PEB0160000000000PE000001 /* SimulationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0160000000000PE000001 /* SimulationView.swift */; };
-		PEB0170000000000PE000001 /* CombatSimulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0170000000000PE000001 /* CombatSimulator.swift */; };
+		PEBPEK0000000000PE000001 /* PackEditorKit in Frameworks */ = {isa = PBXBuildFile; productRef = PEPKG30000000000PE000001 /* PackEditorKit */; };
 		PEFB010000000000PE000001 /* TwilightEngine in Frameworks */ = {isa = PBXBuildFile; productRef = PEPKG10000000000PE000001 /* TwilightEngine */; };
 		PEFB020000000000PE000001 /* PackAuthoring in Frameworks */ = {isa = PBXBuildFile; productRef = PEPKG20000000000PE000001 /* PackAuthoring */; };
 /* End PBXBuildFile section */
@@ -190,7 +190,7 @@
 		PEF0140000000000PE000001 /* QuestEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestEditor.swift; sourceTree = "<group>"; };
 		PEF0150000000000PE000001 /* BalanceEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceEditor.swift; sourceTree = "<group>"; };
 		PEF0160000000000PE000001 /* SimulationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimulationView.swift; sourceTree = "<group>"; };
-		PEF0170000000000PE000001 /* CombatSimulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombatSimulator.swift; sourceTree = "<group>"; };
+		/* CombatSimulator.swift removed — now in PackEditorKit */
 		PEP0010000000000PE000001 /* PackEditor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PackEditor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -222,6 +222,7 @@
 			files = (
 				PEFB010000000000PE000001 /* TwilightEngine in Frameworks */,
 				PEFB020000000000PE000001 /* PackAuthoring in Frameworks */,
+				PEBPEK0000000000PE000001 /* PackEditorKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -485,7 +486,7 @@
 			isa = PBXGroup;
 			children = (
 				PEF0160000000000PE000001 /* SimulationView.swift */,
-				PEF0170000000000PE000001 /* CombatSimulator.swift */,
+				/* CombatSimulator.swift removed */
 			);
 			path = Simulation;
 			sourceTree = "<group>";
@@ -555,6 +556,7 @@
 			packageProductDependencies = (
 				PEPKG10000000000PE000001 /* TwilightEngine */,
 				PEPKG20000000000PE000001 /* PackAuthoring */,
+				PEPKG30000000000PE000001 /* PackEditorKit */,
 			);
 			productName = PackEditor;
 			productReference = PEP0010000000000PE000001 /* PackEditor.app */;
@@ -596,6 +598,7 @@
 				PKG0010000000000000000001 /* XCLocalSwiftPackageReference "TwilightEngine" */,
 				PKG0012000000000000000001 /* XCLocalSwiftPackageReference "CoreHeroes" */,
 				PKG0013000000000000000001 /* XCLocalSwiftPackageReference "TwilightMarchesActI" */,
+				PKG0030000000000000000001 /* XCLocalSwiftPackageReference "PackEditorKit" */,
 			);
 			productRefGroup = AA0000260000000000000001 /* Products */;
 			projectDirPath = "";
@@ -728,7 +731,7 @@
 				PEB0140000000000PE000001 /* QuestEditor.swift in Sources */,
 				PEB0150000000000PE000001 /* BalanceEditor.swift in Sources */,
 				PEB0160000000000PE000001 /* SimulationView.swift in Sources */,
-				PEB0170000000000PE000001 /* CombatSimulator.swift in Sources */,
+				/* CombatSimulator.swift removed */
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1076,6 +1079,10 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/StoryPacks/Season1/TwilightMarchesActI;
 		};
+		PKG0030000000000000000001 /* XCLocalSwiftPackageReference "PackEditorKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/PackEditorKit;
+		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1114,6 +1121,10 @@
 		PEPKG20000000000PE000001 /* PackAuthoring */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = PackAuthoring;
+		};
+		PEPKG30000000000PE000001 /* PackEditorKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PackEditorKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

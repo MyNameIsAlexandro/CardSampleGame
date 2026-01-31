@@ -1,6 +1,7 @@
 import SwiftUI
 import Charts
 import TwilightEngine
+import PackEditorKit
 
 struct SimulationView: View {
     @EnvironmentObject var state: PackEditorState

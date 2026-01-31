@@ -1,5 +1,6 @@
 import SwiftUI
 import TwilightEngine
+import PackEditorKit
 
 struct ContentSidebar: View {
     @EnvironmentObject var state: PackEditorState

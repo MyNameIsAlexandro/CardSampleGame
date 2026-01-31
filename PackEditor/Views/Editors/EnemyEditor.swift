@@ -1,5 +1,6 @@
 import SwiftUI
 import TwilightEngine
+import PackEditorKit
 
 struct EnemyEditor: View {
     @Binding var enemy: EnemyDefinition

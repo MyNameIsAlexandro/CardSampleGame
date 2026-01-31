@@ -1,0 +1,13 @@
+[
+  {
+    "id": "test_region_1",
+    "title": { "en": "Test Region", "ru": "Тест Регион" },
+    "description": { "en": "A test region", "ru": "Тестовый регион" },
+    "region_type": "settlement",
+    "neighbor_ids": [],
+    "initially_discovered": true,
+    "event_pool_ids": ["pool_1"],
+    "initial_state": "stable",
+    "degradation_weight": 1
+  }
+]

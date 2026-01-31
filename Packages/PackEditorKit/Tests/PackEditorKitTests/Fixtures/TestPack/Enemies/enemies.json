@@ -1,0 +1,17 @@
+[
+  {
+    "id": "test_enemy_1",
+    "name": { "en": "Test Goblin", "ru": "Тестовый гоблин" },
+    "description": { "en": "A test enemy", "ru": "Тестовый враг" },
+    "health": 10,
+    "power": 3,
+    "defense": 1,
+    "difficulty": 1,
+    "enemy_type": "beast",
+    "rarity": "common",
+    "abilities": [],
+    "loot_card_ids": [],
+    "faith_reward": 1,
+    "balance_delta": 0
+  }
+]

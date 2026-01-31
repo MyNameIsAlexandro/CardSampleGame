@@ -1,0 +1,35 @@
+[
+  {
+    "id": "test_event_1",
+    "title": { "en": "Test Event", "ru": "Тестовое событие" },
+    "body": { "en": "Something happens", "ru": "Что-то происходит" },
+    "event_kind": "inline",
+    "availability": {
+      "required_flags": [],
+      "forbidden_flags": [],
+      "min_pressure": null,
+      "max_pressure": null,
+      "min_balance": null,
+      "max_balance": null,
+      "region_states": null,
+      "region_ids": null
+    },
+    "pool_ids": ["pool_1"],
+    "weight": 10,
+    "is_one_time": false,
+    "is_instant": false,
+    "cooldown": 0,
+    "choices": [
+      {
+        "id": "choice_1",
+        "label": { "en": "Accept", "ru": "Принять" },
+        "consequences": {
+          "resource_changes": {},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0
+        }
+      }
+    ]
+  }
+]

@@ -1,5 +1,6 @@
 import SwiftUI
 import TwilightEngine
+import PackEditorKit
 
 struct EventEditor: View {
     @Binding var event: EventDefinition

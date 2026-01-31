@@ -1,5 +1,6 @@
 import SwiftUI
 import TwilightEngine
+import PackEditorKit
 
 struct RegionEditor: View {
     @Binding var region: RegionDefinition

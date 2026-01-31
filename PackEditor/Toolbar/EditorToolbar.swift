@@ -1,6 +1,7 @@
 import SwiftUI
 import TwilightEngine
 import PackAuthoring
+import PackEditorKit
 
 struct EditorToolbar: ToolbarContent {
     @EnvironmentObject var state: PackEditorState
@@ -39,10 +40,8 @@ struct EditorToolbar: ToolbarContent {
     }
 
     private func validatePack() {
-        guard let url = state.packURL else { return }
-        let validator = PackValidator(packURL: url)
-        let summary = validator.validate()
-        state.validationSummary = summary
+        guard state.packURL != nil else { return }
+        state.validate()
         state.showValidation = true
     }
 

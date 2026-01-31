@@ -1,5 +1,6 @@
 import SwiftUI
 import TwilightEngine
+import PackEditorKit
 
 struct QuestEditor: View {
     @Binding var quest: QuestDefinition

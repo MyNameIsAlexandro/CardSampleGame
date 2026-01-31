@@ -1,5 +1,6 @@
 import SwiftUI
 import TwilightEngine
+import PackEditorKit
 
 struct HeroEditor: View {
     @Binding var hero: StandardHeroDefinition

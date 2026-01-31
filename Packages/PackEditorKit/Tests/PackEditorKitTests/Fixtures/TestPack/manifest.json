@@ -1,0 +1,24 @@
+{
+  "id": "test-pack",
+  "name": {
+    "en": "Test Pack",
+    "ru": "Тестовый пак"
+  },
+  "description": {
+    "en": "A minimal test pack",
+    "ru": "Минимальный тестовый пак"
+  },
+  "version": "1.0.0",
+  "type": "campaign",
+  "core_version_min": "1.0.0",
+  "dependencies": [],
+  "required_capabilities": [],
+  "entry_region": "test_region_1",
+  "recommended_heroes": [],
+  "author": "Test",
+  "license": "test",
+  "locales": ["en", "ru"],
+  "regions_path": "Regions/regions.json",
+  "events_path": "Events/events.json",
+  "enemies_path": "Enemies/enemies.json"
+}

@@ -1,5 +1,6 @@
 import SwiftUI
 import TwilightEngine
+import PackEditorKit
 
 struct BalanceEditor: View {
     @Binding var config: BalanceConfiguration

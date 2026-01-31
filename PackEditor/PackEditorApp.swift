@@ -1,6 +1,7 @@
 import SwiftUI
 import TwilightEngine
 import PackAuthoring
+import PackEditorKit
 
 @main
 struct PackEditorApp: App {

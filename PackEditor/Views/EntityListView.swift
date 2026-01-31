@@ -1,5 +1,6 @@
 import SwiftUI
 import TwilightEngine
+import PackEditorKit
 
 struct EntityListView: View {
     @EnvironmentObject var state: PackEditorState
