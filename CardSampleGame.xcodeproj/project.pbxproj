@@ -24,6 +24,7 @@
 		AS00000000000010 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AS00000000000001 /* Assets.xcassets */; };
 		BB0001150000000000000001 /* SaveLoadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001160000000000000001 /* SaveLoadTests.swift */; };
 		BB0004110000000000000001 /* AuditGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0004120000000000000001 /* AuditGateTests.swift */; };
+		PG00001500000000000000001 /* ProfileGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = PG00001600000000000000001 /* ProfileGateTests.swift */; };
 		CC000002000000000000001B /* ContrastComplianceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC000001000000000000001A /* ContrastComplianceTests.swift */; };
 		C80DC6128F371177237472A1 /* ConditionValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72352D1C9BABFA97F62257B /* ConditionValidatorTests.swift */; };
 		CC0000020000000000000001 /* CombatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000010000000000000001 /* CombatView.swift */; };
@@ -35,6 +36,13 @@
 		CT00000000000010 /* PackLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CT00000000000001 /* PackLoaderTests.swift */; };
 		CT00000000000020 /* ContentRegistryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CT00000000000002 /* ContentRegistryTests.swift */; };
 		DS00000000000010 /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DS00000000000001 /* DesignSystem.swift */; };
+		PG00000100000000000000001 /* PlayerProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = PG00000200000000000000001 /* PlayerProfile.swift */; };
+		PG00000300000000000000001 /* ProfileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = PG00000400000000000000001 /* ProfileManager.swift */; };
+		PG00000500000000000000001 /* AchievementDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = PG00000600000000000000001 /* AchievementDefinition.swift */; };
+		PG00000700000000000000001 /* AchievementEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = PG00000800000000000000001 /* AchievementEngine.swift */; };
+		PG00000900000000000000001 /* BestiaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = PG00001000000000000000001 /* BestiaryView.swift */; };
+		PG00001100000000000000001 /* CreatureDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = PG00001200000000000000001 /* CreatureDetailView.swift */; };
+		PG00001300000000000000001 /* AchievementsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = PG00001400000000000000001 /* AchievementsView.swift */; };
 		E9601DE7AB72AE3B9035899A /* CodeHygieneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60C1474DB750BB1D0378466E /* CodeHygieneTests.swift */; };
 		GG0002010000000000000001 /* HeroSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = GG0002020000000000000001 /* HeroSelectionView.swift */; };
 		HP00000000000010 /* HeroPanelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = HP00000000000001 /* HeroPanelTests.swift */; };
@@ -112,6 +120,13 @@
 		AA0000460000000000000001 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
 		AA0000490000000000000001 /* RulesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RulesView.swift; sourceTree = "<group>"; };
 		AA0000530000000000000001 /* GameSave.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameSave.swift; sourceTree = "<group>"; };
+		PG00000200000000000000001 /* PlayerProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerProfile.swift; sourceTree = "<group>"; };
+		PG00000400000000000000001 /* ProfileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileManager.swift; sourceTree = "<group>"; };
+		PG00000600000000000000001 /* AchievementDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementDefinition.swift; sourceTree = "<group>"; };
+		PG00000800000000000000001 /* AchievementEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementEngine.swift; sourceTree = "<group>"; };
+		PG00001000000000000000001 /* BestiaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BestiaryView.swift; sourceTree = "<group>"; };
+		PG00001200000000000000001 /* CreatureDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatureDetailView.swift; sourceTree = "<group>"; };
+		PG00001400000000000000001 /* AchievementsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementsView.swift; sourceTree = "<group>"; };
 		AA0000550000000000000001 /* StatisticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsView.swift; sourceTree = "<group>"; };
 		APP00102000000000000001 /* CardGameApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/CardGameApp.swift; sourceTree = SOURCE_ROOT; };
 		APP00202000000000000001 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/ContentView.swift; sourceTree = SOURCE_ROOT; };
@@ -119,6 +134,7 @@
 		BB0000010000000000000001 /* CardSampleGameTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CardSampleGameTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB0001160000000000000001 /* SaveLoadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveLoadTests.swift; sourceTree = "<group>"; };
 		BB0004120000000000000001 /* AuditGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditGateTests.swift; sourceTree = "<group>"; };
+		PG00001600000000000000001 /* ProfileGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileGateTests.swift; sourceTree = "<group>"; };
 		CC000001000000000000001A /* ContrastComplianceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContrastComplianceTests.swift; sourceTree = "<group>"; };
 		CC0000010000000000000001 /* CombatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombatView.swift; sourceTree = "<group>"; };
 		CB0000020000000000000001 /* EncounterBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncounterBridge.swift; sourceTree = "<group>"; };
@@ -247,6 +263,10 @@
 			isa = PBXGroup;
 			children = (
 				AA0000530000000000000001 /* GameSave.swift */,
+				PG00000200000000000000001 /* PlayerProfile.swift */,
+				PG00000400000000000000001 /* ProfileManager.swift */,
+				PG00000600000000000000001 /* AchievementDefinition.swift */,
+				PG00000800000000000000001 /* AchievementEngine.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -268,6 +288,9 @@
 				GOV0000200000000000000001 /* GameOverView.swift */,
 				TOV0000200000000000000001 /* TutorialOverlayView.swift */,
 				STV0000200000000000000001 /* SettingsView.swift */,
+				PG00001000000000000000001 /* BestiaryView.swift */,
+				PG00001200000000000000001 /* CreatureDetailView.swift */,
+				PG00001400000000000000001 /* AchievementsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -297,6 +320,7 @@
 			isa = PBXGroup;
 			children = (
 				BB0004120000000000000001 /* AuditGateTests.swift */,
+				PG00001600000000000000001 /* ProfileGateTests.swift */,
 				A0CA67A53A024B4CEDD6685C /* DesignSystemComplianceTests.swift */,
 				CC000001000000000000001A /* ContrastComplianceTests.swift */,
 				60C1474DB750BB1D0378466E /* CodeHygieneTests.swift */,
@@ -643,6 +667,13 @@
 				UT00000000000030 /* SafeImage.swift in Sources */,
 				UT00000000000040 /* AssetRegistry.swift in Sources */,
 				DS00000000000010 /* DesignSystem.swift in Sources */,
+				PG00000100000000000000001 /* PlayerProfile.swift in Sources */,
+				PG00000300000000000000001 /* ProfileManager.swift in Sources */,
+				PG00000500000000000000001 /* AchievementDefinition.swift in Sources */,
+				PG00000700000000000000001 /* AchievementEngine.swift in Sources */,
+				PG00000900000000000000001 /* BestiaryView.swift in Sources */,
+				PG00001100000000000000001 /* CreatureDetailView.swift in Sources */,
+				PG00001300000000000000001 /* AchievementsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -652,6 +683,7 @@
 			files = (
 				BB0001150000000000000001 /* SaveLoadTests.swift in Sources */,
 				BB0004110000000000000001 /* AuditGateTests.swift in Sources */,
+				PG00001500000000000000001 /* ProfileGateTests.swift in Sources */,
 				TH00000300000000000000001 /* TestContentLoader.swift in Sources */,
 				CT00000000000010 /* PackLoaderTests.swift in Sources */,
 				CT00000000000020 /* ContentRegistryTests.swift in Sources */,

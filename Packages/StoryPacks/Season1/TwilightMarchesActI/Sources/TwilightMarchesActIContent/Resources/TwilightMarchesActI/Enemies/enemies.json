@@ -20,7 +20,25 @@
       "beast_hide"
     ],
     "faith_reward": 2,
-    "balance_delta": 0
+    "balance_delta": 0,
+    "lore": {
+      "en": "Elders say the beasts were peaceful once, before the boundary thinned. Now hunger and Navi corruption drive them to madness.",
+      "ru": "Старики говорят, звери были мирными, пока граница не истончилась. Теперь голод и порча Нави сводят их с ума."
+    },
+    "tactics_nav": {
+      "en": "Spirits of Nav may calm the beast — approach with resonance offerings.",
+      "ru": "Духи Нави могут успокоить зверя — подойди с дарами резонанса."
+    },
+    "tactics_yav": {
+      "en": "Steel and strength. Strike fast before it can lunge.",
+      "ru": "Сталь и сила. Бей быстро, пока не бросился."
+    },
+    "tactics_prav": {
+      "en": "The light of Prav burns corruption away. Holy words may pacify.",
+      "ru": "Свет Прави выжигает порчу. Святое слово может усмирить."
+    },
+    "weaknesses": ["fire", "silver"],
+    "strengths": ["poison"]
   },
   {
     "id": "leshy",
@@ -91,7 +109,25 @@
       "forest_blessing"
     ],
     "faith_reward": 5,
-    "balance_delta": 5
+    "balance_delta": 5,
+    "lore": {
+      "en": "The Leshy remembers when the forest was whole. His rage is the rage of a world dying. He fights not from malice, but grief.",
+      "ru": "Леший помнит, когда лес был цел. Его ярость — ярость умирающего мира. Он сражается не от злобы, а от горя."
+    },
+    "tactics_nav": {
+      "en": "The Leshy is of Nav. Speak in the tongue of spirits, offer resonance, and he may relent.",
+      "ru": "Леший — существо Нави. Говори на языке духов, предложи резонанс, и он может отступить."
+    },
+    "tactics_yav": {
+      "en": "His bark is thick — aim for the eyes. Fire disrupts his regeneration.",
+      "ru": "Его кора толста — цель в глаза. Огонь нарушает регенерацию."
+    },
+    "tactics_prav": {
+      "en": "Blessings of Prav weaken his hold on the forest. Purify the ground beneath him.",
+      "ru": "Благословения Прави ослабляют его власть над лесом. Очисти землю под ним."
+    },
+    "weaknesses": ["fire", "holy"],
+    "strengths": ["poison", "nature"]
   },
   {
     "id": "mountain_spirit",
@@ -130,7 +166,25 @@
       "mountain_blessing"
     ],
     "faith_reward": 8,
-    "balance_delta": 10
+    "balance_delta": 10,
+    "lore": {
+      "en": "Mountain spirits test those who would cross their domain. They are neither good nor evil — only ancient.",
+      "ru": "Горные духи испытывают тех, кто осмелится пересечь их владения. Они ни добры, ни злы — лишь древны."
+    },
+    "tactics_nav": {
+      "en": "Resonance of the deep — the spirit respects those who walk between worlds.",
+      "ru": "Резонанс глубин — дух уважает тех, кто ходит между мирами."
+    },
+    "tactics_yav": {
+      "en": "Brute force barely scratches stone. Seek cracks in the armor — strike precisely.",
+      "ru": "Грубая сила едва царапает камень. Ищи трещины в броне — бей точно."
+    },
+    "tactics_prav": {
+      "en": "Ancient prayers to the mountain can still the spirit. Offer faith, not violence.",
+      "ru": "Древние молитвы горам могут утихомирить дух. Предложи веру, а не насилие."
+    },
+    "weaknesses": ["lightning"],
+    "strengths": ["fire", "physical"]
   },
   {
     "id": "risen_dead",
@@ -151,7 +205,25 @@
     "abilities": [],
     "loot_card_ids": [],
     "faith_reward": 3,
-    "balance_delta": -5
+    "balance_delta": -5,
+    "lore": {
+      "en": "When Navi creeps too close, the dead stir. They remember nothing — not name, not purpose. Only hunger remains.",
+      "ru": "Когда Навь подползает слишком близко, мёртвые шевелятся. Они не помнят ничего — ни имени, ни цели. Остаётся лишь голод."
+    },
+    "tactics_nav": {
+      "en": "The undead are puppets of Navi energy. A skilled practitioner can sever the threads.",
+      "ru": "Нежить — марионетки энергии Нави. Умелый практик может обрубить нити."
+    },
+    "tactics_yav": {
+      "en": "Hack the limbs. They feel no pain, so aim to dismember, not wound.",
+      "ru": "Руби конечности. Они не чувствуют боли, так что цель — расчленить, а не ранить."
+    },
+    "tactics_prav": {
+      "en": "Holy fire and blessed weapons. The light of Prav is their bane.",
+      "ru": "Святой огонь и благословлённое оружие. Свет Прави — их погибель."
+    },
+    "weaknesses": ["fire", "holy"],
+    "strengths": ["poison", "fear"]
   },
   {
     "id": "swamp_hag",
@@ -189,7 +261,25 @@
       "witch_knowledge"
     ],
     "faith_reward": 6,
-    "balance_delta": -10
+    "balance_delta": -10,
+    "lore": {
+      "en": "She was human once — a healer who delved too deep into Navi arts. Now she is neither alive nor dead, cursing all who wander near.",
+      "ru": "Когда-то она была человеком — целительницей, что слишком глубоко погрузилась в искусства Нави. Теперь она ни жива, ни мертва, проклиная всех, кто забредает поблизости."
+    },
+    "tactics_nav": {
+      "en": "She respects power. Show mastery of dark resonance and she may bargain.",
+      "ru": "Она уважает силу. Покажи владение тёмным резонансом, и она может пойти на сделку."
+    },
+    "tactics_yav": {
+      "en": "Her curses weaken warriors. Cleanse yourself before engaging, and strike before she can cast.",
+      "ru": "Её проклятия ослабляют воинов. Очистись перед боем и бей, пока она не успела наложить чары."
+    },
+    "tactics_prav": {
+      "en": "Prayers and holy water. Her dark magic crumbles before true faith.",
+      "ru": "Молитвы и святая вода. Её тёмная магия рассыпается перед истинной верой."
+    },
+    "weaknesses": ["holy", "silver"],
+    "strengths": ["poison", "curse"]
   },
   {
     "id": "leshy_guardian_boss",
@@ -243,6 +333,24 @@
       "ancient_power"
     ],
     "faith_reward": 20,
-    "balance_delta": 20
+    "balance_delta": 20,
+    "lore": {
+      "en": "The Guardian has stood at the boundary since before memory. He is the forest's last champion, and he will not yield while a single tree still stands.",
+      "ru": "Хранитель стоит на границе с незапамятных времён. Он последний защитник леса, и не отступит, пока стоит хоть одно дерево."
+    },
+    "tactics_nav": {
+      "en": "He is the deepest spirit of Nav. Only true communion with the dark forest may reach him.",
+      "ru": "Он — глубочайший дух Нави. Лишь истинное единение с тёмным лесом может до него достучаться."
+    },
+    "tactics_yav": {
+      "en": "His armor regenerates. You must overwhelm his healing — constant pressure, no respite.",
+      "ru": "Его броня регенерирует. Нужно превзойти его исцеление — постоянное давление, без передышки."
+    },
+    "tactics_prav": {
+      "en": "The most powerful blessings of Prav can crack his ancient bark. Combine holy attacks with purification.",
+      "ru": "Сильнейшие благословения Прави могут расколоть его древнюю кору. Сочетай святые атаки с очищением."
+    },
+    "weaknesses": ["fire", "holy", "lightning"],
+    "strengths": ["poison", "nature", "physical"]
   }
 ]

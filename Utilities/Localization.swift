@@ -617,4 +617,43 @@ enum L10n {
     static let fateDeckEmpty = "fate.deck.empty"
     static let fateResonanceModifier = "fate.resonance.modifier"
 
+    // MARK: - Bestiary (Epic 13)
+    static let bestiaryTitle = "bestiary.title"
+    static let bestiarySearch = "bestiary.search"
+    static let bestiaryProgress = "bestiary.progress"
+    static let bestiaryKnowledge = "bestiary.knowledge"
+    static let bestiaryLevelUnknown = "bestiary.level.unknown"
+    static let bestiaryLevelEncountered = "bestiary.level.encountered"
+    static let bestiaryLevelStudied = "bestiary.level.studied"
+    static let bestiaryLevelMastered = "bestiary.level.mastered"
+    static let bestiaryStats = "bestiary.stats"
+    static let bestiaryLore = "bestiary.lore"
+    static let bestiaryCombatInfo = "bestiary.combat.info"
+    static let bestiaryWeaknesses = "bestiary.weaknesses"
+    static let bestiaryStrengths = "bestiary.strengths"
+    static let bestiaryTactics = "bestiary.tactics"
+    static let bestiaryPersonalStats = "bestiary.personal.stats"
+    static let bestiaryEncountered = "bestiary.encountered"
+    static let bestiaryDefeated = "bestiary.defeated"
+    static let bestiaryPacified = "bestiary.pacified"
+    static let bestiaryLastMet = "bestiary.last.met"
+    static let bestiaryUnlockStudied = "bestiary.unlock.studied"
+    static let bestiaryUnlockMastered = "bestiary.unlock.mastered"
+
+    // MARK: - Enemy Types (Epic 13)
+    static let enemyTypeBeast = "enemy.type.beast"
+    static let enemyTypeSpirit = "enemy.type.spirit"
+    static let enemyTypeUndead = "enemy.type.undead"
+    static let enemyTypeDemon = "enemy.type.demon"
+    static let enemyTypeHuman = "enemy.type.human"
+    static let enemyTypeBoss = "enemy.type.boss"
+
+    // MARK: - Achievements (Epic 13)
+    static let achievementsTitle = "achievements.title"
+    static let achievementsUnlocked = "achievements.unlocked"
+    static let achievementsCategoryCombat = "achievements.category.combat"
+    static let achievementsCategoryExploration = "achievements.category.exploration"
+    static let achievementsCategoryKnowledge = "achievements.category.knowledge"
+    static let achievementsCategoryMastery = "achievements.category.mastery"
+
 }

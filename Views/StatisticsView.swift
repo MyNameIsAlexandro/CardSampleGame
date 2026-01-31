@@ -3,6 +3,7 @@ import TwilightEngine
 
 struct StatisticsView: View {
     @StateObject private var saveManager = SaveManager.shared
+    @StateObject private var profileManager = ProfileManager.shared
     @Environment(\.dismiss) var dismiss
 
     var allSaves: [EngineSave] {
@@ -50,6 +51,120 @@ struct StatisticsView: View {
                                 title: L10n.statsLongestSurvival.localized,
                                 value: L10n.statsTurnsCount.localized(with: longestSurvival),
                                 color: AppColors.success
+                            )
+                        }
+                    }
+                    .padding()
+                    .background(AppColors.cardBackground)
+                    .cornerRadius(CornerRadius.lg)
+
+                    // Combat Lifetime
+                    VStack(alignment: .leading, spacing: Spacing.lg) {
+                        Text(L10n.achievementsCategoryCombat.localized)
+                            .font(.headline)
+
+                        VStack(spacing: Spacing.lg) {
+                            HStack(spacing: Spacing.lg) {
+                                StatCard(
+                                    icon: "crossed.swords",
+                                    title: "Total Fights",
+                                    value: "\(profileManager.profile.combatStats.totalFights)",
+                                    color: AppColors.primary
+                                )
+
+                                StatCard(
+                                    icon: "checkmark.seal.fill",
+                                    title: "Victories",
+                                    value: "\(profileManager.profile.combatStats.totalVictories)",
+                                    color: AppColors.success
+                                )
+
+                                StatCard(
+                                    icon: "xmark.seal.fill",
+                                    title: "Defeats",
+                                    value: "\(profileManager.profile.combatStats.totalDefeats)",
+                                    color: AppColors.danger
+                                )
+                            }
+
+                            HStack(spacing: Spacing.lg) {
+                                StatCard(
+                                    icon: "figure.run",
+                                    title: "Fled",
+                                    value: "\(profileManager.profile.combatStats.totalFlees)",
+                                    color: AppColors.warning
+                                )
+
+                                StatCard(
+                                    icon: "bolt.fill",
+                                    title: "Damage Dealt",
+                                    value: "\(profileManager.profile.combatStats.totalDamageDealt)",
+                                    color: AppColors.power
+                                )
+
+                                StatCard(
+                                    icon: "shield.lefthalf.filled",
+                                    title: "Damage Taken",
+                                    value: "\(profileManager.profile.combatStats.totalDamageTaken)",
+                                    color: AppColors.health
+                                )
+                            }
+                        }
+                    }
+                    .padding()
+                    .background(AppColors.cardBackground)
+                    .cornerRadius(CornerRadius.lg)
+
+                    // Knowledge
+                    VStack(alignment: .leading, spacing: Spacing.lg) {
+                        Text(L10n.bestiaryKnowledge.localized)
+                            .font(.headline)
+
+                        HStack(spacing: Spacing.lg) {
+                            StatCard(
+                                icon: "eye.fill",
+                                title: "Encountered",
+                                value: "\(profileManager.profile.creatureKnowledge.values.filter { $0.level >= .encountered }.count)",
+                                color: AppColors.primary
+                            )
+
+                            StatCard(
+                                icon: "book.fill",
+                                title: "Studied",
+                                value: "\(profileManager.profile.creatureKnowledge.values.filter { $0.level >= .studied }.count)",
+                                color: AppColors.info
+                            )
+
+                            StatCard(
+                                icon: "star.fill",
+                                title: "Mastered",
+                                value: "\(profileManager.profile.creatureKnowledge.values.filter { $0.level == .mastered }.count)",
+                                color: AppColors.rarityLegendary
+                            )
+                        }
+                    }
+                    .padding()
+                    .background(AppColors.cardBackground)
+                    .cornerRadius(CornerRadius.lg)
+
+                    // Meta
+                    VStack(alignment: .leading, spacing: Spacing.lg) {
+                        Text(L10n.achievementsCategoryMastery.localized)
+                            .font(.headline)
+
+                        HStack(spacing: Spacing.lg) {
+                            StatCard(
+                                icon: "arrow.circlepath",
+                                title: "Total Playthroughs",
+                                value: "\(profileManager.profile.totalPlaythroughs)",
+                                color: AppColors.primary
+                            )
+
+                            StatCard(
+                                icon: "trophy.fill",
+                                title: "Achievements",
+                                value: "\(AchievementEngine.unlockedCount(profile: profileManager.profile))",
+                                color: AppColors.rarityLegendary
                             )
                         }
                     }

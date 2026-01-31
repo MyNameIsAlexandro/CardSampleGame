@@ -134,6 +134,12 @@ struct WorldMapView: View {
             .fullScreenCover(isPresented: $showingGameOver) {
                 if let result = engine.gameResult {
                     GameOverView(result: result, engine: engine) {
+                        // PG-05: Record playthrough end in ProfileManager
+                        ProfileManager.shared.recordPlaythroughEnd(daysSurvived: engine.currentDay)
+                        let newUnlocks = AchievementEngine.evaluateNewUnlocks(profile: ProfileManager.shared.profile)
+                        for id in newUnlocks {
+                            ProfileManager.shared.recordAchievement(id)
+                        }
                         showingGameOver = false
                         onExit?()
                     }

@@ -192,6 +192,20 @@
 - **Difficulty**: `DifficultyLevel` enum in engine package (easy/normal/hard) with HP/power multipliers
 - **Difficulty wiring**: `EncounterBridge` reads `UserDefaults("gameDifficulty")`, applies multipliers to enemy hp/power
 
+### Post-Game System
+- **PlayerProfile**: persistent meta-progression layer, ProfileManager singleton, UserDefaults key `"twilight_profile"`
+- **Bestiary**: Witcher-3 style progressive reveal system
+  - `CreatureKnowledge` tracks bestiary state per enemy ID (encounters, kills, knowledge level, first/last seen)
+  - `KnowledgeLevel` progression: unknown → glimpsed → studied → mastered (unlock at 1/3/7 encounters)
+  - `BestiaryView` + `CreatureDetailView` — full lore, tactics, stats revealed at mastered
+  - `EnemyDefinition` extensions: 6 new optional fields (bestiaryName, category, lore, tactics, habitat, weakness)
+- **Achievements**: full system with 15 launch achievements across 4 categories
+  - `AchievementDefinition` — id, title, desc, category, criteria (Codable)
+  - `AchievementEngine` — evalAll(), partial-progress support, register hooks on game events
+  - `AchievementsView` — grid display, category filter, completion % tracking
+- **Statistics**: enhanced tracking in PlayerProfile (total encounters, kills, deaths, victories, playtime, resonance extremes)
+- **Persistence**: ProfileManager syncs to disk after every encounter/achievement/stat update
+
 ### Pack Editor (macOS)
 - **Target**: `PackEditor` — separate macOS app in same Xcode project
 - **Architecture**: NavigationSplitView (sidebar → entity list → detail editor)
@@ -255,6 +269,7 @@ All audit findings have been addressed across 10 epics:
 10. ~~Design system audit~~ — full token compliance, CardSizes/AppShadows.glow, localized fate strings, 38 violations fixed across 14 files (Epic 10)
 11. ~~Debt closure~~ — mid-combat save (SAV-03) + difficulty wiring (SET-02), Codable on 11 types, snapshot/restore, view-layer resume, 8 gate tests (Epic 11)
 12. ~~Pack editor~~ — macOS SwiftUI content authoring tool, 8 editors, combat simulator, validate/compile toolbar, 17 source files (Epic 12)
+13. ~~Post-game system~~ — PlayerProfile persistence, Witcher-3 bestiary (progressive reveal), 15 achievements (4 categories), enhanced statistics, 13 gate tests, 60 L10n keys (en+ru) (Epic 13)
 
 ### Remaining Debt
 None — all debt items resolved.
@@ -270,7 +285,8 @@ None — all debt items resolved.
 | INV_ENC7_GateTests | 11 | Defend, flee rules, loot, RNG seed, summon |
 | INV_SAV8_GateTests | 3 | Fate deck save/load, round-trip, backward compat |
 | INV_DEBT11_GateTests | 8 | VictoryType Codable, EncounterSaveState round-trip, snapshot/restore, backward compat, difficulty |
-| **Total** | **78** | |
+| AuditGateTests | 13 | PlayerProfile persistence, bestiary progression, achievement unlock/progress, statistics tracking, ProfileManager singleton |
+| **Total** | **91** | |
 
 ## File Layout
 
@@ -301,6 +317,10 @@ Managers/
 Utilities/
   DesignSystem.swift           — AppColors (WCAG AA ≥4.5:1 on dark bg), Spacing, Sizes, CardSizes, CornerRadius, AppShadows, AppAnimation, AppGradient, Opacity
   Localization.swift           — L10n keys
+Views/PostGame/
+  BestiaryView.swift           — Grid of all encountered creatures, category filter
+  CreatureDetailView.swift     — Lore, tactics, stats (progressive reveal)
+  AchievementsView.swift       — Grid of all achievements, category filter, completion %
 Packages/
   TwilightEngine/Sources/TwilightEngine/
     Core/
@@ -324,9 +344,14 @@ Packages/
       DegradationRules.swift     — Region degradation config
       TwilightMarchesConfig.swift — Pressure, anchors, balance
     Data/Definitions/
-      EnemyDefinition.swift      — Enemy stats + lootCardIds + faithReward
+      EnemyDefinition.swift      — Enemy stats + lootCardIds + faithReward + bestiary extensions (6 optional fields)
     ContentPacks/
       ContentRegistry.swift      — Content loading + queries
+    Meta/
+      PlayerProfile.swift        — Meta-progression: bestiary, achievements, statistics
+      ProfileManager.swift       — Singleton, UserDefaults persistence
+      AchievementDefinition.swift — Achievement model + categories
+      AchievementEngine.swift    — Achievement unlock + progress tracking
   TwilightEngine/Tests/
     GateTests/                   — 78 gate tests (7 files)
     LayerTests/                  — Component integration tests

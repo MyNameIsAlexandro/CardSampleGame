@@ -361,6 +361,34 @@ struct CombatView: View {
             outcome = .fled
         }
 
+        // PG-04: Record encounter in ProfileManager
+        let profileManager = ProfileManager.shared
+        for (enemyId, entityOutcome) in result.perEntityOutcomes {
+            let profileOutcome: EncounterOutcomeType
+            switch entityOutcome {
+            case .killed: profileOutcome = .defeated
+            case .pacified: profileOutcome = .pacified
+            case .escaped: profileOutcome = .fled
+            case .alive: profileOutcome = .lost
+            }
+            profileManager.recordEncounter(
+                enemyId: enemyId,
+                day: engine.currentDay,
+                outcome: profileOutcome
+            )
+        }
+        profileManager.recordCombatStats(
+            damageDealt: 0,
+            damageTaken: hpLost,
+            cardsPlayed: 0,
+            fateCardsDrawn: 0
+        )
+        // Check for new achievements
+        let newUnlocks = AchievementEngine.evaluateNewUnlocks(profile: profileManager.profile)
+        for id in newUnlocks {
+            profileManager.recordAchievement(id)
+        }
+
         onCombatEnd(outcome)
     }
 }

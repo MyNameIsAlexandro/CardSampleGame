@@ -66,6 +66,26 @@ public struct EnemyDefinition: GameDefinition {
     /// Balance change when defeated
     public let balanceDelta: Int
 
+    // MARK: - Bestiary Content (Epic 13)
+
+    /// Lore flavor text (Witcher-style scholar quote)
+    public let lore: LocalizableText?
+
+    /// Tactical recommendation for Nav faction
+    public let tacticsNav: LocalizableText?
+
+    /// Tactical recommendation for Yav faction
+    public let tacticsYav: LocalizableText?
+
+    /// Tactical recommendation for Prav faction
+    public let tacticsPrav: LocalizableText?
+
+    /// Keyword vulnerabilities (e.g. ["fire", "silver"])
+    public let weaknesses: [String]?
+
+    /// Keyword resistances
+    public let strengths: [String]?
+
     // Note: No explicit CodingKeys needed - JSONDecoder uses .convertFromSnakeCase
     // which automatically converts enemy_type → enemyType, faith_reward → faithReward, etc.
 
@@ -86,7 +106,13 @@ public struct EnemyDefinition: GameDefinition {
         abilities: [EnemyAbility] = [],
         lootCardIds: [String] = [],
         faithReward: Int = 0,
-        balanceDelta: Int = 0
+        balanceDelta: Int = 0,
+        lore: LocalizableText? = nil,
+        tacticsNav: LocalizableText? = nil,
+        tacticsYav: LocalizableText? = nil,
+        tacticsPrav: LocalizableText? = nil,
+        weaknesses: [String]? = nil,
+        strengths: [String]? = nil
     ) {
         self.id = id
         self.name = name
@@ -103,6 +129,12 @@ public struct EnemyDefinition: GameDefinition {
         self.lootCardIds = lootCardIds
         self.faithReward = faithReward
         self.balanceDelta = balanceDelta
+        self.lore = lore
+        self.tacticsNav = tacticsNav
+        self.tacticsYav = tacticsYav
+        self.tacticsPrav = tacticsPrav
+        self.weaknesses = weaknesses
+        self.strengths = strengths
     }
 
     /// Convert to legacy Card (monster type) for UI compatibility

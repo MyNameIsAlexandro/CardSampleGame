@@ -977,3 +977,102 @@
 "fate.critical" = "CRITICAL";
 "fate.deck.empty" = "No cards in discard pile";
 "fate.resonance.modifier" = "Resonance: %@";
+
+// MARK: - Bestiary (Epic 13)
+"bestiary.title" = "Bestiary";
+"bestiary.search" = "Search creatures...";
+"bestiary.progress" = "%d / %d discovered";
+"bestiary.knowledge" = "Knowledge";
+"bestiary.level.unknown" = "Unknown";
+"bestiary.level.encountered" = "Encountered";
+"bestiary.level.studied" = "Studied";
+"bestiary.level.mastered" = "Mastered";
+"bestiary.stats" = "Statistics";
+"bestiary.lore" = "Lore";
+"bestiary.combat.info" = "Combat Info";
+"bestiary.weaknesses" = "Weaknesses";
+"bestiary.strengths" = "Resistances";
+"bestiary.tactics" = "Faction Tactics";
+"bestiary.personal.stats" = "Your History";
+"bestiary.encountered" = "Met";
+"bestiary.defeated" = "Slain";
+"bestiary.pacified" = "Pacified";
+"bestiary.last.met" = "Last seen: day %d";
+"bestiary.unlock.studied" = "Encounter this creature 3 times to unlock full stats, abilities and lore.";
+"bestiary.unlock.mastered" = "Defeat 5 times or pacify 3 times to unlock weaknesses and faction tactics.";
+
+// MARK: - Enemy Types (Epic 13)
+"enemy.type.beast" = "Beast";
+"enemy.type.spirit" = "Spirit";
+"enemy.type.undead" = "Undead";
+"enemy.type.demon" = "Demon";
+"enemy.type.human" = "Human";
+"enemy.type.boss" = "Boss";
+
+// MARK: - Achievements (Epic 13)
+"achievements.title" = "Achievements";
+"achievements.unlocked" = "achievements unlocked";
+"achievements.category.combat" = "Combat";
+"achievements.category.exploration" = "Exploration";
+"achievements.category.knowledge" = "Knowledge";
+"achievements.category.mastery" = "Mastery";
+
+"achievement.first.blood.title" = "First Blood";
+"achievement.first.blood.desc" = "Win your first battle";
+"achievement.beast.slayer.title" = "Beast Slayer";
+"achievement.beast.slayer.desc" = "Win 10 battles";
+"achievement.battle.hardened.title" = "Battle-Hardened";
+"achievement.battle.hardened.desc" = "Fight 25 battles";
+"achievement.pacifist.title" = "Pacifist";
+"achievement.pacifist.desc" = "Pacify 5 creatures";
+"achievement.spirit.whisperer.title" = "Spirit Whisperer";
+"achievement.spirit.whisperer.desc" = "Pacify 10 creatures";
+"achievement.fate.weaver.title" = "Fate Weaver";
+"achievement.fate.weaver.desc" = "Draw 50 fate cards";
+"achievement.survivor.title" = "Survivor";
+"achievement.survivor.desc" = "Survive 30 days";
+"achievement.enduring.title" = "Enduring";
+"achievement.enduring.desc" = "Survive 50 days";
+"achievement.veteran.title" = "Veteran";
+"achievement.veteran.desc" = "Complete 3 playthroughs";
+"achievement.curious.mind.title" = "Curious Mind";
+"achievement.curious.mind.desc" = "Encounter 3 different creatures";
+"achievement.scholar.title" = "Scholar";
+"achievement.scholar.desc" = "Study 3 different creatures";
+"achievement.master.tracker.title" = "Master Tracker";
+"achievement.master.tracker.desc" = "Master all known creatures";
+"achievement.card.master.title" = "Card Master";
+"achievement.card.master.desc" = "Play 100 cards in combat";
+"achievement.destroyer.title" = "Destroyer";
+"achievement.destroyer.desc" = "Deal 500 total damage";
+"achievement.iron.will.title" = "Iron Will";
+"achievement.iron.will.desc" = "Take 500 total damage";
+
+// MARK: - Bestiary (Epic 13)
+"bestiary.title" = "Bestiary";
+"bestiary.search" = "Search creatures...";
+"bestiary.progress" = "Discovered: %d / %d";
+"bestiary.knowledge" = "Knowledge";
+"bestiary.level.unknown" = "Unknown";
+"bestiary.level.encountered" = "Encountered";
+"bestiary.level.studied" = "Studied";
+"bestiary.level.mastered" = "Mastered";
+"bestiary.stats" = "Stats";
+"bestiary.lore" = "Lore";
+"bestiary.combat.info" = "Combat Intel";
+"bestiary.weaknesses" = "Weaknesses";
+"bestiary.strengths" = "Strengths";
+"bestiary.tactics" = "Faction Tactics";
+"bestiary.personal.stats" = "Your Record";
+"bestiary.encountered" = "Met";
+"bestiary.defeated" = "Defeated";
+"bestiary.pacified" = "Pacified";
+"bestiary.last.met" = "Last seen on day %d";
+"bestiary.unlock.studied" = "Encounter this creature more to reveal stats and abilities.";
+"bestiary.unlock.mastered" = "Defeat or pacify this creature more to reveal weaknesses and tactics.";
+"enemy.type.beast" = "Beasts";
+"enemy.type.spirit" = "Spirits";
+"enemy.type.undead" = "Undead";
+"enemy.type.demon" = "Demons";
+"enemy.type.human" = "Humans";
+"enemy.type.boss" = "Bosses";

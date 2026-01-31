@@ -10,6 +10,8 @@ struct ContentView: View {
     @State private var showingLoadSlots = false  // New: for "Continue" flow
     @State private var showingStatistics = false
     @State private var showingSettings = false
+    @State private var showingBestiary = false
+    @State private var showingAchievements = false
     @State private var showingContentManager = false
     @State private var showingBattleArena = false
     @State private var selectedHeroId: String?
@@ -136,12 +138,28 @@ struct ContentView: View {
                                     .foregroundColor(AppColors.secondary)
                                     .cornerRadius(8)
                             }
-                            Button(action: { showingStatistics = true }) {
-                                Image(systemName: "chart.bar.fill")
+                            Button(action: { showingBestiary = true }) {
+                                Image(systemName: "pawprint.fill")
+                                    .font(.title3)
+                                    .padding(8)
+                                    .background(AppColors.success.opacity(0.2))
+                                    .foregroundColor(AppColors.success)
+                                    .cornerRadius(8)
+                            }
+                            Button(action: { showingAchievements = true }) {
+                                Image(systemName: "trophy.fill")
                                     .font(.title3)
                                     .padding(8)
                                     .background(AppColors.warning.opacity(0.2))
                                     .foregroundColor(AppColors.warning)
+                                    .cornerRadius(8)
+                            }
+                            Button(action: { showingStatistics = true }) {
+                                Image(systemName: "chart.bar.fill")
+                                    .font(.title3)
+                                    .padding(8)
+                                    .background(AppColors.info.opacity(0.2))
+                                    .foregroundColor(AppColors.info)
                                     .cornerRadius(8)
                             }
                             Button(action: { showingRules = true }) {
@@ -308,6 +326,12 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showingSettings) {
             SettingsView()
+        }
+        .sheet(isPresented: $showingBestiary) {
+            BestiaryView()
+        }
+        .sheet(isPresented: $showingAchievements) {
+            AchievementsView()
         }
         #if DEBUG
         .sheet(isPresented: $showingContentManager) {

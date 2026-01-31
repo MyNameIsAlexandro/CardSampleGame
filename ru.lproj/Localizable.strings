@@ -982,3 +982,102 @@
 "fate.critical" = "КРИТ";
 "fate.deck.empty" = "Нет карт в сбросе";
 "fate.resonance.modifier" = "Резонанс: %@";
+
+// MARK: - Bestiary (Epic 13)
+"bestiary.title" = "Бестиарий";
+"bestiary.search" = "Искать существ...";
+"bestiary.progress" = "%d / %d открыто";
+"bestiary.knowledge" = "Знание";
+"bestiary.level.unknown" = "Неизвестно";
+"bestiary.level.encountered" = "Встречено";
+"bestiary.level.studied" = "Изучено";
+"bestiary.level.mastered" = "Освоено";
+"bestiary.stats" = "Характеристики";
+"bestiary.lore" = "Предание";
+"bestiary.combat.info" = "Боевые данные";
+"bestiary.weaknesses" = "Уязвимости";
+"bestiary.strengths" = "Сопротивления";
+"bestiary.tactics" = "Тактика фракций";
+"bestiary.personal.stats" = "Ваша история";
+"bestiary.encountered" = "Встреч";
+"bestiary.defeated" = "Убито";
+"bestiary.pacified" = "Усмирено";
+"bestiary.last.met" = "Последняя встреча: день %d";
+"bestiary.unlock.studied" = "Встретьте это существо 3 раза, чтобы открыть полные характеристики, способности и предание.";
+"bestiary.unlock.mastered" = "Победите 5 раз или усмирите 3 раза, чтобы открыть уязвимости и тактику фракций.";
+
+// MARK: - Enemy Types (Epic 13)
+"enemy.type.beast" = "Зверь";
+"enemy.type.spirit" = "Дух";
+"enemy.type.undead" = "Нежить";
+"enemy.type.demon" = "Демон";
+"enemy.type.human" = "Человек";
+"enemy.type.boss" = "Босс";
+
+// MARK: - Achievements (Epic 13)
+"achievements.title" = "Достижения";
+"achievements.unlocked" = "достижений открыто";
+"achievements.category.combat" = "Бой";
+"achievements.category.exploration" = "Исследование";
+"achievements.category.knowledge" = "Знания";
+"achievements.category.mastery" = "Мастерство";
+
+"achievement.first.blood.title" = "Первая кровь";
+"achievement.first.blood.desc" = "Выиграйте первый бой";
+"achievement.beast.slayer.title" = "Истребитель зверей";
+"achievement.beast.slayer.desc" = "Выиграйте 10 боёв";
+"achievement.battle.hardened.title" = "Закалённый в бою";
+"achievement.battle.hardened.desc" = "Проведите 25 боёв";
+"achievement.pacifist.title" = "Пацифист";
+"achievement.pacifist.desc" = "Усмирите 5 существ";
+"achievement.spirit.whisperer.title" = "Заклинатель духов";
+"achievement.spirit.whisperer.desc" = "Усмирите 10 существ";
+"achievement.fate.weaver.title" = "Ткач судьбы";
+"achievement.fate.weaver.desc" = "Вытяните 50 карт судьбы";
+"achievement.survivor.title" = "Выживший";
+"achievement.survivor.desc" = "Проживите 30 дней";
+"achievement.enduring.title" = "Стойкий";
+"achievement.enduring.desc" = "Проживите 50 дней";
+"achievement.veteran.title" = "Ветеран";
+"achievement.veteran.desc" = "Пройдите 3 прохождения";
+"achievement.curious.mind.title" = "Любопытный ум";
+"achievement.curious.mind.desc" = "Встретьте 3 разных существа";
+"achievement.scholar.title" = "Учёный";
+"achievement.scholar.desc" = "Изучите 3 разных существа";
+"achievement.master.tracker.title" = "Мастер-следопыт";
+"achievement.master.tracker.desc" = "Освойте всех известных существ";
+"achievement.card.master.title" = "Мастер карт";
+"achievement.card.master.desc" = "Сыграйте 100 карт в бою";
+"achievement.destroyer.title" = "Разрушитель";
+"achievement.destroyer.desc" = "Нанесите 500 суммарного урона";
+"achievement.iron.will.title" = "Железная воля";
+"achievement.iron.will.desc" = "Получите 500 суммарного урона";
+
+// MARK: - Bestiary (Epic 13)
+"bestiary.title" = "Бестиарий";
+"bestiary.search" = "Поиск существ...";
+"bestiary.progress" = "Открыто: %d / %d";
+"bestiary.knowledge" = "Знание";
+"bestiary.level.unknown" = "Неизвестно";
+"bestiary.level.encountered" = "Встречено";
+"bestiary.level.studied" = "Изучено";
+"bestiary.level.mastered" = "Освоено";
+"bestiary.stats" = "Характеристики";
+"bestiary.lore" = "Предания";
+"bestiary.combat.info" = "Боевые данные";
+"bestiary.weaknesses" = "Слабости";
+"bestiary.strengths" = "Сильные стороны";
+"bestiary.tactics" = "Тактика фракций";
+"bestiary.personal.stats" = "Ваш опыт";
+"bestiary.encountered" = "Встреч";
+"bestiary.defeated" = "Побед";
+"bestiary.pacified" = "Усмирено";
+"bestiary.last.met" = "Последняя встреча: день %d";
+"bestiary.unlock.studied" = "Встречайте это существо чаще, чтобы узнать его характеристики и способности.";
+"bestiary.unlock.mastered" = "Побеждайте или усмиряйте это существо, чтобы узнать слабости и тактику.";
+"enemy.type.beast" = "Звери";
+"enemy.type.spirit" = "Духи";
+"enemy.type.undead" = "Нежить";
+"enemy.type.demon" = "Демоны";
+"enemy.type.human" = "Люди";
+"enemy.type.boss" = "Боссы";
