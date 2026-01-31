@@ -255,7 +255,7 @@ User taps "Explore" in region
 
 ## Architectural Debt: RESOLVED
 
-All audit findings have been addressed across 10 epics:
+All audit findings have been addressed across 14 epics:
 
 1. ~~RNG split~~ — WorldRNG 100% normalized, deterministic (Epic 1)
 2. ~~Access control~~ — all `public private(set)`, no unprotected state (Epic 2)
@@ -270,6 +270,25 @@ All audit findings have been addressed across 10 epics:
 11. ~~Debt closure~~ — mid-combat save (SAV-03) + difficulty wiring (SET-02), Codable on 11 types, snapshot/restore, view-layer resume, 8 gate tests (Epic 11)
 12. ~~Pack editor~~ — macOS SwiftUI content authoring tool, 8 editors, combat simulator, validate/compile toolbar, 17 source files (Epic 12)
 13. ~~Post-game system~~ — PlayerProfile persistence, Witcher-3 bestiary (progressive reveal), 15 achievements (4 categories), enhanced statistics, 13 gate tests, 60 L10n keys (en+ru) (Epic 13)
+14. ~~Encounter production completion~~ — weakness/strength modifiers, enemy abilities, mid-combat save UI, legacy deprecation marks, 19 new tests (Epic 14)
+
+### Encounter Engine (Production-Complete — Epic 14)
+
+The `EncounterEngine` is the production combat system, replacing legacy `TwilightGameEngine` combat actions.
+
+**Phase loop**: intent → playerAction → enemyResolution → roundEnd
+**Dual-track**: HP (physical kill) + WP (spirit pacification)
+**Deterministic**: WorldRNG seed-based, fully reproducible
+
+Key subsystems:
+- **BehaviorEvaluator** — declarative enemy AI from `behaviors.json`
+- **KeywordInterpreter** — fate card keyword resolution with suit alignment
+- **Weakness/Strength** — ×1.5/×0.67 damage multipliers based on fate card keywords
+- **Enemy Abilities** — bonusDamage, armor, regeneration, applyCurse
+- **Escalation/De-escalation** — track-switching bonuses and rage shields
+- **Mid-combat Save** — full state serialization via `EncounterSaveState`
+
+Legacy combat actions in `TwilightGameAction` are deprecated (marked with MARK headers).
 
 ### Remaining Debt
 None — all debt items resolved.

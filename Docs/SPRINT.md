@@ -7,7 +7,7 @@
 
 ## ALL EPICS COMPLETE
 
-Total: 13 epics, 117 tasks, 358 engine tests + 219 app tests (0 failures), iOS + macOS builds clean.
+Total: 14 epics, 123 tasks, 368 engine tests + 219 app tests (0 failures), iOS + macOS builds clean.
 
 ---
 
@@ -26,6 +26,17 @@ Total: 13 epics, 117 tasks, 358 engine tests + 219 app tests (0 failures), iOS +
 11. ~~Epic 11: Debt Closure~~ CLOSED — mid-combat save (SAV-03), difficulty wiring (SET-02), Codable on 11 types, EncounterEngine snapshot/restore, view-layer resume, 8 gate tests
 12. ~~Epic 12: Pack Editor~~ CLOSED — macOS SwiftUI content authoring tool, 17 source files, 8 editors (enemy/card/event/region/hero/fate/quest/balance), combat simulator with Charts histogram, validate + compile toolbar, NavigationSplitView
 13. ~~Epic 13: Post-Game System~~ CLOSED — PlayerProfile persistence, Witcher-3 style bestiary (progressive reveal), 15 achievements (4 categories), enhanced statistics, 13 gate tests, 60 L10n keys (en+ru)
+14. ~~Epic 14: Encounter Module — Production Completion~~ CLOSED — weakness/strength modifiers, enemy abilities, mid-combat save UI, legacy deprecation, 19 new tests
+
+### Epic 14: Encounter Module — Production Completion
+- **Status**: Complete
+- **Commit**: 0282852
+- EC-01: Weakness/Strength damage modifiers (×1.5/×0.67)
+- EC-02: Enemy ability execution (bonusDamage, armor, regeneration)
+- EC-03: Behavior content (6 patterns, already wired)
+- EC-04: Mid-combat Save & Exit UI
+- EC-05: Legacy combat code deprecated
+- EC-06: 19 new tests (587 total, 0 failures)
 
 ## Epic 13: Post-Game System — CLOSED (2026-01-31)
 
@@ -81,7 +92,7 @@ None — all debt items resolved.
 
 ## Final Stats
 
-- **Engine tests**: 358 (0 failures, 0 skips)
+- **Engine tests**: 368 (0 failures, 0 skips)
 - **App tests**: 219 (0 failures)
 - **Gate tests**: 98 across 9 files
 - **iOS Simulator**: builds clean (iPhone 17 Pro)
@@ -97,3 +108,4 @@ Full details:
 - Epic 11: `Docs/plans/2026-01-31-debt-closure-design.md` (plan file)
 - Epic 12: `Docs/plans/2026-01-31-pack-editor-design.md` (plan file)
 - Epic 13: `Docs/plans/2026-01-31-post-game-system-design.md` (plan file)
+- Epic 14: `Docs/plans/2026-01-31-encounter-completion-design.md`
