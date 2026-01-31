@@ -1,7 +1,7 @@
 # Architecture Map
 
 > Strategic context for Claude sessions. Max 500 lines.
-> Updated when an epic closes. Last update: Epic 12 (pack editor).
+> Updated when an epic closes. Last update: WCAG contrast pass.
 
 ## Core Principle
 
@@ -299,7 +299,7 @@ Managers/
   HapticManager.swift          — Singleton, 7 haptic types (UIFeedbackGenerator)
   SoundManager.swift           — AVAudioPlayer, 20 effects, 3 music tracks
 Utilities/
-  DesignSystem.swift           — AppColors, Spacing, Sizes, CardSizes, CornerRadius, AppShadows, AppAnimation, AppGradient, Opacity
+  DesignSystem.swift           — AppColors (WCAG AA ≥4.5:1 on dark bg), Spacing, Sizes, CardSizes, CornerRadius, AppShadows, AppAnimation, AppGradient, Opacity
   Localization.swift           — L10n keys
 Packages/
   TwilightEngine/Sources/TwilightEngine/

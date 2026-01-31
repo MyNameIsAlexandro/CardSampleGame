@@ -7,7 +7,7 @@
 
 ## ALL EPICS COMPLETE
 
-Total: 12 epics, 101 tasks, 358 engine tests (0 failures), iOS + macOS builds clean.
+Total: 12 epics, 101 tasks, 358 engine tests + 206 app tests (0 failures), iOS + macOS builds clean.
 
 ---
 
@@ -26,6 +26,13 @@ Total: 12 epics, 101 tasks, 358 engine tests (0 failures), iOS + macOS builds cl
 11. ~~Epic 11: Debt Closure~~ CLOSED — mid-combat save (SAV-03), difficulty wiring (SET-02), Codable on 11 types, EncounterEngine snapshot/restore, view-layer resume, 8 gate tests
 12. ~~Epic 12: Pack Editor~~ CLOSED — macOS SwiftUI content authoring tool, 17 source files, 8 editors (enemy/card/event/region/hero/fate/quest/balance), combat simulator with Charts histogram, validate + compile toolbar, NavigationSplitView
 
+## Post-Epic: WCAG Contrast Pass
+
+- Brightened ~20 AppColors to meet WCAG AA 4.5:1 on dark backgrounds
+- Replaced `.foregroundColor(.secondary)` → `AppColors.muted` across all Views
+- Changed white button text to dark on gold (primary) buttons (2.2:1 → 7:1)
+- Added ContrastComplianceTests: 7 gate tests (WCAG 2.1 math)
+
 ## Remaining Debt
 
 None — all debt items resolved.
@@ -41,11 +48,13 @@ None — all debt items resolved.
 | INV_ENC7_GateTests | 11 | Defend, flee rules, loot distribution, RNG seed, summon |
 | INV_SAV8_GateTests | 3 | Fate deck save/load, round-trip, backward compatibility |
 | INV_DEBT11_GateTests | 8 | VictoryType Codable, EncounterSaveState round-trip, snapshot/restore, backward compat, difficulty |
+| ContrastComplianceTests | 7 | WCAG AA 4.5:1 on cardBackground + backgroundSystem, button contrast, muted text, math validation |
 
 ## Final Stats
 
 - **Engine tests**: 358 (0 failures, 0 skips)
-- **Gate tests**: 78 across 7 files
+- **App tests**: 206 (0 failures)
+- **Gate tests**: 85 across 8 files
 - **iOS Simulator**: builds clean (iPhone 17 Pro)
 - **macOS**: builds clean (PackEditor)
 - **Architecture**: Engine-First, all state via performAction(), deterministic RNG
