@@ -72,6 +72,25 @@ Total: 14 epics, 123 tasks, 368 engine tests + 219 app tests (0 failures), iOS +
 - Changed white button text to dark on gold (primary) buttons (2.2:1 → 7:1)
 - Added ContrastComplianceTests: 7 gate tests (WCAG 2.1 math)
 
+## Post-Epic: Stabilization Pass (2026-01-31)
+
+**Dead code removal** (~1780 lines):
+- GameLoop.swift (~330 lines) — moved EngineGamePhase and GameEndResult to EngineProtocols.swift, deleted unused GameLoopBase class and StandardAction enum
+- Legacy combat code (~1450 lines) — removed 9 deprecated actions and 4 test files from pre-EncounterEngine era
+
+**Test coverage expansion** (104 new tests):
+- EconomyManager: 17 tests
+- PressureEngine: 16 tests
+- RequirementsEvaluator: 13 tests
+- EventPipeline: 21 tests
+- QuestTriggerEngine: 24 tests
+- MiniGameDispatcher: 13 tests
+
+**Final metrics**:
+- Engine tests: 335 → 439
+- Total tests: 658 (439 engine + 219 app), 0 failures
+- Coverage: ~97% of engine source files (up from 87%)
+
 ## Remaining Debt
 
 None — all debt items resolved.

@@ -293,6 +293,26 @@ Legacy combat actions in `TwilightGameAction` are deprecated (marked with MARK h
 ### Remaining Debt
 None — all debt items resolved.
 
+### Stabilization Pass (2026-01-31)
+
+After completing all 14 epics, a stabilization pass removed dead code and expanded test coverage:
+
+**Dead code removal**:
+- GameLoop.swift (~330 lines) — moved EngineGamePhase and GameEndResult to EngineProtocols.swift, deleted unused GameLoopBase class and StandardAction enum
+- Legacy combat code (~1450 lines) — removed 9 deprecated actions and 4 test files from the pre-EncounterEngine era
+
+**Test coverage expansion**:
+- Added 104 new tests for 6 previously untested core systems:
+  - EconomyManager (17 tests)
+  - PressureEngine (16 tests)
+  - RequirementsEvaluator (13 tests)
+  - EventPipeline (21 tests)
+  - QuestTriggerEngine (24 tests)
+  - MiniGameDispatcher (13 tests)
+- Engine tests: 335 → 439
+- Total tests: 658 (439 engine + 219 app)
+- Coverage: ~97% of engine source files (up from 87%)
+
 ## Gate Tests
 
 | File | Count | Scope |
