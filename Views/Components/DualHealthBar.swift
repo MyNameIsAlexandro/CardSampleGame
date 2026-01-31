@@ -9,6 +9,11 @@ struct DualHealthBar: View {
     let currentWill: Int
     let maxWill: Int
 
+    @State private var ghostHP: Int?
+    @State private var ghostWill: Int?
+    @State private var prevHP: Int?
+    @State private var prevWill: Int?
+
     /// Whether this enemy has a Spirit track
     var hasSpiritTrack: Bool {
         maxWill > 0
@@ -22,7 +27,8 @@ struct DualHealthBar: View {
                 current: currentHP,
                 max: maxHP,
                 color: AppColors.health,
-                icon: "heart.fill"
+                icon: "heart.fill",
+                ghostValue: ghostHP
             )
 
             // Spirit (Will) bar — only if enemy has will
@@ -32,13 +38,40 @@ struct DualHealthBar: View {
                     current: currentWill,
                     max: maxWill,
                     color: AppColors.spirit,
-                    icon: "sparkles"
+                    icon: "sparkles",
+                    ghostValue: ghostWill
                 )
             }
         }
+        .onAppear {
+            prevHP = currentHP
+            prevWill = currentWill
+        }
+        .onChange(of: currentHP) { newValue in
+            if let old = prevHP, newValue < old {
+                ghostHP = old
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    withAnimation(.easeOut(duration: 0.5)) {
+                        ghostHP = nil
+                    }
+                }
+            }
+            prevHP = newValue
+        }
+        .onChange(of: currentWill) { newValue in
+            if let old = prevWill, newValue < old {
+                ghostWill = old
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    withAnimation(.easeOut(duration: 0.5)) {
+                        ghostWill = nil
+                    }
+                }
+            }
+            prevWill = newValue
+        }
     }
 
-    private func healthBar(label: String, current: Int, max: Int, color: Color, icon: String) -> some View {
+    private func healthBar(label: String, current: Int, max: Int, color: Color, icon: String, ghostValue: Int?) -> some View {
         HStack(spacing: Spacing.xs) {
             Image(systemName: icon)
                 .font(.caption)
@@ -50,6 +83,14 @@ struct DualHealthBar: View {
                     // Background
                     Capsule()
                         .fill(color.opacity(Opacity.faint))
+
+                    // Ghost bar (old value lingering)
+                    if let ghost = ghostValue {
+                        Capsule()
+                            .fill(color.opacity(Opacity.light))
+                            .frame(width: max > 0 ? geo.size.width * CGFloat(ghost) / CGFloat(max) : 0)
+                            .animation(.easeOut(duration: 0.5), value: ghostValue)
+                    }
 
                     // Fill
                     Capsule()

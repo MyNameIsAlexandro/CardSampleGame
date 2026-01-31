@@ -282,6 +282,8 @@ struct HeroHealthBar: View {
 struct ActionBar: View {
     let canAct: Bool
     let hasSpiritTrack: Bool
+    var attackBonus: Int = 0
+    var influenceBonus: Int = 0
     let onAttack: () -> Void
     let onInfluence: () -> Void
     let onWait: () -> Void
@@ -292,6 +294,7 @@ struct ActionBar: View {
                 title: L10n.encounterActionAttack.localized,
                 icon: "flame.fill",
                 color: AppColors.danger,
+                bonus: attackBonus,
                 action: onAttack
             )
 
@@ -299,28 +302,44 @@ struct ActionBar: View {
                 title: L10n.encounterActionInfluence.localized,
                 icon: "bubble.left.fill",
                 color: AppColors.primary,
+                bonus: influenceBonus,
                 action: onInfluence
             )
-            .disabled(!hasSpiritTrack)
             .opacity(hasSpiritTrack ? 1.0 : 0.4)
+            .disabled(!hasSpiritTrack)
 
             actionButton(
                 title: L10n.encounterActionWait.localized,
                 icon: "hourglass",
                 color: AppColors.secondary,
+                bonus: 0,
                 action: onWait
             )
         }
         .padding(.horizontal)
+        .opacity(canAct ? 1.0 : 0.4)
         .disabled(!canAct)
-        .opacity(canAct ? 1.0 : 0.5)
     }
 
-    private func actionButton(title: String, icon: String, color: Color, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
+    private func actionButton(title: String, icon: String, color: Color, bonus: Int, action: @escaping () -> Void) -> some View {
+        Button {
+            HapticManager.shared.play(.light)
+            action()
+        } label: {
             VStack(spacing: Spacing.xxs) {
-                Image(systemName: icon)
-                    .font(.title2)
+                ZStack(alignment: .topTrailing) {
+                    Image(systemName: icon)
+                        .font(.title2)
+                    if bonus > 0 {
+                        Text("+\(bonus)")
+                            .font(.system(size: Sizes.tinyCaption, weight: .bold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, Spacing.xxxs)
+                            .background(AppColors.warning)
+                            .cornerRadius(CornerRadius.sm)
+                            .offset(x: Spacing.sm, y: -Spacing.xxs)
+                    }
+                }
                 Text(title)
                     .font(.caption)
                     .fontWeight(.semibold)
@@ -331,6 +350,16 @@ struct ActionBar: View {
             .background(color)
             .cornerRadius(CornerRadius.lg)
         }
+        .buttonStyle(ActionButtonStyle())
+    }
+}
+
+/// Press-scale button style for action buttons
+private struct ActionButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
     }
 }
 
@@ -605,12 +634,36 @@ struct CombatLogView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xxxs) {
             ForEach(Array(entries.suffix(5).enumerated()), id: \.offset) { _, entry in
-                Text(entry)
-                    .font(.caption2)
-                    .foregroundColor(AppColors.muted)
+                HStack(spacing: Spacing.xxxs) {
+                    if let icon = logIcon(for: entry) {
+                        Image(systemName: icon)
+                            .font(.system(size: Sizes.tinyCaption))
+                            .foregroundColor(logColor(for: entry))
+                    }
+                    Text(entry)
+                        .font(.caption2)
+                        .foregroundColor(logColor(for: entry))
+                }
             }
         }
         .padding(.horizontal)
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func logColor(for entry: String) -> Color {
+        let lower = entry.lowercased()
+        if lower.contains("weak") || lower.contains("слабость") { return AppColors.success }
+        if lower.contains("resist") || lower.contains("блок") { return AppColors.muted }
+        if lower.contains("heal") || lower.contains("лечен") || lower.contains("regen") { return AppColors.success }
+        if lower.contains("damage") || lower.contains("урон") || lower.contains("takes") || lower.contains("получ") { return AppColors.danger }
+        if lower.contains("body") || lower.contains("тел") || lower.contains("will") || lower.contains("дух") { return AppColors.warning }
+        return AppColors.muted
+    }
+
+    private func logIcon(for entry: String) -> String? {
+        let lower = entry.lowercased()
+        if lower.contains("weak") || lower.contains("слабость") { return "arrow.up.circle.fill" }
+        if lower.contains("resist") || lower.contains("блок") { return "arrow.down.circle.fill" }
+        return nil
     }
 }

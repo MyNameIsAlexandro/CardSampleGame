@@ -1093,3 +1093,11 @@
 "combat.save_exit_message" = "Прогресс боя будет сохранён. Вы сможете продолжить с карты мира.";
 "combat.save_exit_confirm" = "Сохранить и выйти";
 "combat.save_exit_cancel" = "Отмена";
+
+// Combat Phase UI
+"combat_phase_intent" = "Намерение врага";
+"combat_phase_your_turn" = "Ваш ход";
+"combat_phase_enemy_acts" = "Ход врага";
+"combat_phase_next_round" = "Раунд %@";
+"combat_feedback_weak" = "СЛАБОСТЬ!";
+"combat_feedback_resist" = "БЛОК";

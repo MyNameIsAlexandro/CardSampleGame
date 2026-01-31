@@ -74,7 +74,7 @@ final class INV_RNG_GateTests: XCTestCase {
         let save = engine1.createEngineSave()
 
         // Continue from current state → explore
-        let exploreResult1 = engine1.performAction(.explore)
+        _ = engine1.performAction(.explore)
         let eventId1 = engine1.currentEvent?.id
 
         // Run 2: restore from save → explore
@@ -82,7 +82,7 @@ final class INV_RNG_GateTests: XCTestCase {
         engine2.initializeNewGame(playerName: "Test", heroId: nil)
         engine2.restoreFromEngineSave(save)
 
-        let exploreResult2 = engine2.performAction(.explore)
+        _ = engine2.performAction(.explore)
         let eventId2 = engine2.currentEvent?.id
 
         XCTAssertEqual(eventId1, eventId2, "Explore after save/load must produce same event")
@@ -141,7 +141,7 @@ final class INV_RNG_GateTests: XCTestCase {
         let tensionAfterSkip = engine.worldTension
 
         // Explore (RNG-heavy: event selection)
-        let exploreResult = engine.performAction(.explore)
+        _ = engine.performAction(.explore)
         let eventId = engine.currentEvent?.id
 
         return ExploreSequenceResult(

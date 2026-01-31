@@ -668,4 +668,12 @@ enum L10n {
     static let combatSaveExitConfirm = "combat.save_exit_confirm"
     static let combatSaveExitCancel = "combat.save_exit_cancel"
 
+    // MARK: - Combat Phase UI
+    static let combatPhaseIntent = "combat_phase_intent"
+    static let combatPhaseYourTurn = "combat_phase_your_turn"
+    static let combatPhaseEnemyActs = "combat_phase_enemy_acts"
+    static let combatPhaseNextRound = "combat_phase_next_round"
+    static let combatFeedbackWeak = "combat_feedback_weak"
+    static let combatFeedbackResist = "combat_feedback_resist"
+
 }

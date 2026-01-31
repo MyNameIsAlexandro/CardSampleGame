@@ -44,6 +44,9 @@ struct CombatView: View {
     @State private var showDamageFlash: Bool = false
     @State private var showSaveExitConfirm: Bool = false
 
+    // Combat feedback overlay per enemy
+    @State private var enemyFeedback: [String: CombatFeedback] = [:]
+
     var body: some View {
         ZStack {
             AppColors.backgroundSystem
@@ -83,12 +86,26 @@ struct CombatView: View {
             for change in changes {
                 switch change {
                 case .playerHPChanged(let delta, _) where delta < 0:
-                    showFloatingDamage(value: -delta, isHero: true)
+                    showFloatingDamage(value: -delta, isHero: true, color: .damage)
                     triggerDamageFlash()
+                case .playerHPChanged(let delta, _) where delta > 0:
+                    showFloatingDamage(value: delta, isHero: true, color: .heal)
                 case .enemyHPChanged(_, let delta, _) where delta < 0:
-                    showFloatingDamage(value: -delta, isHero: false)
+                    showFloatingDamage(value: -delta, isHero: false, color: .enemyDamage)
                 case .enemyWPChanged(_, let delta, _) where delta < 0:
-                    showFloatingDamage(value: -delta, isHero: false)
+                    showFloatingDamage(value: -delta, isHero: false, color: .spiritDamage)
+                case .weaknessTriggered(let enemyId, let keyword):
+                    showEnemyFeedback(enemyId: enemyId, feedback: .weakness(keyword: keyword))
+                case .resistanceTriggered(let enemyId, let keyword):
+                    showEnemyFeedback(enemyId: enemyId, feedback: .resistance(keyword: keyword))
+                case .abilityTriggered(let enemyId, _, let effect):
+                    if effect.contains("regen") {
+                        showEnemyFeedback(enemyId: enemyId, feedback: .abilityRegen(amount: 0))
+                    } else if effect.contains("armor") {
+                        showEnemyFeedback(enemyId: enemyId, feedback: .abilityArmor)
+                    } else if effect.contains("bonus") || effect.contains("damage") {
+                        showEnemyFeedback(enemyId: enemyId, feedback: .abilityBonusDamage)
+                    }
                 default:
                     break
                 }
@@ -101,10 +118,10 @@ struct CombatView: View {
     @ViewBuilder
     private var floatingDamageOverlay: some View {
         if let dmg = floatingDamage {
-            Text("-\(dmg.value)")
+            Text("\(dmg.floatingColor.prefix)\(dmg.value)")
                 .font(.title)
                 .fontWeight(.black)
-                .foregroundColor(dmg.isHero ? AppColors.danger : AppColors.warning)
+                .foregroundColor(dmg.floatingColor.color)
                 .shadow(color: AppColors.backgroundSystem, radius: 2)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
                 .id(dmg.id)
@@ -125,9 +142,9 @@ struct CombatView: View {
         }
     }
 
-    private func showFloatingDamage(value: Int, isHero: Bool) {
+    private func showFloatingDamage(value: Int, isHero: Bool, color: FloatingColor = .damage) {
         withAnimation(AppAnimation.snap) {
-            floatingDamage = FloatingNumber(value: value, isHero: isHero)
+            floatingDamage = FloatingNumber(value: value, isHero: isHero, floatingColor: color)
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
             withAnimation(.easeOut(duration: 0.3)) {
@@ -166,11 +183,26 @@ struct CombatView: View {
             .padding(.horizontal)
             .padding(.top, Spacing.sm)
 
-            // Enemy panel: intent + name + dual health bars
-            EnemyPanel(
-                enemy: vm.enemy,
-                intent: vm.currentIntent
-            )
+            // Phase banner
+            PhaseBanner(phase: vm.phase, round: vm.round)
+                .padding(.top, Spacing.xs)
+
+            // Enemy cards (horizontal scroll for multi-enemy)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: Spacing.sm) {
+                    ForEach(vm.enemies, id: \.id) { enemy in
+                        EnemyCardView(
+                            enemy: enemy,
+                            intent: enemy.id == (vm.selectedTarget?.id ?? vm.enemy?.id) ? vm.currentIntent : nil,
+                            isSelected: vm.enemies.count > 1 && enemy.id == (vm.selectedTargetId ?? vm.enemy?.id),
+                            feedbackType: enemyFeedback[enemy.id],
+                            onTap: { vm.selectTarget(enemy.id) }
+                        )
+                    }
+                }
+                .padding(.horizontal, Spacing.md)
+            }
+            .padding(.vertical, Spacing.xs)
 
             // Round info
             RoundInfoBar(round: vm.round, phase: vm.phase)
@@ -199,43 +231,22 @@ struct CombatView: View {
                         .foregroundColor(.white)
                 }
 
-                // Attack bonus
+                // Attack bonus capsule
                 if vm.turnAttackBonus > 0 {
-                    HStack(spacing: Spacing.xxxs) {
-                        Image(systemName: "flame.fill")
-                            .font(.caption2)
-                            .foregroundColor(AppColors.power)
-                        Text("+\(vm.turnAttackBonus)")
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                            .foregroundColor(AppColors.power)
-                    }
+                    bonusCapsule(icon: "flame.fill", value: vm.turnAttackBonus, color: AppColors.power)
+                        .transition(.scale.combined(with: .opacity))
                 }
 
-                // Influence bonus
+                // Influence bonus capsule
                 if vm.turnInfluenceBonus > 0 {
-                    HStack(spacing: Spacing.xxxs) {
-                        Image(systemName: "bubble.left.fill")
-                            .font(.caption2)
-                            .foregroundColor(AppColors.info)
-                        Text("+\(vm.turnInfluenceBonus)")
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                            .foregroundColor(AppColors.info)
-                    }
+                    bonusCapsule(icon: "bubble.left.fill", value: vm.turnInfluenceBonus, color: AppColors.info)
+                        .transition(.scale.combined(with: .opacity))
                 }
 
-                // Defense bonus
+                // Defense bonus capsule
                 if vm.turnDefenseBonus > 0 {
-                    HStack(spacing: Spacing.xxxs) {
-                        Image(systemName: "shield.fill")
-                            .font(.caption2)
-                            .foregroundColor(AppColors.defense)
-                        Text("+\(vm.turnDefenseBonus)")
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                            .foregroundColor(AppColors.defense)
-                    }
+                    bonusCapsule(icon: "shield.fill", value: vm.turnDefenseBonus, color: AppColors.defense)
+                        .transition(.scale.combined(with: .opacity))
                 }
 
                 Spacer()
@@ -293,6 +304,8 @@ struct CombatView: View {
             ActionBar(
                 canAct: vm.phase == .playerAction && !vm.isFinished && !vm.isProcessingEnemyTurn,
                 hasSpiritTrack: vm.enemy?.hasSpiritTrack ?? false,
+                attackBonus: vm.turnAttackBonus,
+                influenceBonus: vm.turnInfluenceBonus,
                 onAttack: { vm.performAttack() },
                 onInfluence: { vm.performInfluence() },
                 onWait: { vm.performWait() }
@@ -338,6 +351,36 @@ struct CombatView: View {
             Button(L10n.combatSaveExitCancel.localized, role: .cancel) {}
         } message: {
             Text(L10n.combatSaveExitMessage.localized)
+        }
+    }
+
+    // MARK: - Bonus Capsule
+
+    private func bonusCapsule(icon: String, value: Int, color: Color) -> some View {
+        HStack(spacing: Spacing.xxxs) {
+            Image(systemName: icon)
+                .font(.caption2)
+            Text("+\(value)")
+                .font(.caption)
+                .fontWeight(.semibold)
+        }
+        .foregroundColor(.white)
+        .padding(.horizontal, Spacing.xs)
+        .padding(.vertical, Spacing.xxxs)
+        .background(color.opacity(Opacity.high))
+        .cornerRadius(CornerRadius.sm)
+    }
+
+    // MARK: - Enemy Feedback
+
+    private func showEnemyFeedback(enemyId: String, feedback: CombatFeedback) {
+        withAnimation(.easeIn(duration: 0.15)) {
+            enemyFeedback[enemyId] = feedback
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            withAnimation(.easeOut(duration: 0.3)) {
+                enemyFeedback[enemyId] = nil
+            }
         }
     }
 
@@ -423,10 +466,36 @@ struct CombatView: View {
 
 // MARK: - Floating Number Model
 
+private enum FloatingColor {
+    case damage      // red — hero takes damage
+    case heal        // green — hero heals
+    case enemyDamage // yellow — enemy HP damage
+    case spiritDamage // blue — enemy WP damage
+
+    var color: Color {
+        switch self {
+        case .damage: return AppColors.danger
+        case .heal: return AppColors.success
+        case .enemyDamage: return AppColors.warning
+        case .spiritDamage: return AppColors.spirit
+        }
+    }
+
+    var prefix: String {
+        switch self {
+        case .damage: return "-"
+        case .heal: return "+"
+        case .enemyDamage: return "-"
+        case .spiritDamage: return "-"
+        }
+    }
+}
+
 private struct FloatingNumber: Equatable {
     let id = UUID()
     let value: Int
     let isHero: Bool
+    let floatingColor: FloatingColor
 
     static func == (lhs: FloatingNumber, rhs: FloatingNumber) -> Bool {
         lhs.id == rhs.id

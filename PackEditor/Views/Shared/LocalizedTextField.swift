@@ -91,28 +91,34 @@ struct LocalizedTextField: View {
 
 // MARK: - Preview
 
-#Preview {
-    @State var enText = "Hello, World!"
-    @State var ruText = "Привет, мир!"
-    @State var enMultiline = "Line 1\nLine 2\nLine 3"
-    @State var ruMultiline = "Строка 1\nСтрока 2\nСтрока 3"
+private struct LocalizedTextFieldPreview: View {
+    @State private var enText = "Hello, World!"
+    @State private var ruText = "Привет, мир!"
+    @State private var enMultiline = "Line 1\nLine 2\nLine 3"
+    @State private var ruMultiline = "Строка 1\nСтрока 2\nСтрока 3"
 
-    return VStack(spacing: 32) {
-        LocalizedTextField(
-            label: "Single Line Example",
-            en: $enText,
-            ru: $ruText
-        )
+    var body: some View {
+        VStack(spacing: 32) {
+            LocalizedTextField(
+                label: "Single Line Example",
+                en: $enText,
+                ru: $ruText
+            )
 
-        LocalizedTextField(
-            label: "Multiline Example",
-            en: $enMultiline,
-            ru: $ruMultiline,
-            multiline: true
-        )
+            LocalizedTextField(
+                label: "Multiline Example",
+                en: $enMultiline,
+                ru: $ruMultiline,
+                multiline: true
+            )
 
-        Spacer()
+            Spacer()
+        }
+        .padding()
+        .frame(width: 600, height: 400)
     }
-    .padding()
-    .frame(width: 600, height: 400)
+}
+
+#Preview {
+    LocalizedTextFieldPreview()
 }

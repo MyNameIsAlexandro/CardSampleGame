@@ -259,15 +259,14 @@ final class MiniGameDispatcherTests: XCTestCase {
         let challenge = MiniGameChallenge(
             id: "skill_001",
             type: .skillCheck,
-            difficulty: 2, // Target = 2 * 3 = 6
+            difficulty: 1, // Target = 1 * 3 = 3
             rewards: rewards
         )
-        let context = makeContext(playerStrength: 7) // Strength 7 + fateModifier(-2..3) = 5..10
-
-        var sawSuccess = false
+        let context = makeContext(playerStrength: 10) // Strength 10 + fateModifier(-2..3) = 8..13, always >= 3
 
         // When: Run multiple times to observe at least one success
-        for _ in 0..<10 {
+        var sawSuccess = false
+        for _ in 0..<20 {
             let result = dispatcher.dispatch(challenge: challenge, context: context)
             if result.narrativeText?.contains("пройдена") == true {
                 sawSuccess = true
@@ -276,9 +275,7 @@ final class MiniGameDispatcherTests: XCTestCase {
         }
 
         // Then: With strength 7 vs target 6, most rolls should succeed
-        // Note: Not asserting sawSuccess because RNG might not cooperate,
-        // but this demonstrates the expected behavior
-        XCTAssertTrue(true, "Test demonstrates skill check structure")
+        XCTAssertTrue(sawSuccess, "High strength should pass skill check within 10 tries")
     }
 
     // MARK: - Reward and Penalty Structure Tests

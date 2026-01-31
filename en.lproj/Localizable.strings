@@ -1088,3 +1088,11 @@
 "combat.save_exit_message" = "Your combat progress will be saved. You can resume from the world map.";
 "combat.save_exit_confirm" = "Save & Exit";
 "combat.save_exit_cancel" = "Cancel";
+
+// Combat Phase UI
+"combat_phase_intent" = "Enemy Intent";
+"combat_phase_your_turn" = "Your Turn";
+"combat_phase_enemy_acts" = "Enemy Acts";
+"combat_phase_next_round" = "Round %@";
+"combat_feedback_weak" = "WEAK!";
+"combat_feedback_resist" = "RESIST";
