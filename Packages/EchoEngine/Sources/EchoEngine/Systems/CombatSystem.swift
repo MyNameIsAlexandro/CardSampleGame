@@ -262,6 +262,18 @@ public struct CombatSystem: EchoSystem {
                 }
                 statusApplied = "resonance"
 
+            case .applyCurse(let curseType, let duration):
+                enemyStatus.apply(stat: curseType.rawValue, amount: 1, duration: duration)
+                statusApplied = curseType.rawValue
+
+            case .permanentStat(let stat, let amount):
+                if stat == "poison" {
+                    enemyStatus.apply(stat: stat, amount: amount, duration: 99)
+                } else {
+                    playerStatus.apply(stat: stat, amount: amount, duration: 99)
+                }
+                statusApplied = stat
+
             default:
                 break
             }
