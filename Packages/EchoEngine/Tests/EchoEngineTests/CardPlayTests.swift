@@ -443,4 +443,63 @@ struct CardPlayTests {
         // Enemy power=2, shield should absorb some/all
         #expect(sim.playerHealth >= hpBefore - 2)
     }
+
+    // MARK: - Multi-Ability Tests
+
+    @Test("Card with multiple abilities resolves all of them")
+    func testMultiAbilityCard() {
+        let multiCard = Card(
+            id: "multi", name: "Vampiric Strike", type: .spell,
+            description: "Deal 3 damage and heal 2",
+            abilities: [
+                CardAbility(id: "a1", name: "Strike", description: "Damage",
+                           effect: .damage(amount: 3, type: .physical)),
+                CardAbility(id: "a2", name: "Drain", description: "Heal",
+                           effect: .heal(amount: 2))
+            ]
+        )
+        let sim = CombatSimulation.create(
+            enemyDefinition: makeEnemy(health: 20),
+            playerHealth: 5,
+            playerMaxHealth: 10,
+            playerDeck: [multiCard],
+            playerEnergy: 3,
+            fateCards: makeFateCards(),
+            seed: 42
+        )
+        sim.beginCombat()
+
+        let event = sim.playCard(cardId: multiCard.id)
+        if case .cardPlayed(_, let damage, let heal, _, _) = event {
+            #expect(damage == 3)
+            #expect(heal == 2)
+        } else {
+            Issue.record("Expected cardPlayed event")
+        }
+        #expect(sim.enemyHealth == 17)
+        #expect(sim.playerHealth == 7)
+    }
+
+    @Test("Card with no abilities uses power as damage")
+    func testCardWithNoPowerFallback() {
+        let powerCard = Card(
+            id: "basic", name: "Punch", type: .spell,
+            description: "Basic hit", power: 4
+        )
+        let sim = CombatSimulation.create(
+            enemyDefinition: makeEnemy(health: 20),
+            playerDeck: [powerCard],
+            fateCards: makeFateCards(),
+            seed: 42
+        )
+        sim.beginCombat()
+
+        let event = sim.playCard(cardId: powerCard.id)
+        if case .cardPlayed(_, let damage, _, _, _) = event {
+            #expect(damage == 4)
+        } else {
+            Issue.record("Expected cardPlayed event")
+        }
+        #expect(sim.enemyHealth == 16)
+    }
 }

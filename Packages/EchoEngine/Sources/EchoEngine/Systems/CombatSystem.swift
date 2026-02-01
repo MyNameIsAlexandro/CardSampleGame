@@ -184,14 +184,26 @@ public struct CombatSystem: EchoSystem {
         var totalHeal = 0
         var totalDrawn = 0
         var statusApplied: String? = nil
+        var strengthApplied = false
 
-        // Resolve first ability, or fallback to card.power as damage
-        if let ability = card.abilities.first {
+        // Resolve all abilities
+        if card.abilities.isEmpty {
+            // No abilities — use card power as damage
+            let dmg = max(0, card.power ?? 0)
+            if dmg > 0 {
+                enemyHealth.current = max(0, enemyHealth.current - dmg)
+                totalDamage += dmg
+            }
+        }
+        for ability in card.abilities {
             switch ability.effect {
             case .damage(let amount, _):
                 var dmg = max(0, amount)
-                // Strength buff increases damage
-                dmg += playerStatus.total(for: "strength")
+                // Strength buff applies once per card
+                if !strengthApplied {
+                    dmg += playerStatus.total(for: "strength")
+                    strengthApplied = true
+                }
                 // Enemy shield absorbs damage
                 let shield = enemyStatus.total(for: "shield")
                 if shield > 0 {
@@ -204,20 +216,19 @@ public struct CombatSystem: EchoSystem {
                 }
                 dmg = max(0, dmg)
                 enemyHealth.current = max(0, enemyHealth.current - dmg)
-                totalDamage = dmg
+                totalDamage += dmg
 
             case .heal(let amount):
                 let heal = min(amount, playerHealth.max - playerHealth.current)
                 playerHealth.current += heal
-                totalHeal = heal
+                totalHeal += heal
 
             case .drawCards(let count):
                 let beforeCount = deck.hand.count
                 deckSystem.drawCards(count: count, for: player, nexus: nexus)
-                totalDrawn = deck.hand.count - beforeCount
+                totalDrawn += deck.hand.count - beforeCount
 
             case .temporaryStat(let stat, let amount, let duration):
-                // Apply buff to player (shield, strength) or debuff to enemy (poison)
                 if stat == "poison" {
                     enemyStatus.apply(stat: stat, amount: amount, duration: duration)
                 } else {
@@ -230,18 +241,7 @@ public struct CombatSystem: EchoSystem {
                 statusApplied = "energy"
 
             default:
-                // Fallback: use card power as damage
-                let dmg = max(0, card.power ?? 0)
-                if dmg > 0 {
-                    enemyHealth.current = max(0, enemyHealth.current - dmg)
-                    totalDamage = dmg
-                }
-            }
-        } else {
-            let dmg = max(0, card.power ?? 0)
-            if dmg > 0 {
-                enemyHealth.current = max(0, enemyHealth.current - dmg)
-                totalDamage = dmg
+                break
             }
         }
 
