@@ -406,6 +406,14 @@ public final class CombatScene: SKScene {
     }
 
     private func handleTap(at location: CGPoint) {
+        // Check continue button even when combat is over
+        let tapped = nodes(at: location)
+        if tapped.contains(where: { $0.name == "btn_continue" }),
+           let outcome = simulation.outcome {
+            onCombatEnd?(outcome)
+            return
+        }
+
         guard !simulation.isOver, simulation.phase == .playerTurn, !isAnimating else { return }
 
         let tappedNodes = nodes(at: location)
@@ -813,24 +821,79 @@ public final class CombatScene: SKScene {
     private func handleCombatEnd() {
         guard let outcome = simulation.outcome else { return }
 
-        let text = outcome == .victory ? "Victory!" : "Defeat"
-        let color: SKColor = outcome == .victory ? CombatSceneTheme.success : CombatSceneTheme.health
+        // Dark overlay
+        let overlay = SKShapeNode(rectOf: size)
+        overlay.fillColor = SKColor(white: 0.0, alpha: 0.75)
+        overlay.strokeColor = .clear
+        overlay.position = .zero
+        overlay.zPosition = 90
+        overlay.alpha = 0
+        overlay.name = "end_overlay"
+        addChild(overlay)
 
-        let endLabel = SKLabelNode(fontNamed: "AvenirNext-Heavy")
-        endLabel.text = text
-        endLabel.fontSize = 48
-        endLabel.fontColor = color
-        endLabel.position = .zero
-        endLabel.zPosition = 100
-        endLabel.alpha = 0
-        addChild(endLabel)
+        let container = SKNode()
+        container.zPosition = 100
+        container.alpha = 0
+        addChild(container)
 
-        endLabel.run(SKAction.sequence([
-            SKAction.fadeIn(withDuration: 0.5),
-            SKAction.wait(forDuration: 1.5),
-        ])) { [weak self] in
-            self?.onCombatEnd?(outcome)
+        let isVictory = outcome == .victory
+        let titleColor: SKColor = isVictory ? CombatSceneTheme.success : CombatSceneTheme.health
+
+        // Title
+        let titleLabel = SKLabelNode(fontNamed: "AvenirNext-Heavy")
+        titleLabel.text = isVictory ? "Victory!" : "Defeat"
+        titleLabel.fontSize = 42
+        titleLabel.fontColor = titleColor
+        titleLabel.position = CGPoint(x: 0, y: 60)
+        titleLabel.verticalAlignmentMode = .center
+        container.addChild(titleLabel)
+
+        // Separator
+        let sep = SKShapeNode(rectOf: CGSize(width: 120, height: 1))
+        sep.fillColor = CombatSceneTheme.muted
+        sep.strokeColor = .clear
+        sep.position = CGPoint(x: 0, y: 30)
+        container.addChild(sep)
+
+        // Stats
+        let stats = [
+            "Rounds: \(simulation.round)",
+            "HP: \(simulation.playerHealth)",
+            "Enemy HP: \(simulation.enemyHealth)"
+        ]
+        for (i, stat) in stats.enumerated() {
+            let label = SKLabelNode(fontNamed: "AvenirNext-Medium")
+            label.text = stat
+            label.fontSize = 14
+            label.fontColor = CombatSceneTheme.muted
+            label.position = CGPoint(x: 0, y: 10 - CGFloat(i) * 22)
+            label.verticalAlignmentMode = .center
+            container.addChild(label)
         }
+
+        // Continue button
+        let btnBg = SKShapeNode(rectOf: CGSize(width: 130, height: 36), cornerRadius: 8)
+        btnBg.fillColor = titleColor
+        btnBg.strokeColor = .clear
+        btnBg.position = CGPoint(x: 0, y: -70)
+        btnBg.name = "btn_continue"
+        container.addChild(btnBg)
+
+        let btnLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+        btnLabel.text = "Continue"
+        btnLabel.fontSize = 15
+        btnLabel.fontColor = .white
+        btnLabel.position = CGPoint(x: 0, y: -70)
+        btnLabel.verticalAlignmentMode = .center
+        btnLabel.name = "btn_continue"
+        container.addChild(btnLabel)
+
+        // Animate in
+        overlay.run(SKAction.fadeIn(withDuration: 0.4))
+        container.run(SKAction.sequence([
+            SKAction.wait(forDuration: 0.2),
+            SKAction.fadeIn(withDuration: 0.4)
+        ]))
     }
 
     // MARK: - Frame Update
