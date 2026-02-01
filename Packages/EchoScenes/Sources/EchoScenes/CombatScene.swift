@@ -246,7 +246,7 @@ public final class CombatScene: SKScene {
         let buttonY = -halfH + 60
 
         attackButton = makeButton(text: "Attack", position: CGPoint(x: -60, y: buttonY), name: "btn_attack")
-        skipButton = makeButton(text: "Skip", position: CGPoint(x: 60, y: buttonY), name: "btn_skip")
+        skipButton = makeButton(text: "End Turn", position: CGPoint(x: 60, y: buttonY), name: "btn_end_turn")
 
         fateOverlay = SKNode()
         fateOverlay.position = CGPoint(x: 0, y: 20)
@@ -359,8 +359,8 @@ public final class CombatScene: SKScene {
             case "btn_attack":
                 performPlayerAttack()
                 return
-            case "btn_skip":
-                performPlayerSkip()
+            case "btn_end_turn":
+                performEndTurn()
                 return
             default:
                 // Check if tapped a card node (or its children)
@@ -522,13 +522,20 @@ public final class CombatScene: SKScene {
             showDamageNumber(heal, at: playerPosition, color: CombatSceneTheme.success, prefix: "+")
         }
 
+        syncRender()
+        updateHUD()
         refreshHand()
-        resolveAfterPlayerAction()
+        isAnimating = false
     }
 
-    private func performPlayerSkip() {
-        simulation.playerSkip()
-        resolveAfterPlayerAction()
+    private func performEndTurn() {
+        simulation.endTurn()
+        syncRender()
+        updateHUD()
+        isAnimating = true
+        run(SKAction.wait(forDuration: 0.3)) { [weak self] in
+            self?.resolveEnemyTurn()
+        }
     }
 
     private func resolveAfterPlayerAction() {

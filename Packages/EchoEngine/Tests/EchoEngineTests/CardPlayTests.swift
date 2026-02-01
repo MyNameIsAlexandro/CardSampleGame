@@ -131,6 +131,93 @@ struct CardPlayTests {
         #expect(sim.discardPileCount == 1)
     }
 
+    @Test("playCard does not change phase from playerTurn")
+    func testPlayCardKeepsPhase() {
+        let card = makeDamageCard()
+        let sim = CombatSimulation.create(
+            enemyDefinition: makeEnemy(),
+            playerDeck: [card],
+            fateCards: makeFateCards(),
+            seed: 42
+        )
+        sim.beginCombat()
+        #expect(sim.phase == .playerTurn)
+
+        sim.playCard(cardId: card.id)
+        #expect(sim.phase == .playerTurn)
+    }
+
+    @Test("endTurn transitions to enemyResolve")
+    func testEndTurn() {
+        let card = makeDamageCard()
+        let sim = CombatSimulation.create(
+            enemyDefinition: makeEnemy(health: 20),
+            playerDeck: [card],
+            fateCards: makeFateCards(),
+            seed: 42
+        )
+        sim.beginCombat()
+        #expect(sim.phase == .playerTurn)
+
+        sim.endTurn()
+        #expect(sim.phase == .enemyResolve)
+
+        // Resolve enemy turn completes the cycle
+        let roundBefore = sim.round
+        sim.resolveEnemyTurn()
+        #expect(sim.phase == .playerTurn)
+        #expect(sim.round == roundBefore + 1)
+    }
+
+    @Test("Can play two cards in one turn")
+    func testPlayTwoCards() {
+        let card1 = makeDamageCard(id: "dmg1", damage: 2)
+        let card2 = makeDamageCard(id: "dmg2", damage: 3)
+        let fillers = (0..<3).map { i in
+            Card(id: "filler_\(i)", name: "Filler", type: .spell, description: "Filler")
+        }
+        let sim = CombatSimulation.create(
+            enemyDefinition: makeEnemy(health: 20),
+            playerDeck: [card1, card2] + fillers,
+            fateCards: makeFateCards(),
+            seed: 42
+        )
+        sim.beginCombat()
+
+        guard sim.hand.contains(where: { $0.id == "dmg1" }),
+              sim.hand.contains(where: { $0.id == "dmg2" }) else { return }
+
+        let initialHP = sim.enemyHealth
+        sim.playCard(cardId: "dmg1")
+        #expect(sim.phase == .playerTurn)
+        sim.playCard(cardId: "dmg2")
+        #expect(sim.phase == .playerTurn)
+        #expect(sim.enemyHealth == initialHP - 5)
+    }
+
+    @Test("Turn start draws one card")
+    func testTurnStartDraw() {
+        let fillers = (0..<6).map { i in
+            Card(id: "filler_\(i)", name: "Filler", type: .spell, description: "Filler")
+        }
+        let sim = CombatSimulation.create(
+            enemyDefinition: makeEnemy(health: 20),
+            playerDeck: fillers,
+            fateCards: makeFateCards(),
+            seed: 42
+        )
+        sim.beginCombat()
+
+        let handBefore = sim.hand.count
+        let drawBefore = sim.drawPileCount
+        sim.endTurn()
+        sim.resolveEnemyTurn()
+
+        // Drew 1 card at start of new turn
+        #expect(sim.hand.count == handBefore + 1)
+        #expect(sim.drawPileCount == drawBefore - 1)
+    }
+
     @Test("playCard with drawCards increases hand size")
     func testPlayDrawCard() {
         let drawCard = makeDrawCard(count: 2)

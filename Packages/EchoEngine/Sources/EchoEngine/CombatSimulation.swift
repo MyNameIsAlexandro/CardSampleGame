@@ -139,19 +139,23 @@ public final class CombatSimulation {
         return event
     }
 
-    /// Play a card from hand. Resolves effect, discards card, transitions to enemy phase.
+    /// Play a card from hand. Resolves effect and discards card. Does NOT end the turn.
     @discardableResult
     public func playCard(cardId: String) -> CombatEvent {
         guard let player = playerEntity, let enemy = enemyEntity else {
             return .cardPlayed(cardId: cardId, damage: 0, heal: 0, cardsDrawn: 0)
         }
-        let event = combatSystem.playCard(cardId: cardId, player: player, enemy: enemy, deckSystem: deckSystem, nexus: nexus)
-        combatSystem.setCombatPhase(.enemyResolve, nexus: nexus)
-        return event
+        return combatSystem.playCard(cardId: cardId, player: player, enemy: enemy, deckSystem: deckSystem, nexus: nexus)
     }
 
-    /// Player skips attack.
+    /// Player skips (ends turn without acting).
     public func playerSkip() {
+        endTurn()
+    }
+
+    /// End the player's turn: transitions phase to enemyResolve.
+    /// Call resolveEnemyTurn() separately to execute the enemy action.
+    public func endTurn() {
         combatSystem.setCombatPhase(.enemyResolve, nexus: nexus)
     }
 
@@ -170,6 +174,9 @@ public final class CombatSimulation {
 
         // Advance round
         combatSystem.advanceRound(nexus: nexus)
+
+        // Draw card for new turn
+        deckSystem.drawCards(count: 1, for: player, nexus: nexus)
 
         // Generate new enemy intent
         aiSystem.update(nexus: nexus)
