@@ -1,5 +1,7 @@
 import SwiftUI
 import TwilightEngine
+import EchoScenes
+import EchoEngine
 
 /// Quick Battle mode: pick hero, pick enemy, fight
 struct BattleArenaView: View {
@@ -9,7 +11,9 @@ struct BattleArenaView: View {
     @State private var selectedHeroId: String?
     @State private var selectedEnemyId: String?
     @State private var showingCombat = false
+    @State private var showingSpriteKitCombat = false
     @State private var lastOutcome: CombatView.CombatOutcome?
+    @State private var useSpriteKit = true
 
     private var availableHeroes: [HeroDefinition] {
         HeroRegistry.shared.availableHeroes()
@@ -39,6 +43,10 @@ struct BattleArenaView: View {
                 Text(L10n.arenaTitle.localized)
                     .font(.title2)
                     .fontWeight(.bold)
+                Spacer()
+                Toggle("SK", isOn: $useSpriteKit)
+                    .toggleStyle(.switch)
+                    .fixedSize()
             }
             .padding()
 
@@ -116,6 +124,9 @@ struct BattleArenaView: View {
                 }
             )
         }
+        .fullScreenCover(isPresented: $showingSpriteKitCombat) {
+            spriteKitCombatView
+        }
     }
 
     private var canStart: Bool {
@@ -133,17 +144,49 @@ struct BattleArenaView: View {
         }
         let startingDeck = startingDeckDefs.map { $0.toCard() }
 
-        engine.initializeNewGame(
-            playerName: hero.name.localized,
-            heroId: heroId,
-            startingDeck: startingDeck
-        )
-
-        // Setup enemy
-        engine.combat.setupCombatEnemy(enemy.toCard())
-
         lastOutcome = nil
-        showingCombat = true
+
+        if useSpriteKit {
+            showingSpriteKitCombat = true
+        } else {
+            engine.initializeNewGame(
+                playerName: hero.name.localized,
+                heroId: heroId,
+                startingDeck: startingDeck
+            )
+            engine.combat.setupCombatEnemy(enemy.toCard())
+            showingCombat = true
+        }
+    }
+
+    // MARK: - SpriteKit Combat
+
+    @ViewBuilder
+    private var spriteKitCombatView: some View {
+        if let heroId = selectedHeroId,
+           let hero = HeroRegistry.shared.hero(id: heroId),
+           let enemy = selectedEnemy {
+            let startingDeck = hero.startingDeckCardIDs.compactMap {
+                ContentRegistry.shared.getCard(id: $0)
+            }.map { $0.toCard() }
+            let fateCards = ContentRegistry.shared.getAllFateCards()
+
+            CombatSceneView(
+                enemyDefinition: enemy,
+                playerName: hero.name.localized,
+                playerHealth: hero.baseStats.health,
+                playerStrength: hero.baseStats.strength,
+                playerDeck: startingDeck,
+                fateCards: fateCards,
+                seed: UInt64(Date().timeIntervalSince1970),
+                onCombatEnd: { outcome in
+                    lastOutcome = outcome == .victory
+                        ? .victory(stats: CombatView.CombatStats(turnsPlayed: 0, totalDamageDealt: 0, totalDamageTaken: 0, cardsPlayed: 0))
+                        : .defeat(stats: CombatView.CombatStats(turnsPlayed: 0, totalDamageDealt: 0, totalDamageTaken: 0, cardsPlayed: 0))
+                    showingSpriteKitCombat = false
+                }
+            )
+        }
     }
 
     // MARK: - Subviews

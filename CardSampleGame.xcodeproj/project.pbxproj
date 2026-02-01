@@ -538,6 +538,8 @@
 				PKG0002000000000000000001 /* TwilightEngine */,
 				PKG0014000000000000000001 /* CoreHeroesContent */,
 				PKG0015000000000000000001 /* TwilightMarchesActIContent */,
+				PKG0042000000000000000001 /* EchoEngine */,
+				PKG0043000000000000000001 /* EchoScenes */,
 			);
 			productName = CardSampleGame;
 			productReference = AA0000210000000000000001 /* CardSampleGame.app */;
@@ -626,6 +628,8 @@
 				PKG0012000000000000000001 /* XCLocalSwiftPackageReference "CoreHeroes" */,
 				PKG0013000000000000000001 /* XCLocalSwiftPackageReference "TwilightMarchesActI" */,
 				PKG0030000000000000000001 /* XCLocalSwiftPackageReference "PackEditorKit" */,
+				PKG0040000000000000000001 /* XCLocalSwiftPackageReference "EchoEngine" */,
+				PKG0041000000000000000001 /* XCLocalSwiftPackageReference "EchoScenes" */,
 			);
 			productRefGroup = AA0000260000000000000001 /* Products */;
 			projectDirPath = "";
@@ -1119,6 +1123,14 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/PackEditorKit;
 		};
+		PKG0040000000000000000001 /* XCLocalSwiftPackageReference "EchoEngine" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/EchoEngine;
+		};
+		PKG0041000000000000000001 /* XCLocalSwiftPackageReference "EchoScenes" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/EchoScenes;
+		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1161,6 +1173,14 @@
 		PEPKG30000000000PE000001 /* PackEditorKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = PackEditorKit;
+		};
+		PKG0042000000000000000001 /* EchoEngine */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = EchoEngine;
+		};
+		PKG0043000000000000000001 /* EchoScenes */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = EchoScenes;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
