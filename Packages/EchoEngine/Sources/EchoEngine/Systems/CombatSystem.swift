@@ -240,6 +240,23 @@ public struct CombatSystem: EchoSystem {
                 energy.current = min(energy.max, energy.current + amount)
                 statusApplied = "energy"
 
+            case .shiftBalance(let towards, let amount):
+                let combatFamily = nexus.family(requires: CombatStateComponent.self)
+                for combatEntity in combatFamily.entities {
+                    if combatEntity.has(ResonanceComponent.self) {
+                        let res: ResonanceComponent = nexus.get(unsafe: combatEntity.identifier)
+                        let delta: Float
+                        switch towards {
+                        case .light: delta = Float(amount)
+                        case .dark: delta = Float(-amount)
+                        case .neutral: delta = res.value > 0 ? Float(-amount) : Float(amount)
+                        }
+                        res.value = max(-100, min(100, res.value + delta))
+                        break
+                    }
+                }
+                statusApplied = "resonance"
+
             default:
                 break
             }

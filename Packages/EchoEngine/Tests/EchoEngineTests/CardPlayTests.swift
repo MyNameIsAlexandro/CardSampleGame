@@ -579,4 +579,53 @@ struct CardPlayTests {
         // Exhaust pile should still have 1 card — it wasn't recycled
         #expect(sim.exhaustPileCount == 1)
     }
+
+    // MARK: - Resonance Tests
+
+    @Test("shiftBalance card shifts resonance toward light")
+    func testShiftBalanceLight() {
+        let lightCard = Card(
+            id: "light", name: "Prayer", type: .spell,
+            description: "Shift resonance",
+            abilities: [CardAbility(id: "r1", name: "Pray", description: "Light +10",
+                                   effect: .shiftBalance(towards: .light, amount: 10))]
+        )
+        let sim = CombatSimulation.create(
+            enemyDefinition: makeEnemy(health: 20),
+            playerDeck: [lightCard],
+            fateCards: makeFateCards(),
+            resonance: 0,
+            seed: 42
+        )
+        sim.beginCombat()
+
+        let event = sim.playCard(cardId: lightCard.id)
+        if case .cardPlayed(_, _, _, _, let status) = event {
+            #expect(status == "resonance")
+        } else {
+            Issue.record("Expected cardPlayed event")
+        }
+        #expect(sim.resonance == 10)
+    }
+
+    @Test("shiftBalance card shifts resonance toward dark")
+    func testShiftBalanceDark() {
+        let darkCard = Card(
+            id: "dark", name: "Hex", type: .spell,
+            description: "Shift resonance",
+            abilities: [CardAbility(id: "r1", name: "Hex", description: "Dark +15",
+                                   effect: .shiftBalance(towards: .dark, amount: 15))]
+        )
+        let sim = CombatSimulation.create(
+            enemyDefinition: makeEnemy(health: 20),
+            playerDeck: [darkCard],
+            fateCards: makeFateCards(),
+            resonance: 0,
+            seed: 42
+        )
+        sim.beginCombat()
+
+        sim.playCard(cardId: darkCard.id)
+        #expect(sim.resonance == -15)
+    }
 }

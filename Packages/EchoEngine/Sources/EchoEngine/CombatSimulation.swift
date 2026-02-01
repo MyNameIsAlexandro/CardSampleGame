@@ -140,6 +140,17 @@ public final class CombatSimulation {
         return family.firstElement()?.round ?? 1
     }
 
+    public var resonance: Float {
+        let family = nexus.family(requires: CombatStateComponent.self)
+        for entity in family.entities {
+            if entity.has(ResonanceComponent.self) {
+                let res: ResonanceComponent = nexus.get(unsafe: entity.identifier)
+                return res.value
+            }
+        }
+        return 0
+    }
+
     public func playerStatus(for stat: String) -> Int {
         guard let player = playerEntity else { return 0 }
         let s: StatusEffectComponent = nexus.get(unsafe: player.identifier)
