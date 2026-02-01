@@ -12,6 +12,7 @@ public final class CardNode: SKNode {
     private let nameLabel: SKLabelNode
     private let powerLabel: SKLabelNode
     private let typeLabel: SKLabelNode
+    private let costLabel: SKLabelNode
 
     public init(card: Card) {
         self.card = card
@@ -48,6 +49,14 @@ public final class CardNode: SKNode {
         typeLabel.position = CGPoint(x: 0, y: -size.height / 2 + 12)
         typeLabel.verticalAlignmentMode = .center
 
+        // Cost badge (top-left)
+        costLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
+        costLabel.text = "\(card.cost ?? 1)"
+        costLabel.fontSize = 9
+        costLabel.fontColor = CombatSceneTheme.faith
+        costLabel.position = CGPoint(x: -size.width / 2 + 10, y: size.height / 2 - 14)
+        costLabel.verticalAlignmentMode = .center
+
         super.init()
         name = "card_\(card.id)"
 
@@ -55,6 +64,7 @@ public final class CardNode: SKNode {
         addChild(nameLabel)
         addChild(powerLabel)
         addChild(typeLabel)
+        addChild(costLabel)
     }
 
     @available(*, unavailable)

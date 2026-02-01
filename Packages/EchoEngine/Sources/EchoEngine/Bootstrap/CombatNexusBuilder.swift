@@ -12,6 +12,7 @@ public struct CombatNexusBuilder {
         playerMaxHealth: Int,
         playerStrength: Int,
         playerDeck: [Card],
+        playerEnergy: Int = 3,
         fateDeck: FateDeckManager,
         resonance: Float,
         rng: WorldRNG
@@ -29,6 +30,7 @@ public struct CombatNexusBuilder {
         playerEntity.assign(PlayerTagComponent(name: playerName, strength: playerStrength))
         playerEntity.assign(HealthComponent(current: playerHealth, max: playerMaxHealth))
         playerEntity.assign(DeckComponent(drawPile: rng.shuffled(playerDeck)))
+        playerEntity.assign(EnergyComponent(current: playerEnergy, max: playerEnergy))
 
         // Enemy entity
         let enemyEntity = nexus.createEntity()

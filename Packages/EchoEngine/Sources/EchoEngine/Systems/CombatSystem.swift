@@ -10,6 +10,7 @@ public enum CombatEvent {
     case enemyRitual(resonanceShift: Float)
     case enemyBlocked
     case cardPlayed(cardId: String, damage: Int, heal: Int, cardsDrawn: Int)
+    case insufficientEnergy(cardId: String)
     case roundAdvanced(newRound: Int)
 }
 
@@ -150,6 +151,14 @@ public struct CombatSystem: EchoSystem {
         guard let card = deck.hand.first(where: { $0.id == cardId }) else {
             return .cardPlayed(cardId: cardId, damage: 0, heal: 0, cardsDrawn: 0)
         }
+
+        // Check energy cost
+        let energy: EnergyComponent = nexus.get(unsafe: player.identifier)
+        let cost = card.cost ?? 1
+        guard cost <= energy.current else {
+            return .insufficientEnergy(cardId: cardId)
+        }
+        energy.current -= cost
 
         let playerHealth: HealthComponent = nexus.get(unsafe: player.identifier)
         let enemyHealth: HealthComponent = nexus.get(unsafe: enemy.identifier)

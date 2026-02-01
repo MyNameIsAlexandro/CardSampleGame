@@ -28,6 +28,7 @@ public final class CombatScene: SKScene {
     private var handContainer: SKNode!
     private var deckCountLabel: SKLabelNode!
     private var discardCountLabel: SKLabelNode!
+    private var energyLabel: SKLabelNode!
     private var isAnimating = false
 
     // MARK: - Callbacks
@@ -276,6 +277,13 @@ public final class CombatScene: SKScene {
         discardCountLabel.zPosition = 15
         addChild(discardCountLabel)
 
+        energyLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+        energyLabel.fontSize = 13
+        energyLabel.fontColor = CombatSceneTheme.faith
+        energyLabel.position = CGPoint(x: 0, y: indicatorY)
+        energyLabel.zPosition = 15
+        addChild(energyLabel)
+
         refreshHand()
     }
 
@@ -310,6 +318,7 @@ public final class CombatScene: SKScene {
 
         deckCountLabel.text = "🂠 \(simulation.drawPileCount)"
         discardCountLabel.text = "♻ \(simulation.discardPileCount)"
+        energyLabel.text = "⚡ \(simulation.energy)/\(simulation.maxEnergy)"
     }
 
     private func refreshHand() {
@@ -431,6 +440,20 @@ public final class CombatScene: SKScene {
 
         // Resolve logic immediately (state changes)
         let event = simulation.playCard(cardId: cardId)
+
+        if case .insufficientEnergy = event {
+            // Shake the card to indicate insufficient energy
+            if let cardNode = cardNode {
+                cardNode.run(SKAction.sequence([
+                    SKAction.moveBy(x: -4, y: 0, duration: 0.05),
+                    SKAction.moveBy(x: 8, y: 0, duration: 0.05),
+                    SKAction.moveBy(x: -8, y: 0, duration: 0.05),
+                    SKAction.moveBy(x: 4, y: 0, duration: 0.05)
+                ]))
+            }
+            isAnimating = false
+            return
+        }
 
         guard case .cardPlayed(_, let damage, let heal, _) = event else {
             isAnimating = false

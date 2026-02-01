@@ -26,6 +26,7 @@ public final class CombatSimulation {
         playerMaxHealth: Int = 10,
         playerStrength: Int = 5,
         playerDeck: [Card] = [],
+        playerEnergy: Int = 3,
         fateCards: [FateCard] = [],
         resonance: Float = 0,
         seed: UInt64 = 42
@@ -39,6 +40,7 @@ public final class CombatSimulation {
             playerMaxHealth: playerMaxHealth,
             playerStrength: playerStrength,
             playerDeck: playerDeck,
+            playerEnergy: playerEnergy,
             fateDeck: fateDeck,
             resonance: resonance,
             rng: rng
@@ -105,6 +107,18 @@ public final class CombatSimulation {
         guard let player = playerEntity else { return 0 }
         let deck: DeckComponent = nexus.get(unsafe: player.identifier)
         return deck.discardPile.count
+    }
+
+    public var energy: Int {
+        guard let player = playerEntity else { return 0 }
+        let e: EnergyComponent = nexus.get(unsafe: player.identifier)
+        return e.current
+    }
+
+    public var maxEnergy: Int {
+        guard let player = playerEntity else { return 0 }
+        let e: EnergyComponent = nexus.get(unsafe: player.identifier)
+        return e.max
     }
 
     public var round: Int {
@@ -175,7 +189,9 @@ public final class CombatSimulation {
         // Advance round
         combatSystem.advanceRound(nexus: nexus)
 
-        // Draw card for new turn
+        // Reset energy and draw card for new turn
+        let energy: EnergyComponent = nexus.get(unsafe: player.identifier)
+        energy.current = energy.max
         deckSystem.drawCards(count: 1, for: player, nexus: nexus)
 
         // Generate new enemy intent

@@ -218,6 +218,88 @@ struct CardPlayTests {
         #expect(sim.drawPileCount == drawBefore - 1)
     }
 
+    @Test("playCard reduces energy by card cost")
+    func testPlayCardReducesEnergy() {
+        let card = Card(
+            id: "costly", name: "Fireball", type: .spell,
+            description: "Boom", cost: 2,
+            abilities: [CardAbility(id: "a1", name: "FB", description: "Boom",
+                                   effect: .damage(amount: 5, type: .physical))]
+        )
+        let sim = CombatSimulation.create(
+            enemyDefinition: makeEnemy(health: 20),
+            playerDeck: [card],
+            playerEnergy: 3,
+            fateCards: makeFateCards(),
+            seed: 42
+        )
+        sim.beginCombat()
+        #expect(sim.energy == 3)
+
+        sim.playCard(cardId: card.id)
+        #expect(sim.energy == 1)
+    }
+
+    @Test("playCard with insufficient energy returns insufficientEnergy")
+    func testInsufficientEnergy() {
+        let card = Card(
+            id: "expensive", name: "Mega", type: .spell,
+            description: "Big", cost: 5,
+            abilities: [CardAbility(id: "a1", name: "Mega", description: "Big",
+                                   effect: .damage(amount: 10, type: .physical))]
+        )
+        let sim = CombatSimulation.create(
+            enemyDefinition: makeEnemy(health: 20),
+            playerDeck: [card],
+            playerEnergy: 3,
+            fateCards: makeFateCards(),
+            seed: 42
+        )
+        sim.beginCombat()
+
+        let event = sim.playCard(cardId: card.id)
+        if case .insufficientEnergy = event {
+            // expected
+        } else {
+            Issue.record("Expected insufficientEnergy event")
+        }
+        #expect(sim.energy == 3) // unchanged
+    }
+
+    @Test("Energy resets after resolveEnemyTurn")
+    func testEnergyResetsOnNewTurn() {
+        let card = makeDamageCard()
+        let sim = CombatSimulation.create(
+            enemyDefinition: makeEnemy(health: 20),
+            playerDeck: [card],
+            playerEnergy: 3,
+            fateCards: makeFateCards(),
+            seed: 42
+        )
+        sim.beginCombat()
+        sim.playCard(cardId: card.id) // costs 1 (default)
+        #expect(sim.energy == 2)
+
+        sim.endTurn()
+        sim.resolveEnemyTurn()
+        #expect(sim.energy == 3) // reset
+    }
+
+    @Test("Card without cost defaults to 1 energy")
+    func testDefaultCost() {
+        let card = makeDamageCard() // no cost set, defaults to 1
+        let sim = CombatSimulation.create(
+            enemyDefinition: makeEnemy(health: 20),
+            playerDeck: [card],
+            playerEnergy: 3,
+            fateCards: makeFateCards(),
+            seed: 42
+        )
+        sim.beginCombat()
+        sim.playCard(cardId: card.id)
+        #expect(sim.energy == 2)
+    }
+
     @Test("playCard with drawCards increases hand size")
     func testPlayDrawCard() {
         let drawCard = makeDrawCard(count: 2)

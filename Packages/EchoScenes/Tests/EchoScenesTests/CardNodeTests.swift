@@ -22,8 +22,23 @@ struct CardNodeTests {
     @Test("CardNode has expected children")
     func testStructure() {
         let node = CardNode(card: makeCard())
-        // background + name + power + type = 4
-        #expect(node.children.count == 4)
+        // background + name + power + type + cost = 5
+        #expect(node.children.count == 5)
+    }
+
+    @Test("CardNode shows cost label")
+    func testCostLabel() {
+        let card = Card(
+            id: "costly",
+            name: "Fireball",
+            type: .spell,
+            description: "Boom",
+            cost: 2
+        )
+        let node = CardNode(card: card)
+        let labels = node.children.compactMap { $0 as? SKLabelNode }
+        let costLabel = labels.first { $0.text == "2" && $0.fontColor == CombatSceneTheme.faith }
+        #expect(costLabel != nil)
     }
 
     @Test("CardNode stores card reference")
