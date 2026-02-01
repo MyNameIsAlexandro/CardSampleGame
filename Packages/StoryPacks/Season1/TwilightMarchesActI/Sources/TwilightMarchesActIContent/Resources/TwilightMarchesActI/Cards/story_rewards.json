@@ -241,7 +241,7 @@
         "name_ru": "Теневой Удар",
         "description": "Deal 6 damage",
         "description_ru": "Нанести 6 урона",
-        "effect": {"damage": 6}
+        "effect": {"damage": {"amount": 6, "type": "physical"}}
       }
     ],
     "faith_cost": 0,
