@@ -43,7 +43,7 @@ struct CombatSystemTests {
         let event = system.playerAttack(player: player, enemy: enemy, nexus: nexus)
 
         let health: HealthComponent = nexus.get(unsafe: enemy.identifier)
-        if case .playerAttacked(let damage, _, _) = event {
+        if case .playerAttacked(let damage, _, _, _) = event {
             #expect(damage == 3)
             #expect(health.current == 7)
         } else {
@@ -76,7 +76,7 @@ struct CombatSystemTests {
         let event = system.resolveEnemyIntent(enemy: enemy, player: player, nexus: nexus)
 
         let health: HealthComponent = nexus.get(unsafe: player.identifier)
-        if case .enemyAttacked(let damage, _, _) = event {
+        if case .enemyAttacked(let damage, _, _, _) = event {
             #expect(damage > 0)
             #expect(health.current < 10)
         } else {
@@ -93,7 +93,7 @@ struct CombatSystemTests {
         let system = CombatSystem()
         let outcome = system.checkVictoryOrDefeat(nexus: nexus)
 
-        #expect(outcome == .victory)
+        #expect(outcome == .victory(.killed))
     }
 
     @Test("Defeat when player health reaches 0")
@@ -159,6 +159,6 @@ struct CombatSystemTests {
         sim.resolveEnemyTurn()
 
         // Should be victory because will is depleted
-        #expect(sim.outcome == .victory)
+        #expect(sim.outcome == .victory(.pacified))
     }
 }

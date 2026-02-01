@@ -14,6 +14,7 @@ public struct CombatSceneView: View {
         playerStrength: Int = 5,
         playerDeck: [Card] = [],
         fateCards: [FateCard] = [],
+        resonance: Float = 0,
         seed: UInt64 = 42,
         size: CGSize = CGSize(width: 390, height: 700),
         onCombatEnd: ((CombatOutcome) -> Void)? = nil
@@ -28,6 +29,7 @@ public struct CombatSceneView: View {
             playerStrength: playerStrength,
             playerDeck: playerDeck,
             fateCards: fateCards,
+            resonance: resonance,
             seed: seed
         )
         s.onCombatEnd = onCombatEnd

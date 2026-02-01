@@ -6,6 +6,51 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [2.5.0] - 2026-02-01 - EchoEngine: Fate Resolution, Diplomacy, Integration
+
+### Summary
+
+Full Fate Deck resolution with keyword interpretation and suit matching. Diplomacy system with dual victory paths (kill vs pacify). CombatResult struct carries resonance/faith/loot deltas. EchoEncounterBridge connects EchoEngine combat to TwilightGameEngine. CombatScene updated with Influence button, WP bar, and enhanced fate card overlay. 140 tests passing.
+
+---
+
+### Features
+
+#### Fate Resolution Service
+- **FateResolutionService** — wraps FateDeckManager + KeywordInterpreter for full fate card resolution
+- **Keyword effects** — surge (bonus damage), focus (precision), ward (extra block), shadow (evade), echo (repeat)
+- **Suit matching** — Nav suit ↔ physical context (×2 amplify), Prav suit ↔ spiritual context; mismatch nullifies keyword
+- **ActionContext** — .combatPhysical, .combatSpiritual, .defense determine keyword interpretation
+
+#### Diplomacy System
+- **playerInfluence()** — spiritual attack damages Will instead of HP
+- **AttackTrack** — physical / spiritual with escalation mechanics
+- **Surprise bonus** — switching physical→spiritual grants extra spirit damage
+- **Rage shield** — switching spiritual→physical grants enemy extra defense
+- **Escalation decay** — bonuses/penalties decrease each round
+
+#### Dual Victory & CombatResult
+- **CombatOutcome** — `.victory(.killed)` when HP=0, `.victory(.pacified)` when Will=0, `.defeat`
+- **CombatResult** — outcome, resonanceDelta (-5 kill / +5 pacify), faithDelta, lootCardIds, updatedFateDeckState
+
+#### EchoEncounterBridge
+- `makeEchoCombatConfig()` — builds config from TwilightGameEngine state
+- `applyEchoCombatResult()` — applies resonance, faith, loot, fate deck back to engine
+
+#### CombatScene (SpriteKit)
+- **Influence button** — shown when enemy has Will > 0
+- **performPlayerInfluence()** — spirit-themed animations (cyan flash, pulse)
+- **Enhanced fate card overlay** — keyword name + suit match indicator (★)
+
+### Tests
+- 30 new tests: FateResolutionTests (15), DiplomacyTests (9), IntegrationTests (6)
+- Total: 140 tests (100 EchoEngine + 19 EchoScenes + 21 TwilightEngine)
+
+### Documentation
+- ENGINE_ARCHITECTURE.md updated to v1.4 (E.5 rewritten)
+
+---
+
 ## [2.4.0] - 2026-02-01 - EchoEngine Combat: Energy, Exhaust, Enemy Patterns
 
 ### Summary

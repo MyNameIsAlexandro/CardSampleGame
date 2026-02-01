@@ -1,11 +1,19 @@
 # Game Engine v1.0: Technical Architecture Document
 
-**Версия:** 1.3
+**Версия:** 1.4
 **Статус:** Architecture Lock (Source of Truth)
 **Дата:** 1 февраля 2026
 **Назначение:** Техническая спецификация для реализации переиспользуемого игрового ядра.
 
-**Последние изменения (v1.3):**
+**Последние изменения (v1.4):**
+- EchoEngine: Fate Resolution Service (keyword + suit matching)
+- Diplomacy system: playerInfluence(), AttackTrack, escalation/de-escalation
+- Dual victory: CombatOutcome.victory(.killed) / .victory(.pacified)
+- CombatResult struct with resonance/faith deltas, loot, fate deck state
+- EchoEncounterBridge: TwilightGameEngine ↔ EchoEngine integration
+- 140 tests (100 EchoEngine + 19 EchoScenes + 21 TwilightEngine)
+
+**Предыдущие изменения (v1.3):**
 - EchoEngine: ECS-based combat system (FirebladeECS)
 - Energy system, exhaust mechanic, enemy behavior patterns
 - Card cost/exhaust fields, enemy pattern cycling
@@ -1109,29 +1117,32 @@ let result = CombatCalculator.calculatePlayerAttack(
 // result.isHit, result.attackRoll, result.damageCalculation
 ```
 
-### E.5 EchoEngine — ECS Combat System (v1.3)
+### E.5 EchoEngine — ECS Combat System (v1.4)
 
 **Пакет:** `Packages/EchoEngine`
 **Фреймворк:** FirebladeECS (Entity-Component-System)
 **UI:** `Packages/EchoScenes` (SpriteKit)
 
-EchoEngine — параллельная реализация боевой системы на ECS-архитектуре. Работает независимо от TwilightGameEngine и предоставляет real-time карточный бой через SpriteKit.
+EchoEngine — параллельная реализация боевой системы на ECS-архитектуре. Работает независимо от TwilightGameEngine и предоставляет real-time карточный бой через SpriteKit. Интегрируется с основным движком через `EchoEncounterBridge`.
 
 #### Компоненты (ECS)
 
 | Компонент | Описание |
 |-----------|----------|
-| `HealthComponent` | HP текущее/максимальное |
+| `HealthComponent` | HP + Will (текущее/максимальное) |
 | `EnergyComponent` | Энергия за ход (current/max, default 3) |
 | `DeckComponent` | drawPile, hand, discardPile, exhaustPile |
 | `StatusEffectComponent` | Активные статус-эффекты (яд, щит, усиление) |
-| `EnemyComponent` | Паттерн поведения, power, will |
+| `EnemyTagComponent` | Паттерн поведения, power, defense, faithReward, lootCardIds |
+| `DiplomacyComponent` | AttackTrack (physical/spiritual), rageShield, surpriseBonus |
+| `PlayerTagComponent` | Имя, сила, strength |
 
-#### Системы
+#### Системы и сервисы
 
 | Система | Ответственность |
 |---------|-----------------|
-| `CombatSystem` | Розыгрыш карт, проверка энергии, резолв эффектов |
+| `CombatSystem` | playerAttack(), playerInfluence(), resolveEnemyIntent(), victory check |
+| `FateResolutionService` | Полный fate draw: keyword interpretation + suit matching |
 | `AISystem` | Циклический паттерн врага: `pattern[(round-1) % count]` |
 | `DeckSystem` | Тасовка, добор, сброс, exhaust |
 
@@ -1142,13 +1153,40 @@ EchoEngine — параллельная реализация боевой сис
 - **Паттерны врагов:** Циклический массив `EnemyPatternStep` (attack/block/heal/ritual)
 - **Dual Health:** HP (Body) + Will (Mind), Will depletion = умиротворение
 - **Статус-эффекты:** poison, shield, buff — тикают каждый ход
+- **Fate Resolution:** FateResolutionService оборачивает FateDeckManager + KeywordInterpreter. Keyword эффекты (surge/focus/echo/shadow/ward) зависят от `ActionContext`. Suit match (Nav↔physical, Prav↔spiritual) усиливает ×2, mismatch обнуляет keyword.
+- **Дипломатия:** `playerInfluence()` наносит урон Will вместо HP. Переключение трека physical↔spiritual: surprise bonus / rage shield. Эскалация спадает каждый ход.
+- **Dual Victory:** `CombatOutcome.victory(.killed)` при HP=0, `.victory(.pacified)` при Will=0. Resonance delta: -5 за kill (Nav), +5 за pacify (Prav).
+
+#### CombatResult
+
+```swift
+public struct CombatResult {
+    let outcome: CombatOutcome      // .victory(.killed), .victory(.pacified), .defeat
+    let resonanceDelta: Int         // Nav за kill, Prav за pacify
+    let faithDelta: Int
+    let lootCardIds: [String]
+    let updatedFateDeckState: FateDeckState?
+}
+```
 
 #### CombatSimulation (Фасад)
 
 ```swift
-let sim = CombatSimulation.create(playerHealth: 20, playerEnergy: 3, ...)
-let event = sim.playCard(cardId: "strike_basic")  // → .cardPlayed / .insufficientEnergy
-sim.resolveEnemyTurn()  // AI + energy reset
+let sim = CombatSimulation.create(enemyDefinition: enemy, playerStrength: 10, seed: 42)
+sim.beginCombat()
+sim.playerAttack()      // физическая атака с fate resolution
+sim.playerInfluence()   // духовная атака по Will
+sim.endTurn()
+sim.resolveEnemyTurn()
+let result = sim.combatResult  // CombatResult после завершения боя
+```
+
+#### EchoEncounterBridge (Интеграция)
+
+```swift
+// TwilightGameEngine extension
+let config = engine.makeEchoCombatConfig()   // собирает параметры из engine state
+engine.applyEchoCombatResult(result)          // применяет resonance, faith, loot, fate deck
 ```
 
 ### E.6 Интеграция модулей (обновлено)

@@ -180,9 +180,12 @@ struct BattleArenaView: View {
                 fateCards: fateCards,
                 seed: UInt64(Date().timeIntervalSince1970),
                 onCombatEnd: { outcome in
-                    lastOutcome = outcome == .victory
-                        ? .victory(stats: CombatView.CombatStats(turnsPlayed: 0, totalDamageDealt: 0, totalDamageTaken: 0, cardsPlayed: 0))
-                        : .defeat(stats: CombatView.CombatStats(turnsPlayed: 0, totalDamageDealt: 0, totalDamageTaken: 0, cardsPlayed: 0))
+                    let stats = CombatView.CombatStats(turnsPlayed: 0, totalDamageDealt: 0, totalDamageTaken: 0, cardsPlayed: 0)
+                    if case .victory = outcome {
+                        lastOutcome = .victory(stats: stats)
+                    } else {
+                        lastOutcome = .defeat(stats: stats)
+                    }
                     showingSpriteKitCombat = false
                 }
             )

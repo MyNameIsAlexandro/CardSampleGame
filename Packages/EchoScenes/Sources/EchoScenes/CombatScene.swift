@@ -21,6 +21,7 @@ public final class CombatScene: SKScene {
     // MARK: - UI Nodes
 
     private var attackButton: SKLabelNode!
+    private var influenceButton: SKLabelNode?
     private var skipButton: SKLabelNode!
     private var phaseLabel: SKLabelNode!
     private var roundLabel: SKLabelNode!
@@ -60,6 +61,7 @@ public final class CombatScene: SKScene {
         playerStrength: Int = 5,
         playerDeck: [Card] = [],
         fateCards: [FateCard] = [],
+        resonance: Float = 0,
         seed: UInt64 = 42
     ) {
         simulation = CombatSimulation.create(
@@ -70,6 +72,7 @@ public final class CombatScene: SKScene {
             playerStrength: playerStrength,
             playerDeck: playerDeck,
             fateCards: fateCards,
+            resonance: resonance,
             seed: seed
         )
     }
@@ -263,8 +266,15 @@ public final class CombatScene: SKScene {
 
         let buttonY = -halfH + 60
 
-        attackButton = makeButton(text: "Attack", position: CGPoint(x: -60, y: buttonY), name: "btn_attack")
-        skipButton = makeButton(text: "End Turn", position: CGPoint(x: 60, y: buttonY), name: "btn_end_turn")
+        let hasInfluence = simulation.enemyMaxWill > 0
+        if hasInfluence {
+            attackButton = makeButton(text: "⚔ Attack", position: CGPoint(x: -100, y: buttonY), name: "btn_attack")
+            influenceButton = makeButton(text: "✦ Influence", position: CGPoint(x: 0, y: buttonY), name: "btn_influence")
+            skipButton = makeButton(text: "End Turn", position: CGPoint(x: 100, y: buttonY), name: "btn_end_turn")
+        } else {
+            attackButton = makeButton(text: "⚔ Attack", position: CGPoint(x: -60, y: buttonY), name: "btn_attack")
+            skipButton = makeButton(text: "End Turn", position: CGPoint(x: 60, y: buttonY), name: "btn_end_turn")
+        }
 
         fateOverlay = SKNode()
         fateOverlay.position = CGPoint(x: 0, y: 20)
@@ -352,6 +362,7 @@ public final class CombatScene: SKScene {
 
         let isPlayerTurn = simulation.phase == .playerTurn && !simulation.isOver
         attackButton.parent?.alpha = isPlayerTurn ? 1.0 : 0.4
+        influenceButton?.parent?.alpha = isPlayerTurn ? 1.0 : 0.4
         skipButton.parent?.alpha = isPlayerTurn ? 1.0 : 0.4
         handContainer.alpha = isPlayerTurn ? 1.0 : 0.5
 
@@ -636,6 +647,9 @@ public final class CombatScene: SKScene {
             switch node.name {
             case "btn_attack":
                 performPlayerAttack()
+                return
+            case "btn_influence":
+                performPlayerInfluence()
                 return
             case "btn_end_turn":
                 performEndTurn()
@@ -928,11 +942,11 @@ public final class CombatScene: SKScene {
 
     private func logCombatEvent(_ event: CombatEvent) {
         switch event {
-        case .playerAttacked(let dmg, _, _):
+        case .playerAttacked(let dmg, _, _, _):
             addLogEntry("You deal \(dmg) damage")
         case .playerMissed:
             addLogEntry("You missed!")
-        case .enemyAttacked(let dmg, _, _):
+        case .enemyAttacked(let dmg, _, _, _):
             addLogEntry(dmg > 0 ? "Enemy deals \(dmg) damage" : "Enemy attack blocked!")
         case .enemyHealed(let amt):
             addLogEntry("Enemy heals \(amt)")
@@ -958,6 +972,12 @@ public final class CombatScene: SKScene {
             addLogEntry("Not enough energy!")
         case .roundAdvanced(let r):
             addLogEntry("— Round \(r) —")
+        case .playerInfluenced(let dmg, _, _, _):
+            addLogEntry("You influence for \(dmg) will damage")
+        case .influenceNotAvailable:
+            addLogEntry("Cannot influence this enemy")
+        case .trackSwitched(let track):
+            addLogEntry("Switched to \(track.rawValue) track")
         }
     }
 
@@ -1038,20 +1058,21 @@ public final class CombatScene: SKScene {
         let event = simulation.playerAttack()
         logCombatEvent(event)
 
-        // Extract fate value from event
+        // Extract fate value and resolution from event
         let fateValue: Int
         let damage: Int
+        let resolution: FateResolution?
         switch event {
-        case .playerAttacked(let d, let fv, _):
-            fateValue = fv; damage = d
-        case .playerMissed(let fv):
-            fateValue = fv; damage = 0
+        case .playerAttacked(let d, let fv, _, let res):
+            fateValue = fv; damage = d; resolution = res
+        case .playerMissed(let fv, let res):
+            fateValue = fv; damage = 0; resolution = res
         default:
-            fateValue = 0; damage = 0
+            fateValue = 0; damage = 0; resolution = nil
         }
 
         // Show fate card, then apply hit visuals
-        showFateCard(value: fateValue, isCritical: false, label: "Attack") { [weak self] in
+        showFateCard(value: fateValue, isCritical: resolution?.isCritical ?? false, label: "Attack", resolution: resolution) { [weak self] in
             guard let self else { return }
 
             // Lunge player avatar toward enemy
@@ -1073,6 +1094,47 @@ public final class CombatScene: SKScene {
             // Damage number on enemy
             if damage > 0 {
                 self.showDamageNumber(damage, at: self.enemyPosition, color: CombatSceneTheme.highlight)
+            }
+
+            self.resolveAfterPlayerAction()
+        }
+    }
+
+    private func performPlayerInfluence() {
+        isAnimating = true
+        let event = simulation.playerInfluence()
+        logCombatEvent(event)
+
+        let fateValue: Int
+        let willDamage: Int
+        let resolution: FateResolution?
+        switch event {
+        case .playerInfluenced(let wd, let fv, _, let res):
+            fateValue = fv; willDamage = wd; resolution = res
+        default:
+            fateValue = 0; willDamage = 0; resolution = nil
+        }
+
+        showFateCard(value: fateValue, isCritical: resolution?.isCritical ?? false, label: "Influence", resolution: resolution) { [weak self] in
+            guard let self else { return }
+
+            // Pulse player avatar
+            if let playerAvatar = self.childNode(withName: "avatar_player") {
+                playerAvatar.run(SKAction.sequence([
+                    SKAction.scale(to: 1.15, duration: 0.15),
+                    SKAction.scale(to: 1.0, duration: 0.15)
+                ]))
+            }
+
+            // Flash enemy with spirit color
+            if case .playerInfluenced = event, let enemy = self.simulation.enemyEntity {
+                let anim = self.getOrCreateAnim(for: enemy)
+                anim.enqueue(.flash(colorName: "cyan", duration: 0.3))
+            }
+
+            // Will damage number on enemy (spirit color)
+            if willDamage > 0 {
+                self.showDamageNumber(willDamage, at: self.enemyPosition, color: CombatSceneTheme.spirit)
             }
 
             self.resolveAfterPlayerAction()
@@ -1235,7 +1297,7 @@ public final class CombatScene: SKScene {
         let fateValue: Int
         let damage: Int
         switch event {
-        case .enemyAttacked(let d, let fv, _):
+        case .enemyAttacked(let d, let fv, _, _):
             fateValue = fv; damage = d
         default:
             fateValue = 0; damage = 0
@@ -1286,7 +1348,7 @@ public final class CombatScene: SKScene {
 
     // MARK: - Fate Card Overlay
 
-    private func showFateCard(value: Int, isCritical: Bool, label: String, completion: @escaping () -> Void) {
+    private func showFateCard(value: Int, isCritical: Bool, label: String, resolution: FateResolution? = nil, completion: @escaping () -> Void) {
         let card = FateCardNode()
         card.alpha = 0
         fateOverlay.addChild(card)
@@ -1300,6 +1362,18 @@ public final class CombatScene: SKScene {
         context.position = CGPoint(x: 0, y: -(FateCardNode.cardSize.height / 2 + 14))
         context.verticalAlignmentMode = .top
         card.addChild(context)
+
+        // Keyword + suit match indicator
+        if let resolution = resolution, let keyword = resolution.keyword {
+            let keywordLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+            let matchIcon = resolution.suitMatch ? " ★" : ""
+            keywordLabel.text = "\(keyword.rawValue.capitalized)\(matchIcon)"
+            keywordLabel.fontSize = 12
+            keywordLabel.fontColor = resolution.suitMatch ? CombatSceneTheme.highlight : CombatSceneTheme.faith
+            keywordLabel.position = CGPoint(x: 0, y: -(FateCardNode.cardSize.height / 2 + 30))
+            keywordLabel.verticalAlignmentMode = .top
+            card.addChild(keywordLabel)
+        }
 
         // Animate: fade in → flip → hold → fade out
         card.run(SKAction.fadeIn(withDuration: 0.15)) { [weak card] in
@@ -1369,12 +1443,24 @@ public final class CombatScene: SKScene {
         container.alpha = 0
         addChild(container)
 
-        let isVictory = outcome == .victory
+        let isVictory: Bool
+        let victoryText: String
+        switch outcome {
+        case .victory(.pacified):
+            isVictory = true
+            victoryText = "Pacified!"
+        case .victory:
+            isVictory = true
+            victoryText = "Victory!"
+        case .defeat:
+            isVictory = false
+            victoryText = "Defeat"
+        }
         let titleColor: SKColor = isVictory ? CombatSceneTheme.success : CombatSceneTheme.health
 
         // Title
         let titleLabel = SKLabelNode(fontNamed: "AvenirNext-Heavy")
-        titleLabel.text = isVictory ? "Victory!" : "Defeat"
+        titleLabel.text = victoryText
         titleLabel.fontSize = 42
         titleLabel.fontColor = titleColor
         titleLabel.position = CGPoint(x: 0, y: 60)

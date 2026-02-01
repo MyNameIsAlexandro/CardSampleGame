@@ -33,13 +33,20 @@ public struct CombatNexusBuilder {
         playerEntity.assign(EnergyComponent(current: playerEnergy, max: playerEnergy))
         playerEntity.assign(StatusEffectComponent())
 
+        // Diplomacy component (only if enemy has will)
+        if (enemyDefinition.will ?? 0) > 0 {
+            playerEntity.assign(DiplomacyComponent())
+        }
+
         // Enemy entity
         let enemyEntity = nexus.createEntity()
         enemyEntity.assign(EnemyTagComponent(
             definitionId: enemyDefinition.id,
             power: enemyDefinition.power,
             defense: enemyDefinition.defense,
-            pattern: enemyDefinition.pattern
+            pattern: enemyDefinition.pattern,
+            faithReward: enemyDefinition.faithReward,
+            lootCardIds: enemyDefinition.lootCardIds
         ))
         enemyEntity.assign(HealthComponent(
             current: enemyDefinition.health,

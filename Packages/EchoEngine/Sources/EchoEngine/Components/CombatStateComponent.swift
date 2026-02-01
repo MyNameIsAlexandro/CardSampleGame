@@ -10,8 +10,13 @@ public enum EchoCombatPhase: String, Sendable {
     case defeat
 }
 
-public enum CombatOutcome: Sendable {
-    case victory
+public enum VictoryType: String, Sendable {
+    case killed
+    case pacified
+}
+
+public enum CombatOutcome: Sendable, Equatable {
+    case victory(VictoryType)
     case defeat
 }
 

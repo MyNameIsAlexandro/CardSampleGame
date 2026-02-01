@@ -1,6 +1,30 @@
 import FirebladeECS
 import TwilightEngine
 
+/// Result of a completed combat encounter, containing all deltas to apply back to the game.
+public struct CombatResult: Sendable {
+    public let outcome: CombatOutcome
+    /// Resonance shift: negative for kill (Nav), positive for pacify (Prav)
+    public let resonanceDelta: Int
+    public let faithDelta: Int
+    public let lootCardIds: [String]
+    public let updatedFateDeckState: FateDeckState?
+
+    public init(
+        outcome: CombatOutcome,
+        resonanceDelta: Int = 0,
+        faithDelta: Int = 0,
+        lootCardIds: [String] = [],
+        updatedFateDeckState: FateDeckState? = nil
+    ) {
+        self.outcome = outcome
+        self.resonanceDelta = resonanceDelta
+        self.faithDelta = faithDelta
+        self.lootCardIds = lootCardIds
+        self.updatedFateDeckState = updatedFateDeckState
+    }
+}
+
 /// High-level orchestrator for a complete combat encounter.
 /// Owns the Nexus and all systems. Provides a simple API for tests and future UI.
 public final class CombatSimulation {
@@ -73,7 +97,14 @@ public final class CombatSimulation {
 
     public var outcome: CombatOutcome? {
         switch phase {
-        case .victory: return .victory
+        case .victory:
+            // Determine victory type from enemy state
+            if let enemy = enemyEntity {
+                let health: HealthComponent = nexus.get(unsafe: enemy.identifier)
+                if !health.isAlive { return .victory(.killed) }
+                if health.willDepleted { return .victory(.pacified) }
+            }
+            return .victory(.killed)
         case .defeat: return .defeat
         default: return nil
         }
@@ -187,6 +218,46 @@ public final class CombatSimulation {
         return intent.intent
     }
 
+    /// Build a CombatResult from the current combat state. Call after combat ends.
+    public var combatResult: CombatResult? {
+        guard let outcome = outcome else { return nil }
+        guard let enemy = enemyEntity else { return nil }
+        let enemyTag: EnemyTagComponent = nexus.get(unsafe: enemy.identifier)
+
+        let resonanceDelta: Int
+        let faithDelta: Int
+        switch outcome {
+        case .victory(.killed):
+            resonanceDelta = -5  // Nav shift
+            faithDelta = enemyTag.faithReward
+        case .victory(.pacified):
+            resonanceDelta = 5   // Prav shift
+            faithDelta = enemyTag.faithReward
+        case .defeat:
+            resonanceDelta = 0
+            faithDelta = 0
+        }
+
+        // Get fate deck state
+        var fateDeckState: FateDeckState?
+        let combatFamily = nexus.family(requires: CombatStateComponent.self)
+        for combatEntity in combatFamily.entities {
+            if combatEntity.has(FateDeckComponent.self) {
+                let fateDeckComp: FateDeckComponent = nexus.get(unsafe: combatEntity.identifier)
+                fateDeckState = fateDeckComp.fateDeck.getState()
+                break
+            }
+        }
+
+        return CombatResult(
+            outcome: outcome,
+            resonanceDelta: resonanceDelta,
+            faithDelta: faithDelta,
+            lootCardIds: enemyTag.lootCardIds,
+            updatedFateDeckState: fateDeckState
+        )
+    }
+
     // MARK: - Actions
 
     /// Begin combat: draw hand, generate enemy intent, set phase to playerTurn.
@@ -207,7 +278,7 @@ public final class CombatSimulation {
     @discardableResult
     public func playerAttack(bonusDamage: Int = 0) -> CombatEvent {
         guard let player = playerEntity, let enemy = enemyEntity else {
-            return .playerMissed(fateValue: 0)
+            return .playerMissed(fateValue: 0, fateResolution: nil)
         }
         let event = combatSystem.playerAttack(player: player, enemy: enemy, bonusDamage: bonusDamage, nexus: nexus)
         combatSystem.setCombatPhase(.enemyResolve, nexus: nexus)
@@ -221,6 +292,17 @@ public final class CombatSimulation {
             return .cardPlayed(cardId: cardId, damage: 0, heal: 0, cardsDrawn: 0, statusApplied: nil)
         }
         return combatSystem.playCard(cardId: cardId, player: player, enemy: enemy, deckSystem: deckSystem, nexus: nexus)
+    }
+
+    /// Player uses spiritual influence on enemy.
+    @discardableResult
+    public func playerInfluence(bonusDamage: Int = 0) -> CombatEvent {
+        guard let player = playerEntity, let enemy = enemyEntity else {
+            return .influenceNotAvailable
+        }
+        let event = combatSystem.playerInfluence(player: player, enemy: enemy, bonusDamage: bonusDamage, nexus: nexus)
+        combatSystem.setCombatPhase(.enemyResolve, nexus: nexus)
+        return event
     }
 
     /// Player skips (ends turn without acting).
