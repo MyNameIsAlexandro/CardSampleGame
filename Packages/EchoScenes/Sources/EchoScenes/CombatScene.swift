@@ -24,6 +24,8 @@ public final class CombatScene: SKScene {
     private var skipButton: SKLabelNode!
     private var phaseLabel: SKLabelNode!
     private var roundLabel: SKLabelNode!
+    private var fateOverlay: SKNode!
+    private var isAnimating = false
 
     // MARK: - Callbacks
 
@@ -146,6 +148,11 @@ public final class CombatScene: SKScene {
 
         attackButton = makeButton(text: "Attack", position: CGPoint(x: -60, y: buttonY), name: "btn_attack")
         skipButton = makeButton(text: "Skip", position: CGPoint(x: 60, y: buttonY), name: "btn_skip")
+
+        fateOverlay = SKNode()
+        fateOverlay.position = CGPoint(x: 0, y: 20)
+        fateOverlay.zPosition = 50
+        addChild(fateOverlay)
     }
 
     private func makeButton(text: String, position: CGPoint, name: String) -> SKLabelNode {
@@ -199,7 +206,7 @@ public final class CombatScene: SKScene {
     #endif
 
     private func handleTap(at location: CGPoint) {
-        guard !simulation.isOver, simulation.phase == .playerTurn else { return }
+        guard !simulation.isOver, simulation.phase == .playerTurn, !isAnimating else { return }
 
         let tappedNodes = nodes(at: location)
         for node in tappedNodes {
@@ -219,25 +226,39 @@ public final class CombatScene: SKScene {
     // MARK: - Combat Actions
 
     private func performPlayerAttack() {
+        isAnimating = true
         let event = simulation.playerAttack()
 
-        // Animate based on event
-        if let enemy = simulation.enemyEntity {
-            let anim: AnimationComponent
-            if simulation.nexus.has(componentId: AnimationComponent.identifier, entityId: enemy.identifier) {
-                anim = simulation.nexus.get(unsafe: enemy.identifier)
-            } else {
-                anim = AnimationComponent()
-                enemy.assign(anim)
-            }
+        // Extract fate value from event
+        let fateValue: Int
+        let damage: Int
+        switch event {
+        case .playerAttacked(let d, let fv, _):
+            fateValue = fv; damage = d
+        case .playerMissed(let fv):
+            fateValue = fv; damage = 0
+        default:
+            fateValue = 0; damage = 0
+        }
 
-            if case .playerAttacked = event {
+        // Show fate card, then apply hit visuals
+        showFateCard(value: fateValue, isCritical: false, label: "Attack") { [weak self] in
+            guard let self else { return }
+
+            // Shake/flash enemy on hit
+            if case .playerAttacked = event, let enemy = self.simulation.enemyEntity {
+                let anim = self.getOrCreateAnim(for: enemy)
                 anim.enqueue(.shake(intensity: 8, duration: 0.3))
                 anim.enqueue(.flash(colorName: "white", duration: 0.2))
             }
-        }
 
-        resolveAfterPlayerAction()
+            // Damage number on enemy
+            if damage > 0 {
+                self.showDamageNumber(damage, at: self.enemyPosition, color: .white)
+            }
+
+            self.resolveAfterPlayerAction()
+        }
     }
 
     private func performPlayerSkip() {
@@ -248,6 +269,7 @@ public final class CombatScene: SKScene {
     private func resolveAfterPlayerAction() {
         syncRender()
         updateHUD()
+        isAnimating = false
 
         if simulation.isOver {
             handleCombatEnd()
@@ -255,6 +277,7 @@ public final class CombatScene: SKScene {
         }
 
         // Enemy turn after short delay
+        isAnimating = true
         run(SKAction.wait(forDuration: 0.6)) { [weak self] in
             self?.resolveEnemyTurn()
         }
@@ -263,27 +286,97 @@ public final class CombatScene: SKScene {
     private func resolveEnemyTurn() {
         let event = simulation.resolveEnemyTurn()
 
-        // Animate player hit
-        if let player = simulation.playerEntity {
-            let anim: AnimationComponent
-            if simulation.nexus.has(componentId: AnimationComponent.identifier, entityId: player.identifier) {
-                anim = simulation.nexus.get(unsafe: player.identifier)
-            } else {
-                anim = AnimationComponent()
-                player.assign(anim)
-            }
+        // Extract fate value
+        let fateValue: Int
+        let damage: Int
+        switch event {
+        case .enemyAttacked(let d, let fv, _):
+            fateValue = fv; damage = d
+        default:
+            fateValue = 0; damage = 0
+        }
 
-            if case .enemyAttacked = event {
+        showFateCard(value: fateValue, isCritical: false, label: "Defense") { [weak self] in
+            guard let self else { return }
+
+            // Shake player on hit
+            if case .enemyAttacked = event, let player = self.simulation.playerEntity {
+                let anim = self.getOrCreateAnim(for: player)
                 anim.enqueue(.shake(intensity: 5, duration: 0.2))
             }
-        }
 
-        syncRender()
-        updateHUD()
+            if damage > 0 {
+                self.showDamageNumber(damage, at: self.playerPosition, color: .red)
+            }
 
-        if simulation.isOver {
-            handleCombatEnd()
+            self.syncRender()
+            self.updateHUD()
+            self.isAnimating = false
+
+            if self.simulation.isOver {
+                self.handleCombatEnd()
+            }
         }
+    }
+
+    // MARK: - Animation Helpers
+
+    private func getOrCreateAnim(for entity: Entity) -> AnimationComponent {
+        if simulation.nexus.has(componentId: AnimationComponent.identifier, entityId: entity.identifier) {
+            return simulation.nexus.get(unsafe: entity.identifier)
+        }
+        let anim = AnimationComponent()
+        entity.assign(anim)
+        return anim
+    }
+
+    // MARK: - Fate Card Overlay
+
+    private func showFateCard(value: Int, isCritical: Bool, label: String, completion: @escaping () -> Void) {
+        let card = FateCardNode()
+        card.alpha = 0
+        fateOverlay.addChild(card)
+
+        // Context label below card
+        let context = SKLabelNode(fontNamed: "AvenirNext-Medium")
+        let sign = value > 0 ? "+\(value)" : "\(value)"
+        context.text = "\(label) \(sign)"
+        context.fontSize = 14
+        context.fontColor = .gray
+        context.position = CGPoint(x: 0, y: -(FateCardNode.cardSize.height / 2 + 14))
+        context.verticalAlignmentMode = .top
+        card.addChild(context)
+
+        // Animate: fade in → flip → hold → fade out
+        card.run(SKAction.fadeIn(withDuration: 0.15)) { [weak card] in
+            card?.reveal(value: value, isCritical: isCritical) {
+                card?.run(SKAction.sequence([
+                    SKAction.wait(forDuration: 0.6),
+                    SKAction.fadeOut(withDuration: 0.2),
+                    SKAction.removeFromParent()
+                ])) {
+                    completion()
+                }
+            }
+        }
+    }
+
+    private func showDamageNumber(_ value: Int, at position: CGPoint, color: SKColor) {
+        let label = SKLabelNode(fontNamed: "AvenirNext-Heavy")
+        label.text = "-\(value)"
+        label.fontSize = 22
+        label.fontColor = color
+        label.position = CGPoint(x: position.x, y: position.y + 30)
+        label.zPosition = 60
+        addChild(label)
+
+        label.run(SKAction.sequence([
+            SKAction.group([
+                SKAction.moveBy(x: 0, y: 40, duration: 0.8),
+                SKAction.fadeOut(withDuration: 0.8)
+            ]),
+            SKAction.removeFromParent()
+        ]))
     }
 
     private func handleCombatEnd() {
