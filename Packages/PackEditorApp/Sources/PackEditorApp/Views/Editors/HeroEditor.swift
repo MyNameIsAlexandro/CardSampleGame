@@ -9,6 +9,11 @@ struct HeroEditor: View {
         Form {
             Section("Identity") {
                 LabeledContent("ID", value: hero.id)
+                Picker("Class", selection: $hero.heroClass) {
+                    ForEach(HeroClass.allCases, id: \.self) { heroClass in
+                        Text(heroClass.rawValue.capitalized).tag(heroClass)
+                    }
+                }
                 LocalizedTextField(label: "Name", text: $hero.name)
                     .validated(hero.name.displayString.isEmpty ? .error("Name is required") : nil)
                 LocalizedTextField(label: "Description", text: $hero.description)

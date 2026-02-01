@@ -303,6 +303,7 @@ public class PackStore {
             let id = "hero_new_\(uuid)"
             heroes[id] = StandardHeroDefinition(
                 id: id,
+                heroClass: .warrior,
                 name: .inline(LocalizedString(en: "New Hero", ru: "Новый герой")),
                 description: .inline(LocalizedString(en: "Description", ru: "Описание")),
                 icon: "🛡️",

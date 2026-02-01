@@ -127,6 +127,11 @@ public final class HeroRegistry {
         }
     }
 
+    /// Get heroes filtered by class.
+    public func heroes(ofClass heroClass: HeroClass) -> [HeroDefinition] {
+        return allHeroes.filter { $0.heroClass == heroClass }
+    }
+
     /// Number of registered heroes.
     public var count: Int {
         return definitions.count
@@ -258,6 +263,7 @@ public struct JSONHeroStats: Codable {
 /// JSON-совместимое определение героя (data-driven)
 public struct JSONHeroDefinition: Codable {
     let id: String
+    let heroClass: String?
     let name: String
     let nameRu: String?
     let description: String
@@ -308,8 +314,19 @@ public struct JSONHeroDefinition: Codable {
             fatalError("Missing ability definition for '\(abilityId)'. Add it to HeroAbility.forAbilityId() or hero_abilities.json")
         }
 
+        // Parse hero class from JSON or infer from ID prefix
+        let resolvedClass: HeroClass
+        if let classStr = heroClass, let parsed = HeroClass(rawValue: classStr) {
+            resolvedClass = parsed
+        } else {
+            // Infer from ID prefix (e.g., "warrior_ragnar" → .warrior)
+            let prefix = id.split(separator: "_").first.map(String.init) ?? ""
+            resolvedClass = HeroClass(rawValue: prefix) ?? .warrior
+        }
+
         return StandardHeroDefinition(
             id: id,
+            heroClass: resolvedClass,
             name: localizedName,
             description: localizedDescription,
             icon: icon,

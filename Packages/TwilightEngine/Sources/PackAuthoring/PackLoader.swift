@@ -498,6 +498,7 @@ private struct PackHeroStats: Codable {
 /// Статы загружаются из JSON (data-driven)
 private struct PackHeroDefinition: Codable {
     public let id: String
+    public let heroClass: String?
     public let name: String
     public let nameRu: String?
     public let description: String
@@ -554,8 +555,18 @@ private struct PackHeroDefinition: Codable {
             fatalError("Missing ability definition for '\(abilityId)'. Add it to HeroAbility.forAbilityId() or hero_abilities.json")
         }
 
+        // Parse hero class from JSON or infer from ID prefix
+        let resolvedClass: HeroClass
+        if let classStr = heroClass, let parsed = HeroClass(rawValue: classStr) {
+            resolvedClass = parsed
+        } else {
+            let prefix = id.split(separator: "_").first.map(String.init) ?? ""
+            resolvedClass = HeroClass(rawValue: prefix) ?? .warrior
+        }
+
         return StandardHeroDefinition(
             id: id,
+            heroClass: resolvedClass,
             name: localizedName,
             description: localizedDescription,
             icon: icon,

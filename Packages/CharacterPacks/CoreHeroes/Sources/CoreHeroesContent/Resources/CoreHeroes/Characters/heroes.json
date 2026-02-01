@@ -1,6 +1,7 @@
 [
   {
     "id": "warrior_ragnar",
+    "hero_class": "warrior",
     "name": "Ragnar",
     "name_ru": "Рагнар",
     "description": "Former commander of the royal guard. His battle rage is legendary.",
@@ -34,6 +35,7 @@
   },
   {
     "id": "mage_elvira",
+    "hero_class": "mage",
     "name": "Elvira",
     "name_ru": "Эльвира",
     "description": "Master of arcane arts. Draws power from both sources.",
@@ -67,6 +69,7 @@
   },
   {
     "id": "ranger_thorin",
+    "hero_class": "ranger",
     "name": "Thorin",
     "name_ru": "Торин",
     "description": "Monster hunter from the northern forests. Never misses.",
@@ -100,6 +103,7 @@
   },
   {
     "id": "priest_aurelius",
+    "hero_class": "priest",
     "name": "Aurelius",
     "name_ru": "Аврелий",
     "description": "Devoted servant of the Light. His blessings protect allies.",
@@ -133,6 +137,7 @@
   },
   {
     "id": "shadow_umbra",
+    "hero_class": "shadow",
     "name": "Umbra",
     "name_ru": "Умбра",
     "description": "Agent of Nav. Strikes from the shadow when the enemy least expects it.",

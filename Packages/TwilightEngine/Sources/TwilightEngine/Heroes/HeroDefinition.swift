@@ -1,5 +1,17 @@
 import Foundation
 
+/// Hero class archetype — determines playstyle and card restrictions (FR-HRO-003)
+public enum HeroClass: String, Codable, CaseIterable, Hashable {
+    case warrior
+    case mage
+    case ranger
+    case priest
+    case shadow
+    case alchemist
+    case bard
+    case monk
+}
+
 /// Structure with hero stats
 public struct HeroStats: Codable, Equatable {
     public var health: Int
@@ -48,6 +60,9 @@ public protocol HeroDefinition {
     /// Unique identifier (from JSON)
     var id: String { get }
 
+    /// Hero class archetype
+    var heroClass: HeroClass { get }
+
     /// Localized name (supports inline LocalizedString or StringKey)
     var name: LocalizableText { get }
 
@@ -80,6 +95,7 @@ public enum HeroAvailability: Codable, Equatable {
 /// Standard hero definition implementation
 public struct StandardHeroDefinition: HeroDefinition, Codable {
     public var id: String
+    public var heroClass: HeroClass
     public var name: LocalizableText
     public var description: LocalizableText
     public var icon: String
@@ -90,6 +106,7 @@ public struct StandardHeroDefinition: HeroDefinition, Codable {
 
     public init(
         id: String,
+        heroClass: HeroClass,
         name: LocalizableText,
         description: LocalizableText,
         icon: String,
@@ -99,6 +116,7 @@ public struct StandardHeroDefinition: HeroDefinition, Codable {
         availability: HeroAvailability = .alwaysAvailable
     ) {
         self.id = id
+        self.heroClass = heroClass
         self.name = name
         self.description = description
         self.icon = icon
@@ -106,5 +124,26 @@ public struct StandardHeroDefinition: HeroDefinition, Codable {
         self.specialAbility = specialAbility
         self.startingDeckCardIDs = startingDeckCardIDs
         self.availability = availability
+    }
+
+    // Custom Codable: backward-compatible with packs that lack heroClass
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        name = try c.decode(LocalizableText.self, forKey: .name)
+        description = try c.decode(LocalizableText.self, forKey: .description)
+        icon = try c.decode(String.self, forKey: .icon)
+        baseStats = try c.decode(HeroStats.self, forKey: .baseStats)
+        specialAbility = try c.decode(HeroAbility.self, forKey: .specialAbility)
+        startingDeckCardIDs = try c.decode([String].self, forKey: .startingDeckCardIDs)
+        availability = try c.decode(HeroAvailability.self, forKey: .availability)
+
+        if let decoded = try c.decodeIfPresent(HeroClass.self, forKey: .heroClass) {
+            heroClass = decoded
+        } else {
+            // Infer from ID prefix for legacy packs
+            let prefix = id.split(separator: "_").first.map(String.init) ?? ""
+            heroClass = HeroClass(rawValue: prefix) ?? .warrior
+        }
     }
 }
