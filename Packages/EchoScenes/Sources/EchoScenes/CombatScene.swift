@@ -29,6 +29,9 @@ public final class CombatScene: SKScene {
     private var deckCountLabel: SKLabelNode!
     private var discardCountLabel: SKLabelNode!
     private var energyLabel: SKLabelNode!
+    private var tooltipNode: SKNode?
+    private var longPressTimer: Timer?
+    private var touchStartLocation: CGPoint?
     private var isAnimating = false
 
     // MARK: - Callbacks
@@ -350,14 +353,57 @@ public final class CombatScene: SKScene {
     public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         let location = touch.location(in: self)
+        touchStartLocation = location
+
+        // Dismiss existing tooltip on any new touch
+        dismissTooltip()
+
+        // Start long press timer for cards
+        let cardNode = findCardNode(at: location)
+        if cardNode != nil {
+            longPressTimer = Timer.scheduledTimer(withTimeInterval: 0.4, repeats: false) { [weak self] _ in
+                guard let self, let card = cardNode?.card else { return }
+                self.touchStartLocation = nil // prevent tap
+                self.showTooltip(for: card, at: location)
+            }
+        }
+    }
+
+    public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        longPressTimer?.invalidate()
+        longPressTimer = nil
+
+        if tooltipNode != nil {
+            dismissTooltip()
+            return
+        }
+
+        guard let location = touchStartLocation else { return }
+        touchStartLocation = nil
         handleTap(at: location)
+    }
+
+    public override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        longPressTimer?.invalidate()
+        longPressTimer = nil
+        touchStartLocation = nil
+        dismissTooltip()
     }
     #elseif os(macOS)
     public override func mouseDown(with event: NSEvent) {
         let location = event.location(in: self)
+        dismissTooltip()
         handleTap(at: location)
     }
     #endif
+
+    private func findCardNode(at location: CGPoint) -> CardNode? {
+        for node in nodes(at: location) {
+            if let cardNode = node as? CardNode { return cardNode }
+            if let parent = node.parent as? CardNode { return parent }
+        }
+        return nil
+    }
 
     private func handleTap(at location: CGPoint) {
         guard !simulation.isOver, simulation.phase == .playerTurn, !isAnimating else { return }
@@ -383,6 +429,68 @@ public final class CombatScene: SKScene {
                 }
             }
         }
+    }
+
+    // MARK: - Tooltip
+
+    private func showTooltip(for card: Card, at location: CGPoint) {
+        dismissTooltip()
+
+        let tooltip = SKNode()
+        tooltip.zPosition = 100
+
+        let cost = card.cost ?? 1
+        let abilityText: String
+        if let ability = card.abilities.first {
+            abilityText = ability.description
+        } else {
+            abilityText = card.description
+        }
+
+        let lines = [
+            card.name,
+            "Cost: \(cost) ⚡",
+            abilityText
+        ]
+        let text = lines.joined(separator: "\n")
+
+        let label = SKLabelNode(fontNamed: "AvenirNext-Medium")
+        label.text = text
+        label.numberOfLines = 0
+        label.preferredMaxLayoutWidth = 160
+        label.fontSize = 11
+        label.fontColor = .white
+        label.verticalAlignmentMode = .center
+        label.horizontalAlignmentMode = .center
+
+        let padding: CGFloat = 12
+        let bgWidth = max(label.frame.width + padding * 2, 120)
+        let bgHeight = max(label.frame.height + padding * 2, 50)
+
+        let bg = SKShapeNode(rectOf: CGSize(width: bgWidth, height: bgHeight), cornerRadius: 8)
+        bg.fillColor = SKColor(white: 0.0, alpha: 0.85)
+        bg.strokeColor = CombatSceneTheme.muted
+        bg.lineWidth = 1
+
+        tooltip.addChild(bg)
+        tooltip.addChild(label)
+
+        // Position above touch, clamped to scene
+        let halfW = size.width / 2
+        let tooltipX = max(-halfW + bgWidth / 2 + 8, min(halfW - bgWidth / 2 - 8, location.x))
+        tooltip.position = CGPoint(x: tooltipX, y: location.y + bgHeight / 2 + 20)
+
+        addChild(tooltip)
+        tooltipNode = tooltip
+
+        // Fade in
+        tooltip.alpha = 0
+        tooltip.run(SKAction.fadeIn(withDuration: 0.15))
+    }
+
+    private func dismissTooltip() {
+        tooltipNode?.removeFromParent()
+        tooltipNode = nil
     }
 
     // MARK: - Combat Actions
