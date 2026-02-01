@@ -167,6 +167,19 @@ struct BattleArenaView: View {
                         lastOutcome = .defeat(stats: stats)
                     }
                     showingCombat = false
+                },
+                onSoundEffect: { SoundManager.shared.play(SoundManager.SoundEffect(rawValue: $0) ?? .buttonTap) },
+                onHaptic: { name in
+                    let type: HapticManager.HapticType
+                    switch name {
+                    case "light": type = .light
+                    case "medium": type = .medium
+                    case "heavy": type = .heavy
+                    case "success": type = .success
+                    case "error": type = .error
+                    default: type = .light
+                    }
+                    HapticManager.shared.play(type)
                 }
             )
         }

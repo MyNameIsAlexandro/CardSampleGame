@@ -19,7 +19,9 @@ public struct CombatSceneView: View {
         seed: UInt64 = 42,
         size: CGSize = CGSize(width: 390, height: 700),
         onCombatEnd: ((CombatOutcome) -> Void)? = nil,
-        onCombatEndWithResult: ((EchoCombatResult) -> Void)? = nil
+        onCombatEndWithResult: ((EchoCombatResult) -> Void)? = nil,
+        onSoundEffect: ((String) -> Void)? = nil,
+        onHaptic: ((String) -> Void)? = nil
     ) {
         let s = CombatScene(size: size)
         s.scaleMode = .aspectFill
@@ -36,6 +38,8 @@ public struct CombatSceneView: View {
         )
         s.onCombatEnd = onCombatEnd
         s.onCombatEndWithResult = onCombatEndWithResult
+        s.onSoundEffect = onSoundEffect
+        s.onHaptic = onHaptic
         self.scene = s
     }
 

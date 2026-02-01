@@ -2262,5 +2262,453 @@
       }
     ],
     "mini_game_challenge": null
+  },
+  {
+    "id": "event_shadow_wolves",
+    "title": {
+      "en": "Shadow Wolf Ambush",
+      "ru": "Засада Теневого Волка"
+    },
+    "body": {
+      "en": "A pair of glowing eyes appears in the undergrowth. A shadow wolf — corrupted by Navi — lunges from the darkness with unnatural speed.",
+      "ru": "Пара светящихся глаз появляется в подлеске. Теневой волк — искажённый Навью — бросается из тьмы с неестественной скоростью."
+    },
+    "event_kind": {"mini_game": "combat"},
+    "availability": {
+      "required_flags": [],
+      "forbidden_flags": [],
+      "min_pressure": null,
+      "max_pressure": null,
+      "min_balance": null,
+      "max_balance": null,
+      "region_states": ["stable", "borderland", "breach"],
+      "region_ids": ["forest"]
+    },
+    "pool_ids": ["pool_forest"],
+    "weight": 18,
+    "is_one_time": false,
+    "is_instant": false,
+    "cooldown": 2,
+    "choices": [
+      {
+        "id": "fight_shadow_wolf",
+        "label": {
+          "en": "Fight the shadow wolf",
+          "ru": "Сразиться с теневым волком"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"health": 2},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "combat_start"
+        }
+      },
+      {
+        "id": "scare_wolf",
+        "label": {
+          "en": "Use fire to scare it (3 Faith)",
+          "ru": "Использовать огонь для отпугивания (3 ✨)"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"faith": 3},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": -3},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "wolf_scared"
+        }
+      },
+      {
+        "id": "flee_shadow_wolf",
+        "label": {
+          "en": "Flee into the trees",
+          "ru": "Бежать в лес"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {"health": -1},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "fled_wolf"
+        }
+      }
+    ],
+    "mini_game_challenge": {
+      "enemy_id": "shadow_wolf",
+      "difficulty": 1,
+      "rewards": {
+        "resource_changes": {"faith": 2},
+        "set_flags": [],
+        "clear_flags": [],
+        "balance_delta": 2,
+        "region_state_change": null,
+        "quest_progress": null,
+        "trigger_event_id": null,
+        "result_key": null
+      }
+    }
+  },
+  {
+    "id": "event_cursed_knight",
+    "title": {
+      "en": "The Cursed Knight",
+      "ru": "Проклятый Рыцарь"
+    },
+    "body": {
+      "en": "Among crumbling ruins, a figure in rusted armor stirs. The cursed knight rises, bound by an oath that death could not break. His hollow eyes fix upon you.",
+      "ru": "Среди разрушенных руин шевелится фигура в ржавых доспехах. Проклятый рыцарь поднимается, связанный клятвой, которую смерть не смогла разрушить. Его пустые глаза устремляются на вас."
+    },
+    "event_kind": {"mini_game": "combat"},
+    "availability": {
+      "required_flags": [],
+      "forbidden_flags": [],
+      "min_pressure": null,
+      "max_pressure": null,
+      "min_balance": null,
+      "max_balance": null,
+      "region_states": ["borderland", "breach"],
+      "region_ids": null
+    },
+    "pool_ids": ["pool_common"],
+    "weight": 14,
+    "is_one_time": false,
+    "is_instant": false,
+    "cooldown": 4,
+    "choices": [
+      {
+        "id": "fight_knight",
+        "label": {
+          "en": "Fight the cursed knight",
+          "ru": "Сразиться с проклятым рыцарем"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"health": 3},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "combat_start"
+        }
+      },
+      {
+        "id": "break_curse",
+        "label": {
+          "en": "Try to break his curse (10 Faith)",
+          "ru": "Попытаться разрушить проклятие (10 ✨)"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"faith": 10},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": -10},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 8,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "curse_broken"
+        }
+      },
+      {
+        "id": "flee_knight",
+        "label": {
+          "en": "Retreat from the ruins",
+          "ru": "Отступить из руин"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {"health": -2},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "fled_knight"
+        }
+      }
+    ],
+    "mini_game_challenge": {
+      "enemy_id": "cursed_knight",
+      "difficulty": 3,
+      "rewards": {
+        "resource_changes": {"faith": 6},
+        "set_flags": [],
+        "clear_flags": [],
+        "balance_delta": 5,
+        "region_state_change": null,
+        "quest_progress": null,
+        "trigger_event_id": null,
+        "result_key": null
+      }
+    }
+  },
+  {
+    "id": "event_dark_sorcerer",
+    "title": {
+      "en": "Dark Ritual",
+      "ru": "Тёмный Ритуал"
+    },
+    "body": {
+      "en": "Dark energy crackles in the air. A robed figure chants over a circle of black stones, pulling Navi energy into the world. The dark sorcerer turns, his eyes blazing with power.",
+      "ru": "Тёмная энергия потрескивает в воздухе. Фигура в мантии читает заклинания над кругом из чёрных камней, втягивая энергию Нави в мир. Тёмный колдун поворачивается, его глаза пылают силой."
+    },
+    "event_kind": {"mini_game": "combat"},
+    "availability": {
+      "required_flags": [],
+      "forbidden_flags": [],
+      "min_pressure": 30,
+      "max_pressure": null,
+      "min_balance": null,
+      "max_balance": null,
+      "region_states": ["borderland", "breach"],
+      "region_ids": ["swamp", "breach"]
+    },
+    "pool_ids": ["pool_swamp", "pool_breach"],
+    "weight": 16,
+    "is_one_time": false,
+    "is_instant": false,
+    "cooldown": 5,
+    "choices": [
+      {
+        "id": "fight_sorcerer",
+        "label": {
+          "en": "Interrupt the ritual",
+          "ru": "Прервать ритуал"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"health": 4},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "combat_start"
+        }
+      },
+      {
+        "id": "counter_ritual",
+        "label": {
+          "en": "Counter with holy ward (12 Faith)",
+          "ru": "Противодействовать святым оберегом (12 ✨)"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"faith": 12},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": -12},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 10,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "ritual_countered"
+        }
+      },
+      {
+        "id": "observe_sorcerer",
+        "label": {
+          "en": "Observe from a distance",
+          "ru": "Наблюдать издалека"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": -5,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "ritual_completed"
+        }
+      }
+    ],
+    "mini_game_challenge": {
+      "enemy_id": "dark_sorcerer",
+      "difficulty": 4,
+      "rewards": {
+        "resource_changes": {"faith": 10},
+        "set_flags": [],
+        "clear_flags": [],
+        "balance_delta": 8,
+        "region_state_change": null,
+        "quest_progress": null,
+        "trigger_event_id": null,
+        "result_key": null
+      }
+    }
+  },
+  {
+    "id": "event_breach_crawler",
+    "title": {
+      "en": "Breach Crawler Emergence",
+      "ru": "Появление Ползучего Ужаса"
+    },
+    "body": {
+      "en": "The ground trembles. A massive, otherworldly form pushes through a tear in reality. The Breach Crawler has arrived — a creature from the void between worlds, corroding everything around it.",
+      "ru": "Земля дрожит. Массивная, потусторонняя форма проталкивается сквозь разрыв в реальности. Ползучий Ужас прибыл — создание из пустоты между мирами, разъедающее всё вокруг."
+    },
+    "event_kind": {"mini_game": "combat"},
+    "availability": {
+      "required_flags": [],
+      "forbidden_flags": [],
+      "min_pressure": 40,
+      "max_pressure": null,
+      "min_balance": null,
+      "max_balance": null,
+      "region_states": ["breach"],
+      "region_ids": null
+    },
+    "pool_ids": ["pool_breach"],
+    "weight": 20,
+    "is_one_time": false,
+    "is_instant": false,
+    "cooldown": 5,
+    "choices": [
+      {
+        "id": "fight_crawler",
+        "label": {
+          "en": "Fight the breach crawler",
+          "ru": "Сразиться с Ползучим Ужасом"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"health": 5},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 0,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "combat_start"
+        }
+      },
+      {
+        "id": "seal_breach",
+        "label": {
+          "en": "Seal the breach (15 Faith)",
+          "ru": "Запечатать разлом (15 ✨)"
+        },
+        "tooltip": null,
+        "requirements": {
+          "min_resources": {"faith": 15},
+          "required_flags": [],
+          "forbidden_flags": [],
+          "min_balance": null,
+          "max_balance": null
+        },
+        "consequences": {
+          "resource_changes": {"faith": -15},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": 12,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "breach_sealed"
+        }
+      },
+      {
+        "id": "flee_crawler",
+        "label": {
+          "en": "Run before it fully emerges",
+          "ru": "Бежать, пока оно не вылезло полностью"
+        },
+        "tooltip": null,
+        "requirements": null,
+        "consequences": {
+          "resource_changes": {"health": -3},
+          "set_flags": [],
+          "clear_flags": [],
+          "balance_delta": -5,
+          "region_state_change": null,
+          "quest_progress": null,
+          "trigger_event_id": null,
+          "result_key": "fled_crawler"
+        }
+      }
+    ],
+    "mini_game_challenge": {
+      "enemy_id": "breach_crawler",
+      "difficulty": 4,
+      "rewards": {
+        "resource_changes": {"faith": 12},
+        "set_flags": [],
+        "clear_flags": [],
+        "balance_delta": 10,
+        "region_state_change": null,
+        "quest_progress": null,
+        "trigger_event_id": null,
+        "result_key": null
+      }
+    }
   }
 ]

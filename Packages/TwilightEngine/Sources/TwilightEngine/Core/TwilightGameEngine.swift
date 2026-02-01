@@ -154,7 +154,10 @@ public final class TwilightGameEngine: ObservableObject {
             return true
         }
 
-        return !availableEvents.isEmpty
+        if !availableEvents.isEmpty { return true }
+
+        // Random encounters are always possible if enemies exist
+        return !contentRegistry.getAllEnemies().isEmpty
     }
 
     /// Map RegionState to string for ContentRegistry queries
@@ -188,6 +191,7 @@ public final class TwilightGameEngine: ObservableObject {
 
     private var regions: [String: EngineRegionState] = [:]
     private var completedEventIds: Set<String> = []  // Definition IDs (Epic 3: Stable IDs)
+    var _blockScriptedEvents = false  // Test helper
     private var worldFlags: [String: Bool] = [:]
     private var questStages: [String: Int] = [:]
 
@@ -994,6 +998,7 @@ public final class TwilightGameEngine: ObservableObject {
     // MARK: - Event Generation
 
     private func generateEvent(for regionId: String, trigger: EventTrigger) -> String? {
+        if _blockScriptedEvents { return nil }
         // Engine-First: generate event from ContentRegistry
         guard let region = publishedRegions[regionId] else {
             return nil
@@ -1785,5 +1790,15 @@ public extension TwilightGameEngine {
     /// Set resonance value directly (for testing)
     func setResonance(_ value: Float) {
         resonanceValue = max(-100, min(100, value))
+    }
+
+    /// Block all scripted events from generating (for testing random encounters)
+    func blockAllScriptedEvents() {
+        let allEvents = contentRegistry.getAllEventDefinitions()
+        for event in allEvents {
+            completedEventIds.insert(event.id)
+            // Also set forbidden flags to block non-oneTime events
+        }
+        _blockScriptedEvents = true
     }
 }

@@ -51,6 +51,8 @@ public final class CombatScene: SKScene {
 
     public var onCombatEnd: ((CombatOutcome) -> Void)?
     public var onCombatEndWithResult: ((EchoCombatResult) -> Void)?
+    public var onSoundEffect: ((String) -> Void)?
+    public var onHaptic: ((String) -> Void)?
 
     // MARK: - Configuration
 
@@ -1061,6 +1063,8 @@ public final class CombatScene: SKScene {
         isAnimating = true
         let event = simulation.playerAttack()
         logCombatEvent(event)
+        onSoundEffect?("attackHit")
+        onHaptic?("medium")
 
         // Extract fate value and resolution from event
         let fateValue: Int
@@ -1088,11 +1092,16 @@ public final class CombatScene: SKScene {
             }
 
             // Shake/flash enemy on hit + particle burst
+            let isCrit = resolution?.isCritical ?? false
             if case .playerAttacked = event, let enemy = self.simulation.enemyEntity {
                 let anim = self.getOrCreateAnim(for: enemy)
-                anim.enqueue(.shake(intensity: 8, duration: 0.3))
+                anim.enqueue(.shake(intensity: isCrit ? 14 : 8, duration: 0.3))
                 anim.enqueue(.flash(colorName: "white", duration: 0.2))
-                self.spawnImpactParticles(at: self.enemyPosition, isCritical: false)
+                self.spawnImpactParticles(at: self.enemyPosition, isCritical: isCrit)
+                // Screen shake on critical hit
+                if isCrit {
+                    self.screenShake(intensity: 6)
+                }
             }
 
             // Damage number on enemy
@@ -1108,6 +1117,8 @@ public final class CombatScene: SKScene {
         isAnimating = true
         let event = simulation.playerInfluence()
         logCombatEvent(event)
+        onSoundEffect?("influence")
+        onHaptic?("medium")
 
         let fateValue: Int
         let willDamage: Int
@@ -1154,6 +1165,8 @@ public final class CombatScene: SKScene {
         // Resolve logic immediately (state changes)
         let event = simulation.playCard(cardId: cardId)
         logCombatEvent(event)
+        onSoundEffect?("cardPlay")
+        onHaptic?("light")
 
         if case .insufficientEnergy = event {
             // Shake the card to indicate insufficient energy
@@ -1296,6 +1309,8 @@ public final class CombatScene: SKScene {
     private func resolveEnemyTurn() {
         let event = simulation.resolveEnemyTurn()
         logCombatEvent(event)
+        onSoundEffect?("enemyAttack")
+        onHaptic?("heavy")
 
         // Extract fate value
         let fateValue: Int
@@ -1350,12 +1365,24 @@ public final class CombatScene: SKScene {
         return anim
     }
 
+    private func screenShake(intensity: CGFloat) {
+        let actions = (0..<4).flatMap { _ -> [SKAction] in
+            [SKAction.moveBy(x: CGFloat.random(in: -intensity...intensity),
+                             y: CGFloat.random(in: -intensity...intensity),
+                             duration: 0.04),
+             SKAction.move(to: .zero, duration: 0.04)]
+        }
+        self.run(SKAction.sequence(actions))
+    }
+
     // MARK: - Fate Card Overlay
 
     private func showFateCard(value: Int, isCritical: Bool, label: String, resolution: FateResolution? = nil, completion: @escaping () -> Void) {
         let card = FateCardNode()
         card.alpha = 0
         fateOverlay.addChild(card)
+        onSoundEffect?(isCritical ? "fateCritical" : "fateReveal")
+        if isCritical { onHaptic?("heavy") }
 
         // Context label below card
         let context = SKLabelNode(fontNamed: "AvenirNext-Medium")
@@ -1432,6 +1459,30 @@ public final class CombatScene: SKScene {
     private func handleCombatEnd() {
         guard let outcome = simulation.outcome else { return }
 
+        // Enemy fade-out on victory
+        if case .victory = outcome, let enemyAvatar = childNode(withName: "avatar_enemy") {
+            enemyAvatar.run(SKAction.sequence([
+                SKAction.group([
+                    SKAction.fadeOut(withDuration: 0.6),
+                    SKAction.scale(to: 0.3, duration: 0.6)
+                ]),
+                SKAction.removeFromParent()
+            ]))
+        }
+
+        // Victory/defeat particle burst
+        let burstEmitter = CombatParticles.attackImpact()
+        burstEmitter.position = .zero
+        let isWin: Bool
+        if case .victory = outcome { isWin = true } else { isWin = false }
+        burstEmitter.particleColor = isWin ? .systemGreen : .systemRed
+        burstEmitter.numParticlesToEmit = 30
+        addChild(burstEmitter)
+        burstEmitter.run(SKAction.sequence([
+            SKAction.wait(forDuration: 1.5),
+            SKAction.removeFromParent()
+        ]))
+
         // Dark overlay
         let overlay = SKShapeNode(rectOf: size)
         overlay.fillColor = SKColor(white: 0.0, alpha: 0.75)
@@ -1446,6 +1497,16 @@ public final class CombatScene: SKScene {
         container.zPosition = 100
         container.alpha = 0
         addChild(container)
+
+        // Sound + haptic for combat end
+        switch outcome {
+        case .victory:
+            onSoundEffect?("victory")
+            onHaptic?("success")
+        case .defeat:
+            onSoundEffect?("defeat")
+            onHaptic?("error")
+        }
 
         let isVictory: Bool
         let victoryText: String

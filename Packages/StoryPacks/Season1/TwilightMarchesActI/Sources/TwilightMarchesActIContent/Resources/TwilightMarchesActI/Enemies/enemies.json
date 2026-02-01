@@ -362,5 +362,228 @@
     },
     "weaknesses": ["fire", "holy", "lightning"],
     "strengths": ["poison", "nature", "physical"]
+  },
+  {
+    "id": "shadow_wolf",
+    "name": {
+      "en": "Shadow Wolf",
+      "ru": "Теневой Волк"
+    },
+    "description": {
+      "en": "A swift predator corrupted by Navi energy. Its shadowy form flickers between realms.",
+      "ru": "Стремительный хищник, искажённый энергией Нави. Его теневая форма мерцает между мирами."
+    },
+    "health": 6,
+    "power": 4,
+    "defense": 0,
+    "difficulty": 1,
+    "enemy_type": "beast",
+    "rarity": "common",
+    "abilities": [],
+    "loot_card_ids": ["shadow_fang"],
+    "faith_reward": 2,
+    "balance_delta": -3,
+    "lore": {
+      "en": "Once they hunted in packs under moonlight. Now the shadow has claimed them, and they hunt alone — silent, relentless, hungry.",
+      "ru": "Когда-то они охотились стаями при свете луны. Теперь тень поглотила их, и они охотятся поодиночке — бесшумно, неустанно, голодно."
+    },
+    "tactics_nav": {
+      "en": "The wolf respects the dark. Show dominance through Navi resonance.",
+      "ru": "Волк уважает тьму. Покажи превосходство через резонанс Нави."
+    },
+    "tactics_yav": {
+      "en": "Fast but fragile. One solid strike can bring it down.",
+      "ru": "Быстрый, но хрупкий. Один крепкий удар может свалить его."
+    },
+    "tactics_prav": {
+      "en": "Holy light burns away the shadow that sustains it.",
+      "ru": "Святой свет выжигает тень, которая поддерживает его."
+    },
+    "weaknesses": ["fire", "holy"],
+    "strengths": ["shadow"],
+    "pattern": [
+      {"type": "attack", "value": 4},
+      {"type": "attack", "value": 4}
+    ]
+  },
+  {
+    "id": "cursed_knight",
+    "name": {
+      "en": "Cursed Knight",
+      "ru": "Проклятый Рыцарь"
+    },
+    "description": {
+      "en": "A fallen warrior bound to eternal service by dark magic. His rusted armor still holds power.",
+      "ru": "Павший воин, привязанный к вечной службе тёмной магией. Его ржавые доспехи всё ещё хранят силу."
+    },
+    "health": 14,
+    "power": 5,
+    "defense": 3,
+    "difficulty": 3,
+    "enemy_type": "undead",
+    "rarity": "uncommon",
+    "abilities": [
+      {
+        "id": "cursed_armor",
+        "name": {
+          "en": "Cursed Armor",
+          "ru": "Проклятые Доспехи"
+        },
+        "description": {
+          "en": "Reduces incoming damage.",
+          "ru": "Уменьшает входящий урон."
+        },
+        "effect": {
+          "armor": 2
+        }
+      }
+    ],
+    "loot_card_ids": ["cursed_plate"],
+    "faith_reward": 6,
+    "balance_delta": -5,
+    "lore": {
+      "en": "He once swore an oath to protect this land. Death did not release him — the oath twisted into a curse, and now he guards nothing but his own torment.",
+      "ru": "Когда-то он поклялся защищать эту землю. Смерть не освободила его — клятва обратилась проклятием, и теперь он стережёт лишь собственные мучения."
+    },
+    "tactics_nav": {
+      "en": "The curse that binds him is of Navi. A skilled practitioner can unravel it.",
+      "ru": "Проклятие, связывающее его, из Нави. Умелый практик может распутать его."
+    },
+    "tactics_yav": {
+      "en": "His armor is thick. Find the gaps — strike at joints and visor.",
+      "ru": "Его броня толста. Ищи бреши — бей по суставам и забралу."
+    },
+    "tactics_prav": {
+      "en": "A prayer of release may break the curse. Otherwise, holy fire melts cursed steel.",
+      "ru": "Молитва освобождения может разрушить проклятие. Иначе — святой огонь плавит проклятую сталь."
+    },
+    "weaknesses": ["holy", "fire"],
+    "strengths": ["physical", "poison"],
+    "pattern": [
+      {"type": "attack", "value": 5},
+      {"type": "block", "value": 0},
+      {"type": "attack", "value": 5}
+    ]
+  },
+  {
+    "id": "dark_sorcerer",
+    "name": {
+      "en": "Dark Sorcerer",
+      "ru": "Тёмный Колдун"
+    },
+    "description": {
+      "en": "A mage who delved too deep into forbidden Navi arts. Wields devastating magic and can influence minds.",
+      "ru": "Маг, слишком глубоко погрузившийся в запретные искусства Нави. Владеет разрушительной магией и может влиять на разум."
+    },
+    "health": 10,
+    "power": 7,
+    "defense": 1,
+    "will": 8,
+    "difficulty": 4,
+    "enemy_type": "demon",
+    "rarity": "rare",
+    "abilities": [
+      {
+        "id": "dark_bolt",
+        "name": {
+          "en": "Dark Bolt",
+          "ru": "Тёмная Молния"
+        },
+        "description": {
+          "en": "Powerful magical attack.",
+          "ru": "Мощная магическая атака."
+        },
+        "effect": {
+          "bonus_damage": 3
+        }
+      }
+    ],
+    "loot_card_ids": ["sorcerers_tome"],
+    "faith_reward": 10,
+    "balance_delta": -10,
+    "lore": {
+      "en": "He sought knowledge beyond mortal limits. The Navi answered, and now he is more shadow than man — a conduit for dark power that consumes all it touches.",
+      "ru": "Он искал знания за пределами смертных. Навь ответила, и теперь он больше тень, чем человек — проводник тёмной силы, пожирающей всё, к чему прикасается."
+    },
+    "tactics_nav": {
+      "en": "He respects raw dark power. Show mastery greater than his, and he may yield.",
+      "ru": "Он уважает грубую тёмную силу. Покажи мастерство выше его, и он может уступить."
+    },
+    "tactics_yav": {
+      "en": "Close the distance fast — his magic is devastating at range but weak up close.",
+      "ru": "Сократи дистанцию быстро — его магия разрушительна на расстоянии, но слаба вблизи."
+    },
+    "tactics_prav": {
+      "en": "Holy wards can deflect his spells. Counter his darkness with pure light.",
+      "ru": "Святые обереги могут отразить его заклинания. Противопоставь его тьме чистый свет."
+    },
+    "weaknesses": ["holy", "silver"],
+    "strengths": ["shadow", "curse"],
+    "pattern": [
+      {"type": "attack", "value": 7},
+      {"type": "ritual", "value": -8},
+      {"type": "attack", "value": 7},
+      {"type": "heal", "value": 3}
+    ]
+  },
+  {
+    "id": "breach_crawler",
+    "name": {
+      "en": "Breach Crawler",
+      "ru": "Ползучий Ужас"
+    },
+    "description": {
+      "en": "A massive aberration that crawls through breaches between worlds. Its very presence corrodes reality.",
+      "ru": "Массивная аберрация, проползающая сквозь разломы между мирами. Само её присутствие разъедает реальность."
+    },
+    "health": 18,
+    "power": 6,
+    "defense": 2,
+    "difficulty": 4,
+    "enemy_type": "spirit",
+    "rarity": "rare",
+    "abilities": [
+      {
+        "id": "reality_warp",
+        "name": {
+          "en": "Reality Warp",
+          "ru": "Искажение Реальности"
+        },
+        "description": {
+          "en": "Distorts reality around it, weakening attacks.",
+          "ru": "Искажает реальность вокруг себя, ослабляя атаки."
+        },
+        "effect": {
+          "armor": 1
+        }
+      }
+    ],
+    "loot_card_ids": ["void_shard"],
+    "faith_reward": 12,
+    "balance_delta": -8,
+    "lore": {
+      "en": "Born from the space between worlds, the Crawler knows neither mercy nor malice. It simply consumes — reality, sanity, hope — all dissolve in its wake.",
+      "ru": "Рождённый из пространства между мирами, Ползучий не знает ни жалости, ни злобы. Он просто поглощает — реальность, рассудок, надежду — всё растворяется на его пути."
+    },
+    "tactics_nav": {
+      "en": "It is of the void between Nav and Yav. Only the deepest resonance can push it back.",
+      "ru": "Оно из пустоты между Навью и Явью. Лишь глубочайший резонанс может оттеснить его."
+    },
+    "tactics_yav": {
+      "en": "Physical attacks barely scratch it. Focus on sustained pressure — it heals slowly.",
+      "ru": "Физические атаки едва царапают его. Сосредоточься на постоянном давлении — оно медленно исцеляется."
+    },
+    "tactics_prav": {
+      "en": "The light of Prav is anathema to breach creatures. Seal the rift and it weakens.",
+      "ru": "Свет Прави — проклятие для существ из разлома. Запечатай разлом, и оно ослабнет."
+    },
+    "weaknesses": ["holy", "lightning"],
+    "strengths": ["physical", "poison", "shadow"],
+    "pattern": [
+      {"type": "attack", "value": 6},
+      {"type": "attack", "value": 6},
+      {"type": "block", "value": 0},
+      {"type": "heal", "value": 4}
+    ]
   }
 ]

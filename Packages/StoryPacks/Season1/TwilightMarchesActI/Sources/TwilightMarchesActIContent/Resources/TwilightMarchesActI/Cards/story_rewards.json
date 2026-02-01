@@ -222,5 +222,117 @@
     "defense": null,
     "health": null,
     "realm": "prav"
+  },
+  {
+    "id": "shadow_fang",
+    "name": "Shadow Fang",
+    "name_ru": "Теневой Клык",
+    "card_type": "special",
+    "rarity": "rare",
+    "description": "A fang torn from a shadow wolf. Strikes with dark speed.",
+    "description_ru": "Клык, вырванный у теневого волка. Бьёт с тёмной скоростью.",
+    "icon": "bolt.slash",
+    "expansion_set": "twilightMarches",
+    "ownership": "universal",
+    "abilities": [
+      {
+        "id": "shadow_strike",
+        "name": "Shadow Strike",
+        "name_ru": "Теневой Удар",
+        "description": "Deal 6 damage",
+        "description_ru": "Нанести 6 урона",
+        "effect": {"damage": 6}
+      }
+    ],
+    "faith_cost": 0,
+    "balance": "dark",
+    "power": 6,
+    "defense": null,
+    "health": null,
+    "realm": "nav"
+  },
+  {
+    "id": "cursed_plate",
+    "name": "Cursed Plate",
+    "name_ru": "Проклятая Пластина",
+    "card_type": "special",
+    "rarity": "uncommon",
+    "description": "A piece of the cursed knight's armor. Still holds protective power.",
+    "description_ru": "Часть доспехов проклятого рыцаря. Всё ещё хранит защитную силу.",
+    "icon": "shield.lefthalf.filled",
+    "expansion_set": "twilightMarches",
+    "ownership": "universal",
+    "abilities": [
+      {
+        "id": "cursed_defense",
+        "name": "Cursed Defense",
+        "name_ru": "Проклятая Защита",
+        "description": "Gain 4 defense",
+        "description_ru": "Получить 4 защиты",
+        "effect": {"temporary_stat": {"stat": "defense", "amount": 4, "duration": 1}}
+      }
+    ],
+    "faith_cost": 0,
+    "balance": "dark",
+    "power": null,
+    "defense": 4,
+    "health": null,
+    "realm": "nav"
+  },
+  {
+    "id": "sorcerers_tome",
+    "name": "Sorcerer's Tome",
+    "name_ru": "Фолиант Колдуна",
+    "card_type": "special",
+    "rarity": "rare",
+    "description": "A book of forbidden knowledge. Grants dark wisdom and insight.",
+    "description_ru": "Книга запретных знаний. Дарует тёмную мудрость и прозрение.",
+    "icon": "book.fill",
+    "expansion_set": "twilightMarches",
+    "ownership": "universal",
+    "abilities": [
+      {
+        "id": "forbidden_knowledge",
+        "name": "Forbidden Knowledge",
+        "name_ru": "Запретные Знания",
+        "description": "Wisdom 5 + Draw 1 card",
+        "description_ru": "Мудрость 5 + Взять 1 карту",
+        "effect": {"wisdom": 5, "draw_cards": 1}
+      }
+    ],
+    "faith_cost": 1,
+    "balance": "dark",
+    "power": null,
+    "defense": null,
+    "health": null,
+    "realm": "prav"
+  },
+  {
+    "id": "void_shard",
+    "name": "Void Shard",
+    "name_ru": "Осколок Пустоты",
+    "card_type": "special",
+    "rarity": "epic",
+    "description": "A fragment of the void between worlds. Powerful but corrupting.",
+    "description_ru": "Фрагмент пустоты между мирами. Могущественный, но развращающий.",
+    "icon": "diamond.fill",
+    "expansion_set": "twilightMarches",
+    "ownership": "universal",
+    "abilities": [
+      {
+        "id": "void_blast",
+        "name": "Void Blast",
+        "name_ru": "Взрыв Пустоты",
+        "description": "Deal 4 damage, lose 1 faith",
+        "description_ru": "Нанести 4 урона, потерять 1 веру",
+        "effect": {"damage": 4, "faith": -1}
+      }
+    ],
+    "faith_cost": 0,
+    "balance": "dark",
+    "power": 4,
+    "defense": null,
+    "health": null,
+    "realm": "nav"
   }
 ]
