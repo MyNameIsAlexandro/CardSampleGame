@@ -62,12 +62,12 @@ final class INV_WLD_GateTests: XCTestCase {
 
     /// Anchor integrity thresholds map correctly to region states
     func testAnchorConfig_integrityThresholds() {
-        XCTAssertEqual(TwilightAnchorConfig.regionStateForIntegrity(100), .stable)
-        XCTAssertEqual(TwilightAnchorConfig.regionStateForIntegrity(70), .stable)
-        XCTAssertEqual(TwilightAnchorConfig.regionStateForIntegrity(69), .borderland)
-        XCTAssertEqual(TwilightAnchorConfig.regionStateForIntegrity(31), .borderland)
-        XCTAssertEqual(TwilightAnchorConfig.regionStateForIntegrity(30), .breach)
-        XCTAssertEqual(TwilightAnchorConfig.regionStateForIntegrity(0), .breach)
+        XCTAssertEqual(AnchorBalanceConfig.regionStateForIntegrity(100), .stable)
+        XCTAssertEqual(AnchorBalanceConfig.regionStateForIntegrity(70), .stable)
+        XCTAssertEqual(AnchorBalanceConfig.regionStateForIntegrity(69), .borderland)
+        XCTAssertEqual(AnchorBalanceConfig.regionStateForIntegrity(31), .borderland)
+        XCTAssertEqual(AnchorBalanceConfig.regionStateForIntegrity(30), .breach)
+        XCTAssertEqual(AnchorBalanceConfig.regionStateForIntegrity(0), .breach)
     }
 
     // MARK: - WLD-03: Tension 100% → Game Over

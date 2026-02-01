@@ -359,6 +359,22 @@ public struct AnchorBalanceConfig: Codable, Sendable {
     )
 }
 
+// MARK: - Anchor Helpers
+
+extension AnchorBalanceConfig {
+    /// Determine region state based on anchor integrity and configured thresholds.
+    public func regionStateForIntegrity(_ integrity: Int) -> TwilightRegionState {
+        if integrity >= stableThreshold { return .stable }
+        if integrity > breachThreshold { return .borderland }
+        return .breach
+    }
+
+    /// Static convenience using default config.
+    public static func regionStateForIntegrity(_ integrity: Int) -> TwilightRegionState {
+        AnchorBalanceConfig.default.regionStateForIntegrity(integrity)
+    }
+}
+
 // MARK: - Balance System
 
 /// Light/Dark balance system configuration.
