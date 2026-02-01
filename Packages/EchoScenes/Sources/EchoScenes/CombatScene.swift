@@ -31,6 +31,9 @@ public final class CombatScene: SKScene {
     private var energyLabel: SKLabelNode!
     private var intentNode: SKNode?
     private var tooltipNode: SKNode?
+    private var combatLogNode: SKNode!
+    private var combatLogEntries: [String] = []
+    private let maxLogEntries = 5
     private var longPressTimer: Timer?
     private var touchStartLocation: CGPoint?
     private var isAnimating = false
@@ -288,6 +291,12 @@ public final class CombatScene: SKScene {
         energyLabel.zPosition = 15
         addChild(energyLabel)
 
+        // Combat log — right side
+        combatLogNode = SKNode()
+        combatLogNode.position = CGPoint(x: size.width / 2 - 10, y: 0)
+        combatLogNode.zPosition = 15
+        addChild(combatLogNode)
+
         refreshHand()
     }
 
@@ -502,6 +511,58 @@ public final class CombatScene: SKScene {
         }
     }
 
+    // MARK: - Combat Log
+
+    private func addLogEntry(_ text: String) {
+        combatLogEntries.append(text)
+        if combatLogEntries.count > maxLogEntries {
+            combatLogEntries.removeFirst()
+        }
+        refreshLog()
+    }
+
+    private func refreshLog() {
+        combatLogNode.removeAllChildren()
+        for (i, entry) in combatLogEntries.reversed().enumerated() {
+            let label = SKLabelNode(fontNamed: "AvenirNext-Regular")
+            label.text = entry
+            label.fontSize = 8
+            label.fontColor = CombatSceneTheme.muted.withAlphaComponent(CGFloat(1.0 - Double(i) * 0.15))
+            label.horizontalAlignmentMode = .right
+            label.verticalAlignmentMode = .center
+            label.position = CGPoint(x: 0, y: CGFloat(i) * 12)
+            combatLogNode.addChild(label)
+        }
+    }
+
+    private func logCombatEvent(_ event: CombatEvent) {
+        switch event {
+        case .playerAttacked(let dmg, _, _):
+            addLogEntry("You deal \(dmg) damage")
+        case .playerMissed:
+            addLogEntry("You missed!")
+        case .enemyAttacked(let dmg, _, _):
+            addLogEntry(dmg > 0 ? "Enemy deals \(dmg) damage" : "Enemy attack blocked!")
+        case .enemyHealed(let amt):
+            addLogEntry("Enemy heals \(amt)")
+        case .enemyRitual(let shift):
+            addLogEntry("Enemy ritual (\(shift > 0 ? "+" : "")\(Int(shift)))")
+        case .enemyBlocked:
+            addLogEntry("Enemy defends")
+        case .cardPlayed(_, let dmg, let heal, let drawn, let status):
+            var parts: [String] = []
+            if dmg > 0 { parts.append("\(dmg) dmg") }
+            if heal > 0 { parts.append("+\(heal) hp") }
+            if drawn > 0 { parts.append("+\(drawn) cards") }
+            if let s = status { parts.append(s) }
+            addLogEntry("Card: \(parts.joined(separator: ", "))")
+        case .insufficientEnergy:
+            addLogEntry("Not enough energy!")
+        case .roundAdvanced(let r):
+            addLogEntry("— Round \(r) —")
+        }
+    }
+
     // MARK: - Tooltip
 
     private func showTooltip(for card: Card, at location: CGPoint) {
@@ -569,6 +630,7 @@ public final class CombatScene: SKScene {
     private func performPlayerAttack() {
         isAnimating = true
         let event = simulation.playerAttack()
+        logCombatEvent(event)
 
         // Extract fate value from event
         let fateValue: Int
@@ -619,6 +681,7 @@ public final class CombatScene: SKScene {
 
         // Resolve logic immediately (state changes)
         let event = simulation.playCard(cardId: cardId)
+        logCombatEvent(event)
 
         if case .insufficientEnergy = event {
             // Shake the card to indicate insufficient energy
@@ -760,6 +823,7 @@ public final class CombatScene: SKScene {
 
     private func resolveEnemyTurn() {
         let event = simulation.resolveEnemyTurn()
+        logCombatEvent(event)
 
         // Extract fate value
         let fateValue: Int
