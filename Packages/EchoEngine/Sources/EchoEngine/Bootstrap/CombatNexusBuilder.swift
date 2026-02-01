@@ -38,7 +38,8 @@ public struct CombatNexusBuilder {
         enemyEntity.assign(EnemyTagComponent(
             definitionId: enemyDefinition.id,
             power: enemyDefinition.power,
-            defense: enemyDefinition.defense
+            defense: enemyDefinition.defense,
+            pattern: enemyDefinition.pattern
         ))
         enemyEntity.assign(HealthComponent(
             current: enemyDefinition.health,

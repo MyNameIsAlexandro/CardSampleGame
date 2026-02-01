@@ -155,4 +155,36 @@ public struct EnemyIntentGenerator {
         // Default: attack
         return .attack(damage: enemyPower)
     }
+
+    /// Generate intent from a repeating pattern. Cycles through steps by round.
+    public static func intentFromPattern(
+        _ pattern: [EnemyPatternStep],
+        round: Int,
+        enemyPower: Int
+    ) -> EnemyIntent {
+        guard !pattern.isEmpty else { return .attack(damage: enemyPower) }
+        let step = pattern[(round - 1) % pattern.count]
+        switch step.type {
+        case .attack:
+            return .attack(damage: step.value > 0 ? step.value : enemyPower)
+        case .heal:
+            return .heal(amount: step.value > 0 ? step.value : 3)
+        case .ritual:
+            return .ritual(resonanceShift: step.value != 0 ? step.value : -5)
+        case .block:
+            return .block(reduction: step.value > 0 ? step.value : 3)
+        case .buff:
+            return .buff(amount: step.value > 0 ? step.value : 2)
+        case .defend:
+            return .defend(reduction: step.value > 0 ? step.value : 3)
+        case .debuff:
+            return .debuff(amount: step.value > 0 ? step.value : 2)
+        case .prepare:
+            return .prepare(value: step.value)
+        case .summon:
+            return .prepare(value: 0)
+        case .restoreWP:
+            return .restoreWP(amount: step.value > 0 ? step.value : 3)
+        }
+    }
 }

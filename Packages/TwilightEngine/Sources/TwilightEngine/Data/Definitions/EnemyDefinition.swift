@@ -86,6 +86,10 @@ public struct EnemyDefinition: GameDefinition {
     /// Keyword resistances
     public var strengths: [String]?
 
+    /// Repeating behavior pattern. If set, the enemy cycles through these
+    /// intents instead of using random generation.
+    public var pattern: [EnemyPatternStep]?
+
     // Note: No explicit CodingKeys needed - JSONDecoder uses .convertFromSnakeCase
     // which automatically converts enemy_type → enemyType, faith_reward → faithReward, etc.
 
@@ -112,7 +116,8 @@ public struct EnemyDefinition: GameDefinition {
         tacticsYav: LocalizableText? = nil,
         tacticsPrav: LocalizableText? = nil,
         weaknesses: [String]? = nil,
-        strengths: [String]? = nil
+        strengths: [String]? = nil,
+        pattern: [EnemyPatternStep]? = nil
     ) {
         self.id = id
         self.name = name
@@ -135,6 +140,7 @@ public struct EnemyDefinition: GameDefinition {
         self.tacticsPrav = tacticsPrav
         self.weaknesses = weaknesses
         self.strengths = strengths
+        self.pattern = pattern
     }
 
     /// Convert to legacy Card (monster type) for UI compatibility
@@ -280,6 +286,19 @@ public enum EnemyAbilityEffect: Codable, Hashable {
         case .custom(let value):
             try container.encode(value, forKey: .custom)
         }
+    }
+}
+
+// MARK: - Enemy Pattern Step
+
+/// A single step in a repeating enemy behavior pattern.
+public struct EnemyPatternStep: Codable, Equatable, Hashable {
+    public var type: IntentType
+    public var value: Int
+
+    public init(type: IntentType, value: Int = 0) {
+        self.type = type
+        self.value = value
     }
 }
 

@@ -18,13 +18,19 @@ public struct AISystem: EchoSystem {
 
         for (tag, health, intent) in enemies {
             if intent.intent == nil && health.isAlive {
-                intent.intent = EnemyIntentGenerator.generateIntent(
-                    enemyPower: tag.power,
-                    enemyHealth: health.current,
-                    enemyMaxHealth: health.max,
-                    turnNumber: round,
-                    rng: rng
-                )
+                if let pattern = tag.pattern, !pattern.isEmpty {
+                    intent.intent = EnemyIntentGenerator.intentFromPattern(
+                        pattern, round: round, enemyPower: tag.power
+                    )
+                } else {
+                    intent.intent = EnemyIntentGenerator.generateIntent(
+                        enemyPower: tag.power,
+                        enemyHealth: health.current,
+                        enemyMaxHealth: health.max,
+                        turnNumber: round,
+                        rng: rng
+                    )
+                }
             }
         }
     }
@@ -38,12 +44,18 @@ public struct AISystem: EchoSystem {
         var round = 1
         for state in combatFamily { round = state.round; break }
 
-        intent.intent = EnemyIntentGenerator.generateIntent(
-            enemyPower: tag.power,
-            enemyHealth: health.current,
-            enemyMaxHealth: health.max,
-            turnNumber: round,
-            rng: rng
-        )
+        if let pattern = tag.pattern, !pattern.isEmpty {
+            intent.intent = EnemyIntentGenerator.intentFromPattern(
+                pattern, round: round, enemyPower: tag.power
+            )
+        } else {
+            intent.intent = EnemyIntentGenerator.generateIntent(
+                enemyPower: tag.power,
+                enemyHealth: health.current,
+                enemyMaxHealth: health.max,
+                turnNumber: round,
+                rng: rng
+            )
+        }
     }
 }
