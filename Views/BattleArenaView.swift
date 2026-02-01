@@ -153,8 +153,12 @@ struct BattleArenaView: View {
                 playerStrength: hero.baseStats.strength,
                 playerDeck: startingDeck,
                 fateCards: fateCards,
+                resonance: vm.engine.resonanceValue,
                 seed: UInt64(Date().timeIntervalSince1970),
                 onCombatEndWithResult: { result in
+                    // Apply combat result to engine state
+                    vm.engine.applyEchoCombatResult(result)
+
                     let stats = CombatView.CombatStats(
                         turnsPlayed: result.turnsPlayed,
                         totalDamageDealt: result.totalDamageDealt,

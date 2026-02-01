@@ -9,6 +9,8 @@ public struct EchoCombatResult: Sendable {
     public let faithDelta: Int
     public let lootCardIds: [String]
     public let updatedFateDeckState: FateDeckState?
+    /// Net HP change for the player (negative = damage taken)
+    public let hpDelta: Int
     // Combat stats
     public let turnsPlayed: Int
     public let totalDamageDealt: Int
@@ -21,6 +23,7 @@ public struct EchoCombatResult: Sendable {
         faithDelta: Int = 0,
         lootCardIds: [String] = [],
         updatedFateDeckState: FateDeckState? = nil,
+        hpDelta: Int = 0,
         turnsPlayed: Int = 0,
         totalDamageDealt: Int = 0,
         totalDamageTaken: Int = 0,
@@ -31,6 +34,7 @@ public struct EchoCombatResult: Sendable {
         self.faithDelta = faithDelta
         self.lootCardIds = lootCardIds
         self.updatedFateDeckState = updatedFateDeckState
+        self.hpDelta = hpDelta
         self.turnsPlayed = turnsPlayed
         self.totalDamageDealt = totalDamageDealt
         self.totalDamageTaken = totalDamageTaken
@@ -132,6 +136,12 @@ public final class CombatSimulation {
         guard let player = playerEntity else { return 0 }
         let health: HealthComponent = nexus.get(unsafe: player.identifier)
         return health.current
+    }
+
+    public var playerMaxHealth: Int {
+        guard let player = playerEntity else { return 0 }
+        let health: HealthComponent = nexus.get(unsafe: player.identifier)
+        return health.max
     }
 
     public var enemyHealth: Int {
@@ -273,6 +283,7 @@ public final class CombatSimulation {
             faithDelta: faithDelta,
             lootCardIds: enemyTag.lootCardIds,
             updatedFateDeckState: fateDeckState,
+            hpDelta: playerHealth - playerMaxHealth,
             turnsPlayed: round,
             totalDamageDealt: statDamageDealt,
             totalDamageTaken: statDamageTaken,
