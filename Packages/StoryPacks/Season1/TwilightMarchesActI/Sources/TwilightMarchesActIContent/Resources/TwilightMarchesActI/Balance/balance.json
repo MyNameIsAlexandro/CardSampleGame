@@ -71,7 +71,8 @@
     "strengthen_amount": 20,
     "strengthen_cost": 3,
     "stable_threshold": 70,
-    "breach_threshold": 0,
-    "decay_per_turn": 3
+    "breach_threshold": 30,
+    "decay_per_turn": 3,
+    "degradation_amount": 20
   }
 }

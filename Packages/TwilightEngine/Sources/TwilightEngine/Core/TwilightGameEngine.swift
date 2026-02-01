@@ -260,7 +260,8 @@ public final class TwilightGameEngine {
         self.contentRegistry = registry
         self.balanceConfig = registry.getBalanceConfig() ?? .default
         self.timeEngine = TimeEngine(thresholdInterval: 3)
-        self.pressureEngine = PressureEngine(rules: TwilightPressureRules())
+        self.pressureEngine = PressureEngine(rules: TwilightPressureRules(from: balanceConfig.pressure))
+        DegradationRules.current = TwilightDegradationRules(anchorConfig: balanceConfig.anchor)
         self.economyManager = EconomyManager()
         self.questTriggerEngine = QuestTriggerEngine(contentRegistry: registry)
         self.combat = nil // set after super.init
@@ -747,8 +748,10 @@ public final class TwilightGameEngine {
     }
 
     private func calculateTensionIncrease() -> Int {
-        // Use TwilightPressureRules as single source of truth (Audit v1.1 Issue #6)
-        return TwilightPressureRules.calculateTensionIncrease(daysPassed: currentDay)
+        return TwilightPressureRules.calculateTensionIncrease(
+            daysPassed: currentDay,
+            base: balanceConfig.pressure.pressurePerTurn
+        )
     }
 
     private func processWorldDegradation() -> [StateChange] {

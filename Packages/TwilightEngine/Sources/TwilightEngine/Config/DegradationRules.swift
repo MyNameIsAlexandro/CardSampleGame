@@ -21,12 +21,25 @@ public protocol DegradationRuleSet {
 }
 
 /// Default degradation rules for world region state changes
+/// Reads degradationAmount from AnchorBalanceConfig when provided
 public struct TwilightDegradationRules: DegradationRuleSet {
+
+    /// Урон якорю при деградации
+    public let degradationAmount: Int
+
+    /// Деградация происходит только при Tension >= минимум
+    public let minimumTensionForDegradation: Int
+
+    public init(anchorConfig: AnchorBalanceConfig? = nil) {
+        let c = anchorConfig ?? .default
+        degradationAmount = c.degradationAmount ?? 20
+        minimumTensionForDegradation = 0
+    }
 
     /// Веса выбора региона:
     /// - Stable (70-100%): 0 — не деградирует напрямую
     /// - Borderland (30-69%): 1 — умеренный приоритет
-    /// - Breach (0-29%): 2 — высокий приоритет (уже слабые регионы ухудшаются быстрее)
+    /// - Breach (0-29%): 2 — высокий приоритет
     public func selectionWeight(for regionState: RegionState) -> Int {
         switch regionState {
         case .stable:
@@ -38,20 +51,10 @@ public struct TwilightDegradationRules: DegradationRuleSet {
         }
     }
 
-    /// Вероятность сопротивления: чем выше integrity, тем больше шанс сопротивляться
-    /// Формула: P(resist) = integrity / 100
-    /// - integrity 100% → 100% сопротивление
-    /// - integrity 50% → 50% сопротивление
-    /// - integrity 0% → 0% сопротивление
+    /// Вероятность сопротивления: P(resist) = integrity / 100
     public func resistanceProbability(anchorIntegrity: Int) -> Double {
         return Double(anchorIntegrity) / 100.0
     }
-
-    /// Урон якорю при деградации: -20% integrity
-    public let degradationAmount: Int = 20
-
-    /// Деградация происходит только при Tension >= 0 (всегда возможна)
-    public let minimumTensionForDegradation: Int = 0
 }
 
 // MARK: - Shared Instance

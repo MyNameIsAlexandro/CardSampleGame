@@ -344,14 +344,18 @@ public struct AnchorBalanceConfig: Codable, Sendable {
     /// Base decay rate per turn in threatened regions.
     public var decayPerTurn: Int
 
+    /// Anchor integrity damage per degradation event (optional, default 20).
+    public var degradationAmount: Int?
+
     /// Default anchor configuration.
     public static let `default` = AnchorBalanceConfig(
         maxIntegrity: 100,
         strengthenAmount: 20,
         strengthenCost: 3,
         stableThreshold: 70,
-        breachThreshold: 0,
-        decayPerTurn: 5
+        breachThreshold: 30,
+        decayPerTurn: 3,
+        degradationAmount: 20
     )
 }
 

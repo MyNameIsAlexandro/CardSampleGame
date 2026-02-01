@@ -44,36 +44,51 @@ public func twilightInitialResources() -> [String: Int] {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /// Twilight Marches pressure (WorldTension) rules
-/// SINGLE SOURCE OF TRUTH for tension escalation formula (Audit v1.1 Issue #6)
+/// Reads from BalanceConfiguration (balance.json) as single source of truth
 public struct TwilightPressureRules: PressureRuleSet {
-    public let maxPressure: Int = 100
-    public let initialPressure: Int = 15
-    public let escalationInterval: Int = 3  // Every 3 days
-    public let escalationAmount: Int = 3    // Base +3 tension (increased for balance)
+    public let maxPressure: Int
+    public let initialPressure: Int
+    public let escalationInterval: Int
+    public let escalationAmount: Int
 
-    /// Thresholds and their effects
+    private let warningThreshold: Int
+    private let criticalThreshold: Int
+    private let catastrophicThreshold: Int
+    private let warningDegradation: Double
+    private let criticalDegradation: Double
+    private let catastrophicDegradation: Double
+
+    public init(from config: PressureBalanceConfig? = nil) {
+        let c = config ?? .default
+        maxPressure = c.maxPressure
+        initialPressure = c.startingPressure
+        escalationInterval = c.effectiveTickInterval
+        escalationAmount = c.pressurePerTurn
+        warningThreshold = c.thresholds.warning
+        criticalThreshold = c.thresholds.critical
+        catastrophicThreshold = c.thresholds.catastrophic
+        warningDegradation = c.degradation.warningChance
+        criticalDegradation = c.degradation.criticalChance
+        catastrophicDegradation = c.degradation.catastrophicChance ?? 0.5
+    }
+
+    /// Thresholds and their effects (driven by balance.json)
     public var thresholds: [Int: [WorldEffect]] {
         return [
-            50: [.regionDegradation(probability: 0.15)],
-            75: [.regionDegradation(probability: 0.3), .globalEvent(eventId: "world_shift_warning")],
-            90: [.regionDegradation(probability: 0.5), .anchorWeakening(amount: 10)]
+            warningThreshold: [.regionDegradation(probability: warningDegradation)],
+            criticalThreshold: [.regionDegradation(probability: criticalDegradation), .globalEvent(eventId: "world_shift_warning")],
+            catastrophicThreshold: [.regionDegradation(probability: catastrophicDegradation), .anchorWeakening(amount: 10)]
         ]
     }
 
     /// Canonical escalation formula: base + (daysPassed / 10)
-    /// - Day 1-9: +3
-    /// - Day 10-19: +4
-    /// - Day 20-29: +5
-    /// Creates increasing urgency as game progresses
     public func calculateEscalation(currentPressure: Int, currentTime: Int) -> Int {
         let escalationBonus = currentTime / 10
         return escalationAmount + escalationBonus
     }
 
     /// Static helper for use outside of PressureEngine context
-    /// Both WorldState and TwilightGameEngine should use this
-    public static func calculateTensionIncrease(daysPassed: Int) -> Int {
-        let base = 3  // escalationAmount
+    public static func calculateTensionIncrease(daysPassed: Int, base: Int = PressureBalanceConfig.default.pressurePerTurn) -> Int {
         let escalationBonus = daysPassed / 10
         return base + escalationBonus
     }
@@ -294,35 +309,28 @@ public enum TwilightBalanceState: String {
     }
 }
 
-/// Balance thresholds
+/// Balance thresholds — reads from BalanceConfiguration
 public struct TwilightBalanceConfig {
-    public static let min = 0
-    public static let max = 100
-    public static let initial = 50
-    public static let lightThreshold = 70
-    public static let darkThreshold = 30
+    private static var config: BalanceSystemConfig { ContentRegistry.shared.getBalanceConfig()?.balanceSystem ?? .default }
+    public static var min: Int { config.min }
+    public static var max: Int { config.max }
+    public static var initial: Int { config.initial }
+    public static var lightThreshold: Int { config.lightThreshold }
+    public static var darkThreshold: Int { config.darkThreshold }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // MARK: - Combat Configuration
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/// Combat configuration for Twilight Marches
+/// Combat configuration — reads from BalanceConfiguration
 public struct TwilightCombatConfig {
-    /// Dice type (e.g., d6)
-    public static let diceMax = 6
-
-    /// Base damage bonus
-    public static let baseDamageBonus = 2
-
-    /// Actions per combat turn
-    public static let actionsPerTurn = 3
-
-    /// Cards drawn at turn start
-    public static let cardsDrawnPerTurn = 5
-
-    /// Maximum hand size
-    public static let maxHandSize = 7
+    private static var config: CombatBalanceConfig { ContentRegistry.shared.getBalanceConfig()?.combat ?? .default }
+    public static var diceMax: Int { config.diceMax ?? 6 }
+    public static var baseDamageBonus: Int { config.baseDamage }
+    public static var actionsPerTurn: Int { config.actionsPerTurn ?? 3 }
+    public static var cardsDrawnPerTurn: Int { config.cardsDrawnPerTurn ?? 5 }
+    public static var maxHandSize: Int { config.maxHandSize ?? 7 }
 
     /// Calculate damage: playerPower + diceRoll - enemyDefense + bonus
     public static func calculateDamage(
@@ -347,14 +355,14 @@ public struct TwilightCombatConfig {
 // MARK: - Anchor Configuration
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/// Anchor integrity thresholds
+/// Anchor integrity thresholds — reads from BalanceConfiguration
 public struct TwilightAnchorConfig {
-    public static let maxIntegrity = 100
-    public static let stableThreshold = 70   // Above = region stable
-    public static let breachThreshold = 30   // Below = region breach
-
-    public static let strengthenAmount = 20
-    public static let degradeAmount = 20
+    private static var config: AnchorBalanceConfig { ContentRegistry.shared.getBalanceConfig()?.anchor ?? .default }
+    public static var maxIntegrity: Int { config.maxIntegrity }
+    public static var stableThreshold: Int { config.stableThreshold }
+    public static var breachThreshold: Int { config.breachThreshold }
+    public static var strengthenAmount: Int { config.strengthenAmount }
+    public static var degradeAmount: Int { config.degradationAmount ?? 20 }
 
     /// Determine region state based on anchor integrity
     public static func regionStateForIntegrity(_ integrity: Int) -> TwilightRegionState {
@@ -368,23 +376,19 @@ public struct TwilightAnchorConfig {
 // MARK: - Time Configuration
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/// Time-related configuration
+/// Time-related configuration — reads from BalanceConfiguration
 public struct TwilightTimeConfig {
-    /// Days for tension increase
-    public static let tensionIncreaseInterval = 3
+    private static var timeConfig: TimeBalanceConfig { ContentRegistry.shared.getBalanceConfig()?.time ?? .default }
+    private static var pressureConfig: PressureBalanceConfig { ContentRegistry.shared.getBalanceConfig()?.pressure ?? .default }
 
-    /// Tension increase amount (increased from 2 to 3 for balance)
-    public static let tensionIncreaseAmount = 3
-
-    /// Travel costs
-    public static let neighborTravelCost = 1
-    public static let distantTravelCost = 2
-
-    /// Action costs
-    public static let restCost = 1
-    public static let strengthenAnchorCost = 1
-    public static let exploreCost = 1
-    public static let instantCost = 0
+    public static var tensionIncreaseInterval: Int { pressureConfig.effectiveTickInterval }
+    public static var tensionIncreaseAmount: Int { pressureConfig.pressurePerTurn }
+    public static var neighborTravelCost: Int { timeConfig.travelCost }
+    public static var distantTravelCost: Int { timeConfig.travelCost * 2 }
+    public static var restCost: Int { timeConfig.restCost }
+    public static var strengthenAnchorCost: Int { timeConfig.strengthenAnchorCost ?? 1 }
+    public static var exploreCost: Int { timeConfig.exploreCost }
+    public static var instantCost: Int { timeConfig.instantCost ?? 0 }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
