@@ -58,11 +58,12 @@ public final class CombatScene: SKScene {
     // MARK: - Scene Lifecycle
 
     public override func didMove(to view: SKView) {
-        backgroundColor = SKColor(red: 0.08, green: 0.08, blue: 0.12, alpha: 1)
+        backgroundColor = CombatSceneTheme.background
         anchorPoint = CGPoint(x: 0.5, y: 0.5)
 
         guard simulation != nil else { return }
 
+        setupBackground()
         renderGroup = RenderSystemGroup(scene: self)
         setupCombatEntities()
         setupHUD()
@@ -72,14 +73,102 @@ public final class CombatScene: SKScene {
         updateHUD()
     }
 
+    // MARK: - Background
+
+    private func setupBackground() {
+        // Gradient background: dark purple bottom → near-black top
+        let gradientNode = SKSpriteNode(color: .clear, size: size)
+        gradientNode.zPosition = -10
+        if let texture = makeGradientTexture(size: size,
+                                              topColor: CombatSceneTheme.background,
+                                              bottomColor: CombatSceneTheme.backgroundLight) {
+            gradientNode.texture = texture
+        }
+        addChild(gradientNode)
+
+        // Separator line between enemy and player zones
+        let separator = SKShapeNode(rectOf: CGSize(width: size.width * 0.6, height: 1))
+        separator.fillColor = CombatSceneTheme.separator
+        separator.strokeColor = .clear
+        separator.position = CGPoint(x: 0, y: 10)
+        separator.zPosition = 1
+        separator.alpha = 0.5
+        addChild(separator)
+    }
+
+    private func makeGradientTexture(size: CGSize, topColor: SKColor, bottomColor: SKColor) -> SKTexture? {
+        let w = Int(size.width)
+        let h = Int(size.height)
+        guard w > 0, h > 0 else { return nil }
+
+        #if os(iOS)
+        UIGraphicsBeginImageContextWithOptions(size, true, 1)
+        guard let ctx = UIGraphicsGetCurrentContext() else { return nil }
+        #elseif os(macOS)
+        guard let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: w, pixelsHigh: h,
+                                          bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true,
+                                          isPlanar: false, colorSpaceName: .deviceRGB,
+                                          bytesPerRow: 0, bitsPerPixel: 0),
+              let ctx = NSGraphicsContext(bitmapImageRep: rep)?.cgContext else { return nil }
+        #endif
+
+        let colors = [topColor.cgColor, bottomColor.cgColor] as CFArray
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        guard let gradient = CGGradient(colorsSpace: colorSpace, colors: colors, locations: [0, 1]) else {
+            #if os(iOS)
+            UIGraphicsEndImageContext()
+            #endif
+            return nil
+        }
+        ctx.drawLinearGradient(gradient,
+                               start: CGPoint(x: 0, y: 0),
+                               end: CGPoint(x: 0, y: size.height),
+                               options: [])
+
+        #if os(iOS)
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        guard let cgImage = image?.cgImage else { return nil }
+        #elseif os(macOS)
+        guard let cgImage = rep.cgImage else { return nil }
+        #endif
+        return SKTexture(cgImage: cgImage)
+    }
+
+    // MARK: - Avatar Helpers
+
+    private func makeAvatarNode(initial: String, color: SKColor, radius: CGFloat) -> SKNode {
+        let circle = SKShapeNode(circleOfRadius: radius)
+        circle.fillColor = color.withAlphaComponent(0.3)
+        circle.strokeColor = color
+        circle.lineWidth = 2
+
+        let label = SKLabelNode(fontNamed: "AvenirNext-Heavy")
+        label.text = String(initial.prefix(1)).uppercased()
+        label.fontSize = radius * 0.8
+        label.fontColor = color
+        label.verticalAlignmentMode = .center
+        label.horizontalAlignmentMode = .center
+        circle.addChild(label)
+
+        return circle
+    }
+
     // MARK: - Entity Setup
 
     private func setupCombatEntities() {
         let nexus = simulation.nexus
 
-        // Enemy sprite + health bar + label
+        // Enemy avatar + health bar + label
         if let enemy = simulation.enemyEntity {
             let tag: EnemyTagComponent = nexus.get(unsafe: enemy.identifier)
+
+            let avatar = makeAvatarNode(initial: tag.definitionId, color: CombatSceneTheme.health, radius: 36)
+            avatar.position = enemyPosition
+            avatar.zPosition = 5
+            avatar.name = "avatar_enemy"
+            addChild(avatar)
+
             enemy.assign(SpriteComponent(
                 textureName: "enemy_\(tag.definitionId)",
                 position: enemyPosition,
@@ -101,9 +190,16 @@ public final class CombatScene: SKScene {
             ))
         }
 
-        // Player sprite + health bar + label
+        // Player avatar + health bar + label
         if let player = simulation.playerEntity {
             let tag: PlayerTagComponent = nexus.get(unsafe: player.identifier)
+
+            let avatar = makeAvatarNode(initial: tag.name, color: CombatSceneTheme.spirit, radius: 30)
+            avatar.position = playerPosition
+            avatar.zPosition = 5
+            avatar.name = "avatar_player"
+            addChild(avatar)
+
             player.assign(SpriteComponent(
                 textureName: "hero_default",
                 position: playerPosition,
@@ -132,14 +228,14 @@ public final class CombatScene: SKScene {
 
         phaseLabel = SKLabelNode(fontNamed: "AvenirNext-Medium")
         phaseLabel.fontSize = 14
-        phaseLabel.fontColor = .gray
+        phaseLabel.fontColor = CombatSceneTheme.muted
         phaseLabel.position = CGPoint(x: 0, y: halfH - 30)
         phaseLabel.zPosition = 20
         addChild(phaseLabel)
 
         roundLabel = SKLabelNode(fontNamed: "AvenirNext-Medium")
         roundLabel.fontSize = 12
-        roundLabel.fontColor = .gray
+        roundLabel.fontColor = CombatSceneTheme.muted
         roundLabel.position = CGPoint(x: 0, y: halfH - 50)
         roundLabel.zPosition = 20
         addChild(roundLabel)
@@ -157,8 +253,8 @@ public final class CombatScene: SKScene {
 
     private func makeButton(text: String, position: CGPoint, name: String) -> SKLabelNode {
         let bg = SKShapeNode(rectOf: CGSize(width: 100, height: 36), cornerRadius: 8)
-        bg.fillColor = SKColor(white: 0.2, alpha: 0.9)
-        bg.strokeColor = SKColor(white: 0.5, alpha: 0.6)
+        bg.fillColor = CombatSceneTheme.cardBack
+        bg.strokeColor = CombatSceneTheme.muted.withAlphaComponent(0.6)
         bg.position = position
         bg.zPosition = 20
         bg.name = name
@@ -245,16 +341,25 @@ public final class CombatScene: SKScene {
         showFateCard(value: fateValue, isCritical: false, label: "Attack") { [weak self] in
             guard let self else { return }
 
-            // Shake/flash enemy on hit
+            // Lunge player avatar toward enemy
+            if let playerAvatar = self.childNode(withName: "avatar_player") {
+                playerAvatar.run(SKAction.sequence([
+                    SKAction.moveBy(x: 0, y: 20, duration: 0.1),
+                    SKAction.moveBy(x: 0, y: -20, duration: 0.1)
+                ]))
+            }
+
+            // Shake/flash enemy on hit + particle burst
             if case .playerAttacked = event, let enemy = self.simulation.enemyEntity {
                 let anim = self.getOrCreateAnim(for: enemy)
                 anim.enqueue(.shake(intensity: 8, duration: 0.3))
                 anim.enqueue(.flash(colorName: "white", duration: 0.2))
+                self.spawnImpactParticles(at: self.enemyPosition, isCritical: false)
             }
 
             // Damage number on enemy
             if damage > 0 {
-                self.showDamageNumber(damage, at: self.enemyPosition, color: .white)
+                self.showDamageNumber(damage, at: self.enemyPosition, color: CombatSceneTheme.highlight)
             }
 
             self.resolveAfterPlayerAction()
@@ -299,14 +404,23 @@ public final class CombatScene: SKScene {
         showFateCard(value: fateValue, isCritical: false, label: "Defense") { [weak self] in
             guard let self else { return }
 
-            // Shake player on hit
+            // Lunge enemy avatar toward player
+            if let enemyAvatar = self.childNode(withName: "avatar_enemy") {
+                enemyAvatar.run(SKAction.sequence([
+                    SKAction.moveBy(x: 0, y: -15, duration: 0.1),
+                    SKAction.moveBy(x: 0, y: 15, duration: 0.1)
+                ]))
+            }
+
+            // Shake player on hit + particle burst
             if case .enemyAttacked = event, let player = self.simulation.playerEntity {
                 let anim = self.getOrCreateAnim(for: player)
                 anim.enqueue(.shake(intensity: 5, duration: 0.2))
+                self.spawnImpactParticles(at: self.playerPosition, isCritical: false)
             }
 
             if damage > 0 {
-                self.showDamageNumber(damage, at: self.playerPosition, color: .red)
+                self.showDamageNumber(damage, at: self.playerPosition, color: CombatSceneTheme.health)
             }
 
             self.syncRender()
@@ -342,7 +456,7 @@ public final class CombatScene: SKScene {
         let sign = value > 0 ? "+\(value)" : "\(value)"
         context.text = "\(label) \(sign)"
         context.fontSize = 14
-        context.fontColor = .gray
+        context.fontColor = CombatSceneTheme.muted
         context.position = CGPoint(x: 0, y: -(FateCardNode.cardSize.height / 2 + 14))
         context.verticalAlignmentMode = .top
         card.addChild(context)
@@ -368,9 +482,14 @@ public final class CombatScene: SKScene {
         label.fontColor = color
         label.position = CGPoint(x: position.x, y: position.y + 30)
         label.zPosition = 60
+        label.setScale(0.5)
         addChild(label)
 
         label.run(SKAction.sequence([
+            // Scale bounce on appear
+            SKAction.scale(to: 1.3, duration: 0.1),
+            SKAction.scale(to: 1.0, duration: 0.1),
+            // Float up and fade
             SKAction.group([
                 SKAction.moveBy(x: 0, y: 40, duration: 0.8),
                 SKAction.fadeOut(withDuration: 0.8)
@@ -379,11 +498,24 @@ public final class CombatScene: SKScene {
         ]))
     }
 
+    // MARK: - Particles
+
+    private func spawnImpactParticles(at position: CGPoint, isCritical: Bool) {
+        let emitter = isCritical ? CombatParticles.criticalHit() : CombatParticles.attackImpact()
+        emitter.position = position
+        addChild(emitter)
+        // Auto-remove after particles finish
+        emitter.run(SKAction.sequence([
+            SKAction.wait(forDuration: 1.0),
+            SKAction.removeFromParent()
+        ]))
+    }
+
     private func handleCombatEnd() {
         guard let outcome = simulation.outcome else { return }
 
         let text = outcome == .victory ? "Victory!" : "Defeat"
-        let color: SKColor = outcome == .victory ? .green : .red
+        let color: SKColor = outcome == .victory ? CombatSceneTheme.success : CombatSceneTheme.health
 
         let endLabel = SKLabelNode(fontNamed: "AvenirNext-Heavy")
         endLabel.text = text

@@ -22,21 +22,21 @@ public final class FateCardNode: SKNode {
 
         // Card back (dark with "?" symbol)
         backNode = SKShapeNode(rectOf: size, cornerRadius: corner)
-        backNode.fillColor = SKColor(white: 0.15, alpha: 1)
-        backNode.strokeColor = SKColor(white: 0.4, alpha: 1)
+        backNode.fillColor = CombatSceneTheme.cardBack
+        backNode.strokeColor = CombatSceneTheme.muted
         backNode.lineWidth = 2
 
         let questionMark = SKLabelNode(fontNamed: "AvenirNext-Bold")
         questionMark.text = "?"
         questionMark.fontSize = 28
-        questionMark.fontColor = SKColor(white: 0.5, alpha: 1)
+        questionMark.fontColor = CombatSceneTheme.muted
         questionMark.verticalAlignmentMode = .center
         questionMark.horizontalAlignmentMode = .center
         backNode.addChild(questionMark)
 
         // Card face (colored by value, hidden initially)
         faceNode = SKShapeNode(rectOf: size, cornerRadius: corner)
-        faceNode.strokeColor = SKColor(white: 0.6, alpha: 1)
+        faceNode.strokeColor = CombatSceneTheme.muted
         faceNode.lineWidth = 2
         faceNode.xScale = 0 // hidden via scale
 
@@ -62,10 +62,10 @@ public final class FateCardNode: SKNode {
 
     /// Returns the fill color for a given fate value.
     public static func color(for value: Int, isCritical: Bool) -> SKColor {
-        if isCritical { return SKColor(red: 1.0, green: 0.84, blue: 0.0, alpha: 1) } // gold
-        if value > 0 { return SKColor(red: 0.2, green: 0.8, blue: 0.3, alpha: 1) }   // green
-        if value < 0 { return SKColor(red: 0.9, green: 0.25, blue: 0.2, alpha: 1) }   // red
-        return SKColor(red: 0.85, green: 0.75, blue: 0.3, alpha: 1)                    // yellow (neutral)
+        if isCritical { return CombatSceneTheme.highlight }
+        if value > 0 { return CombatSceneTheme.success }
+        if value < 0 { return CombatSceneTheme.health }
+        return CombatSceneTheme.faith
     }
 
     /// Flip-reveal the card with the fate value.

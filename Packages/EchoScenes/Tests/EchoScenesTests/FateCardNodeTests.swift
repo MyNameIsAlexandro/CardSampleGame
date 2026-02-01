@@ -34,9 +34,10 @@ struct FateCardNodeTests {
         let color = FateCardNode.color(for: 1, isCritical: true)
         var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
         color.getRed(&r, green: &g, blue: &b, alpha: &a)
-        #expect(r > 0.9)
-        #expect(g > 0.7)
-        #expect(b < 0.2)
+        // Theme highlight: warm gold (0.90, 0.75, 0.30)
+        #expect(r > 0.8)
+        #expect(g > 0.6)
+        #expect(b < 0.4)
     }
 
     @Test("Reveal configures face node color and label")
