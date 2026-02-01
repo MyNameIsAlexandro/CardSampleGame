@@ -945,7 +945,14 @@ public final class CombatScene: SKScene {
             if dmg > 0 { parts.append("\(dmg) dmg") }
             if heal > 0 { parts.append("+\(heal) hp") }
             if drawn > 0 { parts.append("+\(drawn) cards") }
-            if let s = status { parts.append(s) }
+            if let s = status {
+                if s == "resonance" {
+                    let res = Int(simulation.resonance)
+                    parts.append("resonance → \(res)")
+                } else {
+                    parts.append(s)
+                }
+            }
             addLogEntry("Card: \(parts.joined(separator: ", "))")
         case .insufficientEnergy:
             addLogEntry("Not enough energy!")
