@@ -138,6 +138,12 @@ public final class CombatSimulation {
         return s.total(for: stat)
     }
 
+    public var enemyIntent: EnemyIntent? {
+        guard let enemy = enemyEntity else { return nil }
+        let intent: IntentComponent = nexus.get(unsafe: enemy.identifier)
+        return intent.intent
+    }
+
     // MARK: - Actions
 
     /// Begin combat: draw hand, generate enemy intent, set phase to playerTurn.

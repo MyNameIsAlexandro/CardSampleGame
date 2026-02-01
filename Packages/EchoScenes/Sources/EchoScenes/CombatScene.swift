@@ -29,6 +29,7 @@ public final class CombatScene: SKScene {
     private var deckCountLabel: SKLabelNode!
     private var discardCountLabel: SKLabelNode!
     private var energyLabel: SKLabelNode!
+    private var intentNode: SKNode?
     private var tooltipNode: SKNode?
     private var longPressTimer: Timer?
     private var touchStartLocation: CGPoint?
@@ -322,6 +323,68 @@ public final class CombatScene: SKScene {
         deckCountLabel.text = "🂠 \(simulation.drawPileCount)"
         discardCountLabel.text = "♻ \(simulation.discardPileCount)"
         energyLabel.text = "⚡ \(simulation.energy)/\(simulation.maxEnergy)"
+
+        updateIntentDisplay()
+    }
+
+    private func updateIntentDisplay() {
+        intentNode?.removeFromParent()
+        intentNode = nil
+
+        guard let intent = simulation.enemyIntent, !simulation.isOver else { return }
+
+        let node = SKNode()
+        node.position = CGPoint(x: enemyPosition.x, y: enemyPosition.y + 55)
+        node.zPosition = 30
+
+        let icon: String
+        let color: SKColor
+        switch intent.type {
+        case .attack:
+            icon = "⚔ \(intent.value)"
+            color = CombatSceneTheme.health
+        case .heal:
+            icon = "♥ \(intent.value)"
+            color = CombatSceneTheme.success
+        case .ritual:
+            icon = "✦ Ritual"
+            color = CombatSceneTheme.spirit
+        case .block, .defend:
+            icon = "🛡 Defend"
+            color = CombatSceneTheme.muted
+        case .buff:
+            icon = "↑ Buff"
+            color = CombatSceneTheme.faith
+        case .debuff:
+            icon = "↓ Debuff"
+            color = CombatSceneTheme.spirit
+        case .prepare:
+            icon = "… Prepare"
+            color = CombatSceneTheme.muted
+        default:
+            icon = "? \(intent.type.rawValue)"
+            color = CombatSceneTheme.muted
+        }
+
+        let bg = SKShapeNode(rectOf: CGSize(width: 70, height: 22), cornerRadius: 6)
+        bg.fillColor = color.withAlphaComponent(0.25)
+        bg.strokeColor = color.withAlphaComponent(0.6)
+        bg.lineWidth = 1
+        node.addChild(bg)
+
+        let label = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+        label.text = icon
+        label.fontSize = 11
+        label.fontColor = color
+        label.verticalAlignmentMode = .center
+        node.addChild(label)
+
+        addChild(node)
+        intentNode = node
+
+        // Pulse animation
+        node.alpha = 0
+        node.run(SKAction.fadeIn(withDuration: 0.3))
     }
 
     private func refreshHand() {
