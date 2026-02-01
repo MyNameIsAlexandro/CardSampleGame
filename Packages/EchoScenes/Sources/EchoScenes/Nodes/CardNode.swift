@@ -13,6 +13,7 @@ public final class CardNode: SKNode {
     private let powerLabel: SKLabelNode
     private let typeLabel: SKLabelNode
     private let costLabel: SKLabelNode
+    private let keywordLabel: SKLabelNode?
 
     public init(card: Card) {
         self.card = card
@@ -57,6 +58,23 @@ public final class CardNode: SKNode {
         costLabel.position = CGPoint(x: -size.width / 2 + 10, y: size.height / 2 - 14)
         costLabel.verticalAlignmentMode = .center
 
+        // Keywords (bottom, above type)
+        var keywords: [String] = []
+        if card.exhaust { keywords.append("Exhaust") }
+        keywords.append(contentsOf: card.traits.prefix(2))
+
+        if !keywords.isEmpty {
+            let lbl = SKLabelNode(fontNamed: "AvenirNext-Medium")
+            lbl.text = keywords.joined(separator: " · ")
+            lbl.fontSize = 7
+            lbl.fontColor = CombatSceneTheme.spirit
+            lbl.position = CGPoint(x: 0, y: -size.height / 2 + 22)
+            lbl.verticalAlignmentMode = .center
+            keywordLabel = lbl
+        } else {
+            keywordLabel = nil
+        }
+
         super.init()
         name = "card_\(card.id)"
 
@@ -65,6 +83,7 @@ public final class CardNode: SKNode {
         addChild(powerLabel)
         addChild(typeLabel)
         addChild(costLabel)
+        if let kw = keywordLabel { addChild(kw) }
     }
 
     @available(*, unavailable)

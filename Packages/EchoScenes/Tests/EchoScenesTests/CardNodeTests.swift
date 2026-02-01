@@ -65,4 +65,20 @@ struct CardNodeTests {
         node.setSelected(false)
         #expect(bg.strokeColor == CombatSceneTheme.muted)
     }
+
+    @Test("Exhaust card shows keyword label")
+    func testExhaustKeyword() {
+        let card = Card(
+            id: "ex", name: "Sacrifice", type: .spell,
+            description: "Once",
+            abilities: [CardAbility(id: "a1", name: "Hit", description: "Hit",
+                                   effect: .damage(amount: 1, type: .physical))],
+            exhaust: true
+        )
+        let node = CardNode(card: card)
+        // background + name + power + type + cost + keyword = 6
+        #expect(node.children.count == 6)
+        let labels = node.children.compactMap { $0 as? SKLabelNode }
+        #expect(labels.contains(where: { $0.text == "Exhaust" }))
+    }
 }
