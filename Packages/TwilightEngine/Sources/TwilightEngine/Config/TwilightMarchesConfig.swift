@@ -18,13 +18,13 @@ public enum TwilightResource: String, CaseIterable {
 
     public var id: String { rawValue }
 
-    /// Default starting values
+    /// Default starting values (synced with balance.json resources)
     public var defaultValue: Int {
         switch self {
-        case .health: return 10
-        case .maxHealth: return 10
-        case .faith: return 3
-        case .maxFaith: return 10
+        case .health: return 20
+        case .maxHealth: return 30
+        case .faith: return 8
+        case .maxFaith: return 20
         case .balance: return 50
         }
     }
@@ -47,16 +47,16 @@ public func twilightInitialResources() -> [String: Int] {
 /// SINGLE SOURCE OF TRUTH for tension escalation formula (Audit v1.1 Issue #6)
 public struct TwilightPressureRules: PressureRuleSet {
     public let maxPressure: Int = 100
-    public let initialPressure: Int = 30
+    public let initialPressure: Int = 15
     public let escalationInterval: Int = 3  // Every 3 days
     public let escalationAmount: Int = 3    // Base +3 tension (increased for balance)
 
     /// Thresholds and their effects
     public var thresholds: [Int: [WorldEffect]] {
         return [
-            50: [.regionDegradation(probability: 0.3)],
-            75: [.regionDegradation(probability: 0.5), .globalEvent(eventId: "world_shift_warning")],
-            90: [.regionDegradation(probability: 0.7), .anchorWeakening(amount: 10)]
+            50: [.regionDegradation(probability: 0.15)],
+            75: [.regionDegradation(probability: 0.3), .globalEvent(eventId: "world_shift_warning")],
+            90: [.regionDegradation(probability: 0.5), .anchorWeakening(amount: 10)]
         ]
     }
 

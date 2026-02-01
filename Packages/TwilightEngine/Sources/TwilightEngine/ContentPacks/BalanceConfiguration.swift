@@ -138,10 +138,10 @@ public struct PressureBalanceConfig: Codable, Sendable {
 
     /// Default pressure configuration.
     public static let `default` = PressureBalanceConfig(
-        startingPressure: 0,
+        startingPressure: 15,
         minPressure: 0,
         maxPressure: 100,
-        pressurePerTurn: 5,
+        pressurePerTurn: 3,
         tensionTickInterval: 3,
         escalationInterval: nil,
         thresholds: .default,
@@ -162,8 +162,8 @@ public struct PressureThresholds: Codable, Sendable {
 
     /// Default thresholds.
     public static let `default` = PressureThresholds(
-        warning: 30,
-        critical: 60,
+        warning: 50,
+        critical: 75,
         catastrophic: 100
     )
 }
@@ -184,9 +184,9 @@ public struct DegradationConfig: Codable, Sendable {
 
     /// Default degradation configuration.
     public static let `default` = DegradationConfig(
-        warningChance: 0.1,
-        criticalChance: 0.25,
-        catastrophicChance: nil,
+        warningChance: 0.15,
+        criticalChance: 0.3,
+        catastrophicChance: 0.5,
         anchorDecayChance: 0.05
     )
 }
@@ -281,9 +281,9 @@ public struct TimeBalanceConfig: Codable, Sendable {
     public static let `default` = TimeBalanceConfig(
         startingTime: 8,
         maxDays: nil,
-        travelCost: 2,
+        travelCost: 1,
         exploreCost: 1,
-        restCost: 4,
+        restCost: 1,
         strengthenAnchorCost: 1,
         instantCost: 0
     )
@@ -347,8 +347,8 @@ public struct AnchorBalanceConfig: Codable, Sendable {
     /// Default anchor configuration.
     public static let `default` = AnchorBalanceConfig(
         maxIntegrity: 100,
-        strengthenAmount: 15,
-        strengthenCost: 5,
+        strengthenAmount: 20,
+        strengthenCost: 3,
         stableThreshold: 70,
         breachThreshold: 0,
         decayPerTurn: 5

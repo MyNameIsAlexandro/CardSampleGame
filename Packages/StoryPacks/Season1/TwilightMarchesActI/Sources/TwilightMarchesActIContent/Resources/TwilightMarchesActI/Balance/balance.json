@@ -1,17 +1,18 @@
 {
   "resources": {
-    "starting_health": 10,
-    "max_health": 10,
-    "starting_faith": 3,
-    "max_faith": 10,
+    "starting_health": 20,
+    "max_health": 30,
+    "starting_faith": 8,
+    "max_faith": 20,
     "starting_supplies": 5,
     "max_supplies": 10,
     "starting_gold": 0,
     "max_gold": 100,
+    "rest_heal_amount": 3,
     "starting_balance": 50
   },
   "pressure": {
-    "starting_pressure": 30,
+    "starting_pressure": 15,
     "min_pressure": 0,
     "max_pressure": 100,
     "pressure_per_turn": 3,
@@ -22,9 +23,9 @@
       "catastrophic": 100
     },
     "degradation": {
-      "warning_chance": 0.3,
-      "critical_chance": 0.5,
-      "catastrophic_chance": 0.7,
+      "warning_chance": 0.15,
+      "critical_chance": 0.3,
+      "catastrophic_chance": 0.5,
       "anchor_decay_chance": 0.05
     }
   },
@@ -35,7 +36,11 @@
     "dice_max": 6,
     "actions_per_turn": 3,
     "cards_drawn_per_turn": 5,
-    "max_hand_size": 7
+    "max_hand_size": 7,
+    "escalation_resonance_shift": -5.0,
+    "escalation_surprise_bonus": 3,
+    "de_escalation_rage_shield": 3,
+    "match_multiplier": 1.5
   },
   "time": {
     "starting_time": 8,
@@ -64,9 +69,9 @@
   "anchor": {
     "max_integrity": 100,
     "strengthen_amount": 20,
-    "strengthen_cost": 5,
+    "strengthen_cost": 3,
     "stable_threshold": 70,
     "breach_threshold": 0,
-    "decay_per_turn": 5
+    "decay_per_turn": 3
   }
 }
