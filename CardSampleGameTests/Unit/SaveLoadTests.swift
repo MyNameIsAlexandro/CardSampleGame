@@ -49,8 +49,8 @@ final class SaveLoadTests: XCTestCase {
     }
 
     func testSaveGamePreservesHealth() {
-        let initialHealth = engine.playerHealth
-        let initialMaxHealth = engine.playerMaxHealth
+        let initialHealth = engine.player.health
+        let initialMaxHealth = engine.player.maxHealth
 
         saveManager.saveGame(to: 100, engine: engine)
         let save = saveManager.getSave(from: 100)
@@ -60,8 +60,8 @@ final class SaveLoadTests: XCTestCase {
     }
 
     func testSaveGamePreservesFaith() {
-        let initialFaith = engine.playerFaith
-        let initialMaxFaith = engine.playerMaxFaith
+        let initialFaith = engine.player.faith
+        let initialMaxFaith = engine.player.maxFaith
 
         saveManager.saveGame(to: 100, engine: engine)
         let save = saveManager.getSave(from: 100)
@@ -71,7 +71,7 @@ final class SaveLoadTests: XCTestCase {
     }
 
     func testSaveGamePreservesBalance() {
-        let initialBalance = engine.playerBalance
+        let initialBalance = engine.player.balance
 
         saveManager.saveGame(to: 100, engine: engine)
         let save = saveManager.getSave(from: 100)
@@ -94,7 +94,7 @@ final class SaveLoadTests: XCTestCase {
     // MARK: - Deck Preservation (CRITICAL)
 
     func testSaveGamePreservesDeck() {
-        let deckCount = engine.playerDeck.count
+        let deckCount = engine.deck.playerDeck.count
 
         saveManager.saveGame(to: 100, engine: engine)
         let save = saveManager.getSave(from: 100)
@@ -103,7 +103,7 @@ final class SaveLoadTests: XCTestCase {
     }
 
     func testSaveGamePreservesHand() {
-        let handCount = engine.playerHand.count
+        let handCount = engine.deck.playerHand.count
 
         saveManager.saveGame(to: 100, engine: engine)
         let save = saveManager.getSave(from: 100)
@@ -149,7 +149,7 @@ final class SaveLoadTests: XCTestCase {
 
     func testLoadGameRestoresHealth() {
         saveManager.saveGame(to: 100, engine: engine)
-        let savedHealth = engine.playerHealth
+        let savedHealth = engine.player.health
 
         let newEngine = TwilightGameEngine()
         TestContentLoader.loadContentPacksIfNeeded()
@@ -160,7 +160,7 @@ final class SaveLoadTests: XCTestCase {
 
     func testLoadGameRestoresFaith() {
         saveManager.saveGame(to: 100, engine: engine)
-        let savedFaith = engine.playerFaith
+        let savedFaith = engine.player.faith
 
         let newEngine = TwilightGameEngine()
         TestContentLoader.loadContentPacksIfNeeded()
@@ -171,7 +171,7 @@ final class SaveLoadTests: XCTestCase {
 
     func testLoadGameRestoresBalance() {
         saveManager.saveGame(to: 100, engine: engine)
-        let savedBalance = engine.playerBalance
+        let savedBalance = engine.player.balance
 
         let newEngine = TwilightGameEngine()
         TestContentLoader.loadContentPacksIfNeeded()
@@ -270,12 +270,12 @@ final class SaveLoadTests: XCTestCase {
         XCTAssertTrue(saveManager.loadGame(from: 100, engine: newEngine))
 
         // Verify all fields match
-        XCTAssertEqual(newEngine.playerName, engine.playerName)
-        XCTAssertEqual(newEngine.playerHealth, engine.playerHealth)
-        XCTAssertEqual(newEngine.playerMaxHealth, engine.playerMaxHealth)
-        XCTAssertEqual(newEngine.playerFaith, engine.playerFaith)
-        XCTAssertEqual(newEngine.playerMaxFaith, engine.playerMaxFaith)
-        XCTAssertEqual(newEngine.playerBalance, engine.playerBalance)
+        XCTAssertEqual(newEngine.playerName, engine.player.name)
+        XCTAssertEqual(newEngine.playerHealth, engine.player.health)
+        XCTAssertEqual(newEngine.playerMaxHealth, engine.player.maxHealth)
+        XCTAssertEqual(newEngine.playerFaith, engine.player.faith)
+        XCTAssertEqual(newEngine.playerMaxFaith, engine.player.maxFaith)
+        XCTAssertEqual(newEngine.playerBalance, engine.player.balance)
         XCTAssertEqual(newEngine.currentDay, engine.currentDay)
         XCTAssertEqual(newEngine.worldTension, engine.worldTension)
         XCTAssertEqual(newEngine.mainQuestStage, engine.mainQuestStage)

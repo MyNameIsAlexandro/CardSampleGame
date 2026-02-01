@@ -34,7 +34,7 @@ final class HeroPanelTests: XCTestCase {
         engine.setHeroId(hero.id)
 
         // Then: Hero ID should be set
-        XCTAssertEqual(engine.heroId, hero.id)
+        XCTAssertEqual(engine.player.heroId, hero.id)
     }
 
     func testAllHeroesHaveValidData() {
@@ -61,11 +61,11 @@ final class HeroPanelTests: XCTestCase {
         engine.setPlayerName("Тестовый Герой")
 
         // Then: Stats should be readable from engine
-        XCTAssertEqual(engine.playerName, "Тестовый Герой")
-        XCTAssertEqual(engine.playerHealth, 15)
-        XCTAssertEqual(engine.playerMaxHealth, 20)
-        XCTAssertEqual(engine.playerFaith, 8)
-        XCTAssertEqual(engine.playerBalance, 65)
+        XCTAssertEqual(engine.player.name, "Тестовый Герой")
+        XCTAssertEqual(engine.player.health, 15)
+        XCTAssertEqual(engine.player.maxHealth, 20)
+        XCTAssertEqual(engine.player.faith, 8)
+        XCTAssertEqual(engine.player.balance, 65)
     }
 
     // MARK: - Balance Display Tests
@@ -75,7 +75,7 @@ final class HeroPanelTests: XCTestCase {
         engine.setPlayerBalance(80)
 
         // Then: Balance should indicate Light path
-        XCTAssertGreaterThanOrEqual(engine.playerBalance, 70)
+        XCTAssertGreaterThanOrEqual(engine.player.balance, 70)
     }
 
     func testBalanceDescriptionForDarkPath() {
@@ -83,7 +83,7 @@ final class HeroPanelTests: XCTestCase {
         engine.setPlayerBalance(20)
 
         // Then: Balance should indicate Dark path
-        XCTAssertLessThanOrEqual(engine.playerBalance, 30)
+        XCTAssertLessThanOrEqual(engine.player.balance, 30)
     }
 
     func testBalanceDescriptionForNeutral() {
@@ -91,7 +91,7 @@ final class HeroPanelTests: XCTestCase {
         engine.setPlayerBalance(50)
 
         // Then: Balance should be in neutral range
-        let balance = engine.playerBalance
+        let balance = engine.player.balance
         XCTAssertGreaterThan(balance, 30)
         XCTAssertLessThan(balance, 70)
     }

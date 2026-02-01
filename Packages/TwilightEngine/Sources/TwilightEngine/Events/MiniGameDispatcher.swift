@@ -184,12 +184,12 @@ public struct MiniGameContext {
     /// - Returns: MiniGameContext with values from engine
     public static func from(engine: TwilightGameEngine) -> MiniGameContext {
         MiniGameContext(
-            playerHealth: engine.playerHealth,
-            playerMaxHealth: engine.playerMaxHealth,
-            playerStrength: engine.playerStrength,
-            playerFaith: engine.playerFaith,
-            playerBalance: engine.playerBalance,
-            playerResources: ["faith": engine.playerFaith, "health": engine.playerHealth],
+            playerHealth: engine.player.health,
+            playerMaxHealth: engine.player.maxHealth,
+            playerStrength: engine.player.strength,
+            playerFaith: engine.player.faith,
+            playerBalance: engine.player.balance,
+            playerResources: ["faith": engine.player.faith, "health": engine.player.health],
             worldTension: engine.worldTension,
             currentFlags: engine.publishedWorldFlags
         )

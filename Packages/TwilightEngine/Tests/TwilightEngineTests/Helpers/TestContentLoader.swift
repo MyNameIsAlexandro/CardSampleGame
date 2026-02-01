@@ -5,12 +5,18 @@ import Foundation
 /// Загружает паки из директории проекта (CoreHeroes + TwilightMarchesActI)
 enum TestContentLoader {
 
+    /// Lock to prevent concurrent content loading from parallel test suites
+    private static let lock = NSLock()
+
     /// Флаг, показывающий загружены ли паки
     private(set) static var isLoaded = false
 
     /// Загрузить ContentPacks из исходной директории
     /// Безопасно вызывать многократно - загрузка произойдёт только один раз
     static func loadContentPacksIfNeeded() {
+        lock.lock()
+        defer { lock.unlock() }
+
         let registry = ContentRegistry.shared
 
         // Always check actual registry state, not just isLoaded flag.

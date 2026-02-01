@@ -312,7 +312,7 @@ public struct CombatCalculator {
         var totalDice = 1 + bonusDice
 
         // Hero ability: bonus dice (e.g., Tracker on first attack)
-        let heroBonusDice = engine.getHeroBonusDice(isFirstAttack: isFirstAttack)
+        let heroBonusDice = engine.player.getHeroBonusDice(isFirstAttack: isFirstAttack)
         if heroBonusDice > 0 {
             totalDice += heroBonusDice
             modifiers.append(CombatModifier(
@@ -329,7 +329,7 @@ public struct CombatCalculator {
 
         // Create attack roll
         let attackRoll = AttackRoll(
-            baseStrength: engine.playerStrength,
+            baseStrength: engine.player.strength,
             diceRolls: diceRolls,
             bonusDice: bonusDice,
             bonusDamage: bonusDamage,
@@ -344,7 +344,7 @@ public struct CombatCalculator {
             let baseDamage = max(1, attackRoll.total - monsterDefense + 2)
 
             // Curse damage modifiers
-            if engine.hasCurse(.weakness) {
+            if engine.player.hasCurse(.weakness) {
                 damageModifiers.append(CombatModifier(
                     source: .curse,
                     value: -1,
@@ -352,7 +352,7 @@ public struct CombatCalculator {
                 ))
             }
 
-            if engine.hasCurse(.shadowOfNav) {
+            if engine.player.hasCurse(.shadowOfNav) {
                 damageModifiers.append(CombatModifier(
                     source: .curse,
                     value: +3,
@@ -361,7 +361,7 @@ public struct CombatCalculator {
             }
 
             // Hero ability damage bonus
-            let heroDamageBonus = engine.getHeroDamageBonus(targetFullHP: isTargetFullHP)
+            let heroDamageBonus = engine.player.getHeroDamageBonus(targetFullHP: isTargetFullHP)
             if heroDamageBonus > 0 {
                 damageModifiers.append(CombatModifier(
                     source: .heroAbility,
@@ -633,16 +633,16 @@ public struct CombatPlayerContext {
     /// Create from TwilightGameEngine (Engine-First)
     public static func from(engine: TwilightGameEngine) -> CombatPlayerContext {
         CombatPlayerContext(
-            health: engine.playerHealth,
-            maxHealth: engine.playerMaxHealth,
-            faith: engine.playerFaith,
-            balance: engine.playerBalance,
-            strength: engine.playerStrength,
-            wisdom: engine.playerWisdom,
-            intelligence: engine.playerIntelligence,
-            activeCurses: engine.playerActiveCurses.map { $0.type },
-            heroBonusDice: engine.getHeroBonusDice(isFirstAttack: true),
-            heroDamageBonus: engine.getHeroDamageBonus(targetFullHP: false)
+            health: engine.player.health,
+            maxHealth: engine.player.maxHealth,
+            faith: engine.player.faith,
+            balance: engine.player.balance,
+            strength: engine.player.strength,
+            wisdom: engine.player.wisdom,
+            intelligence: engine.player.intelligence,
+            activeCurses: engine.player.activeCurses.map { $0.type },
+            heroBonusDice: engine.player.getHeroBonusDice(isFirstAttack: true),
+            heroDamageBonus: engine.player.getHeroDamageBonus(targetFullHP: false)
         )
     }
 }

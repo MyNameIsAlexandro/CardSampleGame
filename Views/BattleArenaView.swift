@@ -140,7 +140,7 @@ struct BattleArenaView: View {
         )
 
         // Setup enemy
-        engine.setupCombatEnemy(enemy.toCard())
+        engine.combat.setupCombatEnemy(enemy.toCard())
 
         lastOutcome = nil
         showingCombat = true

@@ -7,16 +7,16 @@ extension TwilightGameEngine {
 
     /// Build EncounterContext from current engine state for the active combat enemy
     func makeEncounterContext() -> EncounterContext? {
-        guard let state = combatState else { return nil }
+        guard let state = combat.combatState else { return nil }
         let enemy = state.enemy
 
         let encounterHero = EncounterHero(
-            id: heroId ?? "hero",
-            hp: playerHealth,
-            maxHp: playerMaxHealth,
-            strength: playerStrength,
+            id: player.heroId ?? "hero",
+            hp: player.health,
+            maxHp: player.maxHealth,
+            strength: player.strength,
             armor: 0, // No equipment system yet; armor comes from cards in combat
-            wisdom: playerWisdom,
+            wisdom: player.wisdom,
             willDefense: 0
         )
 
@@ -55,7 +55,7 @@ extension TwilightGameEngine {
         }
 
         // Resolve hero cards from player's current hand/deck/discard (full pool)
-        let heroCards = playerHand + playerDeck + playerDiscard
+        let heroCards = deck.playerHand + deck.playerDeck + deck.playerDiscard
 
         // Assign unique instance IDs to duplicate cards
         var idCounts: [String: Int] = [:]
@@ -69,9 +69,9 @@ extension TwilightGameEngine {
         }
 
         #if DEBUG
-        print("[EncounterBridge] heroCards=\(heroCards.count) (hand=\(playerHand.count), deck=\(playerDeck.count), discard=\(playerDiscard.count))")
+        print("[EncounterBridge] heroCards=\(heroCards.count) (hand=\(deck.playerHand.count), deck=\(deck.playerDeck.count), discard=\(deck.playerDiscard.count))")
         print("[EncounterBridge] fateDeck drawPile=\(fateDeckSnapshot.drawPile.count), discardPile=\(fateDeckSnapshot.discardPile.count)")
-        print("[EncounterBridge] heroFaith=\(playerFaith)")
+        print("[EncounterBridge] heroFaith=\(player.faith)")
         #endif
 
         return EncounterContext(
@@ -85,7 +85,7 @@ extension TwilightGameEngine {
             balanceConfig: ContentRegistry.shared.getBalanceConfig()?.combat,
             behaviors: buildBehaviorMap(),
             heroCards: uniqueHeroCards,
-            heroFaith: playerFaith
+            heroFaith: player.faith
         )
     }
 
@@ -100,8 +100,8 @@ extension TwilightGameEngine {
     /// Apply encounter result back to engine state
     func applyEncounterResult(_ result: EncounterResult) {
         // Apply HP delta
-        let newHP = max(0, playerHealth + result.transaction.hpDelta)
-        setPlayerHealth(newHP)
+        let newHP = max(0, player.health + result.transaction.hpDelta)
+        player.setHealth(newHP)
 
         // Apply resonance delta
         if result.transaction.resonanceDelta != 0 {
@@ -122,13 +122,13 @@ extension TwilightGameEngine {
 
         // Apply faith reward
         if result.transaction.faithDelta > 0 {
-            applyFaithDelta(result.transaction.faithDelta)
+            player.applyFaithDelta(result.transaction.faithDelta)
         }
 
         // Apply loot: add cards to player's deck
         for cardId in result.transaction.lootCardIds {
             if let card = CardFactory.shared.getCard(id: cardId) {
-                addToDeck(card)
+                deck.addToDeck(card)
             }
         }
 
@@ -138,6 +138,6 @@ extension TwilightGameEngine {
         }
 
         // Exit combat mode so next battle can start fresh
-        endCombat()
+        combat.endCombat()
     }
 }

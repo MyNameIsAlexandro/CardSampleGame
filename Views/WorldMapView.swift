@@ -877,7 +877,7 @@ struct EngineRegionDetailView: View {
                             title: L10n.actionAnchorCost.localized(with: 5, 20),
                             icon: "hammer.fill",
                             color: AppColors.dark,
-                            enabled: engine.canAffordFaith(5)
+                            enabled: engine.player.canAffordFaith(5)
                         ) {
                             selectedAction = .strengthenAnchor
                             showingActionConfirmation = true

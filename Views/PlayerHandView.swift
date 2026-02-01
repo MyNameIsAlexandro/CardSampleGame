@@ -39,7 +39,7 @@ struct PlayerHandView: View {
 
             // Compact deck info
             HStack(spacing: Spacing.lg) {
-                Text(engine.playerName)
+                Text(engine.player.name)
                     .font(.caption)
                     .fontWeight(.bold)
 
@@ -49,7 +49,7 @@ struct PlayerHandView: View {
                 HStack(spacing: Spacing.xxs) {
                     Image(systemName: "rectangle.stack.fill")
                         .font(.caption2)
-                    Text("\(engine.playerDeck.count)")
+                    Text("\(engine.deck.playerDeck.count)")
                         .font(.caption2)
                 }
                 .foregroundColor(AppColors.primary)
@@ -58,7 +58,7 @@ struct PlayerHandView: View {
                 HStack(spacing: Spacing.xxs) {
                     Image(systemName: "trash.fill")
                         .font(.caption2)
-                    Text("\(engine.playerDiscard.count)")
+                    Text("\(engine.deck.playerDiscard.count)")
                         .font(.caption2)
                 }
                 .foregroundColor(AppColors.secondary)
@@ -68,7 +68,7 @@ struct PlayerHandView: View {
             .background(AppColors.cardBackground)
 
             // Hand of cards
-            if engine.playerHand.isEmpty {
+            if engine.deck.playerHand.isEmpty {
                 Text(L10n.noCardsInHand.localized)
                     .font(.caption)
                     .foregroundColor(AppColors.muted)
@@ -76,7 +76,7 @@ struct PlayerHandView: View {
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: Spacing.sm) {
-                        ForEach(engine.playerHand) { card in
+                        ForEach(engine.deck.playerHand) { card in
                             HandCardView(
                                 card: card,
                                 isSelected: selectedCard?.id == card.id,

@@ -207,14 +207,14 @@ final class GameplayFlowTests: XCTestCase {
         )
 
         // When: Player has enough faith
-        let hasFaith = engine.playerFaith >= 5
+        let hasFaith = engine.player.faith >= 5
 
         // Then: Requirement check depends on faith
         XCTAssertNotNil(choice.requirements?.minimumFaith, "Choice should have faith requirement")
         XCTAssertEqual(choice.requirements?.minimumFaith, 5, "Faith requirement should be 5")
 
         // Document current state
-        print("Player faith: \(engine.playerFaith), Required: 5, Can meet: \(hasFaith)")
+        print("Player faith: \(engine.player.faith), Required: 5, Can meet: \(hasFaith)")
     }
 
     func testChoiceWithHealthRequirement() {
@@ -227,7 +227,7 @@ final class GameplayFlowTests: XCTestCase {
         )
 
         // When: Player has enough health
-        let hasHealth = engine.playerHealth >= 3
+        let hasHealth = engine.player.health >= 3
 
         // Then: Requirement check depends on health
         XCTAssertNotNil(choice.requirements?.minimumHealth, "Choice should have health requirement")
@@ -538,7 +538,7 @@ final class GameplayFlowTests: XCTestCase {
 
     func testCombatResourceFaith() {
         // Given: Engine with player
-        let initialFaith = engine.playerFaith
+        let initialFaith = engine.player.faith
 
         // Then: Faith should be available for card costs
         XCTAssertGreaterThanOrEqual(initialFaith, 0, "Player should have non-negative faith")

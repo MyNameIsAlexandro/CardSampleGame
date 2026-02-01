@@ -188,11 +188,11 @@ final class AuditGateTests: XCTestCase {
         let engine = TwilightGameEngine()
 
         // Engine should expose player state
-        XCTAssertGreaterThan(engine.playerHealth, 0, "Engine должен предоставлять здоровье игрока")
-        XCTAssertGreaterThan(engine.playerFaith, 0, "Engine должен предоставлять веру игрока")
+        XCTAssertGreaterThan(engine.player.health, 0, "Engine должен предоставлять здоровье игрока")
+        XCTAssertGreaterThan(engine.player.faith, 0, "Engine должен предоставлять веру игрока")
 
         // Engine should expose world state
-        XCTAssertFalse(engine.playerName.isEmpty, "Engine должен предоставлять имя игрока")
+        XCTAssertFalse(engine.player.name.isEmpty, "Engine должен предоставлять имя игрока")
 
         // Engine should handle actions
         let result = engine.performAction(.rest)
@@ -209,14 +209,14 @@ final class AuditGateTests: XCTestCase {
         let engine = TwilightGameEngine()
 
         // Basic contracts: state changes are observable
-        let initialHealth = engine.playerHealth
+        let initialHealth = engine.player.health
         XCTAssertGreaterThan(initialHealth, 0, "Initial health должен быть положительным")
 
         // Perform action that should change state
         _ = engine.performAction(.rest)
 
         // State should be accessible (may or may not change depending on game rules)
-        XCTAssertGreaterThanOrEqual(engine.playerHealth, 0, "Health должен быть доступен после действия")
+        XCTAssertGreaterThanOrEqual(engine.player.health, 0, "Health должен быть доступен после действия")
 
         // The test verifies we're using production engine, not a mock
         // Production engine has full game logic
@@ -1132,13 +1132,13 @@ extension AuditGateTests {
         engine.initializeNewGame(playerName: "Test", heroId: nil, startingDeck: [])
 
         // Verify player starts alive
-        XCTAssertGreaterThan(engine.playerHealth, 0, "Player should start with health > 0")
+        XCTAssertGreaterThan(engine.player.health, 0, "Player should start with health > 0")
 
         // Set health to 0 (simulating fatal damage)
         engine.setPlayerHealth(0)
 
         // Verify player health is 0 (not negative)
-        XCTAssertEqual(engine.playerHealth, 0, "Player health should be exactly 0, not negative")
+        XCTAssertEqual(engine.player.health, 0, "Player health should be exactly 0, not negative")
     }
 
     /// Gate test: Player health cannot go below 0
@@ -1151,7 +1151,7 @@ extension AuditGateTests {
         engine.setPlayerHealth(0)
 
         // Health should be 0, not negative
-        XCTAssertGreaterThanOrEqual(engine.playerHealth, 0, "Health cannot be negative")
+        XCTAssertGreaterThanOrEqual(engine.player.health, 0, "Health cannot be negative")
     }
 
     /// Gate test: Healing cannot exceed max health
@@ -1160,13 +1160,13 @@ extension AuditGateTests {
         let engine = TwilightGameEngine()
         engine.initializeNewGame(playerName: "Test", heroId: nil, startingDeck: [])
 
-        let maxHealth = engine.playerMaxHealth
+        let maxHealth = engine.player.maxHealth
 
         // Set health to max (simulating heal beyond max)
         engine.setPlayerHealth(maxHealth + 100)
 
         // Health should not exceed max (setPlayerHealth clamps)
-        XCTAssertLessThanOrEqual(engine.playerHealth, maxHealth, "Health cannot exceed max")
+        XCTAssertLessThanOrEqual(engine.player.health, maxHealth, "Health cannot exceed max")
     }
 
     /// Gate test: Faith cannot go below 0 or exceed max
@@ -1175,15 +1175,15 @@ extension AuditGateTests {
         let engine = TwilightGameEngine()
         engine.initializeNewGame(playerName: "Test", heroId: nil, startingDeck: [])
 
-        let maxFaith = engine.playerMaxFaith
+        let maxFaith = engine.player.maxFaith
 
         // Spending faith via engine setter — verify bounds
         engine.setPlayerFaith(0)
-        XCTAssertGreaterThanOrEqual(engine.playerFaith, 0, "Faith cannot be negative")
+        XCTAssertGreaterThanOrEqual(engine.player.faith, 0, "Faith cannot be negative")
 
         // Setting faith above max — verify bounds
         engine.setPlayerFaith(maxFaith)
-        XCTAssertLessThanOrEqual(engine.playerFaith, maxFaith, "Faith cannot exceed max")
+        XCTAssertLessThanOrEqual(engine.player.faith, maxFaith, "Faith cannot exceed max")
     }
 
     /// Gate test: Enemy health cannot go below 0
@@ -1193,11 +1193,11 @@ extension AuditGateTests {
         engine.initializeNewGame(playerName: "Test", heroId: nil, startingDeck: [])
 
         let enemy = Card(id: "test_enemy", name: "Test Enemy", type: .monster, description: "Test", health: 10)
-        engine.setupCombatEnemy(enemy)
+        engine.combat.setupCombatEnemy(enemy)
 
         // Verify enemy health initialized correctly and is non-negative
-        XCTAssertEqual(engine.combatEnemyHealth, 10, "Enemy should start with defined health")
-        XCTAssertGreaterThanOrEqual(engine.combatEnemyHealth, 0, "Enemy health should never be negative")
+        XCTAssertEqual(engine.combat.combatEnemyHealth, 10, "Enemy should start with defined health")
+        XCTAssertGreaterThanOrEqual(engine.combat.combatEnemyHealth, 0, "Enemy health should never be negative")
     }
 
     // MARK: - EPIC 0.2: Release Configuration (Debug Prints)

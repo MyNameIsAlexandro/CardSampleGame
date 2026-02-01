@@ -34,7 +34,7 @@ struct HeroPanel: View {
             VStack(alignment: .leading, spacing: Spacing.xxs) {
                 // Name and class
                 HStack {
-                    Text(engine.playerName)
+                    Text(engine.player.name)
                         .font(.headline)
                         .fontWeight(.bold)
                     Text(heroClass)
@@ -51,7 +51,7 @@ struct HeroPanel: View {
                     // Health
                     statBadge(
                         icon: "heart.fill",
-                        value: "\(engine.playerHealth)/\(engine.playerMaxHealth)",
+                        value: "\(engine.player.health)/\(engine.player.maxHealth)",
                         color: AppColors.health,
                         label: nil
                     )
@@ -59,7 +59,7 @@ struct HeroPanel: View {
                     // Faith
                     statBadge(
                         icon: "sparkles",
-                        value: "\(engine.playerFaith)",
+                        value: "\(engine.player.faith)",
                         color: AppColors.faith,
                         label: nil
                     )
@@ -67,7 +67,7 @@ struct HeroPanel: View {
                     // Strength
                     statBadge(
                         icon: "hand.raised.fill",
-                        value: "\(engine.playerStrength)",
+                        value: "\(engine.player.strength)",
                         color: AppColors.power,
                         label: nil
                     )
@@ -109,7 +109,7 @@ struct HeroPanel: View {
                     Image(systemName: "heart.fill")
                         .font(.caption2)
                         .foregroundColor(AppColors.health)
-                    Text("\(engine.playerHealth)")
+                    Text("\(engine.player.health)")
                         .font(.caption)
                         .fontWeight(.semibold)
                 }
@@ -119,7 +119,7 @@ struct HeroPanel: View {
                     Image(systemName: "sparkles")
                         .font(.caption2)
                         .foregroundColor(AppColors.faith)
-                    Text("\(engine.playerFaith)")
+                    Text("\(engine.player.faith)")
                         .font(.caption)
                         .fontWeight(.semibold)
                 }
@@ -228,7 +228,7 @@ struct HeroPanel: View {
     }
 
     var heroInitials: String {
-        let name = engine.playerName
+        let name = engine.player.name
         let words = name.split(separator: " ")
         if words.count >= 2 {
             return String(words[0].prefix(1)) + String(words[1].prefix(1))
@@ -237,7 +237,7 @@ struct HeroPanel: View {
     }
 
     var balanceIcon: String {
-        let balance = engine.playerBalance
+        let balance = engine.player.balance
         if balance >= 70 {
             return "sun.max.fill"      // Light path (70-100)
         } else if balance <= 30 {
@@ -248,7 +248,7 @@ struct HeroPanel: View {
     }
 
     var balanceColor: Color {
-        let balance = engine.playerBalance
+        let balance = engine.player.balance
         if balance >= 70 {
             return AppColors.light      // Light path
         } else if balance <= 30 {
@@ -259,7 +259,7 @@ struct HeroPanel: View {
     }
 
     var balanceText: String {
-        let balance = engine.playerBalance
+        let balance = engine.player.balance
         if balance >= 70 {
             return L10n.balanceLight.localized
         } else if balance <= 30 {
@@ -270,7 +270,7 @@ struct HeroPanel: View {
     }
 
     var balanceGradient: LinearGradient {
-        let balance = engine.playerBalance
+        let balance = engine.player.balance
         if balance >= 70 {
             return LinearGradient(
                 colors: [AppColors.light.opacity(Opacity.high), AppColors.power.opacity(Opacity.mediumHigh)],

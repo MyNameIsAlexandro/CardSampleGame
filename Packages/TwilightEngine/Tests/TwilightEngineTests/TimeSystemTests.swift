@@ -164,8 +164,8 @@ final class TimeSystemTests: XCTestCase {
         }
 
         // State should be consistent
-        XCTAssertGreaterThanOrEqual(engine.playerHealth, 0, "Health should not be negative")
-        XCTAssertGreaterThanOrEqual(engine.playerFaith, 0, "Faith should not be negative")
+        XCTAssertGreaterThanOrEqual(engine.player.health, 0, "Health should not be negative")
+        XCTAssertGreaterThanOrEqual(engine.player.faith, 0, "Faith should not be negative")
         XCTAssertGreaterThanOrEqual(engine.worldTension, 0, "Tension should not be negative")
         XCTAssertLessThanOrEqual(engine.worldTension, 100, "Tension should not exceed 100")
     }

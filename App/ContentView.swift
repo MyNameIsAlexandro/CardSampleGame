@@ -437,7 +437,7 @@ struct ContentView: View {
 
     func loadGame(from slot: Int) {
         if saveManager.loadGame(from: slot, engine: engine) {
-            selectedHeroId = engine.heroId
+            selectedHeroId = engine.player.heroId
             selectedSaveSlot = slot
             // Check for pending mid-combat save
             if engine.pendingEncounterState != nil {

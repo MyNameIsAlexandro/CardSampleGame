@@ -86,7 +86,7 @@ final class INV_RNG_GateTests: XCTestCase {
         let eventId2 = engine2.currentEvent?.id
 
         XCTAssertEqual(eventId1, eventId2, "Explore after save/load must produce same event")
-        XCTAssertEqual(engine1.playerHealth, engine2.playerHealth, "HP must match after restore")
+        XCTAssertEqual(engine1.player.health, engine2.player.health, "HP must match after restore")
         XCTAssertEqual(engine1.currentDay, engine2.currentDay, "Day must match after restore")
     }
 
@@ -134,7 +134,7 @@ final class INV_RNG_GateTests: XCTestCase {
 
         // Rest (uses no RNG but advances state)
         _ = engine.performAction(.rest)
-        let healthAfterRest = engine.playerHealth
+        let healthAfterRest = engine.player.health
 
         // Skip turn (may advance day/tension which uses RNG for degradation)
         _ = engine.performAction(.skipTurn)

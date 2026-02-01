@@ -26,12 +26,12 @@ final class INV_TXN_GateTests: XCTestCase {
         engine.initializeNewGame(playerName: "Test", heroId: nil)
 
         // Damage player first so rest has visible effect
-        let hpBefore = engine.playerHealth
+        let hpBefore = engine.player.health
         let result = engine.performAction(.rest)
 
         XCTAssertTrue(result.success, "Rest should succeed")
         // Health should be >= before (rest heals)
-        XCTAssertGreaterThanOrEqual(engine.playerHealth, hpBefore)
+        XCTAssertGreaterThanOrEqual(engine.player.health, hpBefore)
     }
 
     /// INV-TXN-002: performAction(.explore) can trigger event
@@ -91,13 +91,13 @@ final class INV_TXN_GateTests: XCTestCase {
         engine2.initializeNewGame(playerName: "Dummy", heroId: nil)
         engine2.restoreFromEngineSave(save)
 
-        XCTAssertEqual(engine2.playerName, "TestHero")
-        XCTAssertEqual(engine2.playerHealth, engine.playerHealth)
-        XCTAssertEqual(engine2.playerMaxHealth, engine.playerMaxHealth)
-        XCTAssertEqual(engine2.playerFaith, engine.playerFaith)
-        XCTAssertEqual(engine2.playerMaxFaith, engine.playerMaxFaith)
-        XCTAssertEqual(engine2.playerBalance, engine.playerBalance)
-        XCTAssertEqual(engine2.heroId, engine.heroId)
+        XCTAssertEqual(engine2.player.name, "TestHero")
+        XCTAssertEqual(engine2.player.health, engine.player.health)
+        XCTAssertEqual(engine2.player.maxHealth, engine.player.maxHealth)
+        XCTAssertEqual(engine2.player.faith, engine.player.faith)
+        XCTAssertEqual(engine2.player.maxFaith, engine.player.maxFaith)
+        XCTAssertEqual(engine2.player.balance, engine.player.balance)
+        XCTAssertEqual(engine2.player.heroId, engine.player.heroId)
     }
 
     /// INV-TXN-006: Save → Load preserves world state

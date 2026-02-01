@@ -129,15 +129,15 @@ final class Phase3ContractTests: XCTestCase {
     func testRestHealsPlayer() {
         guard requireRegionsLoaded() else { return }
         // Damage player first by setting engine health directly
-        engine.setPlayerHealth(5)
+        engine.player.setHealth(5)
 
-        let initialHealth = engine.playerHealth
+        let initialHealth = engine.player.health
         let result = engine.performAction(.rest)
 
         XCTAssertTrue(result.success)
 
         // Health should increase (capped at max)
-        XCTAssertGreaterThan(engine.playerHealth, initialHealth,
+        XCTAssertGreaterThan(engine.player.health, initialHealth,
             "Rest should heal player")
     }
 
@@ -145,7 +145,7 @@ final class Phase3ContractTests: XCTestCase {
 
     func testStrengthenAnchorCostsFaith() {
         // Ensure player has enough faith
-        engine.setPlayerFaith(20)
+        engine.player.setFaith(20)
 
         // Move to region with anchor
         guard let regionWithAnchor = engine.publishedRegions.values.first(where: { $0.anchor != nil }) else {
@@ -153,12 +153,12 @@ final class Phase3ContractTests: XCTestCase {
         }
         engine.setCurrentRegion(regionWithAnchor.id)
 
-        let initialFaith = engine.playerFaith
+        let initialFaith = engine.player.faith
         let result = engine.performAction(.strengthenAnchor)
 
         if result.success {
             // Faith should decrease
-            XCTAssertLessThan(engine.playerFaith, initialFaith,
+            XCTAssertLessThan(engine.player.faith, initialFaith,
                 "Strengthening anchor should cost faith")
         }
     }
@@ -192,16 +192,16 @@ final class Phase3ContractTests: XCTestCase {
 
     func testGameOverOnHealthZero() {
         // Set health to 1
-        engine.setPlayerHealth(1)
+        engine.player.setHealth(1)
 
         // Apply damage through consequences (simulated)
         // For now, manually trigger check
-        engine.setPlayerHealth(0)
+        engine.player.setHealth(0)
 
         // Trigger end condition check
         _ = engine.performAction(.skipTurn)
 
-        XCTAssertTrue(engine.isGameOver || engine.playerHealth <= 0,
+        XCTAssertTrue(engine.isGameOver || engine.player.health <= 0,
             "Game should be over or health should be 0")
     }
 

@@ -211,9 +211,9 @@ struct EventView: View {
                     Text(L10n.eventRequiresFaith.localized(with: minFaith))
                         .font(.caption2)
                     // Engine-First: read from engine
-                    Text(L10n.eventYouHaveFaith.localized(with: engine.playerFaith))
+                    Text(L10n.eventYouHaveFaith.localized(with: engine.player.faith))
                         .font(.caption2)
-                        .foregroundColor(engine.playerFaith >= minFaith ? AppColors.success : AppColors.danger)
+                        .foregroundColor(engine.player.faith >= minFaith ? AppColors.success : AppColors.danger)
                 }
                 .foregroundColor(AppColors.muted)
             }
@@ -225,16 +225,16 @@ struct EventView: View {
                     Text(L10n.eventRequiresHealth.localized(with: minHealth))
                         .font(.caption2)
                     // Engine-First: read from engine
-                    Text(L10n.eventYouHaveHealth.localized(with: engine.playerHealth))
+                    Text(L10n.eventYouHaveHealth.localized(with: engine.player.health))
                         .font(.caption2)
-                        .foregroundColor(engine.playerHealth >= minHealth ? AppColors.success : AppColors.danger)
+                        .foregroundColor(engine.player.health >= minHealth ? AppColors.success : AppColors.danger)
                 }
                 .foregroundColor(AppColors.muted)
             }
 
             if let reqBalance = requirements.requiredBalance {
                 // Engine-First: read from engine
-                let playerBalanceEnum = getBalanceEnum(engine.playerBalance)
+                let playerBalanceEnum = getBalanceEnum(engine.player.balance)
                 let meetsRequirement = playerBalanceEnum == reqBalance
 
                 HStack(spacing: Spacing.xxs) {
@@ -324,7 +324,7 @@ struct EventView: View {
         let regionState = engine.currentRegion?.state ?? .stable
         let combatContext = CombatContext(
             regionState: regionState,
-            playerCurses: engine.playerActiveCurses.map { $0.type }
+            playerCurses: engine.player.activeCurses.map { $0.type }
         )
 
         // Создать врага с модификаторами региона
@@ -340,7 +340,7 @@ struct EventView: View {
         }
 
         // Setup combat in engine first, then show fullScreenCover
-        engine.setupCombatEnemy(adjustedMonster)
+        engine.combat.setupCombatEnemy(adjustedMonster)
         combatMonster = adjustedMonster
     }
 
@@ -369,21 +369,21 @@ struct EventView: View {
 
         // Check minimum faith
         if let minFaith = requirements.minimumFaith {
-            if engine.playerFaith < minFaith {
+            if engine.player.faith < minFaith {
                 return false
             }
         }
 
         // Check minimum health
         if let minHealth = requirements.minimumHealth {
-            if engine.playerHealth < minHealth {
+            if engine.player.health < minHealth {
                 return false
             }
         }
 
         // Check balance requirement
         if let reqBalance = requirements.requiredBalance {
-            let playerBalanceEnum = getBalanceEnum(engine.playerBalance)
+            let playerBalanceEnum = getBalanceEnum(engine.player.balance)
             if playerBalanceEnum != reqBalance {
                 return false
             }

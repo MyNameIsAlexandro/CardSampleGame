@@ -14,7 +14,7 @@ public final class TwilightGameEngine: ObservableObject {
     /// Current in-game day number
     @Published public private(set) var currentDay: Int = 0
     /// World tension level (0-100), drives degradation and difficulty
-    @Published public private(set) var worldTension: Int = 30
+    @Published public internal(set) var worldTension: Int = 30
     /// ID of the region the player is currently in
     @Published public private(set) var currentRegionId: String?
     /// Whether the game has ended (victory or defeat)
@@ -25,7 +25,7 @@ public final class TwilightGameEngine: ObservableObject {
     /// ID of the event currently being presented to the player
     @Published public private(set) var currentEventId: String?
     /// Whether the player is currently in combat
-    @Published public private(set) var isInCombat: Bool = false
+    @Published public internal(set) var isInCombat: Bool = false
 
     /// Result of the last performed action
     @Published public private(set) var lastActionResult: ActionResult?
@@ -35,28 +35,8 @@ public final class TwilightGameEngine: ObservableObject {
     /// All regions with their current state - UI reads this directly
     @Published public private(set) var publishedRegions: [String: EngineRegionState] = [:]
 
-    /// Player stats - UI reads these directly instead of Player model
-    @Published public private(set) var playerHealth: Int = 10
-    @Published public private(set) var playerMaxHealth: Int = 10
-    @Published public private(set) var playerFaith: Int = 3
-    @Published public private(set) var playerMaxFaith: Int = 10
-    @Published public private(set) var playerBalance: Int = 50
-    @Published public private(set) var playerName: String = "Герой"
-    @Published public private(set) var heroId: String?  // Hero definition ID for data-driven hero system
-
-    /// Character stats (Engine-First) - used for combat calculations
-    @Published public private(set) var playerStrength: Int = 5
-    @Published public private(set) var playerDexterity: Int = 0
-    @Published public private(set) var playerConstitution: Int = 0
-    @Published public private(set) var playerIntelligence: Int = 0
-    @Published public private(set) var playerWisdom: Int = 0
-    @Published public private(set) var playerCharisma: Int = 0
-
     /// World resonance value (-100..+100), drives Navi/Prav world state
-    @Published public private(set) var resonanceValue: Float = 0.0
-
-    /// Active curses on player (Engine-First)
-    @Published public private(set) var playerActiveCurses: [ActiveCurse] = []
+    @Published public internal(set) var resonanceValue: Float = 0.0
 
     /// World flags - for quest/event conditions
     @Published public private(set) var publishedWorldFlags: [String: Bool] = [:]
@@ -90,11 +70,6 @@ public final class TwilightGameEngine: ObservableObject {
     public var currentRegion: EngineRegionState? {
         guard let id = currentRegionId else { return nil }
         return publishedRegions[id]
-    }
-
-    /// Check if player can afford faith cost
-    public func canAffordFaith(_ cost: Int) -> Bool {
-        return playerFaith >= cost
     }
 
     /// Check if region is neighbor to current region
@@ -131,152 +106,6 @@ public final class TwilightGameEngine: ObservableObject {
         }
 
         return connectingNeighbors
-    }
-
-    /// Player balance description for UI
-    public var playerBalanceDescription: String {
-        switch playerBalance {
-        case 70...100: return "Свет"
-        case 31..<70: return "Равновесие"
-        default: return "Тьма"
-        }
-    }
-
-    // MARK: - Hero Abilities (Engine-First)
-
-    /// Get hero definition from registry
-    public var heroDefinition: HeroDefinition? {
-        guard let heroId = heroId else { return nil }
-        return HeroRegistry.shared.hero(id: heroId)
-    }
-
-    /// Get hero's special ability
-    private var heroAbility: HeroAbility? {
-        return heroDefinition?.specialAbility
-    }
-
-    /// Check if player has a specific curse (Engine-First)
-    public func hasCurse(_ type: CurseType) -> Bool {
-        return playerActiveCurses.contains { $0.type == type }
-    }
-
-    /// Get damage modifier from curses (weakness: -1, shadowOfNav: +3)
-    public func getCurseDamageDealtModifier() -> Int {
-        var modifier = 0
-        if hasCurse(.weakness) { modifier -= 1 }
-        if hasCurse(.shadowOfNav) { modifier += 3 }
-        return modifier
-    }
-
-    /// Get damage taken modifier from curses (fear: +1)
-    public func getCurseDamageTakenModifier() -> Int {
-        var modifier = 0
-        if hasCurse(.fear) { modifier += 1 }
-        return modifier
-    }
-
-    /// Get bonus dice from hero ability (e.g., Tracker on first attack)
-    public func getHeroBonusDice(isFirstAttack: Bool) -> Int {
-        guard let ability = heroAbility,
-              ability.trigger == .onAttack else { return 0 }
-
-        // Check ability condition
-        if let condition = ability.condition {
-            switch condition.type {
-            case .firstAttack:
-                guard isFirstAttack else { return 0 }
-            default:
-                break
-            }
-        }
-
-        return ability.effects.first { $0.type == .bonusDice }?.value ?? 0
-    }
-
-    /// Get bonus damage from hero ability (e.g., Berserker when HP < 50%)
-    public func getHeroDamageBonus(targetFullHP: Bool = false) -> Int {
-        guard let ability = heroAbility,
-              ability.trigger == .onDamageDealt else { return 0 }
-
-        // Check ability condition
-        if let condition = ability.condition {
-            switch condition.type {
-            case .hpBelowPercent:
-                let threshold = condition.value ?? 50
-                guard playerHealth < playerMaxHealth * threshold / 100 else { return 0 }
-            case .targetFullHP:
-                guard targetFullHP else { return 0 }
-            default:
-                break
-            }
-        }
-
-        return ability.effects.first { $0.type == .bonusDamage }?.value ?? 0
-    }
-
-    /// Get damage reduction from hero ability (e.g., Priest vs dark sources)
-    public func getHeroDamageReduction(fromDarkSource: Bool = false) -> Int {
-        guard let ability = heroAbility,
-              ability.trigger == .onDamageReceived else { return 0 }
-
-        // Check ability condition
-        if let condition = ability.condition {
-            switch condition.type {
-            case .damageSourceDark:
-                guard fromDarkSource else { return 0 }
-            default:
-                break
-            }
-        }
-
-        return ability.effects.first { $0.type == .damageReduction }?.value ?? 0
-    }
-
-    /// Check if hero gains faith at end of turn (e.g., Mage meditation)
-    public var shouldGainFaithEndOfTurn: Bool {
-        guard let ability = heroAbility,
-              ability.trigger == .turnEnd else { return false }
-        return ability.effects.contains { $0.type == .gainFaith }
-    }
-
-    /// Calculate total damage dealt with curses and hero abilities
-    public func calculateDamageDealt(_ baseDamage: Int, targetFullHP: Bool = false) -> Int {
-        let curseModifier = getCurseDamageDealtModifier()
-        let heroBonus = getHeroDamageBonus(targetFullHP: targetFullHP)
-        return max(0, baseDamage + curseModifier + heroBonus)
-    }
-
-    /// Take damage with curse modifiers and hero abilities
-    public func takeDamageWithModifiers(_ baseDamage: Int, fromDarkSource: Bool = false) {
-        let curseModifier = getCurseDamageTakenModifier()
-        let heroReduction = getHeroDamageReduction(fromDarkSource: fromDarkSource)
-        let actualDamage = max(0, baseDamage + curseModifier - heroReduction)
-        playerHealth = max(0, playerHealth - actualDamage)
-    }
-
-    /// Apply curse to player (Engine-First)
-    public func applyCurse(type: CurseType, duration: Int, sourceCard: String? = nil) {
-        let curse = ActiveCurse(type: type, duration: duration, sourceCard: sourceCard)
-        playerActiveCurses.append(curse)
-    }
-
-    /// Remove curse from player (Engine-First)
-    public func removeCurse(type: CurseType? = nil) {
-        if let specificType = type {
-            playerActiveCurses.removeAll { $0.type == specificType }
-        } else if !playerActiveCurses.isEmpty {
-            playerActiveCurses.removeFirst()
-        }
-    }
-
-    /// Tick curses at end of turn (reduce duration, remove expired)
-    public func tickCurses() {
-        for i in (0..<playerActiveCurses.count).reversed() {
-            playerActiveCurses[i].duration -= 1
-            if playerActiveCurses[i].duration <= 0 {
-                playerActiveCurses.remove(at: i)
-            }
-        }
     }
 
     /// World balance description
@@ -337,6 +166,17 @@ public final class TwilightGameEngine: ObservableObject {
         }
     }
 
+    // MARK: - Sub-Managers
+
+    /// Combat sub-manager — Views access via engine.combat.X
+    public private(set) var combat: EngineCombatManager!
+
+    /// Deck sub-manager — Views access via engine.deck.X
+    public private(set) var deck: EngineDeckManager!
+
+    /// Player sub-manager — Views access via engine.player.X
+    public private(set) var player: EnginePlayerManager!
+
     // MARK: - Core Subsystems
 
     private let timeEngine: TimeEngine
@@ -363,73 +203,12 @@ public final class TwilightGameEngine: ObservableObject {
     /// Event log
     private var eventLog: [EventLogEntry] = []
 
-    /// Player deck (for save/load)
-    private var _playerDeck: [Card] = []
-    /// Public read-only accessor for deck (for testing/UI)
-    public var playerDeck: [Card] { _playerDeck }
-
-    /// Player's hand cards (Published for UI binding)
-    @Published public private(set) var playerHand: [Card] = []
-
-    private var _playerDiscard: [Card] = []
-    /// Public read-only accessor for discard pile (for testing/UI)
-    public var playerDiscard: [Card] { _playerDiscard }
-
-    // MARK: - Combat State
-
-    /// Current enemy card in combat
-    @Published public private(set) var combatEnemy: Card?
-
-    /// Enemy current health
-    @Published public private(set) var combatEnemyHealth: Int = 0
-
-    /// Enemy current will/resolve (Spirit track, 0 if enemy has no will)
-    @Published public private(set) var combatEnemyWill: Int = 0
-
-    /// Enemy maximum will/resolve for UI progress bars
-    @Published public private(set) var combatEnemyMaxWill: Int = 0
-
-    /// Combat actions remaining this turn
-    @Published public private(set) var combatActionsRemaining: Int = 3
-
-    /// Combat turn number
-    @Published public private(set) var combatTurnNumber: Int = 1
-
-    /// Bonus dice for next attack (from cards)
-    private var combatBonusDice: Int = 0
-
-    /// Bonus damage for next attack (from cards)
-    private var combatBonusDamage: Int = 0
-
-    /// Is this the first attack in this combat (for abilities)
-    private var combatIsFirstAttack: Bool = true
-
     // MARK: - Fate Deck
 
     /// Fate Deck manager for skill checks and event resolution
     public private(set) var fateDeck: FateDeckManager?
     /// Mid-combat encounter state for save/resume (SAV-03)
     public var pendingEncounterState: EncounterSaveState?
-
-    /// Last fate attack result for UI display
-    @Published public private(set) var lastFateAttackResult: FateAttackResult?
-
-    // MARK: - Active Defense System (Fate-based combat)
-
-    /// Last attack fate card result (player attacking enemy)
-    @Published public private(set) var lastAttackFateResult: FateDrawResult?
-
-    /// Last defense fate card result (player defending from enemy)
-    @Published public private(set) var lastDefenseFateResult: FateDrawResult?
-
-    /// Current enemy intent for this turn (shown before player acts)
-    @Published public private(set) var currentEnemyIntent: EnemyIntent?
-
-    /// Whether mulligan has been done this combat
-    @Published public private(set) var combatMulliganDone: Bool = false
-
-    /// Whether player has attacked this turn
-    @Published public private(set) var combatPlayerAttackedThisTurn: Bool = false
 
     /// Number of cards remaining in the fate draw pile
     public var fateDeckDrawCount: Int { fateDeck?.drawPile.count ?? 0 }
@@ -465,6 +244,12 @@ public final class TwilightGameEngine: ObservableObject {
         self.pressureEngine = PressureEngine(rules: TwilightPressureRules())
         self.economyManager = EconomyManager()
         self.questTriggerEngine = QuestTriggerEngine(contentRegistry: registry)
+        self.combat = nil // set after super.init
+        self.deck = nil
+        self.player = nil
+        self.combat = EngineCombatManager(engine: self)
+        self.deck = EngineDeckManager(engine: self)
+        self.player = EnginePlayerManager(engine: self)
     }
 
     // MARK: - Setup
@@ -477,11 +262,7 @@ public final class TwilightGameEngine: ObservableObject {
         currentEvent = nil
         lastDayEvent = nil
         isInCombat = false
-        combatEnemy = nil
-        combatEnemyHealth = 0
-        combatEnemyWill = 0
-        combatEnemyMaxWill = 0
-        combatTurnNumber = 0
+        combat.resetState()
     }
 
     /// Initialize the Fate Deck with a set of cards
@@ -510,46 +291,11 @@ public final class TwilightGameEngine: ObservableObject {
         balanceConfig = contentRegistry.getBalanceConfig() ?? .default
 
         // Setup player from balance config and hero definition
-        self.playerName = playerName
-        self.heroId = heroId
-
-        // Get hero stats from HeroRegistry if available
-        if let heroId = heroId,
-           let heroDef = HeroRegistry.shared.hero(id: heroId) {
-            let stats = heroDef.baseStats
-            playerHealth = stats.health
-            playerMaxHealth = stats.maxHealth
-            playerFaith = stats.faith
-            playerMaxFaith = stats.maxFaith
-            playerBalance = stats.startingBalance
-            playerStrength = stats.strength
-            playerDexterity = stats.dexterity
-            playerConstitution = stats.constitution
-            playerIntelligence = stats.intelligence
-            playerWisdom = stats.wisdom
-            playerCharisma = stats.charisma
-        } else {
-            // Default values from balance config
-            playerHealth = balanceConfig.resources.startingHealth
-            playerMaxHealth = balanceConfig.resources.maxHealth
-            playerFaith = balanceConfig.resources.startingFaith
-            playerMaxFaith = balanceConfig.resources.maxFaith
-            playerBalance = 50
-            playerStrength = 5
-            playerDexterity = 0
-            playerConstitution = 0
-            playerIntelligence = 0
-            playerWisdom = 0
-            playerCharisma = 0
-        }
-
-        // Clear curses
-        playerActiveCurses = []
+        player.initializeFromHero(heroId, name: playerName, balanceConfig: balanceConfig)
 
         // Setup starting deck
         if !startingDeck.isEmpty {
-            _playerDeck = startingDeck
-            WorldRNG.shared.shuffle(&_playerDeck)
+            deck.setupStartingDeck(startingDeck)
         }
 
         // Setup world from balance config
@@ -784,7 +530,7 @@ public final class TwilightGameEngine: ObservableObject {
              // Active Defense actions
              .combatMulligan, .combatGenerateIntent, .combatPlayerAttackWithFate,
              .combatSkipAttack, .combatEnemyResolveWithFate:
-            let result = handleCombatAction(action)
+            let result = combat.handleCombatAction(action)
             stateChanges.append(contentsOf: result.changes)
             if result.combatStarted { combatStarted = true }
 
@@ -877,7 +623,7 @@ public final class TwilightGameEngine: ObservableObject {
         }
 
         // Check if player can travel (health > 0, etc.)
-        if playerHealth <= 0 {
+        if player.health <= 0 {
             return .healthTooLow
         }
 
@@ -923,8 +669,8 @@ public final class TwilightGameEngine: ObservableObject {
 
         // Check resource cost
         let cost = anchorStrengthenCost
-        if playerFaith < cost {
-            return .insufficientResources(resource: "faith", required: cost, available: playerFaith)
+        if player.faith < cost {
+            return .insufficientResources(resource: "faith", required: cost, available: player.faith)
         }
 
         return nil
@@ -1066,9 +812,9 @@ public final class TwilightGameEngine: ObservableObject {
 
         // Heal player
         let healAmount = restHealAmount
-        let newHealth = min(playerMaxHealth, playerHealth + healAmount)
-        let delta = newHealth - playerHealth
-        playerHealth = newHealth
+        let newHealth = min(player.maxHealth, player.health + healAmount)
+        let delta = newHealth - player.health
+        player.health = newHealth
         changes.append(.healthChanged(delta: delta, newValue: newHealth))
 
         return changes
@@ -1102,8 +848,8 @@ public final class TwilightGameEngine: ObservableObject {
 
         // Spend faith
         let cost = anchorStrengthenCost
-        playerFaith -= cost
-        changes.append(.faithChanged(delta: -cost, newValue: playerFaith))
+        player.faith -= cost
+        changes.append(.faithChanged(delta: -cost, newValue: player.faith))
 
         // Strengthen anchor
         let strengthAmount = anchorStrengthenAmount
@@ -1146,12 +892,12 @@ public final class TwilightGameEngine: ObservableObject {
         for (resource, amount) in input.bonusRewards {
             switch resource {
             case "health":
-                let newHealth = min(playerMaxHealth, playerHealth + amount)
-                playerHealth = newHealth
+                let newHealth = min(player.maxHealth, player.health + amount)
+                player.health = newHealth
                 changes.append(.healthChanged(delta: amount, newValue: newHealth))
             case "faith":
-                let newFaith = playerFaith + amount
-                playerFaith = newFaith
+                let newFaith = player.faith + amount
+                player.faith = newFaith
                 changes.append(.faithChanged(delta: amount, newValue: newFaith))
             default:
                 break
@@ -1168,22 +914,22 @@ public final class TwilightGameEngine: ObservableObject {
 
         // Health
         if let healthDelta = consequences.healthChange, healthDelta != 0 {
-            let newHealth = max(0, min(playerMaxHealth, playerHealth + healthDelta))
-            playerHealth = newHealth
+            let newHealth = max(0, min(player.maxHealth, player.health + healthDelta))
+            player.health = newHealth
             changes.append(.healthChanged(delta: healthDelta, newValue: newHealth))
         }
 
         // Faith
         if let faithDelta = consequences.faithChange, faithDelta != 0 {
-            let newFaith = max(0, playerFaith + faithDelta)
-            playerFaith = newFaith
+            let newFaith = max(0, player.faith + faithDelta)
+            player.faith = newFaith
             changes.append(.faithChanged(delta: faithDelta, newValue: newFaith))
         }
 
         // Balance
         if let balanceDelta = consequences.balanceChange, balanceDelta != 0 {
-            let newBalance = max(0, min(100, playerBalance + balanceDelta))
-            playerBalance = newBalance
+            let newBalance = max(0, min(100, player.balance + balanceDelta))
+            player.balance = newBalance
             changes.append(.balanceChanged(delta: balanceDelta, newValue: newBalance))
         }
 
@@ -1368,9 +1114,9 @@ public final class TwilightGameEngine: ObservableObject {
 
         // Build resources dictionary
         let resources: [String: Int] = [
-            "health": playerHealth,
-            "faith": playerFaith,
-            "balance": playerBalance,
+            "health": player.health,
+            "faith": player.faith,
+            "balance": player.balance,
             "tension": worldTension
         ]
 
@@ -1396,7 +1142,7 @@ public final class TwilightGameEngine: ObservableObject {
         }
 
         // Defeat: health 0
-        if playerHealth <= 0 {
+        if player.health <= 0 {
             return .defeat(reason: "Герой погиб")
         }
 
@@ -1469,284 +1215,16 @@ public final class TwilightGameEngine: ObservableObject {
         lastDayEvent = event
     }
 
-    // MARK: - Combat Action Handler
+    // MARK: - Combat Helpers (for EngineCombatManager)
 
-    /// Handle all combat-related actions, extracted from performAction to reduce switch size
-    private func handleCombatAction(_ action: TwilightGameAction) -> (changes: [StateChange], combatStarted: Bool) {
-        var stateChanges: [StateChange] = []
-        var didStartCombat = false
-
-        switch action {
-        case .startCombat:
-            didStartCombat = true
-            isInCombat = true
-            combatTurnNumber = 1
-            combatActionsRemaining = 3
-            combatBonusDice = 0
-            combatBonusDamage = 0
-            combatIsFirstAttack = true
-            // Reset Active Defense state
-            combatMulliganDone = false
-            combatPlayerAttackedThisTurn = false
-            currentEnemyIntent = nil
-            lastAttackFateResult = nil
-            lastDefenseFateResult = nil
-
-        // MARK: Active Defense Actions
-
-        case .combatMulligan(let cardIds):
-            // Mulligan: return selected cards to deck, draw replacements
-            guard !combatMulliganDone else { break }
-
-            var cardsToReturn: [Card] = []
-            for cardId in cardIds {
-                if let index = playerHand.firstIndex(where: { $0.id == cardId }) {
-                    cardsToReturn.append(playerHand.remove(at: index))
-                }
-            }
-
-            if !cardsToReturn.isEmpty {
-                _playerDeck.append(contentsOf: cardsToReturn)
-                WorldRNG.shared.shuffle(&_playerDeck)
-
-                // Draw replacement cards
-                let drawCount = min(cardsToReturn.count, _playerDeck.count)
-                let newCards = Array(_playerDeck.prefix(drawCount))
-                _playerDeck.removeFirst(drawCount)
-                playerHand.append(contentsOf: newCards)
-            }
-
-            combatMulliganDone = true
-
-        case .combatGenerateIntent:
-            // Generate enemy intent for this turn
-            guard let enemy = combatEnemy else { break }
-
-            let enemyPower = enemy.power ?? 3
-            currentEnemyIntent = EnemyIntentGenerator.generateIntent(
-                enemyPower: enemyPower,
-                enemyHealth: combatEnemyHealth,
-                enemyMaxHealth: enemy.health ?? 10,
-                turnNumber: combatTurnNumber
-            )
-
-        case .combatPlayerAttackWithFate(let bonusDamage):
-            // Player attack with automatic Fate card draw
-            guard let enemy = combatEnemy else { break }
-
-            combatPlayerAttackedThisTurn = true
-
-            // Draw fate card for attack
-            if let fateResult = fateDeck?.drawAndResolve(worldResonance: resonanceValue) {
-                lastAttackFateResult = fateResult
-
-                // Calculate damage: PlayerStrength + WeaponBonus + FateCard + bonusDamage
-                let baseDamage = playerStrength + combatBonusDamage + bonusDamage
-                let fateBonus = fateResult.effectiveValue
-                let totalAttack = baseDamage + fateBonus
-
-                // Check if hit (attack >= enemy defense)
-                let enemyDefense = enemy.defense ?? 10
-                if totalAttack >= enemyDefense {
-                    let damage = max(1, totalAttack - enemyDefense + 1)
-                    combatEnemyHealth = max(0, combatEnemyHealth - damage)
-                    stateChanges.append(.enemyDamaged(
-                        enemyId: enemy.id,
-                        damage: damage,
-                        newHealth: combatEnemyHealth
-                    ))
-
-                    if combatEnemyHealth <= 0 {
-                        stateChanges.append(.enemyDefeated(enemyId: enemy.id))
-                    }
-                }
-
-                // Apply fate draw effects (resonance/tension shifts)
-                let fateChanges = applyFateDrawEffects(fateResult.drawEffects)
-                stateChanges.append(contentsOf: fateChanges)
-            }
-
-            combatBonusDice = 0
-            combatBonusDamage = 0
-
-        case .combatSkipAttack:
-            // Player skips attack, proceeds to enemy resolution
-            combatPlayerAttackedThisTurn = false
-            lastAttackFateResult = nil
-
-        case .combatEnemyResolveWithFate:
-            // Enemy resolves their intent, player defends with Fate card
-            guard let intent = currentEnemyIntent else { break }
-
-            switch intent.type {
-            case .attack:
-                // Draw fate card for defense
-                if let fateResult = fateDeck?.drawAndResolve(worldResonance: resonanceValue) {
-                    lastDefenseFateResult = fateResult
-
-                    // Calculate damage: EnemyAttack - (PlayerArmor + FateCard)
-                    // High fate card = less damage to player
-                    let fateBonus = fateResult.effectiveValue
-                    let playerArmor = 0  // TODO: Get from equipment
-                    let damageReduction = playerArmor + fateBonus
-                    let actualDamage = max(0, intent.value - damageReduction)
-
-                    if actualDamage > 0 {
-                        playerHealth = max(0, playerHealth - actualDamage)
-                        stateChanges.append(.healthChanged(
-                            delta: -actualDamage,
-                            newValue: playerHealth
-                        ))
-                    }
-
-                    // Apply fate draw effects
-                    let fateChanges = applyFateDrawEffects(fateResult.drawEffects)
-                    stateChanges.append(contentsOf: fateChanges)
-                } else {
-                    // No fate deck available, take full damage
-                    playerHealth = max(0, playerHealth - intent.value)
-                    stateChanges.append(.healthChanged(
-                        delta: -intent.value,
-                        newValue: playerHealth
-                    ))
-                }
-
-            case .ritual:
-                // Ritual shifts resonance toward Nav
-                let shift = Float(intent.secondaryValue ?? -5)
-                resonanceValue = max(-100, min(100, resonanceValue + shift))
-                stateChanges.append(.resonanceChanged(delta: shift, newValue: resonanceValue))
-
-            case .block:
-                // Enemy is blocking - will take less damage next turn
-                // For now, just note it (could add a state variable for enemy block)
-                break
-
-            case .buff:
-                // Enemy buffs themselves
-                // For now, no effect (could increase enemy power/defense)
-                break
-
-            case .heal:
-                // Enemy heals
-                if let enemy = combatEnemy {
-                    let maxHealth = enemy.health ?? 10
-                    combatEnemyHealth = min(maxHealth, combatEnemyHealth + intent.value)
-                    // No state change needed for enemy heal
-                }
-
-            case .summon:
-                // Not implemented yet
-                break
-
-            case .prepare, .restoreWP, .debuff, .defend:
-                break // handled by EncounterEngine
-            }
-
-            // Reset for next turn
-            combatPlayerAttackedThisTurn = false
-            currentEnemyIntent = nil
-
-        case .combatInitialize:
-            _playerDeck.append(contentsOf: playerHand)
-            _playerDeck.append(contentsOf: _playerDiscard)
-            playerHand.removeAll()
-            _playerDiscard.removeAll()
-            WorldRNG.shared.shuffle(&_playerDeck)
-            let drawCount = min(5, _playerDeck.count)
-            playerHand = Array(_playerDeck.prefix(drawCount))
-            _playerDeck.removeFirst(drawCount)
-            combatActionsRemaining = 3
-
-        default:
-            break
-        }
-
-        return (stateChanges, didStartCombat)
+    /// Mulligan: return cards to deck and draw replacements
+    func performCombatMulligan(cardIds: [String]) {
+        deck.performMulligan(cardIds: cardIds)
     }
 
-    // MARK: - Fate Draw Effects
-
-    /// Apply side effects from a fate card draw (resonance shift, tension shift)
-    private func applyFateDrawEffects(_ effects: [FateDrawEffect]) -> [StateChange] {
-        var changes: [StateChange] = []
-        for effect in effects {
-            switch effect.type {
-            case .shiftResonance:
-                let delta = Float(effect.value)
-                resonanceValue = max(-100, min(100, resonanceValue + delta))
-                changes.append(.resonanceChanged(delta: delta, newValue: resonanceValue))
-            case .shiftTension:
-                let oldTension = worldTension
-                worldTension = max(0, min(100, worldTension + effect.value))
-                let actualDelta = worldTension - oldTension
-                if actualDelta != 0 {
-                    changes.append(.tensionChanged(delta: actualDelta, newValue: worldTension))
-                }
-            }
-        }
-        return changes
-    }
-
-    // MARK: - Combat Setup
-
-    /// Setup enemy for combat
-    public func setupCombatEnemy(_ enemy: Card) {
-        combatEnemy = enemy
-        combatEnemyHealth = enemy.health ?? 10
-        combatEnemyWill = enemy.will ?? 0
-        combatEnemyMaxWill = enemy.will ?? 0
-        combatTurnNumber = 1
-        combatActionsRemaining = 3
-        combatBonusDice = 0
-        combatBonusDamage = 0
-        combatIsFirstAttack = true
-        isInCombat = true
-    }
-
-    /// End combat mode so a new battle can be started
-    public func endCombat() {
-        isInCombat = false
-        combatEnemy = nil
-    }
-
-    /// Get current combat state for UI
-    public var combatState: CombatState? {
-        guard isInCombat, let enemy = combatEnemy else { return nil }
-        return CombatState(
-            enemy: enemy,
-            enemyHealth: combatEnemyHealth,
-            enemyWill: combatEnemyWill,
-            enemyMaxWill: combatEnemyMaxWill,
-            turnNumber: combatTurnNumber,
-            actionsRemaining: combatActionsRemaining,
-            bonusDice: combatBonusDice,
-            bonusDamage: combatBonusDamage,
-            isFirstAttack: combatIsFirstAttack,
-            playerHand: playerHand
-        )
-    }
-
-    // MARK: - Engine-First Card Management
-
-    /// Draw cards in Engine-First mode with deck recycling
-    private func drawCardsEngineFirst(count: Int) {
-        var remaining = count
-        while remaining > 0 {
-            // Recycle discard into deck if needed
-            if _playerDeck.isEmpty && !_playerDiscard.isEmpty {
-                _playerDeck = _playerDiscard
-                _playerDiscard.removeAll()
-                WorldRNG.shared.shuffle(&_playerDeck)
-            }
-
-            // If still empty, stop
-            if _playerDeck.isEmpty { break }
-
-            // Draw one card
-            playerHand.append(_playerDeck.removeFirst())
-            remaining -= 1
-        }
+    /// Initialize combat deck: shuffle all cards, draw 5
+    func performCombatInitialize() {
+        deck.initializeCombat()
     }
 
     // MARK: - Save/Load Support Methods
@@ -2033,18 +1511,18 @@ public extension TwilightGameEngine {
             primaryCampaignPackId: primaryCampaignPackId,
 
             // Player state
-            playerName: playerName,
-            heroId: heroId,
-            playerHealth: playerHealth,
-            playerMaxHealth: playerMaxHealth,
-            playerFaith: playerFaith,
-            playerMaxFaith: playerMaxFaith,
-            playerBalance: playerBalance,
+            playerName: player.name,
+            heroId: player.heroId,
+            playerHealth: player.health,
+            playerMaxHealth: player.maxHealth,
+            playerFaith: player.faith,
+            playerMaxFaith: player.maxFaith,
+            playerBalance: player.balance,
 
             // Deck state (card IDs for stable serialization)
-            deckCardIds: _playerDeck.map { $0.id },
-            handCardIds: playerHand.map { $0.id },
-            discardCardIds: _playerDiscard.map { $0.id },
+            deckCardIds: deck.playerDeck.map { $0.id },
+            handCardIds: deck.playerHand.map { $0.id },
+            discardCardIds: deck.playerDiscard.map { $0.id },
 
             // World state
             currentDay: currentDay,
@@ -2109,30 +1587,12 @@ public extension TwilightGameEngine {
         }
 
         // Restore player state
-        playerName = save.playerName
-        heroId = save.heroId
-        playerHealth = save.playerHealth
-        playerMaxHealth = save.playerMaxHealth
-        playerFaith = save.playerFaith
-        playerMaxFaith = save.playerMaxFaith
-        playerBalance = save.playerBalance
-
-        // Restore hero stats from heroId (stats that don't change during gameplay)
-        if let heroId = save.heroId,
-           let heroDef = HeroRegistry.shared.hero(id: heroId) {
-            let stats = heroDef.baseStats
-            playerStrength = stats.strength
-            playerDexterity = stats.dexterity
-            playerConstitution = stats.constitution
-            playerIntelligence = stats.intelligence
-            playerWisdom = stats.wisdom
-            playerCharisma = stats.charisma
-        }
+        player.restoreFromSave(save)
 
         // Restore deck (convert card IDs back to cards)
-        _playerDeck = save.deckCardIds.compactMap { CardFactory.shared.getCard(id: $0) }
-        playerHand = save.handCardIds.compactMap { CardFactory.shared.getCard(id: $0) }
-        _playerDiscard = save.discardCardIds.compactMap { CardFactory.shared.getCard(id: $0) }
+        deck.setDeck(save.deckCardIds.compactMap { CardFactory.shared.getCard(id: $0) })
+        deck.setHand(save.handCardIds.compactMap { CardFactory.shared.getCard(id: $0) })
+        deck.setDiscard(save.discardCardIds.compactMap { CardFactory.shared.getCard(id: $0) })
 
         // Restore world state
         currentDay = save.currentDay
@@ -2237,13 +1697,13 @@ public extension TwilightGameEngine {
         lastDayEvent = nil
         isInCombat = false
 
-        playerName = "Герой"
-        playerHealth = 20
-        playerMaxHealth = 20
-        playerFaith = 10
-        playerMaxFaith = 15
-        playerBalance = 50
-        playerStrength = 5
+        player.setName("Герой")
+        player.setMaxHealth(20)
+        player.setHealth(20)
+        player.setFaith(10)
+        player.maxFaith = 15
+        player.setBalance(50)
+        player.strength = 5
 
         currentDay = 1
         worldTension = 30
@@ -2270,46 +1730,6 @@ public extension TwilightGameEngine {
         setupRegionsFromRegistry()
     }
 
-    /// Set player health directly
-    func setPlayerHealth(_ health: Int) {
-        playerHealth = min(playerMaxHealth, max(0, health))
-    }
-
-    /// Set player max health directly (for testing)
-    func setPlayerMaxHealth(_ maxHealth: Int) {
-        playerMaxHealth = max(1, maxHealth)
-        playerHealth = min(playerHealth, playerMaxHealth)
-    }
-
-    /// Set player faith directly (for testing)
-    func setPlayerFaith(_ faith: Int) {
-        playerFaith = min(playerMaxFaith, max(0, faith))
-    }
-
-    /// Apply faith delta from encounter rewards
-    func applyFaithDelta(_ delta: Int) {
-        playerFaith = min(playerMaxFaith, max(0, playerFaith + delta))
-    }
-
-    /// Add a card to the player's deck (loot reward)
-    func addToDeck(_ card: Card) {
-        _playerDeck.append(card)
-    }
-
-    /// Set player balance directly (for testing)
-    func setPlayerBalance(_ balance: Int) {
-        playerBalance = min(100, max(0, balance))
-    }
-
-    /// Set player name directly (for testing)
-    func setPlayerName(_ name: String) {
-        playerName = name
-    }
-
-    /// Set hero ID directly (for testing)
-    func setHeroId(_ id: String) {
-        heroId = id
-    }
 
     /// Set world tension directly (for testing)
     func setWorldTension(_ tension: Int) {
