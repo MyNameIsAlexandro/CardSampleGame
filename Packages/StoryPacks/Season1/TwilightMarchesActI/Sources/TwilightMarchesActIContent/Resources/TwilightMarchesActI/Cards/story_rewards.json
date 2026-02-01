@@ -138,5 +138,89 @@
     "defense": null,
     "health": null,
     "realm": "nav"
+  },
+  {
+    "id": "beast_hide",
+    "name": "Beast Hide",
+    "name_ru": "Шкура Зверя",
+    "card_type": "special",
+    "rarity": "common",
+    "description": "Tough hide from a wild beast. Grants 2 defense this turn.",
+    "description_ru": "Жёсткая шкура дикого зверя. Даёт 2 защиты в этот ход.",
+    "icon": "shield",
+    "expansion_set": "twilightMarches",
+    "ownership": "universal",
+    "abilities": [
+      {
+        "id": "hide_armor",
+        "name": "Tough Hide",
+        "name_ru": "Жёсткая Шкура",
+        "description": "Gain 2 defense",
+        "description_ru": "Получить 2 защиты",
+        "effect": {"temporary_stat": {"stat": "defense", "amount": 2, "duration": 1}}
+      }
+    ],
+    "faith_cost": 0,
+    "balance": "neutral",
+    "power": null,
+    "defense": 2,
+    "health": null,
+    "realm": "yav"
+  },
+  {
+    "id": "guardian_seal",
+    "name": "Guardian Seal",
+    "name_ru": "Печать Стража",
+    "card_type": "special",
+    "rarity": "legendary",
+    "description": "Ancient seal of the Leshy Guardian. Shifts balance towards light.",
+    "description_ru": "Древняя печать Лешего-Стража. Сдвигает баланс к свету.",
+    "icon": "seal",
+    "expansion_set": "twilightMarches",
+    "ownership": "universal",
+    "abilities": [
+      {
+        "id": "seal_blessing",
+        "name": "Guardian's Blessing",
+        "name_ru": "Благословение Стража",
+        "description": "Shift balance towards light",
+        "description_ru": "Сдвиг баланса к свету",
+        "effect": {"shift_balance": {"towards": "light", "amount": 3}}
+      }
+    ],
+    "faith_cost": 2,
+    "balance": "light",
+    "power": null,
+    "defense": null,
+    "health": null,
+    "realm": "prav"
+  },
+  {
+    "id": "ancient_power",
+    "name": "Ancient Power",
+    "name_ru": "Древняя Сила",
+    "card_type": "special",
+    "rarity": "legendary",
+    "description": "Raw power of the forest guardian. Permanently increases strength.",
+    "description_ru": "Первозданная сила лесного стража. Навсегда увеличивает силу.",
+    "icon": "bolt",
+    "expansion_set": "twilightMarches",
+    "ownership": "universal",
+    "abilities": [
+      {
+        "id": "ancient_might",
+        "name": "Ancient Might",
+        "name_ru": "Древняя Мощь",
+        "description": "+1 permanent power",
+        "description_ru": "+1 к силе навсегда",
+        "effect": {"permanent_stat": {"stat": "power", "amount": 1}}
+      }
+    ],
+    "faith_cost": 3,
+    "balance": "neutral",
+    "power": 3,
+    "defense": null,
+    "health": null,
+    "realm": "prav"
   }
 ]

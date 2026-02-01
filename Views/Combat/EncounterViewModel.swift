@@ -62,6 +62,13 @@ final class EncounterViewModel: ObservableObject {
     @Published var turnInfluenceBonus: Int = 0
     @Published var turnDefenseBonus: Int = 0
 
+    // MARK: - Combat Statistics
+
+    private(set) var totalDamageDealt: Int = 0
+    private(set) var totalDamageTaken: Int = 0
+    private(set) var cardsPlayedCount: Int = 0
+    private(set) var fateCardsDrawnCount: Int = 0
+
     // MARK: - Fate Animation
 
     @Published var showFateReveal: Bool = false
@@ -465,10 +472,12 @@ final class EncounterViewModel: ObservableObject {
         for change in changes {
             switch change {
             case .enemyHPChanged(_, let delta, let newValue):
+                if delta < 0 { totalDamageDealt += -delta }
                 logEntry(L10n.encounterLogBodyDamage.localized(with: -delta, newValue))
             case .enemyWPChanged(_, let delta, let newValue):
                 logEntry(L10n.encounterLogWillDamage.localized(with: -delta, newValue))
             case .playerHPChanged(let delta, let newValue):
+                if delta < 0 { totalDamageTaken += -delta }
                 if delta < 0 {
                     HapticManager.shared.play(.heavy)
                     SoundManager.shared.play(.damageTaken)
@@ -485,6 +494,7 @@ final class EncounterViewModel: ObservableObject {
                 SoundManager.shared.play(.enemyDefeated)
                 logEntry(L10n.encounterLogEnemyPacified.localized(with: name))
             case .fateDraw(_, let value):
+                fateCardsDrawnCount += 1
                 let cardName: String
                 if let result = eng.lastFateDrawResult {
                     lastFateResult = result
@@ -503,6 +513,7 @@ final class EncounterViewModel: ObservableObject {
             case .rageShieldApplied(_, let value):
                 logEntry(L10n.encounterLogRageShield.localized(with: value))
             case .cardPlayed(_, let name):
+                cardsPlayedCount += 1
                 logEntry(L10n.encounterLogCardPlayed.localized(with: name))
             case .faithChanged(let delta, _):
                 if delta < 0 {

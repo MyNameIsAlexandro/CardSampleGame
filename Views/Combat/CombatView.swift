@@ -414,12 +414,11 @@ struct CombatView: View {
     private func applyResultAndDismiss(result: EncounterResult) {
         engine.applyEncounterResult(result)
 
-        let hpLost = max(0, startHP - vm.heroHP)
         let stats = CombatStats(
             turnsPlayed: vm.round,
-            totalDamageDealt: 0,
-            totalDamageTaken: hpLost,
-            cardsPlayed: 0
+            totalDamageDealt: vm.totalDamageDealt,
+            totalDamageTaken: vm.totalDamageTaken,
+            cardsPlayed: vm.cardsPlayedCount
         )
 
         let outcome: CombatOutcome
@@ -449,10 +448,10 @@ struct CombatView: View {
             )
         }
         profileManager.recordCombatStats(
-            damageDealt: 0,
-            damageTaken: hpLost,
-            cardsPlayed: 0,
-            fateCardsDrawn: 0
+            damageDealt: vm.totalDamageDealt,
+            damageTaken: vm.totalDamageTaken,
+            cardsPlayed: vm.cardsPlayedCount,
+            fateCardsDrawn: vm.fateCardsDrawnCount
         )
         // Check for new achievements
         let newUnlocks = AchievementEngine.evaluateNewUnlocks(profile: profileManager.profile)
