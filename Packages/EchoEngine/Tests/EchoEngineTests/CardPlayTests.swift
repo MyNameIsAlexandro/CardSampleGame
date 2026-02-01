@@ -502,4 +502,81 @@ struct CardPlayTests {
         }
         #expect(sim.enemyHealth == 16)
     }
+
+    // MARK: - Exhaust Tests
+
+    @Test("Exhaust card goes to exhaustPile instead of discardPile")
+    func testExhaustCard() {
+        let exhaustCard = Card(
+            id: "ex_card", name: "Sacrifice", type: .spell,
+            description: "One-time use",
+            abilities: [CardAbility(id: "a1", name: "Strike", description: "Hit",
+                                   effect: .damage(amount: 2, type: .physical))],
+            exhaust: true
+        )
+        let sim = CombatSimulation.create(
+            enemyDefinition: makeEnemy(health: 20),
+            playerDeck: [exhaustCard],
+            fateCards: makeFateCards(),
+            seed: 42
+        )
+        sim.beginCombat()
+
+        sim.playCard(cardId: exhaustCard.id)
+        #expect(sim.discardPileCount == 0)
+        #expect(sim.exhaustPileCount == 1)
+        #expect(sim.exhaustPile.first?.id == exhaustCard.id)
+    }
+
+    @Test("Non-exhaust card goes to discardPile as usual")
+    func testNonExhaustCard() {
+        let normalCard = makeDamageCard()
+        let sim = CombatSimulation.create(
+            enemyDefinition: makeEnemy(health: 20),
+            playerDeck: [normalCard],
+            fateCards: makeFateCards(),
+            seed: 42
+        )
+        sim.beginCombat()
+
+        sim.playCard(cardId: normalCard.id)
+        #expect(sim.discardPileCount == 1)
+        #expect(sim.exhaustPileCount == 0)
+    }
+
+    @Test("Exhausted cards are not recycled when draw pile is empty")
+    func testExhaustedCardsNotRecycled() {
+        let exhaustCard = Card(
+            id: "ex1", name: "Once", type: .spell,
+            description: "One-time",
+            abilities: [CardAbility(id: "a1", name: "Hit", description: "Hit",
+                                   effect: .damage(amount: 1, type: .physical))],
+            exhaust: true
+        )
+        let normalCard = Card(
+            id: "norm1", name: "Normal", type: .spell,
+            description: "Normal"
+        )
+        let sim = CombatSimulation.create(
+            enemyDefinition: makeEnemy(health: 50),
+            playerDeck: [exhaustCard, normalCard],
+            playerEnergy: 10,
+            fateCards: makeFateCards(),
+            seed: 42
+        )
+        sim.beginCombat()
+
+        // Play exhaust card — goes to exhaust pile
+        if sim.hand.contains(where: { $0.id == "ex1" }) {
+            sim.playCard(cardId: "ex1")
+        }
+        #expect(sim.exhaustPileCount == 1)
+
+        // End turn + resolve to trigger recycle
+        sim.endTurn()
+        sim.resolveEnemyTurn()
+
+        // Exhaust pile should still have 1 card — it wasn't recycled
+        #expect(sim.exhaustPileCount == 1)
+    }
 }

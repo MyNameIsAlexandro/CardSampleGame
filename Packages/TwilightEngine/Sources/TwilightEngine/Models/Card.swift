@@ -31,6 +31,7 @@ public struct Card: Identifiable, Codable, Hashable, Sendable {
     public var expansionSet: String?  // For DLC/expansions tracking
     public var role: CardRole?  // Functional role in campaign (Sustain/Control/Power/Utility)
     public var regionRequirement: String?  // Required region flag to purchase (for story pool)
+    public var exhaust: Bool  // If true, card is removed from deck after play (not recycled)
     public var faithCost: Int  // Cost in faith to purchase from market
 
     public init(
@@ -56,6 +57,7 @@ public struct Card: Identifiable, Codable, Hashable, Sendable {
         expansionSet: String? = nil,
         role: CardRole? = nil,
         regionRequirement: String? = nil,
+        exhaust: Bool = false,
         faithCost: Int = 3
     ) {
         self.id = id
@@ -80,6 +82,7 @@ public struct Card: Identifiable, Codable, Hashable, Sendable {
         self.expansionSet = expansionSet
         self.role = role
         self.regionRequirement = regionRequirement
+        self.exhaust = exhaust
         self.faithCost = faithCost
     }
 
@@ -108,6 +111,7 @@ public struct Card: Identifiable, Codable, Hashable, Sendable {
             expansionSet: expansionSet,
             role: role,
             regionRequirement: regionRequirement,
+            exhaust: exhaust,
             faithCost: faithCost
         )
     }

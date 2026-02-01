@@ -245,8 +245,12 @@ public struct CombatSystem: EchoSystem {
             }
         }
 
-        // Discard the played card
-        deckSystem.discardCard(id: cardId, for: player, nexus: nexus)
+        // Discard or exhaust the played card
+        if card.exhaust {
+            deckSystem.exhaustCard(id: cardId, for: player, nexus: nexus)
+        } else {
+            deckSystem.discardCard(id: cardId, for: player, nexus: nexus)
+        }
 
         return .cardPlayed(cardId: cardId, damage: totalDamage, heal: totalHeal, cardsDrawn: totalDrawn, statusApplied: statusApplied)
     }

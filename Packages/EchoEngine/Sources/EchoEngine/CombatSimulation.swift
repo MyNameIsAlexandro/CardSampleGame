@@ -113,6 +113,16 @@ public final class CombatSimulation {
         discardPile.count
     }
 
+    public var exhaustPile: [Card] {
+        guard let player = playerEntity else { return [] }
+        let deck: DeckComponent = nexus.get(unsafe: player.identifier)
+        return deck.exhaustPile
+    }
+
+    public var exhaustPileCount: Int {
+        exhaustPile.count
+    }
+
     public var energy: Int {
         guard let player = playerEntity else { return 0 }
         let e: EnergyComponent = nexus.get(unsafe: player.identifier)

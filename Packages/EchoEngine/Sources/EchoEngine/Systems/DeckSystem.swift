@@ -55,6 +55,7 @@ public struct DeckSystem: EchoSystem {
         deck.drawPile.append(contentsOf: deck.discardPile)
         deck.hand.removeAll()
         deck.discardPile.removeAll()
+        deck.exhaustPile.removeAll()
         rng.shuffle(&deck.drawPile)
         let drawCount = min(5, deck.drawPile.count)
         deck.hand = Array(deck.drawPile.prefix(drawCount))
@@ -67,6 +68,15 @@ public struct DeckSystem: EchoSystem {
         if let index = deck.hand.firstIndex(where: { $0.id == id }) {
             let card = deck.hand.remove(at: index)
             deck.discardPile.append(card)
+        }
+    }
+
+    /// Exhaust a card from hand by id (removed for rest of combat).
+    public func exhaustCard(id: String, for entity: Entity, nexus: Nexus) {
+        let deck: DeckComponent = nexus.get(unsafe: entity.identifier)
+        if let index = deck.hand.firstIndex(where: { $0.id == id }) {
+            let card = deck.hand.remove(at: index)
+            deck.exhaustPile.append(card)
         }
     }
 }
