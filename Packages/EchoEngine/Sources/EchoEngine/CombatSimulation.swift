@@ -126,6 +126,18 @@ public final class CombatSimulation {
         return family.firstElement()?.round ?? 1
     }
 
+    public func playerStatus(for stat: String) -> Int {
+        guard let player = playerEntity else { return 0 }
+        let s: StatusEffectComponent = nexus.get(unsafe: player.identifier)
+        return s.total(for: stat)
+    }
+
+    public func enemyStatus(for stat: String) -> Int {
+        guard let enemy = enemyEntity else { return 0 }
+        let s: StatusEffectComponent = nexus.get(unsafe: enemy.identifier)
+        return s.total(for: stat)
+    }
+
     // MARK: - Actions
 
     /// Begin combat: draw hand, generate enemy intent, set phase to playerTurn.
@@ -157,7 +169,7 @@ public final class CombatSimulation {
     @discardableResult
     public func playCard(cardId: String) -> CombatEvent {
         guard let player = playerEntity, let enemy = enemyEntity else {
-            return .cardPlayed(cardId: cardId, damage: 0, heal: 0, cardsDrawn: 0)
+            return .cardPlayed(cardId: cardId, damage: 0, heal: 0, cardsDrawn: 0, statusApplied: nil)
         }
         return combatSystem.playCard(cardId: cardId, player: player, enemy: enemy, deckSystem: deckSystem, nexus: nexus)
     }

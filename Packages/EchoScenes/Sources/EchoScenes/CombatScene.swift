@@ -571,7 +571,7 @@ public final class CombatScene: SKScene {
             return
         }
 
-        guard case .cardPlayed(_, let damage, let heal, _) = event else {
+        guard case .cardPlayed(_, let damage, let heal, _, _) = event else {
             isAnimating = false
             return
         }

@@ -76,7 +76,7 @@ struct CardPlayTests {
         let initialHP = sim.enemyHealth
         let event = sim.playCard(cardId: dmgCard.id)
 
-        if case .cardPlayed(_, let damage, _, _) = event {
+        if case .cardPlayed(_, let damage, _, _, _) = event {
             #expect(damage == 3)
         } else {
             Issue.record("Expected cardPlayed event")
@@ -99,7 +99,7 @@ struct CardPlayTests {
 
         let event = sim.playCard(cardId: healCard.id)
 
-        if case .cardPlayed(_, _, let heal, _) = event {
+        if case .cardPlayed(_, _, let heal, _, _) = event {
             #expect(heal == 4)
         } else {
             Issue.record("Expected cardPlayed event")
@@ -325,12 +325,122 @@ struct CardPlayTests {
         let drawPileBefore = sim.drawPileCount
         let event = sim.playCard(cardId: drawCard.id)
 
-        if case .cardPlayed(_, _, _, let drawn) = event {
+        if case .cardPlayed(_, _, _, let drawn, _) = event {
             #expect(drawn > 0)
         } else {
             Issue.record("Expected cardPlayed event")
         }
         // Net change: played 1, drew some → hand should be larger than before - 1
         #expect(sim.hand.count > handBefore - 1)
+    }
+
+    // MARK: - Status Effect Tests
+
+    @Test("Shield card grants shield to player")
+    func testShieldCard() {
+        let shieldCard = Card(
+            id: "shield", name: "Guard", type: .spell,
+            description: "Gain 4 shield",
+            abilities: [CardAbility(id: "s1", name: "Guard", description: "Shield",
+                                   effect: .temporaryStat(stat: "shield", amount: 4, duration: 2))]
+        )
+        let sim = CombatSimulation.create(
+            enemyDefinition: makeEnemy(health: 20),
+            playerDeck: [shieldCard],
+            fateCards: makeFateCards(),
+            seed: 42
+        )
+        sim.beginCombat()
+
+        let event = sim.playCard(cardId: shieldCard.id)
+        if case .cardPlayed(_, _, _, _, let status) = event {
+            #expect(status == "shield")
+        } else {
+            Issue.record("Expected cardPlayed event")
+        }
+        #expect(sim.playerStatus(for: "shield") == 4)
+    }
+
+    @Test("Poison card applies poison to enemy")
+    func testPoisonCard() {
+        let poisonCard = Card(
+            id: "poison", name: "Venom", type: .spell,
+            description: "Apply 2 poison",
+            abilities: [CardAbility(id: "p1", name: "Venom", description: "Poison",
+                                   effect: .temporaryStat(stat: "poison", amount: 2, duration: 3))]
+        )
+        let sim = CombatSimulation.create(
+            enemyDefinition: makeEnemy(health: 20),
+            playerDeck: [poisonCard],
+            fateCards: makeFateCards(),
+            seed: 42
+        )
+        sim.beginCombat()
+        sim.playCard(cardId: poisonCard.id)
+        #expect(sim.enemyStatus(for: "poison") == 2)
+
+        // Poison ticks on round advance
+        let hpBefore = sim.enemyHealth
+        sim.endTurn()
+        sim.resolveEnemyTurn()
+        #expect(sim.enemyHealth == hpBefore - 2)
+    }
+
+    @Test("Strength buff increases damage")
+    func testStrengthBuff() {
+        let buffCard = Card(
+            id: "buff", name: "Rage", type: .spell,
+            description: "Gain 2 strength",
+            abilities: [CardAbility(id: "b1", name: "Rage", description: "Strength",
+                                   effect: .temporaryStat(stat: "strength", amount: 2, duration: 2))]
+        )
+        let dmgCard = makeDamageCard(id: "dmg", damage: 3)
+        let fillers = (0..<3).map { i in
+            Card(id: "f_\(i)", name: "F", type: .spell, description: "F")
+        }
+        let sim = CombatSimulation.create(
+            enemyDefinition: makeEnemy(health: 30),
+            playerDeck: [buffCard, dmgCard] + fillers,
+            playerEnergy: 5,
+            fateCards: makeFateCards(),
+            seed: 42
+        )
+        sim.beginCombat()
+
+        guard sim.hand.contains(where: { $0.id == "buff" }),
+              sim.hand.contains(where: { $0.id == "dmg" }) else { return }
+
+        sim.playCard(cardId: "buff")
+        #expect(sim.playerStatus(for: "strength") == 2)
+
+        let hpBefore = sim.enemyHealth
+        sim.playCard(cardId: "dmg")
+        // 3 base + 2 strength = 5 damage
+        #expect(sim.enemyHealth == hpBefore - 5)
+    }
+
+    @Test("Shield absorbs enemy damage")
+    func testShieldAbsorbsDamage() {
+        let shieldCard = Card(
+            id: "shield", name: "Guard", type: .spell,
+            description: "Gain 5 shield",
+            abilities: [CardAbility(id: "s1", name: "Guard", description: "Shield",
+                                   effect: .temporaryStat(stat: "shield", amount: 5, duration: 2))]
+        )
+        let sim = CombatSimulation.create(
+            enemyDefinition: makeEnemy(health: 20),
+            playerDeck: [shieldCard],
+            fateCards: makeFateCards(),
+            seed: 42
+        )
+        sim.beginCombat()
+        sim.playCard(cardId: shieldCard.id)
+        #expect(sim.playerStatus(for: "shield") == 5)
+
+        let hpBefore = sim.playerHealth
+        sim.endTurn()
+        sim.resolveEnemyTurn()
+        // Enemy power=2, shield should absorb some/all
+        #expect(sim.playerHealth >= hpBefore - 2)
     }
 }

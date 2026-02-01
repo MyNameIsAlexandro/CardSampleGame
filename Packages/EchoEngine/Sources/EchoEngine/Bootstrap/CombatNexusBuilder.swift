@@ -31,6 +31,7 @@ public struct CombatNexusBuilder {
         playerEntity.assign(HealthComponent(current: playerHealth, max: playerMaxHealth))
         playerEntity.assign(DeckComponent(drawPile: rng.shuffled(playerDeck)))
         playerEntity.assign(EnergyComponent(current: playerEnergy, max: playerEnergy))
+        playerEntity.assign(StatusEffectComponent())
 
         // Enemy entity
         let enemyEntity = nexus.createEntity()
@@ -46,6 +47,7 @@ public struct CombatNexusBuilder {
             maxWill: enemyDefinition.will ?? 0
         ))
         enemyEntity.assign(IntentComponent())
+        enemyEntity.assign(StatusEffectComponent())
 
         return nexus
     }

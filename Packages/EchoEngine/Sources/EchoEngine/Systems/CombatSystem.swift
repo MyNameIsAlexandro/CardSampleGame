@@ -9,7 +9,7 @@ public enum CombatEvent {
     case enemyHealed(amount: Int)
     case enemyRitual(resonanceShift: Float)
     case enemyBlocked
-    case cardPlayed(cardId: String, damage: Int, heal: Int, cardsDrawn: Int)
+    case cardPlayed(cardId: String, damage: Int, heal: Int, cardsDrawn: Int, statusApplied: String?)
     case insufficientEnergy(cardId: String)
     case roundAdvanced(newRound: Int)
 }
@@ -109,7 +109,21 @@ public struct CombatSystem: EchoSystem {
             }
 
             let damageReduction = fateValue
-            let actualDamage = max(0, enemyIntent.value - damageReduction)
+            var actualDamage = max(0, enemyIntent.value - damageReduction)
+            // Player shield absorbs damage
+            if player.has(StatusEffectComponent.self) {
+                let status: StatusEffectComponent = nexus.get(unsafe: player.identifier)
+                let shield = status.total(for: "shield")
+                if shield > 0 {
+                    let absorbed = min(shield, actualDamage)
+                    status.apply(stat: "shield", amount: -absorbed, duration: 1)
+                    if status.total(for: "shield") <= 0 {
+                        status.effects.removeAll { $0.stat == "shield" }
+                    }
+                    actualDamage -= absorbed
+                }
+            }
+            actualDamage = max(0, actualDamage)
             if actualDamage > 0 {
                 playerHealth.current = max(0, playerHealth.current - actualDamage)
             }
@@ -149,7 +163,7 @@ public struct CombatSystem: EchoSystem {
     ) -> CombatEvent {
         let deck: DeckComponent = nexus.get(unsafe: player.identifier)
         guard let card = deck.hand.first(where: { $0.id == cardId }) else {
-            return .cardPlayed(cardId: cardId, damage: 0, heal: 0, cardsDrawn: 0)
+            return .cardPlayed(cardId: cardId, damage: 0, heal: 0, cardsDrawn: 0, statusApplied: nil)
         }
 
         // Check energy cost
@@ -163,26 +177,58 @@ public struct CombatSystem: EchoSystem {
         let playerHealth: HealthComponent = nexus.get(unsafe: player.identifier)
         let enemyHealth: HealthComponent = nexus.get(unsafe: enemy.identifier)
 
+        let playerStatus: StatusEffectComponent = nexus.get(unsafe: player.identifier)
+        let enemyStatus: StatusEffectComponent = nexus.get(unsafe: enemy.identifier)
+
         var totalDamage = 0
         var totalHeal = 0
         var totalDrawn = 0
+        var statusApplied: String? = nil
 
         // Resolve first ability, or fallback to card.power as damage
         if let ability = card.abilities.first {
             switch ability.effect {
             case .damage(let amount, _):
-                let dmg = max(0, amount)
+                var dmg = max(0, amount)
+                // Strength buff increases damage
+                dmg += playerStatus.total(for: "strength")
+                // Enemy shield absorbs damage
+                let shield = enemyStatus.total(for: "shield")
+                if shield > 0 {
+                    let absorbed = min(shield, dmg)
+                    enemyStatus.apply(stat: "shield", amount: -absorbed, duration: 1)
+                    if enemyStatus.total(for: "shield") <= 0 {
+                        enemyStatus.effects.removeAll { $0.stat == "shield" }
+                    }
+                    dmg -= absorbed
+                }
+                dmg = max(0, dmg)
                 enemyHealth.current = max(0, enemyHealth.current - dmg)
                 totalDamage = dmg
+
             case .heal(let amount):
                 let heal = min(amount, playerHealth.max - playerHealth.current)
                 playerHealth.current += heal
                 totalHeal = heal
+
             case .drawCards(let count):
                 let beforeCount = deck.hand.count
                 deckSystem.drawCards(count: count, for: player, nexus: nexus)
-                // hand count changed; the card itself will be discarded below
                 totalDrawn = deck.hand.count - beforeCount
+
+            case .temporaryStat(let stat, let amount, let duration):
+                // Apply buff to player (shield, strength) or debuff to enemy (poison)
+                if stat == "poison" {
+                    enemyStatus.apply(stat: stat, amount: amount, duration: duration)
+                } else {
+                    playerStatus.apply(stat: stat, amount: amount, duration: duration)
+                }
+                statusApplied = stat
+
+            case .gainFaith(let amount):
+                energy.current = min(energy.max, energy.current + amount)
+                statusApplied = "energy"
+
             default:
                 // Fallback: use card power as damage
                 let dmg = max(0, card.power ?? 0)
@@ -192,7 +238,6 @@ public struct CombatSystem: EchoSystem {
                 }
             }
         } else {
-            // No abilities — use card power as damage
             let dmg = max(0, card.power ?? 0)
             if dmg > 0 {
                 enemyHealth.current = max(0, enemyHealth.current - dmg)
@@ -203,7 +248,7 @@ public struct CombatSystem: EchoSystem {
         // Discard the played card
         deckSystem.discardCard(id: cardId, for: player, nexus: nexus)
 
-        return .cardPlayed(cardId: cardId, damage: totalDamage, heal: totalHeal, cardsDrawn: totalDrawn)
+        return .cardPlayed(cardId: cardId, damage: totalDamage, heal: totalHeal, cardsDrawn: totalDrawn, statusApplied: statusApplied)
     }
 
     // MARK: - Round Management
@@ -219,6 +264,18 @@ public struct CombatSystem: EchoSystem {
         let intentFamily = nexus.family(requires: IntentComponent.self)
         for intent in intentFamily {
             intent.intent = nil
+        }
+
+        // Tick status effects: apply poison, decrement durations
+        let statusFamily = nexus.family(requires: StatusEffectComponent.self)
+        for entity in statusFamily.entities {
+            let status: StatusEffectComponent = nexus.get(unsafe: entity.identifier)
+            let poison = status.total(for: "poison")
+            if poison > 0, entity.has(HealthComponent.self) {
+                let health: HealthComponent = nexus.get(unsafe: entity.identifier)
+                health.current = max(0, health.current - poison)
+            }
+            status.tick()
         }
     }
 
