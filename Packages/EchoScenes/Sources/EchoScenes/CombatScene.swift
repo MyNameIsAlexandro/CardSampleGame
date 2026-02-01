@@ -37,6 +37,8 @@ public final class CombatScene: SKScene {
     private let maxLogEntries = 5
     private var discardOverlay: SKNode?
     private var exhaustOverlay: SKNode?
+    private var playerStatusNode: SKNode?
+    private var enemyStatusNode: SKNode?
     private var mulliganOverlay: SKNode?
     private var mulliganSelected: Set<String> = []
     private var longPressTimer: Timer?
@@ -351,6 +353,69 @@ public final class CombatScene: SKScene {
         energyLabel.text = "⚡ \(simulation.energy)/\(simulation.maxEnergy)"
 
         updateIntentDisplay()
+        updateStatusIcons()
+    }
+
+    private func updateStatusIcons() {
+        playerStatusNode?.removeFromParent()
+        playerStatusNode = nil
+        enemyStatusNode?.removeFromParent()
+        enemyStatusNode = nil
+
+        let stats = ["shield", "strength", "poison"]
+        let icons: [String: (String, SKColor)] = [
+            "shield": ("🛡", CombatSceneTheme.muted),
+            "strength": ("⚔", CombatSceneTheme.faith),
+            "poison": ("☠", CombatSceneTheme.success)
+        ]
+
+        // Player status
+        let playerEffects = stats.compactMap { stat -> (String, Int)? in
+            let val = simulation.playerStatus(for: stat)
+            return val > 0 ? (stat, val) : nil
+        }
+        if !playerEffects.isEmpty {
+            let node = SKNode()
+            node.position = CGPoint(x: playerPosition.x + 50, y: playerPosition.y)
+            node.zPosition = 25
+            for (i, (stat, amount)) in playerEffects.enumerated() {
+                let (icon, color) = icons[stat] ?? ("?", .white)
+                let lbl = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+                lbl.text = "\(icon)\(amount)"
+                lbl.fontSize = 10
+                lbl.fontColor = color
+                lbl.verticalAlignmentMode = .center
+                lbl.horizontalAlignmentMode = .left
+                lbl.position = CGPoint(x: 0, y: -CGFloat(i) * 14)
+                node.addChild(lbl)
+            }
+            addChild(node)
+            playerStatusNode = node
+        }
+
+        // Enemy status
+        let enemyEffects = stats.compactMap { stat -> (String, Int)? in
+            let val = simulation.enemyStatus(for: stat)
+            return val > 0 ? (stat, val) : nil
+        }
+        if !enemyEffects.isEmpty {
+            let node = SKNode()
+            node.position = CGPoint(x: enemyPosition.x + 55, y: enemyPosition.y)
+            node.zPosition = 25
+            for (i, (stat, amount)) in enemyEffects.enumerated() {
+                let (icon, color) = icons[stat] ?? ("?", .white)
+                let lbl = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+                lbl.text = "\(icon)\(amount)"
+                lbl.fontSize = 10
+                lbl.fontColor = color
+                lbl.verticalAlignmentMode = .center
+                lbl.horizontalAlignmentMode = .left
+                lbl.position = CGPoint(x: 0, y: -CGFloat(i) * 14)
+                node.addChild(lbl)
+            }
+            addChild(node)
+            enemyStatusNode = node
+        }
     }
 
     private func updateIntentDisplay() {
