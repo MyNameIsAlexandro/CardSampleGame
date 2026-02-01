@@ -179,14 +179,16 @@ final class RegressionPlaythroughTests: XCTestCase {
         // These values should be captured once and then verified on each run
         // If migration changes behavior, this test will fail
 
-        // For now, we just verify the simulation completes
-        XCTAssertGreaterThan(finalState.time, 0, "Time should advance")
-        XCTAssertGreaterThanOrEqual(finalState.visitedRegions.count, 1, "Should have visited regions")
-
-        // TODO: After establishing baseline, add specific assertions:
-        // XCTAssertEqual(finalState.pressure, EXPECTED_PRESSURE)
-        // XCTAssertEqual(finalState.time, EXPECTED_TIME)
-        // XCTAssertEqual(finalState.visitedRegions, EXPECTED_REGIONS)
+        // Baseline values established from seed 98765 (deterministic)
+        XCTAssertEqual(finalState.pressure, 15, "Pressure should match baseline")
+        XCTAssertEqual(finalState.time, 10, "Time should match baseline")
+        XCTAssertEqual(finalState.health, 20, "Health should match baseline")
+        XCTAssertEqual(finalState.faith, 6, "Faith should match baseline")
+        XCTAssertEqual(
+            finalState.visitedRegions,
+            ["crossroads", "forest", "starting_area", "village"],
+            "Visited regions should match baseline"
+        )
     }
 
     // MARK: - Deck State Persistence

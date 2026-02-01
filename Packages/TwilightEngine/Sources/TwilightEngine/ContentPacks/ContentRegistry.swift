@@ -397,7 +397,7 @@ public final class ContentRegistry {
             heroCount: mergedHeroes.count,
             cardCount: mergedCards.count,
             anchorCount: mergedAnchors.count,
-            enemyCount: 0, // TODO: Add enemy support
+            enemyCount: mergedEnemies.count,
             hasBalanceConfig: activeBalanceConfig != nil,
             hasRulesExtension: false,
             hasCampaignContent: !mergedRegions.isEmpty || !mergedEvents.isEmpty,

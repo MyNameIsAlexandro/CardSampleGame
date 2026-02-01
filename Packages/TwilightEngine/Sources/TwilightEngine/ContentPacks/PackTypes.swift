@@ -217,6 +217,12 @@ public enum PackLoadError: Error, LocalizedError {
 // MARK: - Loaded Pack
 
 /// Represents a successfully loaded pack
+/// Placeholder for future rules extension support.
+/// Packs may override or extend game rules (e.g., custom combat modifiers, win conditions).
+public struct RulesExtension: Codable, Equatable {
+    public init() {}
+}
+
 public struct LoadedPack {
     public var manifest: PackManifest
     public var sourceURL: URL
@@ -236,6 +242,9 @@ public struct LoadedPack {
     /// Balance configuration (if pack provides one)
     public var balanceConfig: BalanceConfiguration?
 
+    /// Rules extension (if pack provides one)
+    public var rulesExtension: RulesExtension?
+
     /// Computed inventory
     public var inventory: ContentInventory {
         ContentInventory(
@@ -247,7 +256,7 @@ public struct LoadedPack {
             anchorCount: anchors.count,
             enemyCount: enemies.count,
             hasBalanceConfig: balanceConfig != nil,
-            hasRulesExtension: false, // TODO: Add rules extension support
+            hasRulesExtension: rulesExtension != nil,
             hasCampaignContent: !regions.isEmpty || !events.isEmpty || !quests.isEmpty,
             supportedLocales: manifest.supportedLocales
         )

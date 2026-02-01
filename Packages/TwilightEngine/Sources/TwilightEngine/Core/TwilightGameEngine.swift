@@ -65,6 +65,12 @@ public final class TwilightGameEngine {
     /// Main quest stage (1-5)
     public private(set) var mainQuestStage: Int = 1
 
+    /// Tracks when the current session started, for computing total game duration
+    private var gameStartDate: Date = Date()
+
+    /// Accumulated game duration from previous sessions (seconds)
+    private var previousSessionsDuration: TimeInterval = 0
+
     // MARK: - UI Convenience Accessors (Engine-First Architecture)
 
     /// Get regions as sorted array for UI iteration
@@ -1563,7 +1569,7 @@ public extension TwilightGameEngine {
         return EngineSave(
             version: EngineSave.currentVersion,
             savedAt: Date(),
-            gameDuration: 0,  // TODO: Track game duration
+            gameDuration: previousSessionsDuration + Date().timeIntervalSince(gameStartDate),
 
             // Pack compatibility
             coreVersion: EngineSave.currentCoreVersion,
@@ -1732,6 +1738,10 @@ public extension TwilightGameEngine {
 
         // Restore mid-combat state (SAV-03)
         pendingEncounterState = save.encounterState
+
+        // Restore game duration tracking
+        previousSessionsDuration = save.gameDuration
+        gameStartDate = Date()
 
         // Restore RNG state (Audit 1.5 - determinism after load)
         WorldRNG.shared.restoreState(save.rngState)
