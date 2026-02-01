@@ -906,6 +906,11 @@
 "encounter.outcome.continue" = "Продолжить";
 "encounter.outcome.hp.lost" = "Потеряно здоровья: %d";
 "encounter.outcome.hp.gained" = "Восстановлено здоровья: %d";
+"encounter.outcome.faith" = "Вера +%d";
+"encounter.outcome.resonance.nav" = "Навь %+.0f";
+"encounter.outcome.resonance.prav" = "Правь %+.0f";
+"encounter.outcome.loot" = "Добыча";
+"encounter.outcome.stats" = "%d ходов, %d урона нанесено, %d карт сыграно";
 
 // New intent types
 "combat.intent.prepare" = "Подготовка";

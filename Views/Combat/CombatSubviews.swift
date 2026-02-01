@@ -405,6 +405,9 @@ struct FateDeckBar: View {
 
 struct CombatOverView: View {
     let result: EncounterResult
+    var turnsPlayed: Int = 0
+    var totalDamageDealt: Int = 0
+    var cardsPlayed: Int = 0
     let onDismiss: () -> Void
 
     var body: some View {
@@ -471,7 +474,7 @@ struct CombatOverView: View {
                 HStack {
                     Image(systemName: "sparkles")
                         .foregroundColor(AppColors.faith)
-                    Text("Faith +\(result.transaction.faithDelta)")
+                    Text(L10n.encounterOutcomeFaith.localized(with: result.transaction.faithDelta))
                         .font(.body)
                         .foregroundColor(AppColors.faith)
                     Spacer()
@@ -484,10 +487,21 @@ struct CombatOverView: View {
                     let isNav = result.transaction.resonanceDelta < 0
                     Image(systemName: isNav ? "arrow.left" : "arrow.right")
                         .foregroundColor(isNav ? AppColors.resonanceNav : AppColors.resonancePrav)
-                    Text(isNav ? "Nav" : "Prav")
+                    Text(isNav
+                        ? L10n.encounterOutcomeResonanceNav.localized(with: result.transaction.resonanceDelta)
+                        : L10n.encounterOutcomeResonancePrav.localized(with: result.transaction.resonanceDelta))
                         .font(.body)
                         .foregroundColor(isNav ? AppColors.resonanceNav : AppColors.resonancePrav)
-                    Text(String(format: "%+.0f", result.transaction.resonanceDelta))
+                    Spacer()
+                }
+            }
+
+            // Combat stats
+            if turnsPlayed > 0 {
+                HStack {
+                    Image(systemName: "chart.bar.fill")
+                        .foregroundColor(AppColors.muted)
+                    Text(L10n.encounterOutcomeStats.localized(with: turnsPlayed, totalDamageDealt, cardsPlayed))
                         .font(.caption)
                         .foregroundColor(AppColors.secondary)
                     Spacer()
@@ -497,7 +511,7 @@ struct CombatOverView: View {
             // Loot cards
             if !result.transaction.lootCardIds.isEmpty {
                 VStack(alignment: .leading, spacing: Spacing.sm) {
-                    Text("Loot")
+                    Text(L10n.encounterOutcomeLoot.localized)
                         .font(.caption)
                         .foregroundColor(AppColors.secondary)
 

@@ -31,7 +31,7 @@ extension TwilightGameEngine {
         }
 
         // Gather player cards
-        let heroCards: [Card] = deck.allCards
+        let heroCards: [Card] = deck.playerDeck + deck.playerHand + deck.playerDiscard
 
         // Gather fate cards
         let fateCards: [FateCard]
@@ -44,22 +44,22 @@ extension TwilightGameEngine {
 
         return EchoCombatConfig(
             enemyDefinition: enemyDef,
-            playerName: player.heroName ?? "Hero",
+            playerName: player.name,
             playerHealth: player.health,
             playerMaxHealth: player.maxHealth,
             playerStrength: player.strength,
             playerDeck: heroCards,
             fateCards: fateCards,
-            resonance: Float(resonanceState.currentResonance),
+            resonance: resonanceValue,
             seed: UInt64(Date().timeIntervalSince1970)
         )
     }
 
     /// Apply the result of an EchoEngine combat back to the game engine.
-    func applyEchoCombatResult(_ result: CombatResult) {
+    func applyEchoCombatResult(_ result: EchoCombatResult) {
         // Apply resonance delta
         if result.resonanceDelta != 0 {
-            adjustResonance(by: result.resonanceDelta)
+            adjustResonance(by: Float(result.resonanceDelta))
         }
 
         // Restore fate deck state

@@ -11,9 +11,7 @@ struct BattleArenaView: View {
     @State private var selectedHeroId: String?
     @State private var selectedEnemyId: String?
     @State private var showingCombat = false
-    @State private var showingSpriteKitCombat = false
     @State private var lastOutcome: CombatView.CombatOutcome?
-    @State private var useSpriteKit = true
 
     private var availableHeroes: [HeroDefinition] {
         HeroRegistry.shared.availableHeroes()
@@ -44,9 +42,6 @@ struct BattleArenaView: View {
                     .font(.title2)
                     .fontWeight(.bold)
                 Spacer()
-                Toggle("SK", isOn: $useSpriteKit)
-                    .toggleStyle(.switch)
-                    .fixedSize()
             }
             .padding()
 
@@ -116,15 +111,6 @@ struct BattleArenaView: View {
         .background(AppColors.backgroundSystem.ignoresSafeArea())
         .navigationBarHidden(true)
         .fullScreenCover(isPresented: $showingCombat) {
-            CombatView(
-                engine: engine,
-                onCombatEnd: { outcome in
-                    lastOutcome = outcome
-                    showingCombat = false
-                }
-            )
-        }
-        .fullScreenCover(isPresented: $showingSpriteKitCombat) {
             spriteKitCombatView
         }
     }
@@ -145,18 +131,7 @@ struct BattleArenaView: View {
         let startingDeck = startingDeckDefs.map { $0.toCard() }
 
         lastOutcome = nil
-
-        if useSpriteKit {
-            showingSpriteKitCombat = true
-        } else {
-            engine.initializeNewGame(
-                playerName: hero.name.localized,
-                heroId: heroId,
-                startingDeck: startingDeck
-            )
-            engine.combat.setupCombatEnemy(enemy.toCard())
-            showingCombat = true
-        }
+        showingCombat = true
     }
 
     // MARK: - SpriteKit Combat
@@ -179,14 +154,19 @@ struct BattleArenaView: View {
                 playerDeck: startingDeck,
                 fateCards: fateCards,
                 seed: UInt64(Date().timeIntervalSince1970),
-                onCombatEnd: { outcome in
-                    let stats = CombatView.CombatStats(turnsPlayed: 0, totalDamageDealt: 0, totalDamageTaken: 0, cardsPlayed: 0)
-                    if case .victory = outcome {
+                onCombatEndWithResult: { result in
+                    let stats = CombatView.CombatStats(
+                        turnsPlayed: result.turnsPlayed,
+                        totalDamageDealt: result.totalDamageDealt,
+                        totalDamageTaken: result.totalDamageTaken,
+                        cardsPlayed: result.cardsPlayed
+                    )
+                    if case .victory = result.outcome {
                         lastOutcome = .victory(stats: stats)
                     } else {
                         lastOutcome = .defeat(stats: stats)
                     }
-                    showingSpriteKitCombat = false
+                    showingCombat = false
                 }
             )
         }

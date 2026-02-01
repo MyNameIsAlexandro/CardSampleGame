@@ -2,26 +2,39 @@ import FirebladeECS
 import TwilightEngine
 
 /// Result of a completed combat encounter, containing all deltas to apply back to the game.
-public struct CombatResult: Sendable {
+public struct EchoCombatResult: Sendable {
     public let outcome: CombatOutcome
     /// Resonance shift: negative for kill (Nav), positive for pacify (Prav)
     public let resonanceDelta: Int
     public let faithDelta: Int
     public let lootCardIds: [String]
     public let updatedFateDeckState: FateDeckState?
+    // Combat stats
+    public let turnsPlayed: Int
+    public let totalDamageDealt: Int
+    public let totalDamageTaken: Int
+    public let cardsPlayed: Int
 
     public init(
         outcome: CombatOutcome,
         resonanceDelta: Int = 0,
         faithDelta: Int = 0,
         lootCardIds: [String] = [],
-        updatedFateDeckState: FateDeckState? = nil
+        updatedFateDeckState: FateDeckState? = nil,
+        turnsPlayed: Int = 0,
+        totalDamageDealt: Int = 0,
+        totalDamageTaken: Int = 0,
+        cardsPlayed: Int = 0
     ) {
         self.outcome = outcome
         self.resonanceDelta = resonanceDelta
         self.faithDelta = faithDelta
         self.lootCardIds = lootCardIds
         self.updatedFateDeckState = updatedFateDeckState
+        self.turnsPlayed = turnsPlayed
+        self.totalDamageDealt = totalDamageDealt
+        self.totalDamageTaken = totalDamageTaken
+        self.cardsPlayed = cardsPlayed
     }
 }
 
@@ -32,6 +45,11 @@ public final class CombatSimulation {
     public let combatSystem: CombatSystem
     public let aiSystem: AISystem
     public let deckSystem: DeckSystem
+
+    // Combat stats tracking
+    public private(set) var statDamageDealt: Int = 0
+    public private(set) var statDamageTaken: Int = 0
+    public private(set) var statCardsPlayed: Int = 0
 
     public init(nexus: Nexus, rng: WorldRNG) {
         self.nexus = nexus
@@ -218,8 +236,8 @@ public final class CombatSimulation {
         return intent.intent
     }
 
-    /// Build a CombatResult from the current combat state. Call after combat ends.
-    public var combatResult: CombatResult? {
+    /// Build a EchoCombatResult from the current combat state. Call after combat ends.
+    public var combatResult: EchoCombatResult? {
         guard let outcome = outcome else { return nil }
         guard let enemy = enemyEntity else { return nil }
         let enemyTag: EnemyTagComponent = nexus.get(unsafe: enemy.identifier)
@@ -249,12 +267,16 @@ public final class CombatSimulation {
             }
         }
 
-        return CombatResult(
+        return EchoCombatResult(
             outcome: outcome,
             resonanceDelta: resonanceDelta,
             faithDelta: faithDelta,
             lootCardIds: enemyTag.lootCardIds,
-            updatedFateDeckState: fateDeckState
+            updatedFateDeckState: fateDeckState,
+            turnsPlayed: round,
+            totalDamageDealt: statDamageDealt,
+            totalDamageTaken: statDamageTaken,
+            cardsPlayed: statCardsPlayed
         )
     }
 
@@ -281,6 +303,7 @@ public final class CombatSimulation {
             return .playerMissed(fateValue: 0, fateResolution: nil)
         }
         let event = combatSystem.playerAttack(player: player, enemy: enemy, bonusDamage: bonusDamage, nexus: nexus)
+        if case .playerAttacked(let dmg, _, _, _) = event { statDamageDealt += dmg }
         combatSystem.setCombatPhase(.enemyResolve, nexus: nexus)
         return event
     }
@@ -291,7 +314,10 @@ public final class CombatSimulation {
         guard let player = playerEntity, let enemy = enemyEntity else {
             return .cardPlayed(cardId: cardId, damage: 0, heal: 0, cardsDrawn: 0, statusApplied: nil)
         }
-        return combatSystem.playCard(cardId: cardId, player: player, enemy: enemy, deckSystem: deckSystem, nexus: nexus)
+        let event = combatSystem.playCard(cardId: cardId, player: player, enemy: enemy, deckSystem: deckSystem, nexus: nexus)
+        statCardsPlayed += 1
+        if case .cardPlayed(_, let dmg, _, _, _) = event { statDamageDealt += dmg }
+        return event
     }
 
     /// Player uses spiritual influence on enemy.
@@ -323,6 +349,7 @@ public final class CombatSimulation {
             return .enemyBlocked
         }
         let event = combatSystem.resolveEnemyIntent(enemy: enemy, player: player, nexus: nexus)
+        if case .enemyAttacked(let dmg, _, _, _) = event { statDamageTaken += dmg }
 
         // Check for end conditions
         if let _ = combatSystem.checkVictoryOrDefeat(nexus: nexus) {

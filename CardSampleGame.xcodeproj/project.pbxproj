@@ -31,6 +31,7 @@
 		CB0000010000000000000001 /* EncounterBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0000020000000000000001 /* EncounterBridge.swift */; };
 		CB0000030000000000000001 /* EncounterViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0000040000000000000001 /* EncounterViewModel.swift */; };
 		CB0000050000000000000001 /* CombatSubviews.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0000060000000000000001 /* CombatSubviews.swift */; };
+		CB0000070000000000000001 /* EchoEncounterBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0000080000000000000001 /* EchoEncounterBridge.swift */; };
 		EIV000010000000000000001 /* EnemyIntentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EIV000020000000000000001 /* EnemyIntentView.swift */; };
 		FRV000010000000000000001 /* FateCardRevealView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FRV000020000000000000001 /* FateCardRevealView.swift */; };
 		CT00000000000010 /* PackLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CT00000000000001 /* PackLoaderTests.swift */; };
@@ -151,6 +152,7 @@
 		CB0000020000000000000001 /* EncounterBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncounterBridge.swift; sourceTree = "<group>"; };
 		CB0000040000000000000001 /* EncounterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncounterViewModel.swift; sourceTree = "<group>"; };
 		CB0000060000000000000001 /* CombatSubviews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombatSubviews.swift; sourceTree = "<group>"; };
+		CB0000080000000000000001 /* EchoEncounterBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EchoEncounterBridge.swift; sourceTree = "<group>"; };
 		EIV000020000000000000001 /* EnemyIntentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemyIntentView.swift; sourceTree = "<group>"; };
 		FRV000020000000000000001 /* FateCardRevealView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FateCardRevealView.swift; sourceTree = "<group>"; };
 		CT00000000000001 /* PackLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackLoaderTests.swift; sourceTree = "<group>"; };
@@ -416,6 +418,7 @@
 				CB0000020000000000000001 /* EncounterBridge.swift */,
 				CB0000040000000000000001 /* EncounterViewModel.swift */,
 				CB0000060000000000000001 /* CombatSubviews.swift */,
+				CB0000080000000000000001 /* EchoEncounterBridge.swift */,
 			);
 			path = Combat;
 			sourceTree = "<group>";
@@ -700,6 +703,7 @@
 				CB0000010000000000000001 /* EncounterBridge.swift in Sources */,
 				CB0000030000000000000001 /* EncounterViewModel.swift in Sources */,
 				CB0000050000000000000001 /* CombatSubviews.swift in Sources */,
+				CB0000070000000000000001 /* EchoEncounterBridge.swift in Sources */,
 				EIV000010000000000000001 /* EnemyIntentView.swift in Sources */,
 				FRV000010000000000000001 /* FateCardRevealView.swift in Sources */,
 				GG0002010000000000000001 /* HeroSelectionView.swift in Sources */,

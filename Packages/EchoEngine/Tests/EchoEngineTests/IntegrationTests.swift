@@ -22,10 +22,10 @@ struct IntegrationTests {
         )
     }
 
-    // MARK: - CombatResult Tests
+    // MARK: - EchoCombatResult Tests
 
-    @Test("CombatResult reports killed victory with Nav resonance delta")
-    func testCombatResultKilled() {
+    @Test("EchoCombatResult reports killed victory with Nav resonance delta")
+    func testEchoCombatResultKilled() {
         let enemy = makeEnemy(health: 1, faithReward: 3)
         let sim = CombatSimulation.create(
             enemyDefinition: enemy,
@@ -46,8 +46,8 @@ struct IntegrationTests {
         #expect(result?.updatedFateDeckState != nil)
     }
 
-    @Test("CombatResult reports pacified victory with Prav resonance delta")
-    func testCombatResultPacified() {
+    @Test("EchoCombatResult reports pacified victory with Prav resonance delta")
+    func testEchoCombatResultPacified() {
         let enemy = makeEnemy(health: 50, will: 1, faithReward: 5)
         let sim = CombatSimulation.create(
             enemyDefinition: enemy,
@@ -66,8 +66,8 @@ struct IntegrationTests {
         #expect(result?.faithDelta == 5)
     }
 
-    @Test("CombatResult is nil before combat ends")
-    func testCombatResultNilDuringCombat() {
+    @Test("EchoCombatResult is nil before combat ends")
+    func testEchoCombatResultNilDuringCombat() {
         let enemy = makeEnemy(health: 50)
         let sim = CombatSimulation.create(
             enemyDefinition: enemy,
@@ -79,8 +79,8 @@ struct IntegrationTests {
         #expect(sim.combatResult == nil)
     }
 
-    @Test("CombatResult reports defeat with zero deltas")
-    func testCombatResultDefeat() {
+    @Test("EchoCombatResult reports defeat with zero deltas")
+    func testEchoCombatResultDefeat() {
         let enemy = makeEnemy(health: 100)
         let sim = CombatSimulation.create(
             enemyDefinition: enemy,

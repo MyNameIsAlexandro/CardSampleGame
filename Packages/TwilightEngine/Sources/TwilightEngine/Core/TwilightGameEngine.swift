@@ -832,9 +832,50 @@ public final class TwilightGameEngine: ObservableObject {
         if let event = generateEvent(for: regionId, trigger: .exploration) {
             events.append(event)
             currentEventId = event
+        } else if let encounter = generateRandomEncounter(regionId: regionId) {
+            // No scripted event — try random combat encounter
+            events.append(encounter)
+            currentEventId = encounter
         }
 
         return (changes, events)
+    }
+
+    /// Generate a random combat encounter when no scripted event fires.
+    /// Chance scales with worldTension (0–100). At tension 30 → ~15%, at 80 → ~40%.
+    private func generateRandomEncounter(regionId: String) -> String? {
+        let encounterChance = max(5, worldTension / 2) // 5..50%
+        let roll = WorldRNG.shared.nextInt(in: 0...99)
+        guard roll < encounterChance else { return nil }
+
+        let allEnemies = ContentRegistry.shared.getAllEnemies()
+        guard !allEnemies.isEmpty else { return nil }
+
+        let enemy = allEnemies[WorldRNG.shared.nextInt(in: 0...(allEnemies.count - 1))]
+
+        let monsterCard = enemy.toCard()
+        let combatEvent = GameEvent(
+            id: "random_encounter_\(currentDay)_\(regionId)",
+            eventType: .combat,
+            title: enemy.name.resolved,
+            description: enemy.description.resolved,
+            choices: [
+                EventChoice(
+                    id: "fight",
+                    text: NSLocalizedString("encounter.action.attack", comment: ""),
+                    consequences: EventConsequences(message: "")
+                ),
+                EventChoice(
+                    id: "flee",
+                    text: NSLocalizedString("encounter.action.flee", comment: ""),
+                    consequences: EventConsequences(healthChange: -2, message: "")
+                )
+            ],
+            monsterCard: monsterCard
+        )
+
+        currentEvent = combatEvent
+        return combatEvent.id
     }
 
     private func executeStrengthenAnchor() -> [StateChange] {

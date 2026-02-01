@@ -901,6 +901,11 @@
 "encounter.outcome.continue" = "Continue";
 "encounter.outcome.hp.lost" = "Health lost: %d";
 "encounter.outcome.hp.gained" = "Health restored: %d";
+"encounter.outcome.faith" = "Faith +%d";
+"encounter.outcome.resonance.nav" = "Nav %+.0f";
+"encounter.outcome.resonance.prav" = "Prav %+.0f";
+"encounter.outcome.loot" = "Loot";
+"encounter.outcome.stats" = "%d turns, %d damage dealt, %d cards played";
 
 // New intent types
 "combat.intent.prepare" = "Prepare";

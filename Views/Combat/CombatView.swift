@@ -322,7 +322,12 @@ struct CombatView: View {
         }
         .overlay {
             if vm.showCombatOver, let result = vm.encounterResult {
-                CombatOverView(result: result) {
+                CombatOverView(
+                    result: result,
+                    turnsPlayed: vm.round,
+                    totalDamageDealt: vm.totalDamageDealt,
+                    cardsPlayed: vm.cardsPlayedCount
+                ) {
                     applyResultAndDismiss(result: result)
                 }
             }

@@ -1,5 +1,7 @@
 import SwiftUI
 import TwilightEngine
+import EchoEngine
+import EchoScenes
 
 /// Event view with Engine-First Architecture
 /// - All state mutations go through engine.performAction()
@@ -17,6 +19,7 @@ struct EventView: View {
     @State private var showingResult = false
     @State private var resultMessage: String = ""
     @State private var combatMonster: Card?
+    @State private var echoCombatConfig: EchoCombatConfig?
     @State private var combatVictory: Bool?
 
     // MARK: - Initialization (Engine-First only)
@@ -94,13 +97,41 @@ struct EventView: View {
                 Text(resultMessage)
             }
             .fullScreenCover(item: $combatMonster) { _ in
-                // Combat already set up in initiateCombat via engine.setupCombatEnemy
-                CombatView(
-                    engine: engine,
-                    onCombatEnd: { outcome in
-                        handleCombatEnd(outcome: outcome)
-                    }
-                )
+                if let config = echoCombatConfig {
+                    CombatSceneView(
+                        enemyDefinition: config.enemyDefinition,
+                        playerName: config.playerName,
+                        playerHealth: config.playerHealth,
+                        playerMaxHealth: config.playerMaxHealth,
+                        playerStrength: config.playerStrength,
+                        playerDeck: config.playerDeck,
+                        fateCards: config.fateCards,
+                        resonance: config.resonance,
+                        seed: config.seed,
+                        onCombatEndWithResult: { (result: EchoCombatResult) in
+                            engine.applyEchoCombatResult(result)
+                            let isVictory: Bool
+                            if case .victory = result.outcome { isVictory = true } else { isVictory = false }
+                            let stats = CombatView.CombatStats(
+                                turnsPlayed: 0,
+                                totalDamageDealt: 0,
+                                totalDamageTaken: 0,
+                                cardsPlayed: 0
+                            )
+                            let outcome: CombatView.CombatOutcome = isVictory
+                                ? .victory(stats: stats)
+                                : .defeat(stats: stats)
+                            handleCombatEnd(outcome: outcome)
+                        }
+                    )
+                } else {
+                    CombatView(
+                        engine: engine,
+                        onCombatEnd: { outcome in
+                            handleCombatEnd(outcome: outcome)
+                        }
+                    )
+                }
             }
         }
     }
@@ -341,6 +372,14 @@ struct EventView: View {
 
         // Setup combat in engine first, then show fullScreenCover
         engine.combat.setupCombatEnemy(adjustedMonster)
+
+        // Try to use EchoEngine (SpriteKit) if EnemyDefinition exists
+        if let _ = ContentRegistry.shared.getEnemy(id: monster.id) {
+            echoCombatConfig = engine.makeEchoCombatConfig()
+        } else {
+            echoCombatConfig = nil
+        }
+
         combatMonster = adjustedMonster
     }
 

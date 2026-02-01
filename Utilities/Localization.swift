@@ -517,6 +517,11 @@ enum L10n {
     static let encounterOutcomeContinue = "encounter.outcome.continue"
     static let encounterOutcomeHpLost = "encounter.outcome.hp.lost"
     static let encounterOutcomeHpGained = "encounter.outcome.hp.gained"
+    static let encounterOutcomeFaith = "encounter.outcome.faith"
+    static let encounterOutcomeResonanceNav = "encounter.outcome.resonance.nav"
+    static let encounterOutcomeResonancePrav = "encounter.outcome.resonance.prav"
+    static let encounterOutcomeLoot = "encounter.outcome.loot"
+    static let encounterOutcomeStats = "encounter.outcome.stats"
 
     // Resonance zone names (for FateCardRevealView)
     static let resonanceDeepNav = "resonance.deep.nav"

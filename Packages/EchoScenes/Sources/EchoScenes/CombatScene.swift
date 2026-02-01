@@ -50,6 +50,7 @@ public final class CombatScene: SKScene {
     // MARK: - Callbacks
 
     public var onCombatEnd: ((CombatOutcome) -> Void)?
+    public var onCombatEndWithResult: ((EchoCombatResult) -> Void)?
 
     // MARK: - Configuration
 
@@ -625,6 +626,9 @@ public final class CombatScene: SKScene {
         let tapped = nodes(at: location)
         if tapped.contains(where: { $0.name == "btn_continue" }),
            let outcome = simulation.outcome {
+            if let result = simulation.combatResult {
+                onCombatEndWithResult?(result)
+            }
             onCombatEnd?(outcome)
             return
         }

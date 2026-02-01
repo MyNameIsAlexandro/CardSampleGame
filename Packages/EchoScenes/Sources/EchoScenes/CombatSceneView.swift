@@ -11,13 +11,15 @@ public struct CombatSceneView: View {
         enemyDefinition: EnemyDefinition,
         playerName: String = "Hero",
         playerHealth: Int = 10,
+        playerMaxHealth: Int? = nil,
         playerStrength: Int = 5,
         playerDeck: [Card] = [],
         fateCards: [FateCard] = [],
         resonance: Float = 0,
         seed: UInt64 = 42,
         size: CGSize = CGSize(width: 390, height: 700),
-        onCombatEnd: ((CombatOutcome) -> Void)? = nil
+        onCombatEnd: ((CombatOutcome) -> Void)? = nil,
+        onCombatEndWithResult: ((EchoCombatResult) -> Void)? = nil
     ) {
         let s = CombatScene(size: size)
         s.scaleMode = .aspectFill
@@ -25,7 +27,7 @@ public struct CombatSceneView: View {
             enemyDefinition: enemyDefinition,
             playerName: playerName,
             playerHealth: playerHealth,
-            playerMaxHealth: playerHealth,
+            playerMaxHealth: playerMaxHealth ?? playerHealth,
             playerStrength: playerStrength,
             playerDeck: playerDeck,
             fateCards: fateCards,
@@ -33,6 +35,7 @@ public struct CombatSceneView: View {
             seed: seed
         )
         s.onCombatEnd = onCombatEnd
+        s.onCombatEndWithResult = onCombatEndWithResult
         self.scene = s
     }
 
