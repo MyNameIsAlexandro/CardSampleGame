@@ -36,6 +36,11 @@ struct CardEditor: View {
                 ))
             }
 
+            Section("Combat") {
+                IntField(label: "Energy Cost", value: optionalIntBinding(\.cost), range: 0...10)
+                Toggle("Exhaust", isOn: $card.exhaust)
+            }
+
             Section("Meta") {
                 TextField("Icon", text: $card.icon)
                 TextField("Expansion Set", text: expansionSetBinding)

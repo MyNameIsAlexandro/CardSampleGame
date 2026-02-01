@@ -1,11 +1,17 @@
 # Game Engine v1.0: Technical Architecture Document
 
-**Версия:** 1.2
+**Версия:** 1.3
 **Статус:** Architecture Lock (Source of Truth)
-**Дата:** 20 января 2026
+**Дата:** 1 февраля 2026
 **Назначение:** Техническая спецификация для реализации переиспользуемого игрового ядра.
 
-**Последние изменения (v1.2):**
+**Последние изменения (v1.3):**
+- EchoEngine: ECS-based combat system (FirebladeECS)
+- Energy system, exhaust mechanic, enemy behavior patterns
+- Card cost/exhaust fields, enemy pattern cycling
+- PackValidator: enemy validation, cost/exhaust checks
+
+**Предыдущие изменения (v1.2):**
 - Phase 6: Card Economy v2.0, Combat UI v2.0
 - Content Pack System полностью реализован
 - Async loading для улучшения производительности
@@ -1103,7 +1109,49 @@ let result = CombatCalculator.calculatePlayerAttack(
 // result.isHit, result.attackRoll, result.damageCalculation
 ```
 
-### E.5 Интеграция модулей
+### E.5 EchoEngine — ECS Combat System (v1.3)
+
+**Пакет:** `Packages/EchoEngine`
+**Фреймворк:** FirebladeECS (Entity-Component-System)
+**UI:** `Packages/EchoScenes` (SpriteKit)
+
+EchoEngine — параллельная реализация боевой системы на ECS-архитектуре. Работает независимо от TwilightGameEngine и предоставляет real-time карточный бой через SpriteKit.
+
+#### Компоненты (ECS)
+
+| Компонент | Описание |
+|-----------|----------|
+| `HealthComponent` | HP текущее/максимальное |
+| `EnergyComponent` | Энергия за ход (current/max, default 3) |
+| `DeckComponent` | drawPile, hand, discardPile, exhaustPile |
+| `StatusEffectComponent` | Активные статус-эффекты (яд, щит, усиление) |
+| `EnemyComponent` | Паттерн поведения, power, will |
+
+#### Системы
+
+| Система | Ответственность |
+|---------|-----------------|
+| `CombatSystem` | Розыгрыш карт, проверка энергии, резолв эффектов |
+| `AISystem` | Циклический паттерн врага: `pattern[(round-1) % count]` |
+| `DeckSystem` | Тасовка, добор, сброс, exhaust |
+
+#### Ключевые механики
+
+- **Энергия:** 3/ход, `card.cost ?? 1` за карту, сброс в начале хода
+- **Exhaust:** Карты с `exhaust: true` → exhaustPile (не возвращаются)
+- **Паттерны врагов:** Циклический массив `EnemyPatternStep` (attack/block/heal/ritual)
+- **Dual Health:** HP (Body) + Will (Mind), Will depletion = умиротворение
+- **Статус-эффекты:** poison, shield, buff — тикают каждый ход
+
+#### CombatSimulation (Фасад)
+
+```swift
+let sim = CombatSimulation.create(playerHealth: 20, playerEnergy: 3, ...)
+let event = sim.playCard(cardId: "strike_basic")  // → .cardPlayed / .insufficientEnergy
+sim.resolveEnemyTurn()  // AI + energy reset
+```
+
+### E.6 Интеграция модулей (обновлено)
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -1123,7 +1171,7 @@ let result = CombatCalculator.calculatePlayerAttack(
 └─────────────────────────────────────────────────────────┘
 ```
 
-### E.6 Расширение модулей
+### E.7 Расширение модулей
 
 **Добавление нового героя:**
 1. Добавить запись в `heroes.json`

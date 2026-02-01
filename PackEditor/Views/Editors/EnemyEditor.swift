@@ -105,6 +105,43 @@ struct EnemyEditor: View {
                 }
             }
 
+            Section("Behavior Pattern (\(enemy.pattern?.count ?? 0) steps)") {
+                if let pattern = enemy.pattern {
+                    ForEach(pattern.indices, id: \.self) { index in
+                        HStack {
+                            TextField("Type", text: Binding(
+                                get: { enemy.pattern?[index].type.rawValue ?? "" },
+                                set: { newVal in
+                                    if let t = IntentType(rawValue: newVal) {
+                                        enemy.pattern?[index].type = t
+                                    }
+                                }
+                            ))
+                            IntField(label: "Value", value: Binding(
+                                get: { enemy.pattern?[index].value ?? 0 },
+                                set: { enemy.pattern?[index].value = $0 }
+                            ))
+                            Button(role: .destructive) {
+                                enemy.pattern?.remove(at: index)
+                                if enemy.pattern?.isEmpty == true { enemy.pattern = nil }
+                            } label: {
+                                Image(systemName: "minus.circle")
+                            }
+                        }
+                    }
+                    Button {
+                        enemy.pattern?.append(EnemyPatternStep(type: .attack, value: 0))
+                    } label: {
+                        Label("Add Step", systemImage: "plus.circle")
+                    }
+                } else {
+                    Text("No pattern defined").foregroundStyle(.secondary)
+                    Button("Add Pattern") {
+                        enemy.pattern = [EnemyPatternStep(type: .attack, value: 4)]
+                    }
+                }
+            }
+
             Section("Abilities (\(enemy.abilities.count))") {
                 ForEach(enemy.abilities.indices, id: \.self) { index in
                     VStack(alignment: .leading, spacing: 6) {

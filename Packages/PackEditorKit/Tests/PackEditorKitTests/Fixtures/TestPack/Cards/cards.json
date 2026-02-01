@@ -11,6 +11,8 @@
     "expansion_set": "baseSet",
     "ownership": "universal",
     "abilities": [],
-    "faith_cost": 0
+    "faith_cost": 0,
+    "cost": 1,
+    "exhaust": false
   }
 ]

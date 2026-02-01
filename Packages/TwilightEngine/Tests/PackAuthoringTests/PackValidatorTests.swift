@@ -147,4 +147,58 @@ final class PackValidatorTests: XCTestCase {
         }
         XCTAssertTrue(cardRefErrors.isEmpty, "Should have no broken card references: \(cardRefErrors.map { $0.description })")
     }
+
+    // MARK: - Card Cost & Exhaust Validation
+
+    func testCharacterPackCardsHaveNoNegativeCost() throws {
+        if characterPackURL == nil { XCTFail("CoreHeroes JSON not available"); return }
+        let url = characterPackURL!
+
+        let validator = PackValidator(packURL: url)
+        let summary = validator.validate()
+
+        let costErrors = summary.results.filter {
+            $0.severity == .error && $0.message.contains("negative energy cost")
+        }
+        XCTAssertTrue(costErrors.isEmpty, "Should have no negative cost errors: \(costErrors.map { $0.description })")
+    }
+
+    func testCharacterPackCardsHaveNoExhaustWarnings() throws {
+        if characterPackURL == nil { XCTFail("CoreHeroes JSON not available"); return }
+        let url = characterPackURL!
+
+        let validator = PackValidator(packURL: url)
+        let summary = validator.validate()
+
+        let exhaustWarnings = summary.results.filter {
+            $0.severity == .warning && $0.message.contains("exhaust")
+        }
+        XCTAssertTrue(exhaustWarnings.isEmpty, "Should have no exhaust-without-effect warnings: \(exhaustWarnings.map { $0.description })")
+    }
+
+    // MARK: - Enemy Validation
+
+    func testStoryPackEnemiesHaveValidHealth() throws {
+        let url = try XCTUnwrap(storyPackURL, "TwilightMarchesActI JSON not available")
+
+        let validator = PackValidator(packURL: url)
+        let summary = validator.validate()
+
+        let healthErrors = summary.results.filter {
+            $0.severity == .error && $0.message.contains("non-positive health")
+        }
+        XCTAssertTrue(healthErrors.isEmpty, "Should have no enemy health errors: \(healthErrors.map { $0.description })")
+    }
+
+    func testStoryPackEnemiesHaveNoEmptyPatterns() throws {
+        let url = try XCTUnwrap(storyPackURL, "TwilightMarchesActI JSON not available")
+
+        let validator = PackValidator(packURL: url)
+        let summary = validator.validate()
+
+        let patternWarnings = summary.results.filter {
+            $0.severity == .warning && $0.message.contains("empty pattern")
+        }
+        XCTAssertTrue(patternWarnings.isEmpty, "Should have no empty pattern warnings: \(patternWarnings.map { $0.description })")
+    }
 }

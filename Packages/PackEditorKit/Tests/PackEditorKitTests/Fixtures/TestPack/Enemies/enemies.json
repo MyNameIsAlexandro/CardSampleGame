@@ -12,6 +12,10 @@
     "abilities": [],
     "loot_card_ids": [],
     "faith_reward": 1,
-    "balance_delta": 0
+    "balance_delta": 0,
+    "pattern": [
+      {"type": "attack", "value": 3},
+      {"type": "block", "value": 0}
+    ]
   }
 ]

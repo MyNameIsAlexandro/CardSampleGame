@@ -1,7 +1,7 @@
 # Руководство по Content Pack
 
-> **Версия:** 2.0
-> **Обновлено:** Январь 2026
+> **Версия:** 2.1
+> **Обновлено:** Февраль 2026
 
 Руководство по созданию контент-паков для игры "Сумрачные Пределы".
 
@@ -186,9 +186,31 @@ ContentPacks/TwilightMarches/   # Дополнительный пак
     ],
     "faith_cost": 0,
     "balance": "neutral",
-    "power": 3
+    "power": 3,
+    "cost": 1,
+    "exhaust": false
   }
 ]
+```
+
+### Новые поля карт (v2.1)
+
+| Поле | Тип | По умолчанию | Описание |
+|------|-----|--------------|----------|
+| `cost` | int? | `1` | Стоимость энергии за розыгрыш карты. `null` = 1 |
+| `exhaust` | bool | `false` | Если `true`, карта удаляется из колоды после розыгрыша (в exhaustPile) |
+
+**Пример карты с exhaust:**
+```json
+{
+  "id": "poison_blade",
+  "name": "Poison Blade",
+  "card_type": "attack",
+  "rarity": "uncommon",
+  "abilities": [{"type": "damage", "value": 5}, {"type": "applyCurse", "value": 2}],
+  "cost": 2,
+  "exhaust": true
+}
 ```
 
 ### Типы карт (card_type)
@@ -367,6 +389,11 @@ if !summary.isValid {
 | Unknown ability_id | Способность не найдена | Добавить в `HeroAbility.forAbilityId()` |
 | Card not found | Карта из стартовой колоды не существует | Проверить ID карты |
 | Missing region | Сосед региона не найден | Проверить `neighbor_ids` |
+| Negative energy cost | `cost` < 0 у карты | Указать `cost` >= 0 или убрать поле |
+| Exhaust without effect | Карта с `exhaust: true` без abilities и power | Добавить эффект или убрать exhaust |
+| Enemy empty name | У врага пустое имя | Заполнить `name` |
+| Enemy non-positive health | `health` <= 0 | Указать health > 0 |
+| Enemy empty pattern | Массив `pattern` пустой | Добавить хотя бы один шаг или убрать pattern |
 
 ---
 

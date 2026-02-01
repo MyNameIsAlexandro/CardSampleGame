@@ -1,8 +1,8 @@
 # Спецификация Campaign Pack
 
-> **Версия:** 1.0
+> **Версия:** 1.1
 > **Статус:** Активна
-> **Обновлено:** Январь 2026
+> **Обновлено:** Февраль 2026
 
 ---
 
@@ -283,12 +283,41 @@ Campaign Pack предоставляет сюжетный контент: рег
   "difficulty": "integer (обязательно, 1-5)",
   "enemy_type": "beast | spirit | undead | humanoid | boss (обязательно)",
   "rarity": "common | uncommon | rare | epic | legendary (обязательно)",
+  "will": "integer | null (опционально, духовное здоровье — альтернативное условие победы)",
   "abilities": "EnemyAbility[] (опционально)",
   "loot_card_ids": "string[] (опционально)",
   "faith_reward": "integer (по умолчанию: 0)",
-  "balance_delta": "integer (по умолчанию: 0)"
+  "balance_delta": "integer (по умолчанию: 0)",
+  "resonance_behavior": "{ [zone]: EnemyModifier } | null (опционально, модификаторы по зонам резонанса)",
+  "pattern": "EnemyPatternStep[] | null (опционально, повторяющийся паттерн поведения)",
+  "weaknesses": "string[] | null (опционально, уязвимости)",
+  "strengths": "string[] | null (опционально, сопротивления)"
 }
 ```
+
+#### EnemyPatternStep
+
+```json
+{
+  "type": "attack | heal | block | ritual | buff | defend | prepare | debuff | summon | restoreWP",
+  "value": "integer (значение эффекта)"
+}
+```
+
+Паттерн определяет циклическую последовательность: `pattern[(round - 1) % pattern.length]`.
+
+#### EnemyModifier (Resonance)
+
+```json
+{
+  "power_delta": "integer",
+  "defense_delta": "integer",
+  "health_delta": "integer",
+  "will_delta": "integer"
+}
+```
+
+Ключи зон: `deepNav`, `nav`, `yav`, `prav`, `deepPrav`.
 
 ---
 

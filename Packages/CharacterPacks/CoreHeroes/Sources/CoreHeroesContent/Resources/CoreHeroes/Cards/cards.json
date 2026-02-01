@@ -135,7 +135,9 @@
     "defense": null,
     "wisdom": 1,
     "health": null,
-    "realm": "yav"
+    "realm": "yav",
+    "cost": 2,
+    "exhaust": false
   },
   {
     "id": "arcane_bolt",
@@ -482,6 +484,8 @@
     "defense": null,
     "wisdom": null,
     "health": null,
-    "realm": "nav"
+    "realm": "nav",
+    "exhaust": true,
+    "cost": 2
   }
 ]

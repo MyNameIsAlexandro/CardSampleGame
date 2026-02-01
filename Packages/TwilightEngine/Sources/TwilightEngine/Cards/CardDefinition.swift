@@ -38,6 +38,12 @@ public protocol CardDefinition {
 
     /// Роль карты в кампании
     var role: CardRole? { get }
+
+    /// Если true, карта удаляется из колоды после розыгрыша
+    var exhaust: Bool { get }
+
+    /// Стоимость энергии за ход (nil = используется default 1)
+    var cost: Int? { get }
 }
 
 /// Принадлежность карты - определяет кто может использовать карту
@@ -154,6 +160,8 @@ public struct StandardCardDefinition: CardDefinition, Codable {
     public var wisdom: Int?
     public var realm: Realm?
     public var curseType: CurseType?
+    public var exhaust: Bool
+    public var cost: Int?
 
     public init(
         id: String,
@@ -173,7 +181,9 @@ public struct StandardCardDefinition: CardDefinition, Codable {
         health: Int? = nil,
         wisdom: Int? = nil,
         realm: Realm? = nil,
-        curseType: CurseType? = nil
+        curseType: CurseType? = nil,
+        exhaust: Bool = false,
+        cost: Int? = nil
     ) {
         self.id = id
         self.name = name
@@ -193,6 +203,40 @@ public struct StandardCardDefinition: CardDefinition, Codable {
         self.wisdom = wisdom
         self.realm = realm
         self.curseType = curseType
+        self.exhaust = exhaust
+        self.cost = cost
+    }
+
+    // MARK: - Custom Codable (backward compatibility)
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        name = try container.decode(LocalizableText.self, forKey: .name)
+        cardType = try container.decode(CardType.self, forKey: .cardType)
+        rarity = try container.decodeIfPresent(CardRarity.self, forKey: .rarity) ?? .common
+        description = try container.decode(LocalizableText.self, forKey: .description)
+        icon = try container.decodeIfPresent(String.self, forKey: .icon) ?? "🃏"
+        expansionSet = try container.decodeIfPresent(ExpansionSet.self, forKey: .expansionSet) ?? .baseSet
+        ownership = try container.decodeIfPresent(CardOwnership.self, forKey: .ownership) ?? .universal
+        abilities = try container.decodeIfPresent([CardAbility].self, forKey: .abilities) ?? []
+        faithCost = try container.decodeIfPresent(Int.self, forKey: .faithCost) ?? 3
+        balance = try container.decodeIfPresent(CardBalance.self, forKey: .balance)
+        role = try container.decodeIfPresent(CardRole.self, forKey: .role)
+        power = try container.decodeIfPresent(Int.self, forKey: .power)
+        defense = try container.decodeIfPresent(Int.self, forKey: .defense)
+        health = try container.decodeIfPresent(Int.self, forKey: .health)
+        wisdom = try container.decodeIfPresent(Int.self, forKey: .wisdom)
+        realm = try container.decodeIfPresent(Realm.self, forKey: .realm)
+        curseType = try container.decodeIfPresent(CurseType.self, forKey: .curseType)
+        exhaust = try container.decodeIfPresent(Bool.self, forKey: .exhaust) ?? false
+        cost = try container.decodeIfPresent(Int.self, forKey: .cost)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, name, cardType, rarity, description, icon, expansionSet, ownership
+        case abilities, faithCost, balance, role, power, defense, health, wisdom
+        case realm, curseType, exhaust, cost
     }
 
     /// Конвертация в игровую Card
@@ -207,12 +251,14 @@ public struct StandardCardDefinition: CardDefinition, Codable {
             defense: defense,
             health: health,
             wisdom: wisdom,
+            cost: cost,
             abilities: abilities,
             balance: balance,
             realm: realm,
             curseType: curseType,
             expansionSet: expansionSet.rawValue,
             role: role,
+            exhaust: exhaust,
             faithCost: faithCost
         )
     }

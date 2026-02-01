@@ -300,6 +300,11 @@ public final class PackValidator {
             validateCard(id: id, card: card)
         }
 
+        // Validate enemies
+        for (id, enemy) in pack.enemies {
+            validateEnemy(id: id, enemy: enemy)
+        }
+
         // Validate anchors
         for (id, anchor) in pack.anchors {
             validateAnchor(id: id, anchor: anchor)
@@ -372,6 +377,39 @@ public final class PackValidator {
 
         if card.faithCost < 0 {
             addError("Card", "Card '\(id)' has negative faith cost: \(card.faithCost)")
+        }
+
+        if let cost = card.cost, cost < 0 {
+            addError("Card", "Card '\(id)' has negative energy cost: \(cost)")
+        }
+
+        if card.exhaust && card.abilities.isEmpty && card.power == nil {
+            addWarning("Card", "Card '\(id)' has exhaust but no abilities or power")
+        }
+    }
+
+    private func validateEnemy(id: String, enemy: EnemyDefinition) {
+        if enemy.name.isEmpty {
+            addError("Enemy", "Enemy '\(id)' has empty name")
+        }
+
+        if enemy.health <= 0 {
+            addError("Enemy", "Enemy '\(id)' has non-positive health: \(enemy.health)")
+        }
+
+        if enemy.power < 0 {
+            addError("Enemy", "Enemy '\(id)' has negative power: \(enemy.power)")
+        }
+
+        if let pattern = enemy.pattern {
+            if pattern.isEmpty {
+                addWarning("Enemy", "Enemy '\(id)' has empty pattern array")
+            }
+            for (i, step) in pattern.enumerated() {
+                if step.type == .attack && step.value <= 0 {
+                    addWarning("Enemy", "Enemy '\(id)' pattern step \(i) is attack with value \(step.value)")
+                }
+            }
         }
     }
 

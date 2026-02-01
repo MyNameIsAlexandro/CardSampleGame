@@ -6,6 +6,54 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [2.4.0] - 2026-02-01 - EchoEngine Combat: Energy, Exhaust, Enemy Patterns
+
+### Summary
+
+EchoEngine ECS combat system now features energy cost per card, exhaust mechanic, and cyclic enemy behavior patterns. CardDefinition protocol extended with `cost` and `exhaust` fields (backward-compatible Codable). PackValidator validates enemy health/patterns and card cost/exhaust. PackEditor updated with Combat section (energy cost, exhaust toggle) and Behavior Pattern editor. Specs and documentation updated to v1.1.
+
+---
+
+### Features
+
+#### EchoEngine (ECS Combat)
+- **Energy system** — 3 energy/turn, `card.cost ?? 1` per play, reset on new turn
+- **Exhaust mechanic** — `exhaust: true` cards go to exhaustPile, never reshuffled
+- **Enemy patterns** — Cyclic `EnemyPatternStep[]` for simple AI behavior
+- **Will depletion** — Mental damage as alternative victory condition
+- **Status effects** — Poison, shield, buff components with per-turn ticking
+- **CombatEvent.insufficientEnergy** — Returned when card cost > current energy
+
+#### CardDefinition Protocol
+- Added `cost: Int?` (energy cost, default 1) and `exhaust: Bool` (default false)
+- Custom `init(from:)` with `decodeIfPresent` for backward-compatible binary .pack loading
+
+#### PackValidator
+- Card validation: negative cost (error), exhaust without abilities (warning)
+- Enemy validation: empty name, non-positive health, negative power, empty/invalid patterns
+
+#### PackEditor
+- **CardEditor** — New "Combat" section with Energy Cost field and Exhaust toggle
+- **EnemyEditor** — New "Behavior Pattern" section with add/edit/delete pattern steps
+
+#### Content JSON
+- `cards.json` — Added cost/exhaust to rage_strike and poison_blade
+- `enemies.json` — Added patterns to risen_dead and swamp_hag
+
+### Documentation
+- **SPEC_CHARACTER_PACK.md** v1.1 — FR-CRD-008 (energy cost), FR-CRD-009 (exhaust)
+- **SPEC_CAMPAIGN_PACK.md** v1.1 — FR-ENM-006 (Will), FR-ENM-007 (pattern), FR-ENM-008 (resonance)
+- **CONTENT_PACK_GUIDE.md** v2.1 — Card cost/exhaust fields, new validation errors
+- **COMBAT_DIPLOMACY_SPEC.md** v1.1 — Energy system, exhaust, enemy patterns
+- **ENGINE_ARCHITECTURE.md** v1.3 — EchoEngine ECS combat section
+
+### Tests
+- PackValidatorTests: +4 tests (card cost, exhaust warnings, enemy health, enemy patterns)
+- EchoEngine: 70 tests including 4 energy-specific tests
+- EchoScenes: 19 tests including CardNode cost/exhaust label tests
+
+---
+
 ## [2.3.0] - 2026-01-31 - PackEditor: Full Read-Write CRUD + ManifestEditor + Import/Export
 
 ### Summary
