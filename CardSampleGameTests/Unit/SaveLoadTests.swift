@@ -155,7 +155,7 @@ final class SaveLoadTests: XCTestCase {
         TestContentLoader.loadContentPacksIfNeeded()
         XCTAssertTrue(saveManager.loadGame(from: 100, engine: newEngine))
 
-        XCTAssertEqual(newEngine.playerHealth, savedHealth)
+        XCTAssertEqual(newEngine.player.health, savedHealth)
     }
 
     func testLoadGameRestoresFaith() {
@@ -166,7 +166,7 @@ final class SaveLoadTests: XCTestCase {
         TestContentLoader.loadContentPacksIfNeeded()
         XCTAssertTrue(saveManager.loadGame(from: 100, engine: newEngine))
 
-        XCTAssertEqual(newEngine.playerFaith, savedFaith)
+        XCTAssertEqual(newEngine.player.faith, savedFaith)
     }
 
     func testLoadGameRestoresBalance() {
@@ -177,7 +177,7 @@ final class SaveLoadTests: XCTestCase {
         TestContentLoader.loadContentPacksIfNeeded()
         XCTAssertTrue(saveManager.loadGame(from: 100, engine: newEngine))
 
-        XCTAssertEqual(newEngine.playerBalance, savedBalance)
+        XCTAssertEqual(newEngine.player.balance, savedBalance)
     }
 
     func testLoadGameRestoresCurrentDay() {
@@ -270,12 +270,12 @@ final class SaveLoadTests: XCTestCase {
         XCTAssertTrue(saveManager.loadGame(from: 100, engine: newEngine))
 
         // Verify all fields match
-        XCTAssertEqual(newEngine.playerName, engine.player.name)
-        XCTAssertEqual(newEngine.playerHealth, engine.player.health)
-        XCTAssertEqual(newEngine.playerMaxHealth, engine.player.maxHealth)
-        XCTAssertEqual(newEngine.playerFaith, engine.player.faith)
-        XCTAssertEqual(newEngine.playerMaxFaith, engine.player.maxFaith)
-        XCTAssertEqual(newEngine.playerBalance, engine.player.balance)
+        XCTAssertEqual(newEngine.player.name, engine.player.name)
+        XCTAssertEqual(newEngine.player.health, engine.player.health)
+        XCTAssertEqual(newEngine.player.maxHealth, engine.player.maxHealth)
+        XCTAssertEqual(newEngine.player.faith, engine.player.faith)
+        XCTAssertEqual(newEngine.player.maxFaith, engine.player.maxFaith)
+        XCTAssertEqual(newEngine.player.balance, engine.player.balance)
         XCTAssertEqual(newEngine.currentDay, engine.currentDay)
         XCTAssertEqual(newEngine.worldTension, engine.worldTension)
         XCTAssertEqual(newEngine.mainQuestStage, engine.mainQuestStage)

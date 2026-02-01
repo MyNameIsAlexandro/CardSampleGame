@@ -658,6 +658,8 @@ final class AuditGateTests: XCTestCase {
             if file == "EngineSave.swift" { return false }
             // ResonanceEngine.swift is a subsystem (zone detection + resonance state), not a runtime engine
             if file == "ResonanceEngine.swift" { return false }
+            // Sub-manager files are internal parts of TwilightGameEngine, not alternative engines
+            if file == "EnginePlayerManager.swift" || file == "EngineDeckManager.swift" || file == "EngineCombatManager.swift" { return false }
             // Any other "Engine" file is a potential violation
             return true
         }
@@ -1135,7 +1137,7 @@ extension AuditGateTests {
         XCTAssertGreaterThan(engine.player.health, 0, "Player should start with health > 0")
 
         // Set health to 0 (simulating fatal damage)
-        engine.setPlayerHealth(0)
+        engine.player.setHealth(0)
 
         // Verify player health is 0 (not negative)
         XCTAssertEqual(engine.player.health, 0, "Player health should be exactly 0, not negative")
@@ -1148,7 +1150,7 @@ extension AuditGateTests {
         engine.initializeNewGame(playerName: "Test", heroId: nil, startingDeck: [])
 
         // Set health to 0 (simulating massive damage)
-        engine.setPlayerHealth(0)
+        engine.player.setHealth(0)
 
         // Health should be 0, not negative
         XCTAssertGreaterThanOrEqual(engine.player.health, 0, "Health cannot be negative")
@@ -1163,7 +1165,7 @@ extension AuditGateTests {
         let maxHealth = engine.player.maxHealth
 
         // Set health to max (simulating heal beyond max)
-        engine.setPlayerHealth(maxHealth + 100)
+        engine.player.setHealth(maxHealth + 100)
 
         // Health should not exceed max (setPlayerHealth clamps)
         XCTAssertLessThanOrEqual(engine.player.health, maxHealth, "Health cannot exceed max")
@@ -1178,11 +1180,11 @@ extension AuditGateTests {
         let maxFaith = engine.player.maxFaith
 
         // Spending faith via engine setter — verify bounds
-        engine.setPlayerFaith(0)
+        engine.player.setFaith(0)
         XCTAssertGreaterThanOrEqual(engine.player.faith, 0, "Faith cannot be negative")
 
         // Setting faith above max — verify bounds
-        engine.setPlayerFaith(maxFaith)
+        engine.player.setFaith(maxFaith)
         XCTAssertLessThanOrEqual(engine.player.faith, maxFaith, "Faith cannot exceed max")
     }
 

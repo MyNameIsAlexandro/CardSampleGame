@@ -241,15 +241,15 @@ public final class EnginePlayerManager: ObservableObject {
 
     // MARK: - Setters (for engine/test access)
 
-    public func setHealth(_ value: Int) { health = value }
-    func setMaxHealth(_ value: Int) {
+    public func setHealth(_ value: Int) { health = min(max(0, value), maxHealth) }
+    public func setMaxHealth(_ value: Int) {
         maxHealth = max(1, value)
         health = min(health, maxHealth)
     }
     public func canAffordFaith(_ cost: Int) -> Bool { faith >= cost }
-    func setFaith(_ value: Int) { faith = min(maxFaith, max(0, value)) }
+    public func setFaith(_ value: Int) { faith = min(maxFaith, max(0, value)) }
     public func applyFaithDelta(_ delta: Int) { faith = min(maxFaith, max(0, faith + delta)) }
-    func setBalance(_ value: Int) { balance = min(100, max(0, value)) }
-    func setName(_ value: String) { name = value }
-    func setHeroId(_ value: String) { heroId = value }
+    public func setBalance(_ value: Int) { balance = min(100, max(0, value)) }
+    public func setName(_ value: String) { name = value }
+    public func setHeroId(_ value: String) { heroId = value }
 }

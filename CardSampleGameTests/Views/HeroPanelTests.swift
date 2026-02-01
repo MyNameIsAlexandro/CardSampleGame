@@ -31,7 +31,7 @@ final class HeroPanelTests: XCTestCase {
         }
 
         // Set hero via Engine-First
-        engine.setHeroId(hero.id)
+        engine.player.setHeroId(hero.id)
 
         // Then: Hero ID should be set
         XCTAssertEqual(engine.player.heroId, hero.id)
@@ -54,11 +54,11 @@ final class HeroPanelTests: XCTestCase {
     func testPlayerStatsAvailableFromEngine() {
         // Given: Engine with specific stats
         // Note: setMaxHealth before setHealth, as health is capped to maxHealth
-        engine.setPlayerMaxHealth(20)
-        engine.setPlayerHealth(15)
-        engine.setPlayerFaith(8)
-        engine.setPlayerBalance(65)
-        engine.setPlayerName("Тестовый Герой")
+        engine.player.setMaxHealth(20)
+        engine.player.setHealth(15)
+        engine.player.setFaith(8)
+        engine.player.setBalance(65)
+        engine.player.setName("Тестовый Герой")
 
         // Then: Stats should be readable from engine
         XCTAssertEqual(engine.player.name, "Тестовый Герой")
@@ -72,7 +72,7 @@ final class HeroPanelTests: XCTestCase {
 
     func testBalanceDescriptionForLightPath() {
         // Given: Player with high balance (Light path)
-        engine.setPlayerBalance(80)
+        engine.player.setBalance(80)
 
         // Then: Balance should indicate Light path
         XCTAssertGreaterThanOrEqual(engine.player.balance, 70)
@@ -80,7 +80,7 @@ final class HeroPanelTests: XCTestCase {
 
     func testBalanceDescriptionForDarkPath() {
         // Given: Player with low balance (Dark path)
-        engine.setPlayerBalance(20)
+        engine.player.setBalance(20)
 
         // Then: Balance should indicate Dark path
         XCTAssertLessThanOrEqual(engine.player.balance, 30)
@@ -88,7 +88,7 @@ final class HeroPanelTests: XCTestCase {
 
     func testBalanceDescriptionForNeutral() {
         // Given: Player with neutral balance
-        engine.setPlayerBalance(50)
+        engine.player.setBalance(50)
 
         // Then: Balance should be in neutral range
         let balance = engine.player.balance
