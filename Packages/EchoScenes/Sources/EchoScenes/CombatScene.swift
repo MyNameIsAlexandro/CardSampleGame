@@ -28,6 +28,7 @@ public final class CombatScene: SKScene {
     private var handContainer: SKNode!
     private var deckCountLabel: SKLabelNode!
     private var discardCountLabel: SKLabelNode!
+    private var exhaustCountLabel: SKLabelNode!
     private var energyLabel: SKLabelNode!
     private var intentNode: SKNode?
     private var tooltipNode: SKNode?
@@ -35,6 +36,7 @@ public final class CombatScene: SKScene {
     private var combatLogEntries: [String] = []
     private let maxLogEntries = 5
     private var discardOverlay: SKNode?
+    private var exhaustOverlay: SKNode?
     private var mulliganOverlay: SKNode?
     private var mulliganSelected: Set<String> = []
     private var longPressTimer: Timer?
@@ -289,6 +291,14 @@ public final class CombatScene: SKScene {
         discardCountLabel.name = "btn_discard"
         addChild(discardCountLabel)
 
+        exhaustCountLabel = SKLabelNode(fontNamed: "AvenirNext-Medium")
+        exhaustCountLabel.fontSize = 11
+        exhaustCountLabel.fontColor = CombatSceneTheme.muted
+        exhaustCountLabel.position = CGPoint(x: size.width / 2 - 30, y: indicatorY - 16)
+        exhaustCountLabel.zPosition = 15
+        exhaustCountLabel.name = "btn_exhaust"
+        addChild(exhaustCountLabel)
+
         energyLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
         energyLabel.fontSize = 13
         energyLabel.fontColor = CombatSceneTheme.faith
@@ -336,6 +346,8 @@ public final class CombatScene: SKScene {
 
         deckCountLabel.text = "🂠 \(simulation.drawPileCount)"
         discardCountLabel.text = "♻ \(simulation.discardPileCount)"
+        let exhaustCount = simulation.exhaustPileCount
+        exhaustCountLabel.text = exhaustCount > 0 ? "✕ \(exhaustCount)" : ""
         energyLabel.text = "⚡ \(simulation.energy)/\(simulation.maxEnergy)"
 
         updateIntentDisplay()
@@ -489,7 +501,11 @@ public final class CombatScene: SKScene {
             return
         }
 
-        // Dismiss discard overlay if showing
+        // Dismiss overlays if showing
+        if exhaustOverlay != nil {
+            dismissExhaustOverlay()
+            return
+        }
         if discardOverlay != nil {
             dismissDiscardOverlay()
             return
@@ -506,6 +522,11 @@ public final class CombatScene: SKScene {
         // Discard pile viewer — works anytime
         if tapped.contains(where: { $0.name == "btn_discard" }) {
             showDiscardOverlay()
+            return
+        }
+
+        if tapped.contains(where: { $0.name == "btn_exhaust" }) {
+            showExhaustOverlay()
             return
         }
 
@@ -720,6 +741,66 @@ public final class CombatScene: SKScene {
     private func dismissDiscardOverlay() {
         discardOverlay?.removeFromParent()
         discardOverlay = nil
+    }
+
+    // MARK: - Exhaust Pile Viewer
+
+    private func showExhaustOverlay() {
+        dismissExhaustOverlay()
+
+        let cards = simulation.exhaustPile
+        guard !cards.isEmpty else { return }
+
+        let overlay = SKNode()
+        overlay.zPosition = 100
+
+        let bg = SKShapeNode(rectOf: size)
+        bg.fillColor = SKColor(white: 0.0, alpha: 0.8)
+        bg.strokeColor = .clear
+        overlay.addChild(bg)
+
+        let title = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+        title.text = "Exhausted (\(cards.count))"
+        title.fontSize = 16
+        title.fontColor = CombatSceneTheme.muted
+        title.position = CGPoint(x: 0, y: size.height / 2 - 50)
+        title.verticalAlignmentMode = .center
+        overlay.addChild(title)
+
+        let cardW = CardNode.cardSize.width + 8
+        let cols = min(cards.count, 4)
+        let totalW = cardW * CGFloat(cols)
+        let startX = -totalW / 2 + cardW / 2
+
+        for (i, card) in cards.enumerated() {
+            let col = i % 4
+            let row = i / 4
+            let node = CardNode(card: card)
+            node.alpha = 0.6
+            node.position = CGPoint(
+                x: startX + CGFloat(col) * cardW,
+                y: CGFloat(20) - CGFloat(row) * (CardNode.cardSize.height + 10)
+            )
+            overlay.addChild(node)
+        }
+
+        let hint = SKLabelNode(fontNamed: "AvenirNext-Regular")
+        hint.text = "Tap to close"
+        hint.fontSize = 10
+        hint.fontColor = CombatSceneTheme.muted
+        hint.position = CGPoint(x: 0, y: -size.height / 2 + 40)
+        hint.verticalAlignmentMode = .center
+        overlay.addChild(hint)
+
+        overlay.alpha = 0
+        addChild(overlay)
+        overlay.run(SKAction.fadeIn(withDuration: 0.2))
+        exhaustOverlay = overlay
+    }
+
+    private func dismissExhaustOverlay() {
+        exhaustOverlay?.removeFromParent()
+        exhaustOverlay = nil
     }
 
     // MARK: - Combat Log
