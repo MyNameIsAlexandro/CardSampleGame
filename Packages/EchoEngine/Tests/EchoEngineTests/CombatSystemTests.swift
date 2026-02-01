@@ -123,4 +123,42 @@ struct CombatSystemTests {
         let intent: IntentComponent = nexus.get(unsafe: enemy.identifier)
         #expect(intent.intent == nil) // cleared
     }
+
+    @Test("Victory when enemy Will depleted even if HP remains")
+    func testWillDepletedVictory() {
+        let mentalCard = Card(
+            id: "mind", name: "Mind Blast", type: .spell,
+            description: "Mental damage",
+            abilities: [CardAbility(id: "m1", name: "Blast", description: "Mental 10",
+                                   effect: .damage(amount: 10, type: .mental))]
+        )
+        let enemyDef = EnemyDefinition(
+            id: "spirit",
+            name: .key("spirit"),
+            description: .key("spirit_desc"),
+            health: 20,
+            power: 2,
+            defense: 0,
+            will: 5
+        )
+        let sim = CombatSimulation.create(
+            enemyDefinition: enemyDef,
+            playerDeck: [mentalCard],
+            fateCards: (0..<10).map { FateCard(id: "f\($0)", modifier: 0, name: "F\($0)") },
+            seed: 42
+        )
+        sim.beginCombat()
+
+        sim.playCard(cardId: mentalCard.id)
+        // Will depleted, HP still full
+        #expect(sim.enemyWill == 0)
+        #expect(sim.enemyHealth == 20)
+
+        // End turn → checkVictoryOrDefeat triggers
+        sim.endTurn()
+        sim.resolveEnemyTurn()
+
+        // Should be victory because will is depleted
+        #expect(sim.outcome == .victory)
+    }
 }

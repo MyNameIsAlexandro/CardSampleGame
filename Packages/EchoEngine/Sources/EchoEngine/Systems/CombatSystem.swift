@@ -309,11 +309,11 @@ public struct CombatSystem: EchoSystem {
     public func checkVictoryOrDefeat(nexus: Nexus) -> CombatOutcome? {
         // Check enemy defeated
         let enemies = nexus.family(requiresAll: EnemyTagComponent.self, HealthComponent.self)
-        var allEnemiesDead = true
+        var allEnemiesDefeated = true
         for (_, health) in enemies {
-            if health.isAlive { allEnemiesDead = false; break }
+            if health.isAlive && !health.willDepleted { allEnemiesDefeated = false; break }
         }
-        if allEnemiesDead && enemies.count > 0 {
+        if allEnemiesDefeated && enemies.count > 0 {
             setCombatPhase(.victory, nexus: nexus)
             return .victory
         }
