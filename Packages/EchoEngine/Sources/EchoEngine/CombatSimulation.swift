@@ -103,10 +103,14 @@ public final class CombatSimulation {
         return deck.drawPile.count
     }
 
-    public var discardPileCount: Int {
-        guard let player = playerEntity else { return 0 }
+    public var discardPile: [Card] {
+        guard let player = playerEntity else { return [] }
         let deck: DeckComponent = nexus.get(unsafe: player.identifier)
-        return deck.discardPile.count
+        return deck.discardPile
+    }
+
+    public var discardPileCount: Int {
+        discardPile.count
     }
 
     public var energy: Int {

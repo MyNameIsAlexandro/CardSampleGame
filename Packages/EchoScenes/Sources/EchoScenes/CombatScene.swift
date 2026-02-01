@@ -34,6 +34,7 @@ public final class CombatScene: SKScene {
     private var combatLogNode: SKNode!
     private var combatLogEntries: [String] = []
     private let maxLogEntries = 5
+    private var discardOverlay: SKNode?
     private var longPressTimer: Timer?
     private var touchStartLocation: CGPoint?
     private var isAnimating = false
@@ -282,6 +283,7 @@ public final class CombatScene: SKScene {
         discardCountLabel.fontColor = CombatSceneTheme.muted
         discardCountLabel.position = CGPoint(x: size.width / 2 - 30, y: indicatorY)
         discardCountLabel.zPosition = 15
+        discardCountLabel.name = "btn_discard"
         addChild(discardCountLabel)
 
         energyLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
@@ -478,11 +480,23 @@ public final class CombatScene: SKScene {
     }
 
     private func handleTap(at location: CGPoint) {
+        // Dismiss discard overlay if showing
+        if discardOverlay != nil {
+            dismissDiscardOverlay()
+            return
+        }
+
         // Check continue button even when combat is over
         let tapped = nodes(at: location)
         if tapped.contains(where: { $0.name == "btn_continue" }),
            let outcome = simulation.outcome {
             onCombatEnd?(outcome)
+            return
+        }
+
+        // Discard pile viewer — works anytime
+        if tapped.contains(where: { $0.name == "btn_discard" }) {
+            showDiscardOverlay()
             return
         }
 
@@ -509,6 +523,77 @@ public final class CombatScene: SKScene {
                 }
             }
         }
+    }
+
+    // MARK: - Discard Pile Viewer
+
+    private func showDiscardOverlay() {
+        dismissDiscardOverlay()
+
+        let cards = simulation.discardPile
+        let overlay = SKNode()
+        overlay.zPosition = 100
+
+        // Dark background
+        let bg = SKShapeNode(rectOf: size)
+        bg.fillColor = SKColor(white: 0.0, alpha: 0.8)
+        bg.strokeColor = .clear
+        overlay.addChild(bg)
+
+        // Title
+        let title = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+        title.text = "Discard Pile (\(cards.count))"
+        title.fontSize = 16
+        title.fontColor = .white
+        title.position = CGPoint(x: 0, y: size.height / 2 - 50)
+        title.verticalAlignmentMode = .center
+        overlay.addChild(title)
+
+        if cards.isEmpty {
+            let empty = SKLabelNode(fontNamed: "AvenirNext-Regular")
+            empty.text = "Empty"
+            empty.fontSize = 14
+            empty.fontColor = CombatSceneTheme.muted
+            empty.position = .zero
+            empty.verticalAlignmentMode = .center
+            overlay.addChild(empty)
+        } else {
+            // Show cards in a grid
+            let cardW = CardNode.cardSize.width + 8
+            let cols = min(cards.count, 4)
+            let totalW = cardW * CGFloat(cols)
+            let startX = -totalW / 2 + cardW / 2
+
+            for (i, card) in cards.enumerated() {
+                let col = i % 4
+                let row = i / 4
+                let node = CardNode(card: card)
+                node.position = CGPoint(
+                    x: startX + CGFloat(col) * cardW,
+                    y: CGFloat(20) - CGFloat(row) * (CardNode.cardSize.height + 10)
+                )
+                overlay.addChild(node)
+            }
+        }
+
+        // Tap to close hint
+        let hint = SKLabelNode(fontNamed: "AvenirNext-Regular")
+        hint.text = "Tap to close"
+        hint.fontSize = 10
+        hint.fontColor = CombatSceneTheme.muted
+        hint.position = CGPoint(x: 0, y: -size.height / 2 + 40)
+        hint.verticalAlignmentMode = .center
+        overlay.addChild(hint)
+
+        overlay.alpha = 0
+        addChild(overlay)
+        overlay.run(SKAction.fadeIn(withDuration: 0.2))
+        discardOverlay = overlay
+    }
+
+    private func dismissDiscardOverlay() {
+        discardOverlay?.removeFromParent()
+        discardOverlay = nil
     }
 
     // MARK: - Combat Log
