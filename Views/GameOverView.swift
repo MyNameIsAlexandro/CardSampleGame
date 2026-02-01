@@ -3,7 +3,7 @@ import TwilightEngine
 
 struct GameOverView: View {
     let result: GameEndResult
-    let engine: TwilightGameEngine
+    let vm: GameEngineObservable
     let onReturnToMenu: () -> Void
 
     @State private var showContent = false
@@ -71,7 +71,7 @@ struct GameOverView: View {
                     Text(L10n.gameOverStats.localized)
                         .font(.headline)
 
-                    Text(L10n.gameOverDaysSurvived.localized(with: engine.currentDay))
+                    Text(L10n.gameOverDaysSurvived.localized(with: vm.engine.currentDay))
                         .font(.subheadline)
                         .foregroundColor(AppColors.muted)
                 }

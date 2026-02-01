@@ -288,103 +288,6 @@ public struct CombatCalculator {
         )
     }
 
-    // MARK: - Engine-First Attack Calculation
-
-    /// Calculate player attack without requiring Player model (Engine-First Architecture)
-    /// Uses engine stats directly for full independence from legacy Player
-    @available(*, deprecated, message: "Use calculateAttackWithFate(context:...) instead")
-    public static func calculateAttackEngineFirst(
-        engine: TwilightGameEngine,
-        monsterDefense: Int,
-        monsterCurrentHP: Int,
-        monsterMaxHP: Int,
-        bonusDice: Int,
-        bonusDamage: Int,
-        isFirstAttack: Bool
-    ) -> CombatResult {
-        var modifiers: [CombatModifier] = []
-        var damageModifiers: [CombatModifier] = []
-        let specialEffects: [CombatEffect] = []
-
-        let isTargetFullHP = monsterCurrentHP == monsterMaxHP
-
-        // Roll dice
-        var totalDice = 1 + bonusDice
-
-        // Hero ability: bonus dice (e.g., Tracker on first attack)
-        let heroBonusDice = engine.player.getHeroBonusDice(isFirstAttack: isFirstAttack)
-        if heroBonusDice > 0 {
-            totalDice += heroBonusDice
-            modifiers.append(CombatModifier(
-                source: .heroAbility,
-                value: 0,
-                description: L10n.calcHeroAbilityDice.localized(with: heroBonusDice)
-            ))
-        }
-
-        var diceRolls: [Int] = []
-        for _ in 0..<totalDice {
-            diceRolls.append(WorldRNG.shared.nextInt(in: 1...6))
-        }
-
-        // Create attack roll
-        let attackRoll = AttackRoll(
-            baseStrength: engine.player.strength,
-            diceRolls: diceRolls,
-            bonusDice: bonusDice,
-            bonusDamage: bonusDamage,
-            modifiers: modifiers
-        )
-
-        let isHit = attackRoll.total >= monsterDefense
-
-        var damageCalculation: DamageCalculation? = nil
-
-        if isHit {
-            let baseDamage = max(1, attackRoll.total - monsterDefense + 2)
-
-            // Curse damage modifiers
-            if engine.player.hasCurse(.weakness) {
-                damageModifiers.append(CombatModifier(
-                    source: .curse,
-                    value: -1,
-                    description: L10n.calcCurseWeakness.localized
-                ))
-            }
-
-            if engine.player.hasCurse(.shadowOfNav) {
-                damageModifiers.append(CombatModifier(
-                    source: .curse,
-                    value: +3,
-                    description: L10n.calcCurseShadowOfNav.localized
-                ))
-            }
-
-            // Hero ability damage bonus
-            let heroDamageBonus = engine.player.getHeroDamageBonus(targetFullHP: isTargetFullHP)
-            if heroDamageBonus > 0 {
-                damageModifiers.append(CombatModifier(
-                    source: .heroAbility,
-                    value: heroDamageBonus,
-                    description: L10n.calcHeroAbility.localized
-                ))
-            }
-
-            damageCalculation = DamageCalculation(
-                base: baseDamage,
-                modifiers: damageModifiers
-            )
-        }
-
-        return CombatResult(
-            isHit: isHit,
-            attackRoll: attackRoll,
-            defenseValue: monsterDefense,
-            damageCalculation: damageCalculation,
-            specialEffects: specialEffects
-        )
-    }
-
     // MARK: - Attack Calculation with CombatPlayerContext
 
     /// Calculate player attack using CombatPlayerContext (Engine-First Architecture)
@@ -514,23 +417,6 @@ public struct CombatCalculator {
             newWill: newWill,
             isPacified: newWill <= 0,
             fateDrawEffects: fateDrawEffects
-        )
-    }
-
-    /// Calculate spirit/will damage for the Pacify path (engine-coupled, deprecated).
-    @available(*, deprecated, message: "Use calculateSpiritAttack(context:...) instead")
-    public static func calculateSpiritAttack(
-        engine: TwilightGameEngine,
-        enemyCurrentWill: Int,
-        fateDeck: FateDeckManager?,
-        worldResonance: Float = 0.0
-    ) -> SpiritAttackResult {
-        let context = CombatPlayerContext.from(engine: engine)
-        return calculateSpiritAttack(
-            context: context,
-            enemyCurrentWill: enemyCurrentWill,
-            fateDeck: fateDeck,
-            worldResonance: worldResonance
         )
     }
 

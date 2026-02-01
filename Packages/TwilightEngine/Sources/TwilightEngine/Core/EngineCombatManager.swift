@@ -1,51 +1,50 @@
 import Foundation
-import Combine
 
 /// Manages all combat state and logic for the engine.
 /// Views access combat state via `engine.combat.X`.
-public final class EngineCombatManager: ObservableObject {
+public final class EngineCombatManager {
 
     // MARK: - Back-reference
 
     unowned let engine: TwilightGameEngine
 
-    // MARK: - Published Combat State
+    // MARK: - Combat State
 
     /// Current enemy card in combat
-    @Published public private(set) var combatEnemy: Card?
+    public private(set) var combatEnemy: Card?
 
     /// Enemy current health
-    @Published public private(set) var combatEnemyHealth: Int = 0
+    public private(set) var combatEnemyHealth: Int = 0
 
     /// Enemy current will/resolve (Spirit track, 0 if enemy has no will)
-    @Published public private(set) var combatEnemyWill: Int = 0
+    public private(set) var combatEnemyWill: Int = 0
 
     /// Enemy maximum will/resolve for UI progress bars
-    @Published public private(set) var combatEnemyMaxWill: Int = 0
+    public private(set) var combatEnemyMaxWill: Int = 0
 
     /// Combat actions remaining this turn
-    @Published public private(set) var combatActionsRemaining: Int = 3
+    public private(set) var combatActionsRemaining: Int = 3
 
     /// Combat turn number
-    @Published public private(set) var combatTurnNumber: Int = 1
+    public private(set) var combatTurnNumber: Int = 1
 
     /// Whether mulligan has been done this combat
-    @Published public private(set) var combatMulliganDone: Bool = false
+    public private(set) var combatMulliganDone: Bool = false
 
     /// Whether player has attacked this turn
-    @Published public private(set) var combatPlayerAttackedThisTurn: Bool = false
+    public private(set) var combatPlayerAttackedThisTurn: Bool = false
 
     /// Last attack fate card result (player attacking enemy)
-    @Published public private(set) var lastAttackFateResult: FateDrawResult?
+    public private(set) var lastAttackFateResult: FateDrawResult?
 
     /// Last defense fate card result (player defending from enemy)
-    @Published public private(set) var lastDefenseFateResult: FateDrawResult?
+    public private(set) var lastDefenseFateResult: FateDrawResult?
 
     /// Current enemy intent for this turn (shown before player acts)
-    @Published public private(set) var currentEnemyIntent: EnemyIntent?
+    public private(set) var currentEnemyIntent: EnemyIntent?
 
     /// Last fate attack result for UI display
-    @Published public private(set) var lastFateAttackResult: FateAttackResult?
+    public private(set) var lastFateAttackResult: FateAttackResult?
 
     // MARK: - Private Combat State
 

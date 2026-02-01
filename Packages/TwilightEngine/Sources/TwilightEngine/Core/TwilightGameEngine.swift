@@ -1,63 +1,69 @@
 import Foundation
-import Combine
 
 // MARK: - Game Engine
 // The central game orchestrator - ALL game actions go through here
 
 /// Main game engine — the central orchestrator for all game actions
 /// UI should NEVER mutate state directly - always go through performAction()
-public final class TwilightGameEngine: ObservableObject {
+///
+/// Architecture: Engine is pure logic (no Combine/SwiftUI). App layer wraps
+/// this in `GameEngineObservable` for SwiftUI binding via `onStateChanged`.
+public final class TwilightGameEngine {
 
-    // MARK: - Published State (for UI binding)
-    // Audit v1.1 Issue #1, #8: UI reads directly from Engine, not WorldState
+    // MARK: - State Change Callback
+
+    /// Called after state mutations so App-layer wrapper can notify SwiftUI.
+    public var onStateChanged: (() -> Void)?
+
+    // MARK: - State (for UI binding via App-layer wrapper)
 
     /// Current in-game day number
-    @Published public private(set) var currentDay: Int = 0
+    public private(set) var currentDay: Int = 0
     /// World tension level (0-100), drives degradation and difficulty
-    @Published public internal(set) var worldTension: Int = 30
+    public internal(set) var worldTension: Int = 30
     /// ID of the region the player is currently in
-    @Published public private(set) var currentRegionId: String?
+    public private(set) var currentRegionId: String?
     /// Whether the game has ended (victory or defeat)
-    @Published public private(set) var isGameOver: Bool = false
+    public private(set) var isGameOver: Bool = false
     /// Result of the game if it has ended
-    @Published public private(set) var gameResult: GameEndResult?
+    public private(set) var gameResult: GameEndResult?
 
     /// ID of the event currently being presented to the player
-    @Published public private(set) var currentEventId: String?
+    public private(set) var currentEventId: String?
     /// Whether the player is currently in combat
-    @Published public internal(set) var isInCombat: Bool = false
+    public internal(set) var isInCombat: Bool = false
 
     /// Result of the last performed action
-    @Published public private(set) var lastActionResult: ActionResult?
+    public private(set) var lastActionResult: ActionResult?
 
-    // MARK: - Published State for UI (Engine-First Architecture)
+    // MARK: - State for UI (Engine-First Architecture)
 
     /// All regions with their current state - UI reads this directly
-    @Published public private(set) var publishedRegions: [String: EngineRegionState] = [:]
+    public private(set) var publishedRegions: [String: EngineRegionState] = [:]
 
     /// World resonance value (-100..+100), drives Navi/Prav world state
-    @Published public internal(set) var resonanceValue: Float = 0.0
+    public internal(set) var resonanceValue: Float = 0.0
 
     /// World flags - for quest/event conditions
-    @Published public private(set) var publishedWorldFlags: [String: Bool] = [:]
+    public private(set) var publishedWorldFlags: [String: Bool] = [:]
 
     /// Current event being displayed to player
-    @Published public private(set) var currentEvent: GameEvent?
+    public private(set) var currentEvent: GameEvent?
 
     /// Day event notification (tension increase, degradation, etc.)
-    @Published public private(set) var lastDayEvent: DayEvent?
+    public private(set) var lastDayEvent: DayEvent?
 
     /// Active quests
-    @Published public private(set) var publishedActiveQuests: [Quest] = []
+    public private(set) var publishedActiveQuests: [Quest] = []
 
     /// Event log (last 100 entries)
-    @Published public private(set) var publishedEventLog: [EventLogEntry] = []
+    public private(set) var publishedEventLog: [EventLogEntry] = []
 
     /// Light/Dark balance of the world
-    @Published public private(set) var lightDarkBalance: Int = 50
+    public private(set) var lightDarkBalance: Int = 50
 
     /// Main quest stage (1-5)
-    @Published public private(set) var mainQuestStage: Int = 1
+    public private(set) var mainQuestStage: Int = 1
 
     // MARK: - UI Convenience Accessors (Engine-First Architecture)
 
@@ -191,7 +197,10 @@ public final class TwilightGameEngine: ObservableObject {
 
     private var regions: [String: EngineRegionState] = [:]
     private var completedEventIds: Set<String> = []  // Definition IDs (Epic 3: Stable IDs)
-    var _blockScriptedEvents = false  // Test helper
+    #if DEBUG
+    /// Test-only flag: blocks scripted event generation to isolate random encounters.
+    internal var _blockScriptedEvents = false
+    #endif
     private var worldFlags: [String: Bool] = [:]
     private var questStages: [String: Int] = [:]
 
@@ -267,6 +276,7 @@ public final class TwilightGameEngine: ObservableObject {
         lastDayEvent = nil
         isInCombat = false
         combat.resetState()
+        onStateChanged?()
     }
 
     /// Initialize the Fate Deck with a set of cards
@@ -998,7 +1008,9 @@ public final class TwilightGameEngine: ObservableObject {
     // MARK: - Event Generation
 
     private func generateEvent(for regionId: String, trigger: EventTrigger) -> String? {
+        #if DEBUG
         if _blockScriptedEvents { return nil }
+        #endif
         // Engine-First: generate event from ContentRegistry
         guard let region = publishedRegions[regionId] else {
             return nil
@@ -1224,6 +1236,8 @@ public final class TwilightGameEngine: ObservableObject {
         }
         // Note: currentEvent is set directly when generating events
         // Player stats are managed directly by the engine
+
+        onStateChanged?()
     }
 
     // MARK: - Event Log
@@ -1252,6 +1266,7 @@ public final class TwilightGameEngine: ObservableObject {
         }
 
         publishedEventLog = eventLog
+        onStateChanged?()
     }
 
     // MARK: - Day Events
@@ -1792,13 +1807,14 @@ public extension TwilightGameEngine {
         resonanceValue = max(-100, min(100, value))
     }
 
+    #if DEBUG
     /// Block all scripted events from generating (for testing random encounters)
     func blockAllScriptedEvents() {
         let allEvents = contentRegistry.getAllEventDefinitions()
         for event in allEvents {
             completedEventIds.insert(event.id)
-            // Also set forbidden flags to block non-oneTime events
         }
         _blockScriptedEvents = true
     }
+    #endif
 }

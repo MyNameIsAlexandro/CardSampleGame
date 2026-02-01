@@ -446,7 +446,7 @@ struct HandCardView: View {
         VStack(spacing: 0) {
             // Card name
             Text(card.name)
-                .font(.system(size: Spacing.smd))
+                .font(.system(size: Sizes.smallText))
                 .fontWeight(.bold)
                 .foregroundColor(.white)
                 .lineLimit(1)
@@ -478,7 +478,7 @@ struct HandCardView: View {
                 if let cost = card.cost {
                     HStack(spacing: Spacing.xxxs) {
                         Image(systemName: "star.fill")
-                            .font(.system(size: Spacing.sm))
+                            .font(.system(size: Sizes.microText))
                             .foregroundColor(AppColors.faith)
                         Text("\(cost)")
                             .font(.system(size: Sizes.tinyCaption))
@@ -488,7 +488,7 @@ struct HandCardView: View {
                 if let power = card.power {
                     HStack(spacing: Spacing.xxxs) {
                         Image(systemName: "bolt.fill")
-                            .font(.system(size: Spacing.sm))
+                            .font(.system(size: Sizes.microText))
                             .foregroundColor(AppColors.health)
                         Text("\(power)")
                             .font(.system(size: Sizes.tinyCaption))
@@ -498,7 +498,7 @@ struct HandCardView: View {
                 if let defense = card.defense {
                     HStack(spacing: Spacing.xxxs) {
                         Image(systemName: "shield.fill")
-                            .font(.system(size: Spacing.sm))
+                            .font(.system(size: Sizes.microText))
                             .foregroundColor(AppColors.defense)
                         Text("\(defense)")
                             .font(.system(size: Sizes.tinyCaption))

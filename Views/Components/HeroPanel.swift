@@ -5,7 +5,7 @@ import TwilightEngine
 /// Inspired by Arkham Horror LCG investigator cards but with unique Twilight Marches style
 /// Engine-First Architecture: reads all data from TwilightGameEngine
 struct HeroPanel: View {
-    @ObservedObject var engine: TwilightGameEngine
+    @ObservedObject var vm: GameEngineObservable
 
     /// Compact mode for screens with limited space (like combat header)
     var compact: Bool = false
@@ -34,7 +34,7 @@ struct HeroPanel: View {
             VStack(alignment: .leading, spacing: Spacing.xxs) {
                 // Name and class
                 HStack {
-                    Text(engine.player.name)
+                    Text(vm.engine.player.name)
                         .font(.headline)
                         .fontWeight(.bold)
                     Text(heroClass)
@@ -51,7 +51,7 @@ struct HeroPanel: View {
                     // Health
                     statBadge(
                         icon: "heart.fill",
-                        value: "\(engine.player.health)/\(engine.player.maxHealth)",
+                        value: "\(vm.engine.player.health)/\(vm.engine.player.maxHealth)",
                         color: AppColors.health,
                         label: nil
                     )
@@ -59,7 +59,7 @@ struct HeroPanel: View {
                     // Faith
                     statBadge(
                         icon: "sparkles",
-                        value: "\(engine.player.faith)",
+                        value: "\(vm.engine.player.faith)",
                         color: AppColors.faith,
                         label: nil
                     )
@@ -67,7 +67,7 @@ struct HeroPanel: View {
                     // Strength
                     statBadge(
                         icon: "hand.raised.fill",
-                        value: "\(engine.player.strength)",
+                        value: "\(vm.engine.player.strength)",
                         color: AppColors.power,
                         label: nil
                     )
@@ -109,7 +109,7 @@ struct HeroPanel: View {
                     Image(systemName: "heart.fill")
                         .font(.caption2)
                         .foregroundColor(AppColors.health)
-                    Text("\(engine.player.health)")
+                    Text("\(vm.engine.player.health)")
                         .font(.caption)
                         .fontWeight(.semibold)
                 }
@@ -119,7 +119,7 @@ struct HeroPanel: View {
                     Image(systemName: "sparkles")
                         .font(.caption2)
                         .foregroundColor(AppColors.faith)
-                    Text("\(engine.player.faith)")
+                    Text("\(vm.engine.player.faith)")
                         .font(.caption)
                         .fontWeight(.semibold)
                 }
@@ -228,7 +228,7 @@ struct HeroPanel: View {
     }
 
     var heroInitials: String {
-        let name = engine.player.name
+        let name = vm.engine.player.name
         let words = name.split(separator: " ")
         if words.count >= 2 {
             return String(words[0].prefix(1)) + String(words[1].prefix(1))
@@ -237,7 +237,7 @@ struct HeroPanel: View {
     }
 
     var balanceIcon: String {
-        let balance = engine.player.balance
+        let balance = vm.engine.player.balance
         if balance >= 70 {
             return "sun.max.fill"      // Light path (70-100)
         } else if balance <= 30 {
@@ -248,7 +248,7 @@ struct HeroPanel: View {
     }
 
     var balanceColor: Color {
-        let balance = engine.player.balance
+        let balance = vm.engine.player.balance
         if balance >= 70 {
             return AppColors.light      // Light path
         } else if balance <= 30 {
@@ -259,7 +259,7 @@ struct HeroPanel: View {
     }
 
     var balanceText: String {
-        let balance = engine.player.balance
+        let balance = vm.engine.player.balance
         if balance >= 70 {
             return L10n.balanceLight.localized
         } else if balance <= 30 {
@@ -270,7 +270,7 @@ struct HeroPanel: View {
     }
 
     var balanceGradient: LinearGradient {
-        let balance = engine.player.balance
+        let balance = vm.engine.player.balance
         if balance >= 70 {
             return LinearGradient(
                 colors: [AppColors.light.opacity(Opacity.high), AppColors.power.opacity(Opacity.mediumHigh)],
@@ -299,23 +299,23 @@ struct HeroPanel_Previews: PreviewProvider {
     static var previews: some View {
         VStack(spacing: Spacing.xl) {
             // Full panel
-            HeroPanel(engine: previewEngine)
+            HeroPanel(vm: previewVM)
                 .padding()
 
             // Compact panel
-            HeroPanel(engine: previewEngine, compact: true)
+            HeroPanel(vm: previewVM, compact: true)
                 .padding()
 
             // Full panel without avatar
-            HeroPanel(engine: previewEngine, showAvatar: false)
+            HeroPanel(vm: previewVM, showAvatar: false)
                 .padding()
         }
         .background(AppColors.backgroundSystem)
     }
 
-    static var previewEngine: TwilightGameEngine {
-        let engine = TwilightGameEngine()
+    static var previewVM: GameEngineObservable {
+        let vm = GameEngineObservable()
         // Preview data would be set here
-        return engine
+        return vm
     }
 }

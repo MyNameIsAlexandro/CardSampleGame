@@ -5,7 +5,7 @@ import TwilightEngine
 /// Layout: ResonanceWidget → EnemyPanel → HeroHealthBar → RoundInfoBar → CombatLog → ActionBar → FateDeckBar
 /// Overlays: CombatOverView, MulliganOverlay
 struct CombatView: View {
-    @ObservedObject var engine: TwilightGameEngine
+    @ObservedObject var engineVM: GameEngineObservable
     let onCombatEnd: (CombatOutcome) -> Void
 
     // MARK: - Legacy-compatible types
@@ -56,7 +56,7 @@ struct CombatView: View {
                 if vm.showMulligan {
                     VStack(spacing: 0) {
                         // Hero stats visible during mulligan
-                        HeroPanel(engine: engine, compact: true)
+                        HeroPanel(vm: engineVM, compact: true)
                             .padding(.horizontal, Spacing.sm)
                             .padding(.top, Spacing.sm)
 
@@ -170,7 +170,7 @@ struct CombatView: View {
         VStack(spacing: 0) {
             // Resonance widget (compact) + Save & Exit
             HStack {
-                ResonanceWidget(engine: engine, compact: true)
+                ResonanceWidget(vm: engineVM, compact: true)
                 Spacer()
                 Button {
                     showSaveExitConfirm = true
@@ -337,7 +337,7 @@ struct CombatView: View {
                 FateCardRevealView(
                     result: result,
                     context: vm.fateContext,
-                    worldResonance: engine.resonanceValue,
+                    worldResonance: engineVM.engine.resonanceValue,
                     onDismiss: { vm.dismissFateReveal() }
                 )
             }
@@ -397,7 +397,7 @@ struct CombatView: View {
             startHP = saved.context.hero.hp
             vm.restoreEncounter(from: saved)
             didStart = true
-        } else if let ctx = engine.makeEncounterContext() {
+        } else if let ctx = engineVM.engine.makeEncounterContext() {
             startHP = ctx.hero.hp
             vm.configure(context: ctx)
             vm.startEncounter()
@@ -409,7 +409,7 @@ struct CombatView: View {
 
     private func saveAndExit() {
         if let state = vm.getSaveState() {
-            engine.pendingEncounterState = state
+            engineVM.engine.pendingEncounterState = state
         }
         onCombatEnd(.fled)
     }
@@ -417,7 +417,7 @@ struct CombatView: View {
     // MARK: - Result
 
     private func applyResultAndDismiss(result: EncounterResult) {
-        engine.applyEncounterResult(result)
+        engineVM.engine.applyEncounterResult(result)
 
         let stats = CombatStats(
             turnsPlayed: vm.round,
@@ -448,7 +448,7 @@ struct CombatView: View {
             }
             profileManager.recordEncounter(
                 enemyId: enemyId,
-                day: engine.currentDay,
+                day: engineVM.engine.currentDay,
                 outcome: profileOutcome
             )
         }

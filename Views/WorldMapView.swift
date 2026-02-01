@@ -4,7 +4,7 @@ import TwilightEngine
 struct WorldMapView: View {
     // MARK: - Engine-First Architecture
     // Engine is the ONLY source of truth for UI
-    @ObservedObject var engine: TwilightGameEngine
+    @ObservedObject var vm: GameEngineObservable
     var onExit: (() -> Void)? = nil
     var onAutoSave: (() -> Void)? = nil
 
@@ -18,8 +18,8 @@ struct WorldMapView: View {
 
     // MARK: - Initialization (Engine-First only)
 
-    init(engine: TwilightGameEngine, onExit: (() -> Void)? = nil, onAutoSave: (() -> Void)? = nil) {
-        self.engine = engine
+    init(vm: GameEngineObservable, onExit: (() -> Void)? = nil, onAutoSave: (() -> Void)? = nil) {
+        self.vm = vm
         self.onExit = onExit
         self.onAutoSave = onAutoSave
     }
@@ -28,12 +28,12 @@ struct WorldMapView: View {
         NavigationView {
             VStack(spacing: 0) {
                 // Hero Panel (persistent, consistent design across all screens)
-                HeroPanel(engine: engine)
+                HeroPanel(vm: vm)
                     .padding(.horizontal, Spacing.sm)
                     .padding(.top, Spacing.xxs)
 
                 // Resonance gauge
-                ResonanceWidget(engine: engine)
+                ResonanceWidget(vm: vm)
 
                 Divider()
                     .padding(.vertical, Spacing.xxs)
@@ -43,8 +43,8 @@ struct WorldMapView: View {
 
                 Divider()
 
-                // Regions list (Engine-First: reads from engine.regionsArray)
-                if engine.regionsArray.isEmpty {
+                // Regions list (Engine-First: reads from vm.engine.regionsArray)
+                if vm.engine.regionsArray.isEmpty {
                     // Show loading state if regions aren't loaded yet
                     VStack(spacing: Spacing.lg) {
                         ProgressView()
@@ -57,10 +57,10 @@ struct WorldMapView: View {
                 } else {
                     ScrollView {
                         LazyVStack(spacing: Spacing.md) {
-                            ForEach(engine.regionsArray, id: \.id) { region in
+                            ForEach(vm.engine.regionsArray, id: \.id) { region in
                                 EngineRegionCardView(
                                     region: region,
-                                    isCurrentLocation: region.id == engine.currentRegionId
+                                    isCurrentLocation: region.id == vm.engine.currentRegionId
                                 )
                                 .onTapGesture {
                                     selectedRegion = region
@@ -100,12 +100,12 @@ struct WorldMapView: View {
                 }
             }
             .sheet(isPresented: $showingEventLog) {
-                EngineEventLogView(engine: engine)
+                EngineEventLogView(vm: vm)
             }
             .sheet(item: $selectedRegion) { region in
                 EngineRegionDetailView(
                     region: region,
-                    engine: engine,
+                    vm: vm,
                     onDismiss: {
                         selectedRegion = nil
                     },
@@ -132,10 +132,10 @@ struct WorldMapView: View {
                 }
             }
             .fullScreenCover(isPresented: $showingGameOver) {
-                if let result = engine.gameResult {
-                    GameOverView(result: result, engine: engine) {
+                if let result = vm.engine.gameResult {
+                    GameOverView(result: result, vm: vm) {
                         // PG-05: Record playthrough end in ProfileManager
-                        ProfileManager.shared.recordPlaythroughEnd(daysSurvived: engine.currentDay)
+                        ProfileManager.shared.recordPlaythroughEnd(daysSurvived: vm.engine.currentDay)
                         let newUnlocks = AchievementEngine.evaluateNewUnlocks(profile: ProfileManager.shared.profile)
                         for id in newUnlocks {
                             ProfileManager.shared.recordAchievement(id)
@@ -153,7 +153,7 @@ struct WorldMapView: View {
                             .ignoresSafeArea()
                         VStack(spacing: Spacing.md) {
                             Image(systemName: "figure.walk")
-                                .font(.system(size: 40))
+                                .font(.system(size: Sizes.iconXL))
                                 .foregroundColor(AppColors.primary)
                             ProgressView()
                                 .tint(AppColors.primary)
@@ -162,12 +162,12 @@ struct WorldMapView: View {
                     .transition(.opacity)
                 }
             }
-            .onChange(of: engine.isGameOver) { isOver in
+            .onChange(of: vm.engine.isGameOver) { isOver in
                 if isOver {
                     showingGameOver = true
                 }
             }
-            .onChange(of: engine.currentRegionId) { _ in
+            .onChange(of: vm.engine.currentRegionId) { _ in
                 // UX-10: Show travel flash
                 HapticManager.shared.play(.light)
                 withAnimation(.easeIn(duration: 0.15)) { showingTravelTransition = true }
@@ -175,24 +175,24 @@ struct WorldMapView: View {
                     withAnimation(.easeOut(duration: 0.3)) { showingTravelTransition = false }
                 }
             }
-            .onChange(of: engine.currentDay) { newDay in
+            .onChange(of: vm.engine.currentDay) { newDay in
                 // Auto-save every 3 days (SAV-04)
                 if newDay > 1 && newDay % 3 == 1 {
                     onAutoSave?()
                 }
             }
-            .onChange(of: engine.isInCombat) { inCombat in
+            .onChange(of: vm.engine.isInCombat) { inCombat in
                 // Auto-save after combat ends (SAV-04)
                 if !inCombat {
                     onAutoSave?()
                 }
             }
-            .onChange(of: engine.lastDayEvent?.id) { _ in
-                if let event = engine.lastDayEvent {
+            .onChange(of: vm.engine.lastDayEvent?.id) { _ in
+                if let event = vm.engine.lastDayEvent {
                     currentDayEvent = event
                     showingDayEvent = true
                     // Dismiss via Engine action (Engine-First)
-                    engine.performAction(.dismissDayEvent)
+                    vm.engine.performAction(.dismissDayEvent)
                 }
             }
         }
@@ -212,7 +212,7 @@ struct WorldMapView: View {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .font(.caption)
                             .foregroundColor(tensionColor)
-                        Text("\(engine.worldTension)%")
+                        Text("\(vm.engine.worldTension)%")
                             .font(.caption)
                             .fontWeight(.bold)
                     }
@@ -225,7 +225,7 @@ struct WorldMapView: View {
                     Text(L10n.worldLabel.localized)
                         .font(.caption2)
                         .foregroundColor(AppColors.muted)
-                    Text(engine.worldBalanceDescription)
+                    Text(vm.engine.worldBalanceDescription)
                         .font(.caption)
                         .fontWeight(.bold)
                         .foregroundColor(balanceColor)
@@ -238,7 +238,7 @@ struct WorldMapView: View {
                     Text(L10n.daysInJourney.localized)
                         .font(.caption2)
                         .foregroundColor(AppColors.muted)
-                    Text("\(engine.currentDay)")
+                    Text("\(vm.engine.currentDay)")
                         .font(.caption)
                         .fontWeight(.bold)
                 }
@@ -255,7 +255,7 @@ struct WorldMapView: View {
                     Rectangle()
                         .fill(tensionColor)
                         .frame(
-                            width: geometry.size.width * CGFloat(engine.worldTension) / 100,
+                            width: geometry.size.width * CGFloat(vm.engine.worldTension) / 100,
                             height: Sizes.progressThin
                         )
                 }
@@ -268,7 +268,7 @@ struct WorldMapView: View {
     }
 
     var tensionColor: Color {
-        switch engine.worldTension {
+        switch vm.engine.worldTension {
         case 0..<30: return AppColors.success
         case 30..<60: return AppColors.warning
         case 60..<80: return AppColors.warning
@@ -277,7 +277,7 @@ struct WorldMapView: View {
     }
 
     var balanceColor: Color {
-        switch engine.lightDarkBalance {
+        switch vm.engine.lightDarkBalance {
         case 0..<30: return AppColors.dark      // Тьма
         case 30..<70: return AppColors.neutral  // Нейтрально
         case 70...100: return AppColors.light   // Свет
@@ -463,7 +463,7 @@ struct EngineRegionCardView: View {
 
 struct EngineRegionDetailView: View {
     let region: EngineRegionState
-    @ObservedObject var engine: TwilightGameEngine
+    @ObservedObject var vm: GameEngineObservable
     let onDismiss: () -> Void
     var onRegionChange: ((EngineRegionState?) -> Void)? = nil
 
@@ -490,7 +490,7 @@ struct EngineRegionDetailView: View {
         NavigationView {
             VStack(spacing: 0) {
                 // Hero Panel (persistent, consistent design across all screens)
-                HeroPanel(engine: engine)
+                HeroPanel(vm: vm)
                     .padding(.horizontal, Spacing.sm)
                     .padding(.vertical, Spacing.xxs)
 
@@ -554,7 +554,7 @@ struct EngineRegionDetailView: View {
             }
             .sheet(item: $eventToShow) { event in
                 EventView(
-                    engine: engine,
+                    vm: vm,
                     event: event,
                     regionId: region.id,
                     onChoiceSelected: { choice in
@@ -563,13 +563,13 @@ struct EngineRegionDetailView: View {
                     onDismiss: {
                         eventToShow = nil
                         // Dismiss current event in engine
-                        engine.performAction(.dismissCurrentEvent)
+                        vm.engine.performAction(.dismissCurrentEvent)
                     }
                 )
             }
-            .onChange(of: engine.currentEvent?.id) { _ in
+            .onChange(of: vm.engine.currentEvent?.id) { _ in
                 // When engine triggers an event, show it
-                if let event = engine.currentEvent {
+                if let event = vm.engine.currentEvent {
                     eventToShow = event
                 }
             }
@@ -793,7 +793,7 @@ struct EngineRegionDetailView: View {
     // MARK: - Actions Section
 
     var isPlayerHere: Bool {
-        region.id == engine.currentRegionId
+        region.id == vm.engine.currentRegionId
     }
 
     var actionsSection: some View {
@@ -804,9 +804,9 @@ struct EngineRegionDetailView: View {
             VStack(spacing: Spacing.sm) {
                 // Travel action - only if player is NOT here
                 if !isPlayerHere {
-                    let canTravel = engine.canTravelTo(regionId: region.id)
-                    let routingHint = engine.getRoutingHint(to: region.id)
-                    let travelCost = engine.calculateTravelCost(to: region.id)
+                    let canTravel = vm.engine.canTravelTo(regionId: region.id)
+                    let routingHint = vm.engine.getRoutingHint(to: region.id)
+                    let travelCost = vm.engine.calculateTravelCost(to: region.id)
                     let dayWord = travelCost == 1 ? L10n.dayWord1.localized : L10n.dayWord234.localized
 
                     actionButton(
@@ -877,7 +877,7 @@ struct EngineRegionDetailView: View {
                             title: L10n.actionAnchorCost.localized(with: 5, 20),
                             icon: "hammer.fill",
                             color: AppColors.dark,
-                            enabled: engine.player.canAffordFaith(5)
+                            enabled: vm.engine.player.canAffordFaith(5)
                         ) {
                             selectedAction = .strengthenAnchor
                             showingActionConfirmation = true
@@ -885,7 +885,7 @@ struct EngineRegionDetailView: View {
                     }
 
                     // Explore (only if events available)
-                    let hasEvents = engine.hasAvailableEventsInCurrentRegion()
+                    let hasEvents = vm.engine.hasAvailableEventsInCurrentRegion()
                     actionButton(
                         title: L10n.actionExploreName.localized,
                         icon: "magnifyingglass",
@@ -958,7 +958,7 @@ struct EngineRegionDetailView: View {
         guard let action = selectedAction else { return "" }
         switch action {
         case .travel:
-            let days = engine.calculateTravelCost(to: region.id)
+            let days = vm.engine.calculateTravelCost(to: region.id)
             let dayWord = days == 1 ? L10n.dayWord1.localized : L10n.dayWord234.localized
             return L10n.confirmTravel.localized(with: region.name, days, dayWord)
         case .rest:
@@ -977,9 +977,9 @@ struct EngineRegionDetailView: View {
     func performAction(_ action: EngineRegionAction) {
         switch action {
         case .travel:
-            let result = engine.performAction(.travel(toRegionId: region.id))
+            let result = vm.engine.performAction(.travel(toRegionId: region.id))
             if result.success {
-                engine.addLogEntry(
+                vm.engine.addLogEntry(
                     regionName: region.name,
                     eventTitle: L10n.journalEntryTravel.localized,
                     choiceMade: L10n.journalEntryTravelChoice.localized,
@@ -987,7 +987,7 @@ struct EngineRegionDetailView: View {
                     type: .travel
                 )
                 // После перемещения показываем новый регион (текущую локацию)
-                if let newRegion = engine.regionsArray.first(where: { $0.id == engine.currentRegionId }) {
+                if let newRegion = vm.engine.regionsArray.first(where: { $0.id == vm.engine.currentRegionId }) {
                     onRegionChange?(newRegion)
                 } else {
                     onDismiss()
@@ -999,9 +999,9 @@ struct EngineRegionDetailView: View {
             }
 
         case .rest:
-            let result = engine.performAction(.rest)
+            let result = vm.engine.performAction(.rest)
             if result.success {
-                engine.addLogEntry(
+                vm.engine.addLogEntry(
                     regionName: region.name,
                     eventTitle: L10n.journalRestTitle.localized,
                     choiceMade: L10n.journalRestChoice.localized,
@@ -1015,9 +1015,9 @@ struct EngineRegionDetailView: View {
             break
 
         case .strengthenAnchor:
-            let result = engine.performAction(.strengthenAnchor)
+            let result = vm.engine.performAction(.strengthenAnchor)
             if result.success {
-                engine.addLogEntry(
+                vm.engine.addLogEntry(
                     regionName: region.name,
                     eventTitle: L10n.journalAnchorTitle.localized,
                     choiceMade: L10n.journalAnchorChoice.localized,
@@ -1027,13 +1027,13 @@ struct EngineRegionDetailView: View {
             }
 
         case .explore:
-            let result = engine.performAction(.explore)
+            let result = vm.engine.performAction(.explore)
             if result.success {
                 // Check if an event was triggered
                 if result.currentEvent == nil {
                     // No event available - show alert
                     showingNoEventsAlert = true
-                    engine.addLogEntry(
+                    vm.engine.addLogEntry(
                         regionName: region.name,
                         eventTitle: L10n.journalEntryExplore.localized,
                         choiceMade: L10n.journalEntryExploreChoice.localized,
@@ -1041,7 +1041,7 @@ struct EngineRegionDetailView: View {
                         type: .exploration
                     )
                 }
-                // If event was triggered, it will be shown via onChange of engine.currentEvent
+                // If event was triggered, it will be shown via onChange of vm.engine.currentEvent
             }
         }
     }
@@ -1085,13 +1085,13 @@ struct EngineRegionDetailView: View {
 
         // Execute choice via engine
         if let choiceIndex = event.choices.firstIndex(where: { $0.id == choice.id }) {
-            let result = engine.performAction(.chooseEventOption(eventId: event.id, choiceIndex: choiceIndex))
+            let result = vm.engine.performAction(.chooseEventOption(eventId: event.id, choiceIndex: choiceIndex))
 
             if result.success {
                 // Log the event
                 let logType: EventLogType = event.eventType == .combat ? .combat : .exploration
                 let outcomeMessage = choice.consequences.message ?? L10n.journalChoiceMade.localized
-                engine.addLogEntry(
+                vm.engine.addLogEntry(
                     regionName: region.name,
                     eventTitle: event.title,
                     choiceMade: choice.text,
@@ -1103,7 +1103,7 @@ struct EngineRegionDetailView: View {
 
         // Dismiss event view
         eventToShow = nil
-        engine.performAction(.dismissCurrentEvent)
+        vm.engine.performAction(.dismissCurrentEvent)
 
         // Show card received notification if cards were gained
         if !cardsToNotify.isEmpty {
@@ -1121,18 +1121,18 @@ struct EngineRegionDetailView: View {
 // MARK: - Engine-First Event Log View
 
 struct EngineEventLogView: View {
-    @ObservedObject var engine: TwilightGameEngine
+    @ObservedObject var vm: GameEngineObservable
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
         NavigationView {
             List {
-                if engine.publishedEventLog.isEmpty {
+                if vm.engine.publishedEventLog.isEmpty {
                     Text(L10n.journalEmpty.localized)
                         .foregroundColor(AppColors.muted)
                         .padding()
                 } else {
-                    ForEach(engine.publishedEventLog.reversed()) { entry in
+                    ForEach(vm.engine.publishedEventLog.reversed()) { entry in
                         EventLogEntryView(entry: entry)
                     }
                 }

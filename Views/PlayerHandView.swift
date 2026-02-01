@@ -2,7 +2,7 @@ import SwiftUI
 import TwilightEngine
 
 struct PlayerHandView: View {
-    @ObservedObject var engine: TwilightGameEngine
+    @ObservedObject var vm: GameEngineObservable
     @Binding var selectedCard: Card?
     var onCardPlay: ((Card) -> Void)?
 
@@ -39,7 +39,7 @@ struct PlayerHandView: View {
 
             // Compact deck info
             HStack(spacing: Spacing.lg) {
-                Text(engine.player.name)
+                Text(vm.engine.player.name)
                     .font(.caption)
                     .fontWeight(.bold)
 
@@ -49,7 +49,7 @@ struct PlayerHandView: View {
                 HStack(spacing: Spacing.xxs) {
                     Image(systemName: "rectangle.stack.fill")
                         .font(.caption2)
-                    Text("\(engine.deck.playerDeck.count)")
+                    Text("\(vm.engine.deck.playerDeck.count)")
                         .font(.caption2)
                 }
                 .foregroundColor(AppColors.primary)
@@ -58,7 +58,7 @@ struct PlayerHandView: View {
                 HStack(spacing: Spacing.xxs) {
                     Image(systemName: "trash.fill")
                         .font(.caption2)
-                    Text("\(engine.deck.playerDiscard.count)")
+                    Text("\(vm.engine.deck.playerDiscard.count)")
                         .font(.caption2)
                 }
                 .foregroundColor(AppColors.secondary)
@@ -68,7 +68,7 @@ struct PlayerHandView: View {
             .background(AppColors.cardBackground)
 
             // Hand of cards
-            if engine.deck.playerHand.isEmpty {
+            if vm.engine.deck.playerHand.isEmpty {
                 Text(L10n.noCardsInHand.localized)
                     .font(.caption)
                     .foregroundColor(AppColors.muted)
@@ -76,7 +76,7 @@ struct PlayerHandView: View {
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: Spacing.sm) {
-                        ForEach(engine.deck.playerHand) { card in
+                        ForEach(vm.engine.deck.playerHand) { card in
                             HandCardView(
                                 card: card,
                                 isSelected: selectedCard?.id == card.id,

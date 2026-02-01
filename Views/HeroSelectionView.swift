@@ -181,7 +181,7 @@ struct StatBadge: View {
                 .fontWeight(.bold)
 
             Text(label)
-                .font(.system(size: Spacing.sm))
+                .font(.system(size: Sizes.microText))
                 .foregroundColor(AppColors.muted)
         }
         .frame(minWidth: Sizes.iconXL)

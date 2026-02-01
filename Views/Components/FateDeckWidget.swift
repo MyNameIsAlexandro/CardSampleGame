@@ -4,7 +4,7 @@ import TwilightEngine
 /// Shows Fate Deck as a visual card pile with back-side up.
 /// Tap deck to draw a card. Shows drawn card briefly before discarding.
 struct FateDeckWidget: View {
-    @ObservedObject var engine: TwilightGameEngine
+    @ObservedObject var vm: GameEngineObservable
     @State private var showDiscardPile = false
     @State private var drawnCard: FateCard?
     @State private var showDrawnCard = false
@@ -15,20 +15,20 @@ struct FateDeckWidget: View {
             Button(action: drawCard) {
                 ZStack {
                     // Stack effect - multiple cards behind
-                    if engine.fateDeckDrawCount > 2 {
+                    if vm.engine.fateDeckDrawCount > 2 {
                         RoundedRectangle(cornerRadius: CornerRadius.sm)
                             .fill(AppColors.cardBack.opacity(Opacity.medium))
                             .frame(width: Sizes.cardFrameTinyW, height: Sizes.cardFrameTinyH)
                             .offset(x: 3, y: 3)
                     }
-                    if engine.fateDeckDrawCount > 1 {
+                    if vm.engine.fateDeckDrawCount > 1 {
                         RoundedRectangle(cornerRadius: CornerRadius.sm)
                             .fill(AppColors.cardBack.opacity(Opacity.high))
                             .frame(width: Sizes.cardFrameTinyW, height: Sizes.cardFrameTinyH)
                             .offset(x: 1.5, y: 1.5)
                     }
                     // Top card (back side)
-                    if engine.fateDeckDrawCount > 0 {
+                    if vm.engine.fateDeckDrawCount > 0 {
                         cardBackView
                     } else {
                         // Empty deck placeholder
@@ -44,19 +44,19 @@ struct FateDeckWidget: View {
                 }
             }
             .buttonStyle(.plain)
-            .disabled(engine.fateDeckDrawCount == 0 && engine.fateDeckDiscardCount == 0)
+            .disabled(vm.engine.fateDeckDrawCount == 0 && vm.engine.fateDeckDiscardCount == 0)
 
             // Deck info
             VStack(alignment: .leading, spacing: Spacing.xxxs) {
-                Text(L10n.combatFateDeckCount.localized(with: engine.fateDeckDrawCount))
+                Text(L10n.combatFateDeckCount.localized(with: vm.engine.fateDeckDrawCount))
                     .font(.caption2)
-                    .foregroundColor(engine.fateDeckDrawCount > 0 ? AppColors.spirit : AppColors.muted)
+                    .foregroundColor(vm.engine.fateDeckDrawCount > 0 ? AppColors.spirit : AppColors.muted)
 
                 Button(action: { showDiscardPile = true }) {
                     HStack(spacing: Spacing.xxxs) {
                         Image(systemName: "tray.full.fill")
                             .font(.caption2)
-                        Text(L10n.combatFateDiscardCount.localized(with: engine.fateDeckDiscardCount))
+                        Text(L10n.combatFateDiscardCount.localized(with: vm.engine.fateDeckDiscardCount))
                             .font(.caption2)
                     }
                     .foregroundColor(AppColors.muted)
@@ -65,11 +65,11 @@ struct FateDeckWidget: View {
             }
         }
         .sheet(isPresented: $showDiscardPile) {
-            FateDiscardPileView(engine: engine)
+            FateDiscardPileView(vm: vm)
         }
         .sheet(isPresented: $showDrawnCard) {
             if let card = drawnCard {
-                DrawnFateCardView(card: card, resonance: engine.resonanceValue) {
+                DrawnFateCardView(card: card, resonance: vm.engine.resonanceValue) {
                     showDrawnCard = false
                     drawnCard = nil
                 }
@@ -98,9 +98,9 @@ struct FateDeckWidget: View {
     }
 
     private func drawCard() {
-        guard let result = engine.fateDeck?.drawAndResolve(worldResonance: engine.resonanceValue) else {
+        guard let result = vm.engine.fateDeck?.drawAndResolve(worldResonance: vm.engine.resonanceValue) else {
             // If deck empty, try reshuffle
-            engine.fateDeck?.reshuffle()
+            vm.engine.fateDeck?.reshuffle()
             return
         }
         drawnCard = result.card
@@ -216,18 +216,18 @@ struct DrawnFateCardView: View {
 
 /// Shows the discard pile of played Fate Cards for card counting.
 struct FateDiscardPileView: View {
-    @ObservedObject var engine: TwilightGameEngine
+    @ObservedObject var vm: GameEngineObservable
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
         NavigationView {
             List {
-                if engine.fateDeckDiscardCards.isEmpty {
+                if vm.engine.fateDeckDiscardCards.isEmpty {
                     Text(L10n.fateDeckEmpty.localized)
                         .foregroundColor(AppColors.muted)
                         .italic()
                 } else {
-                    ForEach(engine.fateDeckDiscardCards, id: \.id) { card in
+                    ForEach(vm.engine.fateDeckDiscardCards, id: \.id) { card in
                         HStack {
                             if let suit = card.suit {
                                 Image(systemName: suitIcon(suit))

@@ -5,7 +5,7 @@ import EchoEngine
 
 /// Quick Battle mode: pick hero, pick enemy, fight
 struct BattleArenaView: View {
-    @ObservedObject var engine: TwilightGameEngine
+    @ObservedObject var vm: GameEngineObservable
     let onExit: () -> Void
 
     @State private var selectedHeroId: String?

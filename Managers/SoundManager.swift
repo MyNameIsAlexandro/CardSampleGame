@@ -24,10 +24,7 @@ final class SoundManager {
     enum SoundEffect: String, CaseIterable {
         // UI
         case buttonTap = "sfx_button_tap"
-        case cardSelect = "sfx_card_select"
-        case cardDraw = "sfx_card_draw"
         case cardPlay = "sfx_card_play"
-        case menuOpen = "sfx_menu_open"
 
         // Combat
         case attackHit = "sfx_attack_hit"
@@ -46,8 +43,6 @@ final class SoundManager {
         // Results
         case victory = "sfx_victory"
         case defeat = "sfx_defeat"
-        case lootReceived = "sfx_loot_received"
-        case questComplete = "sfx_quest_complete"
     }
 
     func play(_ effect: SoundEffect) {

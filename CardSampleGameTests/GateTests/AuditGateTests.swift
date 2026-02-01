@@ -228,7 +228,7 @@ final class AuditGateTests: XCTestCase {
     /// Requirement: "runtime не обращается напрямую к CodeRegistry"
     func testCardFactoryIsThePrimaryInterface() throws {
         // CardFactory should be the single entry point for card creation at runtime
-        // It abstracts over both ContentRegistry (JSON packs) and CardRegistry (built-in)
+        // It abstracts over ContentRegistry (JSON packs)
 
         let factory = CardFactory.shared
 
@@ -251,7 +251,7 @@ final class AuditGateTests: XCTestCase {
         XCTAssertNotNil(encounters, "CardFactory должен предоставлять колоду столкновений")
 
         // This test documents that CardFactory is the correct abstraction layer
-        // Direct CardRegistry/HeroRegistry access should only be in CardFactory implementation
+        // Direct HeroRegistry access should only be in CardFactory implementation
     }
 
     /// Gate test: ContentRegistry is the source of truth for pack content
@@ -689,7 +689,7 @@ final class AuditGateTests: XCTestCase {
 
         // Patterns that indicate direct code registry access (should use ContentRegistry/CardFactory)
         let forbiddenPatterns = [
-            "CardRegistry.shared",           // Direct CardRegistry access
+            "CardRegistry.shared",           // Direct CardRegistry access (deleted)
             "TwilightMarchesCards",          // Hardcoded card definitions
             "registerBuiltInCards",          // Built-in card registration
             "HeroRegistry.shared.register"   // Direct hero registration (reading is OK)
@@ -697,7 +697,6 @@ final class AuditGateTests: XCTestCase {
 
         // Allowed patterns (these files ARE the registries, they can access themselves)
         let allowedFiles = [
-            "CardRegistry.swift",
             "CardFactory.swift",  // CardFactory internally manages registries
             "ContentRegistry.swift",
             "HeroRegistry.swift"

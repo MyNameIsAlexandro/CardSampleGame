@@ -43,7 +43,7 @@ final class CodeHygieneTests: XCTestCase {
         "AbilityRegistry.swift",        // Ability loading types
         "HeroRegistry.swift",           // Hero loading types
         "HeroDefinition.swift",         // Hero system types
-        "CardRegistry.swift",           // Card loading types
+        // CardRegistry.swift removed — all content via ContentRegistry
         "EngineSave.swift",             // Save system types
         "TimeEngine.swift",             // Time system types
         "TwilightGameAction.swift",     // Action types
@@ -68,7 +68,6 @@ final class CodeHygieneTests: XCTestCase {
     /// Critical public API files that MUST have doc comments on public methods
     /// These are the main entry points for engine consumers
     private let criticalAPIFiles = [
-        "CardRegistry.swift",
         "HeroRegistry.swift",
         "ContentRegistry.swift",
         "PackManifest.swift"
@@ -167,7 +166,7 @@ final class CodeHygieneTests: XCTestCase {
 
         // Only check CardRegistry and HeroRegistry for now
         // ContentRegistry/PackLoader/PackManifest have many internal properties
-        let strictPropertyFiles = ["CardRegistry.swift", "HeroRegistry.swift"]
+        let strictPropertyFiles = ["HeroRegistry.swift"]
 
         for apiFile in strictPropertyFiles {
             let filePath = findFile(named: apiFile, in: engine)

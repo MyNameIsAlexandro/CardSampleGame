@@ -1,34 +1,33 @@
 import Foundation
-import Combine
 
 /// Manages player stats, hero abilities, and curses.
 /// Views access player state via `engine.player.X`.
-public final class EnginePlayerManager: ObservableObject {
+public final class EnginePlayerManager {
 
     // MARK: - Back-reference
 
     unowned let engine: TwilightGameEngine
 
-    // MARK: - Published State
+    // MARK: - State
 
-    @Published public internal(set) var health: Int = 10
-    @Published public internal(set) var maxHealth: Int = 10
-    @Published public internal(set) var faith: Int = 3
-    @Published public internal(set) var maxFaith: Int = 10
-    @Published public internal(set) var balance: Int = 50
-    @Published public internal(set) var name: String = "Герой"
-    @Published public internal(set) var heroId: String?
+    public internal(set) var health: Int = 10
+    public internal(set) var maxHealth: Int = 10
+    public internal(set) var faith: Int = 3
+    public internal(set) var maxFaith: Int = 10
+    public internal(set) var balance: Int = 50
+    public internal(set) var name: String = "Герой"
+    public internal(set) var heroId: String?
 
     /// Character stats
-    @Published public internal(set) var strength: Int = 5
-    @Published public internal(set) var dexterity: Int = 0
-    @Published public internal(set) var constitution: Int = 0
-    @Published public internal(set) var intelligence: Int = 0
-    @Published public internal(set) var wisdom: Int = 0
-    @Published public internal(set) var charisma: Int = 0
+    public internal(set) var strength: Int = 5
+    public internal(set) var dexterity: Int = 0
+    public internal(set) var constitution: Int = 0
+    public internal(set) var intelligence: Int = 0
+    public internal(set) var wisdom: Int = 0
+    public internal(set) var charisma: Int = 0
 
     /// Active curses
-    @Published public internal(set) var activeCurses: [ActiveCurse] = []
+    public internal(set) var activeCurses: [ActiveCurse] = []
 
     // MARK: - Init
 

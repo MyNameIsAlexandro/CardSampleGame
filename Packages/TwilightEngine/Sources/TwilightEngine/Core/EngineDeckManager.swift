@@ -1,18 +1,17 @@
 import Foundation
-import Combine
 
 /// Manages player deck, hand, and discard pile.
 /// Views access deck state via `engine.deck.X`.
-public final class EngineDeckManager: ObservableObject {
+public final class EngineDeckManager {
 
     // MARK: - Back-reference
 
     unowned let engine: TwilightGameEngine
 
-    // MARK: - Published State
+    // MARK: - State
 
-    /// Player's hand cards (Published for UI binding)
-    @Published public private(set) var playerHand: [Card] = []
+    /// Player's hand cards
+    public private(set) var playerHand: [Card] = []
 
     // MARK: - Internal State
 

@@ -8,7 +8,7 @@ import EchoScenes
 /// - UI reads state from engine properties
 struct EventView: View {
     // MARK: - Engine-First Architecture
-    @ObservedObject var engine: TwilightGameEngine
+    @ObservedObject var vm: GameEngineObservable
 
     let event: GameEvent
     let regionId: String
@@ -25,13 +25,13 @@ struct EventView: View {
     // MARK: - Initialization (Engine-First only)
 
     init(
-        engine: TwilightGameEngine,
+        vm: GameEngineObservable,
         event: GameEvent,
         regionId: String,
         onChoiceSelected: @escaping (EventChoice) -> Void,
         onDismiss: @escaping () -> Void
     ) {
-        self.engine = engine
+        self.vm = vm
         self.event = event
         self.regionId = regionId
         self.onChoiceSelected = onChoiceSelected
@@ -43,7 +43,7 @@ struct EventView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: Spacing.xl) {
                     // Hero Panel (consistent design across all screens)
-                    HeroPanel(engine: engine, compact: true)
+                    HeroPanel(vm: vm, compact: true)
                         .padding(.horizontal)
 
                     // Event header
@@ -109,7 +109,7 @@ struct EventView: View {
                         resonance: config.resonance,
                         seed: config.seed,
                         onCombatEndWithResult: { (result: EchoCombatResult) in
-                            engine.applyEchoCombatResult(result)
+                            vm.engine.applyEchoCombatResult(result)
                             let isVictory: Bool
                             if case .victory = result.outcome { isVictory = true } else { isVictory = false }
                             let stats = CombatView.CombatStats(
@@ -139,7 +139,7 @@ struct EventView: View {
                     )
                 } else {
                     CombatView(
-                        engine: engine,
+                        engineVM: vm,
                         onCombatEnd: { outcome in
                             handleCombatEnd(outcome: outcome)
                         }
@@ -255,9 +255,9 @@ struct EventView: View {
                     Text(L10n.eventRequiresFaith.localized(with: minFaith))
                         .font(.caption2)
                     // Engine-First: read from engine
-                    Text(L10n.eventYouHaveFaith.localized(with: engine.player.faith))
+                    Text(L10n.eventYouHaveFaith.localized(with: vm.engine.player.faith))
                         .font(.caption2)
-                        .foregroundColor(engine.player.faith >= minFaith ? AppColors.success : AppColors.danger)
+                        .foregroundColor(vm.engine.player.faith >= minFaith ? AppColors.success : AppColors.danger)
                 }
                 .foregroundColor(AppColors.muted)
             }
@@ -269,16 +269,16 @@ struct EventView: View {
                     Text(L10n.eventRequiresHealth.localized(with: minHealth))
                         .font(.caption2)
                     // Engine-First: read from engine
-                    Text(L10n.eventYouHaveHealth.localized(with: engine.player.health))
+                    Text(L10n.eventYouHaveHealth.localized(with: vm.engine.player.health))
                         .font(.caption2)
-                        .foregroundColor(engine.player.health >= minHealth ? AppColors.success : AppColors.danger)
+                        .foregroundColor(vm.engine.player.health >= minHealth ? AppColors.success : AppColors.danger)
                 }
                 .foregroundColor(AppColors.muted)
             }
 
             if let reqBalance = requirements.requiredBalance {
                 // Engine-First: read from engine
-                let playerBalanceEnum = getBalanceEnum(engine.player.balance)
+                let playerBalanceEnum = getBalanceEnum(vm.engine.player.balance)
                 let meetsRequirement = playerBalanceEnum == reqBalance
 
                 HStack(spacing: Spacing.xxs) {
@@ -365,10 +365,10 @@ struct EventView: View {
         guard let monster = event.monsterCard else { return }
 
         // Engine-First: Get combat context from engine
-        let regionState = engine.currentRegion?.state ?? .stable
+        let regionState = vm.engine.currentRegion?.state ?? .stable
         let combatContext = CombatContext(
             regionState: regionState,
-            playerCurses: engine.player.activeCurses.map { $0.type }
+            playerCurses: vm.engine.player.activeCurses.map { $0.type }
         )
 
         // Создать врага с модификаторами региона
@@ -384,11 +384,11 @@ struct EventView: View {
         }
 
         // Setup combat in engine first, then show fullScreenCover
-        engine.combat.setupCombatEnemy(adjustedMonster)
+        vm.engine.combat.setupCombatEnemy(adjustedMonster)
 
         // Try to use EchoEngine (SpriteKit) if EnemyDefinition exists
         if let _ = ContentRegistry.shared.getEnemy(id: monster.id) {
-            echoCombatConfig = engine.makeEchoCombatConfig()
+            echoCombatConfig = vm.engine.makeEchoCombatConfig()
         } else {
             echoCombatConfig = nil
         }
@@ -421,21 +421,21 @@ struct EventView: View {
 
         // Check minimum faith
         if let minFaith = requirements.minimumFaith {
-            if engine.player.faith < minFaith {
+            if vm.engine.player.faith < minFaith {
                 return false
             }
         }
 
         // Check minimum health
         if let minHealth = requirements.minimumHealth {
-            if engine.player.health < minHealth {
+            if vm.engine.player.health < minHealth {
                 return false
             }
         }
 
         // Check balance requirement
         if let reqBalance = requirements.requiredBalance {
-            let playerBalanceEnum = getBalanceEnum(engine.player.balance)
+            let playerBalanceEnum = getBalanceEnum(vm.engine.player.balance)
             if playerBalanceEnum != reqBalance {
                 return false
             }
@@ -470,6 +470,7 @@ struct EventView_Previews: PreviewProvider {
         // Engine-First: Use engine for preview
         let engine = TwilightGameEngine()
         engine.initializeNewGame(playerName: "Волхв", heroId: nil, startingDeck: [])
+        let vm = GameEngineObservable(engine: engine)
 
         let event = GameEvent(
             id: "preview_event",
@@ -499,7 +500,7 @@ struct EventView_Previews: PreviewProvider {
         )
 
         return EventView(
-            engine: engine,
+            vm: vm,
             event: event,
             regionId: "preview_region",
             onChoiceSelected: { _ in },

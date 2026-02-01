@@ -23,7 +23,8 @@ struct ContentView: View {
 
     // MARK: - Engine-First Architecture
     // Engine is the single source of truth (no legacy GameState)
-    @StateObject private var engine = TwilightGameEngine()
+    // GameEngineObservable wraps pure-logic Engine for SwiftUI binding
+    @StateObject private var vm = GameEngineObservable()
     @StateObject private var saveManager = SaveManager.shared
 
     // Heroes loaded from Content Pack (data-driven)
@@ -63,17 +64,17 @@ struct ContentView: View {
                     .onAppear { ambientPulse = true }
 
             if showingBattleArena {
-                BattleArenaView(engine: engine, onExit: {
+                BattleArenaView(vm: vm, onExit: {
                     showingBattleArena = false
                 })
             } else if showingWorldMap {
                 // MARK: - Engine-First: Pass engine directly to WorldMapView
                 WorldMapView(
-                    engine: engine,
+                    vm: vm,
                     onExit: {
                         // Save game on exit
                         if let slot = selectedSaveSlot {
-                            saveManager.saveGame(to: slot, engine: engine)
+                            saveManager.saveGame(to: slot, engine: vm.engine)
                         }
                         showingWorldMap = false
                         showingSaveSlots = false
@@ -82,7 +83,7 @@ struct ContentView: View {
                     onAutoSave: {
                         // Auto-save to current slot (SAV-04)
                         if let slot = selectedSaveSlot {
-                            saveManager.saveGame(to: slot, engine: engine)
+                            saveManager.saveGame(to: slot, engine: vm.engine)
                         }
                     }
                 )
@@ -339,13 +340,13 @@ struct ContentView: View {
         }
         #endif
         .fullScreenCover(isPresented: $resumingCombat) {
-            if let savedState = engine.pendingEncounterState {
-                CombatView(engine: engine, onCombatEnd: { outcome in
-                    engine.pendingEncounterState = nil
+            if let savedState = vm.engine.pendingEncounterState {
+                CombatView(engineVM: vm, onCombatEnd: { outcome in
+                    vm.engine.pendingEncounterState = nil
                     resumingCombat = false
                     // Auto-save after combat
                     if let slot = selectedSaveSlot {
-                        saveManager.saveGame(to: slot, engine: engine)
+                        saveManager.saveGame(to: slot, engine: vm.engine)
                     }
                 }, savedState: savedState)
             }
@@ -416,7 +417,7 @@ struct ContentView: View {
         let startingDeck = startingDeckDefs.map { $0.toCard() }
 
         // Initialize new game in engine
-        engine.initializeNewGame(
+        vm.engine.initializeNewGame(
             playerName: hero.name.localized,
             heroId: heroId,
             startingDeck: startingDeck
@@ -424,7 +425,7 @@ struct ContentView: View {
 
         // Save to selected slot
         selectedSaveSlot = slot
-        saveManager.saveGame(to: slot, engine: engine)
+        saveManager.saveGame(to: slot, engine: vm.engine)
 
         showingWorldMap = true
         showingSaveSlots = false
@@ -436,11 +437,11 @@ struct ContentView: View {
     }
 
     func loadGame(from slot: Int) {
-        if saveManager.loadGame(from: slot, engine: engine) {
-            selectedHeroId = engine.player.heroId
+        if saveManager.loadGame(from: slot, engine: vm.engine) {
+            selectedHeroId = vm.engine.player.heroId
             selectedSaveSlot = slot
             // Check for pending mid-combat save
-            if engine.pendingEncounterState != nil {
+            if vm.engine.pendingEncounterState != nil {
                 resumingCombat = true
             }
             showingWorldMap = true
@@ -744,7 +745,7 @@ struct HeroSelectionCard: View {
             // Hero icon/name header
             VStack(spacing: 4) {
                 Image(systemName: hero.icon)
-                    .font(.system(size: 40))
+                    .font(.system(size: Sizes.iconXL))
 
                 Text(hero.name.localized)
                     .font(.headline)

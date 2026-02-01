@@ -3,21 +3,21 @@ import TwilightEngine
 
 /// Displays current world resonance as an animated horizontal gauge.
 /// Color shifts from purple (Nav) through gray (Yav) to gold (Prav).
-/// Engine-First: reads `engine.resonanceValue` directly.
+/// Engine-First: reads `vm.engine.resonanceValue` directly.
 struct ResonanceWidget: View {
-    @ObservedObject var engine: TwilightGameEngine
+    @ObservedObject var vm: GameEngineObservable
 
     /// Compact mode: shows only icon + value badge (for combat HUD)
     var compact: Bool = false
 
     /// Normalized position 0...1 (0 = deepNav -100, 0.5 = Yav 0, 1 = deepPrav +100)
     private var normalizedValue: CGFloat {
-        CGFloat((engine.resonanceValue + 100) / 200)
+        CGFloat((vm.engine.resonanceValue + 100) / 200)
     }
 
     /// Current zone label based on resonance value
     private var zoneLabel: String {
-        let v = engine.resonanceValue
+        let v = vm.engine.resonanceValue
         switch v {
         case ...(-60): return L10n.resonanceZoneDeepNav.localized
         case ...(-20): return L10n.resonanceZoneNav.localized
@@ -29,7 +29,7 @@ struct ResonanceWidget: View {
 
     /// Zone color based on resonance value
     private var zoneColor: Color {
-        let v = engine.resonanceValue
+        let v = vm.engine.resonanceValue
         switch v {
         case ...(-60): return AppColors.resonanceNav
         case ...(-20): return AppColors.resonanceNav.opacity(Opacity.high)
@@ -41,7 +41,7 @@ struct ResonanceWidget: View {
 
     /// Zone icon based on resonance value
     private var zoneIcon: String {
-        let v = engine.resonanceValue
+        let v = vm.engine.resonanceValue
         switch v {
         case ...(-20): return "moon.fill"       // Nav
         case ..<20:    return "circle.fill"      // Yav
@@ -65,7 +65,7 @@ struct ResonanceWidget: View {
                 .font(.caption)
                 .foregroundColor(zoneColor)
 
-            Text(String(format: "%+.0f", engine.resonanceValue))
+            Text(String(format: "%+.0f", vm.engine.resonanceValue))
                 .font(.caption.bold())
                 .foregroundColor(zoneColor)
         }
@@ -111,7 +111,7 @@ struct ResonanceWidget: View {
             .frame(height: Sizes.progressThick * 2)
 
             // Value label
-            Text(String(format: "%+.0f", engine.resonanceValue))
+            Text(String(format: "%+.0f", vm.engine.resonanceValue))
                 .font(.caption2)
                 .foregroundColor(AppColors.muted)
         }

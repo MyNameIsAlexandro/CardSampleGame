@@ -137,5 +137,94 @@
         "valueFormula": "power"
       }
     ]
+  },
+  {
+    "id": "shadow_wolf",
+    "rules": [
+      {
+        "conditions": [
+          { "type": "turn", "operator": "==", "value": 1 }
+        ],
+        "intentType": "attack",
+        "valueFormula": "power * 1.5"
+      },
+      {
+        "conditions": [],
+        "intentType": "attack",
+        "valueFormula": "power"
+      }
+    ]
+  },
+  {
+    "id": "cursed_knight",
+    "rules": [
+      {
+        "conditions": [
+          { "type": "turn", "operator": "==", "value": 1 }
+        ],
+        "intentType": "block",
+        "valueFormula": "defense"
+      },
+      {
+        "conditions": [
+          { "type": "health_percent", "operator": "<", "value": 0.4 }
+        ],
+        "intentType": "block",
+        "valueFormula": "defense"
+      },
+      {
+        "conditions": [],
+        "intentType": "attack",
+        "valueFormula": "power"
+      }
+    ]
+  },
+  {
+    "id": "dark_sorcerer",
+    "rules": [
+      {
+        "conditions": [
+          { "type": "turn_mod3", "operator": "==", "value": 0 }
+        ],
+        "intentType": "ritual",
+        "valueFormula": "10"
+      },
+      {
+        "conditions": [
+          { "type": "health_percent", "operator": "<", "value": 0.3 }
+        ],
+        "intentType": "heal",
+        "valueFormula": "power"
+      },
+      {
+        "conditions": [],
+        "intentType": "attack",
+        "valueFormula": "power"
+      }
+    ]
+  },
+  {
+    "id": "breach_crawler",
+    "rules": [
+      {
+        "conditions": [
+          { "type": "turn", "operator": "==", "value": 1 }
+        ],
+        "intentType": "buff",
+        "valueFormula": "3"
+      },
+      {
+        "conditions": [
+          { "type": "health_percent", "operator": "<", "value": 0.5 }
+        ],
+        "intentType": "attack",
+        "valueFormula": "power * 1.5"
+      },
+      {
+        "conditions": [],
+        "intentType": "attack",
+        "valueFormula": "power"
+      }
+    ]
   }
 ]

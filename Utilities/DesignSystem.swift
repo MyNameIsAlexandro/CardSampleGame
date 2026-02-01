@@ -56,8 +56,12 @@ public enum Sizes {
     public static let iconRegionXL: CGFloat = 72
 
     // MARK: - Font Sizes
+    /// 8pt - Micro text (card stat labels)
+    public static let microText: CGFloat = 8
     /// 9pt - Tiny caption text
     public static let tinyCaption: CGFloat = 9
+    /// 10pt - Small text (card stat values)
+    public static let smallText: CGFloat = 10
     /// 36pt - Large display icon
     public static let largeIcon: CGFloat = 36
     /// 48pt - Extra extra large icon

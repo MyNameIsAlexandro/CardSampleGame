@@ -21,6 +21,7 @@
 		AA0000540000000000000001 /* StatisticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000550000000000000001 /* StatisticsView.swift */; };
 		APP00101000000000000001 /* CardGameApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = APP00102000000000000001 /* CardGameApp.swift */; };
 		APP00201000000000000001 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = APP00202000000000000001 /* ContentView.swift */; };
+		GEO00301000000000000001 /* GameEngineObservable.swift in Sources */ = {isa = PBXBuildFile; fileRef = GEO00302000000000000001 /* GameEngineObservable.swift */; };
 		AS00000000000010 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AS00000000000001 /* Assets.xcassets */; };
 		BB0001150000000000000001 /* SaveLoadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001160000000000000001 /* SaveLoadTests.swift */; };
 		BB0004110000000000000001 /* AuditGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0004120000000000000001 /* AuditGateTests.swift */; };
@@ -142,6 +143,7 @@
 		AA0000550000000000000001 /* StatisticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsView.swift; sourceTree = "<group>"; };
 		APP00102000000000000001 /* CardGameApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/CardGameApp.swift; sourceTree = SOURCE_ROOT; };
 		APP00202000000000000001 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/ContentView.swift; sourceTree = SOURCE_ROOT; };
+		GEO00302000000000000001 /* GameEngineObservable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/GameEngineObservable.swift; sourceTree = SOURCE_ROOT; };
 		AS00000000000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BB0000010000000000000001 /* CardSampleGameTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CardSampleGameTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB0001160000000000000001 /* SaveLoadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveLoadTests.swift; sourceTree = "<group>"; };
@@ -678,6 +680,7 @@
 			files = (
 				APP00101000000000000001 /* CardGameApp.swift in Sources */,
 				APP00201000000000000001 /* ContentView.swift in Sources */,
+				GEO00301000000000000001 /* GameEngineObservable.swift in Sources */,
 				VWC00101000000000000001 /* HeroPanel.swift in Sources */,
 				RW00000100000000000000001 /* ResonanceWidget.swift in Sources */,
 				DHB0000100000000000000001 /* DualHealthBar.swift in Sources */,

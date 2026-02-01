@@ -358,7 +358,6 @@ enum L10n {
     static let loadingItemLocalization = "loading.item.localization"
 
     // MARK: - ViewModels/GameViewModel
-    static let choiceMade = "choice.made"
 
     // MARK: - WorldMapView - Additional Actions (unique keys)
     static let actionExplore = "action.explore"
@@ -577,10 +576,6 @@ enum L10n {
     // Card draw
     static let combatCardDrawn = "combat.card.drawn"
 
-    // Escalation
-    static let combatEscalationSurprise = "combat.escalation.surprise"
-    static let combatEscalationRageShield = "combat.escalation.rage_shield"
-
     // Settings (SET-01/02)
     static let settingsTitle = "settings.title"
     static let settingsDifficulty = "settings.difficulty"
@@ -672,13 +667,5 @@ enum L10n {
     static let combatSaveExitMessage = "combat.save_exit_message"
     static let combatSaveExitConfirm = "combat.save_exit_confirm"
     static let combatSaveExitCancel = "combat.save_exit_cancel"
-
-    // MARK: - Combat Phase UI
-    static let combatPhaseIntent = "combat_phase_intent"
-    static let combatPhaseYourTurn = "combat_phase_your_turn"
-    static let combatPhaseEnemyActs = "combat_phase_enemy_acts"
-    static let combatPhaseNextRound = "combat_phase_next_round"
-    static let combatFeedbackWeak = "combat_feedback_weak"
-    static let combatFeedbackResist = "combat_feedback_resist"
 
 }
