@@ -411,41 +411,126 @@ struct CombatOverView: View {
         VStack(spacing: Spacing.xl) {
             Spacer()
 
-            VStack(spacing: Spacing.lg) {
-                Image(systemName: iconName)
-                    .font(.system(size: Sizes.iconRegion))
-                    .foregroundColor(outcomeColor)
+            ScrollView {
+                VStack(spacing: Spacing.lg) {
+                    Image(systemName: iconName)
+                        .font(.system(size: Sizes.iconRegion))
+                        .foregroundColor(outcomeColor)
 
-                Text(outcomeTitle)
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(outcomeColor)
+                    Text(outcomeTitle)
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .foregroundColor(outcomeColor)
 
-                Text(outcomeSummary)
-                    .font(.body)
-                    .foregroundColor(AppColors.secondary)
-                    .multilineTextAlignment(.center)
+                    // HP summary
+                    if !outcomeSummary.isEmpty {
+                        Text(outcomeSummary)
+                            .font(.body)
+                            .foregroundColor(AppColors.secondary)
+                            .multilineTextAlignment(.center)
+                    }
 
-                Button(action: onDismiss) {
-                    Text(L10n.encounterOutcomeContinue.localized)
-                        .font(.headline)
-                        .foregroundColor(AppColors.backgroundSystem)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(AppColors.primary)
-                        .cornerRadius(CornerRadius.lg)
+                    // Rewards section (only on victory)
+                    if case .victory = result.outcome {
+                        rewardsSection
+                    }
+
+                    Button(action: onDismiss) {
+                        Text(L10n.encounterOutcomeContinue.localized)
+                            .font(.headline)
+                            .foregroundColor(AppColors.backgroundSystem)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(AppColors.primary)
+                            .cornerRadius(CornerRadius.lg)
+                    }
+                    .padding(.horizontal, Spacing.xl)
                 }
-                .padding(.horizontal, Spacing.xl)
+                .padding(Spacing.xl)
             }
-            .padding(Spacing.xl)
             .background(AppColors.backgroundTertiary)
             .cornerRadius(CornerRadius.xl)
             .padding(.horizontal, Spacing.xl)
+            .frame(maxHeight: UIScreen.main.bounds.height * 0.7)
 
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(AppColors.backgroundSystem.opacity(Opacity.mediumHigh))
+    }
+
+    // MARK: - Rewards Section
+
+    @ViewBuilder
+    private var rewardsSection: some View {
+        VStack(spacing: Spacing.md) {
+            Divider().background(AppColors.secondary.opacity(0.3))
+
+            // Faith reward
+            if result.transaction.faithDelta > 0 {
+                HStack {
+                    Image(systemName: "sparkles")
+                        .foregroundColor(AppColors.faith)
+                    Text("Faith +\(result.transaction.faithDelta)")
+                        .font(.body)
+                        .foregroundColor(AppColors.faith)
+                    Spacer()
+                }
+            }
+
+            // Resonance shift
+            if abs(result.transaction.resonanceDelta) > 0.01 {
+                HStack {
+                    let isNav = result.transaction.resonanceDelta < 0
+                    Image(systemName: isNav ? "arrow.left" : "arrow.right")
+                        .foregroundColor(isNav ? AppColors.resonanceNav : AppColors.resonancePrav)
+                    Text(isNav ? "Nav" : "Prav")
+                        .font(.body)
+                        .foregroundColor(isNav ? AppColors.resonanceNav : AppColors.resonancePrav)
+                    Text(String(format: "%+.0f", result.transaction.resonanceDelta))
+                        .font(.caption)
+                        .foregroundColor(AppColors.secondary)
+                    Spacer()
+                }
+            }
+
+            // Loot cards
+            if !result.transaction.lootCardIds.isEmpty {
+                VStack(alignment: .leading, spacing: Spacing.sm) {
+                    Text("Loot")
+                        .font(.caption)
+                        .foregroundColor(AppColors.secondary)
+
+                    ForEach(result.transaction.lootCardIds, id: \.self) { cardId in
+                        HStack(spacing: Spacing.sm) {
+                            Image(systemName: "creditcard.fill")
+                                .foregroundColor(lootCardColor(cardId))
+                                .font(.caption)
+                            Text(lootCardName(cardId))
+                                .font(.body)
+                                .foregroundColor(.white)
+                            Spacer()
+                        }
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, Spacing.sm)
+    }
+
+    private func lootCardName(_ cardId: String) -> String {
+        ContentRegistry.shared.getCard(id: cardId)?.name.localized ?? cardId
+    }
+
+    private func lootCardColor(_ cardId: String) -> Color {
+        guard let card = ContentRegistry.shared.getCard(id: cardId) else { return AppColors.secondary }
+        switch card.rarity {
+        case .common: return AppColors.secondary
+        case .uncommon: return AppColors.success
+        case .rare: return AppColors.info
+        case .epic: return AppColors.dark
+        case .legendary: return AppColors.primary
+        }
     }
 
     private var iconName: String {

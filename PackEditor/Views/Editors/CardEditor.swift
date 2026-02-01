@@ -38,7 +38,14 @@ struct CardEditor: View {
 
             Section("Combat") {
                 IntField(label: "Energy Cost", value: optionalIntBinding(\.cost), range: 0...10)
+                IntField(label: "Health", value: optionalIntBinding(\.health), range: 0...999)
                 Toggle("Exhaust", isOn: $card.exhaust)
+                Picker("Curse Type", selection: optionalCurseTypeBinding) {
+                    Text("None").tag("")
+                    ForEach(Self.curseTypes, id: \.self) { curse in
+                        Text(curse).tag(curse)
+                    }
+                }
             }
 
             Section("Meta") {
@@ -52,7 +59,7 @@ struct CardEditor: View {
                         TextField("ID", text: $card.abilities[index].id)
                         TextField("Name", text: $card.abilities[index].name)
                         TextField("Description", text: $card.abilities[index].description)
-                        LabeledContent("Effect", value: String(describing: card.abilities[index].effect))
+                        AbilityEffectEditor(effect: $card.abilities[index].effect)
                         Button(role: .destructive) {
                             card.abilities.remove(at: index)
                         } label: {
@@ -107,5 +114,18 @@ struct CardEditor: View {
 
     private func optionalEnumBinding(get: @escaping () -> String, set: @escaping (String) -> Void) -> Binding<String> {
         Binding(get: get, set: set)
+    }
+
+    // MARK: - Curse Type binding
+
+    private static let curseTypes = [
+        "weakness", "fear", "exhaustion", "greed", "shadowOfNav", "bloodCurse", "sealOfNav"
+    ]
+
+    private var optionalCurseTypeBinding: Binding<String> {
+        Binding(
+            get: { card.curseType?.rawValue ?? "" },
+            set: { card.curseType = $0.isEmpty ? nil : CurseType(rawValue: $0) }
+        )
     }
 }

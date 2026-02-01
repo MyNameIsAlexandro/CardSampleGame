@@ -33,7 +33,7 @@ public enum CardRarity: String, Codable, Hashable, Sendable {
     case legendary
 }
 
-public enum DamageType: String, Codable, Hashable, Sendable {
+public enum DamageType: String, Codable, Hashable, Sendable, CaseIterable {
     case physical
     case fire
     case cold
@@ -45,7 +45,7 @@ public enum DamageType: String, Codable, Hashable, Sendable {
 }
 
 // Balance system (Light/Dark)
-public enum CardBalance: String, Codable, Hashable, Sendable {
+public enum CardBalance: String, Codable, Hashable, Sendable, CaseIterable {
     case light      // Cards from Prav, protective/healing
     case neutral    // Balanced cards
     case dark       // Cards from Nav, aggressive/cursing
@@ -62,7 +62,7 @@ public enum CardBalance: String, Codable, Hashable, Sendable {
 }
 
 // Three Realms system
-public enum Realm: String, Codable, Hashable, Sendable {
+public enum Realm: String, Codable, Hashable, Sendable, CaseIterable {
     case yav        // Явь - World of the Living (reality, settlements, heroes)
     case nav        // Навь - World of the Dead (spirits, undead, curses)
     case prav       // Правь - World of the Gods (higher powers, blessings, ancient magic)

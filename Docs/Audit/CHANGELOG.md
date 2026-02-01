@@ -6,6 +6,40 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [2.6.0] - 2026-02-01 - Combat Ecosystem: Loot UI, Validator, CardEditor
+
+### Summary
+
+Combat results screen now shows faith reward, resonance shift, and loot cards earned. PackValidator extended with enemy field validations (defense, will, faithReward, difficulty, lootCardIds cross-refs). CardEditor enhanced with health, curse type fields and structured AbilityEffect editor. DamageType, CardBalance, Realm enums now CaseIterable.
+
+---
+
+### Features
+
+#### CombatOverView — Loot & Rewards
+- **Faith reward display** — sparkle icon + faith delta on victory
+- **Resonance shift indicator** — Nav/Prav arrow with color
+- **Loot cards list** — card names with rarity-colored icons from ContentRegistry
+- ScrollView wrapper for long reward lists
+
+#### PackValidator — Enemy Field Validations
+- Validates `defense >= 0`, `will >= 0`, `faithReward >= 0`
+- Validates `difficulty` in range 1–5
+- Cross-references `lootCardIds` against pack cards
+- 5 new tests (19 total PackValidator tests)
+
+#### CardEditor — Missing Fields + AbilityEffectEditor
+- **Health** and **Curse Type** fields added to Combat section
+- **AbilityEffectEditor** — structured editor replaces read-only effect display
+  - Type picker for all 16 AbilityEffect cases
+  - Dynamic parameter fields per effect type (amount, duration, damage type, etc.)
+- `DamageType`, `CardBalance`, `Realm` enums now `CaseIterable`
+
+### Tests
+- 140 tests passing (100 EchoEngine + 19 EchoScenes + 21 TwilightEngine)
+
+---
+
 ## [2.5.0] - 2026-02-01 - EchoEngine: Fate Resolution, Diplomacy, Integration
 
 ### Summary

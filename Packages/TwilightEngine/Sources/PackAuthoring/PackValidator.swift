@@ -401,6 +401,22 @@ public final class PackValidator {
             addError("Enemy", "Enemy '\(id)' has negative power: \(enemy.power)")
         }
 
+        if enemy.defense < 0 {
+            addWarning("Enemy", "Enemy '\(id)' has negative defense: \(enemy.defense)")
+        }
+
+        if let will = enemy.will, will < 0 {
+            addError("Enemy", "Enemy '\(id)' has negative will: \(will)")
+        }
+
+        if enemy.faithReward < 0 {
+            addError("Enemy", "Enemy '\(id)' has negative faith reward: \(enemy.faithReward)")
+        }
+
+        if enemy.difficulty < 1 || enemy.difficulty > 5 {
+            addWarning("Enemy", "Enemy '\(id)' has invalid difficulty: \(enemy.difficulty) (expected 1-5)")
+        }
+
         if let pattern = enemy.pattern {
             if pattern.isEmpty {
                 addWarning("Enemy", "Enemy '\(id)' has empty pattern array")
@@ -475,6 +491,15 @@ public final class PackValidator {
             for cardId in hero.startingDeckCardIDs {
                 if pack.cards[cardId] == nil {
                     addError("Reference", "Hero '\(id)' references non-existent card '\(cardId)'")
+                }
+            }
+        }
+
+        // Enemy loot card references
+        for (id, enemy) in pack.enemies {
+            for lootCardId in enemy.lootCardIds {
+                if pack.cards[lootCardId] == nil {
+                    addWarning("Reference", "Enemy '\(id)' references loot card '\(lootCardId)' not found in pack")
                 }
             }
         }

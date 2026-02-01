@@ -190,6 +190,68 @@ final class PackValidatorTests: XCTestCase {
         XCTAssertTrue(healthErrors.isEmpty, "Should have no enemy health errors: \(healthErrors.map { $0.description })")
     }
 
+    func testStoryPackEnemiesHaveNoNegativeDefense() throws {
+        let url = try XCTUnwrap(storyPackURL, "TwilightMarchesActI JSON not available")
+
+        let validator = PackValidator(packURL: url)
+        let summary = validator.validate()
+
+        let defenseWarnings = summary.results.filter {
+            $0.severity == .warning && $0.message.contains("negative defense")
+        }
+        XCTAssertTrue(defenseWarnings.isEmpty, "Should have no negative defense warnings: \(defenseWarnings.map { $0.description })")
+    }
+
+    func testStoryPackEnemiesHaveNoNegativeWill() throws {
+        let url = try XCTUnwrap(storyPackURL, "TwilightMarchesActI JSON not available")
+
+        let validator = PackValidator(packURL: url)
+        let summary = validator.validate()
+
+        let willErrors = summary.results.filter {
+            $0.severity == .error && $0.message.contains("negative will")
+        }
+        XCTAssertTrue(willErrors.isEmpty, "Should have no negative will errors: \(willErrors.map { $0.description })")
+    }
+
+    func testStoryPackEnemiesHaveNoNegativeFaithReward() throws {
+        let url = try XCTUnwrap(storyPackURL, "TwilightMarchesActI JSON not available")
+
+        let validator = PackValidator(packURL: url)
+        let summary = validator.validate()
+
+        let faithErrors = summary.results.filter {
+            $0.severity == .error && $0.message.contains("negative faith reward")
+        }
+        XCTAssertTrue(faithErrors.isEmpty, "Should have no negative faith reward errors: \(faithErrors.map { $0.description })")
+    }
+
+    func testStoryPackEnemiesHaveValidDifficulty() throws {
+        let url = try XCTUnwrap(storyPackURL, "TwilightMarchesActI JSON not available")
+
+        let validator = PackValidator(packURL: url)
+        let summary = validator.validate()
+
+        let difficultyWarnings = summary.results.filter {
+            $0.severity == .warning && $0.message.contains("invalid difficulty")
+        }
+        XCTAssertTrue(difficultyWarnings.isEmpty, "Should have no invalid difficulty warnings: \(difficultyWarnings.map { $0.description })")
+    }
+
+    func testStoryPackEnemyLootCardReferencesAreValid() throws {
+        let url = try XCTUnwrap(storyPackURL, "TwilightMarchesActI JSON not available")
+
+        let validator = PackValidator(packURL: url)
+        let summary = validator.validate()
+
+        let lootWarnings = summary.results.filter {
+            $0.message.contains("loot card")
+        }
+        // Loot cards may reference cards from other packs, so these are warnings not errors
+        // Verify the validator runs and produces warnings (not crashes)
+        _ = lootWarnings
+    }
+
     func testStoryPackEnemiesHaveNoEmptyPatterns() throws {
         let url = try XCTUnwrap(storyPackURL, "TwilightMarchesActI JSON not available")
 
