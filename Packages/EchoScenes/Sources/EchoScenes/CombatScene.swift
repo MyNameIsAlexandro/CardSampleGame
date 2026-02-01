@@ -929,18 +929,26 @@ public final class CombatScene: SKScene {
         tooltip.zPosition = 100
 
         let cost = card.cost ?? 1
-        let abilityText: String
-        if let ability = card.abilities.first {
-            abilityText = ability.description
+        var lines = [
+            card.name,
+            "Cost: \(cost) ⚡"
+        ]
+
+        if card.abilities.isEmpty {
+            lines.append(card.description)
         } else {
-            abilityText = card.description
+            for ability in card.abilities {
+                lines.append("• \(ability.description)")
+            }
         }
 
-        let lines = [
-            card.name,
-            "Cost: \(cost) ⚡",
-            abilityText
-        ]
+        var keywords: [String] = []
+        if card.exhaust { keywords.append("Exhaust") }
+        keywords.append(contentsOf: card.traits)
+        if !keywords.isEmpty {
+            lines.append(keywords.joined(separator: " · "))
+        }
+
         let text = lines.joined(separator: "\n")
 
         let label = SKLabelNode(fontNamed: "AvenirNext-Medium")
