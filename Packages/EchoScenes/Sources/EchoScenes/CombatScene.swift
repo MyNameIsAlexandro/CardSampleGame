@@ -425,6 +425,11 @@ public final class CombatScene: SKScene {
 
     private func performPlayCard(_ cardId: String) {
         isAnimating = true
+
+        // Find the CardNode in hand container before resolving
+        let cardNode = handContainer.children.compactMap { $0 as? CardNode }.first { $0.card.id == cardId }
+
+        // Resolve logic immediately (state changes)
         let event = simulation.playCard(cardId: cardId)
 
         guard case .cardPlayed(_, let damage, let heal, _) = event else {
@@ -432,9 +437,73 @@ public final class CombatScene: SKScene {
             return
         }
 
-        // Animate card flying up from hand then resolve
+        // Determine fly target
+        let targetPos: CGPoint
         if damage > 0 {
-            // Damage card → impact on enemy
+            targetPos = enemyPosition
+        } else if heal > 0 {
+            targetPos = playerPosition
+        } else {
+            targetPos = CGPoint(x: 0, y: 0)
+        }
+
+        // Animate card flying from hand to target
+        if let cardNode = cardNode {
+            animateCardFly(cardNode: cardNode, to: targetPos) { [weak self] in
+                self?.resolveCardEffect(damage: damage, heal: heal)
+            }
+        } else {
+            resolveCardEffect(damage: damage, heal: heal)
+        }
+    }
+
+    private func animateCardFly(cardNode: CardNode, to target: CGPoint, completion: @escaping () -> Void) {
+        // Convert card position from handContainer to scene coordinates
+        let scenePos = handContainer.convert(cardNode.position, to: self)
+
+        // Create a flying copy in scene space
+        let flyCard = CardNode(card: cardNode.card)
+        flyCard.position = scenePos
+        flyCard.zPosition = 55
+        addChild(flyCard)
+
+        // Add glow behind the card
+        let glow = SKShapeNode(rectOf: CGSize(width: CardNode.cardSize.width + 12,
+                                               height: CardNode.cardSize.height + 12),
+                                cornerRadius: 10)
+        glow.fillColor = CombatSceneTheme.highlight.withAlphaComponent(0.4)
+        glow.strokeColor = .clear
+        glow.zPosition = -1
+        glow.setScale(0.8)
+        flyCard.addChild(glow)
+
+        // Pulse glow
+        glow.run(SKAction.repeatForever(SKAction.sequence([
+            SKAction.scale(to: 1.1, duration: 0.15),
+            SKAction.scale(to: 0.9, duration: 0.15)
+        ])))
+
+        // Remove original from hand immediately
+        cardNode.removeFromParent()
+
+        // Fly to target
+        let flyAction = SKAction.move(to: target, duration: 0.3)
+        flyAction.timingMode = .easeIn
+        let scaleDown = SKAction.scale(to: 0.6, duration: 0.3)
+
+        flyCard.run(SKAction.group([flyAction, scaleDown])) {
+            // Flash and remove
+            flyCard.run(SKAction.sequence([
+                SKAction.fadeOut(withDuration: 0.15),
+                SKAction.removeFromParent()
+            ])) {
+                completion()
+            }
+        }
+    }
+
+    private func resolveCardEffect(damage: Int, heal: Int) {
+        if damage > 0 {
             spawnImpactParticles(at: enemyPosition, isCritical: false)
             if let enemy = simulation.enemyEntity {
                 let anim = getOrCreateAnim(for: enemy)
@@ -443,7 +512,6 @@ public final class CombatScene: SKScene {
             showDamageNumber(damage, at: enemyPosition, color: CombatSceneTheme.highlight)
         }
         if heal > 0 {
-            // Heal → green particles on player
             let emitter = CombatParticles.healEffect()
             emitter.position = playerPosition
             addChild(emitter)
@@ -451,7 +519,7 @@ public final class CombatScene: SKScene {
                 SKAction.wait(forDuration: 1.0),
                 SKAction.removeFromParent()
             ]))
-            showDamageNumber(-heal, at: playerPosition, color: CombatSceneTheme.success, prefix: "+")
+            showDamageNumber(heal, at: playerPosition, color: CombatSceneTheme.success, prefix: "+")
         }
 
         refreshHand()
