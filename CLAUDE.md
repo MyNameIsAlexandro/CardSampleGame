@@ -12,6 +12,21 @@
 - Pure Swift logic only. **No UI imports** (`SwiftUI`/`UIKit` запрещены в Engine).
 - Single source of truth: `WorldState`, `ResonanceState`, `FateDeck` (+ derived projections).
 - Any state mutation goes **only** through `GameAction` (reducers/handlers). No "reach-in and mutate".
+- **Sub-manager pattern:** `TwilightGameEngine` delegates domain state to focused managers:
+  - `engine.combat` → `EngineCombatManager` (combat state, enemy, fate draws)
+  - `engine.deck` → `EngineDeckManager` (playerDeck, playerHand, playerDiscard, draw/mulligan)
+  - `engine.player` → `EnginePlayerManager` (health, faith, balance, stats, curses, hero abilities)
+- Each manager holds `unowned let engine` back-reference, is `ObservableObject` with `@Published` state.
+- Views read via `engine.player.health`, `engine.deck.playerHand`, etc.
+
+### 1b) ECS Layer — `Packages/EchoEngine` (FirebladeECS)
+- ECS-based game logic using [FirebladeECS](https://github.com/fireblade-engine/ecs) (Nexus, Entity, Component, Family).
+- Imports shared types from TwilightEngine (Card, EnemyDefinition, WorldRNG, FateCard, FateDeckManager).
+- **Components** are `final class` (FirebladeECS requirement): HealthComponent, CombatStateComponent, DeckComponent, PlayerTagComponent, EnemyTagComponent, IntentComponent, FateDeckComponent, ResonanceComponent.
+- **Systems** are stateless: CombatSystem, AISystem, DeckSystem.
+- **CombatSimulation** orchestrates a full headless combat encounter (owns Nexus + systems).
+- Family iteration: use `.firstElement()` helper (not `.first`) because Family conforms to `LazySequenceProtocol`.
+- Tests: `swift test --package-path Packages/EchoEngine`
 
 ### 2) Data Layer — `Resources/ContentPacks` (JSON)
 - All gameplay entities are defined here: enemies, cards, heroes, locations, rules, etc.
@@ -75,8 +90,10 @@
 
 ## 🧪 Useful Commands (Project Defaults)
 
-- Run Engine tests:
+- Run TwilightEngine tests:
   - `swift test --package-path Packages/TwilightEngine`
+- Run EchoEngine tests:
+  - `swift test --package-path Packages/EchoEngine`
 - Project dump:
   - `python3 DevTools/collect_project_v4.py`
 - Update docs:
