@@ -197,25 +197,30 @@ public struct CombatSystem: EchoSystem {
         }
         for ability in card.abilities {
             switch ability.effect {
-            case .damage(let amount, _):
+            case .damage(let amount, let damageType):
                 var dmg = max(0, amount)
                 // Strength buff applies once per card
                 if !strengthApplied {
                     dmg += playerStatus.total(for: "strength")
                     strengthApplied = true
                 }
-                // Enemy shield absorbs damage
-                let shield = enemyStatus.total(for: "shield")
-                if shield > 0 {
-                    let absorbed = min(shield, dmg)
-                    enemyStatus.apply(stat: "shield", amount: -absorbed, duration: 1)
-                    if enemyStatus.total(for: "shield") <= 0 {
-                        enemyStatus.effects.removeAll { $0.stat == "shield" }
+                // Mental damage targets Will instead of HP
+                if damageType == .mental && enemyHealth.maxWill > 0 {
+                    enemyHealth.will = max(0, enemyHealth.will - dmg)
+                } else {
+                    // Enemy shield absorbs damage
+                    let shield = enemyStatus.total(for: "shield")
+                    if shield > 0 {
+                        let absorbed = min(shield, dmg)
+                        enemyStatus.apply(stat: "shield", amount: -absorbed, duration: 1)
+                        if enemyStatus.total(for: "shield") <= 0 {
+                            enemyStatus.effects.removeAll { $0.stat == "shield" }
+                        }
+                        dmg -= absorbed
                     }
-                    dmg -= absorbed
+                    dmg = max(0, dmg)
+                    enemyHealth.current = max(0, enemyHealth.current - dmg)
                 }
-                dmg = max(0, dmg)
-                enemyHealth.current = max(0, enemyHealth.current - dmg)
                 totalDamage += dmg
 
             case .heal(let amount):

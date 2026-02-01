@@ -628,4 +628,60 @@ struct CardPlayTests {
         sim.playCard(cardId: darkCard.id)
         #expect(sim.resonance == -15)
     }
+
+    // MARK: - Mental Damage (Will) Tests
+
+    @Test("Mental damage targets enemy Will instead of HP")
+    func testMentalDamageTargetsWill() {
+        let mentalCard = Card(
+            id: "mind", name: "Mind Blast", type: .spell,
+            description: "Mental damage",
+            abilities: [CardAbility(id: "m1", name: "Blast", description: "Mental 4",
+                                   effect: .damage(amount: 4, type: .mental))]
+        )
+        let enemyDef = EnemyDefinition(
+            id: "spirit_wolf",
+            name: .key("wolf"),
+            description: .key("wolf_desc"),
+            health: 10,
+            power: 2,
+            defense: 0,
+            will: 8
+        )
+        let sim = CombatSimulation.create(
+            enemyDefinition: enemyDef,
+            playerDeck: [mentalCard],
+            fateCards: makeFateCards(),
+            seed: 42
+        )
+        sim.beginCombat()
+
+        let hpBefore = sim.enemyHealth
+        sim.playCard(cardId: mentalCard.id)
+
+        // HP unchanged, Will reduced
+        #expect(sim.enemyHealth == hpBefore)
+        #expect(sim.enemyWill == 4)
+    }
+
+    @Test("Mental damage on enemy without Will hits HP instead")
+    func testMentalDamageFallsBackToHP() {
+        let mentalCard = Card(
+            id: "mind", name: "Mind Blast", type: .spell,
+            description: "Mental damage",
+            abilities: [CardAbility(id: "m1", name: "Blast", description: "Mental 3",
+                                   effect: .damage(amount: 3, type: .mental))]
+        )
+        let sim = CombatSimulation.create(
+            enemyDefinition: makeEnemy(health: 10),
+            playerDeck: [mentalCard],
+            fateCards: makeFateCards(),
+            seed: 42
+        )
+        sim.beginCombat()
+
+        sim.playCard(cardId: mentalCard.id)
+        // No Will → hits HP
+        #expect(sim.enemyHealth == 7)
+    }
 }
