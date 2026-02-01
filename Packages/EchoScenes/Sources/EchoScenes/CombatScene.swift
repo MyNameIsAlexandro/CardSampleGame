@@ -195,9 +195,10 @@ public final class CombatScene: SKScene {
                 scale: 1.0,
                 zPosition: 5
             ))
+            let health: HealthComponent = nexus.get(unsafe: enemy.identifier)
             enemy.assign(HealthBarComponent(
                 showHP: true,
-                showWill: false,
+                showWill: health.maxWill > 0,
                 barWidth: 80,
                 verticalOffset: -50
             ))
@@ -371,6 +372,18 @@ public final class CombatScene: SKScene {
         } else {
             resonanceLabel.text = "☽ Навь \(resInt)"
             resonanceLabel.fontColor = CombatSceneTheme.spirit
+        }
+
+        // Обновить текст под врагом: HP + Will
+        if let enemy = simulation.enemyEntity {
+            let label: LabelComponent = simulation.nexus.get(unsafe: enemy.identifier)
+            let tag: EnemyTagComponent = simulation.nexus.get(unsafe: enemy.identifier)
+            var text = tag.definitionId
+            text += "  ♥\(simulation.enemyHealth)/\(simulation.enemyMaxHealth)"
+            if simulation.enemyMaxWill > 0 {
+                text += "  ✦\(simulation.enemyWill)/\(simulation.enemyMaxWill)"
+            }
+            label.text = text
         }
 
         updateIntentDisplay()

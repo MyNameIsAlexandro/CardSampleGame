@@ -91,6 +91,24 @@ public final class CombatSimulation {
         return health.current
     }
 
+    public var enemyMaxHealth: Int {
+        guard let enemy = enemyEntity else { return 0 }
+        let health: HealthComponent = nexus.get(unsafe: enemy.identifier)
+        return health.max
+    }
+
+    public var enemyWill: Int {
+        guard let enemy = enemyEntity else { return 0 }
+        let health: HealthComponent = nexus.get(unsafe: enemy.identifier)
+        return health.will
+    }
+
+    public var enemyMaxWill: Int {
+        guard let enemy = enemyEntity else { return 0 }
+        let health: HealthComponent = nexus.get(unsafe: enemy.identifier)
+        return health.maxWill
+    }
+
     public var hand: [Card] {
         guard let player = playerEntity else { return [] }
         let deck: DeckComponent = nexus.get(unsafe: player.identifier)
