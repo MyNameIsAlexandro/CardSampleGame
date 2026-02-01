@@ -35,6 +35,8 @@ public final class CombatScene: SKScene {
     private var combatLogEntries: [String] = []
     private let maxLogEntries = 5
     private var discardOverlay: SKNode?
+    private var mulliganOverlay: SKNode?
+    private var mulliganSelected: Set<String> = []
     private var longPressTimer: Timer?
     private var touchStartLocation: CGPoint?
     private var isAnimating = false
@@ -83,6 +85,7 @@ public final class CombatScene: SKScene {
         simulation.beginCombat()
         syncRender()
         updateHUD()
+        showMulliganOverlay()
     }
 
     // MARK: - Background
@@ -480,6 +483,12 @@ public final class CombatScene: SKScene {
     }
 
     private func handleTap(at location: CGPoint) {
+        // Mulligan phase intercepts all taps
+        if mulliganOverlay != nil {
+            handleMulliganTap(at: location)
+            return
+        }
+
         // Dismiss discard overlay if showing
         if discardOverlay != nil {
             dismissDiscardOverlay()
@@ -523,6 +532,123 @@ public final class CombatScene: SKScene {
                 }
             }
         }
+    }
+
+    // MARK: - Mulligan
+
+    private func showMulliganOverlay() {
+        guard !simulation.hand.isEmpty else { return }
+
+        mulliganSelected.removeAll()
+        let overlay = SKNode()
+        overlay.zPosition = 100
+
+        let bg = SKShapeNode(rectOf: size)
+        bg.fillColor = SKColor(white: 0.0, alpha: 0.7)
+        bg.strokeColor = .clear
+        overlay.addChild(bg)
+
+        let title = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+        title.text = "Mulligan"
+        title.fontSize = 20
+        title.fontColor = .white
+        title.position = CGPoint(x: 0, y: 80)
+        title.verticalAlignmentMode = .center
+        overlay.addChild(title)
+
+        let subtitle = SKLabelNode(fontNamed: "AvenirNext-Regular")
+        subtitle.text = "Tap cards to replace, then Keep"
+        subtitle.fontSize = 11
+        subtitle.fontColor = CombatSceneTheme.muted
+        subtitle.position = CGPoint(x: 0, y: 58)
+        subtitle.verticalAlignmentMode = .center
+        overlay.addChild(subtitle)
+
+        refreshMulliganCards(in: overlay)
+
+        // Keep button
+        let btnBg = SKShapeNode(rectOf: CGSize(width: 120, height: 36), cornerRadius: 8)
+        btnBg.fillColor = CombatSceneTheme.success
+        btnBg.strokeColor = .clear
+        btnBg.position = CGPoint(x: 0, y: -80)
+        btnBg.name = "btn_mulligan_keep"
+        overlay.addChild(btnBg)
+
+        let btnLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+        btnLabel.text = "Keep"
+        btnLabel.fontSize = 15
+        btnLabel.fontColor = .white
+        btnLabel.position = CGPoint(x: 0, y: -80)
+        btnLabel.verticalAlignmentMode = .center
+        btnLabel.name = "btn_mulligan_keep"
+        overlay.addChild(btnLabel)
+
+        overlay.alpha = 0
+        addChild(overlay)
+        overlay.run(SKAction.fadeIn(withDuration: 0.3))
+        mulliganOverlay = overlay
+    }
+
+    private func refreshMulliganCards(in overlay: SKNode) {
+        // Remove old card nodes
+        overlay.children.filter { $0 is CardNode }.forEach { $0.removeFromParent() }
+
+        let cards = simulation.hand
+        let cardW = CardNode.cardSize.width + 10
+        let totalW = cardW * CGFloat(cards.count)
+        let startX = -totalW / 2 + cardW / 2
+
+        for (i, card) in cards.enumerated() {
+            let node = CardNode(card: card)
+            node.position = CGPoint(x: startX + CGFloat(i) * cardW, y: -10)
+            node.name = "mulligan_\(card.id)"
+            if mulliganSelected.contains(card.id) {
+                node.setSelected(true)
+                node.alpha = 0.5
+            }
+            overlay.addChild(node)
+        }
+    }
+
+    private func handleMulliganTap(at location: CGPoint) {
+        guard let overlay = mulliganOverlay else { return }
+
+        let tapped = nodes(at: location)
+
+        // Keep button
+        if tapped.contains(where: { $0.name == "btn_mulligan_keep" }) {
+            if !mulliganSelected.isEmpty {
+                simulation.mulligan(cardIds: Array(mulliganSelected))
+            }
+            overlay.run(SKAction.fadeOut(withDuration: 0.2)) { [weak self] in
+                overlay.removeFromParent()
+                self?.mulliganOverlay = nil
+                self?.refreshHand()
+                self?.updateHUD()
+            }
+            return
+        }
+
+        // Toggle card selection
+        for node in tapped {
+            if let cardNode = node as? CardNode {
+                toggleMulliganCard(cardNode.card.id, in: overlay)
+                return
+            }
+            if let parent = node.parent as? CardNode {
+                toggleMulliganCard(parent.card.id, in: overlay)
+                return
+            }
+        }
+    }
+
+    private func toggleMulliganCard(_ cardId: String, in overlay: SKNode) {
+        if mulliganSelected.contains(cardId) {
+            mulliganSelected.remove(cardId)
+        } else {
+            mulliganSelected.insert(cardId)
+        }
+        refreshMulliganCards(in: overlay)
     }
 
     // MARK: - Discard Pile Viewer
