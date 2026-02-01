@@ -9,6 +9,7 @@ public enum CombatEvent {
     case enemyHealed(amount: Int)
     case enemyRitual(resonanceShift: Float)
     case enemyBlocked
+    case cardPlayed(cardId: String, damage: Int, heal: Int, cardsDrawn: Int)
     case roundAdvanced(newRound: Int)
 }
 
@@ -133,6 +134,67 @@ public struct CombatSystem: EchoSystem {
         case .block, .buff, .defend, .prepare, .debuff, .summon, .restoreWP:
             return .enemyBlocked
         }
+    }
+
+    // MARK: - Card Play
+
+    /// Play a card from hand. Resolves first ability effect, discards card.
+    public func playCard(
+        cardId: String,
+        player: Entity,
+        enemy: Entity,
+        deckSystem: DeckSystem,
+        nexus: Nexus
+    ) -> CombatEvent {
+        let deck: DeckComponent = nexus.get(unsafe: player.identifier)
+        guard let card = deck.hand.first(where: { $0.id == cardId }) else {
+            return .cardPlayed(cardId: cardId, damage: 0, heal: 0, cardsDrawn: 0)
+        }
+
+        let playerHealth: HealthComponent = nexus.get(unsafe: player.identifier)
+        let enemyHealth: HealthComponent = nexus.get(unsafe: enemy.identifier)
+
+        var totalDamage = 0
+        var totalHeal = 0
+        var totalDrawn = 0
+
+        // Resolve first ability, or fallback to card.power as damage
+        if let ability = card.abilities.first {
+            switch ability.effect {
+            case .damage(let amount, _):
+                let dmg = max(0, amount)
+                enemyHealth.current = max(0, enemyHealth.current - dmg)
+                totalDamage = dmg
+            case .heal(let amount):
+                let heal = min(amount, playerHealth.max - playerHealth.current)
+                playerHealth.current += heal
+                totalHeal = heal
+            case .drawCards(let count):
+                let beforeCount = deck.hand.count
+                deckSystem.drawCards(count: count, for: player, nexus: nexus)
+                // hand count changed; the card itself will be discarded below
+                totalDrawn = deck.hand.count - beforeCount
+            default:
+                // Fallback: use card power as damage
+                let dmg = max(0, card.power ?? 0)
+                if dmg > 0 {
+                    enemyHealth.current = max(0, enemyHealth.current - dmg)
+                    totalDamage = dmg
+                }
+            }
+        } else {
+            // No abilities — use card power as damage
+            let dmg = max(0, card.power ?? 0)
+            if dmg > 0 {
+                enemyHealth.current = max(0, enemyHealth.current - dmg)
+                totalDamage = dmg
+            }
+        }
+
+        // Discard the played card
+        deckSystem.discardCard(id: cardId, for: player, nexus: nexus)
+
+        return .cardPlayed(cardId: cardId, damage: totalDamage, heal: totalHeal, cardsDrawn: totalDrawn)
     }
 
     // MARK: - Round Management

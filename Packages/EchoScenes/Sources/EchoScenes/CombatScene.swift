@@ -25,6 +25,9 @@ public final class CombatScene: SKScene {
     private var phaseLabel: SKLabelNode!
     private var roundLabel: SKLabelNode!
     private var fateOverlay: SKNode!
+    private var handContainer: SKNode!
+    private var deckCountLabel: SKLabelNode!
+    private var discardCountLabel: SKLabelNode!
     private var isAnimating = false
 
     // MARK: - Callbacks
@@ -249,6 +252,31 @@ public final class CombatScene: SKScene {
         fateOverlay.position = CGPoint(x: 0, y: 20)
         fateOverlay.zPosition = 50
         addChild(fateOverlay)
+
+        // Hand container — above buttons
+        let handY = buttonY + 60
+        handContainer = SKNode()
+        handContainer.position = CGPoint(x: 0, y: handY)
+        handContainer.zPosition = 15
+        addChild(handContainer)
+
+        // Deck/discard indicators
+        let indicatorY = handY
+        deckCountLabel = SKLabelNode(fontNamed: "AvenirNext-Medium")
+        deckCountLabel.fontSize = 11
+        deckCountLabel.fontColor = CombatSceneTheme.muted
+        deckCountLabel.position = CGPoint(x: -size.width / 2 + 30, y: indicatorY)
+        deckCountLabel.zPosition = 15
+        addChild(deckCountLabel)
+
+        discardCountLabel = SKLabelNode(fontNamed: "AvenirNext-Medium")
+        discardCountLabel.fontSize = 11
+        discardCountLabel.fontColor = CombatSceneTheme.muted
+        discardCountLabel.position = CGPoint(x: size.width / 2 - 30, y: indicatorY)
+        discardCountLabel.zPosition = 15
+        addChild(discardCountLabel)
+
+        refreshHand()
     }
 
     private func makeButton(text: String, position: CGPoint, name: String) -> SKLabelNode {
@@ -278,6 +306,27 @@ public final class CombatScene: SKScene {
         let isPlayerTurn = simulation.phase == .playerTurn && !simulation.isOver
         attackButton.parent?.alpha = isPlayerTurn ? 1.0 : 0.4
         skipButton.parent?.alpha = isPlayerTurn ? 1.0 : 0.4
+        handContainer.alpha = isPlayerTurn ? 1.0 : 0.5
+
+        deckCountLabel.text = "🂠 \(simulation.drawPileCount)"
+        discardCountLabel.text = "♻ \(simulation.discardPileCount)"
+    }
+
+    private func refreshHand() {
+        handContainer.removeAllChildren()
+        let cards = simulation.hand
+        guard !cards.isEmpty else { return }
+
+        let cardW = CardNode.cardSize.width
+        let spacing: CGFloat = 4
+        let totalWidth = CGFloat(cards.count) * cardW + CGFloat(cards.count - 1) * spacing
+        let startX = -totalWidth / 2 + cardW / 2
+
+        for (i, card) in cards.enumerated() {
+            let node = CardNode(card: card)
+            node.position = CGPoint(x: startX + CGFloat(i) * (cardW + spacing), y: 0)
+            handContainer.addChild(node)
+        }
     }
 
     // MARK: - Render Sync
@@ -314,7 +363,15 @@ public final class CombatScene: SKScene {
                 performPlayerSkip()
                 return
             default:
-                break
+                // Check if tapped a card node (or its children)
+                if let cardNode = node as? CardNode {
+                    performPlayCard(cardNode.card.id)
+                    return
+                }
+                if let parent = node.parent as? CardNode {
+                    performPlayCard(parent.card.id)
+                    return
+                }
             }
         }
     }
@@ -366,6 +423,41 @@ public final class CombatScene: SKScene {
         }
     }
 
+    private func performPlayCard(_ cardId: String) {
+        isAnimating = true
+        let event = simulation.playCard(cardId: cardId)
+
+        guard case .cardPlayed(_, let damage, let heal, _) = event else {
+            isAnimating = false
+            return
+        }
+
+        // Animate card flying up from hand then resolve
+        if damage > 0 {
+            // Damage card → impact on enemy
+            spawnImpactParticles(at: enemyPosition, isCritical: false)
+            if let enemy = simulation.enemyEntity {
+                let anim = getOrCreateAnim(for: enemy)
+                anim.enqueue(.shake(intensity: 6, duration: 0.2))
+            }
+            showDamageNumber(damage, at: enemyPosition, color: CombatSceneTheme.highlight)
+        }
+        if heal > 0 {
+            // Heal → green particles on player
+            let emitter = CombatParticles.healEffect()
+            emitter.position = playerPosition
+            addChild(emitter)
+            emitter.run(SKAction.sequence([
+                SKAction.wait(forDuration: 1.0),
+                SKAction.removeFromParent()
+            ]))
+            showDamageNumber(-heal, at: playerPosition, color: CombatSceneTheme.success, prefix: "+")
+        }
+
+        refreshHand()
+        resolveAfterPlayerAction()
+    }
+
     private func performPlayerSkip() {
         simulation.playerSkip()
         resolveAfterPlayerAction()
@@ -374,6 +466,7 @@ public final class CombatScene: SKScene {
     private func resolveAfterPlayerAction() {
         syncRender()
         updateHUD()
+        refreshHand()
         isAnimating = false
 
         if simulation.isOver {
@@ -475,9 +568,9 @@ public final class CombatScene: SKScene {
         }
     }
 
-    private func showDamageNumber(_ value: Int, at position: CGPoint, color: SKColor) {
+    private func showDamageNumber(_ value: Int, at position: CGPoint, color: SKColor, prefix: String = "-") {
         let label = SKLabelNode(fontNamed: "AvenirNext-Heavy")
-        label.text = "-\(value)"
+        label.text = "\(prefix)\(abs(value))"
         label.fontSize = 22
         label.fontColor = color
         label.position = CGPoint(x: position.x, y: position.y + 30)

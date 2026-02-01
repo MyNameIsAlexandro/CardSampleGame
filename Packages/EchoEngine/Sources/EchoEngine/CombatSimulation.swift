@@ -95,6 +95,18 @@ public final class CombatSimulation {
         return deck.hand
     }
 
+    public var drawPileCount: Int {
+        guard let player = playerEntity else { return 0 }
+        let deck: DeckComponent = nexus.get(unsafe: player.identifier)
+        return deck.drawPile.count
+    }
+
+    public var discardPileCount: Int {
+        guard let player = playerEntity else { return 0 }
+        let deck: DeckComponent = nexus.get(unsafe: player.identifier)
+        return deck.discardPile.count
+    }
+
     public var round: Int {
         let family = nexus.family(requires: CombatStateComponent.self)
         return family.firstElement()?.round ?? 1
@@ -123,6 +135,17 @@ public final class CombatSimulation {
             return .playerMissed(fateValue: 0)
         }
         let event = combatSystem.playerAttack(player: player, enemy: enemy, bonusDamage: bonusDamage, nexus: nexus)
+        combatSystem.setCombatPhase(.enemyResolve, nexus: nexus)
+        return event
+    }
+
+    /// Play a card from hand. Resolves effect, discards card, transitions to enemy phase.
+    @discardableResult
+    public func playCard(cardId: String) -> CombatEvent {
+        guard let player = playerEntity, let enemy = enemyEntity else {
+            return .cardPlayed(cardId: cardId, damage: 0, heal: 0, cardsDrawn: 0)
+        }
+        let event = combatSystem.playCard(cardId: cardId, player: player, enemy: enemy, deckSystem: deckSystem, nexus: nexus)
         combatSystem.setCombatPhase(.enemyResolve, nexus: nexus)
         return event
     }
