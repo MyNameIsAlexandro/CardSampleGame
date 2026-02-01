@@ -30,6 +30,7 @@ public final class CombatScene: SKScene {
     private var discardCountLabel: SKLabelNode!
     private var exhaustCountLabel: SKLabelNode!
     private var energyLabel: SKLabelNode!
+    private var resonanceLabel: SKLabelNode!
     private var intentNode: SKNode?
     private var tooltipNode: SKNode?
     private var combatLogNode: SKNode!
@@ -308,6 +309,13 @@ public final class CombatScene: SKScene {
         energyLabel.zPosition = 15
         addChild(energyLabel)
 
+        resonanceLabel = SKLabelNode(fontNamed: "AvenirNext-Medium")
+        resonanceLabel.fontSize = 11
+        resonanceLabel.fontColor = CombatSceneTheme.muted
+        resonanceLabel.position = CGPoint(x: 0, y: indicatorY - 16)
+        resonanceLabel.zPosition = 15
+        addChild(resonanceLabel)
+
         // Combat log — right side
         combatLogNode = SKNode()
         combatLogNode.position = CGPoint(x: size.width / 2 - 10, y: 0)
@@ -351,6 +359,19 @@ public final class CombatScene: SKScene {
         let exhaustCount = simulation.exhaustPileCount
         exhaustCountLabel.text = exhaustCount > 0 ? "✕ \(exhaustCount)" : ""
         energyLabel.text = "⚡ \(simulation.energy)/\(simulation.maxEnergy)"
+
+        let res = simulation.resonance
+        let resInt = Int(res)
+        if resInt == 0 {
+            resonanceLabel.text = "☯ Явь"
+            resonanceLabel.fontColor = CombatSceneTheme.muted
+        } else if res > 0 {
+            resonanceLabel.text = "☀ Правь +\(resInt)"
+            resonanceLabel.fontColor = CombatSceneTheme.faith
+        } else {
+            resonanceLabel.text = "☽ Навь \(resInt)"
+            resonanceLabel.fontColor = CombatSceneTheme.spirit
+        }
 
         updateIntentDisplay()
         updateStatusIcons()
