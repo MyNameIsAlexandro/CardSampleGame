@@ -1,4 +1,5 @@
 import Foundation
+import TwilightEngine
 
 /// Content categories available in the pack editor.
 public enum ContentCategory: String, CaseIterable, Identifiable, Sendable {
@@ -14,6 +15,18 @@ public enum ContentCategory: String, CaseIterable, Identifiable, Sendable {
     case balance = "Balance"
 
     public var id: String { rawValue }
+
+    /// Returns the content categories relevant to a given pack type.
+    public static func categories(for packType: PackType) -> [ContentCategory] {
+        switch packType {
+        case .character:
+            return [.heroes, .cards]
+        case .campaign:
+            return [.enemies, .cards, .events, .regions, .fateCards, .quests, .behaviors, .anchors, .balance]
+        default:
+            return Array(allCases)
+        }
+    }
 
     public var icon: String {
         switch self {
