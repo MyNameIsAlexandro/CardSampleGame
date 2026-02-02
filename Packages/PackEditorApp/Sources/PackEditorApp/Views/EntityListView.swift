@@ -26,7 +26,7 @@ struct EntityListView: View {
                     tab.moveEntities(for: category, from: from, to: to)
                 }
             }
-            .searchable(text: $searchText, prompt: "Filter \(category.rawValue.lowercased())")
+            .searchable(text: $searchText, prompt: Text(String(localized: "entityList.filterPrompt \(category.localizedName.lowercased())", bundle: .module)))
             .navigationSplitViewColumnWidth(min: 200, ideal: 250)
             .toolbar {
                 ToolbarItemGroup(placement: .primaryAction) {
@@ -38,21 +38,21 @@ struct EntityListView: View {
                                 }
                             }
                         } else {
-                            Button("New") {
+                            Button(String(localized: "entityList.new", bundle: .module)) {
                                 tab.addEntity()
                             }
                         }
 
                         Divider()
 
-                        Button("Import from Clipboard") {
+                        Button(String(localized: "entityList.importClipboard", bundle: .module)) {
                             _ = tab.importEntityFromClipboard()
                         }
                     } label: {
                         Image(systemName: "plus")
                     }
                     .disabled(category == .balance)
-                    .help("Add new \(category.rawValue.lowercased().dropLast())")
+                    .help(String(localized: "entityList.addHelp \(category.localizedName.lowercased())", bundle: .module))
 
                     Button {
                         tab.duplicateSelectedEntity()
@@ -60,7 +60,7 @@ struct EntityListView: View {
                         Image(systemName: "doc.on.doc")
                     }
                     .disabled(tab.selectedEntityId == nil || category == .balance)
-                    .help("Duplicate selected entity")
+                    .help(String(localized: "entityList.duplicateHelp", bundle: .module))
 
                     Button {
                         tab.exportSelectedEntityToClipboard()
@@ -68,7 +68,7 @@ struct EntityListView: View {
                         Image(systemName: "square.and.arrow.up")
                     }
                     .disabled(tab.selectedEntityId == nil)
-                    .help("Export selected entity to clipboard")
+                    .help(String(localized: "entityList.exportHelp", bundle: .module))
 
                     Button {
                         showDeleteConfirmation = true
@@ -76,30 +76,43 @@ struct EntityListView: View {
                         Image(systemName: "minus")
                     }
                     .disabled(tab.selectedEntityId == nil || category == .balance)
-                    .help("Delete selected entity")
+                    .help(String(localized: "entityList.deleteHelp", bundle: .module))
                 }
             }
-            .alert("Delete Entity?", isPresented: $showDeleteConfirmation) {
-                Button("Delete", role: .destructive) {
+            .alert(String(localized: "entityList.deleteTitle", bundle: .module), isPresented: $showDeleteConfirmation) {
+                Button(String(localized: "entityList.delete", bundle: .module), role: .destructive) {
                     tab.deleteSelectedEntity()
                 }
-                Button("Cancel", role: .cancel) {}
+                Button(String(localized: "entityList.cancel", bundle: .module), role: .cancel) {}
             } message: {
                 if let id = tab.selectedEntityId {
-                    Text("Are you sure you want to delete \"\(id)\"? This cannot be undone.")
+                    Text(String(localized: "entityList.deleteMessage \(id)", bundle: .module))
                 }
             }
         } else {
-            Text("Select a category")
+            Text("placeholder.selectCategory", bundle: .module)
                 .foregroundStyle(.secondary)
         }
     }
 
     private func templateOptions(for category: ContentCategory) -> [(String, String)]? {
         switch category {
-        case .enemies: return [("beast", "Beast"), ("undead", "Undead"), ("boss", "Boss")]
-        case .cards: return [("attack", "Attack"), ("defense", "Defense"), ("spell", "Spell"), ("item", "Item")]
-        case .regions: return [("settlement", "Settlement"), ("wilderness", "Wilderness"), ("dungeon", "Dungeon")]
+        case .enemies: return [
+            ("beast", String(localized: "template.beast", bundle: .module)),
+            ("undead", String(localized: "template.undead", bundle: .module)),
+            ("boss", String(localized: "template.boss", bundle: .module))
+        ]
+        case .cards: return [
+            ("attack", String(localized: "template.attack", bundle: .module)),
+            ("defense", String(localized: "template.defense", bundle: .module)),
+            ("spell", String(localized: "template.spell", bundle: .module)),
+            ("item", String(localized: "template.item", bundle: .module))
+        ]
+        case .regions: return [
+            ("settlement", String(localized: "template.settlement", bundle: .module)),
+            ("wilderness", String(localized: "template.wilderness", bundle: .module)),
+            ("dungeon", String(localized: "template.dungeon", bundle: .module))
+        ]
         default: return nil
         }
     }

@@ -1,0 +1,108 @@
+/* Sidebar */
+"sidebar.enemies" = "Enemies";
+"sidebar.cards" = "Cards";
+"sidebar.events" = "Events";
+"sidebar.regions" = "Regions";
+"sidebar.heroes" = "Heroes";
+"sidebar.fateCards" = "Fate Cards";
+"sidebar.quests" = "Quests";
+"sidebar.behaviors" = "Behaviors";
+"sidebar.anchors" = "Anchors";
+"sidebar.balance" = "Balance";
+
+/* Toolbar */
+"toolbar.save" = "Save";
+"toolbar.validate" = "Validate";
+"toolbar.compile" = "Compile";
+"toolbar.open" = "Open";
+"toolbar.export" = "Export to Game";
+
+/* Placeholders */
+"placeholder.selectCategory" = "Select a category";
+"placeholder.selectEntity" = "Select an entity to edit";
+"placeholder.searchAll" = "Search all entities";
+"placeholder.noResults" = "No results";
+"placeholder.noEntitySelected" = "No entity selected";
+
+/* Pack Browser */
+"browser.title" = "Pack Browser";
+"browser.newPack" = "New Pack...";
+"browser.openOther" = "Open Other...";
+"browser.setProjectRoot" = "Set Project Root...";
+"browser.rescan" = "Rescan";
+"browser.noPacksFound" = "No packs found";
+"browser.scanning" = "Scanning: %@";
+"browser.selectProjectRoot" = "Select the CardSampleGame project root directory";
+
+/* New Pack Sheet */
+"newPack.title" = "New Pack";
+"newPack.packId" = "Pack ID (e.g. my-adventure)";
+"newPack.displayName" = "Display Name";
+"newPack.type" = "Type";
+"newPack.typeCampaign" = "Campaign";
+"newPack.typeCharacter" = "Character";
+"newPack.author" = "Author";
+"newPack.cancel" = "Cancel";
+"newPack.create" = "Create...";
+"newPack.chooseLocation" = "Choose location for the new pack";
+
+/* Entity List */
+"entityList.new" = "New";
+"entityList.importClipboard" = "Import from Clipboard";
+"entityList.addHelp" = "Add new %@";
+"entityList.duplicateHelp" = "Duplicate selected entity";
+"entityList.exportHelp" = "Export selected entity to clipboard";
+"entityList.deleteHelp" = "Delete selected entity";
+"entityList.deleteTitle" = "Delete Entity?";
+"entityList.delete" = "Delete";
+"entityList.cancel" = "Cancel";
+"entityList.deleteMessage" = "Are you sure you want to delete \"%@\"? This cannot be undone.";
+"entityList.filterPrompt" = "Filter %@";
+
+/* Entity Templates */
+"template.beast" = "Beast";
+"template.undead" = "Undead";
+"template.boss" = "Boss";
+"template.attack" = "Attack";
+"template.defense" = "Defense";
+"template.spell" = "Spell";
+"template.item" = "Item";
+"template.settlement" = "Settlement";
+"template.wilderness" = "Wilderness";
+"template.dungeon" = "Dungeon";
+
+/* Editor Detail */
+"editor.viewJSON" = "View as JSON";
+
+/* Simulation */
+"simulation.configuration" = "Configuration";
+"simulation.hero" = "Hero";
+"simulation.selectHero" = "Select a hero...";
+"simulation.enemies" = "Enemies";
+"simulation.simulations" = "Simulations";
+"simulation.startingResonance" = "Starting Resonance: %d";
+"simulation.run" = "Run Simulation";
+"simulation.results" = "Results";
+"simulation.winRate" = "Win Rate";
+"simulation.winsLosses" = "Wins / Losses";
+"simulation.avgRounds" = "Avg Rounds";
+"simulation.avgHPRemaining" = "Avg HP Remaining (wins)";
+"simulation.avgResonanceDelta" = "Avg Resonance Delta";
+"simulation.longestFight" = "Longest Fight";
+"simulation.longestFightValue" = "%d rounds";
+"simulation.roundDistribution" = "Round Distribution";
+"simulation.chartRound" = "Round";
+"simulation.chartFightsEnded" = "Fights Ended";
+"simulation.balancePrefix" = "Balance: %@";
+"simulation.tooHard" = "Too Hard";
+"simulation.slightlyHard" = "Slightly Hard";
+"simulation.balanced" = "Balanced";
+"simulation.tooEasy" = "Too Easy";
+
+/* Export */
+"export.validationFailed" = "Validation Failed";
+"export.validationFailedMessage %lld" = "%lld error(s) found. Fix them before exporting.";
+"export.selectGameRoot" = "Select the game project root directory";
+"export.success" = "Export Successful";
+"export.successMessage %@ %lld" = "Exported %@ (%lld bytes) to ContentPacks.";
+"export.failed" = "Export Failed";

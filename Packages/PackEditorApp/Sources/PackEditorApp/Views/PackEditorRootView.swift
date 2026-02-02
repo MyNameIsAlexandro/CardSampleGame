@@ -21,7 +21,7 @@ struct PackEditorRootView: View {
                 Button {
                     state.openPackDialog()
                 } label: {
-                    Label("Open", systemImage: "folder")
+                    Label(String(localized: "toolbar.open", bundle: .module), systemImage: "folder")
                 }
             }
         }

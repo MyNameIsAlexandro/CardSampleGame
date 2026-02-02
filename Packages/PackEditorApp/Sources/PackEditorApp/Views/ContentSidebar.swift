@@ -12,7 +12,7 @@ struct ContentSidebar: View {
                 List(ContentCategory.allCases, selection: $tab.selectedCategory) { category in
                     Label {
                         HStack {
-                            Text(category.rawValue)
+                            Text(category.localizedName)
                             Spacer()
                             Text("\(tab.entityCount(for: category))")
                                 .foregroundStyle(.secondary)
@@ -28,7 +28,7 @@ struct ContentSidebar: View {
                 let results = tab.globalSearchResults
                 if results.isEmpty {
                     List {
-                        Text("No results")
+                        Text("placeholder.noResults", bundle: .module)
                             .foregroundStyle(.secondary)
                     }
                 } else {
@@ -36,7 +36,7 @@ struct ContentSidebar: View {
                         ForEach(ContentCategory.allCases) { category in
                             let categoryResults = results.filter { $0.category == category }
                             if !categoryResults.isEmpty {
-                                Section(category.rawValue) {
+                                Section(category.localizedName) {
                                     ForEach(categoryResults, id: \.id) { result in
                                         Button {
                                             tab.selectedCategory = result.category
@@ -56,7 +56,7 @@ struct ContentSidebar: View {
                 }
             }
         }
-        .searchable(text: $tab.globalSearchText, prompt: "Search all entities")
+        .searchable(text: $tab.globalSearchText, prompt: Text("placeholder.searchAll", bundle: .module))
         .listStyle(.sidebar)
         .navigationSplitViewColumnWidth(min: 180, ideal: 200)
         .onChange(of: tab.selectedCategory) { _ in

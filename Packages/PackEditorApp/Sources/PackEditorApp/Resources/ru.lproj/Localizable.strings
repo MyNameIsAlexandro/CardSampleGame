@@ -1,0 +1,108 @@
+/* Sidebar */
+"sidebar.enemies" = "Враги";
+"sidebar.cards" = "Карты";
+"sidebar.events" = "События";
+"sidebar.regions" = "Регионы";
+"sidebar.heroes" = "Герои";
+"sidebar.fateCards" = "Карты судьбы";
+"sidebar.quests" = "Квесты";
+"sidebar.behaviors" = "Поведения";
+"sidebar.anchors" = "Якоря";
+"sidebar.balance" = "Баланс";
+
+/* Toolbar */
+"toolbar.save" = "Сохранить";
+"toolbar.validate" = "Проверить";
+"toolbar.compile" = "Скомпилировать";
+"toolbar.open" = "Открыть";
+"toolbar.export" = "Экспорт в игру";
+
+/* Placeholders */
+"placeholder.selectCategory" = "Выберите категорию";
+"placeholder.selectEntity" = "Выберите элемент для редактирования";
+"placeholder.searchAll" = "Поиск по всем элементам";
+"placeholder.noResults" = "Нет результатов";
+"placeholder.noEntitySelected" = "Элемент не выбран";
+
+/* Pack Browser */
+"browser.title" = "Обозреватель паков";
+"browser.newPack" = "Новый пак...";
+"browser.openOther" = "Открыть другой...";
+"browser.setProjectRoot" = "Указать корень проекта...";
+"browser.rescan" = "Обновить";
+"browser.noPacksFound" = "Паки не найдены";
+"browser.scanning" = "Сканирование: %@";
+"browser.selectProjectRoot" = "Выберите корневую папку проекта CardSampleGame";
+
+/* New Pack Sheet */
+"newPack.title" = "Новый пак";
+"newPack.packId" = "ID пака (напр. my-adventure)";
+"newPack.displayName" = "Отображаемое имя";
+"newPack.type" = "Тип";
+"newPack.typeCampaign" = "Кампания";
+"newPack.typeCharacter" = "Персонаж";
+"newPack.author" = "Автор";
+"newPack.cancel" = "Отмена";
+"newPack.create" = "Создать...";
+"newPack.chooseLocation" = "Выберите расположение для нового пака";
+
+/* Entity List */
+"entityList.new" = "Новый";
+"entityList.importClipboard" = "Импорт из буфера обмена";
+"entityList.addHelp" = "Добавить: %@";
+"entityList.duplicateHelp" = "Дублировать выбранный элемент";
+"entityList.exportHelp" = "Экспортировать в буфер обмена";
+"entityList.deleteHelp" = "Удалить выбранный элемент";
+"entityList.deleteTitle" = "Удалить элемент?";
+"entityList.delete" = "Удалить";
+"entityList.cancel" = "Отмена";
+"entityList.deleteMessage" = "Вы уверены, что хотите удалить «%@»? Это действие нельзя отменить.";
+"entityList.filterPrompt" = "Фильтр: %@";
+
+/* Entity Templates */
+"template.beast" = "Зверь";
+"template.undead" = "Нежить";
+"template.boss" = "Босс";
+"template.attack" = "Атака";
+"template.defense" = "Защита";
+"template.spell" = "Заклинание";
+"template.item" = "Предмет";
+"template.settlement" = "Поселение";
+"template.wilderness" = "Дикие земли";
+"template.dungeon" = "Подземелье";
+
+/* Editor Detail */
+"editor.viewJSON" = "Просмотр JSON";
+
+/* Simulation */
+"simulation.configuration" = "Настройки";
+"simulation.hero" = "Герой";
+"simulation.selectHero" = "Выберите героя...";
+"simulation.enemies" = "Враги";
+"simulation.simulations" = "Симуляции";
+"simulation.startingResonance" = "Начальный резонанс: %d";
+"simulation.run" = "Запустить симуляцию";
+"simulation.results" = "Результаты";
+"simulation.winRate" = "Процент побед";
+"simulation.winsLosses" = "Победы / Поражения";
+"simulation.avgRounds" = "Среднее кол-во раундов";
+"simulation.avgHPRemaining" = "Среднее HP (победы)";
+"simulation.avgResonanceDelta" = "Среднее изменение резонанса";
+"simulation.longestFight" = "Самый длинный бой";
+"simulation.longestFightValue" = "%d раундов";
+"simulation.roundDistribution" = "Распределение по раундам";
+"simulation.chartRound" = "Раунд";
+"simulation.chartFightsEnded" = "Завершено боёв";
+"simulation.balancePrefix" = "Баланс: %@";
+"simulation.tooHard" = "Слишком сложно";
+"simulation.slightlyHard" = "Немного сложно";
+"simulation.balanced" = "Сбалансировано";
+"simulation.tooEasy" = "Слишком легко";
+
+/* Export */
+"export.validationFailed" = "Ошибка валидации";
+"export.validationFailedMessage %lld" = "Найдено ошибок: %lld. Исправьте их перед экспортом.";
+"export.selectGameRoot" = "Выберите корневую папку игрового проекта";
+"export.success" = "Экспорт завершён";
+"export.successMessage %@ %lld" = "Экспортирован %@ (%lld байт) в ContentPacks.";
+"export.failed" = "Ошибка экспорта";

@@ -14,7 +14,7 @@ struct EditorToolbar: ToolbarContent {
             Button {
                 tab.savePack()
             } label: {
-                Label("Save", systemImage: "square.and.arrow.down")
+                Label(String(localized: "toolbar.save", bundle: .module), systemImage: "square.and.arrow.down")
             }
             .disabled(!tab.isDirty)
 
@@ -23,14 +23,14 @@ struct EditorToolbar: ToolbarContent {
             Button {
                 validatePack()
             } label: {
-                Label("Validate", systemImage: "checkmark.shield")
+                Label(String(localized: "toolbar.validate", bundle: .module), systemImage: "checkmark.shield")
             }
             .disabled(tab.loadedPack == nil)
 
             Button {
                 compilePack()
             } label: {
-                Label("Compile", systemImage: "hammer")
+                Label(String(localized: "toolbar.compile", bundle: .module), systemImage: "hammer")
             }
             .disabled(tab.loadedPack == nil)
 
@@ -39,7 +39,7 @@ struct EditorToolbar: ToolbarContent {
             Button {
                 exportToGame()
             } label: {
-                Label("Export to Game", systemImage: "square.and.arrow.up")
+                Label(String(localized: "toolbar.export", bundle: .module), systemImage: "square.and.arrow.up")
             }
             .disabled(tab.loadedPack == nil)
             .alert(item: $exportAlert) { alert in
@@ -64,8 +64,8 @@ struct EditorToolbar: ToolbarContent {
         tab.validate()
         if let summary = tab.validationSummary, summary.errorCount > 0 {
             exportAlert = ExportAlert(
-                title: "Validation Failed",
-                message: "\(summary.errorCount) error(s) found. Fix them before exporting."
+                title: String(localized: "export.validationFailed", bundle: .module),
+                message: String(localized: "export.validationFailedMessage \(summary.errorCount)", bundle: .module)
             )
             tab.showValidation = true
             return
@@ -78,7 +78,7 @@ struct EditorToolbar: ToolbarContent {
             panel.canChooseFiles = false
             panel.canChooseDirectories = true
             panel.allowsMultipleSelection = false
-            panel.message = "Select the game project root directory"
+            panel.message = String(localized: "export.selectGameRoot", bundle: .module)
 
             guard panel.runModal() == .OK, let selected = panel.url else { return }
             gamePath = selected.path
@@ -95,12 +95,12 @@ struct EditorToolbar: ToolbarContent {
             try FileManager.default.createDirectory(at: outputDir, withIntermediateDirectories: true)
             let result = try PackCompiler.compile(from: url, to: outputFile)
             exportAlert = ExportAlert(
-                title: "Export Successful",
-                message: "Exported \(result.packId) (\(result.outputSize) bytes) to ContentPacks."
+                title: String(localized: "export.success", bundle: .module),
+                message: String(localized: "export.successMessage \(result.packId) \(result.outputSize)", bundle: .module)
             )
         } catch {
             exportAlert = ExportAlert(
-                title: "Export Failed",
+                title: String(localized: "export.failed", bundle: .module),
                 message: error.localizedDescription
             )
         }

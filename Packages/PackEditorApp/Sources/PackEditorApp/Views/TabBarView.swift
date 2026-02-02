@@ -12,7 +12,7 @@ struct TabBarView: View {
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "house")
-                        Text("Pack Browser")
+                        Text("browser.title", bundle: .module)
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)

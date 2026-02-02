@@ -100,7 +100,7 @@ struct EditorDetailView: View {
                         }
                     ))
                 } else {
-                    Text("Select a category")
+                    Text("placeholder.selectCategory", bundle: .module)
                         .foregroundStyle(.secondary)
                 }
             }
@@ -114,7 +114,7 @@ struct EditorDetailView: View {
                     Image(systemName: "curlybraces")
                 }
                 .disabled(tab.selectedEntityId == nil && tab.selectedCategory != .balance)
-                .help("View as JSON")
+                .help(String(localized: "editor.viewJSON", bundle: .module))
             }
         }
         .sheet(isPresented: $showJSONPreview) {
@@ -147,7 +147,7 @@ struct EditorDetailView: View {
             case .balance:
                 if let c = tab.balanceConfig { JSONPreviewSheet(title: "Balance", value: c) }
             case .none:
-                Text("No entity selected")
+                Text("placeholder.noEntitySelected", bundle: .module)
             }
         } else if tab.selectedCategory == .balance, let c = tab.balanceConfig {
             JSONPreviewSheet(title: "Balance", value: c)

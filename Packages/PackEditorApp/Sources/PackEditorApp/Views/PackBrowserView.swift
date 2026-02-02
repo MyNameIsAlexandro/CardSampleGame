@@ -11,13 +11,13 @@ struct PackBrowserView: View {
         VStack(spacing: 0) {
             // Header
             HStack {
-                Text("Pack Browser")
+                Text("browser.title", bundle: .module)
                     .font(.title.bold())
                 Spacer()
-                Button("Open Other...") {
+                Button(String(localized: "browser.openOther", bundle: .module)) {
                     state.openPackDialog()
                 }
-                Button("New Pack...") {
+                Button(String(localized: "browser.newPack", bundle: .module)) {
                     showNewPackSheet = true
                 }
                 .buttonStyle(.borderedProminent)
@@ -29,17 +29,17 @@ struct PackBrowserView: View {
                     Image(systemName: "folder.badge.questionmark")
                         .font(.system(size: 48))
                         .foregroundStyle(.secondary)
-                    Text("No packs found")
+                    Text("browser.noPacksFound", bundle: .module)
                         .font(.title3)
                     if state.projectRootPath.isEmpty {
-                        Button("Set Project Root...") {
+                        Button(String(localized: "browser.setProjectRoot", bundle: .module)) {
                             pickProjectRoot()
                         }
                     } else {
-                        Text("Scanning: \(state.projectRootPath)")
+                        Text(String(localized: "browser.scanning \(state.projectRootPath)", bundle: .module))
                             .foregroundStyle(.secondary)
                             .font(.caption)
-                        Button("Rescan") { rescan() }
+                        Button(String(localized: "browser.rescan", bundle: .module)) { rescan() }
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -92,7 +92,7 @@ struct PackBrowserView: View {
         let panel = NSOpenPanel()
         panel.canChooseFiles = false
         panel.canChooseDirectories = true
-        panel.message = "Select the CardSampleGame project root directory"
+        panel.message = String(localized: "browser.selectProjectRoot", bundle: .module)
         guard panel.runModal() == .OK, let url = panel.url else { return }
         state.projectRootPath = url.path
         rescan()
@@ -150,16 +150,16 @@ struct NewPackSheet: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            Text("New Pack").font(.title2.bold())
+            Text("newPack.title", bundle: .module).font(.title2.bold())
 
             Form {
-                TextField("Pack ID (e.g. my-adventure)", text: $packId)
-                TextField("Display Name", text: $displayName)
-                Picker("Type", selection: $packType) {
-                    Text("Campaign").tag(PackType.campaign)
-                    Text("Character").tag(PackType.character)
+                TextField(String(localized: "newPack.packId", bundle: .module), text: $packId)
+                TextField(String(localized: "newPack.displayName", bundle: .module), text: $displayName)
+                Picker(String(localized: "newPack.type", bundle: .module), selection: $packType) {
+                    Text("newPack.typeCampaign", bundle: .module).tag(PackType.campaign)
+                    Text("newPack.typeCharacter", bundle: .module).tag(PackType.character)
                 }
-                TextField("Author", text: $author)
+                TextField(String(localized: "newPack.author", bundle: .module), text: $author)
             }
 
             if let error = errorMessage {
@@ -167,8 +167,8 @@ struct NewPackSheet: View {
             }
 
             HStack {
-                Button("Cancel") { dismiss() }
-                Button("Create...") { createPack() }
+                Button(String(localized: "newPack.cancel", bundle: .module)) { dismiss() }
+                Button(String(localized: "newPack.create", bundle: .module)) { createPack() }
                     .buttonStyle(.borderedProminent)
                     .disabled(packId.isEmpty || displayName.isEmpty)
             }
@@ -192,7 +192,7 @@ struct NewPackSheet: View {
             // Fallback: ask user
             let panel = NSSavePanel()
             panel.nameFieldStringValue = packId
-            panel.message = "Choose location for the new pack"
+            panel.message = String(localized: "newPack.chooseLocation", bundle: .module)
             guard panel.runModal() == .OK, let url = panel.url else { return }
             parentURL = url.deletingLastPathComponent()
         }
