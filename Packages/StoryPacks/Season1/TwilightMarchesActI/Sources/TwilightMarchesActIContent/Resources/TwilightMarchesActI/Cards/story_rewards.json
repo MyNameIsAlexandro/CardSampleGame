@@ -325,7 +325,7 @@
         "name_ru": "Взрыв Пустоты",
         "description": "Deal 4 damage, lose 1 faith",
         "description_ru": "Нанести 4 урона, потерять 1 веру",
-        "effect": {"damage": 4, "faith": -1}
+        "effect": {"damage": {"amount": 4, "type": "dark"}, "faith": -1}
       }
     ],
     "faith_cost": 0,
