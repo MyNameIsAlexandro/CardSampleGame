@@ -4,15 +4,23 @@ struct PackEditorContentView: View {
     @EnvironmentObject var tab: EditorTab
 
     var body: some View {
-        NavigationSplitView {
-            ContentSidebar()
-        } content: {
-            EntityListView()
-        } detail: {
-            EditorDetailView()
+        VStack(spacing: 0) {
+            NavigationSplitView {
+                ContentSidebar()
+            } content: {
+                EntityListView()
+            } detail: {
+                EditorDetailView()
+            }
+            .toolbar {
+                EditorToolbar()
+            }
+
+            if tab.showValidation {
+                ValidationPanelView()
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
         }
-        .toolbar {
-            EditorToolbar()
-        }
+        .animation(.easeInOut(duration: 0.2), value: tab.showValidation)
     }
 }

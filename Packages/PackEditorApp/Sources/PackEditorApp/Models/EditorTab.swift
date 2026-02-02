@@ -101,6 +101,8 @@ class EditorTab: ObservableObject, Identifiable {
     func savePack() {
         do {
             try store.savePack()
+            validate()
+            showValidation = true
             objectWillChange.send()
         } catch {
             print("PackEditor: Failed to save: \(error)")
