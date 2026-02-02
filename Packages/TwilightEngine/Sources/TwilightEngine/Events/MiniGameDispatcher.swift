@@ -284,14 +284,15 @@ public struct MiniGameDispatchResult {
 public final class CombatMiniGameResolver {
     public func resolve(
         challenge: MiniGameChallenge,
-        context: MiniGameContext
+        context: MiniGameContext,
+        rng: WorldRNG = .shared
     ) -> MiniGameDispatchResult {
 
         var changes: [StateChange] = []
 
-        // Simple combat resolution using WorldRNG
-        let playerRoll = WorldRNG.shared.nextInt(in: 1...6) + context.playerStrength
-        let enemyRoll = WorldRNG.shared.nextInt(in: 1...6) + challenge.difficulty
+        // Simple combat resolution
+        let playerRoll = rng.nextInt(in: 1...6) + context.playerStrength
+        let enemyRoll = rng.nextInt(in: 1...6) + challenge.difficulty
 
         if playerRoll >= enemyRoll {
             // Victory
@@ -335,14 +336,15 @@ public final class CombatMiniGameResolver {
 public final class PuzzleMiniGameResolver {
     public func resolve(
         challenge: MiniGameChallenge,
-        context: MiniGameContext
+        context: MiniGameContext,
+        rng: WorldRNG = .shared
     ) -> MiniGameDispatchResult {
 
         var changes: [StateChange] = []
 
         // Simple puzzle resolution based on faith/wisdom
         let successChance = min(90, 50 + context.playerFaith * 5)
-        let roll = WorldRNG.shared.nextInt(in: 1...100)
+        let roll = rng.nextInt(in: 1...100)
 
         if roll <= successChance {
             // Success
@@ -382,7 +384,8 @@ public final class SkillCheckResolver {
 
     public func resolve(
         challenge: MiniGameChallenge,
-        context: MiniGameContext
+        context: MiniGameContext,
+        rng: WorldRNG = .shared
     ) -> MiniGameDispatchResult {
 
         var changes: [StateChange] = []
@@ -404,7 +407,7 @@ public final class SkillCheckResolver {
             }
         } else {
             // Fallback: legacy d20 roll scaled to fate-like range (-2...+3)
-            fateModifier = WorldRNG.shared.nextInt(in: -2...3)
+            fateModifier = rng.nextInt(in: -2...3)
         }
 
         let testResult = context.playerStrength + fateModifier

@@ -218,7 +218,8 @@ public struct CombatCalculator {
         worldResonance: Float,
         effortCards: Int,
         monsterDefense: Int,
-        bonusDamage: Int
+        bonusDamage: Int,
+        rng: WorldRNG = .shared
     ) -> FateAttackResult {
         let baseStrength = context.strength
         let effortBonus = max(0, effortCards)
@@ -231,7 +232,7 @@ public struct CombatCalculator {
             fateValue = result.effectiveValue
         } else {
             fateResult = nil
-            fateValue = WorldRNG.shared.nextInt(in: -1...2)  // fallback if no deck
+            fateValue = rng.nextInt(in: -1...2)  // fallback if no deck
         }
 
         let totalAttack = baseStrength + effortBonus + fateValue + bonusDamage
@@ -299,7 +300,8 @@ public struct CombatCalculator {
         monsterMaxHP: Int,
         bonusDice: Int,
         bonusDamage: Int,
-        isFirstAttack: Bool
+        isFirstAttack: Bool,
+        rng: WorldRNG = .shared
     ) -> CombatResult {
 
         var modifiers: [CombatModifier] = []
@@ -324,7 +326,7 @@ public struct CombatCalculator {
 
         var diceRolls: [Int] = []
         for _ in 0..<totalDice {
-            diceRolls.append(WorldRNG.shared.nextInt(in: 1...6))
+            diceRolls.append(rng.nextInt(in: 1...6))
         }
 
         // Create attack roll
@@ -393,7 +395,8 @@ public struct CombatCalculator {
         context: CombatPlayerContext,
         enemyCurrentWill: Int,
         fateDeck: FateDeckManager?,
-        worldResonance: Float = 0.0
+        worldResonance: Float = 0.0,
+        rng: WorldRNG = .shared
     ) -> SpiritAttackResult {
         let baseStat = max(context.wisdom, context.intelligence, 1)
 
@@ -404,7 +407,7 @@ public struct CombatCalculator {
             fateModifier = result.effectiveValue
             fateDrawEffects = result.drawEffects
         } else {
-            fateModifier = WorldRNG.shared.nextInt(in: -1...2)
+            fateModifier = rng.nextInt(in: -1...2)
         }
 
         let damage = max(1, baseStat + fateModifier)

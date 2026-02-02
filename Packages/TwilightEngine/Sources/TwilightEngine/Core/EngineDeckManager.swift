@@ -36,7 +36,7 @@ public final class EngineDeckManager {
     /// Set starting deck and shuffle
     func setupStartingDeck(_ cards: [Card]) {
         deck = cards
-        WorldRNG.shared.shuffle(&deck)
+        engine.services.rng.shuffle(&deck)
     }
 
     /// Reset all deck state
@@ -55,7 +55,7 @@ public final class EngineDeckManager {
             if deck.isEmpty && !discard.isEmpty {
                 deck = discard
                 discard.removeAll()
-                WorldRNG.shared.shuffle(&deck)
+                engine.services.rng.shuffle(&deck)
             }
             if deck.isEmpty { break }
             playerHand.append(deck.removeFirst())
@@ -73,7 +73,7 @@ public final class EngineDeckManager {
         }
         if !cardsToReturn.isEmpty {
             deck.append(contentsOf: cardsToReturn)
-            WorldRNG.shared.shuffle(&deck)
+            engine.services.rng.shuffle(&deck)
             let drawCount = min(cardsToReturn.count, deck.count)
             let newCards = Array(deck.prefix(drawCount))
             deck.removeFirst(drawCount)
@@ -87,7 +87,7 @@ public final class EngineDeckManager {
         deck.append(contentsOf: discard)
         playerHand.removeAll()
         discard.removeAll()
-        WorldRNG.shared.shuffle(&deck)
+        engine.services.rng.shuffle(&deck)
         let drawCount = min(5, deck.count)
         playerHand = Array(deck.prefix(drawCount))
         deck.removeFirst(drawCount)

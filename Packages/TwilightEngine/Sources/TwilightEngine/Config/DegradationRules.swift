@@ -57,14 +57,3 @@ public struct TwilightDegradationRules: DegradationRuleSet {
     }
 }
 
-// MARK: - Shared Instance
-
-/// Глобальные правила деградации (по умолчанию TwilightDegradationRules)
-public enum DegradationRules {
-    public static var current: DegradationRuleSet = TwilightDegradationRules()
-
-    /// Сбросить на дефолтные правила
-    public static func reset() {
-        current = TwilightDegradationRules()
-    }
-}

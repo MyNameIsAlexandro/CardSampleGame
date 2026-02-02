@@ -162,18 +162,18 @@ public final class EventSelector {
     }
 
     /// Select event using weighted random selection
-    public func weightedSelect(from events: [GameEvent]) -> GameEvent? {
+    public func weightedSelect(from events: [GameEvent], rng: WorldRNG = .shared) -> GameEvent? {
         guard !events.isEmpty else { return nil }
 
         let totalWeight = events.reduce(0) { $0 + $1.weight }
 
         guard totalWeight > 0 else {
             // If all weights are 0, select randomly
-            let index = WorldRNG.shared.nextInt(in: 0...(events.count - 1))
+            let index = rng.nextInt(in: 0...(events.count - 1))
             return events[index]
         }
 
-        let roll = WorldRNG.shared.nextInt(in: 0...(totalWeight - 1))
+        let roll = rng.nextInt(in: 0...(totalWeight - 1))
         var cumulative = 0
 
         for event in events {

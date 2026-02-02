@@ -266,42 +266,6 @@ public struct ChoiceRequirements: Codable, Hashable {
         self.maxBalance = balanceRange?.upperBound
     }
 
-    /// Check if requirements can be met with given context
-    /// - Note: Prefer using `Requirements.evaluator.canMeet(requirements:...)` instead
-    ///   for cleaner separation of data and logic (see ENGINE_ARCHITECTURE.md)
-    @available(*, deprecated, message: "Use Requirements.evaluator.canMeet() instead")
-    public func canMeet(resources: [String: Int], flags: Set<String>, balance: Int) -> Bool {
-        // Check resources
-        for (resourceId, minValue) in minResources {
-            if (resources[resourceId] ?? 0) < minValue {
-                return false
-            }
-        }
-
-        // Check required flags
-        for flag in requiredFlags {
-            if !flags.contains(flag) {
-                return false
-            }
-        }
-
-        // Check forbidden flags
-        for flag in forbiddenFlags {
-            if flags.contains(flag) {
-                return false
-            }
-        }
-
-        // Check balance range
-        if let min = minBalance, balance < min {
-            return false
-        }
-        if let max = maxBalance, balance > max {
-            return false
-        }
-
-        return true
-    }
 }
 
 // MARK: - Choice Consequences

@@ -757,7 +757,8 @@ final class PackStoreTests: XCTestCase {
 
     private func fixturePackURL() throws -> URL {
         guard let url = Bundle.module.url(forResource: "Fixtures/TestPack", withExtension: nil) else {
-            throw XCTSkip("Test fixture not found in bundle")
+            XCTFail("Test fixture not found in bundle — ensure Fixtures/TestPack is in test resources")
+            return URL(fileURLWithPath: "/nonexistent")
         }
         return url
     }

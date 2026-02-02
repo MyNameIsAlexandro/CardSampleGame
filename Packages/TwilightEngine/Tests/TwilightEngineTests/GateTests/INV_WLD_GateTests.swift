@@ -7,16 +7,16 @@ import XCTest
 /// Gate rules: < 2s, no XCTSkip, no non-deterministic RNG.
 final class INV_WLD_GateTests: XCTestCase {
 
+    private let rules = TwilightDegradationRules()
+
     override func setUp() {
         super.setUp()
         TestContentLoader.loadContentPacksIfNeeded()
         WorldRNG.shared.setSeed(42)
-        DegradationRules.reset()
     }
 
     override func tearDown() {
         WorldRNG.shared.setSeed(0)
-        DegradationRules.reset()
         super.tearDown()
     }
 
@@ -24,14 +24,14 @@ final class INV_WLD_GateTests: XCTestCase {
 
     /// DegradationRules is the single source of truth for selection weights
     func testDegradationRules_stableWeightIsZero() {
-        let weight = DegradationRules.current.selectionWeight(for: .stable)
+        let weight = rules.selectionWeight(for: .stable)
         XCTAssertEqual(weight, 0, "Stable regions should have 0 weight (never selected)")
     }
 
     /// Borderland weight = 1, Breach weight = 2
     func testDegradationRules_weightOrdering() {
-        let borderland = DegradationRules.current.selectionWeight(for: .borderland)
-        let breach = DegradationRules.current.selectionWeight(for: .breach)
+        let borderland = rules.selectionWeight(for: .borderland)
+        let breach = rules.selectionWeight(for: .breach)
         XCTAssertEqual(borderland, 1)
         XCTAssertEqual(breach, 2)
         XCTAssertGreaterThan(breach, borderland, "Breach should have higher weight than borderland")
@@ -39,9 +39,9 @@ final class INV_WLD_GateTests: XCTestCase {
 
     /// Resistance probability is integrity / 100
     func testDegradationRules_resistanceProbability() {
-        XCTAssertEqual(DegradationRules.current.resistanceProbability(anchorIntegrity: 100), 1.0)
-        XCTAssertEqual(DegradationRules.current.resistanceProbability(anchorIntegrity: 50), 0.5)
-        XCTAssertEqual(DegradationRules.current.resistanceProbability(anchorIntegrity: 0), 0.0)
+        XCTAssertEqual(rules.resistanceProbability(anchorIntegrity: 100), 1.0)
+        XCTAssertEqual(rules.resistanceProbability(anchorIntegrity: 50), 0.5)
+        XCTAssertEqual(rules.resistanceProbability(anchorIntegrity: 0), 0.0)
     }
 
     // MARK: - WLD-02: Stable → Borderland single rule

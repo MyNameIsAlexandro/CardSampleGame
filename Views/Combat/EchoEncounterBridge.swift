@@ -51,7 +51,7 @@ extension TwilightGameEngine {
             playerDeck: heroCards,
             fateCards: fateCards,
             resonance: resonanceValue,
-            seed: UInt64(Date().timeIntervalSince1970)
+            seed: WorldRNG.shared.nextSeed()
         )
     }
 

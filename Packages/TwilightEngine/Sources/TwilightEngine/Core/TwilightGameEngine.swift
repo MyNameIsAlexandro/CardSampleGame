@@ -238,10 +238,13 @@ public final class TwilightGameEngine {
     /// Cards in the fate discard pile (for card-counting UI)
     public var fateDeckDiscardCards: [FateCard] { fateDeck?.discardPile ?? [] }
 
-    // MARK: - Content Registry
+    // MARK: - Services
+
+    /// Injected dependencies (RNG, content, degradation rules).
+    public let services: EngineServices
 
     /// Content registry for loading content packs
-    private let contentRegistry: ContentRegistry
+    private var contentRegistry: ContentRegistry { services.contentRegistry }
 
     /// Balance configuration from content pack
     private var balanceConfig: BalanceConfiguration
@@ -255,21 +258,25 @@ public final class TwilightGameEngine {
 
     // MARK: - Initialization
 
-    /// Initialize engine with a content registry for loading game data
-    public init(registry: ContentRegistry = .shared) {
-        self.contentRegistry = registry
-        self.balanceConfig = registry.getBalanceConfig() ?? .default
+    /// Initialize engine with injected services.
+    public init(services: EngineServices = .default) {
+        self.services = services
+        self.balanceConfig = services.contentRegistry.getBalanceConfig() ?? .default
         self.timeEngine = TimeEngine(thresholdInterval: 3)
         self.pressureEngine = PressureEngine(rules: TwilightPressureRules(from: balanceConfig.pressure))
-        DegradationRules.current = TwilightDegradationRules(anchorConfig: balanceConfig.anchor)
         self.economyManager = EconomyManager()
-        self.questTriggerEngine = QuestTriggerEngine(contentRegistry: registry)
+        self.questTriggerEngine = QuestTriggerEngine(contentRegistry: services.contentRegistry)
         self.combat = nil // set after super.init
         self.deck = nil
         self.player = nil
         self.combat = EngineCombatManager(engine: self)
         self.deck = EngineDeckManager(engine: self)
         self.player = EnginePlayerManager(engine: self)
+    }
+
+    /// Convenience init for backward compatibility.
+    public convenience init(registry: ContentRegistry) {
+        self.init(services: EngineServices(contentRegistry: registry))
     }
 
     // MARK: - Setup
@@ -768,11 +775,11 @@ public final class TwilightGameEngine {
         guard !degradableRegions.isEmpty else { return changes }
 
         // Weighted selection using WorldRNG
-        let weights = degradableRegions.map { DegradationRules.current.selectionWeight(for: $0.state) }
+        let weights = degradableRegions.map { services.degradationRules.selectionWeight(for: $0.state) }
         let totalWeight = weights.reduce(0, +)
 
         if totalWeight > 0 {
-            let roll = WorldRNG.shared.nextInt(in: 0...(totalWeight - 1))
+            let roll = services.rng.nextInt(in: 0...(totalWeight - 1))
             var cumulative = 0
             for (index, weight) in weights.enumerated() {
                 cumulative += weight
@@ -781,8 +788,8 @@ public final class TwilightGameEngine {
 
                     // Check anchor resistance using probability
                     let anchorIntegrity = region.anchor?.integrity ?? 0
-                    let resistProb = DegradationRules.current.resistanceProbability(anchorIntegrity: anchorIntegrity)
-                    let resistRoll = Double(WorldRNG.shared.nextInt(in: 0...99)) / 100.0
+                    let resistProb = services.degradationRules.resistanceProbability(anchorIntegrity: anchorIntegrity)
+                    let resistRoll = Double(services.rng.nextInt(in: 0...99)) / 100.0
 
                     if resistRoll >= resistProb {
                         // Anchor failed to resist - degrade region
@@ -868,13 +875,13 @@ public final class TwilightGameEngine {
     /// Chance scales with worldTension (0–100). At tension 30 → ~15%, at 80 → ~40%.
     private func generateRandomEncounter(regionId: String) -> String? {
         let encounterChance = max(5, worldTension / 2) // 5..50%
-        let roll = WorldRNG.shared.nextInt(in: 0...99)
+        let roll = services.rng.nextInt(in: 0...99)
         guard roll < encounterChance else { return nil }
 
-        let allEnemies = ContentRegistry.shared.getAllEnemies()
+        let allEnemies = services.contentRegistry.getAllEnemies()
         guard !allEnemies.isEmpty else { return nil }
 
-        let enemy = allEnemies[WorldRNG.shared.nextInt(in: 0...(allEnemies.count - 1))]
+        let enemy = allEnemies[services.rng.nextInt(in: 0...(allEnemies.count - 1))]
 
         let monsterCard = enemy.toCard()
         let combatEvent = GameEvent(
@@ -1066,13 +1073,13 @@ public final class TwilightGameEngine {
         let totalWeight = filteredDefinitions.reduce(0) { $0 + $1.weight }
         guard totalWeight > 0 else {
             // If all weights are 0, select randomly
-            let selectedDef = filteredDefinitions[WorldRNG.shared.nextInt(in: 0...(filteredDefinitions.count - 1))]
+            let selectedDef = filteredDefinitions[services.rng.nextInt(in: 0...(filteredDefinitions.count - 1))]
             let gameEvent = selectedDef.toGameEvent(forRegion: regionDefId)
             currentEvent = gameEvent
             return gameEvent.id
         }
 
-        let roll = WorldRNG.shared.nextInt(in: 0...(totalWeight - 1))
+        let roll = services.rng.nextInt(in: 0...(totalWeight - 1))
         var cumulative = 0
         for eventDef in filteredDefinitions {
             cumulative += eventDef.weight
@@ -1546,7 +1553,7 @@ public extension TwilightGameEngine {
         var activePackSet: [String: String] = [:]
         var primaryCampaignPackId: String? = nil
 
-        for (packId, pack) in ContentRegistry.shared.loadedPacks {
+        for (packId, pack) in services.contentRegistry.loadedPacks {
             activePackSet[packId] = pack.manifest.version.description
 
             // First campaign/full pack becomes the primary campaign pack
@@ -1621,8 +1628,8 @@ public extension TwilightGameEngine {
             encounterState: pendingEncounterState,
 
             // RNG state (Audit A2 - save for deterministic replay)
-            rngSeed: WorldRNG.shared.currentSeed(),
-            rngState: WorldRNG.shared.currentState()
+            rngSeed: services.rng.currentSeed(),
+            rngState: services.rng.currentState()
         )
     }
 
@@ -1630,7 +1637,7 @@ public extension TwilightGameEngine {
     /// This replaces GameState-based loads
     func restoreFromEngineSave(_ save: EngineSave) {
         // Validate compatibility
-        let compatibility = save.validateCompatibility(with: ContentRegistry.shared)
+        let compatibility = save.validateCompatibility(with: services.contentRegistry)
 
         // Log compatibility result
         #if DEBUG
@@ -1660,9 +1667,9 @@ public extension TwilightGameEngine {
         player.restoreFromSave(save)
 
         // Restore deck (convert card IDs back to cards)
-        deck.setDeck(save.deckCardIds.compactMap { CardFactory.shared.getCard(id: $0) })
-        deck.setHand(save.handCardIds.compactMap { CardFactory.shared.getCard(id: $0) })
-        deck.setDiscard(save.discardCardIds.compactMap { CardFactory.shared.getCard(id: $0) })
+        deck.setDeck(save.deckCardIds.compactMap { CardFactory(contentRegistry: services.contentRegistry).getCard(id: $0) })
+        deck.setHand(save.handCardIds.compactMap { CardFactory(contentRegistry: services.contentRegistry).getCard(id: $0) })
+        deck.setDiscard(save.discardCardIds.compactMap { CardFactory(contentRegistry: services.contentRegistry).getCard(id: $0) })
 
         // Restore world state
         currentDay = save.currentDay
@@ -1747,7 +1754,7 @@ public extension TwilightGameEngine {
         gameStartDate = Date()
 
         // Restore RNG state (Audit 1.5 - determinism after load)
-        WorldRNG.shared.restoreState(save.rngState)
+        services.rng.restoreState(save.rngState)
 
         // Clear game over state
         isGameOver = false

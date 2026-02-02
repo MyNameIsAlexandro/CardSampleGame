@@ -81,6 +81,12 @@ public final class WorldRNG {
         return copy
     }
 
+    /// Generate a deterministic seed derived from current state.
+    /// Use this instead of `Date().timeIntervalSince1970` for sub-system seeding.
+    public func nextSeed() -> UInt64 {
+        return next()
+    }
+
     /// Pick random element from array
     public func randomElement<T>(from array: [T]) -> T? {
         guard !array.isEmpty else { return nil }

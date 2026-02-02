@@ -243,7 +243,7 @@ public enum AbilityCostType: String, Codable {
 extension HeroAbility {
     /// Получить способность по ID (data-driven через AbilityRegistry)
     /// Способности загружаются из hero_abilities.json в ContentPack
-    public static func forAbilityId(_ id: String) -> HeroAbility? {
-        return AbilityRegistry.shared.ability(id: id)
+    public static func forAbilityId(_ id: String, registry: AbilityRegistry = .shared) -> HeroAbility? {
+        return registry.ability(id: id)
     }
 }

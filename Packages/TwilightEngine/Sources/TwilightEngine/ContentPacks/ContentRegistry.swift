@@ -32,6 +32,14 @@ public final class ContentRegistry {
     /// Pack load order (for priority resolution)
     private var loadOrder: [String] = []
 
+    // MARK: - Sub-Registries
+
+    /// Hero definitions registry.
+    public let heroRegistry = HeroRegistry()
+
+    /// Ability definitions registry.
+    public let abilityRegistry = AbilityRegistry()
+
     // MARK: - Initialization
 
     public init() {}
@@ -68,7 +76,7 @@ public final class ContentRegistry {
     /// Register pack content (internal helper)
     private func registerPackContent(_ content: PackContent, from url: URL) throws -> LoadedPack {
         // Register abilities BEFORE creating pack (needed for hero definitions)
-        AbilityRegistry.shared.registerAll(content.abilities)
+        abilityRegistry.registerAll(content.abilities)
 
         let pack = content.toLoadedPack(sourceURL: url)
 
@@ -619,7 +627,7 @@ public final class ContentRegistry {
         // Merge heroes and register into HeroRegistry for backward compatibility
         for (id, hero) in pack.heroes {
             mergedHeroes[id] = hero
-            HeroRegistry.shared.register(hero)
+            heroRegistry.register(hero)
         }
         #if DEBUG
         if !pack.heroes.isEmpty {

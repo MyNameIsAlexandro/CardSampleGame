@@ -154,7 +154,7 @@ struct BattleArenaView: View {
                 playerDeck: startingDeck,
                 fateCards: fateCards,
                 resonance: vm.engine.resonanceValue,
-                seed: UInt64(Date().timeIntervalSince1970),
+                seed: WorldRNG.shared.nextSeed(),
                 onCombatEndWithResult: { result in
                     // Apply combat result to engine state
                     vm.engine.applyEchoCombatResult(result)

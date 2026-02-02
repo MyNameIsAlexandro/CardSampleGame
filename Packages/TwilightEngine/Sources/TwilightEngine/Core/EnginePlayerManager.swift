@@ -40,7 +40,7 @@ public final class EnginePlayerManager {
     /// Get hero definition from registry
     public var heroDefinition: HeroDefinition? {
         guard let heroId = heroId else { return nil }
-        return HeroRegistry.shared.hero(id: heroId)
+        return engine.services.contentRegistry.heroRegistry.hero(id: heroId)
     }
 
     /// Get hero's special ability
@@ -181,7 +181,7 @@ public final class EnginePlayerManager {
         self.heroId = heroId
 
         if let heroId = heroId,
-           let heroDef = HeroRegistry.shared.hero(id: heroId) {
+           let heroDef = engine.services.contentRegistry.heroRegistry.hero(id: heroId) {
             let stats = heroDef.baseStats
             health = stats.health
             maxHealth = stats.maxHealth
@@ -222,7 +222,7 @@ public final class EnginePlayerManager {
         balance = save.playerBalance
 
         if let heroId = save.heroId,
-           let heroDef = HeroRegistry.shared.hero(id: heroId) {
+           let heroDef = engine.services.contentRegistry.heroRegistry.hero(id: heroId) {
             let stats = heroDef.baseStats
             strength = stats.strength
             dexterity = stats.dexterity

@@ -9,7 +9,7 @@ extension EventDefinition {
     /// Convert EventDefinition to legacy GameEvent for UI compatibility
     /// - Parameter regionId: Optional region ID for context-specific conversion
     /// - Returns: GameEvent compatible with existing UI
-    public func toGameEvent(forRegion regionId: String? = nil) -> GameEvent {
+    public func toGameEvent(forRegion regionId: String? = nil, registry: ContentRegistry = .shared) -> GameEvent {
         // Map event kind to legacy event type
         let eventType = mapEventKind(eventKind)
 
@@ -17,13 +17,13 @@ extension EventDefinition {
         let regionStates = mapRegionStates(availability.regionStates)
 
         // Map region types (infer from region IDs if needed)
-        let regionTypes = mapRegionTypes(availability.regionIds)
+        let regionTypes = mapRegionTypes(availability.regionIds, registry: registry)
 
         // Convert choices
         let eventChoices = choices.map { $0.toEventChoice() }
 
         // Create monster card for combat events
-        let monsterCard = createMonsterCard(for: miniGameChallenge)
+        let monsterCard = createMonsterCard(for: miniGameChallenge, registry: registry)
 
         return GameEvent(
             id: id,
@@ -83,7 +83,7 @@ extension EventDefinition {
         }
     }
 
-    private func mapRegionTypes(_ regionIds: [String]?) -> [RegionType] {
+    private func mapRegionTypes(_ regionIds: [String]?, registry: ContentRegistry = .shared) -> [RegionType] {
         guard let ids = regionIds else {
             return [] // Empty = any region type
         }
@@ -91,7 +91,7 @@ extension EventDefinition {
         // Look up region types from ContentRegistry (no hardcoded ID mapping)
         var types = Set<RegionType>()
         for regionId in ids {
-            if let regionDef = ContentRegistry.shared.getRegion(id: regionId) {
+            if let regionDef = registry.getRegion(id: regionId) {
                 // Map regionType string from definition to RegionType enum
                 let regionType = mapRegionTypeString(regionDef.regionType)
                 types.insert(regionType)
@@ -115,17 +115,17 @@ extension EventDefinition {
         return links
     }
 
-    private func createMonsterCard(for challenge: MiniGameChallengeDefinition?) -> Card? {
+    private func createMonsterCard(for challenge: MiniGameChallengeDefinition?, registry: ContentRegistry = .shared) -> Card? {
         guard let challenge = challenge,
               let enemyId = challenge.enemyId else { return nil }
 
         // First, try to get enemy from ContentRegistry
-        if let enemy = ContentRegistry.shared.getEnemy(id: enemyId) {
+        if let enemy = registry.getEnemy(id: enemyId) {
             return enemy.toCard()
         }
 
         // Fallback: Create from hardcoded stats
-        let enemyStats = getEnemyStats(for: enemyId, difficulty: challenge.difficulty)
+        let enemyStats = getEnemyStats(for: enemyId, difficulty: challenge.difficulty, registry: registry)
 
         return Card(
             id: enemyId,
@@ -139,9 +139,9 @@ extension EventDefinition {
         )
     }
 
-    private func getEnemyStats(for enemyId: String, difficulty: Int) -> (health: Int, power: Int, defense: Int) {
+    private func getEnemyStats(for enemyId: String, difficulty: Int, registry: ContentRegistry = .shared) -> (health: Int, power: Int, defense: Int) {
         // Try to get stats from ContentRegistry (data-driven)
-        if let enemyDef = ContentRegistry.shared.getEnemy(id: enemyId) {
+        if let enemyDef = registry.getEnemy(id: enemyId) {
             return (health: enemyDef.health, power: enemyDef.power, defense: enemyDef.defense)
         }
 
