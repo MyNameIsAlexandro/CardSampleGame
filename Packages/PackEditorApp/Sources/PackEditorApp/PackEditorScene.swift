@@ -12,6 +12,9 @@ public struct PackEditorScene: Scene {
             PackEditorRootView()
                 .environmentObject(state)
                 .frame(minWidth: 900, minHeight: 600)
+                .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
+                    state.autosaveAll()
+                }
         }
         .commands {
             CommandGroup(replacing: .newItem) {}

@@ -8,18 +8,7 @@ struct PackEditorRootView: View {
             TabBarView()
 
             if state.showBrowser {
-                // Placeholder for Phase 3 PackBrowserView
-                VStack {
-                    Text("Pack Browser")
-                        .font(.largeTitle)
-                    Text("Coming soon — use Open button in toolbar")
-                        .foregroundStyle(.secondary)
-                    Button("Open Pack...") {
-                        state.openPackDialog()
-                    }
-                    .padding()
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                PackBrowserView()
             } else if let tab = state.activeTab {
                 PackEditorContentView()
                     .environmentObject(tab)
