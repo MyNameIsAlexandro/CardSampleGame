@@ -3,6 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "PackEditorApp",
+    defaultLocalization: "en",
     platforms: [
         .macOS(.v13)
     ],
@@ -23,7 +24,8 @@ let package = Package(
                 .product(name: "TwilightEngine", package: "TwilightEngine"),
                 .product(name: "PackAuthoring", package: "TwilightEngine"),
                 .product(name: "PackEditorKit", package: "PackEditorKit"),
-            ]
+            ],
+            resources: [.process("Resources")]
         ),
         .testTarget(
             name: "PackEditorAppTests",
