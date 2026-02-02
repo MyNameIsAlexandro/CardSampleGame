@@ -4,22 +4,16 @@ import PackAuthoring
 import PackEditorKit
 
 struct EditorToolbar: ToolbarContent {
-    @EnvironmentObject var state: PackEditorState
+    @EnvironmentObject var tab: EditorTab
 
     var body: some ToolbarContent {
         ToolbarItemGroup(placement: .primaryAction) {
             Button {
-                state.openPack()
-            } label: {
-                Label("Open", systemImage: "folder")
-            }
-
-            Button {
-                state.savePack()
+                tab.savePack()
             } label: {
                 Label("Save", systemImage: "square.and.arrow.down")
             }
-            .disabled(!state.isDirty)
+            .disabled(!tab.isDirty)
 
             Divider()
 
@@ -28,28 +22,28 @@ struct EditorToolbar: ToolbarContent {
             } label: {
                 Label("Validate", systemImage: "checkmark.shield")
             }
-            .disabled(state.loadedPack == nil)
+            .disabled(tab.loadedPack == nil)
 
             Button {
                 compilePack()
             } label: {
                 Label("Compile", systemImage: "hammer")
             }
-            .disabled(state.loadedPack == nil)
+            .disabled(tab.loadedPack == nil)
         }
     }
 
     private func validatePack() {
-        guard state.packURL != nil else { return }
-        state.validate()
-        state.showValidation = true
+        guard tab.packURL != nil else { return }
+        tab.validate()
+        tab.showValidation = true
     }
 
     private func compilePack() {
-        guard let url = state.packURL else { return }
+        guard let url = tab.packURL else { return }
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.data]
-        panel.nameFieldStringValue = "\(state.loadedPack?.manifest.packId ?? "pack").pack"
+        panel.nameFieldStringValue = "\(tab.loadedPack?.manifest.packId ?? "pack").pack"
 
         guard panel.runModal() == .OK, let outputURL = panel.url else { return }
 

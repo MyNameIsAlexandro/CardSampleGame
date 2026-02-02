@@ -17,27 +17,27 @@ public struct PackEditorScene: Scene {
             CommandGroup(replacing: .newItem) {}
             CommandGroup(after: .newItem) {
                 Button("Open Pack Folder...") {
-                    state.openPack()
+                    state.openPackDialog()
                 }
                 .keyboardShortcut("o")
 
                 Button("Save") {
-                    state.savePack()
+                    state.activeTab?.savePack()
                 }
                 .keyboardShortcut("s")
-                .disabled(!state.isDirty)
+                .disabled(state.activeTab?.isDirty != true)
 
                 Button("New Entity") {
-                    state.addEntity()
+                    state.activeTab?.addEntity()
                 }
                 .keyboardShortcut("n")
-                .disabled(state.selectedCategory == nil || state.selectedCategory == .balance)
+                .disabled(state.activeTab?.selectedCategory == nil || state.activeTab?.selectedCategory == .balance)
 
                 Button("Duplicate Entity") {
-                    state.duplicateSelectedEntity()
+                    state.activeTab?.duplicateSelectedEntity()
                 }
                 .keyboardShortcut("d")
-                .disabled(state.selectedEntityId == nil || state.selectedCategory == .balance)
+                .disabled(state.activeTab?.selectedEntityId == nil || state.activeTab?.selectedCategory == .balance)
             }
         }
     }

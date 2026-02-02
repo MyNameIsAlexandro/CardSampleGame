@@ -3,17 +3,17 @@ import TwilightEngine
 import PackEditorKit
 
 struct EntityListView: View {
-    @EnvironmentObject var state: PackEditorState
+    @EnvironmentObject var tab: EditorTab
     @State private var searchText = ""
     @State private var showDeleteConfirmation = false
 
     var body: some View {
-        if let category = state.selectedCategory {
+        if let category = tab.selectedCategory {
             let ids = filteredIds(for: category)
-            List(selection: $state.selectedEntityId) {
+            List(selection: $tab.selectedEntityId) {
                 ForEach(ids, id: \.self) { id in
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(state.entityName(for: id, in: category))
+                        Text(tab.entityName(for: id, in: category))
                             .fontWeight(.medium)
                         Text(id)
                             .font(.caption)
@@ -23,7 +23,7 @@ struct EntityListView: View {
                 }
                 .onMove { from, to in
                     guard searchText.isEmpty else { return }
-                    state.moveEntities(for: category, from: from, to: to)
+                    tab.moveEntities(for: category, from: from, to: to)
                 }
             }
             .searchable(text: $searchText, prompt: "Filter \(category.rawValue.lowercased())")
@@ -34,19 +34,19 @@ struct EntityListView: View {
                         if let templates = templateOptions(for: category) {
                             ForEach(templates, id: \.0) { (key, label) in
                                 Button(label) {
-                                    state.addEntity(template: key)
+                                    tab.addEntity(template: key)
                                 }
                             }
                         } else {
                             Button("New") {
-                                state.addEntity()
+                                tab.addEntity()
                             }
                         }
 
                         Divider()
 
                         Button("Import from Clipboard") {
-                            _ = state.importEntityFromClipboard()
+                            _ = tab.importEntityFromClipboard()
                         }
                     } label: {
                         Image(systemName: "plus")
@@ -55,19 +55,19 @@ struct EntityListView: View {
                     .help("Add new \(category.rawValue.lowercased().dropLast())")
 
                     Button {
-                        state.duplicateSelectedEntity()
+                        tab.duplicateSelectedEntity()
                     } label: {
                         Image(systemName: "doc.on.doc")
                     }
-                    .disabled(state.selectedEntityId == nil || category == .balance)
+                    .disabled(tab.selectedEntityId == nil || category == .balance)
                     .help("Duplicate selected entity")
 
                     Button {
-                        state.exportSelectedEntityToClipboard()
+                        tab.exportSelectedEntityToClipboard()
                     } label: {
                         Image(systemName: "square.and.arrow.up")
                     }
-                    .disabled(state.selectedEntityId == nil)
+                    .disabled(tab.selectedEntityId == nil)
                     .help("Export selected entity to clipboard")
 
                     Button {
@@ -75,17 +75,17 @@ struct EntityListView: View {
                     } label: {
                         Image(systemName: "minus")
                     }
-                    .disabled(state.selectedEntityId == nil || category == .balance)
+                    .disabled(tab.selectedEntityId == nil || category == .balance)
                     .help("Delete selected entity")
                 }
             }
             .alert("Delete Entity?", isPresented: $showDeleteConfirmation) {
                 Button("Delete", role: .destructive) {
-                    state.deleteSelectedEntity()
+                    tab.deleteSelectedEntity()
                 }
                 Button("Cancel", role: .cancel) {}
             } message: {
-                if let id = state.selectedEntityId {
+                if let id = tab.selectedEntityId {
                     Text("Are you sure you want to delete \"\(id)\"? This cannot be undone.")
                 }
             }
@@ -105,11 +105,11 @@ struct EntityListView: View {
     }
 
     private func filteredIds(for category: ContentCategory) -> [String] {
-        let allIds = state.orderedEntityIds(for: category)
+        let allIds = tab.orderedEntityIds(for: category)
         guard !searchText.isEmpty else { return allIds }
         return allIds.filter { id in
             id.localizedCaseInsensitiveContains(searchText) ||
-            state.entityName(for: id, in: category).localizedCaseInsensitiveContains(searchText)
+            tab.entityName(for: id, in: category).localizedCaseInsensitiveContains(searchText)
         }
     }
 }

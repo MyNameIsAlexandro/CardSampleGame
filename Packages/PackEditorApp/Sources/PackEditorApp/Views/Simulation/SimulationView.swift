@@ -4,7 +4,7 @@ import TwilightEngine
 import PackEditorKit
 
 struct SimulationView: View {
-    @EnvironmentObject var state: PackEditorState
+    @EnvironmentObject var tab: EditorTab
 
     @State private var selectedHeroId: String?
     @State private var selectedEnemyIds: Set<String> = []
@@ -15,13 +15,13 @@ struct SimulationView: View {
     @State private var result: SimulationResult?
 
     private var heroOptions: [(id: String, label: String)] {
-        state.heroes.values
+        tab.heroes.values
             .sorted { $0.id < $1.id }
             .map { (id: $0.id, label: $0.name.resolved(for: "en")) }
     }
 
     private var enemyOptions: [(id: String, label: String)] {
-        state.enemies.values
+        tab.enemies.values
             .sorted { $0.id < $1.id }
             .map { (id: $0.id, label: $0.name.resolved(for: "en")) }
     }
@@ -175,9 +175,9 @@ struct SimulationView: View {
 
     private func runSimulation() {
         guard let heroId = selectedHeroId,
-              let heroDef = state.heroes[heroId] else { return }
+              let heroDef = tab.heroes[heroId] else { return }
 
-        let enemyDefs = selectedEnemyIds.compactMap { state.enemies[$0] }
+        let enemyDefs = selectedEnemyIds.compactMap { tab.enemies[$0] }
         guard !enemyDefs.isEmpty else { return }
 
         let config = SimulationConfig(

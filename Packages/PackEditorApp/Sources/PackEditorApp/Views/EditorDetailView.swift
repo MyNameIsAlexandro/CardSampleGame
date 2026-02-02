@@ -3,100 +3,100 @@ import TwilightEngine
 import PackEditorKit
 
 struct EditorDetailView: View {
-    @EnvironmentObject var state: PackEditorState
+    @EnvironmentObject var tab: EditorTab
     @Environment(\.undoManager) var undoManager
     @State private var showJSONPreview = false
 
     var body: some View {
         ScrollView {
-            switch state.selectedCategory {
+            switch tab.selectedCategory {
             case .enemies:
-                if let id = state.selectedEntityId, state.enemies[id] != nil {
+                if let id = tab.selectedEntityId, tab.enemies[id] != nil {
                     EnemyEditor(enemy: undoBinding(
-                        get: { state.enemies[id]! },
-                        set: { state.enemies[id] = $0 },
+                        get: { tab.enemies[id]! },
+                        set: { tab.enemies[id] = $0 },
                         label: "Edit Enemy"
                     ))
                 }
             case .cards:
-                if let id = state.selectedEntityId, state.cards[id] != nil {
+                if let id = tab.selectedEntityId, tab.cards[id] != nil {
                     CardEditor(card: undoBinding(
-                        get: { state.cards[id]! },
-                        set: { state.cards[id] = $0 },
+                        get: { tab.cards[id]! },
+                        set: { tab.cards[id] = $0 },
                         label: "Edit Card"
                     ))
                 }
             case .events:
-                if let id = state.selectedEntityId, state.events[id] != nil {
+                if let id = tab.selectedEntityId, tab.events[id] != nil {
                     EventEditor(event: undoBinding(
-                        get: { state.events[id]! },
-                        set: { state.events[id] = $0 },
+                        get: { tab.events[id]! },
+                        set: { tab.events[id] = $0 },
                         label: "Edit Event"
                     ))
                 }
             case .regions:
-                if let id = state.selectedEntityId, state.regions[id] != nil {
+                if let id = tab.selectedEntityId, tab.regions[id] != nil {
                     RegionEditor(region: undoBinding(
-                        get: { state.regions[id]! },
-                        set: { state.regions[id] = $0 },
+                        get: { tab.regions[id]! },
+                        set: { tab.regions[id] = $0 },
                         label: "Edit Region"
                     ))
                 }
             case .heroes:
-                if let id = state.selectedEntityId, state.heroes[id] != nil {
+                if let id = tab.selectedEntityId, tab.heroes[id] != nil {
                     HeroEditor(hero: undoBinding(
-                        get: { state.heroes[id]! },
-                        set: { state.heroes[id] = $0 },
+                        get: { tab.heroes[id]! },
+                        set: { tab.heroes[id] = $0 },
                         label: "Edit Hero"
                     ))
                 }
             case .fateCards:
-                if let id = state.selectedEntityId, state.fateCards[id] != nil {
+                if let id = tab.selectedEntityId, tab.fateCards[id] != nil {
                     FateCardEditor(card: undoBinding(
-                        get: { state.fateCards[id]! },
-                        set: { state.fateCards[id] = $0 },
+                        get: { tab.fateCards[id]! },
+                        set: { tab.fateCards[id] = $0 },
                         label: "Edit Fate Card"
                     ))
                 }
             case .quests:
-                if let id = state.selectedEntityId, state.quests[id] != nil {
+                if let id = tab.selectedEntityId, tab.quests[id] != nil {
                     QuestEditor(quest: undoBinding(
-                        get: { state.quests[id]! },
-                        set: { state.quests[id] = $0 },
+                        get: { tab.quests[id]! },
+                        set: { tab.quests[id] = $0 },
                         label: "Edit Quest"
                     ))
                 }
             case .behaviors:
-                if let id = state.selectedEntityId, state.behaviors[id] != nil {
+                if let id = tab.selectedEntityId, tab.behaviors[id] != nil {
                     BehaviorEditor(behavior: undoBinding(
-                        get: { state.behaviors[id]! },
-                        set: { state.behaviors[id] = $0 },
+                        get: { tab.behaviors[id]! },
+                        set: { tab.behaviors[id] = $0 },
                         label: "Edit Behavior"
                     ))
                 }
             case .anchors:
-                if let id = state.selectedEntityId, state.anchors[id] != nil {
+                if let id = tab.selectedEntityId, tab.anchors[id] != nil {
                     AnchorEditor(anchor: undoBinding(
-                        get: { state.anchors[id]! },
-                        set: { state.anchors[id] = $0 },
+                        get: { tab.anchors[id]! },
+                        set: { tab.anchors[id] = $0 },
                         label: "Edit Anchor"
                     ))
                 }
             case .balance:
-                if state.balanceConfig != nil {
+                if tab.balanceConfig != nil {
                     BalanceEditor(config: undoBinding(
-                        get: { state.balanceConfig! },
-                        set: { state.balanceConfig = $0 },
+                        get: { tab.balanceConfig! },
+                        set: { tab.balanceConfig = $0 },
                         label: "Edit Balance"
                     ))
                 }
             case .none:
-                if state.manifest != nil {
+                if tab.manifest != nil {
                     ManifestEditor(manifest: Binding(
-                        get: { state.manifest! },
+                        get: { tab.manifest! },
                         set: {
-                            state.manifest = $0
-                            state.isDirty = true
+                            tab.manifest = $0
+                            tab.isDirty = true
                         }
                     ))
                 } else {
@@ -113,7 +113,7 @@ struct EditorDetailView: View {
                 } label: {
                     Image(systemName: "curlybraces")
                 }
-                .disabled(state.selectedEntityId == nil && state.selectedCategory != .balance)
+                .disabled(tab.selectedEntityId == nil && tab.selectedCategory != .balance)
                 .help("View as JSON")
             }
         }
@@ -124,32 +124,32 @@ struct EditorDetailView: View {
 
     @ViewBuilder
     private var jsonPreviewContent: some View {
-        if let id = state.selectedEntityId {
-            switch state.selectedCategory {
+        if let id = tab.selectedEntityId {
+            switch tab.selectedCategory {
             case .enemies:
-                if let e = state.enemies[id] { JSONPreviewSheet(title: id, value: e) }
+                if let e = tab.enemies[id] { JSONPreviewSheet(title: id, value: e) }
             case .cards:
-                if let c = state.cards[id] { JSONPreviewSheet(title: id, value: c) }
+                if let c = tab.cards[id] { JSONPreviewSheet(title: id, value: c) }
             case .events:
-                if let e = state.events[id] { JSONPreviewSheet(title: id, value: e) }
+                if let e = tab.events[id] { JSONPreviewSheet(title: id, value: e) }
             case .regions:
-                if let r = state.regions[id] { JSONPreviewSheet(title: id, value: r) }
+                if let r = tab.regions[id] { JSONPreviewSheet(title: id, value: r) }
             case .heroes:
-                if let h = state.heroes[id] { JSONPreviewSheet(title: id, value: h) }
+                if let h = tab.heroes[id] { JSONPreviewSheet(title: id, value: h) }
             case .fateCards:
-                if let f = state.fateCards[id] { JSONPreviewSheet(title: id, value: f) }
+                if let f = tab.fateCards[id] { JSONPreviewSheet(title: id, value: f) }
             case .quests:
-                if let q = state.quests[id] { JSONPreviewSheet(title: id, value: q) }
+                if let q = tab.quests[id] { JSONPreviewSheet(title: id, value: q) }
             case .behaviors:
-                if let b = state.behaviors[id] { JSONPreviewSheet(title: id, value: b) }
+                if let b = tab.behaviors[id] { JSONPreviewSheet(title: id, value: b) }
             case .anchors:
-                if let a = state.anchors[id] { JSONPreviewSheet(title: id, value: a) }
+                if let a = tab.anchors[id] { JSONPreviewSheet(title: id, value: a) }
             case .balance:
-                if let c = state.balanceConfig { JSONPreviewSheet(title: "Balance", value: c) }
+                if let c = tab.balanceConfig { JSONPreviewSheet(title: "Balance", value: c) }
             case .none:
                 Text("No entity selected")
             }
-        } else if state.selectedCategory == .balance, let c = state.balanceConfig {
+        } else if tab.selectedCategory == .balance, let c = tab.balanceConfig {
             JSONPreviewSheet(title: "Balance", value: c)
         }
     }
@@ -164,11 +164,11 @@ struct EditorDetailView: View {
             set: { newValue in
                 let oldValue = get()
                 set(newValue)
-                state.isDirty = true
-                undoManager?.registerUndo(withTarget: state) { state in
+                tab.isDirty = true
+                undoManager?.registerUndo(withTarget: tab) { tab in
                     set(oldValue)
-                    state.isDirty = true
-                    state.objectWillChange.send()
+                    tab.isDirty = true
+                    tab.objectWillChange.send()
                 }
                 undoManager?.setActionName(label)
             }
