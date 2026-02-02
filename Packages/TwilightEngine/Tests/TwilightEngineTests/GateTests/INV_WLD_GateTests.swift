@@ -196,4 +196,180 @@ final class INV_WLD_GateTests: XCTestCase {
         let run2 = runSimulation(seed: 99999)
         XCTAssertEqual(run1, run2, "Same seed must produce identical 30-day simulation")
     }
+
+    // MARK: - WLD-06: Anchor Alignment
+
+    /// Anchor alignment is initialized from definition's initialInfluence
+    func testAnchorAlignment_initialFromDefinition() {
+        let engine = TwilightGameEngine()
+        engine.initializeNewGame(playerName: "Test", heroId: nil)
+
+        // Check that anchors have alignment set (from definition)
+        for region in engine.regionsArray {
+            if let anchor = region.anchor {
+                // Alignment should be a valid value (not crash)
+                XCTAssertTrue(
+                    [AnchorAlignment.light, .neutral, .dark].contains(anchor.alignment),
+                    "Anchor \(anchor.id) should have valid alignment"
+                )
+            }
+        }
+    }
+
+    /// Region alignment is derived from its anchor
+    func testRegionAlignment_derivedFromAnchor() {
+        let engine = TwilightGameEngine()
+        engine.initializeNewGame(playerName: "Test", heroId: nil)
+
+        for region in engine.regionsArray {
+            if let anchor = region.anchor {
+                XCTAssertEqual(region.alignment, anchor.alignment,
+                    "Region alignment should match anchor alignment")
+            } else {
+                XCTAssertEqual(region.alignment, .neutral,
+                    "Region without anchor should be neutral")
+            }
+        }
+    }
+
+    /// Light/neutral hero strengthening does not change alignment
+    func testStrengthenAnchor_lightHero_keepsAlignment() {
+        let engine = TwilightGameEngine()
+        engine.initializeNewGame(playerName: "Test", heroId: nil)
+
+        guard let regionWithAnchor = engine.regionsArray.first(where: { $0.anchor != nil }) else {
+            XCTFail("No region with anchor"); return
+        }
+
+        // Set player to light alignment (balance > 70 = prav)
+        engine.player.setBalance(80)
+        engine.player.setFaith(20)
+        engine.setCurrentRegion(regionWithAnchor.id)
+
+        let originalAlignment = regionWithAnchor.anchor!.alignment
+
+        _ = engine.performAction(.strengthenAnchor)
+
+        let updatedRegion = engine.publishedRegions[regionWithAnchor.id]!
+        XCTAssertEqual(updatedRegion.anchor?.alignment, originalAlignment,
+            "Light hero strengthen should not change anchor alignment")
+    }
+
+    /// Dark hero strengthening shifts alignment toward dark
+    func testStrengthenAnchor_darkHero_shiftsAlignment() {
+        let engine = TwilightGameEngine()
+        engine.initializeNewGame(playerName: "Test", heroId: nil)
+
+        guard let regionWithAnchor = engine.regionsArray.first(where: {
+            $0.anchor != nil && $0.anchor!.alignment != .dark
+        }) else {
+            XCTFail("No region with non-dark anchor"); return
+        }
+
+        // Set player to dark alignment (balance < 30 = nav)
+        engine.player.setBalance(10)
+        engine.player.setHealth(20)
+        engine.setCurrentRegion(regionWithAnchor.id)
+
+        let originalAlignment = regionWithAnchor.anchor!.alignment
+
+        _ = engine.performAction(.strengthenAnchor)
+
+        let updatedRegion = engine.publishedRegions[regionWithAnchor.id]!
+        XCTAssertNotEqual(updatedRegion.anchor?.alignment, originalAlignment,
+            "Dark hero strengthen should shift anchor alignment toward dark")
+    }
+
+    /// Defile anchor changes alignment to dark
+    func testDefileAnchor_changesAlignmentToDark() {
+        let engine = TwilightGameEngine()
+        engine.initializeNewGame(playerName: "Test", heroId: nil)
+
+        guard let regionWithAnchor = engine.regionsArray.first(where: {
+            $0.anchor != nil && $0.anchor!.alignment != .dark
+        }) else {
+            XCTFail("No region with non-dark anchor"); return
+        }
+
+        engine.player.setBalance(10) // nav alignment
+        engine.player.setHealth(20)
+        engine.setCurrentRegion(regionWithAnchor.id)
+
+        _ = engine.performAction(.defileAnchor)
+
+        let updatedRegion = engine.publishedRegions[regionWithAnchor.id]!
+        XCTAssertEqual(updatedRegion.anchor?.alignment, .dark,
+            "Defile should set anchor alignment to dark")
+    }
+
+    /// Defile requires nav (dark) player alignment
+    func testDefileAnchor_requiresNavAlignment() {
+        let engine = TwilightGameEngine()
+        engine.initializeNewGame(playerName: "Test", heroId: nil)
+
+        guard let regionWithAnchor = engine.regionsArray.first(where: {
+            $0.anchor != nil && $0.anchor!.alignment != .dark
+        }) else {
+            XCTFail("No region with non-dark anchor"); return
+        }
+
+        engine.player.setBalance(80) // prav = light
+        engine.player.setHealth(20)
+        engine.setCurrentRegion(regionWithAnchor.id)
+
+        let result = engine.performAction(.defileAnchor)
+        XCTAssertFalse(result.success, "Light hero should not be able to defile")
+    }
+
+    /// Cannot defile already dark anchor
+    func testDefileAnchor_alreadyDark_fails() {
+        let engine = TwilightGameEngine()
+        engine.initializeNewGame(playerName: "Test", heroId: nil)
+
+        guard let regionWithAnchor = engine.regionsArray.first(where: { $0.anchor != nil }) else {
+            XCTFail("No region with anchor"); return
+        }
+
+        // First defile it
+        engine.player.setBalance(10)
+        engine.player.setHealth(20)
+        engine.setCurrentRegion(regionWithAnchor.id)
+        _ = engine.performAction(.defileAnchor)
+
+        // Try to defile again
+        let result = engine.performAction(.defileAnchor)
+        XCTAssertFalse(result.success, "Cannot defile already dark anchor")
+    }
+
+    /// Save/load preserves anchor alignment
+    func testSaveLoad_preservesAnchorAlignment() {
+        let region = EngineRegionState(
+            id: "test_region",
+            name: "Test",
+            type: .sacred,
+            state: .stable,
+            anchor: EngineAnchorState(id: "test_anchor", name: "Anchor", integrity: 80, alignment: .dark)
+        )
+
+        let saveState = RegionSaveState(from: region)
+        XCTAssertEqual(saveState.anchorAlignment, "dark")
+
+        let restored = saveState.toEngineRegionState()
+        XCTAssertEqual(restored.anchor?.alignment, .dark, "Alignment should survive save/load")
+    }
+
+    /// Save/load defaults to neutral for old saves without alignment
+    func testSaveLoad_defaultsToNeutral() {
+        let region = EngineRegionState(
+            id: "test_region",
+            name: "Test",
+            type: .sacred,
+            state: .stable,
+            anchor: EngineAnchorState(id: "test_anchor", name: "Anchor", integrity: 80)
+        )
+
+        let saveState = RegionSaveState(from: region)
+        let restored = saveState.toEngineRegionState()
+        XCTAssertEqual(restored.anchor?.alignment, .neutral, "Default alignment should be neutral")
+    }
 }

@@ -183,14 +183,19 @@ public struct AnchorRuntimeState: Codable, Equatable {
     /// Whether anchor is active/usable
     public var isActive: Bool
 
+    /// Current alignment (light/neutral/dark), can change via defile/strengthen
+    public var alignment: AnchorAlignment
+
     public init(
         definitionId: String,
         integrity: Int = 50,
-        isActive: Bool = true
+        isActive: Bool = true,
+        alignment: AnchorAlignment = .neutral
     ) {
         self.definitionId = definitionId
         self.integrity = integrity
         self.isActive = isActive
+        self.alignment = alignment
     }
 
     // MARK: - Operations

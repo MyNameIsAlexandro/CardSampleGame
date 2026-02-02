@@ -329,6 +329,7 @@ private func describeAction(_ action: TwilightGameAction) -> String {
     case .explore: return "explore"
     case .trade: return "trade"
     case .strengthenAnchor: return "strengthenAnchor"
+    case .defileAnchor: return "defileAnchor"
     case .chooseEventOption(let e, let c): return "choose(\(e), \(c))"
     case .resolveMiniGame(let r): return "miniGame(\(r))"
     case .startCombat(let id): return "combat(\(id))"

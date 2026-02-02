@@ -347,6 +347,12 @@ public struct AnchorBalanceConfig: Codable, Sendable {
     /// Anchor integrity damage per degradation event (optional, default 20).
     public var degradationAmount: Int?
 
+    /// HP cost for dark hero to defile anchor (shift alignment to dark). Default 5.
+    public var defileCostHP: Int?
+
+    /// HP cost for dark hero to strengthen anchor. Default 3.
+    public var darkStrengthenCostHP: Int?
+
     /// Default anchor configuration.
     public static let `default` = AnchorBalanceConfig(
         maxIntegrity: 100,
@@ -355,7 +361,9 @@ public struct AnchorBalanceConfig: Codable, Sendable {
         stableThreshold: 70,
         breachThreshold: 30,
         decayPerTurn: 3,
-        degradationAmount: 20
+        degradationAmount: 20,
+        defileCostHP: 5,
+        darkStrengthenCostHP: 3
     )
 }
 

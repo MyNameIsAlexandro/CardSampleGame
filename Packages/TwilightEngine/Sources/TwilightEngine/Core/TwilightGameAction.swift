@@ -22,6 +22,9 @@ public enum TwilightGameAction: TimedAction, Equatable {
     /// Strengthen anchor in current region
     case strengthenAnchor
 
+    /// Defile anchor in current region (dark heroes: shift alignment to dark)
+    case defileAnchor
+
     // MARK: - Event Handling
     /// Choose an option in an event
     case chooseEventOption(eventId: String, choiceIndex: Int)
@@ -87,6 +90,9 @@ public enum TwilightGameAction: TimedAction, Equatable {
             return 0  // Trading doesn't cost time
 
         case .strengthenAnchor:
+            return 1
+
+        case .defileAnchor:
             return 1
 
         case .chooseEventOption:
@@ -324,6 +330,7 @@ public enum StateChange: Equatable {
     case regionChanged(regionId: String)
     case regionStateChanged(regionId: String, newState: String)
     case anchorIntegrityChanged(anchorId: String, delta: Int, newValue: Int)
+    case anchorAlignmentChanged(anchorId: String, newAlignment: String)
 
     // Flags and progress
     case flagSet(key: String, value: Bool)

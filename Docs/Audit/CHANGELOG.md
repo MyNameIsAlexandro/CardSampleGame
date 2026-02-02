@@ -6,6 +6,45 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [2.7.0] - 2026-02-02 - Region Alignment: Anchor Polarity System
+
+### Summary
+
+Regions gain a second dimension: alongside health (stable/borderland/breach), anchors now track **alignment** (light/neutral/dark). Dark heroes can defile anchors or strengthen them with HP instead of Faith, shifting alignment toward dark. Creates a 3×3 state matrix for strategic depth.
+
+---
+
+### Features
+
+#### Anchor Alignment
+- **`EngineAnchorState.alignment`** — runtime alignment field (light/neutral/dark), initialized from `AnchorDefinition.initialInfluence`
+- **`EngineRegionState.alignment`** — computed property derived from anchor (neutral if no anchor)
+- **Save/Load** — `RegionSaveState.anchorAlignment` persists alignment; old saves default to neutral
+- **`AnchorRuntimeState.alignment`** — alignment field added to WorldRuntimeState model
+
+#### Dark Hero Strengthen
+- Dark heroes (balance < 30) pay **HP** instead of Faith to strengthen anchors
+- Each strengthen shifts anchor alignment one step toward dark (light→neutral→dark)
+- Cost configurable via `AnchorBalanceConfig.darkStrengthenCostHP` (default: 3)
+
+#### Defile Anchor Action
+- **`TwilightGameAction.defileAnchor`** — new action for dark-aligned heroes
+- Instantly sets anchor alignment to dark, costs HP
+- Validation: requires nav alignment, anchor must not already be dark
+- Cost configurable via `AnchorBalanceConfig.defileCostHP` (default: 5)
+
+#### StateChange
+- **`anchorAlignmentChanged(anchorId:newAlignment:)`** — new state change event
+
+### Docs
+- Updated EXPLORATION_CORE_DESIGN.md §6.4-6.5 (anchor actions, 3×3 state matrix)
+- Updated SPEC_BALANCE_PACK.md / SPEC_BALANCE_PACK_RU.md (defile_cost_hp, dark_strengthen_cost_hp)
+
+### Tests
+- 9 new tests in INV_WLD_GateTests (alignment init, strengthen light/dark, defile, save/load)
+
+---
+
 ## [2.6.0] - 2026-02-01 - Combat Ecosystem: Loot UI, Validator, CardEditor
 
 ### Summary

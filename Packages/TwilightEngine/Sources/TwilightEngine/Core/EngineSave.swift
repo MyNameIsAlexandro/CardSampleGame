@@ -294,6 +294,7 @@ public struct RegionSaveState: Codable {
     public let state: String  // RegionState.rawValue
     public let anchorDefinitionId: String?
     public let anchorIntegrity: Int?
+    public let anchorAlignment: String?
     public let neighborDefinitionIds: [String]
     public let canTrade: Bool
     public let visited: Bool
@@ -307,6 +308,7 @@ public struct RegionSaveState: Codable {
         self.state = region.state.rawValue
         self.anchorDefinitionId = region.anchor?.id
         self.anchorIntegrity = region.anchor?.integrity
+        self.anchorAlignment = region.anchor?.alignment.rawValue
         self.neighborDefinitionIds = region.neighborIds
         self.canTrade = region.canTrade
         self.visited = region.visited
@@ -316,10 +318,12 @@ public struct RegionSaveState: Codable {
     public func toEngineRegionState() -> EngineRegionState {
         var anchor: EngineAnchorState? = nil
         if let anchorId = anchorDefinitionId {
+            let restoredAlignment = anchorAlignment.flatMap { AnchorAlignment(rawValue: $0) } ?? .neutral
             anchor = EngineAnchorState(
                 id: anchorId,
                 name: anchorId,
-                integrity: anchorIntegrity ?? 100
+                integrity: anchorIntegrity ?? 100,
+                alignment: restoredAlignment
             )
         }
 

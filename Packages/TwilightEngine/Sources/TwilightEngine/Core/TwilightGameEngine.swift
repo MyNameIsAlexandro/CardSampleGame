@@ -255,6 +255,15 @@ public final class TwilightGameEngine {
     private var restHealAmount: Int { balanceConfig.resources.restHealAmount ?? 3 }
     private var anchorStrengthenCost: Int { balanceConfig.anchor.strengthenCost }
     private var anchorStrengthenAmount: Int { balanceConfig.anchor.strengthenAmount }
+    private var anchorDefileCostHP: Int { balanceConfig.anchor.defileCostHP ?? 5 }
+    private var anchorDarkStrengthenCostHP: Int { balanceConfig.anchor.darkStrengthenCostHP ?? 3 }
+
+    /// Player's current alignment derived from balance
+    private var playerAlignment: BalanceAlignment {
+        if player.balance < 30 { return .nav }
+        if player.balance > 70 { return .prav }
+        return .neutral
+    }
 
     // MARK: - Initialization
 
@@ -414,7 +423,8 @@ public final class TwilightGameEngine {
                 EngineAnchorState(
                     id: anchorDef.id,
                     name: anchorDef.title.localized,
-                    integrity: anchorDef.initialIntegrity
+                    integrity: anchorDef.initialIntegrity,
+                    alignment: anchorDef.initialInfluence
                 )
             }
 
@@ -454,7 +464,8 @@ public final class TwilightGameEngine {
         return EngineAnchorState(
             id: def.id,
             name: def.title.localized,
-            integrity: def.initialIntegrity
+            integrity: def.initialIntegrity,
+            alignment: def.initialInfluence
         )
     }
 
@@ -545,6 +556,10 @@ public final class TwilightGameEngine {
             let changes = executeStrengthenAnchor()
             stateChanges.append(contentsOf: changes)
 
+        case .defileAnchor:
+            let changes = executeDefileAnchor()
+            stateChanges.append(contentsOf: changes)
+
         case .chooseEventOption(let eventId, let choiceIndex):
             let changes = executeEventChoice(eventId: eventId, choiceIndex: choiceIndex)
             stateChanges.append(contentsOf: changes)
@@ -627,6 +642,9 @@ public final class TwilightGameEngine {
         case .strengthenAnchor:
             return validateStrengthenAnchor()
 
+        case .defileAnchor:
+            return validateDefileAnchor()
+
         case .chooseEventOption(let eventId, let choiceIndex):
             return validateEventChoice(eventId: eventId, choiceIndex: choiceIndex)
 
@@ -695,10 +713,46 @@ public final class TwilightGameEngine {
             return .actionNotAvailableInRegion(action: "strengthen anchor", regionType: "no anchor")
         }
 
-        // Check resource cost
-        let cost = anchorStrengthenCost
-        if player.faith < cost {
-            return .insufficientResources(resource: "faith", required: cost, available: player.faith)
+        // Dark heroes pay HP, light/neutral heroes pay faith
+        if playerAlignment == .nav {
+            let cost = anchorDarkStrengthenCostHP
+            if player.health <= cost {
+                return .insufficientResources(resource: "health", required: cost, available: player.health)
+            }
+        } else {
+            let cost = anchorStrengthenCost
+            if player.faith < cost {
+                return .insufficientResources(resource: "faith", required: cost, available: player.faith)
+            }
+        }
+
+        return nil
+    }
+
+    private func validateDefileAnchor() -> ActionError? {
+        guard let currentId = currentRegionId,
+              let region = regions[currentId] else {
+            return .invalidAction(reason: "No current region")
+        }
+
+        guard let anchor = region.anchor else {
+            return .actionNotAvailableInRegion(action: "defile anchor", regionType: "no anchor")
+        }
+
+        // Only dark-aligned heroes can defile
+        if playerAlignment != .nav {
+            return .invalidAction(reason: "Only dark-aligned heroes can defile anchors")
+        }
+
+        // Cannot defile already dark anchor
+        if anchor.alignment == .dark {
+            return .invalidAction(reason: "Anchor is already dark")
+        }
+
+        // Check HP cost
+        let cost = anchorDefileCostHP
+        if player.health <= cost {
+            return .insufficientResources(resource: "health", required: cost, available: player.health)
         }
 
         return nil
@@ -917,12 +971,26 @@ public final class TwilightGameEngine {
             return changes
         }
 
-        // Spend faith
-        let cost = anchorStrengthenCost
-        player.faith -= cost
-        changes.append(.faithChanged(delta: -cost, newValue: player.faith))
+        // Dark heroes pay HP and shift alignment toward dark
+        if playerAlignment == .nav {
+            let cost = anchorDarkStrengthenCostHP
+            player.health -= cost
+            changes.append(.healthChanged(delta: -cost, newValue: player.health))
 
-        // Strengthen anchor
+            // Shift alignment toward dark
+            if anchor.alignment != .dark {
+                let oldAlignment = anchor.alignment
+                anchor.alignment = (oldAlignment == .light) ? .neutral : .dark
+                changes.append(.anchorAlignmentChanged(anchorId: anchor.id, newAlignment: anchor.alignment.rawValue))
+            }
+        } else {
+            // Light/neutral heroes pay faith
+            let cost = anchorStrengthenCost
+            player.faith -= cost
+            changes.append(.faithChanged(delta: -cost, newValue: player.faith))
+        }
+
+        // Strengthen anchor integrity
         let strengthAmount = anchorStrengthenAmount
         let newIntegrity = min(100, anchor.integrity + strengthAmount)
         let delta = newIntegrity - anchor.integrity
@@ -931,6 +999,30 @@ public final class TwilightGameEngine {
         regions[regionId] = region
 
         changes.append(.anchorIntegrityChanged(anchorId: anchor.id, delta: delta, newValue: newIntegrity))
+
+        return changes
+    }
+
+    private func executeDefileAnchor() -> [StateChange] {
+        var changes: [StateChange] = []
+
+        guard let regionId = currentRegionId,
+              var region = regions[regionId],
+              var anchor = region.anchor else {
+            return changes
+        }
+
+        // Spend HP
+        let cost = anchorDefileCostHP
+        player.health -= cost
+        changes.append(.healthChanged(delta: -cost, newValue: player.health))
+
+        // Shift alignment to dark
+        anchor.alignment = .dark
+        region.anchor = anchor
+        regions[regionId] = region
+
+        changes.append(.anchorAlignmentChanged(anchorId: anchor.id, newAlignment: AnchorAlignment.dark.rawValue))
 
         return changes
     }
@@ -1450,6 +1542,11 @@ public struct EngineRegionState: Identifiable {
     public var canRest: Bool {
         state == .stable && (type == .settlement || type == .sacred)
     }
+
+    /// Region alignment derived from anchor (neutral if no anchor)
+    public var alignment: AnchorAlignment {
+        anchor?.alignment ?? .neutral
+    }
 }
 
 // MARK: - Engine Anchor State (Bridge from Legacy)
@@ -1462,12 +1559,15 @@ public struct EngineAnchorState {
     public let name: String
     /// Current integrity level (0-100)
     public var integrity: Int
+    /// Anchor alignment (light/neutral/dark)
+    public var alignment: AnchorAlignment
 
     /// Create directly (Engine-First) - id is the definition ID
-    public init(id: String, name: String, integrity: Int) {
+    public init(id: String, name: String, integrity: Int, alignment: AnchorAlignment = .neutral) {
         self.id = id
         self.name = name
         self.integrity = max(0, min(100, integrity))
+        self.alignment = alignment
     }
 }
 

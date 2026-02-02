@@ -9,6 +9,9 @@ public enum AnchorInfluence: String, Codable, Hashable {
     case dark
 }
 
+/// Alias for runtime context readability
+public typealias AnchorAlignment = AnchorInfluence
+
 // MARK: - Anchor Definition
 // Reference: Docs/ENGINE_ARCHITECTURE.md, Section 4.1
 // Reference: Docs/EXPLORATION_CORE_DESIGN.md, Section 6

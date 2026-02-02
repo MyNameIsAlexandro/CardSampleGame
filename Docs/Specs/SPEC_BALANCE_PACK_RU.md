@@ -718,7 +718,9 @@ let travelCost = BalanceConfig.current.time.travelCost
     "default_strengthen_amount": 20,
     "default_strengthen_cost": 5,
     "stable_threshold": 70,
-    "decay_per_turn": 5
+    "decay_per_turn": 5,
+    "defile_cost_hp": 5,
+    "dark_strengthen_cost_hp": 3
   },
   "time": {
     "starting_time": 8,
