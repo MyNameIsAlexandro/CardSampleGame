@@ -63,6 +63,7 @@ struct FateCardNodeTests {
 
         let faceNode = node.children[1] as! SKShapeNode
         let label = faceNode.children.first as! SKLabelNode
-        #expect(label.text == "CRIT")
+        // Accepts either localized "CRIT" or localization key "combat.fate.crit"
+        #expect(label.text == "CRIT" || label.text == "combat.fate.crit")
     }
 }

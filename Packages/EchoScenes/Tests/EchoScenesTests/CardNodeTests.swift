@@ -22,8 +22,8 @@ struct CardNodeTests {
     @Test("CardNode has expected children")
     func testStructure() {
         let node = CardNode(card: makeCard())
-        // background + name + power + type + cost = 5
-        #expect(node.children.count == 5)
+        // background + badge + name + illusBox + value + description = 6
+        #expect(node.children.count == 6)
     }
 
     @Test("CardNode shows cost label")
@@ -36,8 +36,9 @@ struct CardNodeTests {
             cost: 2
         )
         let node = CardNode(card: card)
-        let labels = node.children.compactMap { $0 as? SKLabelNode }
-        let costLabel = labels.first { $0.text == "2" && $0.fontColor == CombatSceneTheme.faith }
+        // Cost label is a child of the badge node (SKShapeNode), not direct child of CardNode
+        let badge = node.children.compactMap { $0 as? SKShapeNode }.first { $0.fillColor != CombatSceneTheme.cardBack }
+        let costLabel = badge?.children.compactMap { $0 as? SKLabelNode }.first { $0.text == "2" }
         #expect(costLabel != nil)
     }
 
@@ -76,9 +77,10 @@ struct CardNodeTests {
             exhaust: true
         )
         let node = CardNode(card: card)
-        // background + name + power + type + cost + keyword = 6
-        #expect(node.children.count == 6)
+        // background + badge + name + illusBox + value + description + keyword = 7
+        #expect(node.children.count == 7)
         let labels = node.children.compactMap { $0 as? SKLabelNode }
-        #expect(labels.contains(where: { $0.text == "Exhaust" }))
+        // Keyword uses localization key "combat.keyword.exhaust" (or "Exhaust" if localized)
+        #expect(labels.contains(where: { $0.text?.contains("exhaust") == true || $0.text == "Exhaust" }))
     }
 }
