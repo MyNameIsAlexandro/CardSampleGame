@@ -13,7 +13,10 @@ func printUsage() {
 
     Commands:
         compile <source-dir> <output-file>
-            Compile a JSON pack directory to .pack binary file
+            Compile a JSON pack directory to .pack binary file (v2 format with SHA256)
+
+        decompile <pack-file> <output-dir>
+            Decompile a .pack binary file back to JSON directory
 
         validate <source-dir>
             Validate a JSON pack without compiling
@@ -26,6 +29,7 @@ func printUsage() {
 
     Examples:
         \(programName) compile ./CoreHeroes ./CoreHeroes.pack
+        \(programName) decompile ./CoreHeroes.pack ./CoreHeroes-extracted
         \(programName) validate ./TwilightMarchesActI
         \(programName) info ./CoreHeroes.pack
     """)
@@ -44,6 +48,22 @@ func compilePack(source: String, output: String) {
         print("✅ Compilation successful!")
     } catch {
         print("❌ Compilation failed: \(error)")
+        exit(1)
+    }
+}
+
+/// Decompile a .pack file back to JSON directory
+func decompilePack(packFile: String, outputDir: String) {
+    let packURL = URL(fileURLWithPath: packFile)
+    let outputURL = URL(fileURLWithPath: outputDir)
+
+    print("Decompiling: \(packURL.lastPathComponent) -> \(outputURL.lastPathComponent)/")
+
+    do {
+        let result = try PackDecompiler.decompileWithResult(from: packURL, to: outputURL)
+        print("✅ \(result.summary)")
+    } catch {
+        print("❌ Decompilation failed: \(error)")
         exit(1)
     }
 }
@@ -71,6 +91,10 @@ func showPackInfo(packFile: String) {
     print("Reading: \(packURL.lastPathComponent)")
 
     do {
+        // Get file info first (for format version and checksum)
+        let fileInfo = try BinaryPackReader.getFileInfo(from: packURL)
+
+        // Load full content
         let content = try BinaryPackReader.loadContent(from: packURL)
         let manifest = content.manifest
 
@@ -83,6 +107,13 @@ func showPackInfo(packFile: String) {
         Type: \(manifest.packType.rawValue)
         Core Version: \(manifest.coreVersionMin)+
 
+        Format:
+        ─────────────────
+        Format Version: v\(fileInfo.version)
+        SHA256: \(fileInfo.checksumHex ?? "N/A (v1 format)")
+        Integrity: \(fileInfo.isValid ? "✅ Valid" : "❌ Corrupted")
+        Compression: \(String(format: "%.1f%%", fileInfo.compressionRatio * 100))
+
         Content:
         ─────────────────
         Regions: \(content.regions.count)
@@ -93,13 +124,14 @@ func showPackInfo(packFile: String) {
         Cards: \(content.cards.count)
         Enemies: \(content.enemies.count)
         Abilities: \(content.abilities.count)
+        Fate Cards: \(content.fateCards.count)
         """)
 
         // File size
         let attributes = try FileManager.default.attributesOfItem(atPath: packFile)
         if let fileSize = attributes[.size] as? Int64 {
             let sizeKB = Double(fileSize) / 1024
-            print("File Size: \(String(format: "%.1f", sizeKB)) KB")
+            print("File Size: \(String(format: "%.1f", sizeKB)) KB (original: \(String(format: "%.1f", Double(fileInfo.originalSize) / 1024)) KB)")
         }
 
     } catch {
@@ -176,6 +208,13 @@ case "compile":
         exit(1)
     }
     compilePack(source: args[2], output: args[3])
+
+case "decompile":
+    guard args.count >= 4 else {
+        print("Error: decompile requires <pack-file> and <output-dir>")
+        exit(1)
+    }
+    decompilePack(packFile: args[2], outputDir: args[3])
 
 case "validate":
     guard args.count >= 3 else {

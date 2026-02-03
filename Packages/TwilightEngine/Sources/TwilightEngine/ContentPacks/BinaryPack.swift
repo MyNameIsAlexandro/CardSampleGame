@@ -1,14 +1,26 @@
 import Foundation
 import Compression
+import CryptoKit
 
 // MARK: - Binary Pack Format
 // .pack file = Header + gzip(JSON-encoded PackContent)
+//
+// Format v1 (10 bytes header): Magic(4) + Version(2) + OriginalSize(4)
+// Format v2 (42 bytes header): Magic(4) + Version(2) + OriginalSize(4) + SHA256(32)
 
 /// Magic bytes for .pack file identification
 private let packMagic: [UInt8] = [0x54, 0x57, 0x50, 0x4B] // "TWPK"
 
-/// Binary pack format version
-private let packFormatVersion: UInt16 = 1
+/// Binary pack format versions
+private let packFormatVersionV1: UInt16 = 1
+private let packFormatVersionV2: UInt16 = 2
+
+/// Current version for writing (always latest)
+private let packFormatVersion: UInt16 = packFormatVersionV2
+
+/// Header sizes
+private let headerSizeV1 = 10  // Magic(4) + Version(2) + OriginalSize(4)
+private let headerSizeV2 = 42  // V1 header + SHA256(32)
 
 // MARK: - Pack Content (serializable)
 
@@ -88,7 +100,7 @@ public final class BinaryPackWriter {
         try compile(content, to: outputURL)
     }
 
-    /// Compile PackContent to binary .pack file
+    /// Compile PackContent to binary .pack file (v2 format with SHA256 checksum)
     public static func compile(_ content: PackContent, to outputURL: URL) throws {
         // Encode to JSON
         let encoder = JSONEncoder()
@@ -98,19 +110,26 @@ public final class BinaryPackWriter {
         // Compress with gzip
         let compressedData = try compress(jsonData)
 
-        // Build file: Header + Compressed Data
+        // Compute SHA256 checksum of compressed data
+        let hash = SHA256.hash(data: compressedData)
+        let checksum = Data(hash)
+
+        // Build v2 file: Header (42 bytes) + Compressed Data
         var fileData = Data()
 
         // Magic (4 bytes)
         fileData.append(contentsOf: packMagic)
 
-        // Format version (2 bytes, little-endian)
-        var version = packFormatVersion.littleEndian
+        // Format version (2 bytes, little-endian) - v2
+        var version = packFormatVersionV2.littleEndian
         fileData.append(Data(bytes: &version, count: 2))
 
         // Original size (4 bytes, for decompression buffer allocation)
         var originalSize = UInt32(jsonData.count).littleEndian
         fileData.append(Data(bytes: &originalSize, count: 4))
+
+        // SHA256 checksum (32 bytes)
+        fileData.append(checksum)
 
         // Compressed data
         fileData.append(compressedData)
@@ -164,7 +183,7 @@ public final class BinaryPackReader {
         return content.toLoadedPack(sourceURL: url)
     }
 
-    /// Load pack content from .pack file
+    /// Load pack content from .pack file (supports v1 and v2 formats)
     public static func loadContent(from url: URL) throws -> PackContent {
         guard FileManager.default.fileExists(atPath: url.path) else {
             throw PackLoadError.fileNotFound(url.path)
@@ -172,8 +191,8 @@ public final class BinaryPackReader {
 
         let fileData = try Data(contentsOf: url)
 
-        // Verify minimum size (header = 10 bytes)
-        guard fileData.count >= 10 else {
+        // Verify minimum size for v1 header (10 bytes)
+        guard fileData.count >= headerSizeV1 else {
             throw PackLoadError.invalidManifest(reason: "File too small")
         }
 
@@ -183,23 +202,70 @@ public final class BinaryPackReader {
             throw PackLoadError.invalidManifest(reason: "Invalid pack file (bad magic)")
         }
 
-        // Read format version (use loadUnaligned to handle sliced Data alignment)
+        // Read format version
         let formatVersion = fileData[4..<6].withUnsafeBytes { $0.loadUnaligned(as: UInt16.self).littleEndian }
-        guard formatVersion == packFormatVersion else {
+
+        // Route to appropriate loader based on version
+        switch formatVersion {
+        case packFormatVersionV1:
+            return try loadV1(fileData: fileData, url: url)
+        case packFormatVersionV2:
+            return try loadV2(fileData: fileData, url: url)
+        default:
             throw PackLoadError.invalidManifest(reason: "Unsupported pack format version: \(formatVersion)")
         }
+    }
 
-        // Read original size (use loadUnaligned for safety)
+    /// Load v1 format (no checksum)
+    private static func loadV1(fileData: Data, url: URL) throws -> PackContent {
+        // Read original size
         let originalSize = Int(fileData[6..<10].withUnsafeBytes { $0.loadUnaligned(as: UInt32.self).littleEndian })
 
         // Decompress
-        let compressedData = fileData[10...]
+        let compressedData = fileData[headerSizeV1...]
         let jsonData = try decompress(Data(compressedData), originalSize: originalSize)
 
         // Decode JSON
-        let decoder = JSONDecoder()
         do {
-            return try decoder.decode(PackContent.self, from: jsonData)
+            return try JSONDecoder().decode(PackContent.self, from: jsonData)
+        } catch {
+            throw PackLoadError.contentLoadFailed(file: url.lastPathComponent, underlyingError: error)
+        }
+    }
+
+    /// Load v2 format (with SHA256 checksum verification)
+    private static func loadV2(fileData: Data, url: URL) throws -> PackContent {
+        // Verify minimum size for v2 header
+        guard fileData.count >= headerSizeV2 else {
+            throw PackLoadError.invalidManifest(reason: "V2 file too small")
+        }
+
+        // Read original size
+        let originalSize = Int(fileData[6..<10].withUnsafeBytes { $0.loadUnaligned(as: UInt32.self).littleEndian })
+
+        // Read expected checksum (32 bytes at offset 10)
+        let expectedChecksum = fileData[10..<42]
+
+        // Get compressed data (after 42-byte header)
+        let compressedData = Data(fileData[headerSizeV2...])
+
+        // Verify SHA256 checksum
+        let actualHash = SHA256.hash(data: compressedData)
+        let actualChecksum = Data(actualHash)
+        guard actualChecksum == expectedChecksum else {
+            throw PackLoadError.checksumMismatch(
+                file: url.lastPathComponent,
+                expected: expectedChecksum.map { String(format: "%02x", $0) }.joined(),
+                actual: actualChecksum.map { String(format: "%02x", $0) }.joined()
+            )
+        }
+
+        // Decompress
+        let jsonData = try decompress(compressedData, originalSize: originalSize)
+
+        // Decode JSON
+        do {
+            return try JSONDecoder().decode(PackContent.self, from: jsonData)
         } catch {
             throw PackLoadError.contentLoadFailed(file: url.lastPathComponent, underlyingError: error)
         }
@@ -239,6 +305,83 @@ public final class BinaryPackReader {
 
         guard let magicData = try? handle.read(upToCount: 4) else { return false }
         return Array(magicData) == packMagic
+    }
+
+    /// Get file info without full content load (useful for pack listing/validation)
+    public static func getFileInfo(from url: URL) throws -> PackFileInfo {
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            throw PackLoadError.fileNotFound(url.path)
+        }
+
+        let fileData = try Data(contentsOf: url)
+
+        guard fileData.count >= headerSizeV1 else {
+            throw PackLoadError.invalidManifest(reason: "File too small")
+        }
+
+        // Verify magic
+        let magic = Array(fileData[0..<4])
+        guard magic == packMagic else {
+            throw PackLoadError.invalidManifest(reason: "Invalid pack file (bad magic)")
+        }
+
+        // Read version
+        let version = fileData[4..<6].withUnsafeBytes { $0.loadUnaligned(as: UInt16.self).littleEndian }
+
+        // Read original size
+        let originalSize = Int(fileData[6..<10].withUnsafeBytes { $0.loadUnaligned(as: UInt32.self).littleEndian })
+
+        // Get file size
+        let fileSize = fileData.count
+
+        // For v2, extract and verify checksum
+        var checksumHex: String? = nil
+        var isValid = true
+
+        if version == packFormatVersionV2 && fileData.count >= headerSizeV2 {
+            let expectedChecksum = fileData[10..<42]
+            checksumHex = expectedChecksum.map { String(format: "%02x", $0) }.joined()
+
+            // Verify checksum
+            let compressedData = Data(fileData[headerSizeV2...])
+            let actualHash = SHA256.hash(data: compressedData)
+            let actualChecksum = Data(actualHash)
+            isValid = actualChecksum == expectedChecksum
+        }
+
+        return PackFileInfo(
+            version: version,
+            originalSize: originalSize,
+            compressedSize: fileSize - (version == packFormatVersionV2 ? headerSizeV2 : headerSizeV1),
+            checksumHex: checksumHex,
+            isValid: isValid
+        )
+    }
+}
+
+// MARK: - Pack File Info
+
+/// Information about a .pack file without loading full content
+public struct PackFileInfo {
+    /// Format version (1 or 2)
+    public let version: UInt16
+
+    /// Original uncompressed JSON size in bytes
+    public let originalSize: Int
+
+    /// Compressed payload size in bytes
+    public let compressedSize: Int
+
+    /// SHA256 checksum hex string (nil for v1)
+    public let checksumHex: String?
+
+    /// Whether checksum verification passed (always true for v1)
+    public let isValid: Bool
+
+    /// Compression ratio
+    public var compressionRatio: Double {
+        guard originalSize > 0 else { return 0 }
+        return Double(compressedSize) / Double(originalSize)
     }
 }
 

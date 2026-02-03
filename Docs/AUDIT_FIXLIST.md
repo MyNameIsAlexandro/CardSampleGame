@@ -14,7 +14,7 @@
 3. ✅ RNG состояние сохраняется и восстанавливается (determinism после Save/Load).
 4. ✅ Нет мёртвых/неиспользуемых параметров конфигурации (`unitsPerDay`) — удалено.
 5. ✅ Локализация имеет единый канон (inline LocalizedString).
-6. ⏳ План по binary pack зафиксирован (B2 — non-blocking, запланирован на Phase N).
+6. ✅ Binary pack v2 с SHA256 checksum реализован (B2 — ЗАКРЫТО 2026-02-03).
 
 ---
 
@@ -122,42 +122,51 @@
 
 ---
 
-## B2) ⏳ Binary pack — запланировано на v2.0 (non-blocking)
-**Статус:** Задокументировано, запланировано на Phase 2.0
+## B2) ✅ Binary pack v2 с SHA256 checksum — РЕАЛИЗОВАНО (2026-02-03)
+**Статус:** Полностью реализовано
 
 **Текущее состояние:**
 - Authoring format: JSON ✅
-- Runtime format: JSON ✅
-- Binary .pack: 📋 Planned
+- Runtime format: Binary .pack v2 ✅
+- SHA256 checksum: ✅
 
-### Что сделано (v1.x)
-1. ✅ Зафиксировано в документации (`CONTENT_PACK_GUIDE.md`):
-   - `Authoring format = JSON` (текущий и целевой)
-   - `Runtime/Distribution format = Binary .pack` (planned v2.0)
-   - Roadmap с версиями и acceptance criteria
-2. ✅ JSON loading работает стабильно
-3. ✅ Валидация контента на этапе загрузки
+### Что реализовано
+1. ✅ **Pack Compiler CLI** (`pack-compiler`):
+   - `pack-compiler compile <dir> <file.pack>` — компиляция JSON → binary
+   - `pack-compiler validate <dir>` — валидация pack directory
+   - `pack-compiler decompile <file.pack> <dir>` — декомпиляция binary → JSON
+   - `pack-compiler info <file.pack>` — информация о pack файле
+   - `pack-compiler compile-all <dir>` — компиляция всех паков
 
-### Что запланировано (v2.0)
-1. Pack Compiler CLI (`packc`):
-   - `packc compile <dir> -o <file.pack>`
-   - `packc validate <dir>`
-   - `packc decompile <file.pack> -o <dir>`
-2. Binary .pack format с:
-   - Header (magic, version, flags)
-   - Compressed content blocks
-   - SHA256 checksum
-3. Runtime loading .pack files
+2. ✅ **Binary .pack format v2** (42-byte header):
+   - Magic bytes: "TWPK" (4 bytes)
+   - Format version: 2 (2 bytes, little-endian)
+   - Original size: (4 bytes, for decompression)
+   - SHA256 checksum: (32 bytes, of compressed data)
+   - Compressed payload: zlib
 
-### Acceptance / Gate tests (v2.0)
-- `testPackCompilerRoundTrip()` — json → pack → load → validate
-- `testRuntimeLoadsOnlyPack()` — когда runtime переключится на pack
+3. ✅ **Integrity verification**:
+   - SHA256 checksum computed on compressed data
+   - Verification at load time (throws `checksumMismatch` on corruption)
+   - `getFileInfo()` for quick header inspection without full load
 
-### Почему non-blocking
-- JSON loading достаточен для разработки и тестирования
-- Binary pack — оптимизация для дистрибуции
-- Контент ещё не стабилен (активная разработка Act I-III)
-- Переход на binary-only после стабилизации контента
+4. ✅ **Backward compatibility**:
+   - Reader supports both v1 (10-byte header) and v2 (42-byte header)
+   - Writer always produces v2 format
+
+### Acceptance / Gate tests
+- ✅ `testV2WriteProducesValidHeader()` — 42-byte header, version=2
+- ✅ `testV2ChecksumVerification()` — SHA256 validation passes
+- ✅ `testV2DetectsCorruptedData()` — throws `checksumMismatch` on corruption
+- ✅ `testDecompileRoundTrip()` — decompile → recompile → identical content
+- ✅ `testDecompileCreatesCorrectDirectoryStructure()` — proper folder layout
+
+### Файлы
+- `BinaryPack.swift` — v2 format reader/writer with SHA256
+- `PackDecompiler.swift` — pack → JSON extraction
+- `main.swift` — CLI with decompile command
+- `BinaryPackV2Tests.swift` — 10 tests
+- `PackDecompilerTests.swift` — 12 tests
 
 ---
 
@@ -308,10 +317,11 @@
 # I) Оставшиеся задачи (Non-Blocking)
 
 ## Warnings (не блокируют приёмку)
-- **B2)** Binary pack — задокументировано, запланировано на v2.0 (см. `CONTENT_PACK_GUIDE.md`)
+- Нет открытых warnings
 
 ## Tech Debt
 - ✅ ~~**F1)** Legacy Adapters / Legacy Initialization в WorldMapView~~ — ЗАКРЫТО
 - ✅ ~~**F2)** AssetRegistry safety (placeholder для отсутствующих ассетов)~~ — ЗАКРЫТО
+- ✅ ~~**B2)** Binary pack v2 с SHA256 checksum~~ — ЗАКРЫТО (2026-02-03)
 
-**Весь технический долг закрыт.**
+**Весь технический долг закрыт. Все warnings разрешены.**

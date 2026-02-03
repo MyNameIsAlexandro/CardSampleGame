@@ -149,3 +149,39 @@ Full details:
 - Gate tests: `testMissingAssetHandling_returnsPlaceholder()`, `testAssetRegistry_returnsFallbackForMissingAssets()`, `testNoDirectUIImageNamedInViewsAndViewModels()` pass
 
 **All technical debt from AUDIT_FIXLIST.md is now resolved.**
+
+## Post-Epic: Binary Pack v2 (2026-02-03)
+
+**B2) Binary Pack v2 with SHA256 Checksum — COMPLETE**
+
+Implemented full binary pack infrastructure with integrity verification:
+
+1. **Pack Format v2** (42-byte header):
+   - Magic: "TWPK" (4 bytes)
+   - Version: 2 (little-endian)
+   - Original size: 4 bytes
+   - SHA256 checksum: 32 bytes (of compressed data)
+   - Payload: zlib compressed JSON
+
+2. **CLI Commands**:
+   - `pack-compiler compile <dir> <file.pack>` — JSON → binary
+   - `pack-compiler decompile <file.pack> <dir>` — binary → JSON
+   - `pack-compiler validate <dir>` — validate pack
+   - `pack-compiler info <file.pack>` — show format info
+
+3. **Features**:
+   - SHA256 integrity verification at load time
+   - Backward compatible (reads v1 and v2)
+   - Decompile roundtrip (pack → JSON → pack)
+   - Quick header inspection via `getFileInfo()`
+
+4. **New Tests** (22 total):
+   - BinaryPackV2Tests: 10 tests (format, checksum, corruption detection)
+   - PackDecompilerTests: 12 tests (manifest, structure, roundtrip)
+
+**Files modified/created**:
+- `BinaryPack.swift` — v2 format with CryptoKit SHA256
+- `PackDecompiler.swift` — new file for pack → JSON
+- `main.swift` — added decompile command
+- `BinaryPackV2Tests.swift` — new test file
+- `PackDecompilerTests.swift` — new test file
