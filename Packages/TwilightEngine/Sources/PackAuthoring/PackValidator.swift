@@ -510,6 +510,30 @@ public final class PackValidator {
                 addError("Reference", "Manifest entryRegionId '\(entryRegionId)' not found in regions")
             }
         }
+
+        // Duplicate ID detection across all categories
+        validateDuplicateIds(pack)
+    }
+
+    private func validateDuplicateIds(_ pack: LoadedPack) {
+        // Check for ID collisions across different entity types
+        var allIds: [String: [String]] = [:] // id -> [category names]
+
+        for id in pack.regions.keys { allIds[id, default: []].append("Region") }
+        for id in pack.events.keys { allIds[id, default: []].append("Event") }
+        for id in pack.heroes.keys { allIds[id, default: []].append("Hero") }
+        for id in pack.cards.keys { allIds[id, default: []].append("Card") }
+        for id in pack.enemies.keys { allIds[id, default: []].append("Enemy") }
+        for id in pack.anchors.keys { allIds[id, default: []].append("Anchor") }
+        for id in pack.quests.keys { allIds[id, default: []].append("Quest") }
+        for id in pack.behaviors.keys { allIds[id, default: []].append("Behavior") }
+        for id in pack.fateCards.keys { allIds[id, default: []].append("FateCard") }
+
+        for (id, categories) in allIds {
+            if categories.count > 1 {
+                addWarning("Reference", "ID '\(id)' used in multiple categories: \(categories.joined(separator: ", "))")
+            }
+        }
     }
 
     // MARK: - Phase 5: Balance Validation

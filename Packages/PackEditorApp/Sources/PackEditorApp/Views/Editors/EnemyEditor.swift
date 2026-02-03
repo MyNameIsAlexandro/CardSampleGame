@@ -134,20 +134,29 @@ struct EnemyEditor: View {
             }
 
             Section("Abilities (\(enemy.abilities.count))") {
-                ForEach(Array(enemy.abilities.enumerated()), id: \.element.id) { index, ability in
-                    VStack(alignment: .leading, spacing: 6) {
-                        TextField("ID", text: abilityIdBinding(at: index))
-                        LocalizedTextField(label: "Name", text: abilityNameBinding(at: index))
-                        LocalizedTextField(label: "Description", text: abilityDescBinding(at: index))
-                        LabeledContent("Effect", value: String(describing: ability.effect))
-                        Button(role: .destructive) {
-                            guard index < enemy.abilities.count else { return }
-                            enemy.abilities.remove(at: index)
-                        } label: {
-                            Label("Remove Ability", systemImage: "minus.circle")
+                ForEach(Array(enemy.abilities.enumerated()), id: \.element.id) { index, _ in
+                    GroupBox {
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text("Ability \(index + 1)")
+                                    .font(.headline)
+                                Spacer()
+                                Button(role: .destructive) {
+                                    guard index < enemy.abilities.count else { return }
+                                    enemy.abilities.remove(at: index)
+                                } label: {
+                                    Image(systemName: "minus.circle.fill")
+                                }
+                                .buttonStyle(.plain)
+                                .foregroundStyle(.red)
+                            }
+                            TextField("ID", text: abilityIdBinding(at: index))
+                            LocalizedTextField(label: "Name", text: abilityNameBinding(at: index))
+                            LocalizedTextField(label: "Description", text: abilityDescBinding(at: index))
+                            EnemyAbilityEffectEditor(effect: abilityEffectBinding(at: index))
                         }
                     }
-                    .padding(.vertical, 4)
+                    .id("enemy-ability-\(index)")
                 }
                 Button {
                     enemy.abilities.append(
@@ -155,7 +164,7 @@ struct EnemyEditor: View {
                             id: "ability_new_\(UUID().uuidString.prefix(4))",
                             name: .inline(LocalizedString(en: "New Ability", ru: "Новая способность")),
                             description: .inline(LocalizedString(en: "Description", ru: "Описание")),
-                            effect: .bonusDamage(0)
+                            effect: .bonusDamage(1)
                         )
                     )
                 } label: {
@@ -233,6 +242,19 @@ struct EnemyEditor: View {
             set: { newValue in
                 guard index < enemy.abilities.count else { return }
                 enemy.abilities[index].description = newValue
+            }
+        )
+    }
+
+    private func abilityEffectBinding(at index: Int) -> Binding<EnemyAbilityEffect> {
+        Binding(
+            get: {
+                guard index < enemy.abilities.count else { return .bonusDamage(0) }
+                return enemy.abilities[index].effect
+            },
+            set: { newValue in
+                guard index < enemy.abilities.count else { return }
+                enemy.abilities[index].effect = newValue
             }
         )
     }
