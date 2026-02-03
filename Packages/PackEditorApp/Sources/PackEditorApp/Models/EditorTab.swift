@@ -18,7 +18,7 @@ class EditorTab: ObservableObject, Identifiable {
         guard !globalSearchText.isEmpty else { return [] }
         let query = globalSearchText.lowercased()
         var results: [(ContentCategory, String, String)] = []
-        for category in ContentCategory.allCases {
+        for category in availableCategories {
             for id in store.entityIds(for: category) {
                 let name = store.entityName(for: id, in: category)
                 if id.lowercased().contains(query) || name.lowercased().contains(query) {
@@ -83,6 +83,14 @@ class EditorTab: ObservableObject, Identifiable {
     }
     var validationSummary: PackValidator.ValidationSummary? { store.validationSummary }
     var packTitle: String { store.packTitle }
+
+    /// Returns content categories available for this pack's type
+    var availableCategories: [ContentCategory] {
+        guard let packType = manifest?.packType else {
+            return ContentCategory.allCases
+        }
+        return ContentCategory.categories(for: packType)
+    }
 
     func entityCount(for category: ContentCategory) -> Int {
         store.entityCount(for: category)

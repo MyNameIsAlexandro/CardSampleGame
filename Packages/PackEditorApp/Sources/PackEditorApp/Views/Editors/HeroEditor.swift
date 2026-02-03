@@ -58,13 +58,20 @@ struct HeroEditor: View {
 
                 IntField(label: "Cooldown", value: $hero.specialAbility.cooldown)
 
-                LabeledContent("Condition", value: hero.specialAbility.condition.map { String(describing: $0) } ?? "None")
+                AbilityConditionEditor(
+                    label: "Condition",
+                    condition: $hero.specialAbility.condition
+                )
 
-                ForEach(Array(hero.specialAbility.effects.enumerated()), id: \.offset) { index, effect in
-                    LabeledContent("Effect \(index + 1)", value: "\(effect.type.rawValue): \(effect.value)")
-                }
+                HeroAbilityEffectEditor(
+                    label: "Effects",
+                    effects: $hero.specialAbility.effects
+                )
 
-                LabeledContent("Cost", value: hero.specialAbility.cost.map { "\($0.type.rawValue): \($0.value)" } ?? "None")
+                AbilityCostEditor(
+                    label: "Cost",
+                    cost: $hero.specialAbility.cost
+                )
             }
 
             Section("Starting Deck (\(hero.startingDeckCardIDs.count))") {

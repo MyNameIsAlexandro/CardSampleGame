@@ -8,8 +8,8 @@ struct ContentSidebar: View {
     var body: some View {
         Group {
             if tab.globalSearchText.isEmpty {
-                // Normal category list
-                List(ContentCategory.allCases, selection: $tab.selectedCategory) { category in
+                // Normal category list - filtered by pack type
+                List(tab.availableCategories, selection: $tab.selectedCategory) { category in
                     Label {
                         HStack {
                             Text(category.localizedName)
@@ -24,7 +24,7 @@ struct ContentSidebar: View {
                     .tag(category)
                 }
             } else {
-                // Search results
+                // Search results - filtered by available categories
                 let results = tab.globalSearchResults
                 if results.isEmpty {
                     List {
@@ -33,7 +33,7 @@ struct ContentSidebar: View {
                     }
                 } else {
                     List {
-                        ForEach(ContentCategory.allCases) { category in
+                        ForEach(tab.availableCategories) { category in
                             let categoryResults = results.filter { $0.category == category }
                             if !categoryResults.isEmpty {
                                 Section(category.localizedName) {
