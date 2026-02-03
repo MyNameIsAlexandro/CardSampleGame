@@ -35,10 +35,10 @@ jobs:
         run: swift test --package-path Packages/${{ matrix.package }}
 
   # ──────────────────────────────────────────────
-  # Job 2: App Integration Tests (xcodebuild, iOS)
+  # Job 2: App Tests (xcodebuild, iOS)
   # ──────────────────────────────────────────────
   app-tests:
-    name: App Integration Tests
+    name: App Tests
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -46,35 +46,44 @@ jobs:
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode.app
 
-      - name: "Gate 1: Engine Contract Tests"
+      - name: "Gate 1: Quality Gates"
         run: |
           xcodebuild test \
             -scheme CardSampleGame \
             -destination 'platform=iOS Simulator,name=iPhone 15' \
-            -only-testing:CardSampleGameTests/Phase3ContractTests \
-            -only-testing:CardSampleGameTests/EventModuleContractsTests \
-            -resultBundlePath TestResults/EngineTests.xcresult \
+            -only-testing:CardSampleGameTests/CodeHygieneTests \
+            -only-testing:CardSampleGameTests/DesignSystemComplianceTests \
+            -only-testing:CardSampleGameTests/ContrastComplianceTests \
+            -only-testing:CardSampleGameTests/LocalizationValidatorTests \
+            -only-testing:CardSampleGameTests/LocalizationCompletenessTests \
+            -resultBundlePath TestResults/QualityGates.xcresult \
             | xcpretty
 
-      - name: "Gate 2: Integration Tests"
+      - name: "Gate 2: Content Validation"
         run: |
           xcodebuild test \
             -scheme CardSampleGame \
             -destination 'platform=iOS Simulator,name=iPhone 15' \
-            -only-testing:CardSampleGameTests/ActIPlaythroughTests \
-            -only-testing:CardSampleGameTests/CriticalSystemsTests \
-            -only-testing:CardSampleGameTests/PlaythroughSimulationTests \
-            -resultBundlePath TestResults/IntegrationTests.xcresult \
+            -only-testing:CardSampleGameTests/ContentValidationTests \
+            -only-testing:CardSampleGameTests/ConditionValidatorTests \
+            -only-testing:CardSampleGameTests/ExpressionParserTests \
+            -only-testing:CardSampleGameTests/ProfileGateTests \
+            -only-testing:CardSampleGameTests/AuditGateTests \
+            -resultBundlePath TestResults/ContentValidation.xcresult \
             | xcpretty
 
-      - name: "Gate 3: Regression & Determinism Tests"
+      - name: "Gate 3: Unit & View Tests"
         run: |
           xcodebuild test \
             -scheme CardSampleGame \
             -destination 'platform=iOS Simulator,name=iPhone 15' \
-            -only-testing:CardSampleGameTests/MetricsDistributionTests \
-            -only-testing:CardSampleGameTests/RegressionPlaythroughTests \
-            -resultBundlePath TestResults/RegressionTests.xcresult \
+            -only-testing:CardSampleGameTests/HeroRegistryTests \
+            -only-testing:CardSampleGameTests/SaveLoadTests \
+            -only-testing:CardSampleGameTests/ContentManagerTests \
+            -only-testing:CardSampleGameTests/ContentRegistryTests \
+            -only-testing:CardSampleGameTests/PackLoaderTests \
+            -only-testing:CardSampleGameTests/HeroPanelTests \
+            -resultBundlePath TestResults/UnitTests.xcresult \
             | xcpretty
 
       - name: Upload Test Results

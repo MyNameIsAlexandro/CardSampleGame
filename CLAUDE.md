@@ -28,8 +28,10 @@
 - Family iteration: use `.firstElement()` helper (not `.first`) because Family conforms to `LazySequenceProtocol`.
 - Tests: `swift test --package-path Packages/EchoEngine`
 
-### 2) Data Layer — `Resources/ContentPacks` (JSON)
-- All gameplay entities are defined here: enemies, cards, heroes, locations, rules, etc.
+### 2) Data Layer — Content Packs (JSON)
+- **CharacterPacks:** `Packages/CharacterPacks/` — heroes, cards, abilities (e.g., `CoreHeroes`)
+- **StoryPacks:** `Packages/StoryPacks/` — campaigns, enemies, events, regions (e.g., `Season1/TwilightMarchesActI`)
+- All gameplay entities defined in JSON: enemies, cards, heroes, locations, rules, etc.
 - **IDs:** strict `String` (`definitionId`). **UUID for content is forbidden.**
 - Instances in runtime (e.g., a spawned enemy) may have separate **instanceId**, but it must be deterministic/serializable.
 
@@ -90,10 +92,14 @@
 
 ## 🧪 Useful Commands (Project Defaults)
 
-- Run TwilightEngine tests:
+- Run SPM package tests:
   - `swift test --package-path Packages/TwilightEngine`
-- Run EchoEngine tests:
   - `swift test --package-path Packages/EchoEngine`
+  - `swift test --package-path Packages/EchoScenes`
+  - `swift test --package-path Packages/PackEditorKit`
+  - `swift test --package-path Packages/PackEditorApp`
+- Run App tests (Xcode):
+  - `xcodebuild test -scheme CardSampleGame -destination 'platform=iOS Simulator,name=iPhone 15'`
 - Project dump:
   - `python3 DevTools/collect_project_v4.py`
 - Update docs:
