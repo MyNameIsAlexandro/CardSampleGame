@@ -2,6 +2,14 @@ import SpriteKit
 import FirebladeECS
 import EchoEngine
 import TwilightEngine
+import Foundation
+
+private func L(_ key: String) -> String {
+    NSLocalizedString(key, bundle: .main, comment: "")
+}
+private func L(_ key: String, _ args: CVarArg...) -> String {
+    String(format: NSLocalizedString(key, bundle: .main, comment: ""), arguments: args)
+}
 
 /// SpriteKit scene that renders an ECS-driven combat encounter.
 /// Owns a CombatSimulation (logic) and RenderSystemGroup (visuals).
@@ -12,11 +20,16 @@ public final class CombatScene: SKScene {
 
     public private(set) var simulation: CombatSimulation!
     public private(set) var renderGroup: RenderSystemGroup!
+    private var storedEnemyDefinition: EnemyDefinition!
 
-    // MARK: - Layout Constants
+    // MARK: - Layout Constants (zone-based, 390×700 scene)
 
-    private let enemyPosition = CGPoint(x: 0, y: 120)
-    private let playerPosition = CGPoint(x: 0, y: -100)
+    // Enemy zone: top area, avatar on the left
+    private let enemyPosition = CGPoint(x: -130, y: 270)
+    // Player zone: above hand, avatar on the left
+    private let playerPosition = CGPoint(x: -130, y: -20)
+    // Arena center: where cards fly, fate overlay appears
+    private let arenaCenter = CGPoint(x: 0, y: 140)
 
     // MARK: - UI Nodes
 
@@ -46,6 +59,20 @@ public final class CombatScene: SKScene {
     private var longPressTimer: Timer?
     private var touchStartLocation: CGPoint?
     private var isAnimating = false
+    private var handScrollOffset: CGFloat = 0
+    private var handContentWidth: CGFloat = 0
+    private var handCropNode: SKCropNode!
+    private var handInnerNode: SKNode!
+    private var isDraggingHand = false
+    private var arenaCardNodes: [SKNode] = []
+    private var drawPileNode: SKNode?
+    private var fateDeckNode: SKNode?
+    private var awaitingFateReveal = false
+    private var fateRevealCompletion: (() -> Void)?
+    private var pendingFateValue: Int = 0
+    private var pendingFateIsCritical = false
+    private var pendingFateLabel: String = ""
+    private var pendingFateResolution: FateResolution?
 
     // MARK: - Callbacks
 
@@ -67,6 +94,7 @@ public final class CombatScene: SKScene {
         resonance: Float = 0,
         seed: UInt64 = 42
     ) {
+        storedEnemyDefinition = enemyDefinition
         simulation = CombatSimulation.create(
             enemyDefinition: enemyDefinition,
             playerName: playerName,
@@ -112,14 +140,7 @@ public final class CombatScene: SKScene {
         }
         addChild(gradientNode)
 
-        // Separator line between enemy and player zones
-        let separator = SKShapeNode(rectOf: CGSize(width: size.width * 0.6, height: 1))
-        separator.fillColor = CombatSceneTheme.separator
-        separator.strokeColor = .clear
-        separator.position = CGPoint(x: 0, y: 10)
-        separator.zPosition = 1
-        separator.alpha = 0.5
-        addChild(separator)
+        // Zone separators are created in setupHUD()
     }
 
     private func makeGradientTexture(size: CGSize, topColor: SKColor, bottomColor: SKColor) -> SKTexture? {
@@ -184,12 +205,13 @@ public final class CombatScene: SKScene {
 
     private func setupCombatEntities() {
         let nexus = simulation.nexus
+        let infoOffsetX: CGFloat = 150  // horizontal offset from avatar to info area center
 
-        // Enemy avatar + health bar + label
+        // Enemy avatar (left) + health bar + label (right)
         if let enemy = simulation.enemyEntity {
             let tag: EnemyTagComponent = nexus.get(unsafe: enemy.identifier)
 
-            let avatar = makeAvatarNode(initial: tag.definitionId, color: CombatSceneTheme.health, radius: 36)
+            let avatar = makeAvatarNode(initial: storedEnemyDefinition.name.resolved, color: CombatSceneTheme.health, radius: 30)
             avatar.position = enemyPosition
             avatar.zPosition = 5
             avatar.name = "avatar_enemy"
@@ -205,23 +227,26 @@ public final class CombatScene: SKScene {
             enemy.assign(HealthBarComponent(
                 showHP: true,
                 showWill: health.maxWill > 0,
-                barWidth: 80,
-                verticalOffset: -50
+                barWidth: 100,
+                verticalOffset: -10,
+                horizontalOffset: infoOffsetX
             ))
+            // Label to the right of avatar
             enemy.assign(LabelComponent(
-                text: tag.definitionId,
+                text: storedEnemyDefinition.name.resolved,
                 fontName: "AvenirNext-Bold",
-                fontSize: 16,
+                fontSize: 14,
                 colorName: "white",
-                verticalOffset: 50
+                verticalOffset: 14,
+                horizontalOffset: infoOffsetX
             ))
         }
 
-        // Player avatar + health bar + label
+        // Player avatar (left) + health bar + label (right)
         if let player = simulation.playerEntity {
             let tag: PlayerTagComponent = nexus.get(unsafe: player.identifier)
 
-            let avatar = makeAvatarNode(initial: tag.name, color: CombatSceneTheme.spirit, radius: 30)
+            let avatar = makeAvatarNode(initial: tag.name, color: CombatSceneTheme.spirit, radius: 26)
             avatar.position = playerPosition
             avatar.zPosition = 5
             avatar.name = "avatar_player"
@@ -235,15 +260,17 @@ public final class CombatScene: SKScene {
             ))
             player.assign(HealthBarComponent(
                 showHP: true,
-                barWidth: 80,
-                verticalOffset: -40
+                barWidth: 100,
+                verticalOffset: -10,
+                horizontalOffset: infoOffsetX
             ))
             player.assign(LabelComponent(
                 text: tag.name,
                 fontName: "AvenirNext-Bold",
-                fontSize: 14,
+                fontSize: 13,
                 colorName: "cyan",
-                verticalOffset: 40
+                verticalOffset: 14,
+                horizontalOffset: infoOffsetX
             ))
         }
     }
@@ -253,55 +280,77 @@ public final class CombatScene: SKScene {
     private func setupHUD() {
         let halfH = size.height / 2
 
+        // --- HUD zone (top) ---
         phaseLabel = SKLabelNode(fontNamed: "AvenirNext-Medium")
-        phaseLabel.fontSize = 14
+        phaseLabel.fontSize = 12
         phaseLabel.fontColor = CombatSceneTheme.muted
-        phaseLabel.position = CGPoint(x: 0, y: halfH - 30)
+        phaseLabel.position = CGPoint(x: 0, y: halfH - 25)
         phaseLabel.zPosition = 20
         addChild(phaseLabel)
 
         roundLabel = SKLabelNode(fontNamed: "AvenirNext-Medium")
-        roundLabel.fontSize = 12
+        roundLabel.fontSize = 11
         roundLabel.fontColor = CombatSceneTheme.muted
-        roundLabel.position = CGPoint(x: 0, y: halfH - 50)
+        roundLabel.position = CGPoint(x: 0, y: halfH - 42)
         roundLabel.zPosition = 20
         addChild(roundLabel)
 
-        let buttonY = -halfH + 60
+        // --- Buttons zone (bottom, Y = -260) ---
+        let buttonY: CGFloat = -260
 
         let hasInfluence = simulation.enemyMaxWill > 0
         if hasInfluence {
-            attackButton = makeButton(text: "⚔ Attack", position: CGPoint(x: -100, y: buttonY), name: "btn_attack")
-            influenceButton = makeButton(text: "✦ Influence", position: CGPoint(x: 0, y: buttonY), name: "btn_influence")
-            skipButton = makeButton(text: "End Turn", position: CGPoint(x: 100, y: buttonY), name: "btn_end_turn")
+            attackButton = makeButton(text: L("encounter.action.attack"), position: CGPoint(x: -100, y: buttonY), name: "btn_attack")
+            influenceButton = makeButton(text: L("encounter.action.influence"), position: CGPoint(x: 0, y: buttonY), name: "btn_influence")
+            skipButton = makeButton(text: L("encounter.action.wait"), position: CGPoint(x: 100, y: buttonY), name: "btn_end_turn")
         } else {
-            attackButton = makeButton(text: "⚔ Attack", position: CGPoint(x: -60, y: buttonY), name: "btn_attack")
-            skipButton = makeButton(text: "End Turn", position: CGPoint(x: 60, y: buttonY), name: "btn_end_turn")
+            attackButton = makeButton(text: L("encounter.action.attack"), position: CGPoint(x: -60, y: buttonY), name: "btn_attack")
+            skipButton = makeButton(text: L("encounter.action.wait"), position: CGPoint(x: 60, y: buttonY), name: "btn_end_turn")
         }
 
+        // --- Fate overlay in arena center ---
         fateOverlay = SKNode()
-        fateOverlay.position = CGPoint(x: 0, y: 20)
+        fateOverlay.position = arenaCenter
         fateOverlay.zPosition = 50
         addChild(fateOverlay)
 
-        // Hand container — above buttons
-        let handY = buttonY + 60
-        handContainer = SKNode()
-        handContainer.position = CGPoint(x: 0, y: handY)
-        handContainer.zPosition = 15
-        addChild(handContainer)
+        // --- Indicators zone (Y = -215) ---
+        let indicatorY: CGFloat = -215
 
-        // Deck/discard indicators
-        let indicatorY = handY
-        deckCountLabel = SKLabelNode(fontNamed: "AvenirNext-Medium")
-        deckCountLabel.fontSize = 11
-        deckCountLabel.fontColor = CombatSceneTheme.muted
+        // Energy + Resonance (center)
+        energyLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+        energyLabel.fontSize = 13
+        energyLabel.fontColor = CombatSceneTheme.faith
+        energyLabel.position = CGPoint(x: 0, y: indicatorY)
+        energyLabel.zPosition = 15
+        addChild(energyLabel)
+
+        resonanceLabel = SKLabelNode(fontNamed: "AvenirNext-Medium")
+        resonanceLabel.fontSize = 11
+        resonanceLabel.fontColor = CombatSceneTheme.muted
+        resonanceLabel.position = CGPoint(x: 0, y: indicatorY - 14)
+        resonanceLabel.zPosition = 15
+        addChild(resonanceLabel)
+
+        // Deck pile (left of hand)
+        deckCountLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
+        deckCountLabel.fontSize = 14
+        deckCountLabel.fontColor = CombatSceneTheme.spirit
         deckCountLabel.position = CGPoint(x: -size.width / 2 + 30, y: indicatorY)
         deckCountLabel.zPosition = 15
         addChild(deckCountLabel)
 
-        discardCountLabel = SKLabelNode(fontNamed: "AvenirNext-Medium")
-        discardCountLabel.fontSize = 11
+        // Draw pile visual (tappable card-back stack)
+        let drawPile = makeDrawPileNode()
+        drawPile.position = CGPoint(x: -size.width / 2 + 30, y: indicatorY + 30)
+        drawPile.zPosition = 16
+        drawPile.name = "btn_draw_pile"
+        addChild(drawPile)
+        drawPileNode = drawPile
+
+        // Discard pile (right of hand, tappable)
+        discardCountLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
+        discardCountLabel.fontSize = 14
         discardCountLabel.fontColor = CombatSceneTheme.muted
         discardCountLabel.position = CGPoint(x: size.width / 2 - 30, y: indicatorY)
         discardCountLabel.zPosition = 15
@@ -316,25 +365,44 @@ public final class CombatScene: SKScene {
         exhaustCountLabel.name = "btn_exhaust"
         addChild(exhaustCountLabel)
 
-        energyLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
-        energyLabel.fontSize = 13
-        energyLabel.fontColor = CombatSceneTheme.faith
-        energyLabel.position = CGPoint(x: 0, y: indicatorY)
-        energyLabel.zPosition = 15
-        addChild(energyLabel)
+        // --- Hand zone (Y = -60 to -200, clipped) ---
+        let cardH = CardNode.cardSize.height
+        let handY: CGFloat = -130  // center of hand zone
+        let visibleW = size.width
 
-        resonanceLabel = SKLabelNode(fontNamed: "AvenirNext-Medium")
-        resonanceLabel.fontSize = 11
-        resonanceLabel.fontColor = CombatSceneTheme.muted
-        resonanceLabel.position = CGPoint(x: 0, y: indicatorY - 16)
-        resonanceLabel.zPosition = 15
-        addChild(resonanceLabel)
+        handCropNode = SKCropNode()
+        handCropNode.position = CGPoint(x: 0, y: handY)
+        handCropNode.zPosition = 15
+        let mask = SKSpriteNode(color: .white, size: CGSize(width: visibleW, height: cardH + 20))
+        handCropNode.maskNode = mask
+        addChild(handCropNode)
 
-        // Combat log — right side
+        handInnerNode = SKNode()
+        handCropNode.addChild(handInnerNode)
+        handContainer = handInnerNode
+
+        // --- Combat log in arena zone ---
         combatLogNode = SKNode()
-        combatLogNode.position = CGPoint(x: size.width / 2 - 10, y: 0)
+        combatLogNode.position = CGPoint(x: size.width / 2 - 10, y: arenaCenter.y)
         combatLogNode.zPosition = 15
         addChild(combatLogNode)
+
+        // --- Arena separator lines ---
+        let sepTop = SKShapeNode(rectOf: CGSize(width: size.width * 0.7, height: 1))
+        sepTop.fillColor = CombatSceneTheme.separator
+        sepTop.strokeColor = .clear
+        sepTop.position = CGPoint(x: 0, y: 20)
+        sepTop.alpha = 0.3
+        sepTop.zPosition = 1
+        addChild(sepTop)
+
+        let sepBottom = SKShapeNode(rectOf: CGSize(width: size.width * 0.7, height: 1))
+        sepBottom.fillColor = CombatSceneTheme.separator
+        sepBottom.strokeColor = .clear
+        sepBottom.position = CGPoint(x: 0, y: -55)
+        sepBottom.alpha = 0.3
+        sepBottom.zPosition = 1
+        addChild(sepBottom)
 
         refreshHand()
     }
@@ -360,8 +428,8 @@ public final class CombatScene: SKScene {
     }
 
     private func updateHUD() {
-        phaseLabel.text = "Phase: \(simulation.phase)"
-        roundLabel.text = "Round \(simulation.round)"
+        phaseLabel.text = L("encounter.phase.label", "\(simulation.phase)")
+        roundLabel.text = L("encounter.round.label", simulation.round)
 
         let isPlayerTurn = simulation.phase == .playerTurn && !simulation.isOver
         attackButton.parent?.alpha = isPlayerTurn ? 1.0 : 0.4
@@ -369,30 +437,37 @@ public final class CombatScene: SKScene {
         skipButton.parent?.alpha = isPlayerTurn ? 1.0 : 0.4
         handContainer.alpha = isPlayerTurn ? 1.0 : 0.5
 
-        deckCountLabel.text = "🂠 \(simulation.drawPileCount)"
+        let drawCount = simulation.drawPileCount
+        deckCountLabel.text = "🂠 \(drawCount)"
+        drawPileNode?.alpha = drawCount > 0 ? 1.0 : 0.4
         discardCountLabel.text = "♻ \(simulation.discardPileCount)"
         let exhaustCount = simulation.exhaustPileCount
         exhaustCountLabel.text = exhaustCount > 0 ? "✕ \(exhaustCount)" : ""
-        energyLabel.text = "⚡ \(simulation.energy)/\(simulation.maxEnergy)"
+        let available = simulation.availableEnergy
+        let total = simulation.energy
+        if simulation.reservedEnergy > 0 {
+            energyLabel.text = "⚡ \(available)/\(simulation.maxEnergy) (-\(simulation.reservedEnergy))"
+        } else {
+            energyLabel.text = "⚡ \(total)/\(simulation.maxEnergy)"
+        }
 
         let res = simulation.resonance
         let resInt = Int(res)
         if resInt == 0 {
-            resonanceLabel.text = "☯ Явь"
+            resonanceLabel.text = "☯ " + L("resonance.yav")
             resonanceLabel.fontColor = CombatSceneTheme.muted
         } else if res > 0 {
-            resonanceLabel.text = "☀ Правь +\(resInt)"
+            resonanceLabel.text = "☀ " + L("resonance.prav") + " +\(resInt)"
             resonanceLabel.fontColor = CombatSceneTheme.faith
         } else {
-            resonanceLabel.text = "☽ Навь \(resInt)"
+            resonanceLabel.text = "☽ " + L("resonance.nav") + " \(resInt)"
             resonanceLabel.fontColor = CombatSceneTheme.spirit
         }
 
         // Обновить текст под врагом: HP + Will
         if let enemy = simulation.enemyEntity {
             let label: LabelComponent = simulation.nexus.get(unsafe: enemy.identifier)
-            let tag: EnemyTagComponent = simulation.nexus.get(unsafe: enemy.identifier)
-            var text = tag.definitionId
+            var text = storedEnemyDefinition.name.resolved
             text += "  ♥\(simulation.enemyHealth)/\(simulation.enemyMaxHealth)"
             if simulation.enemyMaxWill > 0 {
                 text += "  ✦\(simulation.enemyWill)/\(simulation.enemyMaxWill)"
@@ -424,7 +499,7 @@ public final class CombatScene: SKScene {
         }
         if !playerEffects.isEmpty {
             let node = SKNode()
-            node.position = CGPoint(x: playerPosition.x + 50, y: playerPosition.y)
+            node.position = CGPoint(x: playerPosition.x + 120, y: playerPosition.y)
             node.zPosition = 25
             for (i, (stat, amount)) in playerEffects.enumerated() {
                 let (icon, color) = icons[stat] ?? ("?", .white)
@@ -448,7 +523,7 @@ public final class CombatScene: SKScene {
         }
         if !enemyEffects.isEmpty {
             let node = SKNode()
-            node.position = CGPoint(x: enemyPosition.x + 55, y: enemyPosition.y)
+            node.position = CGPoint(x: enemyPosition.x + 120, y: enemyPosition.y)
             node.zPosition = 25
             for (i, (stat, amount)) in enemyEffects.enumerated() {
                 let (icon, color) = icons[stat] ?? ("?", .white)
@@ -486,19 +561,19 @@ public final class CombatScene: SKScene {
             icon = "♥ \(intent.value)"
             color = CombatSceneTheme.success
         case .ritual:
-            icon = "✦ Ritual"
+            icon = "✦ " + L("encounter.intent.ritual")
             color = CombatSceneTheme.spirit
         case .block, .defend:
-            icon = "🛡 Defend"
+            icon = "🛡 " + L("encounter.intent.defend")
             color = CombatSceneTheme.muted
         case .buff:
-            icon = "↑ Buff"
+            icon = "↑ " + L("encounter.intent.buff")
             color = CombatSceneTheme.faith
         case .debuff:
-            icon = "↓ Debuff"
+            icon = "↓ " + L("encounter.intent.debuff")
             color = CombatSceneTheme.spirit
         case .prepare:
-            icon = "… Prepare"
+            icon = "… " + L("encounter.intent.prepare")
             color = CombatSceneTheme.muted
         default:
             icon = "? \(intent.type.rawValue)"
@@ -529,18 +604,47 @@ public final class CombatScene: SKScene {
     private func refreshHand() {
         handContainer.removeAllChildren()
         let cards = simulation.hand
-        guard !cards.isEmpty else { return }
+        guard !cards.isEmpty else {
+            handContentWidth = 0
+            handScrollOffset = 0
+            handInnerNode.position.x = 0
+            return
+        }
 
         let cardW = CardNode.cardSize.width
-        let spacing: CGFloat = 4
-        let totalWidth = CGFloat(cards.count) * cardW + CGFloat(cards.count - 1) * spacing
+        let step: CGFloat = cardW + 6
+        let totalWidth = step * CGFloat(cards.count - 1) + cardW
+        handContentWidth = totalWidth
+
+        let visibleWidth = self.size.width - 20
+        // Cards laid out in inner node from center
         let startX = -totalWidth / 2 + cardW / 2
 
         for (i, card) in cards.enumerated() {
             let node = CardNode(card: card)
-            node.position = CGPoint(x: startX + CGFloat(i) * (cardW + spacing), y: 0)
+            node.position = CGPoint(x: startX + CGFloat(i) * step, y: 0)
+            node.zPosition = CGFloat(i)
             handContainer.addChild(node)
         }
+
+        // Reset scroll if content fits
+        if totalWidth <= visibleWidth {
+            handScrollOffset = 0
+        }
+        applyHandScroll()
+    }
+
+    private func applyHandScroll() {
+        let visibleWidth = self.size.width
+        if handContentWidth <= visibleWidth {
+            handInnerNode.position.x = 0
+            return
+        }
+        // Allow scrolling so the first and last card can reach the center of the visible area
+        let cardW = CardNode.cardSize.width
+        let maxScroll = (handContentWidth - visibleWidth) / 2 + cardW / 2
+        handScrollOffset = max(-maxScroll, min(maxScroll, handScrollOffset))
+        handInnerNode.position.x = handScrollOffset
     }
 
     // MARK: - Render Sync
@@ -556,18 +660,42 @@ public final class CombatScene: SKScene {
         guard let touch = touches.first else { return }
         let location = touch.location(in: self)
         touchStartLocation = location
+        isDraggingHand = false
 
-        // Dismiss existing tooltip on any new touch
         dismissTooltip()
 
-        // Start long press timer for cards
+        // Long press for tooltip
         let cardNode = findCardNode(at: location)
         if cardNode != nil {
             longPressTimer = Timer.scheduledTimer(withTimeInterval: 0.4, repeats: false) { [weak self] _ in
                 guard let self, let card = cardNode?.card else { return }
-                self.touchStartLocation = nil // prevent tap
+                self.touchStartLocation = nil
                 self.showTooltip(for: card, at: location)
             }
+        }
+    }
+
+    public override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let touch = touches.first, let startLoc = touchStartLocation else { return }
+        let location = touch.location(in: self)
+        let dx = location.x - touch.previousLocation(in: self).x
+
+        // Only start scrolling after 15pt horizontal movement threshold
+        let totalDx = abs(location.x - startLoc.x)
+        let handY = handCropNode.position.y
+        let cardH = CardNode.cardSize.height
+        let visibleW = self.size.width - 20
+        let inHandArea = abs(location.y - handY) < cardH / 2 + 20
+        let needsScroll = handContentWidth > visibleW
+
+        if inHandArea && needsScroll && totalDx > 15 {
+            if !isDraggingHand {
+                isDraggingHand = true
+                longPressTimer?.invalidate()
+                longPressTimer = nil
+            }
+            handScrollOffset += dx
+            applyHandScroll()
         }
     }
 
@@ -577,6 +705,15 @@ public final class CombatScene: SKScene {
 
         if tooltipNode != nil {
             dismissTooltip()
+            isDraggingHand = false
+            touchStartLocation = nil
+            return
+        }
+
+        // If was dragging, don't fire tap
+        if isDraggingHand {
+            isDraggingHand = false
+            touchStartLocation = nil
             return
         }
 
@@ -589,6 +726,7 @@ public final class CombatScene: SKScene {
         longPressTimer?.invalidate()
         longPressTimer = nil
         touchStartLocation = nil
+        isDraggingHand = false
         dismissTooltip()
     }
     #elseif os(macOS)
@@ -600,9 +738,23 @@ public final class CombatScene: SKScene {
     #endif
 
     private func findCardNode(at location: CGPoint) -> CardNode? {
+        // First try scene hit test (works for cards NOT inside SKCropNode, e.g. mulligan)
         for node in nodes(at: location) {
             if let cardNode = node as? CardNode { return cardNode }
             if let parent = node.parent as? CardNode { return parent }
+        }
+        // Then check hand cards manually (SKCropNode blocks hit testing)
+        let localPoint = handInnerNode.convert(location, from: self)
+        let halfW = CardNode.cardSize.width / 2
+        let halfH = CardNode.cardSize.height / 2
+        // Iterate in reverse so topmost card (highest zPosition) wins
+        for node in handInnerNode.children.reversed() {
+            guard let cardNode = node as? CardNode else { continue }
+            let p = cardNode.position
+            if localPoint.x >= p.x - halfW && localPoint.x <= p.x + halfW &&
+               localPoint.y >= p.y - halfH && localPoint.y <= p.y + halfH {
+                return cardNode
+            }
         }
         return nil
     }
@@ -646,6 +798,18 @@ public final class CombatScene: SKScene {
             return
         }
 
+        // Fate deck tap (during awaiting phase)
+        if tapped.contains(where: { $0.name == "btn_fate_deck" }) && awaitingFateReveal {
+            handleFateDeckTap()
+            return
+        }
+
+        // Draw pile tap
+        if tapped.contains(where: { $0.name == "btn_draw_pile" }) {
+            handleDrawPileTap()
+            return
+        }
+
         guard !simulation.isOver, simulation.phase == .playerTurn, !isAnimating else { return }
 
         let tappedNodes = nodes(at: location)
@@ -661,16 +825,60 @@ public final class CombatScene: SKScene {
                 performEndTurn()
                 return
             default:
-                // Check if tapped a card node (or its children)
-                if let cardNode = node as? CardNode {
-                    performPlayCard(cardNode.card.id)
-                    return
-                }
-                if let parent = node.parent as? CardNode {
-                    performPlayCard(parent.card.id)
-                    return
-                }
+                break
             }
+        }
+
+        // Check hand cards (manual hit test for SKCropNode)
+        if let cardNode = findCardNode(at: location),
+           cardNode.parent === handInnerNode {
+            toggleCardSelection(cardNode)
+        }
+    }
+
+    private func toggleCardSelection(_ cardNode: CardNode) {
+        let cardId = cardNode.card.id
+        if simulation.selectedCardIds.contains(cardId) {
+            simulation.deselectCard(cardId: cardId)
+            cardNode.setSelectedAnimated(false)
+            onSoundEffect?("cardDeselect")
+        } else {
+            if simulation.selectCard(cardId: cardId) {
+                cardNode.setSelectedAnimated(true)
+                onSoundEffect?("cardSelect")
+            } else {
+                // Can't afford — shake card
+                cardNode.run(SKAction.sequence([
+                    SKAction.moveBy(x: -4, y: 0, duration: 0.05),
+                    SKAction.moveBy(x: 8, y: 0, duration: 0.05),
+                    SKAction.moveBy(x: -8, y: 0, duration: 0.05),
+                    SKAction.moveBy(x: 4, y: 0, duration: 0.05)
+                ]))
+            }
+        }
+        updateCardAffordability()
+        updateHUD()
+    }
+
+    private func updateCardAffordability() {
+        let available = simulation.availableEnergy
+        let selected = simulation.selectedCardIds
+        for case let cardNode as CardNode in handContainer.children {
+            if selected.contains(cardNode.card.id) {
+                cardNode.setDimmed(false)
+            } else {
+                let cost = cardNode.card.cost ?? 1
+                cardNode.setDimmed(cost > available)
+            }
+        }
+    }
+
+    private func deselectAllCardsVisually() {
+        for case let cardNode as CardNode in handContainer.children {
+            if cardNode.isCardSelected {
+                cardNode.setSelectedAnimated(false)
+            }
+            cardNode.setDimmed(false)
         }
     }
 
@@ -688,37 +896,46 @@ public final class CombatScene: SKScene {
         bg.strokeColor = .clear
         overlay.addChild(bg)
 
+        // Compute grid height to position title/button around it
+        let cardH = CardNode.cardSize.height
+        let handCount = simulation.hand.count
+        let rows = (handCount + 2) / 3  // ceil(count/3)
+        let gridH = CGFloat(rows) * cardH + CGFloat(max(0, rows - 1)) * 8
+        let gridTop: CGFloat = -10 + gridH / 2
+        let gridBottom: CGFloat = -10 - gridH / 2
+
         let title = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
-        title.text = "Mulligan"
-        title.fontSize = 20
+        title.text = L("combat.mulligan.title")
+        title.fontSize = 18
         title.fontColor = .white
-        title.position = CGPoint(x: 0, y: 80)
+        title.position = CGPoint(x: 0, y: gridTop + 30)
         title.verticalAlignmentMode = .center
         overlay.addChild(title)
 
         let subtitle = SKLabelNode(fontNamed: "AvenirNext-Regular")
-        subtitle.text = "Tap cards to replace, then Keep"
+        subtitle.text = L("combat.mulligan.prompt")
         subtitle.fontSize = 11
         subtitle.fontColor = CombatSceneTheme.muted
-        subtitle.position = CGPoint(x: 0, y: 58)
+        subtitle.position = CGPoint(x: 0, y: gridTop + 12)
         subtitle.verticalAlignmentMode = .center
         overlay.addChild(subtitle)
 
         refreshMulliganCards(in: overlay)
 
-        // Keep button
-        let btnBg = SKShapeNode(rectOf: CGSize(width: 120, height: 36), cornerRadius: 8)
+        // Keep button below grid
+        let btnY = gridBottom - 28
+        let btnBg = SKShapeNode(rectOf: CGSize(width: 140, height: 36), cornerRadius: 8)
         btnBg.fillColor = CombatSceneTheme.success
         btnBg.strokeColor = .clear
-        btnBg.position = CGPoint(x: 0, y: -80)
+        btnBg.position = CGPoint(x: 0, y: btnY)
         btnBg.name = "btn_mulligan_keep"
         overlay.addChild(btnBg)
 
         let btnLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
-        btnLabel.text = "Keep"
+        btnLabel.text = L("combat.mulligan.confirm")
         btnLabel.fontSize = 15
         btnLabel.fontColor = .white
-        btnLabel.position = CGPoint(x: 0, y: -80)
+        btnLabel.position = CGPoint(x: 0, y: btnY)
         btnLabel.verticalAlignmentMode = .center
         btnLabel.name = "btn_mulligan_keep"
         overlay.addChild(btnLabel)
@@ -734,13 +951,41 @@ public final class CombatScene: SKScene {
         overlay.children.filter { $0 is CardNode }.forEach { $0.removeFromParent() }
 
         let cards = simulation.hand
-        let cardW = CardNode.cardSize.width + 10
-        let totalW = cardW * CGFloat(cards.count)
-        let startX = -totalW / 2 + cardW / 2
+        guard !cards.isEmpty else { return }
+
+        let availableW = size.width - 20
+        let cardW = CardNode.cardSize.width
+        let cardH = CardNode.cardSize.height
+        let gap: CGFloat = 8
+
+        // Grid layout: 3 per row, full size
+        let cols = min(cards.count, 3)
+        let stepX = cardW + gap
+        let stepY = cardH + gap
+        let rows = (cards.count + cols - 1) / cols
+
+        // Center the grid vertically around y = -10
+        let gridH = CGFloat(rows) * cardH + CGFloat(rows - 1) * gap
+        let topY: CGFloat = -10 + gridH / 2 - cardH / 2
+
+        // Scale if even 3 cards don't fit in width
+        let rowW = stepX * CGFloat(cols - 1) + cardW
+        let scale: CGFloat = rowW > availableW ? availableW / rowW : 1.0
 
         for (i, card) in cards.enumerated() {
+            let col = i % cols
+            let row = i / cols
+            // Center each row
+            let rowCount = min(cols, cards.count - row * cols)
+            let rowTotalW = (stepX * CGFloat(rowCount - 1) + cardW) * scale
+            let rowStartX = -rowTotalW / 2 + cardW * scale / 2
+
             let node = CardNode(card: card)
-            node.position = CGPoint(x: startX + CGFloat(i) * cardW, y: -10)
+            node.setScale(scale)
+            node.position = CGPoint(
+                x: rowStartX + CGFloat(col) * stepX * scale,
+                y: topY - CGFloat(row) * stepY * scale
+            )
             node.name = "mulligan_\(card.id)"
             if mulliganSelected.contains(card.id) {
                 node.setSelected(true)
@@ -808,7 +1053,7 @@ public final class CombatScene: SKScene {
 
         // Title
         let title = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
-        title.text = "Discard Pile (\(cards.count))"
+        title.text = L("combat.discard.title", cards.count)
         title.fontSize = 16
         title.fontColor = .white
         title.position = CGPoint(x: 0, y: size.height / 2 - 50)
@@ -817,26 +1062,29 @@ public final class CombatScene: SKScene {
 
         if cards.isEmpty {
             let empty = SKLabelNode(fontNamed: "AvenirNext-Regular")
-            empty.text = "Empty"
+            empty.text = L("combat.pile.empty")
             empty.fontSize = 14
             empty.fontColor = CombatSceneTheme.muted
             empty.position = .zero
             empty.verticalAlignmentMode = .center
             overlay.addChild(empty)
         } else {
-            // Show cards in a grid
-            let cardW = CardNode.cardSize.width + 8
-            let cols = min(cards.count, 4)
+            // Show cards in a grid, scaled to fit 3 per row
+            let gridScale: CGFloat = 0.6
+            let cardW = CardNode.cardSize.width * gridScale + 6
+            let cardH = CardNode.cardSize.height * gridScale + 8
+            let cols = min(cards.count, 3)
             let totalW = cardW * CGFloat(cols)
             let startX = -totalW / 2 + cardW / 2
 
             for (i, card) in cards.enumerated() {
-                let col = i % 4
-                let row = i / 4
+                let col = i % 3
+                let row = i / 3
                 let node = CardNode(card: card)
+                node.setScale(gridScale)
                 node.position = CGPoint(
                     x: startX + CGFloat(col) * cardW,
-                    y: CGFloat(20) - CGFloat(row) * (CardNode.cardSize.height + 10)
+                    y: CGFloat(20) - CGFloat(row) * cardH
                 )
                 overlay.addChild(node)
             }
@@ -844,7 +1092,7 @@ public final class CombatScene: SKScene {
 
         // Tap to close hint
         let hint = SKLabelNode(fontNamed: "AvenirNext-Regular")
-        hint.text = "Tap to close"
+        hint.text = L("combat.tap.to.close")
         hint.fontSize = 10
         hint.fontColor = CombatSceneTheme.muted
         hint.position = CGPoint(x: 0, y: -size.height / 2 + 40)
@@ -879,32 +1127,35 @@ public final class CombatScene: SKScene {
         overlay.addChild(bg)
 
         let title = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
-        title.text = "Exhausted (\(cards.count))"
+        title.text = L("combat.exhaust.title", cards.count)
         title.fontSize = 16
         title.fontColor = CombatSceneTheme.muted
         title.position = CGPoint(x: 0, y: size.height / 2 - 50)
         title.verticalAlignmentMode = .center
         overlay.addChild(title)
 
-        let cardW = CardNode.cardSize.width + 8
-        let cols = min(cards.count, 4)
+        let gridScale: CGFloat = 0.6
+        let cardW = CardNode.cardSize.width * gridScale + 6
+        let cardH = CardNode.cardSize.height * gridScale + 8
+        let cols = min(cards.count, 3)
         let totalW = cardW * CGFloat(cols)
         let startX = -totalW / 2 + cardW / 2
 
         for (i, card) in cards.enumerated() {
-            let col = i % 4
-            let row = i / 4
+            let col = i % 3
+            let row = i / 3
             let node = CardNode(card: card)
+            node.setScale(gridScale)
             node.alpha = 0.6
             node.position = CGPoint(
                 x: startX + CGFloat(col) * cardW,
-                y: CGFloat(20) - CGFloat(row) * (CardNode.cardSize.height + 10)
+                y: CGFloat(20) - CGFloat(row) * cardH
             )
             overlay.addChild(node)
         }
 
         let hint = SKLabelNode(fontNamed: "AvenirNext-Regular")
-        hint.text = "Tap to close"
+        hint.text = L("combat.tap.to.close")
         hint.fontSize = 10
         hint.fontColor = CombatSceneTheme.muted
         hint.position = CGPoint(x: 0, y: -size.height / 2 + 40)
@@ -949,17 +1200,17 @@ public final class CombatScene: SKScene {
     private func logCombatEvent(_ event: CombatEvent) {
         switch event {
         case .playerAttacked(let dmg, _, _, _):
-            addLogEntry("You deal \(dmg) damage")
+            addLogEntry(L("encounter.log.player.attack", dmg))
         case .playerMissed:
-            addLogEntry("You missed!")
+            addLogEntry(L("encounter.log.player.missed"))
         case .enemyAttacked(let dmg, _, _, _):
-            addLogEntry(dmg > 0 ? "Enemy deals \(dmg) damage" : "Enemy attack blocked!")
+            addLogEntry(dmg > 0 ? L("encounter.log.enemy.damage", dmg) : L("encounter.log.enemy.blocked"))
         case .enemyHealed(let amt):
-            addLogEntry("Enemy heals \(amt)")
+            addLogEntry(L("encounter.log.enemy.heals", amt))
         case .enemyRitual(let shift):
-            addLogEntry("Enemy ritual (\(shift > 0 ? "+" : "")\(Int(shift)))")
+            addLogEntry(L("encounter.log.enemy.ritual", "\(shift > 0 ? "+" : "")\(Int(shift))"))
         case .enemyBlocked:
-            addLogEntry("Enemy defends")
+            addLogEntry(L("encounter.log.enemy.defends"))
         case .cardPlayed(_, let dmg, let heal, let drawn, let status):
             var parts: [String] = []
             if dmg > 0 { parts.append("\(dmg) dmg") }
@@ -975,15 +1226,15 @@ public final class CombatScene: SKScene {
             }
             addLogEntry("Card: \(parts.joined(separator: ", "))")
         case .insufficientEnergy:
-            addLogEntry("Not enough energy!")
+            addLogEntry(L("encounter.log.no.energy"))
         case .roundAdvanced(let r):
-            addLogEntry("— Round \(r) —")
+            addLogEntry(L("encounter.log.round.start", r))
         case .playerInfluenced(let dmg, _, _, _):
-            addLogEntry("You influence for \(dmg) will damage")
+            addLogEntry(L("encounter.log.player.influence", dmg))
         case .influenceNotAvailable:
-            addLogEntry("Cannot influence this enemy")
+            addLogEntry(L("encounter.log.influence.impossible"))
         case .trackSwitched(let track):
-            addLogEntry("Switched to \(track.rawValue) track")
+            addLogEntry(L("encounter.log.track.switch", track.rawValue))
         }
     }
 
@@ -998,7 +1249,7 @@ public final class CombatScene: SKScene {
         let cost = card.cost ?? 1
         var lines = [
             card.name,
-            "Cost: \(cost) ⚡"
+            L("combat.card.cost", cost)
         ]
 
         if card.abilities.isEmpty {
@@ -1010,7 +1261,7 @@ public final class CombatScene: SKScene {
         }
 
         var keywords: [String] = []
-        if card.exhaust { keywords.append("Exhaust") }
+        if card.exhaust { keywords.append(L("combat.keyword.exhaust")) }
         keywords.append(contentsOf: card.traits)
         if !keywords.isEmpty {
             lines.append(keywords.joined(separator: " · "))
@@ -1057,301 +1308,476 @@ public final class CombatScene: SKScene {
         tooltipNode = nil
     }
 
-    // MARK: - Combat Actions
+    // MARK: - Draw Pile & Fate Deck Visuals
 
+    private func makeDrawPileNode() -> SKNode {
+        let node = SKNode()
+        node.name = "btn_draw_pile"
+        // Stack of 3 card backs
+        for i in 0..<3 {
+            let cardBack = SKShapeNode(rectOf: CGSize(width: 36, height: 50), cornerRadius: 4)
+            cardBack.fillColor = CombatSceneTheme.cardBack
+            cardBack.strokeColor = CombatSceneTheme.spirit.withAlphaComponent(0.6)
+            cardBack.lineWidth = 1
+            cardBack.position = CGPoint(x: CGFloat(i) * 2, y: CGFloat(i) * 2)
+            cardBack.name = "btn_draw_pile"
+            node.addChild(cardBack)
+        }
+        // Card back pattern
+        let pattern = SKLabelNode(fontNamed: "AvenirNext-Heavy")
+        pattern.text = "🂠"
+        pattern.fontSize = 20
+        pattern.verticalAlignmentMode = .center
+        pattern.position = CGPoint(x: 4, y: 4)
+        pattern.name = "btn_draw_pile"
+        node.addChild(pattern)
+        return node
+    }
+
+    private func showFateDeckInArena() {
+        fateDeckNode?.removeFromParent()
+
+        let node = SKNode()
+        node.name = "btn_fate_deck"
+        node.position = CGPoint(x: 0, y: arenaCenter.y - 50)
+        node.zPosition = 45
+
+        let cardBack = SKShapeNode(rectOf: FateCardNode.cardSize, cornerRadius: 6)
+        cardBack.fillColor = CombatSceneTheme.faith.withAlphaComponent(0.2)
+        cardBack.strokeColor = CombatSceneTheme.faith.withAlphaComponent(0.8)
+        cardBack.lineWidth = 1.5
+        cardBack.name = "btn_fate_deck"
+        node.addChild(cardBack)
+
+        let icon = SKLabelNode(fontNamed: "AvenirNext-Heavy")
+        icon.text = "☆"
+        icon.fontSize = 24
+        icon.fontColor = CombatSceneTheme.faith
+        icon.verticalAlignmentMode = .center
+        icon.name = "btn_fate_deck"
+        node.addChild(icon)
+
+        let hint = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+        hint.text = L("combat.fate.tap")
+        hint.fontSize = 10
+        hint.fontColor = CombatSceneTheme.faith
+        hint.position = CGPoint(x: 0, y: -(FateCardNode.cardSize.height / 2 + 10))
+        hint.verticalAlignmentMode = .top
+        hint.name = "btn_fate_deck"
+        node.addChild(hint)
+
+        // Pulse animation to attract attention
+        let pulse = SKAction.repeatForever(SKAction.sequence([
+            SKAction.scale(to: 1.05, duration: 0.5),
+            SKAction.scale(to: 1.0, duration: 0.5)
+        ]))
+        node.run(pulse, withKey: "pulse")
+
+        node.alpha = 0
+        addChild(node)
+        node.run(SKAction.fadeIn(withDuration: 0.2))
+        fateDeckNode = node
+    }
+
+    private func hideFateDeck() {
+        fateDeckNode?.removeAllActions()
+        fateDeckNode?.run(SKAction.sequence([
+            SKAction.fadeOut(withDuration: 0.2),
+            SKAction.removeFromParent()
+        ]))
+        fateDeckNode = nil
+    }
+
+    private func handleDrawPileTap() {
+        guard !simulation.isOver, simulation.phase == .playerTurn, !isAnimating else { return }
+        guard simulation.drawPileCount > 0 else { return }
+
+        if let card = simulation.drawOneCard() {
+            onSoundEffect?("cardDraw")
+            refreshHand()
+            updateHUD()
+
+            // Animate the new card: find it in hand and flash it
+            for case let cardNode as CardNode in handContainer.children where cardNode.card.id == card.id {
+                cardNode.alpha = 0
+                cardNode.run(SKAction.fadeIn(withDuration: 0.2))
+            }
+        }
+    }
+
+    private func handleFateDeckTap() {
+        guard awaitingFateReveal, let completion = fateRevealCompletion else { return }
+        awaitingFateReveal = false
+        fateRevealCompletion = nil
+
+        hideFateDeck()
+
+        showFateCard(
+            value: pendingFateValue,
+            isCritical: pendingFateIsCritical,
+            label: pendingFateLabel,
+            resolution: pendingFateResolution,
+            completion: completion
+        )
+    }
+
+    /// Show fate deck and wait for player tap. When tapped, reveals the fate card and calls completion.
+    private func presentFateDeckForReveal(value: Int, isCritical: Bool, label: String, resolution: FateResolution?, completion: @escaping () -> Void) {
+        pendingFateValue = value
+        pendingFateIsCritical = isCritical
+        pendingFateLabel = label
+        pendingFateResolution = resolution
+        fateRevealCompletion = completion
+        awaitingFateReveal = true
+        showFateDeckInArena()
+    }
+
+    // MARK: - Combat Actions (Phased Flow)
+
+    /// Executes the full player attack flow with explicit visual phases:
+    /// Cards → Arena → Fate → Resolution → Apply → Enemy Turn → Round End
     private func performPlayerAttack() {
         isAnimating = true
-        let event = simulation.playerAttack()
-        logCombatEvent(event)
-        onSoundEffect?("attackHit")
-        onHaptic?("medium")
+        let selectedNodes = handContainer.children.compactMap { $0 as? CardNode }
+            .filter { simulation.selectedCardIds.contains($0.card.id) }
 
-        // Extract fate value and resolution from event
-        let fateValue: Int
-        let damage: Int
-        let resolution: FateResolution?
-        switch event {
-        case .playerAttacked(let d, let fv, _, let res):
-            fateValue = fv; damage = d; resolution = res
-        case .playerMissed(let fv, let res):
-            fateValue = fv; damage = 0; resolution = res
-        default:
-            fateValue = 0; damage = 0; resolution = nil
-        }
-
-        // Show fate card, then apply hit visuals
-        showFateCard(value: fateValue, isCritical: resolution?.isCritical ?? false, label: "Attack", resolution: resolution) { [weak self] in
+        // Phase 1: Fly cards to arena
+        animateCardsToArena(selectedNodes) { [weak self] in
             guard let self else { return }
 
-            // Lunge player avatar toward enemy
-            if let playerAvatar = self.childNode(withName: "avatar_player") {
-                playerAvatar.run(SKAction.sequence([
-                    SKAction.moveBy(x: 0, y: 20, duration: 0.1),
-                    SKAction.moveBy(x: 0, y: -20, duration: 0.1)
-                ]))
+            // Commit logic (instant)
+            let roundBefore = self.simulation.round
+            let events = self.simulation.commitAttack()
+            for event in events { self.logCombatEvent(event) }
+
+            let attackEvent = events.last { if case .playerAttacked = $0 { return true }; if case .playerMissed = $0 { return true }; return false }
+            let fateValue: Int; let damage: Int; let resolution: FateResolution?
+            switch attackEvent {
+            case .playerAttacked(let d, let fv, _, let res): fateValue = fv; damage = d; resolution = res
+            case .playerMissed(let fv, let res): fateValue = fv; damage = 0; resolution = res
+            default: fateValue = 0; damage = 0; resolution = nil
             }
 
-            // Shake/flash enemy on hit + particle burst
-            let isCrit = resolution?.isCritical ?? false
-            if case .playerAttacked = event, let enemy = self.simulation.enemyEntity {
-                let anim = self.getOrCreateAnim(for: enemy)
-                anim.enqueue(.shake(intensity: isCrit ? 14 : 8, duration: 0.3))
-                anim.enqueue(.flash(colorName: "white", duration: 0.2))
-                self.spawnImpactParticles(at: self.enemyPosition, isCritical: isCrit)
-                // Screen shake on critical hit
-                if isCrit {
-                    self.screenShake(intensity: 6)
+            // Phase 2: Show fate deck, wait for player tap
+            self.onSoundEffect?("fateReveal")
+            self.presentFateDeckForReveal(value: fateValue, isCritical: resolution?.isCritical ?? false, label: L("encounter.action.attack"), resolution: resolution) { [weak self] in
+                guard let self else { return }
+
+                // Phase 3: Apply damage
+                self.onSoundEffect?("attackHit")
+                self.onHaptic?("medium")
+
+                if let playerAvatar = self.childNode(withName: "avatar_player") {
+                    playerAvatar.run(SKAction.sequence([
+                        SKAction.moveBy(x: 15, y: 15, duration: 0.1),
+                        SKAction.moveBy(x: -15, y: -15, duration: 0.1)
+                    ]))
+                }
+                let isCrit = resolution?.isCritical ?? false
+                if damage > 0, let enemy = self.simulation.enemyEntity {
+                    let anim = self.getOrCreateAnim(for: enemy)
+                    anim.enqueue(.shake(intensity: isCrit ? 14 : 8, duration: 0.3))
+                    anim.enqueue(.flash(colorName: "white", duration: 0.2))
+                    self.spawnImpactParticles(at: CGPoint(x: 0, y: self.enemyPosition.y), isCritical: isCrit)
+                    if isCrit { self.screenShake(intensity: 6) }
+                }
+                if damage > 0 {
+                    self.showDamageNumber(damage, at: CGPoint(x: 0, y: self.enemyPosition.y), color: CombatSceneTheme.highlight)
+                }
+
+                // Clear arena cards
+                self.clearArenaCards()
+                self.deselectAllCardsVisually()
+                self.syncRender()
+                self.updateHUD()
+                self.refreshHand()
+
+                if self.simulation.isOver {
+                    self.isAnimating = false
+                    self.handleCombatEnd()
+                    return
+                }
+
+                // Phase 4: Enemy turn banner + enemy action
+                self.showEnemyTurnBanner {
+                    self.runEnemyPhase(roundBefore: roundBefore)
                 }
             }
-
-            // Damage number on enemy
-            if damage > 0 {
-                self.showDamageNumber(damage, at: self.enemyPosition, color: CombatSceneTheme.highlight)
-            }
-
-            self.resolveAfterPlayerAction()
         }
     }
 
+    /// Executes the full player influence flow (same phases, spiritual track).
     private func performPlayerInfluence() {
         isAnimating = true
-        let event = simulation.playerInfluence()
-        logCombatEvent(event)
-        onSoundEffect?("influence")
-        onHaptic?("medium")
+        let selectedNodes = handContainer.children.compactMap { $0 as? CardNode }
+            .filter { simulation.selectedCardIds.contains($0.card.id) }
 
-        let fateValue: Int
-        let willDamage: Int
-        let resolution: FateResolution?
-        switch event {
-        case .playerInfluenced(let wd, let fv, _, let res):
-            fateValue = fv; willDamage = wd; resolution = res
-        default:
-            fateValue = 0; willDamage = 0; resolution = nil
-        }
-
-        showFateCard(value: fateValue, isCritical: resolution?.isCritical ?? false, label: "Influence", resolution: resolution) { [weak self] in
+        animateCardsToArena(selectedNodes) { [weak self] in
             guard let self else { return }
 
-            // Pulse player avatar
-            if let playerAvatar = self.childNode(withName: "avatar_player") {
-                playerAvatar.run(SKAction.sequence([
-                    SKAction.scale(to: 1.15, duration: 0.15),
-                    SKAction.scale(to: 1.0, duration: 0.15)
-                ]))
+            let roundBefore = self.simulation.round
+            let events = self.simulation.commitInfluence()
+            for event in events { self.logCombatEvent(event) }
+
+            let influenceEvent = events.last { if case .playerInfluenced = $0 { return true }; if case .influenceNotAvailable = $0 { return true }; return false }
+            let fateValue: Int; let willDamage: Int; let resolution: FateResolution?
+            switch influenceEvent {
+            case .playerInfluenced(let wd, let fv, _, let res): fateValue = fv; willDamage = wd; resolution = res
+            default: fateValue = 0; willDamage = 0; resolution = nil
             }
 
-            // Flash enemy with spirit color
-            if case .playerInfluenced = event, let enemy = self.simulation.enemyEntity {
-                let anim = self.getOrCreateAnim(for: enemy)
-                anim.enqueue(.flash(colorName: "cyan", duration: 0.3))
-            }
+            self.onSoundEffect?("fateReveal")
+            self.presentFateDeckForReveal(value: fateValue, isCritical: resolution?.isCritical ?? false, label: L("encounter.action.influence"), resolution: resolution) { [weak self] in
+                guard let self else { return }
 
-            // Will damage number on enemy (spirit color)
-            if willDamage > 0 {
-                self.showDamageNumber(willDamage, at: self.enemyPosition, color: CombatSceneTheme.spirit)
-            }
+                self.onSoundEffect?("influence")
+                self.onHaptic?("medium")
 
-            self.resolveAfterPlayerAction()
+                if let playerAvatar = self.childNode(withName: "avatar_player") {
+                    playerAvatar.run(SKAction.sequence([
+                        SKAction.scale(to: 1.15, duration: 0.15),
+                        SKAction.scale(to: 1.0, duration: 0.15)
+                    ]))
+                }
+                if willDamage > 0, let enemy = self.simulation.enemyEntity {
+                    let anim = self.getOrCreateAnim(for: enemy)
+                    anim.enqueue(.flash(colorName: "cyan", duration: 0.3))
+                }
+                if willDamage > 0 {
+                    self.showDamageNumber(willDamage, at: CGPoint(x: 0, y: self.enemyPosition.y), color: CombatSceneTheme.spirit)
+                }
+
+                self.clearArenaCards()
+                self.deselectAllCardsVisually()
+                self.syncRender()
+                self.updateHUD()
+                self.refreshHand()
+
+                if self.simulation.isOver {
+                    self.isAnimating = false
+                    self.handleCombatEnd()
+                    return
+                }
+
+                self.showEnemyTurnBanner {
+                    self.runEnemyPhase(roundBefore: roundBefore)
+                }
+            }
         }
     }
 
-    private func performPlayCard(_ cardId: String) {
+    private func performEndTurn() {
         isAnimating = true
+        deselectAllCardsVisually()
+        let roundBefore = simulation.round
+        simulation.endTurn()
+        syncRender()
+        updateHUD()
 
-        // Find the CardNode in hand container before resolving
-        let cardNode = handContainer.children.compactMap { $0 as? CardNode }.first { $0.card.id == cardId }
-
-        // Resolve logic immediately (state changes)
-        let event = simulation.playCard(cardId: cardId)
-        logCombatEvent(event)
-        onSoundEffect?("cardPlay")
-        onHaptic?("light")
-
-        if case .insufficientEnergy = event {
-            // Shake the card to indicate insufficient energy
-            if let cardNode = cardNode {
-                cardNode.run(SKAction.sequence([
-                    SKAction.moveBy(x: -4, y: 0, duration: 0.05),
-                    SKAction.moveBy(x: 8, y: 0, duration: 0.05),
-                    SKAction.moveBy(x: -8, y: 0, duration: 0.05),
-                    SKAction.moveBy(x: 4, y: 0, duration: 0.05)
-                ]))
-            }
-            isAnimating = false
-            return
-        }
-
-        guard case .cardPlayed(_, let damage, let heal, _, _) = event else {
-            isAnimating = false
-            return
-        }
-
-        // Determine fly target
-        let targetPos: CGPoint
-        if damage > 0 {
-            targetPos = enemyPosition
-        } else if heal > 0 {
-            targetPos = playerPosition
-        } else {
-            targetPos = CGPoint(x: 0, y: 0)
-        }
-
-        // Animate card flying from hand to target
-        if let cardNode = cardNode {
-            animateCardFly(cardNode: cardNode, to: targetPos) { [weak self] in
-                self?.resolveCardEffect(damage: damage, heal: heal)
-            }
-        } else {
-            resolveCardEffect(damage: damage, heal: heal)
+        showEnemyTurnBanner { [weak self] in
+            self?.runEnemyPhase(roundBefore: roundBefore)
         }
     }
 
-    private func animateCardFly(cardNode: CardNode, to target: CGPoint, completion: @escaping () -> Void) {
-        // Convert card position from handContainer to scene coordinates
-        let scenePos = handContainer.convert(cardNode.position, to: self)
+    // MARK: - Phase: Cards to Arena
 
-        // Create a flying copy in scene space
-        let flyCard = CardNode(card: cardNode.card)
-        flyCard.position = scenePos
-        flyCard.zPosition = 55
-        addChild(flyCard)
+    /// Fly selected cards to the arena zone and keep them visible.
+    private func animateCardsToArena(_ cardNodes: [CardNode], completion: @escaping () -> Void) {
+        guard !cardNodes.isEmpty else {
+            completion()
+            return
+        }
 
-        // Add glow behind the card
-        let glow = SKShapeNode(rectOf: CGSize(width: CardNode.cardSize.width + 12,
-                                               height: CardNode.cardSize.height + 12),
-                                cornerRadius: 10)
-        glow.fillColor = CombatSceneTheme.highlight.withAlphaComponent(0.4)
-        glow.strokeColor = .clear
-        glow.zPosition = -1
-        glow.setScale(0.8)
-        flyCard.addChild(glow)
+        let cardW = CardNode.cardSize.width
+        let arenaScale: CGFloat = 0.7
+        let spacing: CGFloat = 8
+        let scaledW = cardW * arenaScale
+        let totalW = scaledW * CGFloat(cardNodes.count) + spacing * CGFloat(cardNodes.count - 1)
+        let startX = -totalW / 2 + scaledW / 2
 
-        // Pulse glow
-        glow.run(SKAction.repeatForever(SKAction.sequence([
-            SKAction.scale(to: 1.1, duration: 0.15),
-            SKAction.scale(to: 0.9, duration: 0.15)
-        ])))
+        let group = DispatchGroup()
 
-        // Remove original from hand immediately
-        cardNode.removeFromParent()
+        for (i, cardNode) in cardNodes.enumerated() {
+            group.enter()
 
-        // Fly to target
-        let flyAction = SKAction.move(to: target, duration: 0.3)
-        flyAction.timingMode = .easeIn
-        let scaleDown = SKAction.scale(to: 0.6, duration: 0.3)
+            let scenePos = handContainer.convert(cardNode.position, to: self)
+            let flyCard = CardNode(card: cardNode.card)
+            flyCard.position = scenePos
+            flyCard.zPosition = 40 + CGFloat(i)
+            addChild(flyCard)
+            arenaCardNodes.append(flyCard)
 
-        flyCard.run(SKAction.group([flyAction, scaleDown])) {
-            // Flash and remove
-            flyCard.run(SKAction.sequence([
-                SKAction.fadeOut(withDuration: 0.15),
-                SKAction.removeFromParent()
-            ])) {
+            cardNode.removeFromParent()
+
+            let targetX = startX + CGFloat(i) * (scaledW + spacing)
+            let target = CGPoint(x: targetX, y: arenaCenter.y)
+
+            let flyAction = SKAction.move(to: target, duration: 0.3)
+            flyAction.timingMode = .easeOut
+            let scaleAction = SKAction.scale(to: arenaScale, duration: 0.3)
+
+            flyCard.run(SKAction.group([flyAction, scaleAction])) {
+                group.leave()
+            }
+        }
+
+        group.notify(queue: .main) {
+            // Settle pause
+            self.run(SKAction.wait(forDuration: 0.2)) {
                 completion()
             }
         }
     }
 
-    private func resolveCardEffect(damage: Int, heal: Int) {
-        if damage > 0 {
-            spawnImpactParticles(at: enemyPosition, isCritical: false)
-            if let enemy = simulation.enemyEntity {
-                let anim = getOrCreateAnim(for: enemy)
-                anim.enqueue(.shake(intensity: 6, duration: 0.2))
-            }
-            showDamageNumber(damage, at: enemyPosition, color: CombatSceneTheme.highlight)
-        }
-        if heal > 0 {
-            let emitter = CombatParticles.healEffect()
-            emitter.position = playerPosition
-            addChild(emitter)
-            emitter.run(SKAction.sequence([
-                SKAction.wait(forDuration: 1.0),
+    /// Fade out and remove all cards from the arena.
+    private func clearArenaCards() {
+        for node in arenaCardNodes {
+            node.run(SKAction.sequence([
+                SKAction.fadeOut(withDuration: 0.3),
                 SKAction.removeFromParent()
             ]))
-            showDamageNumber(heal, at: playerPosition, color: CombatSceneTheme.success, prefix: "+")
         }
-
-        syncRender()
-        updateHUD()
-        refreshHand()
-        isAnimating = false
+        arenaCardNodes.removeAll()
     }
 
-    private func performEndTurn() {
-        simulation.endTurn()
-        syncRender()
-        updateHUD()
-        isAnimating = true
+    // MARK: - Phase: Enemy Turn Banner
+
+    private func showEnemyTurnBanner(completion: @escaping () -> Void) {
+        let banner = SKNode()
+        banner.zPosition = 80
+        banner.position = CGPoint(x: 0, y: arenaCenter.y)
+
+        let bg = SKShapeNode(rectOf: CGSize(width: size.width * 0.8, height: 40), cornerRadius: 8)
+        bg.fillColor = CombatSceneTheme.health.withAlphaComponent(0.3)
+        bg.strokeColor = CombatSceneTheme.health.withAlphaComponent(0.6)
+        bg.lineWidth = 1
+        banner.addChild(bg)
+
+        let label = SKLabelNode(fontNamed: "AvenirNext-Heavy")
+        label.text = L("combat.enemy.turn")
+        label.fontSize = 20
+        label.fontColor = CombatSceneTheme.health
+        label.verticalAlignmentMode = .center
+        banner.addChild(label)
+
+        banner.alpha = 0
+        banner.setScale(0.8)
+        addChild(banner)
+
+        banner.run(SKAction.sequence([
+            SKAction.group([
+                SKAction.fadeIn(withDuration: 0.2),
+                SKAction.scale(to: 1.05, duration: 0.2)
+            ]),
+            SKAction.scale(to: 1.0, duration: 0.1),
+            SKAction.wait(forDuration: 0.4),
+            SKAction.fadeOut(withDuration: 0.2),
+            SKAction.removeFromParent()
+        ])) {
+            completion()
+        }
+    }
+
+    // MARK: - Phase: Enemy Action
+
+    private func runEnemyPhase(roundBefore: Int) {
+        // Pulse enemy intent
+        if let intentNode = intentNode {
+            intentNode.run(SKAction.sequence([
+                SKAction.scale(to: 1.3, duration: 0.15),
+                SKAction.scale(to: 1.0, duration: 0.15)
+            ]))
+        }
+
         run(SKAction.wait(forDuration: 0.3)) { [weak self] in
-            self?.resolveEnemyTurn()
-        }
-    }
-
-    private func resolveAfterPlayerAction() {
-        syncRender()
-        updateHUD()
-        refreshHand()
-        isAnimating = false
-
-        if simulation.isOver {
-            handleCombatEnd()
-            return
-        }
-
-        // Enemy turn after short delay
-        isAnimating = true
-        run(SKAction.wait(forDuration: 0.6)) { [weak self] in
-            self?.resolveEnemyTurn()
-        }
-    }
-
-    private func resolveEnemyTurn() {
-        let event = simulation.resolveEnemyTurn()
-        logCombatEvent(event)
-        onSoundEffect?("enemyAttack")
-        onHaptic?("heavy")
-
-        // Extract fate value
-        let fateValue: Int
-        let damage: Int
-        switch event {
-        case .enemyAttacked(let d, let fv, _, _):
-            fateValue = fv; damage = d
-        default:
-            fateValue = 0; damage = 0
-        }
-
-        showFateCard(value: fateValue, isCritical: false, label: "Defense") { [weak self] in
             guard let self else { return }
 
-            // Lunge enemy avatar toward player
-            if let enemyAvatar = self.childNode(withName: "avatar_enemy") {
-                enemyAvatar.run(SKAction.sequence([
-                    SKAction.moveBy(x: 0, y: -15, duration: 0.1),
-                    SKAction.moveBy(x: 0, y: 15, duration: 0.1)
-                ]))
+            let event = self.simulation.resolveEnemyTurn()
+            self.logCombatEvent(event)
+            self.onSoundEffect?("enemyAttack")
+            self.onHaptic?("heavy")
+
+            let fateValue: Int; let damage: Int
+            switch event {
+            case .enemyAttacked(let d, let fv, _, _): fateValue = fv; damage = d
+            default: fateValue = 0; damage = 0
             }
 
-            // Shake player on hit + particle burst
-            if case .enemyAttacked = event, let player = self.simulation.playerEntity {
-                let anim = self.getOrCreateAnim(for: player)
-                anim.enqueue(.shake(intensity: 5, duration: 0.2))
-                self.spawnImpactParticles(at: self.playerPosition, isCritical: false)
-            }
+            self.showFateCard(value: fateValue, isCritical: false, label: L("combat.fate.defense.label")) { [weak self] in
+                guard let self else { return }
 
-            if damage > 0 {
-                self.showDamageNumber(damage, at: self.playerPosition, color: CombatSceneTheme.health)
-            }
+                // Enemy lunge
+                if let enemyAvatar = self.childNode(withName: "avatar_enemy") {
+                    enemyAvatar.run(SKAction.sequence([
+                        SKAction.moveBy(x: 15, y: -15, duration: 0.1),
+                        SKAction.moveBy(x: -15, y: 15, duration: 0.1)
+                    ]))
+                }
 
-            self.syncRender()
-            self.updateHUD()
-            self.isAnimating = false
+                if case .enemyAttacked = event, let player = self.simulation.playerEntity {
+                    let anim = self.getOrCreateAnim(for: player)
+                    anim.enqueue(.shake(intensity: 5, duration: 0.2))
+                    self.spawnImpactParticles(at: CGPoint(x: 0, y: self.playerPosition.y), isCritical: false)
+                }
 
-            if self.simulation.isOver {
-                self.handleCombatEnd()
+                if damage > 0 {
+                    self.showDamageNumber(damage, at: CGPoint(x: 0, y: self.playerPosition.y), color: CombatSceneTheme.health)
+                }
+
+                self.syncRender()
+                self.updateHUD()
+
+                if self.simulation.isOver {
+                    self.isAnimating = false
+                    self.handleCombatEnd()
+                    return
+                }
+
+                // Round end phase
+                self.showRoundEnd(roundBefore: roundBefore)
             }
         }
+    }
+
+    // MARK: - Phase: Round End
+
+    private func showRoundEnd(roundBefore: Int) {
+        let newRound = simulation.round
+
+        if newRound > roundBefore {
+            // Show round indicator
+            let roundBanner = SKLabelNode(fontNamed: "AvenirNext-Heavy")
+            roundBanner.text = L("combat.round.start", newRound)
+            roundBanner.fontSize = 24
+            roundBanner.fontColor = CombatSceneTheme.faith
+            roundBanner.position = arenaCenter
+            roundBanner.verticalAlignmentMode = .center
+            roundBanner.zPosition = 80
+            roundBanner.alpha = 0
+            roundBanner.setScale(0.8)
+            addChild(roundBanner)
+
+            roundBanner.run(SKAction.sequence([
+                SKAction.group([
+                    SKAction.fadeIn(withDuration: 0.15),
+                    SKAction.scale(to: 1.1, duration: 0.15)
+                ]),
+                SKAction.scale(to: 1.0, duration: 0.1),
+                SKAction.wait(forDuration: 0.3),
+                SKAction.fadeOut(withDuration: 0.2),
+                SKAction.removeFromParent()
+            ])) { [weak self] in
+                self?.finishRound()
+            }
+        } else {
+            finishRound()
+        }
+    }
+
+    private func finishRound() {
+        refreshHand()
+        updateHUD()
+        isAnimating = false
     }
 
     // MARK: - Animation Helpers
@@ -1425,7 +1851,8 @@ public final class CombatScene: SKScene {
         label.text = "\(prefix)\(abs(value))"
         label.fontSize = 22
         label.fontColor = color
-        label.position = CGPoint(x: position.x, y: position.y + 30)
+        // Show damage numbers centered horizontally, near the target's Y
+        label.position = CGPoint(x: 0, y: position.y + 30)
         label.zPosition = 60
         label.setScale(0.5)
         addChild(label)
@@ -1513,13 +1940,13 @@ public final class CombatScene: SKScene {
         switch outcome {
         case .victory(.pacified):
             isVictory = true
-            victoryText = "Pacified!"
+            victoryText = L("encounter.outcome.pacified")
         case .victory:
             isVictory = true
-            victoryText = "Victory!"
+            victoryText = L("encounter.outcome.victory")
         case .defeat:
             isVictory = false
-            victoryText = "Defeat"
+            victoryText = L("encounter.outcome.defeat")
         }
         let titleColor: SKColor = isVictory ? CombatSceneTheme.success : CombatSceneTheme.health
 
@@ -1541,9 +1968,9 @@ public final class CombatScene: SKScene {
 
         // Stats
         let stats = [
-            "Rounds: \(simulation.round)",
-            "HP: \(simulation.playerHealth)",
-            "Enemy HP: \(simulation.enemyHealth)"
+            L("encounter.result.rounds", simulation.round),
+            L("encounter.result.hp", simulation.playerHealth),
+            L("encounter.result.enemy.hp", simulation.enemyHealth)
         ]
         for (i, stat) in stats.enumerated() {
             let label = SKLabelNode(fontNamed: "AvenirNext-Medium")
@@ -1564,7 +1991,7 @@ public final class CombatScene: SKScene {
         container.addChild(btnBg)
 
         let btnLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
-        btnLabel.text = "Continue"
+        btnLabel.text = L("encounter.outcome.continue")
         btnLabel.fontSize = 15
         btnLabel.fontColor = .white
         btnLabel.position = CGPoint(x: 0, y: -70)

@@ -467,7 +467,7 @@ struct CombatOverView: View {
     @ViewBuilder
     private var rewardsSection: some View {
         VStack(spacing: Spacing.md) {
-            Divider().background(AppColors.secondary.opacity(0.3))
+            Divider().background(AppColors.secondary.opacity(Opacity.light))
 
             // Faith reward
             if result.transaction.faithDelta > 0 {

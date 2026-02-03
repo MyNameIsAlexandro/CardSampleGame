@@ -36,6 +36,7 @@ public final class UIRenderSystem: EchoSystem {
                     fillName: Self.hpBarName,
                     fraction: fraction,
                     barWidth: bar.barWidth,
+                    xOffset: bar.horizontalOffset,
                     yOffset: bar.verticalOffset,
                     color: hpColor(fraction: fraction)
                 )
@@ -49,6 +50,7 @@ public final class UIRenderSystem: EchoSystem {
                     fillName: Self.willBarName,
                     fraction: fraction,
                     barWidth: bar.barWidth,
+                    xOffset: bar.horizontalOffset,
                     yOffset: bar.verticalOffset - 8,
                     color: .cyan
                 )
@@ -62,6 +64,7 @@ public final class UIRenderSystem: EchoSystem {
         fillName: String,
         fraction: CGFloat,
         barWidth: CGFloat,
+        xOffset: CGFloat = 0,
         yOffset: CGFloat,
         color: SKColor
     ) {
@@ -80,7 +83,7 @@ public final class UIRenderSystem: EchoSystem {
             bg.zPosition = 10
             parent.addChild(bg)
         }
-        bg.position = CGPoint(x: 0, y: yOffset)
+        bg.position = CGPoint(x: xOffset, y: yOffset)
 
         // Fill
         let fillWidth = barWidth * clampedFraction
@@ -102,7 +105,7 @@ public final class UIRenderSystem: EchoSystem {
             parent.addChild(fill)
         }
         fill.fillColor = color
-        fill.position = CGPoint(x: 0, y: yOffset)
+        fill.position = CGPoint(x: xOffset, y: yOffset)
     }
 
     private func hpColor(fraction: CGFloat) -> SKColor {
@@ -134,7 +137,7 @@ public final class UIRenderSystem: EchoSystem {
             labelNode.fontName = label.fontName
             labelNode.fontSize = label.fontSize
             labelNode.fontColor = colorFromName(label.colorName)
-            labelNode.position = CGPoint(x: 0, y: label.verticalOffset)
+            labelNode.position = CGPoint(x: label.horizontalOffset, y: label.verticalOffset)
         }
     }
 

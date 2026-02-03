@@ -1182,8 +1182,8 @@ public final class TwilightGameEngine {
             }
         }
 
-        // Fallback to first event
-        let selectedDef = filteredDefinitions[0]
+        // Fallback — weighted loop should always select, but guard defensively
+        let selectedDef = filteredDefinitions[services.rng.nextInt(in: 0...(filteredDefinitions.count - 1))]
         let gameEvent = selectedDef.toGameEvent(forRegion: regionDefId)
         currentEvent = gameEvent
         return gameEvent.id

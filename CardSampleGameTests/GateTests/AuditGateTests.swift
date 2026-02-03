@@ -659,7 +659,7 @@ final class AuditGateTests: XCTestCase {
             // ResonanceEngine.swift is a subsystem (zone detection + resonance state), not a runtime engine
             if file == "ResonanceEngine.swift" { return false }
             // Sub-manager files are internal parts of TwilightGameEngine, not alternative engines
-            if file == "EnginePlayerManager.swift" || file == "EngineDeckManager.swift" || file == "EngineCombatManager.swift" { return false }
+            if file == "EnginePlayerManager.swift" || file == "EngineDeckManager.swift" || file == "EngineCombatManager.swift" || file == "EngineServices.swift" { return false }
             // Any other "Engine" file is a potential violation
             return true
         }
@@ -668,6 +668,46 @@ final class AuditGateTests: XCTestCase {
             alternativeEngines.isEmpty,
             "Found alternative runtime engines that should be removed: \(alternativeEngines). " +
             "TwilightGameEngine должен быть единственным runtime движком."
+        )
+    }
+
+    // MARK: - SpriteKit-Only Combat
+
+    /// Gate test: CombatView (SwiftUI) must not be instantiated in production code.
+    /// All combat must go through CombatSceneView (SpriteKit/EchoEngine).
+    func testNoCombatViewUsedInProductionCode() throws {
+        let testFile = URL(fileURLWithPath: #filePath)
+        let projectRoot = testFile
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+
+        let productionDirs = ["Views", "App"]
+        var violations: [String] = []
+
+        for dir in productionDirs {
+            let dirURL = projectRoot.appendingPathComponent(dir)
+            guard let enumerator = FileManager.default.enumerator(
+                at: dirURL, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles]
+            ) else { continue }
+
+            for case let fileURL as URL in enumerator where fileURL.pathExtension == "swift" {
+                let content = try String(contentsOf: fileURL, encoding: .utf8)
+                let lines = content.components(separatedBy: "\n")
+                for (i, line) in lines.enumerated() {
+                    let trimmed = line.trimmingCharacters(in: .whitespaces)
+                    if trimmed.hasPrefix("//") || trimmed.hasPrefix("*") { continue }
+                    // CombatView( instantiation — but not CombatSceneView( or type refs like CombatView.CombatStats
+                    if trimmed.contains("CombatView(") && !trimmed.contains("CombatSceneView(") {
+                        violations.append("\(fileURL.lastPathComponent):\(i + 1)")
+                    }
+                }
+            }
+        }
+
+        XCTAssertTrue(
+            violations.isEmpty,
+            "Found SwiftUI CombatView instantiation in production code (must use CombatSceneView): \(violations)"
         )
     }
 
@@ -1768,8 +1808,8 @@ extension AuditGateTests {
 
         // createSave must include RNG state
         XCTAssertTrue(
-            content.contains("rngState: WorldRNG.shared.currentState()"),
-            "createSave must save WorldRNG.shared.currentState() (Audit A2)"
+            content.contains("rngState: services.rng.currentState()"),
+            "createSave must save RNG state via services.rng.currentState() (Audit A2)"
         )
 
         // Must not have "rngSeed: nil" pattern anymore

@@ -1,78 +1,78 @@
 {
-  "resources": {
-    "starting_health": 20,
-    "max_health": 30,
-    "starting_faith": 8,
-    "max_faith": 20,
-    "starting_supplies": 5,
-    "max_supplies": 10,
-    "starting_gold": 0,
-    "max_gold": 100,
-    "rest_heal_amount": 3,
-    "starting_balance": 50
+  "anchor" : {
+    "breach_threshold" : 30,
+    "decay_per_turn" : 3,
+    "degradation_amount" : 20,
+    "max_integrity" : 100,
+    "stable_threshold" : 70,
+    "strengthen_amount" : 20,
+    "strengthen_cost" : 3
   },
-  "pressure": {
-    "starting_pressure": 15,
-    "min_pressure": 0,
-    "max_pressure": 100,
-    "pressure_per_turn": 3,
-    "escalation_interval": 3,
-    "thresholds": {
-      "warning": 50,
-      "critical": 75,
-      "catastrophic": 100
+  "balance_system" : {
+    "dark_threshold" : 30,
+    "initial" : 50,
+    "light_threshold" : 70,
+    "max" : 100,
+    "min" : 0
+  },
+  "combat" : {
+    "actions_per_turn" : 3,
+    "base_damage" : 2,
+    "cards_drawn_per_turn" : 5,
+    "de_escalation_rage_shield" : 3,
+    "defense_reduction" : 1,
+    "dice_max" : 6,
+    "escalation_resonance_shift" : -5,
+    "escalation_surprise_bonus" : 3,
+    "match_multiplier" : 1.5,
+    "max_hand_size" : 7,
+    "power_modifier" : 1
+  },
+  "end_conditions" : {
+    "critical_anchor_destroyed_flag" : "critical_anchor_destroyed",
+    "death_health" : 0,
+    "main_quest_complete_flag" : "act5_completed",
+    "pressure_loss" : 100,
+    "victory_quests" : [
+      "main_quest_act5"
+    ]
+  },
+  "pressure" : {
+    "degradation" : {
+      "anchor_decay_chance" : 0.05,
+      "catastrophic_chance" : 0.5,
+      "critical_chance" : 0.3,
+      "warning_chance" : 0.15
     },
-    "degradation": {
-      "warning_chance": 0.15,
-      "critical_chance": 0.3,
-      "catastrophic_chance": 0.5,
-      "anchor_decay_chance": 0.05
+    "escalation_interval" : 3,
+    "max_pressure" : 100,
+    "min_pressure" : 0,
+    "pressure_per_turn" : 3,
+    "starting_pressure" : 15,
+    "thresholds" : {
+      "catastrophic" : 100,
+      "critical" : 75,
+      "warning" : 50
     }
   },
-  "combat": {
-    "base_damage": 2,
-    "power_modifier": 1.0,
-    "defense_reduction": 1.0,
-    "dice_max": 6,
-    "actions_per_turn": 3,
-    "cards_drawn_per_turn": 5,
-    "max_hand_size": 7,
-    "escalation_resonance_shift": -5.0,
-    "escalation_surprise_bonus": 3,
-    "de_escalation_rage_shield": 3,
-    "match_multiplier": 1.5
+  "resources" : {
+    "max_faith" : 20,
+    "max_gold" : 100,
+    "max_health" : 30,
+    "max_supplies" : 10,
+    "rest_heal_amount" : 3,
+    "starting_balance" : 50,
+    "starting_faith" : 8,
+    "starting_gold" : 0,
+    "starting_health" : 20,
+    "starting_supplies" : 5
   },
-  "time": {
-    "starting_time": 8,
-    "max_days": null,
-    "travel_cost": 1,
-    "explore_cost": 1,
-    "rest_cost": 1,
-    "strengthen_anchor_cost": 1,
-    "instant_cost": 0
-  },
-  "end_conditions": {
-    "death_health": 0,
-    "pressure_loss": 100,
-    "breach_loss": null,
-    "victory_quests": ["main_quest_act5"],
-    "main_quest_complete_flag": "act5_completed",
-    "critical_anchor_destroyed_flag": "critical_anchor_destroyed"
-  },
-  "balance_system": {
-    "min": 0,
-    "max": 100,
-    "initial": 50,
-    "light_threshold": 70,
-    "dark_threshold": 30
-  },
-  "anchor": {
-    "max_integrity": 100,
-    "strengthen_amount": 20,
-    "strengthen_cost": 3,
-    "stable_threshold": 70,
-    "breach_threshold": 30,
-    "decay_per_turn": 3,
-    "degradation_amount": 20
+  "time" : {
+    "explore_cost" : 1,
+    "instant_cost" : 0,
+    "rest_cost" : 1,
+    "starting_time" : 8,
+    "strengthen_anchor_cost" : 1,
+    "travel_cost" : 1
   }
 }

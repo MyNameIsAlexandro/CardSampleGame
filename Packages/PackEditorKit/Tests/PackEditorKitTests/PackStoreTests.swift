@@ -589,7 +589,7 @@ final class PackStoreTests: XCTestCase {
     }
 
     func testBehavior_jsonRoundTrip() throws {
-        var behavior = BehaviorDefinition(
+        let behavior = BehaviorDefinition(
             id: "test_beh",
             rules: [BehaviorRule(
                 conditions: [BehaviorCondition(type: "health_pct", op: "<", value: 0.3)],
@@ -825,7 +825,7 @@ final class PackStoreTests: XCTestCase {
     }
 
     func testExportNonexistent_returnsNil() {
-        let data = store.exportEntityJSON(id: "nope", for: .enemies)
+        _ = store.exportEntityJSON(id: "nope", for: .enemies)
         // encoder.encode(nil as EnemyDefinition?) encodes "null", so check the dict is empty
         XCTAssertTrue(store.enemies.isEmpty)
     }

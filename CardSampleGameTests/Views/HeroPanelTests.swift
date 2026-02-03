@@ -13,6 +13,7 @@ final class HeroPanelTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
+        TestContentLoader.loadContentPacksIfNeeded()
         engine = TwilightGameEngine()
     }
 
@@ -25,7 +26,7 @@ final class HeroPanelTests: XCTestCase {
 
     func testHeroDisplaysCorrectly() {
         // Given: Get first available hero from registry
-        let registry = HeroRegistry.shared
+        let registry = ContentRegistry.shared.heroRegistry
         guard let hero = registry.firstHero else {
             XCTFail("No heroes in registry"); return
         }
@@ -39,7 +40,7 @@ final class HeroPanelTests: XCTestCase {
 
     func testAllHeroesHaveValidData() {
         // Verify all heroes have valid data for display
-        let registry = HeroRegistry.shared
+        let registry = ContentRegistry.shared.heroRegistry
 
         for hero in registry.allHeroes {
             XCTAssertFalse(hero.id.isEmpty, "Hero should have ID")

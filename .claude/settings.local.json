@@ -2,7 +2,19 @@
   "permissions": {
     "allow": [
       "WebSearch",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(while read f)",
+      "Bash(do ls -lh \"$f\")",
+      "Bash(du:*)",
+      "Bash(for f in PackEditor/Views/Editors/*.swift)",
+      "Bash(do cp \"$f\" \"Packages/PackEditorApp/Sources/PackEditorApp/Views/Editors/\")",
+      "Bash(done)",
+      "Bash(for f in PackEditor/Views/Shared/*.swift)",
+      "Bash(do cp \"$f\" \"Packages/PackEditorApp/Sources/PackEditorApp/Views/Shared/\")",
+      "Bash(do python3 -m json.tool $f)",
+      "Bash(timeout 5 ./PackEditor.app/Contents/MacOS/PackEditor:*)",
+      "Bash(log show --predicate 'processImagePath CONTAINS \"\"\"\"PackEditor\"\"\"\"' --last 1m)",
+      "Bash(within view updates\" warnings using Task { @MainActor in }\n- Add unique .id\\(\\) to ForEach items in StringListEditor and DictEditor\n  to prevent duplicate ID conflicts in Forms\n- Add safe bindings with bounds checking in all editors \\(Enemy, Card,\n  Event, Quest, Behavior, FateCard\\)\n- Add safeDisplayString\\(\\) helper in PackStore for defensive text access\n- Add detailed debug logging for pack loading diagnostics\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
     ]
   }
 }

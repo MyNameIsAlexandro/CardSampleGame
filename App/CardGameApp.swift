@@ -104,6 +104,26 @@ class ContentLoader: ObservableObject {
             updateLoadingItem(name: L10n.loadingItemEnemies.localized, status: .loaded, count: inventory.enemyCount)
             updateLoadingItem(name: L10n.loadingItemLocalization.localized, status: .loaded, count: inventory.supportedLocales.count)
 
+            // Validate content after loading (defensive programming)
+            loadingProgress = 0.85
+            let safeAccess = SafeContentAccess.shared
+            let validation = safeAccess.validateAllContent()
+
+            #if DEBUG
+            if !validation.errors.isEmpty {
+                print("⚠️ Content validation errors:")
+                for error in validation.errors {
+                    print("  - \(error)")
+                }
+            }
+            if !validation.warnings.isEmpty {
+                print("ℹ️ Content validation warnings:")
+                for warning in validation.warnings {
+                    print("  - \(warning)")
+                }
+            }
+            #endif
+
             loadingProgress = 0.9
             loadingMessage = L10n.loadingContentLoaded.localized
 
@@ -116,6 +136,7 @@ class ContentLoader: ObservableObject {
             for pack in packs {
                 print("  - \(pack.manifest.packId) (\(pack.manifest.packType.rawValue))")
             }
+            print("ContentLoader: Validation \(validation.isValid ? "passed" : "failed with \(validation.errors.count) errors")")
             #endif
 
         case .failure(let error):

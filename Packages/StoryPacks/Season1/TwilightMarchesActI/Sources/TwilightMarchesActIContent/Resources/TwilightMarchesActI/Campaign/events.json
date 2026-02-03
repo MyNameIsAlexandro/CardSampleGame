@@ -1,2714 +1,3482 @@
 [
   {
-    "id": "event_elder_quest",
-    "title": {
-      "en": "Village Elder's Request",
-      "ru": "Просьба Старосты"
+    "availability" : {
+      "forbidden_flags" : [
+
+      ],
+      "region_ids" : [
+        "forest"
+      ],
+      "region_states" : [
+        "stable",
+        "borderland",
+        "breach"
+      ],
+      "required_flags" : [
+
+      ]
     },
-    "body": {
-      "en": "The village elder asks for help. The Navi grows stronger, and the village needs a defender who can strengthen the anchors and resist the darkness.",
-      "ru": "Деревенский староста просит о помощи. Навь усиливается, и деревне нужен защитник, способный укрепить якоря и противостоять тьме."
+    "body" : {
+      "en" : "A pair of glowing eyes appears in the undergrowth. A shadow wolf — corrupted by Navi — lunges from the darkness with unnatural speed.",
+      "ru" : "Пара светящихся глаз появляется в подлеске. Теневой волк — искажённый Навью — бросается из тьмы с неестественной скоростью."
     },
-    "event_kind": "inline",
-    "availability": {
-      "required_flags": [],
-      "forbidden_flags": ["main_quest_started"],
-      "min_pressure": null,
-      "max_pressure": null,
-      "min_balance": null,
-      "max_balance": null,
-      "region_states": ["stable", "borderland"],
-      "region_ids": ["village"]
-    },
-    "pool_ids": ["pool_village"],
-    "weight": 100,
-    "is_one_time": true,
-    "is_instant": false,
-    "cooldown": 0,
-    "choices": [
+    "choices" : [
       {
-        "id": "accept_quest",
-        "label": {
-          "en": "Agree to help the village",
-          "ru": "Согласиться помочь деревне"
-        },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {"faith": 3},
-          "set_flags": ["main_quest_started", "helped_village"],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": {
-            "quest_id": "quest_main_act1",
-            "objective_id": "obj_learn_anchors",
-            "action": "unlock"
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+
           },
-          "trigger_event_id": null,
-          "result_key": "quest_accepted"
-        }
-      },
-      {
-        "id": "request_payment",
-        "label": {
-          "en": "Request payment (10 Faith)",
-          "ru": "Попросить награду (10 ✨)"
+          "result_key" : "combat_start",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {"faith": 10},
-          "set_flags": ["main_quest_started", "mercenary_path"],
-          "clear_flags": [],
-          "balance_delta": -5,
-          "region_state_change": null,
-          "quest_progress": {
-            "quest_id": "quest_main_act1",
-            "objective_id": "obj_learn_anchors",
-            "action": "unlock"
+        "id" : "fight_shadow_wolf",
+        "label" : {
+          "en" : "Fight the shadow wolf",
+          "ru" : "Сразиться с теневым волком"
+        },
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "health" : 2
           },
-          "trigger_event_id": null,
-          "result_key": "mercenary_accepted"
+          "required_flags" : [
+
+          ]
         }
       },
       {
-        "id": "refuse",
-        "label": {
-          "en": "Refuse and go your own way",
-          "ru": "Отказать и идти своим путем"
-        },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {},
-          "set_flags": ["refused_main_quest"],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "quest_refused"
-        }
-      }
-    ],
-    "mini_game_challenge": null
-  },
-  {
-    "id": "event_sacred_oak_wisdom",
-    "title": {
-      "en": "Wisdom of the Sacred Oak",
-      "ru": "Мудрость Священного Дуба"
-    },
-    "body": {
-      "en": "The ancient oak whispers to you in the language of the wind. You feel its ancient power and the wisdom of ages.",
-      "ru": "Древний дуб шепчет вам на языке ветра. Вы чувствуете его древнюю силу и мудрость веков."
-    },
-    "event_kind": "inline",
-    "availability": {
-      "required_flags": [],
-      "forbidden_flags": [],
-      "min_pressure": null,
-      "max_pressure": null,
-      "min_balance": null,
-      "max_balance": null,
-      "region_states": ["stable", "borderland"],
-      "region_ids": ["oak"]
-    },
-    "pool_ids": ["pool_sacred"],
-    "weight": 20,
-    "is_one_time": false,
-    "is_instant": false,
-    "cooldown": 3,
-    "choices": [
-      {
-        "id": "meditate",
-        "label": {
-          "en": "Meditate under the oak (6 Faith)",
-          "ru": "Медитировать под дубом (6 ✨)"
-        },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"faith": 6},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
-        },
-        "consequences": {
-          "resource_changes": {"faith": -6, "health": 5},
-          "set_flags": ["oak_wisdom"],
-          "clear_flags": [],
-          "balance_delta": 10,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "wisdom_gained"
-        }
-      },
-      {
-        "id": "strengthen_oak",
-        "label": {
-          "en": "Strengthen the oak's bond with the earth (12 Faith)",
-          "ru": "Укрепить связь дуба с землей (12 ✨)"
-        },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"faith": 12},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": 60,
-          "max_balance": null
-        },
-        "consequences": {
-          "resource_changes": {"faith": -12},
-          "set_flags": ["oak_strengthened"],
-          "clear_flags": [],
-          "balance_delta": 15,
-          "region_state_change": null,
-          "quest_progress": {
-            "quest_id": "quest_main_act1",
-            "objective_id": "obj_strengthen_oak",
-            "action": "complete"
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : -3
           },
-          "trigger_event_id": null,
-          "result_key": "oak_strengthened"
-        }
-      },
-      {
-        "id": "rest",
-        "label": {
-          "en": "Simply rest in the oak's shade",
-          "ru": "Просто отдохнуть в тени дуба"
+          "result_key" : "wolf_scared",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {"health": 2},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "rested"
-        }
-      }
-    ],
-    "mini_game_challenge": null
-  },
-  {
-    "id": "event_wanderer",
-    "title": {
-      "en": "Wanderer at the Crossroads",
-      "ru": "Странник на Развилке"
-    },
-    "body": {
-      "en": "An old traveler sits by a campfire. He offers to share knowledge about the world in exchange for help.",
-      "ru": "Старый путник сидит у костра. Он предлагает поделиться знаниями о мире в обмен на помощь."
-    },
-    "event_kind": "inline",
-    "availability": {
-      "required_flags": [],
-      "forbidden_flags": ["met_wanderer"],
-      "min_pressure": null,
-      "max_pressure": null,
-      "min_balance": null,
-      "max_balance": null,
-      "region_states": ["stable", "borderland"],
-      "region_ids": null
-    },
-    "pool_ids": ["pool_common"],
-    "weight": 15,
-    "is_one_time": true,
-    "is_instant": false,
-    "cooldown": 0,
-    "choices": [
-      {
-        "id": "listen",
-        "label": {
-          "en": "Listen to the wanderer's tales (3 Faith)",
-          "ru": "Выслушать рассказы странника (3 ✨)"
+        "id" : "scare_wolf",
+        "label" : {
+          "en" : "Use fire to scare it (3 Faith)",
+          "ru" : "Использовать огонь для отпугивания (3 ✨)"
         },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"faith": 3},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
-        },
-        "consequences": {
-          "resource_changes": {"faith": -3},
-          "set_flags": ["met_wanderer"],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "wanderer_tales"
-        }
-      },
-      {
-        "id": "help",
-        "label": {
-          "en": "Help him with supplies",
-          "ru": "Помочь ему припасами"
-        },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {"faith": -2},
-          "set_flags": ["met_wanderer"],
-          "clear_flags": [],
-          "balance_delta": 5,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "wanderer_helped"
-        }
-      },
-      {
-        "id": "pass",
-        "label": {
-          "en": "Pass by",
-          "ru": "Пройти мимо"
-        },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "passed_by"
-        }
-      }
-    ],
-    "mini_game_challenge": null
-  },
-  {
-    "id": "event_wild_beast",
-    "title": {
-      "en": "Wild Beast",
-      "ru": "Дикий Зверь"
-    },
-    "body": {
-      "en": "A maddened creature leaps from the bushes with glowing red eyes. It growls and prepares to attack!",
-      "ru": "Из-за деревьев выскакивает озверевшее существо с горящими красными глазами. Оно рычит и готовится к атаке!"
-    },
-    "event_kind": {"mini_game": "combat"},
-    "availability": {
-      "required_flags": [],
-      "forbidden_flags": [],
-      "min_pressure": null,
-      "max_pressure": null,
-      "min_balance": null,
-      "max_balance": null,
-      "region_states": ["stable", "borderland", "breach"],
-      "region_ids": null
-    },
-    "pool_ids": ["pool_common"],
-    "weight": 20,
-    "is_one_time": false,
-    "is_instant": false,
-    "cooldown": 2,
-    "choices": [
-      {
-        "id": "fight",
-        "label": {
-          "en": "Fight the beast",
-          "ru": "Сразиться со зверем"
-        },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"health": 2},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
-        },
-        "consequences": {
-          "resource_changes": {},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "combat_start"
-        }
-      },
-      {
-        "id": "scare",
-        "label": {
-          "en": "Try to scare the beast (5 Faith)",
-          "ru": "Попытаться испугать зверя (5 ✨)"
-        },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"faith": 5},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
-        },
-        "consequences": {
-          "resource_changes": {"faith": -5},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "beast_scared"
-        }
-      },
-      {
-        "id": "flee",
-        "label": {
-          "en": "Run away",
-          "ru": "Убежать"
-        },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {"health": -1},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "fled_injured"
-        }
-      }
-    ],
-    "mini_game_challenge": {
-      "enemy_id": "wild_beast",
-      "difficulty": 1,
-      "rewards": {
-        "resource_changes": {"faith": 3},
-        "set_flags": [],
-        "clear_flags": [],
-        "balance_delta": 0,
-        "region_state_change": null,
-        "quest_progress": null,
-        "trigger_event_id": null,
-        "result_key": null
-      }
-    }
-  },
-  {
-    "id": "event_swamp_witch",
-    "title": {
-      "en": "Swamp Witch",
-      "ru": "Болотная Ведьма"
-    },
-    "body": {
-      "en": "An old witch appears from the swamp mists. She offers a deal: knowledge in exchange for a part of your essence.",
-      "ru": "Среди болотных туманов появляется старая ведьма. Она предлагает сделку: знания в обмен на часть вашей сущности."
-    },
-    "event_kind": "inline",
-    "availability": {
-      "required_flags": [],
-      "forbidden_flags": ["witch_pact", "witch_refused"],
-      "min_pressure": null,
-      "max_pressure": null,
-      "min_balance": null,
-      "max_balance": null,
-      "region_states": ["borderland", "breach"],
-      "region_ids": ["swamp"]
-    },
-    "pool_ids": ["pool_swamp"],
-    "weight": 25,
-    "is_one_time": true,
-    "is_instant": false,
-    "cooldown": 0,
-    "choices": [
-      {
-        "id": "accept_deal",
-        "label": {
-          "en": "Accept the witch's deal",
-          "ru": "Принять сделку ведьмы"
-        },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"health": 4},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
-        },
-        "consequences": {
-          "resource_changes": {"faith": 5, "health": -3},
-          "set_flags": ["witch_pact", "witch_mark"],
-          "clear_flags": [],
-          "balance_delta": -10,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "deal_accepted"
-        }
-      },
-      {
-        "id": "refuse_politely",
-        "label": {
-          "en": "Refuse and ask for help (7 Faith)",
-          "ru": "Отказаться и попросить о помощи (7 ✨)"
-        },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"faith": 7},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
-        },
-        "consequences": {
-          "resource_changes": {"faith": -7, "health": 2},
-          "set_flags": ["witch_refused"],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "witch_respected"
-        }
-      },
-      {
-        "id": "leave",
-        "label": {
-          "en": "Leave without dealing with the witch",
-          "ru": "Уйти, не связываясь с ведьмой"
-        },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "avoided_witch"
-        }
-      }
-    ],
-    "mini_game_challenge": null
-  },
-  {
-    "id": "event_camp_rest",
-    "title": {
-      "en": "Safe Camping Spot",
-      "ru": "Безопасное Место для Привала"
-    },
-    "body": {
-      "en": "You find a sheltered spot suitable for rest. You can make a fire and restore your strength.",
-      "ru": "Вы находите укрытое место, подходящее для отдыха. Можно развести костер и восстановить силы."
-    },
-    "event_kind": "inline",
-    "availability": {
-      "required_flags": [],
-      "forbidden_flags": [],
-      "min_pressure": null,
-      "max_pressure": 60,
-      "min_balance": null,
-      "max_balance": null,
-      "region_states": ["stable", "borderland"],
-      "region_ids": null
-    },
-    "pool_ids": ["pool_common"],
-    "weight": 15,
-    "is_one_time": false,
-    "is_instant": false,
-    "cooldown": 5,
-    "choices": [
-      {
-        "id": "full_rest",
-        "label": {
-          "en": "Rest and recover",
-          "ru": "Отдохнуть и восстановиться"
-        },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {"faith": 2, "health": 4},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "fully_rested"
-        }
-      },
-      {
-        "id": "purification_ritual",
-        "label": {
-          "en": "Perform a purification ritual (5 Faith)",
-          "ru": "Провести ритуал очищения (5 ✨)"
-        },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"faith": 5},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
-        },
-        "consequences": {
-          "resource_changes": {"faith": -5, "health": 3},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 5,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "purified"
-        }
-      },
-      {
-        "id": "quick_rest",
-        "label": {
-          "en": "Quick snack and move on",
-          "ru": "Быстро перекусить и идти дальше"
-        },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {"health": 1},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "quick_rest"
-        }
-      }
-    ],
-    "mini_game_challenge": null
-  },
-  {
-    "id": "event_breach_surge",
-    "title": {
-      "en": "Navi Breakthrough",
-      "ru": "Прорыв Нави"
-    },
-    "body": {
-      "en": "The boundary between worlds thins. Dark forces try to break through into Yav through a weak anchor.",
-      "ru": "Граница между мирами истончается. Темные силы пытаются прорваться в Явь через слабый якорь."
-    },
-    "event_kind": "inline",
-    "availability": {
-      "required_flags": [],
-      "forbidden_flags": [],
-      "min_pressure": 50,
-      "max_pressure": null,
-      "min_balance": null,
-      "max_balance": null,
-      "region_states": ["breach"],
-      "region_ids": null
-    },
-    "pool_ids": ["pool_breach"],
-    "weight": 30,
-    "is_one_time": false,
-    "is_instant": false,
-    "cooldown": 3,
-    "choices": [
-      {
-        "id": "strengthen_anchor",
-        "label": {
-          "en": "Strengthen the anchor with faith (15 Faith)",
-          "ru": "Укрепить якорь своей верой (15 ✨)"
-        },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"faith": 15},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
-        },
-        "consequences": {
-          "resource_changes": {"faith": -15},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 10,
-          "region_state_change": {
-            "region_id": null,
-            "new_state": null,
-            "transition": "restore"
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "faith" : 3
           },
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "anchor_strengthened"
+          "required_flags" : [
+
+          ]
         }
       },
       {
-        "id": "retreat_warn",
-        "label": {
-          "en": "Retreat and warn others",
-          "ru": "Отступить и предупредить других"
-        },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "warned_others"
-        }
-      },
-      {
-        "id": "use_breach_power",
-        "label": {
-          "en": "Try to use breach power",
-          "ru": "Попытаться использовать силу прорыва"
-        },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": 40
-        },
-        "consequences": {
-          "resource_changes": {"faith": 10, "health": -5},
-          "set_flags": ["breach_corruption"],
-          "clear_flags": [],
-          "balance_delta": -15,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "power_gained"
-        }
-      }
-    ],
-    "mini_game_challenge": null
-  },
-  {
-    "id": "event_mountain_spirit",
-    "title": {
-      "en": "Trial of the Pass",
-      "ru": "Испытание Перевала"
-    },
-    "body": {
-      "en": "A stone spirit appears at the mountain pass. It speaks: 'Prove your strength or turn back, mortal!'",
-      "ru": "На горном перевале появляется каменный дух. Он говорит: 'Докажи свою силу или вернись назад, смертный!'"
-    },
-    "event_kind": {"mini_game": "combat"},
-    "availability": {
-      "required_flags": [],
-      "forbidden_flags": ["mountain_blessing"],
-      "min_pressure": null,
-      "max_pressure": null,
-      "min_balance": null,
-      "max_balance": null,
-      "region_states": ["stable", "borderland", "breach"],
-      "region_ids": ["mountain"]
-    },
-    "pool_ids": ["pool_mountain"],
-    "weight": 25,
-    "is_one_time": true,
-    "is_instant": false,
-    "cooldown": 0,
-    "choices": [
-      {
-        "id": "accept_challenge",
-        "label": {
-          "en": "Accept the spirit's challenge",
-          "ru": "Принять вызов духа"
-        },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"health": 4},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
-        },
-        "consequences": {
-          "resource_changes": {"faith": 2},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "combat_start"
-        }
-      },
-      {
-        "id": "offer_gift",
-        "label": {
-          "en": "Offer a gift to the mountains (10 Faith)",
-          "ru": "Предложить дар горам (10 ✨)"
-        },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"faith": 10},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
-        },
-        "consequences": {
-          "resource_changes": {"faith": -10},
-          "set_flags": ["mountain_blessing"],
-          "clear_flags": [],
-          "balance_delta": 8,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "mountain_blessed"
-        }
-      },
-      {
-        "id": "retreat_pass",
-        "label": {
-          "en": "Retreat from the pass",
-          "ru": "Отступить с перевала"
-        },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "retreated"
-        }
-      }
-    ],
-    "mini_game_challenge": {
-      "enemy_id": "mountain_spirit",
-      "difficulty": 2,
-      "rewards": {
-        "resource_changes": {"faith": 5},
-        "set_flags": ["mountain_blessing"],
-        "clear_flags": [],
-        "balance_delta": 10,
-        "region_state_change": null,
-        "quest_progress": null,
-        "trigger_event_id": null,
-        "result_key": null
-      }
-    }
-  },
-  {
-    "id": "event_leshy_encounter",
-    "title": {
-      "en": "Encounter with Leshy",
-      "ru": "Встреча с Лешим"
-    },
-    "body": {
-      "en": "The ancient forest guardian emerges from the thicket. His eyes burn with green fire, and branches creak menacingly. The Leshy blocks your path.",
-      "ru": "Из чащи появляется древний страж леса. Его глаза горят зеленым огнем, а ветви скрипят угрожающе. Леший преграждает путь."
-    },
-    "event_kind": {"mini_game": "combat"},
-    "availability": {
-      "required_flags": [],
-      "forbidden_flags": [],
-      "min_pressure": null,
-      "max_pressure": null,
-      "min_balance": null,
-      "max_balance": null,
-      "region_states": ["borderland", "breach"],
-      "region_ids": ["forest", "swamp"]
-    },
-    "pool_ids": ["pool_forest", "pool_swamp"],
-    "weight": 18,
-    "is_one_time": false,
-    "is_instant": false,
-    "cooldown": 4,
-    "choices": [
-      {
-        "id": "fight_leshy",
-        "label": {
-          "en": "Fight the forest spirit",
-          "ru": "Вступить в бой с духом леса"
-        },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"health": 3},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
-        },
-        "consequences": {
-          "resource_changes": {"faith": 1},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "combat_start"
-        }
-      },
-      {
-        "id": "appease_leshy",
-        "label": {
-          "en": "Try to appease with gifts (5 Faith)",
-          "ru": "Попытаться задобрить дарами (5 ✨)"
-        },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"faith": 5},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
-        },
-        "consequences": {
-          "resource_changes": {"faith": -5},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 5,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "leshy_appeased"
-        }
-      },
-      {
-        "id": "retreat_leshy",
-        "label": {
-          "en": "Retreat and go around",
-          "ru": "Отступить и обойти стороной"
-        },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": -5,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "retreated_leshy"
-        }
-      }
-    ],
-    "mini_game_challenge": {
-      "enemy_id": "leshy",
-      "difficulty": 2,
-      "rewards": {
-        "resource_changes": {"faith": 4},
-        "set_flags": [],
-        "clear_flags": [],
-        "balance_delta": 3,
-        "region_state_change": null,
-        "quest_progress": null,
-        "trigger_event_id": null,
-        "result_key": null
-      }
-    }
-  },
-  {
-    "id": "event_boss_leshy_guardian",
-    "title": {
-      "en": "Leshy Guardian",
-      "ru": "Леший-Хранитель"
-    },
-    "body": {
-      "en": "Before you towers the ancient guardian of the Twilight Marches. The Leshy Guardian - a being of immense power whose roots reach into the very foundations of the world. Green flame burns eternally in his eyes. This is the final trial of Act I.",
-      "ru": "Перед вами возвышается древний страж Сумрачных Пределов. Леший-Хранитель - существо невиданной силы, чьи корни уходят в самые основы мира. Зелёное пламя в его глазах горит вечностью. Это финальное испытание Акта I."
-    },
-    "event_kind": {"mini_game": "combat"},
-    "availability": {
-      "required_flags": ["main_quest_started", "oak_strengthened"],
-      "forbidden_flags": ["leshy_guardian_defeated"],
-      "min_pressure": null,
-      "max_pressure": null,
-      "min_balance": null,
-      "max_balance": null,
-      "region_states": ["breach"],
-      "region_ids": ["dark_lowland"]
-    },
-    "pool_ids": ["pool_boss"],
-    "weight": 100,
-    "is_one_time": true,
-    "is_instant": false,
-    "cooldown": 0,
-    "choices": [
-      {
-        "id": "fight_boss",
-        "label": {
-          "en": "Enter the final battle",
-          "ru": "Вступить в решающий бой"
-        },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"faith": 10, "health": 8},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
-        },
-        "consequences": {
-          "resource_changes": {},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "boss_combat_start"
-        }
-      },
-      {
-        "id": "negotiate_boss",
-        "label": {
-          "en": "Try to negotiate (20 Faith)",
-          "ru": "Попытаться договориться (20 ✨)"
-        },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"faith": 20},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": 70,
-          "max_balance": null
-        },
-        "consequences": {
-          "resource_changes": {"faith": -20},
-          "set_flags": ["leshy_guardian_peaceful", "leshy_guardian_defeated"],
-          "clear_flags": [],
-          "balance_delta": 15,
-          "region_state_change": null,
-          "quest_progress": {
-            "quest_id": "quest_main_act1",
-            "objective_id": "obj_defeat_guardian",
-            "action": "complete"
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "health" : -1
           },
-          "trigger_event_id": null,
-          "result_key": "boss_negotiated"
+          "result_key" : "fled_wolf",
+          "set_flags" : [
+
+          ]
+        },
+        "id" : "flee_shadow_wolf",
+        "label" : {
+          "en" : "Flee into the trees",
+          "ru" : "Бежать в лес"
         }
+      }
+    ],
+    "cooldown" : 2,
+    "event_kind" : {
+      "mini_game" : "combat"
+    },
+    "id" : "event_shadow_wolves",
+    "is_instant" : false,
+    "is_one_time" : false,
+    "mini_game_challenge" : {
+      "can_retreat" : true,
+      "challenge_kind" : "combat",
+      "defeat_consequences" : {
+        "balance_delta" : 0,
+        "clear_flags" : [
+
+        ],
+        "resource_changes" : {
+
+        },
+        "set_flags" : [
+
+        ]
       },
+      "difficulty" : 1,
+      "enemy_id" : "shadow_wolf",
+      "id" : "challenge_shadow_wolf",
+      "pressure_scaling" : 0.1,
+      "turn_limit" : 0,
+      "victory_consequences" : {
+        "balance_delta" : 2,
+        "clear_flags" : [
+
+        ],
+        "resource_changes" : {
+          "faith" : 2
+        },
+        "set_flags" : [
+
+        ]
+      }
+    },
+    "pool_ids" : [
+      "pool_forest"
+    ],
+    "title" : {
+      "en" : "Shadow Wolf Ambush",
+      "ru" : "Засада Теневого Волка"
+    },
+    "weight" : 18
+  },
+  {
+    "availability" : {
+      "forbidden_flags" : [
+
+      ],
+      "region_states" : [
+        "borderland",
+        "breach"
+      ],
+      "required_flags" : [
+
+      ]
+    },
+    "body" : {
+      "en" : "Among crumbling ruins, a figure in rusted armor stirs. The cursed knight rises, bound by an oath that death could not break. His hollow eyes fix upon you.",
+      "ru" : "Среди разрушенных руин шевелится фигура в ржавых доспехах. Проклятый рыцарь поднимается, связанный клятвой, которую смерть не смогла разрушить. Его пустые глаза устремляются на вас."
+    },
+    "choices" : [
       {
-        "id": "dark_power_boss",
-        "label": {
-          "en": "Use dark power (15 Faith)",
-          "ru": "Использовать силу тьмы (15 ✨)"
-        },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"faith": 15},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": 30
-        },
-        "consequences": {
-          "resource_changes": {"faith": -15, "health": -5},
-          "set_flags": ["leshy_guardian_corrupted", "leshy_guardian_defeated"],
-          "clear_flags": [],
-          "balance_delta": -20,
-          "region_state_change": null,
-          "quest_progress": {
-            "quest_id": "quest_main_act1",
-            "objective_id": "obj_defeat_guardian",
-            "action": "complete"
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+
           },
-          "trigger_event_id": null,
-          "result_key": "boss_corrupted"
+          "result_key" : "combat_start",
+          "set_flags" : [
+
+          ]
+        },
+        "id" : "fight_knight",
+        "label" : {
+          "en" : "Fight the cursed knight",
+          "ru" : "Сразиться с проклятым рыцарем"
+        },
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "health" : 3
+          },
+          "required_flags" : [
+
+          ]
+        }
+      },
+      {
+        "consequences" : {
+          "balance_delta" : 8,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : -10
+          },
+          "result_key" : "curse_broken",
+          "set_flags" : [
+
+          ]
+        },
+        "id" : "break_curse",
+        "label" : {
+          "en" : "Try to break his curse (10 Faith)",
+          "ru" : "Попытаться разрушить проклятие (10 ✨)"
+        },
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "faith" : 10
+          },
+          "required_flags" : [
+
+          ]
+        }
+      },
+      {
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "health" : -2
+          },
+          "result_key" : "fled_knight",
+          "set_flags" : [
+
+          ]
+        },
+        "id" : "flee_knight",
+        "label" : {
+          "en" : "Retreat from the ruins",
+          "ru" : "Отступить из руин"
         }
       }
     ],
-    "mini_game_challenge": {
-      "enemy_id": "leshy_guardian_boss",
-      "difficulty": 5,
-      "rewards": {
-        "resource_changes": {"faith": 20},
-        "set_flags": ["leshy_guardian_defeated"],
-        "clear_flags": [],
-        "balance_delta": 10,
-        "region_state_change": null,
-        "quest_progress": {
-          "quest_id": "quest_main_act1",
-          "objective_id": "obj_defeat_guardian",
-          "action": "complete"
+    "cooldown" : 4,
+    "event_kind" : {
+      "mini_game" : "combat"
+    },
+    "id" : "event_cursed_knight",
+    "is_instant" : false,
+    "is_one_time" : false,
+    "mini_game_challenge" : {
+      "can_retreat" : true,
+      "challenge_kind" : "combat",
+      "defeat_consequences" : {
+        "balance_delta" : 0,
+        "clear_flags" : [
+
+        ],
+        "resource_changes" : {
+
         },
-        "trigger_event_id": null,
-        "result_key": null
+        "set_flags" : [
+
+        ]
+      },
+      "difficulty" : 3,
+      "enemy_id" : "cursed_knight",
+      "id" : "challenge_cursed_knight",
+      "pressure_scaling" : 0.1,
+      "turn_limit" : 0,
+      "victory_consequences" : {
+        "balance_delta" : 5,
+        "clear_flags" : [
+
+        ],
+        "resource_changes" : {
+          "faith" : 6
+        },
+        "set_flags" : [
+
+        ]
       }
-    }
+    },
+    "pool_ids" : [
+      "pool_common"
+    ],
+    "title" : {
+      "en" : "The Cursed Knight",
+      "ru" : "Проклятый Рыцарь"
+    },
+    "weight" : 14
   },
   {
-    "id": "event_risen_dead_patrol",
-    "title": {
-      "en": "Undead Patrol",
-      "ru": "Дозор Мертвецов"
+    "availability" : {
+      "forbidden_flags" : [
+        "child_saved"
+      ],
+      "region_ids" : [
+        "village",
+        "forest"
+      ],
+      "region_states" : [
+        "stable",
+        "borderland",
+        "breach"
+      ],
+      "required_flags" : [
+
+      ]
     },
-    "body": {
-      "en": "A group of shambling corpses emerges from the shadows. Their eyes glow with pale Navi light as they lurch toward you.",
-      "ru": "Из теней появляется группа шатающихся трупов. Их глаза светятся бледным светом Нави, и они ковыляют к вам."
+    "body" : {
+      "en" : "You hear quiet sobbing. A small child sits at the edge of the path, lost and frightened. They wandered too far from home.",
+      "ru" : "Вы слышите тихий плач. На краю тропы сидит маленький ребёнок, потерявшийся и напуганный. Он забрёл слишком далеко от дома."
     },
-    "event_kind": {"mini_game": "combat"},
-    "availability": {
-      "required_flags": [],
-      "forbidden_flags": [],
-      "min_pressure": null,
-      "max_pressure": null,
-      "min_balance": null,
-      "max_balance": null,
-      "region_states": ["stable", "borderland", "breach"],
-      "region_ids": null
-    },
-    "pool_ids": ["pool_common"],
-    "weight": 18,
-    "is_one_time": false,
-    "is_instant": false,
-    "cooldown": 3,
-    "choices": [
+    "choices" : [
       {
-        "id": "fight_undead",
-        "label": {
-          "en": "Fight the undead",
-          "ru": "Сразиться с мертвецами"
+        "consequences" : {
+          "balance_delta" : 8,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : 5
+          },
+          "result_key" : "child_returned",
+          "set_flags" : [
+            "child_saved"
+          ]
         },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"health": 2},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
-        },
-        "consequences": {
-          "resource_changes": {},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "combat_start"
+        "id" : "help_child",
+        "label" : {
+          "en" : "Help the child find home",
+          "ru" : "Помочь ребёнку найти дорогу домой"
         }
       },
       {
-        "id": "purify_undead",
-        "label": {
-          "en": "Purify with faith (8 Faith)",
-          "ru": "Очистить верой (8 \u2728)"
+        "consequences" : {
+          "balance_delta" : -5,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+
+          },
+          "result_key" : "child_ignored",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"faith": 8},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
-        },
-        "consequences": {
-          "resource_changes": {"faith": -8},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 5,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "undead_purified"
+        "id" : "ignore_child",
+        "label" : {
+          "en" : "Ignore and move on",
+          "ru" : "Пройти мимо"
         }
       },
       {
-        "id": "flee_undead",
-        "label": {
-          "en": "Flee",
-          "ru": "Бежать"
+        "consequences" : {
+          "balance_delta" : 3,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : 2
+          },
+          "result_key" : "child_guided",
+          "set_flags" : [
+            "child_saved",
+            "local_knowledge"
+          ]
         },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {"health": -2},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "fled_undead"
+        "id" : "child_guide",
+        "label" : {
+          "en" : "Ask the child to guide you",
+          "ru" : "Попросить ребёнка стать проводником"
         }
       }
     ],
-    "mini_game_challenge": {
-      "enemy_id": "risen_dead",
-      "difficulty": 2,
-      "rewards": {
-        "resource_changes": {"faith": 3},
-        "set_flags": [],
-        "clear_flags": [],
-        "balance_delta": 3,
-        "region_state_change": null,
-        "quest_progress": null,
-        "trigger_event_id": null,
-        "result_key": null
-      }
-    }
+    "cooldown" : 0,
+    "event_kind" : "inline",
+    "id" : "event_lost_child",
+    "is_instant" : false,
+    "is_one_time" : true,
+    "pool_ids" : [
+      "pool_village",
+      "pool_forest"
+    ],
+    "title" : {
+      "en" : "Lost Child",
+      "ru" : "Потерянный Ребёнок"
+    },
+    "weight" : 15
   },
   {
-    "id": "event_swamp_hag_ambush",
-    "title": {
-      "en": "Hag's Ambush",
-      "ru": "Засада Ведьмы"
+    "availability" : {
+      "forbidden_flags" : [
+
+      ],
+      "region_ids" : [
+        "swamp",
+        "breach"
+      ],
+      "region_states" : [
+        "borderland",
+        "breach"
+      ],
+      "required_flags" : [
+
+      ]
     },
-    "body": {
-      "en": "Thick mist rolls in without warning. A cackling figure materializes — the Swamp Hag, hurling curses!",
-      "ru": "Густой туман наползает без предупреждения. Из него появляется хохочущая фигура — Болотная Ведьма, швыряющая проклятия!"
+    "body" : {
+      "en" : "An unnatural fog rolls in, thick and cold. Shapes move within it, and you lose all sense of direction. Something watches from the murk.",
+      "ru" : "Неестественный туман наползает, густой и холодный. В нём движутся силуэты, и вы теряете чувство направления. Что-то наблюдает из мглы."
     },
-    "event_kind": {"mini_game": "combat"},
-    "availability": {
-      "required_flags": [],
-      "forbidden_flags": [],
-      "min_pressure": null,
-      "max_pressure": null,
-      "min_balance": null,
-      "max_balance": null,
-      "region_states": ["borderland", "breach"],
-      "region_ids": ["swamp"]
-    },
-    "pool_ids": ["pool_swamp"],
-    "weight": 22,
-    "is_one_time": false,
-    "is_instant": false,
-    "cooldown": 3,
-    "choices": [
+    "choices" : [
       {
-        "id": "fight_hag",
-        "label": {
-          "en": "Fight the hag",
-          "ru": "Сразиться с ведьмой"
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "health" : -2
+          },
+          "result_key" : "fog_survived",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"health": 3},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
-        },
-        "consequences": {
-          "resource_changes": {},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "combat_start"
+        "id" : "push_through_fog",
+        "label" : {
+          "en" : "Push through the fog",
+          "ru" : "Пробираться сквозь туман"
         }
       },
       {
-        "id": "counter_curse",
-        "label": {
-          "en": "Counter-curse (10 Faith)",
-          "ru": "Контрпроклятие (10 \u2728)"
+        "consequences" : {
+          "balance_delta" : -2,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+
+          },
+          "result_key" : "fog_waited",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"faith": 10},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
-        },
-        "consequences": {
-          "resource_changes": {"faith": -10},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 3,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "hag_banished"
+        "id" : "wait_fog",
+        "label" : {
+          "en" : "Wait for the fog to pass",
+          "ru" : "Подождать, пока туман рассеется"
         }
       },
       {
-        "id": "retreat_hag",
-        "label": {
-          "en": "Retreat through the mist",
-          "ru": "Отступить сквозь туман"
+        "consequences" : {
+          "balance_delta" : 5,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : -5,
+            "health" : 1
+          },
+          "result_key" : "fog_dispelled",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {"health": -3},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": -3,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "fled_cursed"
+        "id" : "light_fog",
+        "label" : {
+          "en" : "Use faith as a beacon (5 Faith)",
+          "ru" : "Использовать веру как маяк (5 ✨)"
+        },
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "faith" : 5
+          },
+          "required_flags" : [
+
+          ]
         }
       }
     ],
-    "mini_game_challenge": {
-      "enemy_id": "swamp_hag",
-      "difficulty": 3,
-      "rewards": {
-        "resource_changes": {"faith": 6},
-        "set_flags": [],
-        "clear_flags": [],
-        "balance_delta": 5,
-        "region_state_change": null,
-        "quest_progress": null,
-        "trigger_event_id": null,
-        "result_key": null
-      }
-    }
+    "cooldown" : 4,
+    "event_kind" : "inline",
+    "id" : "event_strange_fog",
+    "is_instant" : false,
+    "is_one_time" : false,
+    "pool_ids" : [
+      "pool_swamp",
+      "pool_breach"
+    ],
+    "title" : {
+      "en" : "Strange Fog",
+      "ru" : "Странный Туман"
+    },
+    "weight" : 16
   },
   {
-    "id": "event_village_raiders",
-    "title": {
-      "en": "Raiders at the Gates",
-      "ru": "Налётчики у Ворот"
+    "availability" : {
+      "forbidden_flags" : [
+
+      ],
+      "region_ids" : [
+        "swamp"
+      ],
+      "region_states" : [
+        "borderland",
+        "breach"
+      ],
+      "required_flags" : [
+
+      ]
     },
-    "body": {
-      "en": "The village alarm sounds! A pack of risen dead shambles toward the outer fence. The villagers look to you for protection.",
-      "ru": "Звучит деревенская тревога! Стая восставших мертвецов ковыляет к ограде. Жители смотрят на вас с надеждой."
+    "body" : {
+      "en" : "Thick mist rolls in without warning. A cackling figure materializes — the Swamp Hag, hurling curses!",
+      "ru" : "Густой туман наползает без предупреждения. Из него появляется хохочущая фигура — Болотная Ведьма, швыряющая проклятия!"
     },
-    "event_kind": {"mini_game": "combat"},
-    "availability": {
-      "required_flags": [],
-      "forbidden_flags": [],
-      "min_pressure": null,
-      "max_pressure": null,
-      "min_balance": null,
-      "max_balance": null,
-      "region_states": ["borderland", "breach"],
-      "region_ids": ["village"]
-    },
-    "pool_ids": ["pool_village"],
-    "weight": 20,
-    "is_one_time": false,
-    "is_instant": false,
-    "cooldown": 3,
-    "choices": [
+    "choices" : [
       {
-        "id": "defend_village",
-        "label": {
-          "en": "Defend the village",
-          "ru": "Защитить деревню"
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+
+          },
+          "result_key" : "combat_start",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"health": 3},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
+        "id" : "fight_hag",
+        "label" : {
+          "en" : "Fight the hag",
+          "ru" : "Сразиться с ведьмой"
         },
-        "consequences": {
-          "resource_changes": {},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "combat_start"
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "health" : 3
+          },
+          "required_flags" : [
+
+          ]
         }
       },
       {
-        "id": "rally_villagers",
-        "label": {
-          "en": "Rally the villagers (5 Faith)",
-          "ru": "Поднять жителей (5 \u2728)"
+        "consequences" : {
+          "balance_delta" : 3,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : -10
+          },
+          "result_key" : "hag_banished",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"faith": 5},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
+        "id" : "counter_curse",
+        "label" : {
+          "en" : "Counter-curse (10 Faith)",
+          "ru" : "Контрпроклятие (10 ✨)"
         },
-        "consequences": {
-          "resource_changes": {"faith": -5},
-          "set_flags": ["village_militia"],
-          "clear_flags": [],
-          "balance_delta": 5,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "villagers_rallied"
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "faith" : 10
+          },
+          "required_flags" : [
+
+          ]
         }
       },
       {
-        "id": "hide_village",
-        "label": {
-          "en": "Hide and wait it out",
-          "ru": "Спрятаться и переждать"
+        "consequences" : {
+          "balance_delta" : -3,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "health" : -3
+          },
+          "result_key" : "fled_cursed",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": -5,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "village_damaged"
+        "id" : "retreat_hag",
+        "label" : {
+          "en" : "Retreat through the mist",
+          "ru" : "Отступить сквозь туман"
         }
       }
     ],
-    "mini_game_challenge": {
-      "enemy_id": "risen_dead",
-      "difficulty": 2,
-      "rewards": {
-        "resource_changes": {"faith": 4},
-        "set_flags": ["village_defended"],
-        "clear_flags": [],
-        "balance_delta": 5,
-        "region_state_change": null,
-        "quest_progress": null,
-        "trigger_event_id": null,
-        "result_key": null
+    "cooldown" : 3,
+    "event_kind" : {
+      "mini_game" : "combat"
+    },
+    "id" : "event_swamp_hag_ambush",
+    "is_instant" : false,
+    "is_one_time" : false,
+    "mini_game_challenge" : {
+      "can_retreat" : true,
+      "challenge_kind" : "combat",
+      "defeat_consequences" : {
+        "balance_delta" : 0,
+        "clear_flags" : [
+
+        ],
+        "resource_changes" : {
+
+        },
+        "set_flags" : [
+
+        ]
+      },
+      "difficulty" : 3,
+      "enemy_id" : "swamp_hag",
+      "id" : "challenge_swamp_hag",
+      "pressure_scaling" : 0.1,
+      "turn_limit" : 0,
+      "victory_consequences" : {
+        "balance_delta" : 5,
+        "clear_flags" : [
+
+        ],
+        "resource_changes" : {
+          "faith" : 6
+        },
+        "set_flags" : [
+
+        ]
       }
-    }
+    },
+    "pool_ids" : [
+      "pool_swamp"
+    ],
+    "title" : {
+      "en" : "Hag's Ambush",
+      "ru" : "Засада Ведьмы"
+    },
+    "weight" : 22
   },
   {
-    "id": "event_forest_wolves",
-    "title": {
-      "en": "Corrupted Wolf Pack",
-      "ru": "Стая Порченых Волков"
+    "availability" : {
+      "forbidden_flags" : [
+
+      ],
+      "min_pressure" : 50,
+      "region_states" : [
+        "breach"
+      ],
+      "required_flags" : [
+
+      ]
     },
-    "body": {
-      "en": "A pack of wolves with matted fur and glowing eyes emerges from the undergrowth. The corruption of Navi has twisted them into something feral and relentless.",
-      "ru": "Из подлеска появляется стая волков со свалявшейся шерстью и светящимися глазами. Порча Нави превратила их в нечто дикое и неудержимое."
+    "body" : {
+      "en" : "The boundary between worlds thins. Dark forces try to break through into Yav through a weak anchor.",
+      "ru" : "Граница между мирами истончается. Темные силы пытаются прорваться в Явь через слабый якорь."
     },
-    "event_kind": {"mini_game": "combat"},
-    "availability": {
-      "required_flags": [],
-      "forbidden_flags": [],
-      "min_pressure": null,
-      "max_pressure": null,
-      "min_balance": null,
-      "max_balance": null,
-      "region_states": ["stable", "borderland", "breach"],
-      "region_ids": ["forest"]
-    },
-    "pool_ids": ["pool_forest"],
-    "weight": 15,
-    "is_one_time": false,
-    "is_instant": false,
-    "cooldown": 3,
-    "choices": [
+    "choices" : [
       {
-        "id": "fight_wolves",
-        "label": {
-          "en": "Fight the wolves",
-          "ru": "Сразиться с волками"
+        "consequences" : {
+          "balance_delta" : 10,
+          "clear_flags" : [
+
+          ],
+          "region_state_change" : {
+            "transition" : "restore"
+          },
+          "resource_changes" : {
+            "faith" : -15
+          },
+          "result_key" : "anchor_strengthened",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"health": 2},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
+        "id" : "strengthen_anchor",
+        "label" : {
+          "en" : "Strengthen the anchor with faith (15 Faith)",
+          "ru" : "Укрепить якорь своей верой (15 ✨)"
         },
-        "consequences": {
-          "resource_changes": {},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "combat_start"
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "faith" : 15
+          },
+          "required_flags" : [
+
+          ]
         }
       },
       {
-        "id": "calm_wolves",
-        "label": {
-          "en": "Calm with nature magic (6 Faith)",
-          "ru": "Успокоить магией природы (6 \u2728)"
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+
+          },
+          "result_key" : "warned_others",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"faith": 6},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
-        },
-        "consequences": {
-          "resource_changes": {"faith": -6},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 3,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "wolves_calmed"
+        "id" : "retreat_warn",
+        "label" : {
+          "en" : "Retreat and warn others",
+          "ru" : "Отступить и предупредить других"
         }
       },
       {
-        "id": "climb_tree",
-        "label": {
-          "en": "Climb a tree and wait",
-          "ru": "Забраться на дерево и переждать"
+        "consequences" : {
+          "balance_delta" : -15,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : 10,
+            "health" : -5
+          },
+          "result_key" : "power_gained",
+          "set_flags" : [
+            "breach_corruption"
+          ]
         },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "wolves_passed"
+        "id" : "use_breach_power",
+        "label" : {
+          "en" : "Try to use breach power",
+          "ru" : "Попытаться использовать силу прорыва"
+        },
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "max_balance" : 40,
+          "min_resources" : {
+
+          },
+          "required_flags" : [
+
+          ]
         }
       }
     ],
-    "mini_game_challenge": {
-      "enemy_id": "wild_beast",
-      "difficulty": 1,
-      "rewards": {
-        "resource_changes": {"faith": 2},
-        "set_flags": [],
-        "clear_flags": [],
-        "balance_delta": 2,
-        "region_state_change": null,
-        "quest_progress": null,
-        "trigger_event_id": null,
-        "result_key": null
-      }
-    }
+    "cooldown" : 3,
+    "event_kind" : "inline",
+    "id" : "event_breach_surge",
+    "is_instant" : false,
+    "is_one_time" : false,
+    "pool_ids" : [
+      "pool_breach"
+    ],
+    "title" : {
+      "en" : "Navi Breakthrough",
+      "ru" : "Прорыв Нави"
+    },
+    "weight" : 30
   },
   {
-    "id": "event_breach_horror",
-    "title": {
-      "en": "Horror from the Breach",
-      "ru": "Ужас из Разлома"
+    "availability" : {
+      "forbidden_flags" : [
+
+      ],
+      "region_states" : [
+        "stable",
+        "borderland",
+        "breach"
+      ],
+      "required_flags" : [
+
+      ]
     },
-    "body": {
-      "en": "The air crackles with dark energy. A monstrous form pulls itself through the breach — a creature of pure Navi malice, reeking of decay and dark magic.",
-      "ru": "Воздух трещит от тёмной энергии. Чудовищная фигура протискивается через разлом — создание чистой злобы Нави, разящее гнилью и тёмной магией."
+    "body" : {
+      "en" : "A maddened creature leaps from the bushes with glowing red eyes. It growls and prepares to attack!",
+      "ru" : "Из-за деревьев выскакивает озверевшее существо с горящими красными глазами. Оно рычит и готовится к атаке!"
     },
-    "event_kind": {"mini_game": "combat"},
-    "availability": {
-      "required_flags": [],
-      "forbidden_flags": [],
-      "min_pressure": null,
-      "max_pressure": null,
-      "min_balance": null,
-      "max_balance": null,
-      "region_states": ["breach"],
-      "region_ids": ["breach"]
-    },
-    "pool_ids": ["pool_breach"],
-    "weight": 25,
-    "is_one_time": false,
-    "is_instant": false,
-    "cooldown": 3,
-    "choices": [
+    "choices" : [
       {
-        "id": "fight_horror",
-        "label": {
-          "en": "Fight the horror",
-          "ru": "Сразиться с ужасом"
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+
+          },
+          "result_key" : "combat_start",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"health": 4},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
+        "id" : "fight",
+        "label" : {
+          "en" : "Fight the beast",
+          "ru" : "Сразиться со зверем"
         },
-        "consequences": {
-          "resource_changes": {},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "combat_start"
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "health" : 2
+          },
+          "required_flags" : [
+
+          ]
         }
       },
       {
-        "id": "seal_rift",
-        "label": {
-          "en": "Seal the rift (12 Faith)",
-          "ru": "Запечатать разлом (12 \u2728)"
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : -5
+          },
+          "result_key" : "beast_scared",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"faith": 12},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
+        "id" : "scare",
+        "label" : {
+          "en" : "Try to scare the beast (5 Faith)",
+          "ru" : "Попытаться испугать зверя (5 ✨)"
         },
-        "consequences": {
-          "resource_changes": {"faith": -12},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 8,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "rift_sealed"
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "faith" : 5
+          },
+          "required_flags" : [
+
+          ]
         }
       },
       {
-        "id": "retreat_horror",
-        "label": {
-          "en": "Retreat from the breach",
-          "ru": "Отступить от разлома"
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "health" : -1
+          },
+          "result_key" : "fled_injured",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {"health": -3},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": -5,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "fled_horror"
+        "id" : "flee",
+        "label" : {
+          "en" : "Run away",
+          "ru" : "Убежать"
         }
       }
     ],
-    "mini_game_challenge": {
-      "enemy_id": "swamp_hag",
-      "difficulty": 3,
-      "rewards": {
-        "resource_changes": {"faith": 7},
-        "set_flags": [],
-        "clear_flags": [],
-        "balance_delta": 8,
-        "region_state_change": null,
-        "quest_progress": null,
-        "trigger_event_id": null,
-        "result_key": null
+    "cooldown" : 2,
+    "event_kind" : {
+      "mini_game" : "combat"
+    },
+    "id" : "event_wild_beast",
+    "is_instant" : false,
+    "is_one_time" : false,
+    "mini_game_challenge" : {
+      "can_retreat" : true,
+      "challenge_kind" : "combat",
+      "defeat_consequences" : {
+        "balance_delta" : 0,
+        "clear_flags" : [
+
+        ],
+        "resource_changes" : {
+
+        },
+        "set_flags" : [
+
+        ]
+      },
+      "difficulty" : 1,
+      "enemy_id" : "wild_beast",
+      "id" : "challenge_wild_beast",
+      "pressure_scaling" : 0.1,
+      "turn_limit" : 0,
+      "victory_consequences" : {
+        "balance_delta" : 0,
+        "clear_flags" : [
+
+        ],
+        "resource_changes" : {
+          "faith" : 3
+        },
+        "set_flags" : [
+
+        ]
       }
-    }
+    },
+    "pool_ids" : [
+      "pool_common"
+    ],
+    "title" : {
+      "en" : "Wild Beast",
+      "ru" : "Дикий Зверь"
+    },
+    "weight" : 20
   },
   {
-    "id": "event_oak_desecrator",
-    "title": {
-      "en": "Desecrator at the Oak",
-      "ru": "Осквернитель у Дуба"
+    "availability" : {
+      "forbidden_flags" : [
+
+      ],
+      "region_ids" : [
+        "forest",
+        "swamp"
+      ],
+      "region_states" : [
+        "borderland",
+        "breach"
+      ],
+      "required_flags" : [
+
+      ]
     },
-    "body": {
-      "en": "A risen corpse claws at the sacred oak's roots, trying to poison the ancient tree with Navi corruption. The oak's leaves shudder in pain.",
-      "ru": "Восставший мертвец скребёт корни священного дуба, пытаясь отравить древнее дерево порчей Нави. Листья дуба содрогаются от боли."
+    "body" : {
+      "en" : "The ancient forest guardian emerges from the thicket. His eyes burn with green fire, and branches creak menacingly. The Leshy blocks your path.",
+      "ru" : "Из чащи появляется древний страж леса. Его глаза горят зеленым огнем, а ветви скрипят угрожающе. Леший преграждает путь."
     },
-    "event_kind": {"mini_game": "combat"},
-    "availability": {
-      "required_flags": [],
-      "forbidden_flags": [],
-      "min_pressure": null,
-      "max_pressure": null,
-      "min_balance": null,
-      "max_balance": null,
-      "region_states": ["borderland", "breach"],
-      "region_ids": ["oak"]
-    },
-    "pool_ids": ["pool_sacred"],
-    "weight": 20,
-    "is_one_time": false,
-    "is_instant": false,
-    "cooldown": 3,
-    "choices": [
+    "choices" : [
       {
-        "id": "defend_oak",
-        "label": {
-          "en": "Defend the sacred oak",
-          "ru": "Защитить священный дуб"
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : 1
+          },
+          "result_key" : "combat_start",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"health": 2},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
+        "id" : "fight_leshy",
+        "label" : {
+          "en" : "Fight the forest spirit",
+          "ru" : "Вступить в бой с духом леса"
         },
-        "consequences": {
-          "resource_changes": {},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "combat_start"
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "health" : 3
+          },
+          "required_flags" : [
+
+          ]
         }
       },
       {
-        "id": "invoke_oak_power",
-        "label": {
-          "en": "Invoke the oak's power (7 Faith)",
-          "ru": "Призвать силу дуба (7 \u2728)"
+        "consequences" : {
+          "balance_delta" : 5,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : -5
+          },
+          "result_key" : "leshy_appeased",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"faith": 7},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
+        "id" : "appease_leshy",
+        "label" : {
+          "en" : "Try to appease with gifts (5 Faith)",
+          "ru" : "Попытаться задобрить дарами (5 ✨)"
         },
-        "consequences": {
-          "resource_changes": {"faith": -7},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 5,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "oak_defended"
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "faith" : 5
+          },
+          "required_flags" : [
+
+          ]
         }
       },
       {
-        "id": "call_help_oak",
-        "label": {
-          "en": "Call for help",
-          "ru": "Позвать на помощь"
+        "consequences" : {
+          "balance_delta" : -5,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+
+          },
+          "result_key" : "retreated_leshy",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": -3,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "help_called"
+        "id" : "retreat_leshy",
+        "label" : {
+          "en" : "Retreat and go around",
+          "ru" : "Отступить и обойти стороной"
         }
       }
     ],
-    "mini_game_challenge": {
-      "enemy_id": "risen_dead",
-      "difficulty": 2,
-      "rewards": {
-        "resource_changes": {"faith": 4},
-        "set_flags": [],
-        "clear_flags": [],
-        "balance_delta": 5,
-        "region_state_change": null,
-        "quest_progress": null,
-        "trigger_event_id": null,
-        "result_key": null
+    "cooldown" : 4,
+    "event_kind" : {
+      "mini_game" : "combat"
+    },
+    "id" : "event_leshy_encounter",
+    "is_instant" : false,
+    "is_one_time" : false,
+    "mini_game_challenge" : {
+      "can_retreat" : true,
+      "challenge_kind" : "combat",
+      "defeat_consequences" : {
+        "balance_delta" : 0,
+        "clear_flags" : [
+
+        ],
+        "resource_changes" : {
+
+        },
+        "set_flags" : [
+
+        ]
+      },
+      "difficulty" : 2,
+      "enemy_id" : "leshy",
+      "id" : "challenge_leshy",
+      "pressure_scaling" : 0.1,
+      "turn_limit" : 0,
+      "victory_consequences" : {
+        "balance_delta" : 3,
+        "clear_flags" : [
+
+        ],
+        "resource_changes" : {
+          "faith" : 4
+        },
+        "set_flags" : [
+
+        ]
       }
-    }
+    },
+    "pool_ids" : [
+      "pool_forest",
+      "pool_swamp"
+    ],
+    "title" : {
+      "en" : "Encounter with Leshy",
+      "ru" : "Встреча с Лешим"
+    },
+    "weight" : 18
   },
   {
-    "id": "event_merchant_caravan",
-    "title": {
-      "en": "Merchant Caravan",
-      "ru": "Купеческий Караван"
+    "availability" : {
+      "forbidden_flags" : [
+
+      ],
+      "region_states" : [
+        "stable",
+        "borderland",
+        "breach"
+      ],
+      "required_flags" : [
+
+      ]
     },
-    "body": {
-      "en": "A small caravan of traders has set up camp nearby. They offer rare goods and news from distant lands.",
-      "ru": "Небольшой караван торговцев разбил лагерь неподалёку. Они предлагают редкие товары и новости из далёких земель."
+    "body" : {
+      "en" : "A group of shambling corpses emerges from the shadows. Their eyes glow with pale Navi light as they lurch toward you.",
+      "ru" : "Из теней появляется группа шатающихся трупов. Их глаза светятся бледным светом Нави, и они ковыляют к вам."
     },
-    "event_kind": "inline",
-    "availability": {
-      "required_flags": [],
-      "forbidden_flags": [],
-      "min_pressure": null,
-      "max_pressure": null,
-      "min_balance": null,
-      "max_balance": null,
-      "region_states": ["stable", "borderland"],
-      "region_ids": null
-    },
-    "pool_ids": ["pool_common"],
-    "weight": 12,
-    "is_one_time": false,
-    "is_instant": false,
-    "cooldown": 4,
-    "choices": [
+    "choices" : [
       {
-        "id": "buy_supplies",
-        "label": {
-          "en": "Buy healing supplies (8 Faith)",
-          "ru": "Купить припасы (8 \u2728)"
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+
+          },
+          "result_key" : "combat_start",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"faith": 8},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
+        "id" : "fight_undead",
+        "label" : {
+          "en" : "Fight the undead",
+          "ru" : "Сразиться с мертвецами"
         },
-        "consequences": {
-          "resource_changes": {"faith": -8, "health": 5},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "supplies_bought"
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "health" : 2
+          },
+          "required_flags" : [
+
+          ]
         }
       },
       {
-        "id": "trade_knowledge",
-        "label": {
-          "en": "Trade knowledge",
-          "ru": "Обменяться знаниями"
+        "consequences" : {
+          "balance_delta" : 5,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : -8
+          },
+          "result_key" : "undead_purified",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {"faith": 2},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "knowledge_shared"
+        "id" : "purify_undead",
+        "label" : {
+          "en" : "Purify with faith (8 Faith)",
+          "ru" : "Очистить верой (8 ✨)"
+        },
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "faith" : 8
+          },
+          "required_flags" : [
+
+          ]
         }
       },
       {
-        "id": "rob_caravan",
-        "label": {
-          "en": "Rob the merchants",
-          "ru": "Ограбить торговцев"
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "health" : -2
+          },
+          "result_key" : "fled_undead",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {"faith": 12, "health": -2},
-          "set_flags": ["robber"],
-          "clear_flags": [],
-          "balance_delta": -10,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "merchants_robbed"
+        "id" : "flee_undead",
+        "label" : {
+          "en" : "Flee",
+          "ru" : "Бежать"
         }
       }
     ],
-    "mini_game_challenge": null
+    "cooldown" : 3,
+    "event_kind" : {
+      "mini_game" : "combat"
+    },
+    "id" : "event_risen_dead_patrol",
+    "is_instant" : false,
+    "is_one_time" : false,
+    "mini_game_challenge" : {
+      "can_retreat" : true,
+      "challenge_kind" : "combat",
+      "defeat_consequences" : {
+        "balance_delta" : 0,
+        "clear_flags" : [
+
+        ],
+        "resource_changes" : {
+
+        },
+        "set_flags" : [
+
+        ]
+      },
+      "difficulty" : 2,
+      "enemy_id" : "risen_dead",
+      "id" : "challenge_risen_dead",
+      "pressure_scaling" : 0.1,
+      "turn_limit" : 0,
+      "victory_consequences" : {
+        "balance_delta" : 3,
+        "clear_flags" : [
+
+        ],
+        "resource_changes" : {
+          "faith" : 3
+        },
+        "set_flags" : [
+
+        ]
+      }
+    },
+    "pool_ids" : [
+      "pool_common"
+    ],
+    "title" : {
+      "en" : "Undead Patrol",
+      "ru" : "Дозор Мертвецов"
+    },
+    "weight" : 18
   },
   {
-    "id": "event_lost_child",
-    "title": {
-      "en": "Lost Child",
-      "ru": "Потерянный Ребёнок"
+    "availability" : {
+      "forbidden_flags" : [
+        "main_quest_started"
+      ],
+      "region_ids" : [
+        "village"
+      ],
+      "region_states" : [
+        "stable",
+        "borderland"
+      ],
+      "required_flags" : [
+
+      ]
     },
-    "body": {
-      "en": "You hear quiet sobbing. A small child sits at the edge of the path, lost and frightened. They wandered too far from home.",
-      "ru": "Вы слышите тихий плач. На краю тропы сидит маленький ребёнок, потерявшийся и напуганный. Он забрёл слишком далеко от дома."
+    "body" : {
+      "en" : "The village elder asks for help. The Navi grows stronger, and the village needs a defender who can strengthen the anchors and resist the darkness.",
+      "ru" : "Деревенский староста просит о помощи. Навь усиливается, и деревне нужен защитник, способный укрепить якоря и противостоять тьме."
     },
-    "event_kind": "inline",
-    "availability": {
-      "required_flags": [],
-      "forbidden_flags": ["child_saved"],
-      "min_pressure": null,
-      "max_pressure": null,
-      "min_balance": null,
-      "max_balance": null,
-      "region_states": ["stable", "borderland", "breach"],
-      "region_ids": ["village", "forest"]
-    },
-    "pool_ids": ["pool_village", "pool_forest"],
-    "weight": 15,
-    "is_one_time": true,
-    "is_instant": false,
-    "cooldown": 0,
-    "choices": [
+    "choices" : [
       {
-        "id": "help_child",
-        "label": {
-          "en": "Help the child find home",
-          "ru": "Помочь ребёнку найти дорогу домой"
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "quest_progress" : {
+            "action" : "unlock",
+            "objective_id" : "obj_learn_anchors",
+            "quest_id" : "quest_main_act1"
+          },
+          "resource_changes" : {
+            "faith" : 3
+          },
+          "result_key" : "quest_accepted",
+          "set_flags" : [
+            "main_quest_started",
+            "helped_village"
+          ]
         },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {"faith": 5},
-          "set_flags": ["child_saved"],
-          "clear_flags": [],
-          "balance_delta": 8,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "child_returned"
+        "id" : "accept_quest",
+        "label" : {
+          "en" : "Agree to help the village",
+          "ru" : "Согласиться помочь деревне"
         }
       },
       {
-        "id": "ignore_child",
-        "label": {
-          "en": "Ignore and move on",
-          "ru": "Пройти мимо"
+        "consequences" : {
+          "balance_delta" : -5,
+          "clear_flags" : [
+
+          ],
+          "quest_progress" : {
+            "action" : "unlock",
+            "objective_id" : "obj_learn_anchors",
+            "quest_id" : "quest_main_act1"
+          },
+          "resource_changes" : {
+            "faith" : 10
+          },
+          "result_key" : "mercenary_accepted",
+          "set_flags" : [
+            "main_quest_started",
+            "mercenary_path"
+          ]
         },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": -5,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "child_ignored"
+        "id" : "request_payment",
+        "label" : {
+          "en" : "Request payment (10 Faith)",
+          "ru" : "Попросить награду (10 ✨)"
         }
       },
       {
-        "id": "child_guide",
-        "label": {
-          "en": "Ask the child to guide you",
-          "ru": "Попросить ребёнка стать проводником"
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+
+          },
+          "result_key" : "quest_refused",
+          "set_flags" : [
+            "refused_main_quest"
+          ]
         },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {"faith": 2},
-          "set_flags": ["child_saved", "local_knowledge"],
-          "clear_flags": [],
-          "balance_delta": 3,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "child_guided"
+        "id" : "refuse",
+        "label" : {
+          "en" : "Refuse and go your own way",
+          "ru" : "Отказать и идти своим путем"
         }
       }
     ],
-    "mini_game_challenge": null
+    "cooldown" : 0,
+    "event_kind" : "inline",
+    "id" : "event_elder_quest",
+    "is_instant" : false,
+    "is_one_time" : true,
+    "pool_ids" : [
+      "pool_village"
+    ],
+    "title" : {
+      "en" : "Village Elder's Request",
+      "ru" : "Просьба Старосты"
+    },
+    "weight" : 100
   },
   {
-    "id": "event_ancient_shrine",
-    "title": {
-      "en": "Forgotten Shrine",
-      "ru": "Забытое Святилище"
+    "availability" : {
+      "forbidden_flags" : [
+
+      ],
+      "region_ids" : [
+        "oak"
+      ],
+      "region_states" : [
+        "stable",
+        "borderland"
+      ],
+      "required_flags" : [
+
+      ]
     },
-    "body": {
-      "en": "Hidden behind overgrown vines, you discover an ancient shrine. Faded runes glow faintly with residual power. The air here feels sacred.",
-      "ru": "Скрытое за разросшимися лозами, вы обнаруживаете древнее святилище. Выцветшие руны слабо светятся остаточной силой. Воздух здесь ощущается священным."
+    "body" : {
+      "en" : "The ancient oak whispers to you in the language of the wind. You feel its ancient power and the wisdom of ages.",
+      "ru" : "Древний дуб шепчет вам на языке ветра. Вы чувствуете его древнюю силу и мудрость веков."
     },
-    "event_kind": "inline",
-    "availability": {
-      "required_flags": [],
-      "forbidden_flags": ["shrine_visited"],
-      "min_pressure": null,
-      "max_pressure": null,
-      "min_balance": null,
-      "max_balance": null,
-      "region_states": ["stable", "borderland"],
-      "region_ids": ["mountain", "oak"]
-    },
-    "pool_ids": ["pool_mountain", "pool_sacred"],
-    "weight": 10,
-    "is_one_time": true,
-    "is_instant": false,
-    "cooldown": 0,
-    "choices": [
+    "choices" : [
       {
-        "id": "pray_shrine",
-        "label": {
-          "en": "Pray at the shrine (6 Faith)",
-          "ru": "Помолиться у святилища (6 \u2728)"
+        "consequences" : {
+          "balance_delta" : 10,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : -6,
+            "health" : 5
+          },
+          "result_key" : "wisdom_gained",
+          "set_flags" : [
+            "oak_wisdom"
+          ]
         },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"faith": 6},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
+        "id" : "meditate",
+        "label" : {
+          "en" : "Meditate under the oak (6 Faith)",
+          "ru" : "Медитировать под дубом (6 ✨)"
         },
-        "consequences": {
-          "resource_changes": {"faith": -6, "health": 3},
-          "set_flags": ["shrine_visited", "shrine_blessed"],
-          "clear_flags": [],
-          "balance_delta": 12,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "shrine_blessed"
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "faith" : 6
+          },
+          "required_flags" : [
+
+          ]
         }
       },
       {
-        "id": "loot_shrine",
-        "label": {
-          "en": "Take the offerings",
-          "ru": "Забрать подношения"
+        "consequences" : {
+          "balance_delta" : 15,
+          "clear_flags" : [
+
+          ],
+          "quest_progress" : {
+            "action" : "complete",
+            "objective_id" : "obj_strengthen_oak",
+            "quest_id" : "quest_main_act1"
+          },
+          "resource_changes" : {
+            "faith" : -12
+          },
+          "result_key" : "oak_strengthened",
+          "set_flags" : [
+            "oak_strengthened"
+          ]
         },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {"faith": 8},
-          "set_flags": ["shrine_visited", "shrine_looted"],
-          "clear_flags": [],
-          "balance_delta": -8,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "shrine_looted"
+        "id" : "strengthen_oak",
+        "label" : {
+          "en" : "Strengthen the oak's bond with the earth (12 Faith)",
+          "ru" : "Укрепить связь дуба с землей (12 ✨)"
+        },
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_balance" : 60,
+          "min_resources" : {
+            "faith" : 12
+          },
+          "required_flags" : [
+
+          ]
         }
       },
       {
-        "id": "leave_shrine",
-        "label": {
-          "en": "Leave the shrine undisturbed",
-          "ru": "Оставить святилище нетронутым"
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "health" : 2
+          },
+          "result_key" : "rested",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {},
-          "set_flags": ["shrine_visited"],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "shrine_left"
+        "id" : "rest",
+        "label" : {
+          "en" : "Simply rest in the oak's shade",
+          "ru" : "Просто отдохнуть в тени дуба"
         }
       }
     ],
-    "mini_game_challenge": null
+    "cooldown" : 3,
+    "event_kind" : "inline",
+    "id" : "event_sacred_oak_wisdom",
+    "is_instant" : false,
+    "is_one_time" : false,
+    "pool_ids" : [
+      "pool_sacred"
+    ],
+    "title" : {
+      "en" : "Wisdom of the Sacred Oak",
+      "ru" : "Мудрость Священного Дуба"
+    },
+    "weight" : 20
   },
   {
-    "id": "event_navi_whispers",
-    "title": {
-      "en": "Whispers of the Navi",
-      "ru": "Шёпот Нави"
+    "availability" : {
+      "forbidden_flags" : [
+
+      ],
+      "region_ids" : [
+        "forest"
+      ],
+      "region_states" : [
+        "stable",
+        "borderland",
+        "breach"
+      ],
+      "required_flags" : [
+
+      ]
     },
-    "body": {
-      "en": "Dark whispers creep into your mind, promising power and knowledge. The voice of the Navi is seductive and insistent.",
-      "ru": "Тёмный шёпот проникает в ваш разум, обещая силу и знания. Голос Нави соблазнителен и настойчив."
+    "body" : {
+      "en" : "A pack of wolves with matted fur and glowing eyes emerges from the undergrowth. The corruption of Navi has twisted them into something feral and relentless.",
+      "ru" : "Из подлеска появляется стая волков со свалявшейся шерстью и светящимися глазами. Порча Нави превратила их в нечто дикое и неудержимое."
     },
-    "event_kind": "inline",
-    "availability": {
-      "required_flags": [],
-      "forbidden_flags": [],
-      "min_pressure": null,
-      "max_pressure": null,
-      "min_balance": null,
-      "max_balance": null,
-      "region_states": ["borderland", "breach"],
-      "region_ids": null
-    },
-    "pool_ids": ["pool_common"],
-    "weight": 18,
-    "is_one_time": false,
-    "is_instant": false,
-    "cooldown": 4,
-    "choices": [
+    "choices" : [
       {
-        "id": "resist_whispers",
-        "label": {
-          "en": "Resist the whispers",
-          "ru": "Сопротивляться шёпоту"
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+
+          },
+          "result_key" : "combat_start",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 5,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "whispers_resisted"
+        "id" : "fight_wolves",
+        "label" : {
+          "en" : "Fight the wolves",
+          "ru" : "Сразиться с волками"
+        },
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "health" : 2
+          },
+          "required_flags" : [
+
+          ]
         }
       },
       {
-        "id": "listen_whispers",
-        "label": {
-          "en": "Listen to the dark voice",
-          "ru": "Прислушаться к тёмному голосу"
+        "consequences" : {
+          "balance_delta" : 3,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : -6
+          },
+          "result_key" : "wolves_calmed",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {"faith": 8},
-          "set_flags": ["navi_touched"],
-          "clear_flags": [],
-          "balance_delta": -12,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "whispers_accepted"
+        "id" : "calm_wolves",
+        "label" : {
+          "en" : "Calm with nature magic (6 Faith)",
+          "ru" : "Успокоить магией природы (6 ✨)"
+        },
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "faith" : 6
+          },
+          "required_flags" : [
+
+          ]
         }
       },
       {
-        "id": "meditate_whispers",
-        "label": {
-          "en": "Meditate to find balance",
-          "ru": "Медитировать для обретения равновесия"
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+
+          },
+          "result_key" : "wolves_passed",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {"health": 2},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 2,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "balance_found"
+        "id" : "climb_tree",
+        "label" : {
+          "en" : "Climb a tree and wait",
+          "ru" : "Забраться на дерево и переждать"
         }
       }
     ],
-    "mini_game_challenge": null
+    "cooldown" : 3,
+    "event_kind" : {
+      "mini_game" : "combat"
+    },
+    "id" : "event_forest_wolves",
+    "is_instant" : false,
+    "is_one_time" : false,
+    "mini_game_challenge" : {
+      "can_retreat" : true,
+      "challenge_kind" : "combat",
+      "defeat_consequences" : {
+        "balance_delta" : 0,
+        "clear_flags" : [
+
+        ],
+        "resource_changes" : {
+
+        },
+        "set_flags" : [
+
+        ]
+      },
+      "difficulty" : 1,
+      "enemy_id" : "wild_beast",
+      "id" : "challenge_wild_beast",
+      "pressure_scaling" : 0.1,
+      "turn_limit" : 0,
+      "victory_consequences" : {
+        "balance_delta" : 2,
+        "clear_flags" : [
+
+        ],
+        "resource_changes" : {
+          "faith" : 2
+        },
+        "set_flags" : [
+
+        ]
+      }
+    },
+    "pool_ids" : [
+      "pool_forest"
+    ],
+    "title" : {
+      "en" : "Corrupted Wolf Pack",
+      "ru" : "Стая Порченых Волков"
+    },
+    "weight" : 15
   },
   {
-    "id": "event_wounded_soldier",
-    "title": {
-      "en": "Wounded Soldier",
-      "ru": "Раненый Солдат"
+    "availability" : {
+      "forbidden_flags" : [
+        "mountain_blessing"
+      ],
+      "region_ids" : [
+        "mountain"
+      ],
+      "region_states" : [
+        "stable",
+        "borderland",
+        "breach"
+      ],
+      "required_flags" : [
+
+      ]
     },
-    "body": {
-      "en": "A wounded border soldier leans against a rock, bleeding from deep claw marks. He gasps: 'The dead... they're organized... someone leads them...'",
-      "ru": "Раненый пограничный солдат привалился к камню, истекая кровью от глубоких царапин. Он хрипит: 'Мертвецы... они организованы... кто-то ведёт их...'"
+    "body" : {
+      "en" : "A stone spirit appears at the mountain pass. It speaks: 'Prove your strength or turn back, mortal!'",
+      "ru" : "На горном перевале появляется каменный дух. Он говорит: 'Докажи свою силу или вернись назад, смертный!'"
     },
-    "event_kind": "inline",
-    "availability": {
-      "required_flags": [],
-      "forbidden_flags": ["soldier_helped"],
-      "min_pressure": null,
-      "max_pressure": null,
-      "min_balance": null,
-      "max_balance": null,
-      "region_states": ["stable", "borderland", "breach"],
-      "region_ids": ["village", "mountain"]
-    },
-    "pool_ids": ["pool_village", "pool_mountain"],
-    "weight": 14,
-    "is_one_time": true,
-    "is_instant": false,
-    "cooldown": 0,
-    "choices": [
+    "choices" : [
       {
-        "id": "heal_soldier",
-        "label": {
-          "en": "Heal the soldier",
-          "ru": "Исцелить солдата"
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : 2
+          },
+          "result_key" : "combat_start",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {"faith": 3, "health": -3},
-          "set_flags": ["soldier_helped", "enemy_intel"],
-          "clear_flags": [],
-          "balance_delta": 5,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "soldier_healed"
+        "id" : "accept_challenge",
+        "label" : {
+          "en" : "Accept the spirit's challenge",
+          "ru" : "Принять вызов духа"
+        },
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "health" : 4
+          },
+          "required_flags" : [
+
+          ]
         }
       },
       {
-        "id": "question_soldier",
-        "label": {
-          "en": "Question him for intelligence",
-          "ru": "Расспросить о противнике"
+        "consequences" : {
+          "balance_delta" : 8,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : -10
+          },
+          "result_key" : "mountain_blessed",
+          "set_flags" : [
+            "mountain_blessing"
+          ]
         },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {"faith": 1},
-          "set_flags": ["soldier_helped", "enemy_intel"],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "soldier_questioned"
+        "id" : "offer_gift",
+        "label" : {
+          "en" : "Offer a gift to the mountains (10 Faith)",
+          "ru" : "Предложить дар горам (10 ✨)"
+        },
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "faith" : 10
+          },
+          "required_flags" : [
+
+          ]
         }
       },
       {
-        "id": "leave_soldier",
-        "label": {
-          "en": "Leave him to his fate",
-          "ru": "Оставить его на произвол судьбы"
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+
+          },
+          "result_key" : "retreated",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": -3,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "soldier_abandoned"
+        "id" : "retreat_pass",
+        "label" : {
+          "en" : "Retreat from the pass",
+          "ru" : "Отступить с перевала"
         }
       }
     ],
-    "mini_game_challenge": null
+    "cooldown" : 0,
+    "event_kind" : {
+      "mini_game" : "combat"
+    },
+    "id" : "event_mountain_spirit",
+    "is_instant" : false,
+    "is_one_time" : true,
+    "mini_game_challenge" : {
+      "can_retreat" : true,
+      "challenge_kind" : "combat",
+      "defeat_consequences" : {
+        "balance_delta" : 0,
+        "clear_flags" : [
+
+        ],
+        "resource_changes" : {
+
+        },
+        "set_flags" : [
+
+        ]
+      },
+      "difficulty" : 2,
+      "enemy_id" : "mountain_spirit",
+      "id" : "challenge_mountain_spirit",
+      "pressure_scaling" : 0.1,
+      "turn_limit" : 0,
+      "victory_consequences" : {
+        "balance_delta" : 10,
+        "clear_flags" : [
+
+        ],
+        "resource_changes" : {
+          "faith" : 5
+        },
+        "set_flags" : [
+          "mountain_blessing"
+        ]
+      }
+    },
+    "pool_ids" : [
+      "pool_mountain"
+    ],
+    "title" : {
+      "en" : "Trial of the Pass",
+      "ru" : "Испытание Перевала"
+    },
+    "weight" : 25
   },
   {
-    "id": "event_strange_fog",
-    "title": {
-      "en": "Strange Fog",
-      "ru": "Странный Туман"
+    "availability" : {
+      "forbidden_flags" : [
+
+      ],
+      "max_pressure" : 60,
+      "region_states" : [
+        "stable",
+        "borderland"
+      ],
+      "required_flags" : [
+
+      ]
     },
-    "body": {
-      "en": "An unnatural fog rolls in, thick and cold. Shapes move within it, and you lose all sense of direction. Something watches from the murk.",
-      "ru": "Неестественный туман наползает, густой и холодный. В нём движутся силуэты, и вы теряете чувство направления. Что-то наблюдает из мглы."
+    "body" : {
+      "en" : "You find a sheltered spot suitable for rest. You can make a fire and restore your strength.",
+      "ru" : "Вы находите укрытое место, подходящее для отдыха. Можно развести костер и восстановить силы."
     },
-    "event_kind": "inline",
-    "availability": {
-      "required_flags": [],
-      "forbidden_flags": [],
-      "min_pressure": null,
-      "max_pressure": null,
-      "min_balance": null,
-      "max_balance": null,
-      "region_states": ["borderland", "breach"],
-      "region_ids": ["swamp", "breach"]
-    },
-    "pool_ids": ["pool_swamp", "pool_breach"],
-    "weight": 16,
-    "is_one_time": false,
-    "is_instant": false,
-    "cooldown": 4,
-    "choices": [
+    "choices" : [
       {
-        "id": "push_through_fog",
-        "label": {
-          "en": "Push through the fog",
-          "ru": "Пробираться сквозь туман"
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : 2,
+            "health" : 4
+          },
+          "result_key" : "fully_rested",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {"health": -2},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "fog_survived"
+        "id" : "full_rest",
+        "label" : {
+          "en" : "Rest and recover",
+          "ru" : "Отдохнуть и восстановиться"
         }
       },
       {
-        "id": "wait_fog",
-        "label": {
-          "en": "Wait for the fog to pass",
-          "ru": "Подождать, пока туман рассеется"
+        "consequences" : {
+          "balance_delta" : 5,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : -5,
+            "health" : 3
+          },
+          "result_key" : "purified",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": -2,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "fog_waited"
+        "id" : "purification_ritual",
+        "label" : {
+          "en" : "Perform a purification ritual (5 Faith)",
+          "ru" : "Провести ритуал очищения (5 ✨)"
+        },
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "faith" : 5
+          },
+          "required_flags" : [
+
+          ]
         }
       },
       {
-        "id": "light_fog",
-        "label": {
-          "en": "Use faith as a beacon (5 Faith)",
-          "ru": "Использовать веру как маяк (5 \u2728)"
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "health" : 1
+          },
+          "result_key" : "quick_rest",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"faith": 5},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
-        },
-        "consequences": {
-          "resource_changes": {"faith": -5, "health": 1},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 5,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "fog_dispelled"
+        "id" : "quick_rest",
+        "label" : {
+          "en" : "Quick snack and move on",
+          "ru" : "Быстро перекусить и идти дальше"
         }
       }
     ],
-    "mini_game_challenge": null
+    "cooldown" : 5,
+    "event_kind" : "inline",
+    "id" : "event_camp_rest",
+    "is_instant" : false,
+    "is_one_time" : false,
+    "pool_ids" : [
+      "pool_common"
+    ],
+    "title" : {
+      "en" : "Safe Camping Spot",
+      "ru" : "Безопасное Место для Привала"
+    },
+    "weight" : 15
   },
   {
-    "id": "event_shadow_wolves",
-    "title": {
-      "en": "Shadow Wolf Ambush",
-      "ru": "Засада Теневого Волка"
+    "availability" : {
+      "forbidden_flags" : [
+        "witch_pact",
+        "witch_refused"
+      ],
+      "region_ids" : [
+        "swamp"
+      ],
+      "region_states" : [
+        "borderland",
+        "breach"
+      ],
+      "required_flags" : [
+
+      ]
     },
-    "body": {
-      "en": "A pair of glowing eyes appears in the undergrowth. A shadow wolf — corrupted by Navi — lunges from the darkness with unnatural speed.",
-      "ru": "Пара светящихся глаз появляется в подлеске. Теневой волк — искажённый Навью — бросается из тьмы с неестественной скоростью."
+    "body" : {
+      "en" : "An old witch appears from the swamp mists. She offers a deal: knowledge in exchange for a part of your essence.",
+      "ru" : "Среди болотных туманов появляется старая ведьма. Она предлагает сделку: знания в обмен на часть вашей сущности."
     },
-    "event_kind": {"mini_game": "combat"},
-    "availability": {
-      "required_flags": [],
-      "forbidden_flags": [],
-      "min_pressure": null,
-      "max_pressure": null,
-      "min_balance": null,
-      "max_balance": null,
-      "region_states": ["stable", "borderland", "breach"],
-      "region_ids": ["forest"]
-    },
-    "pool_ids": ["pool_forest"],
-    "weight": 18,
-    "is_one_time": false,
-    "is_instant": false,
-    "cooldown": 2,
-    "choices": [
+    "choices" : [
       {
-        "id": "fight_shadow_wolf",
-        "label": {
-          "en": "Fight the shadow wolf",
-          "ru": "Сразиться с теневым волком"
+        "consequences" : {
+          "balance_delta" : -10,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : 5,
+            "health" : -3
+          },
+          "result_key" : "deal_accepted",
+          "set_flags" : [
+            "witch_pact",
+            "witch_mark"
+          ]
         },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"health": 2},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
+        "id" : "accept_deal",
+        "label" : {
+          "en" : "Accept the witch's deal",
+          "ru" : "Принять сделку ведьмы"
         },
-        "consequences": {
-          "resource_changes": {},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "combat_start"
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "health" : 4
+          },
+          "required_flags" : [
+
+          ]
         }
       },
       {
-        "id": "scare_wolf",
-        "label": {
-          "en": "Use fire to scare it (3 Faith)",
-          "ru": "Использовать огонь для отпугивания (3 ✨)"
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : -7,
+            "health" : 2
+          },
+          "result_key" : "witch_respected",
+          "set_flags" : [
+            "witch_refused"
+          ]
         },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"faith": 3},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
+        "id" : "refuse_politely",
+        "label" : {
+          "en" : "Refuse and ask for help (7 Faith)",
+          "ru" : "Отказаться и попросить о помощи (7 ✨)"
         },
-        "consequences": {
-          "resource_changes": {"faith": -3},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "wolf_scared"
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "faith" : 7
+          },
+          "required_flags" : [
+
+          ]
         }
       },
       {
-        "id": "flee_shadow_wolf",
-        "label": {
-          "en": "Flee into the trees",
-          "ru": "Бежать в лес"
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+
+          },
+          "result_key" : "avoided_witch",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {"health": -1},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "fled_wolf"
+        "id" : "leave",
+        "label" : {
+          "en" : "Leave without dealing with the witch",
+          "ru" : "Уйти, не связываясь с ведьмой"
         }
       }
     ],
-    "mini_game_challenge": {
-      "enemy_id": "shadow_wolf",
-      "difficulty": 1,
-      "rewards": {
-        "resource_changes": {"faith": 2},
-        "set_flags": [],
-        "clear_flags": [],
-        "balance_delta": 2,
-        "region_state_change": null,
-        "quest_progress": null,
-        "trigger_event_id": null,
-        "result_key": null
-      }
-    }
+    "cooldown" : 0,
+    "event_kind" : "inline",
+    "id" : "event_swamp_witch",
+    "is_instant" : false,
+    "is_one_time" : true,
+    "pool_ids" : [
+      "pool_swamp"
+    ],
+    "title" : {
+      "en" : "Swamp Witch",
+      "ru" : "Болотная Ведьма"
+    },
+    "weight" : 25
   },
   {
-    "id": "event_cursed_knight",
-    "title": {
-      "en": "The Cursed Knight",
-      "ru": "Проклятый Рыцарь"
+    "availability" : {
+      "forbidden_flags" : [
+        "leshy_guardian_defeated"
+      ],
+      "region_ids" : [
+        "dark_lowland"
+      ],
+      "region_states" : [
+        "breach"
+      ],
+      "required_flags" : [
+        "main_quest_started",
+        "oak_strengthened"
+      ]
     },
-    "body": {
-      "en": "Among crumbling ruins, a figure in rusted armor stirs. The cursed knight rises, bound by an oath that death could not break. His hollow eyes fix upon you.",
-      "ru": "Среди разрушенных руин шевелится фигура в ржавых доспехах. Проклятый рыцарь поднимается, связанный клятвой, которую смерть не смогла разрушить. Его пустые глаза устремляются на вас."
+    "body" : {
+      "en" : "Before you towers the ancient guardian of the Twilight Marches. The Leshy Guardian - a being of immense power whose roots reach into the very foundations of the world. Green flame burns eternally in his eyes. This is the final trial of Act I.",
+      "ru" : "Перед вами возвышается древний страж Сумрачных Пределов. Леший-Хранитель - существо невиданной силы, чьи корни уходят в самые основы мира. Зелёное пламя в его глазах горит вечностью. Это финальное испытание Акта I."
     },
-    "event_kind": {"mini_game": "combat"},
-    "availability": {
-      "required_flags": [],
-      "forbidden_flags": [],
-      "min_pressure": null,
-      "max_pressure": null,
-      "min_balance": null,
-      "max_balance": null,
-      "region_states": ["borderland", "breach"],
-      "region_ids": null
-    },
-    "pool_ids": ["pool_common"],
-    "weight": 14,
-    "is_one_time": false,
-    "is_instant": false,
-    "cooldown": 4,
-    "choices": [
+    "choices" : [
       {
-        "id": "fight_knight",
-        "label": {
-          "en": "Fight the cursed knight",
-          "ru": "Сразиться с проклятым рыцарем"
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+
+          },
+          "result_key" : "boss_combat_start",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"health": 3},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
+        "id" : "fight_boss",
+        "label" : {
+          "en" : "Enter the final battle",
+          "ru" : "Вступить в решающий бой"
         },
-        "consequences": {
-          "resource_changes": {},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "combat_start"
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "faith" : 10,
+            "health" : 8
+          },
+          "required_flags" : [
+
+          ]
         }
       },
       {
-        "id": "break_curse",
-        "label": {
-          "en": "Try to break his curse (10 Faith)",
-          "ru": "Попытаться разрушить проклятие (10 ✨)"
+        "consequences" : {
+          "balance_delta" : 15,
+          "clear_flags" : [
+
+          ],
+          "quest_progress" : {
+            "action" : "complete",
+            "objective_id" : "obj_defeat_guardian",
+            "quest_id" : "quest_main_act1"
+          },
+          "resource_changes" : {
+            "faith" : -20
+          },
+          "result_key" : "boss_negotiated",
+          "set_flags" : [
+            "leshy_guardian_peaceful",
+            "leshy_guardian_defeated"
+          ]
         },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"faith": 10},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
+        "id" : "negotiate_boss",
+        "label" : {
+          "en" : "Try to negotiate (20 Faith)",
+          "ru" : "Попытаться договориться (20 ✨)"
         },
-        "consequences": {
-          "resource_changes": {"faith": -10},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 8,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "curse_broken"
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_balance" : 70,
+          "min_resources" : {
+            "faith" : 20
+          },
+          "required_flags" : [
+
+          ]
         }
       },
       {
-        "id": "flee_knight",
-        "label": {
-          "en": "Retreat from the ruins",
-          "ru": "Отступить из руин"
+        "consequences" : {
+          "balance_delta" : -20,
+          "clear_flags" : [
+
+          ],
+          "quest_progress" : {
+            "action" : "complete",
+            "objective_id" : "obj_defeat_guardian",
+            "quest_id" : "quest_main_act1"
+          },
+          "resource_changes" : {
+            "faith" : -15,
+            "health" : -5
+          },
+          "result_key" : "boss_corrupted",
+          "set_flags" : [
+            "leshy_guardian_corrupted",
+            "leshy_guardian_defeated"
+          ]
         },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {"health": -2},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "fled_knight"
+        "id" : "dark_power_boss",
+        "label" : {
+          "en" : "Use dark power (15 Faith)",
+          "ru" : "Использовать силу тьмы (15 ✨)"
+        },
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "max_balance" : 30,
+          "min_resources" : {
+            "faith" : 15
+          },
+          "required_flags" : [
+
+          ]
         }
       }
     ],
-    "mini_game_challenge": {
-      "enemy_id": "cursed_knight",
-      "difficulty": 3,
-      "rewards": {
-        "resource_changes": {"faith": 6},
-        "set_flags": [],
-        "clear_flags": [],
-        "balance_delta": 5,
-        "region_state_change": null,
-        "quest_progress": null,
-        "trigger_event_id": null,
-        "result_key": null
+    "cooldown" : 0,
+    "event_kind" : {
+      "mini_game" : "combat"
+    },
+    "id" : "event_boss_leshy_guardian",
+    "is_instant" : false,
+    "is_one_time" : true,
+    "mini_game_challenge" : {
+      "can_retreat" : true,
+      "challenge_kind" : "combat",
+      "defeat_consequences" : {
+        "balance_delta" : 0,
+        "clear_flags" : [
+
+        ],
+        "resource_changes" : {
+
+        },
+        "set_flags" : [
+
+        ]
+      },
+      "difficulty" : 5,
+      "enemy_id" : "leshy_guardian_boss",
+      "id" : "challenge_leshy_guardian_boss",
+      "pressure_scaling" : 0.1,
+      "turn_limit" : 0,
+      "victory_consequences" : {
+        "balance_delta" : 10,
+        "clear_flags" : [
+
+        ],
+        "quest_progress" : {
+          "action" : "complete",
+          "objective_id" : "obj_defeat_guardian",
+          "quest_id" : "quest_main_act1"
+        },
+        "resource_changes" : {
+          "faith" : 20
+        },
+        "set_flags" : [
+          "leshy_guardian_defeated"
+        ]
       }
-    }
+    },
+    "pool_ids" : [
+      "pool_boss"
+    ],
+    "title" : {
+      "en" : "Leshy Guardian",
+      "ru" : "Леший-Хранитель"
+    },
+    "weight" : 100
   },
   {
-    "id": "event_dark_sorcerer",
-    "title": {
-      "en": "Dark Ritual",
-      "ru": "Тёмный Ритуал"
+    "availability" : {
+      "forbidden_flags" : [
+
+      ],
+      "region_states" : [
+        "stable",
+        "borderland"
+      ],
+      "required_flags" : [
+
+      ]
     },
-    "body": {
-      "en": "Dark energy crackles in the air. A robed figure chants over a circle of black stones, pulling Navi energy into the world. The dark sorcerer turns, his eyes blazing with power.",
-      "ru": "Тёмная энергия потрескивает в воздухе. Фигура в мантии читает заклинания над кругом из чёрных камней, втягивая энергию Нави в мир. Тёмный колдун поворачивается, его глаза пылают силой."
+    "body" : {
+      "en" : "A small caravan of traders has set up camp nearby. They offer rare goods and news from distant lands.",
+      "ru" : "Небольшой караван торговцев разбил лагерь неподалёку. Они предлагают редкие товары и новости из далёких земель."
     },
-    "event_kind": {"mini_game": "combat"},
-    "availability": {
-      "required_flags": [],
-      "forbidden_flags": [],
-      "min_pressure": 30,
-      "max_pressure": null,
-      "min_balance": null,
-      "max_balance": null,
-      "region_states": ["borderland", "breach"],
-      "region_ids": ["swamp", "breach"]
-    },
-    "pool_ids": ["pool_swamp", "pool_breach"],
-    "weight": 16,
-    "is_one_time": false,
-    "is_instant": false,
-    "cooldown": 5,
-    "choices": [
+    "choices" : [
       {
-        "id": "fight_sorcerer",
-        "label": {
-          "en": "Interrupt the ritual",
-          "ru": "Прервать ритуал"
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : -8,
+            "health" : 5
+          },
+          "result_key" : "supplies_bought",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"health": 4},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
+        "id" : "buy_supplies",
+        "label" : {
+          "en" : "Buy healing supplies (8 Faith)",
+          "ru" : "Купить припасы (8 ✨)"
         },
-        "consequences": {
-          "resource_changes": {},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "combat_start"
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "faith" : 8
+          },
+          "required_flags" : [
+
+          ]
         }
       },
       {
-        "id": "counter_ritual",
-        "label": {
-          "en": "Counter with holy ward (12 Faith)",
-          "ru": "Противодействовать святым оберегом (12 ✨)"
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : 2
+          },
+          "result_key" : "knowledge_shared",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"faith": 12},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
-        },
-        "consequences": {
-          "resource_changes": {"faith": -12},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 10,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "ritual_countered"
+        "id" : "trade_knowledge",
+        "label" : {
+          "en" : "Trade knowledge",
+          "ru" : "Обменяться знаниями"
         }
       },
       {
-        "id": "observe_sorcerer",
-        "label": {
-          "en": "Observe from a distance",
-          "ru": "Наблюдать издалека"
+        "consequences" : {
+          "balance_delta" : -10,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : 12,
+            "health" : -2
+          },
+          "result_key" : "merchants_robbed",
+          "set_flags" : [
+            "robber"
+          ]
         },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": -5,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "ritual_completed"
+        "id" : "rob_caravan",
+        "label" : {
+          "en" : "Rob the merchants",
+          "ru" : "Ограбить торговцев"
         }
       }
     ],
-    "mini_game_challenge": {
-      "enemy_id": "dark_sorcerer",
-      "difficulty": 4,
-      "rewards": {
-        "resource_changes": {"faith": 10},
-        "set_flags": [],
-        "clear_flags": [],
-        "balance_delta": 8,
-        "region_state_change": null,
-        "quest_progress": null,
-        "trigger_event_id": null,
-        "result_key": null
-      }
-    }
+    "cooldown" : 4,
+    "event_kind" : "inline",
+    "id" : "event_merchant_caravan",
+    "is_instant" : false,
+    "is_one_time" : false,
+    "pool_ids" : [
+      "pool_common"
+    ],
+    "title" : {
+      "en" : "Merchant Caravan",
+      "ru" : "Купеческий Караван"
+    },
+    "weight" : 12
   },
   {
-    "id": "event_breach_crawler",
-    "title": {
-      "en": "Breach Crawler Emergence",
-      "ru": "Появление Ползучего Ужаса"
+    "availability" : {
+      "forbidden_flags" : [
+
+      ],
+      "min_pressure" : 30,
+      "region_ids" : [
+        "swamp",
+        "breach"
+      ],
+      "region_states" : [
+        "borderland",
+        "breach"
+      ],
+      "required_flags" : [
+
+      ]
     },
-    "body": {
-      "en": "The ground trembles. A massive, otherworldly form pushes through a tear in reality. The Breach Crawler has arrived — a creature from the void between worlds, corroding everything around it.",
-      "ru": "Земля дрожит. Массивная, потусторонняя форма проталкивается сквозь разрыв в реальности. Ползучий Ужас прибыл — создание из пустоты между мирами, разъедающее всё вокруг."
+    "body" : {
+      "en" : "Dark energy crackles in the air. A robed figure chants over a circle of black stones, pulling Navi energy into the world. The dark sorcerer turns, his eyes blazing with power.",
+      "ru" : "Тёмная энергия потрескивает в воздухе. Фигура в мантии читает заклинания над кругом из чёрных камней, втягивая энергию Нави в мир. Тёмный колдун поворачивается, его глаза пылают силой."
     },
-    "event_kind": {"mini_game": "combat"},
-    "availability": {
-      "required_flags": [],
-      "forbidden_flags": [],
-      "min_pressure": 40,
-      "max_pressure": null,
-      "min_balance": null,
-      "max_balance": null,
-      "region_states": ["breach"],
-      "region_ids": null
-    },
-    "pool_ids": ["pool_breach"],
-    "weight": 20,
-    "is_one_time": false,
-    "is_instant": false,
-    "cooldown": 5,
-    "choices": [
+    "choices" : [
       {
-        "id": "fight_crawler",
-        "label": {
-          "en": "Fight the breach crawler",
-          "ru": "Сразиться с Ползучим Ужасом"
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+
+          },
+          "result_key" : "combat_start",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"health": 5},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
+        "id" : "fight_sorcerer",
+        "label" : {
+          "en" : "Interrupt the ritual",
+          "ru" : "Прервать ритуал"
         },
-        "consequences": {
-          "resource_changes": {},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 0,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "combat_start"
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "health" : 4
+          },
+          "required_flags" : [
+
+          ]
         }
       },
       {
-        "id": "seal_breach",
-        "label": {
-          "en": "Seal the breach (15 Faith)",
-          "ru": "Запечатать разлом (15 ✨)"
+        "consequences" : {
+          "balance_delta" : 10,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : -12
+          },
+          "result_key" : "ritual_countered",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": {
-          "min_resources": {"faith": 15},
-          "required_flags": [],
-          "forbidden_flags": [],
-          "min_balance": null,
-          "max_balance": null
+        "id" : "counter_ritual",
+        "label" : {
+          "en" : "Counter with holy ward (12 Faith)",
+          "ru" : "Противодействовать святым оберегом (12 ✨)"
         },
-        "consequences": {
-          "resource_changes": {"faith": -15},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": 12,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "breach_sealed"
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "faith" : 12
+          },
+          "required_flags" : [
+
+          ]
         }
       },
       {
-        "id": "flee_crawler",
-        "label": {
-          "en": "Run before it fully emerges",
-          "ru": "Бежать, пока оно не вылезло полностью"
+        "consequences" : {
+          "balance_delta" : -5,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+
+          },
+          "result_key" : "ritual_completed",
+          "set_flags" : [
+
+          ]
         },
-        "tooltip": null,
-        "requirements": null,
-        "consequences": {
-          "resource_changes": {"health": -3},
-          "set_flags": [],
-          "clear_flags": [],
-          "balance_delta": -5,
-          "region_state_change": null,
-          "quest_progress": null,
-          "trigger_event_id": null,
-          "result_key": "fled_crawler"
+        "id" : "observe_sorcerer",
+        "label" : {
+          "en" : "Observe from a distance",
+          "ru" : "Наблюдать издалека"
         }
       }
     ],
-    "mini_game_challenge": {
-      "enemy_id": "breach_crawler",
-      "difficulty": 4,
-      "rewards": {
-        "resource_changes": {"faith": 12},
-        "set_flags": [],
-        "clear_flags": [],
-        "balance_delta": 10,
-        "region_state_change": null,
-        "quest_progress": null,
-        "trigger_event_id": null,
-        "result_key": null
+    "cooldown" : 5,
+    "event_kind" : {
+      "mini_game" : "combat"
+    },
+    "id" : "event_dark_sorcerer",
+    "is_instant" : false,
+    "is_one_time" : false,
+    "mini_game_challenge" : {
+      "can_retreat" : true,
+      "challenge_kind" : "combat",
+      "defeat_consequences" : {
+        "balance_delta" : 0,
+        "clear_flags" : [
+
+        ],
+        "resource_changes" : {
+
+        },
+        "set_flags" : [
+
+        ]
+      },
+      "difficulty" : 4,
+      "enemy_id" : "dark_sorcerer",
+      "id" : "challenge_dark_sorcerer",
+      "pressure_scaling" : 0.1,
+      "turn_limit" : 0,
+      "victory_consequences" : {
+        "balance_delta" : 8,
+        "clear_flags" : [
+
+        ],
+        "resource_changes" : {
+          "faith" : 10
+        },
+        "set_flags" : [
+
+        ]
       }
-    }
+    },
+    "pool_ids" : [
+      "pool_swamp",
+      "pool_breach"
+    ],
+    "title" : {
+      "en" : "Dark Ritual",
+      "ru" : "Тёмный Ритуал"
+    },
+    "weight" : 16
+  },
+  {
+    "availability" : {
+      "forbidden_flags" : [
+
+      ],
+      "min_pressure" : 40,
+      "region_states" : [
+        "breach"
+      ],
+      "required_flags" : [
+
+      ]
+    },
+    "body" : {
+      "en" : "The ground trembles. A massive, otherworldly form pushes through a tear in reality. The Breach Crawler has arrived — a creature from the void between worlds, corroding everything around it.",
+      "ru" : "Земля дрожит. Массивная, потусторонняя форма проталкивается сквозь разрыв в реальности. Ползучий Ужас прибыл — создание из пустоты между мирами, разъедающее всё вокруг."
+    },
+    "choices" : [
+      {
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+
+          },
+          "result_key" : "combat_start",
+          "set_flags" : [
+
+          ]
+        },
+        "id" : "fight_crawler",
+        "label" : {
+          "en" : "Fight the breach crawler",
+          "ru" : "Сразиться с Ползучим Ужасом"
+        },
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "health" : 5
+          },
+          "required_flags" : [
+
+          ]
+        }
+      },
+      {
+        "consequences" : {
+          "balance_delta" : 12,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : -15
+          },
+          "result_key" : "breach_sealed",
+          "set_flags" : [
+
+          ]
+        },
+        "id" : "seal_breach",
+        "label" : {
+          "en" : "Seal the breach (15 Faith)",
+          "ru" : "Запечатать разлом (15 ✨)"
+        },
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "faith" : 15
+          },
+          "required_flags" : [
+
+          ]
+        }
+      },
+      {
+        "consequences" : {
+          "balance_delta" : -5,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "health" : -3
+          },
+          "result_key" : "fled_crawler",
+          "set_flags" : [
+
+          ]
+        },
+        "id" : "flee_crawler",
+        "label" : {
+          "en" : "Run before it fully emerges",
+          "ru" : "Бежать, пока оно не вылезло полностью"
+        }
+      }
+    ],
+    "cooldown" : 5,
+    "event_kind" : {
+      "mini_game" : "combat"
+    },
+    "id" : "event_breach_crawler",
+    "is_instant" : false,
+    "is_one_time" : false,
+    "mini_game_challenge" : {
+      "can_retreat" : true,
+      "challenge_kind" : "combat",
+      "defeat_consequences" : {
+        "balance_delta" : 0,
+        "clear_flags" : [
+
+        ],
+        "resource_changes" : {
+
+        },
+        "set_flags" : [
+
+        ]
+      },
+      "difficulty" : 4,
+      "enemy_id" : "breach_crawler",
+      "id" : "challenge_breach_crawler",
+      "pressure_scaling" : 0.1,
+      "turn_limit" : 0,
+      "victory_consequences" : {
+        "balance_delta" : 10,
+        "clear_flags" : [
+
+        ],
+        "resource_changes" : {
+          "faith" : 12
+        },
+        "set_flags" : [
+
+        ]
+      }
+    },
+    "pool_ids" : [
+      "pool_breach"
+    ],
+    "title" : {
+      "en" : "Breach Crawler Emergence",
+      "ru" : "Появление Ползучего Ужаса"
+    },
+    "weight" : 20
+  },
+  {
+    "availability" : {
+      "forbidden_flags" : [
+
+      ],
+      "region_ids" : [
+        "breach"
+      ],
+      "region_states" : [
+        "breach"
+      ],
+      "required_flags" : [
+
+      ]
+    },
+    "body" : {
+      "en" : "The air crackles with dark energy. A monstrous form pulls itself through the breach — a creature of pure Navi malice, reeking of decay and dark magic.",
+      "ru" : "Воздух трещит от тёмной энергии. Чудовищная фигура протискивается через разлом — создание чистой злобы Нави, разящее гнилью и тёмной магией."
+    },
+    "choices" : [
+      {
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+
+          },
+          "result_key" : "combat_start",
+          "set_flags" : [
+
+          ]
+        },
+        "id" : "fight_horror",
+        "label" : {
+          "en" : "Fight the horror",
+          "ru" : "Сразиться с ужасом"
+        },
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "health" : 4
+          },
+          "required_flags" : [
+
+          ]
+        }
+      },
+      {
+        "consequences" : {
+          "balance_delta" : 8,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : -12
+          },
+          "result_key" : "rift_sealed",
+          "set_flags" : [
+
+          ]
+        },
+        "id" : "seal_rift",
+        "label" : {
+          "en" : "Seal the rift (12 Faith)",
+          "ru" : "Запечатать разлом (12 ✨)"
+        },
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "faith" : 12
+          },
+          "required_flags" : [
+
+          ]
+        }
+      },
+      {
+        "consequences" : {
+          "balance_delta" : -5,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "health" : -3
+          },
+          "result_key" : "fled_horror",
+          "set_flags" : [
+
+          ]
+        },
+        "id" : "retreat_horror",
+        "label" : {
+          "en" : "Retreat from the breach",
+          "ru" : "Отступить от разлома"
+        }
+      }
+    ],
+    "cooldown" : 3,
+    "event_kind" : {
+      "mini_game" : "combat"
+    },
+    "id" : "event_breach_horror",
+    "is_instant" : false,
+    "is_one_time" : false,
+    "mini_game_challenge" : {
+      "can_retreat" : true,
+      "challenge_kind" : "combat",
+      "defeat_consequences" : {
+        "balance_delta" : 0,
+        "clear_flags" : [
+
+        ],
+        "resource_changes" : {
+
+        },
+        "set_flags" : [
+
+        ]
+      },
+      "difficulty" : 3,
+      "enemy_id" : "swamp_hag",
+      "id" : "challenge_swamp_hag",
+      "pressure_scaling" : 0.1,
+      "turn_limit" : 0,
+      "victory_consequences" : {
+        "balance_delta" : 8,
+        "clear_flags" : [
+
+        ],
+        "resource_changes" : {
+          "faith" : 7
+        },
+        "set_flags" : [
+
+        ]
+      }
+    },
+    "pool_ids" : [
+      "pool_breach"
+    ],
+    "title" : {
+      "en" : "Horror from the Breach",
+      "ru" : "Ужас из Разлома"
+    },
+    "weight" : 25
+  },
+  {
+    "availability" : {
+      "forbidden_flags" : [
+
+      ],
+      "region_states" : [
+        "borderland",
+        "breach"
+      ],
+      "required_flags" : [
+
+      ]
+    },
+    "body" : {
+      "en" : "Dark whispers creep into your mind, promising power and knowledge. The voice of the Navi is seductive and insistent.",
+      "ru" : "Тёмный шёпот проникает в ваш разум, обещая силу и знания. Голос Нави соблазнителен и настойчив."
+    },
+    "choices" : [
+      {
+        "consequences" : {
+          "balance_delta" : 5,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+
+          },
+          "result_key" : "whispers_resisted",
+          "set_flags" : [
+
+          ]
+        },
+        "id" : "resist_whispers",
+        "label" : {
+          "en" : "Resist the whispers",
+          "ru" : "Сопротивляться шёпоту"
+        }
+      },
+      {
+        "consequences" : {
+          "balance_delta" : -12,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : 8
+          },
+          "result_key" : "whispers_accepted",
+          "set_flags" : [
+            "navi_touched"
+          ]
+        },
+        "id" : "listen_whispers",
+        "label" : {
+          "en" : "Listen to the dark voice",
+          "ru" : "Прислушаться к тёмному голосу"
+        }
+      },
+      {
+        "consequences" : {
+          "balance_delta" : 2,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "health" : 2
+          },
+          "result_key" : "balance_found",
+          "set_flags" : [
+
+          ]
+        },
+        "id" : "meditate_whispers",
+        "label" : {
+          "en" : "Meditate to find balance",
+          "ru" : "Медитировать для обретения равновесия"
+        }
+      }
+    ],
+    "cooldown" : 4,
+    "event_kind" : "inline",
+    "id" : "event_navi_whispers",
+    "is_instant" : false,
+    "is_one_time" : false,
+    "pool_ids" : [
+      "pool_common"
+    ],
+    "title" : {
+      "en" : "Whispers of the Navi",
+      "ru" : "Шёпот Нави"
+    },
+    "weight" : 18
+  },
+  {
+    "availability" : {
+      "forbidden_flags" : [
+
+      ],
+      "region_ids" : [
+        "oak"
+      ],
+      "region_states" : [
+        "borderland",
+        "breach"
+      ],
+      "required_flags" : [
+
+      ]
+    },
+    "body" : {
+      "en" : "A risen corpse claws at the sacred oak's roots, trying to poison the ancient tree with Navi corruption. The oak's leaves shudder in pain.",
+      "ru" : "Восставший мертвец скребёт корни священного дуба, пытаясь отравить древнее дерево порчей Нави. Листья дуба содрогаются от боли."
+    },
+    "choices" : [
+      {
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+
+          },
+          "result_key" : "combat_start",
+          "set_flags" : [
+
+          ]
+        },
+        "id" : "defend_oak",
+        "label" : {
+          "en" : "Defend the sacred oak",
+          "ru" : "Защитить священный дуб"
+        },
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "health" : 2
+          },
+          "required_flags" : [
+
+          ]
+        }
+      },
+      {
+        "consequences" : {
+          "balance_delta" : 5,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : -7
+          },
+          "result_key" : "oak_defended",
+          "set_flags" : [
+
+          ]
+        },
+        "id" : "invoke_oak_power",
+        "label" : {
+          "en" : "Invoke the oak's power (7 Faith)",
+          "ru" : "Призвать силу дуба (7 ✨)"
+        },
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "faith" : 7
+          },
+          "required_flags" : [
+
+          ]
+        }
+      },
+      {
+        "consequences" : {
+          "balance_delta" : -3,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+
+          },
+          "result_key" : "help_called",
+          "set_flags" : [
+
+          ]
+        },
+        "id" : "call_help_oak",
+        "label" : {
+          "en" : "Call for help",
+          "ru" : "Позвать на помощь"
+        }
+      }
+    ],
+    "cooldown" : 3,
+    "event_kind" : {
+      "mini_game" : "combat"
+    },
+    "id" : "event_oak_desecrator",
+    "is_instant" : false,
+    "is_one_time" : false,
+    "mini_game_challenge" : {
+      "can_retreat" : true,
+      "challenge_kind" : "combat",
+      "defeat_consequences" : {
+        "balance_delta" : 0,
+        "clear_flags" : [
+
+        ],
+        "resource_changes" : {
+
+        },
+        "set_flags" : [
+
+        ]
+      },
+      "difficulty" : 2,
+      "enemy_id" : "risen_dead",
+      "id" : "challenge_risen_dead",
+      "pressure_scaling" : 0.1,
+      "turn_limit" : 0,
+      "victory_consequences" : {
+        "balance_delta" : 5,
+        "clear_flags" : [
+
+        ],
+        "resource_changes" : {
+          "faith" : 4
+        },
+        "set_flags" : [
+
+        ]
+      }
+    },
+    "pool_ids" : [
+      "pool_sacred"
+    ],
+    "title" : {
+      "en" : "Desecrator at the Oak",
+      "ru" : "Осквернитель у Дуба"
+    },
+    "weight" : 20
+  },
+  {
+    "availability" : {
+      "forbidden_flags" : [
+        "met_wanderer"
+      ],
+      "region_states" : [
+        "stable",
+        "borderland"
+      ],
+      "required_flags" : [
+
+      ]
+    },
+    "body" : {
+      "en" : "An old traveler sits by a campfire. He offers to share knowledge about the world in exchange for help.",
+      "ru" : "Старый путник сидит у костра. Он предлагает поделиться знаниями о мире в обмен на помощь."
+    },
+    "choices" : [
+      {
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : -3
+          },
+          "result_key" : "wanderer_tales",
+          "set_flags" : [
+            "met_wanderer"
+          ]
+        },
+        "id" : "listen",
+        "label" : {
+          "en" : "Listen to the wanderer's tales (3 Faith)",
+          "ru" : "Выслушать рассказы странника (3 ✨)"
+        },
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "faith" : 3
+          },
+          "required_flags" : [
+
+          ]
+        }
+      },
+      {
+        "consequences" : {
+          "balance_delta" : 5,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : -2
+          },
+          "result_key" : "wanderer_helped",
+          "set_flags" : [
+            "met_wanderer"
+          ]
+        },
+        "id" : "help",
+        "label" : {
+          "en" : "Help him with supplies",
+          "ru" : "Помочь ему припасами"
+        }
+      },
+      {
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+
+          },
+          "result_key" : "passed_by",
+          "set_flags" : [
+
+          ]
+        },
+        "id" : "pass",
+        "label" : {
+          "en" : "Pass by",
+          "ru" : "Пройти мимо"
+        }
+      }
+    ],
+    "cooldown" : 0,
+    "event_kind" : "inline",
+    "id" : "event_wanderer",
+    "is_instant" : false,
+    "is_one_time" : true,
+    "pool_ids" : [
+      "pool_common"
+    ],
+    "title" : {
+      "en" : "Wanderer at the Crossroads",
+      "ru" : "Странник на Развилке"
+    },
+    "weight" : 15
+  },
+  {
+    "availability" : {
+      "forbidden_flags" : [
+        "shrine_visited"
+      ],
+      "region_ids" : [
+        "mountain",
+        "oak"
+      ],
+      "region_states" : [
+        "stable",
+        "borderland"
+      ],
+      "required_flags" : [
+
+      ]
+    },
+    "body" : {
+      "en" : "Hidden behind overgrown vines, you discover an ancient shrine. Faded runes glow faintly with residual power. The air here feels sacred.",
+      "ru" : "Скрытое за разросшимися лозами, вы обнаруживаете древнее святилище. Выцветшие руны слабо светятся остаточной силой. Воздух здесь ощущается священным."
+    },
+    "choices" : [
+      {
+        "consequences" : {
+          "balance_delta" : 12,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : -6,
+            "health" : 3
+          },
+          "result_key" : "shrine_blessed",
+          "set_flags" : [
+            "shrine_visited",
+            "shrine_blessed"
+          ]
+        },
+        "id" : "pray_shrine",
+        "label" : {
+          "en" : "Pray at the shrine (6 Faith)",
+          "ru" : "Помолиться у святилища (6 ✨)"
+        },
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "faith" : 6
+          },
+          "required_flags" : [
+
+          ]
+        }
+      },
+      {
+        "consequences" : {
+          "balance_delta" : -8,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : 8
+          },
+          "result_key" : "shrine_looted",
+          "set_flags" : [
+            "shrine_visited",
+            "shrine_looted"
+          ]
+        },
+        "id" : "loot_shrine",
+        "label" : {
+          "en" : "Take the offerings",
+          "ru" : "Забрать подношения"
+        }
+      },
+      {
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+
+          },
+          "result_key" : "shrine_left",
+          "set_flags" : [
+            "shrine_visited"
+          ]
+        },
+        "id" : "leave_shrine",
+        "label" : {
+          "en" : "Leave the shrine undisturbed",
+          "ru" : "Оставить святилище нетронутым"
+        }
+      }
+    ],
+    "cooldown" : 0,
+    "event_kind" : "inline",
+    "id" : "event_ancient_shrine",
+    "is_instant" : false,
+    "is_one_time" : true,
+    "pool_ids" : [
+      "pool_mountain",
+      "pool_sacred"
+    ],
+    "title" : {
+      "en" : "Forgotten Shrine",
+      "ru" : "Забытое Святилище"
+    },
+    "weight" : 10
+  },
+  {
+    "availability" : {
+      "forbidden_flags" : [
+        "soldier_helped"
+      ],
+      "region_ids" : [
+        "village",
+        "mountain"
+      ],
+      "region_states" : [
+        "stable",
+        "borderland",
+        "breach"
+      ],
+      "required_flags" : [
+
+      ]
+    },
+    "body" : {
+      "en" : "A wounded border soldier leans against a rock, bleeding from deep claw marks. He gasps: 'The dead... they're organized... someone leads them...'",
+      "ru" : "Раненый пограничный солдат привалился к камню, истекая кровью от глубоких царапин. Он хрипит: 'Мертвецы... они организованы... кто-то ведёт их...'"
+    },
+    "choices" : [
+      {
+        "consequences" : {
+          "balance_delta" : 5,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : 3,
+            "health" : -3
+          },
+          "result_key" : "soldier_healed",
+          "set_flags" : [
+            "soldier_helped",
+            "enemy_intel"
+          ]
+        },
+        "id" : "heal_soldier",
+        "label" : {
+          "en" : "Heal the soldier",
+          "ru" : "Исцелить солдата"
+        }
+      },
+      {
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : 1
+          },
+          "result_key" : "soldier_questioned",
+          "set_flags" : [
+            "soldier_helped",
+            "enemy_intel"
+          ]
+        },
+        "id" : "question_soldier",
+        "label" : {
+          "en" : "Question him for intelligence",
+          "ru" : "Расспросить о противнике"
+        }
+      },
+      {
+        "consequences" : {
+          "balance_delta" : -3,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+
+          },
+          "result_key" : "soldier_abandoned",
+          "set_flags" : [
+
+          ]
+        },
+        "id" : "leave_soldier",
+        "label" : {
+          "en" : "Leave him to his fate",
+          "ru" : "Оставить его на произвол судьбы"
+        }
+      }
+    ],
+    "cooldown" : 0,
+    "event_kind" : "inline",
+    "id" : "event_wounded_soldier",
+    "is_instant" : false,
+    "is_one_time" : true,
+    "pool_ids" : [
+      "pool_village",
+      "pool_mountain"
+    ],
+    "title" : {
+      "en" : "Wounded Soldier",
+      "ru" : "Раненый Солдат"
+    },
+    "weight" : 14
+  },
+  {
+    "availability" : {
+      "forbidden_flags" : [
+
+      ],
+      "region_ids" : [
+        "village"
+      ],
+      "region_states" : [
+        "borderland",
+        "breach"
+      ],
+      "required_flags" : [
+
+      ]
+    },
+    "body" : {
+      "en" : "The village alarm sounds! A pack of risen dead shambles toward the outer fence. The villagers look to you for protection.",
+      "ru" : "Звучит деревенская тревога! Стая восставших мертвецов ковыляет к ограде. Жители смотрят на вас с надеждой."
+    },
+    "choices" : [
+      {
+        "consequences" : {
+          "balance_delta" : 0,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+
+          },
+          "result_key" : "combat_start",
+          "set_flags" : [
+
+          ]
+        },
+        "id" : "defend_village",
+        "label" : {
+          "en" : "Defend the village",
+          "ru" : "Защитить деревню"
+        },
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "health" : 3
+          },
+          "required_flags" : [
+
+          ]
+        }
+      },
+      {
+        "consequences" : {
+          "balance_delta" : 5,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+            "faith" : -5
+          },
+          "result_key" : "villagers_rallied",
+          "set_flags" : [
+            "village_militia"
+          ]
+        },
+        "id" : "rally_villagers",
+        "label" : {
+          "en" : "Rally the villagers (5 Faith)",
+          "ru" : "Поднять жителей (5 ✨)"
+        },
+        "requirements" : {
+          "forbidden_flags" : [
+
+          ],
+          "min_resources" : {
+            "faith" : 5
+          },
+          "required_flags" : [
+
+          ]
+        }
+      },
+      {
+        "consequences" : {
+          "balance_delta" : -5,
+          "clear_flags" : [
+
+          ],
+          "resource_changes" : {
+
+          },
+          "result_key" : "village_damaged",
+          "set_flags" : [
+
+          ]
+        },
+        "id" : "hide_village",
+        "label" : {
+          "en" : "Hide and wait it out",
+          "ru" : "Спрятаться и переждать"
+        }
+      }
+    ],
+    "cooldown" : 3,
+    "event_kind" : {
+      "mini_game" : "combat"
+    },
+    "id" : "event_village_raiders",
+    "is_instant" : false,
+    "is_one_time" : false,
+    "mini_game_challenge" : {
+      "can_retreat" : true,
+      "challenge_kind" : "combat",
+      "defeat_consequences" : {
+        "balance_delta" : 0,
+        "clear_flags" : [
+
+        ],
+        "resource_changes" : {
+
+        },
+        "set_flags" : [
+
+        ]
+      },
+      "difficulty" : 2,
+      "enemy_id" : "risen_dead",
+      "id" : "challenge_risen_dead",
+      "pressure_scaling" : 0.1,
+      "turn_limit" : 0,
+      "victory_consequences" : {
+        "balance_delta" : 5,
+        "clear_flags" : [
+
+        ],
+        "resource_changes" : {
+          "faith" : 4
+        },
+        "set_flags" : [
+          "village_defended"
+        ]
+      }
+    },
+    "pool_ids" : [
+      "pool_village"
+    ],
+    "title" : {
+      "en" : "Raiders at the Gates",
+      "ru" : "Налётчики у Ворот"
+    },
+    "weight" : 20
   }
 ]

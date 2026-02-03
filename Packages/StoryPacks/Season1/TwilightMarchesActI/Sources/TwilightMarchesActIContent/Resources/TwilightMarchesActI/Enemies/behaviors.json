@@ -1,229 +1,329 @@
 [
   {
-    "id": "wild_beast",
-    "rules": [
+    "id" : "dark_sorcerer",
+    "rules" : [
       {
-        "conditions": [
-          { "type": "health_percent", "operator": "<", "value": 0.3 }
+        "conditions" : [
+          {
+            "operator" : "==",
+            "type" : "turn_mod3",
+            "value" : 0
+          }
         ],
-        "intentType": "buff",
-        "valueFormula": "power * 0.5"
+        "intent_type" : "ritual",
+        "value_formula" : "10"
       },
       {
-        "conditions": [],
-        "intentType": "attack",
-        "valueFormula": "power"
+        "conditions" : [
+          {
+            "operator" : "<",
+            "type" : "health_percent",
+            "value" : 0.3
+          }
+        ],
+        "intent_type" : "heal",
+        "value_formula" : "power"
+      },
+      {
+        "conditions" : [
+
+        ],
+        "intent_type" : "attack",
+        "value_formula" : "power"
       }
     ]
   },
   {
-    "id": "leshy",
-    "rules": [
+    "id" : "breach_crawler",
+    "rules" : [
       {
-        "conditions": [
-          { "type": "health_percent", "operator": "<", "value": 0.5 },
-          { "type": "turn", "operator": ">", "value": 2 }
+        "conditions" : [
+          {
+            "operator" : "==",
+            "type" : "turn",
+            "value" : 1
+          }
         ],
-        "intentType": "heal",
-        "valueFormula": "power"
+        "intent_type" : "buff",
+        "value_formula" : "3"
       },
       {
-        "conditions": [
-          { "type": "turn_mod3", "operator": "==", "value": 0 }
+        "conditions" : [
+          {
+            "operator" : "<",
+            "type" : "health_percent",
+            "value" : 0.5
+          }
         ],
-        "intentType": "ritual",
-        "valueFormula": "5"
+        "intent_type" : "attack",
+        "value_formula" : "power * 1.5"
       },
       {
-        "conditions": [],
-        "intentType": "attack",
-        "valueFormula": "power"
+        "conditions" : [
+
+        ],
+        "intent_type" : "attack",
+        "value_formula" : "power"
       }
     ]
   },
   {
-    "id": "mountain_spirit",
-    "rules": [
+    "id" : "cursed_knight",
+    "rules" : [
       {
-        "conditions": [
-          { "type": "turn", "operator": "==", "value": 1 }
+        "conditions" : [
+          {
+            "operator" : "==",
+            "type" : "turn",
+            "value" : 1
+          }
         ],
-        "intentType": "block",
-        "valueFormula": "defense"
+        "intent_type" : "block",
+        "value_formula" : "defense"
       },
       {
-        "conditions": [
-          { "type": "health_percent", "operator": "<", "value": 0.4 }
+        "conditions" : [
+          {
+            "operator" : "<",
+            "type" : "health_percent",
+            "value" : 0.4
+          }
         ],
-        "intentType": "block",
-        "valueFormula": "defense"
+        "intent_type" : "block",
+        "value_formula" : "defense"
       },
       {
-        "conditions": [],
-        "intentType": "attack",
-        "valueFormula": "power"
+        "conditions" : [
+
+        ],
+        "intent_type" : "attack",
+        "value_formula" : "power"
       }
     ]
   },
   {
-    "id": "risen_dead",
-    "rules": [
+    "id" : "risen_dead",
+    "rules" : [
       {
-        "conditions": [],
-        "intentType": "attack",
-        "valueFormula": "power"
+        "conditions" : [
+
+        ],
+        "intent_type" : "attack",
+        "value_formula" : "power"
       }
     ]
   },
   {
-    "id": "swamp_hag",
-    "rules": [
+    "id" : "leshy_guardian_boss",
+    "rules" : [
       {
-        "conditions": [
-          { "type": "turn_mod3", "operator": "==", "value": 0 }
+        "conditions" : [
+          {
+            "operator" : "==",
+            "type" : "turn",
+            "value" : 1
+          }
         ],
-        "intentType": "ritual",
-        "valueFormula": "8"
+        "intent_type" : "buff",
+        "value_formula" : "3"
       },
       {
-        "conditions": [
-          { "type": "health_percent", "operator": "<", "value": 0.3 }
+        "conditions" : [
+          {
+            "operator" : "<",
+            "type" : "health_percent",
+            "value" : 0.3
+          }
         ],
-        "intentType": "buff",
-        "valueFormula": "power * 0.5"
+        "intent_type" : "heal",
+        "value_formula" : "3"
       },
       {
-        "conditions": [],
-        "intentType": "attack",
-        "valueFormula": "power"
+        "conditions" : [
+          {
+            "operator" : "==",
+            "type" : "turn_mod3",
+            "value" : 0
+          },
+          {
+            "operator" : ">",
+            "type" : "turn",
+            "value" : 1
+          }
+        ],
+        "intent_type" : "ritual",
+        "value_formula" : "10"
+      },
+      {
+        "conditions" : [
+          {
+            "operator" : "<",
+            "type" : "health_percent",
+            "value" : 0.5
+          }
+        ],
+        "intent_type" : "attack",
+        "value_formula" : "power * 1.5"
+      },
+      {
+        "conditions" : [
+
+        ],
+        "intent_type" : "attack",
+        "value_formula" : "power"
       }
     ]
   },
   {
-    "id": "leshy_guardian_boss",
-    "rules": [
+    "id" : "wild_beast",
+    "rules" : [
       {
-        "conditions": [
-          { "type": "turn", "operator": "==", "value": 1 }
+        "conditions" : [
+          {
+            "operator" : "<",
+            "type" : "health_percent",
+            "value" : 0.3
+          }
         ],
-        "intentType": "buff",
-        "valueFormula": "3"
+        "intent_type" : "buff",
+        "value_formula" : "power * 0.5"
       },
       {
-        "conditions": [
-          { "type": "health_percent", "operator": "<", "value": 0.3 }
+        "conditions" : [
+
         ],
-        "intentType": "heal",
-        "valueFormula": "3"
-      },
-      {
-        "conditions": [
-          { "type": "turn_mod3", "operator": "==", "value": 0 },
-          { "type": "turn", "operator": ">", "value": 1 }
-        ],
-        "intentType": "ritual",
-        "valueFormula": "10"
-      },
-      {
-        "conditions": [
-          { "type": "health_percent", "operator": "<", "value": 0.5 }
-        ],
-        "intentType": "attack",
-        "valueFormula": "power * 1.5"
-      },
-      {
-        "conditions": [],
-        "intentType": "attack",
-        "valueFormula": "power"
+        "intent_type" : "attack",
+        "value_formula" : "power"
       }
     ]
   },
   {
-    "id": "shadow_wolf",
-    "rules": [
+    "id" : "leshy",
+    "rules" : [
       {
-        "conditions": [
-          { "type": "turn", "operator": "==", "value": 1 }
+        "conditions" : [
+          {
+            "operator" : "<",
+            "type" : "health_percent",
+            "value" : 0.5
+          },
+          {
+            "operator" : ">",
+            "type" : "turn",
+            "value" : 2
+          }
         ],
-        "intentType": "attack",
-        "valueFormula": "power * 1.5"
+        "intent_type" : "heal",
+        "value_formula" : "power"
       },
       {
-        "conditions": [],
-        "intentType": "attack",
-        "valueFormula": "power"
+        "conditions" : [
+          {
+            "operator" : "==",
+            "type" : "turn_mod3",
+            "value" : 0
+          }
+        ],
+        "intent_type" : "ritual",
+        "value_formula" : "5"
+      },
+      {
+        "conditions" : [
+
+        ],
+        "intent_type" : "attack",
+        "value_formula" : "power"
       }
     ]
   },
   {
-    "id": "cursed_knight",
-    "rules": [
+    "id" : "swamp_hag",
+    "rules" : [
       {
-        "conditions": [
-          { "type": "turn", "operator": "==", "value": 1 }
+        "conditions" : [
+          {
+            "operator" : "==",
+            "type" : "turn_mod3",
+            "value" : 0
+          }
         ],
-        "intentType": "block",
-        "valueFormula": "defense"
+        "intent_type" : "ritual",
+        "value_formula" : "8"
       },
       {
-        "conditions": [
-          { "type": "health_percent", "operator": "<", "value": 0.4 }
+        "conditions" : [
+          {
+            "operator" : "<",
+            "type" : "health_percent",
+            "value" : 0.3
+          }
         ],
-        "intentType": "block",
-        "valueFormula": "defense"
+        "intent_type" : "buff",
+        "value_formula" : "power * 0.5"
       },
       {
-        "conditions": [],
-        "intentType": "attack",
-        "valueFormula": "power"
+        "conditions" : [
+
+        ],
+        "intent_type" : "attack",
+        "value_formula" : "power"
       }
     ]
   },
   {
-    "id": "dark_sorcerer",
-    "rules": [
+    "id" : "shadow_wolf",
+    "rules" : [
       {
-        "conditions": [
-          { "type": "turn_mod3", "operator": "==", "value": 0 }
+        "conditions" : [
+          {
+            "operator" : "==",
+            "type" : "turn",
+            "value" : 1
+          }
         ],
-        "intentType": "ritual",
-        "valueFormula": "10"
+        "intent_type" : "attack",
+        "value_formula" : "power * 1.5"
       },
       {
-        "conditions": [
-          { "type": "health_percent", "operator": "<", "value": 0.3 }
+        "conditions" : [
+
         ],
-        "intentType": "heal",
-        "valueFormula": "power"
-      },
-      {
-        "conditions": [],
-        "intentType": "attack",
-        "valueFormula": "power"
+        "intent_type" : "attack",
+        "value_formula" : "power"
       }
     ]
   },
   {
-    "id": "breach_crawler",
-    "rules": [
+    "id" : "mountain_spirit",
+    "rules" : [
       {
-        "conditions": [
-          { "type": "turn", "operator": "==", "value": 1 }
+        "conditions" : [
+          {
+            "operator" : "==",
+            "type" : "turn",
+            "value" : 1
+          }
         ],
-        "intentType": "buff",
-        "valueFormula": "3"
+        "intent_type" : "block",
+        "value_formula" : "defense"
       },
       {
-        "conditions": [
-          { "type": "health_percent", "operator": "<", "value": 0.5 }
+        "conditions" : [
+          {
+            "operator" : "<",
+            "type" : "health_percent",
+            "value" : 0.4
+          }
         ],
-        "intentType": "attack",
-        "valueFormula": "power * 1.5"
+        "intent_type" : "block",
+        "value_formula" : "defense"
       },
       {
-        "conditions": [],
-        "intentType": "attack",
-        "valueFormula": "power"
+        "conditions" : [
+
+        ],
+        "intent_type" : "attack",
+        "value_formula" : "power"
       }
     ]
   }

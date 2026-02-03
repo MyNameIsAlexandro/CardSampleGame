@@ -1,5 +1,7 @@
 import SwiftUI
 import TwilightEngine
+import EchoScenes
+import EchoEngine
 import CoreHeroesContent
 import TwilightMarchesActIContent
 
@@ -340,15 +342,40 @@ struct ContentView: View {
         }
         #endif
         .fullScreenCover(isPresented: $resumingCombat) {
-            if let savedState = vm.engine.pendingEncounterState {
-                CombatView(engineVM: vm, onCombatEnd: { outcome in
-                    vm.engine.pendingEncounterState = nil
-                    resumingCombat = false
-                    // Auto-save after combat
-                    if let slot = selectedSaveSlot {
-                        saveManager.saveGame(to: slot, engine: vm.engine)
+            if let savedState = vm.engine.pendingEncounterState,
+               let config = vm.engine.makeEchoCombatConfig(from: savedState) {
+                CombatSceneView(
+                    enemyDefinition: config.enemyDefinition,
+                    playerName: config.playerName,
+                    playerHealth: config.playerHealth,
+                    playerMaxHealth: config.playerMaxHealth,
+                    playerStrength: config.playerStrength,
+                    playerDeck: config.playerDeck,
+                    fateCards: config.fateCards,
+                    resonance: config.resonance,
+                    seed: config.seed,
+                    onCombatEndWithResult: { (result: EchoCombatResult) in
+                        vm.engine.applyEchoCombatResult(result)
+                        vm.engine.pendingEncounterState = nil
+                        resumingCombat = false
+                        if let slot = selectedSaveSlot {
+                            saveManager.saveGame(to: slot, engine: vm.engine)
+                        }
+                    },
+                    onSoundEffect: { SoundManager.shared.play(SoundManager.SoundEffect(rawValue: $0) ?? .buttonTap) },
+                    onHaptic: { name in
+                        let type: HapticManager.HapticType
+                        switch name {
+                        case "light": type = .light
+                        case "medium": type = .medium
+                        case "heavy": type = .heavy
+                        case "success": type = .success
+                        case "error": type = .error
+                        default: type = .light
+                        }
+                        HapticManager.shared.play(type)
                     }
-                }, savedState: savedState)
+                )
             }
         }
         .preferredColorScheme(.dark)

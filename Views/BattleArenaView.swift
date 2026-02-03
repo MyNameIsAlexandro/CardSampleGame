@@ -120,15 +120,8 @@ struct BattleArenaView: View {
     }
 
     private func startBattle() {
-        guard let heroId = selectedHeroId,
-              let hero = HeroRegistry.shared.hero(id: heroId),
-              let enemy = selectedEnemy else { return }
-
-        // Setup hero with starting deck
-        let startingDeckDefs = hero.startingDeckCardIDs.compactMap {
-            ContentRegistry.shared.getCard(id: $0)
-        }
-        let startingDeck = startingDeckDefs.map { $0.toCard() }
+        guard selectedHeroId != nil,
+              selectedEnemy != nil else { return }
 
         lastOutcome = nil
         showingCombat = true

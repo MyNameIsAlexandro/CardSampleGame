@@ -10,6 +10,7 @@
 		01856FA4AED657E11739268F /* DesignSystemComplianceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CA67A53A024B4CEDD6685C /* DesignSystemComplianceTests.swift */; };
 		01D384D3F190A3976183B126 /* EventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43D4E3FBE4DC34B63B61E061 /* EventView.swift */; };
 		0869558992AD64C9C9AC00CB /* LocalizationValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 204A28A32636BB8C22E758C3 /* LocalizationValidatorTests.swift */; };
+		0A1C2D3E4F5A6B7C8D9E0F1A /* LocalizationCompletenessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2C3D4E5F6A7B8C9D0E1F2A /* LocalizationCompletenessTests.swift */; };
 		6352A5DDAB8A087797D247C9 /* ContentValidationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E948FF6BD58A6370B765AD94 /* ContentValidationTests.swift */; };
 		8B5C529E75755A127084F62A /* SourcePathResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85E6536727E3995B16A50F82 /* SourcePathResolver.swift */; };
 		8F035EDB750B2C0441F077B0 /* WorldMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BEC0AA856AB6706612208E1 /* WorldMapView.swift */; };
@@ -97,6 +98,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0B2C3D4E5F6A7B8C9D0E1F2A /* LocalizationCompletenessTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalizationCompletenessTests.swift; sourceTree = "<group>"; };
 		204A28A32636BB8C22E758C3 /* LocalizationValidatorTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalizationValidatorTests.swift; sourceTree = "<group>"; };
 		43D4E3FBE4DC34B63B61E061 /* EventView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EventView.swift; path = EventView.swift; sourceTree = "<group>"; };
 		60C1474DB750BB1D0378466E /* CodeHygieneTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CodeHygieneTests.swift; sourceTree = "<group>"; };
@@ -310,6 +312,7 @@
 				E948FF6BD58A6370B765AD94 /* ContentValidationTests.swift */,
 				D72352D1C9BABFA97F62257B /* ConditionValidatorTests.swift */,
 				204A28A32636BB8C22E758C3 /* LocalizationValidatorTests.swift */,
+				0B2C3D4E5F6A7B8C9D0E1F2A /* LocalizationCompletenessTests.swift */,
 			);
 			path = GateTests;
 			sourceTree = "<group>";
@@ -406,6 +409,30 @@
 			);
 			path = PackEditor;
 			sourceTree = "<group>";
+		};
+		AA0000300000000000000001 /* CardSampleGame */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA0000310000000000000001 /* Build configuration list for PBXNativeTarget "CardSampleGame" */;
+			buildPhases = (
+				AA0000320000000000000001 /* Sources */,
+				AA0000230000000000000001 /* Frameworks */,
+				AA0000330000000000000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CardSampleGame;
+			packageProductDependencies = (
+				PKG0002000000000000000001 /* TwilightEngine */,
+				PKG0014000000000000000001 /* CoreHeroesContent */,
+				PKG0015000000000000000001 /* TwilightMarchesActIContent */,
+				PKG0042000000000000000001 /* EchoEngine */,
+				PKG0043000000000000000001 /* EchoScenes */,
+			);
+			productName = CardSampleGame;
+			productReference = AA0000210000000000000001 /* CardSampleGame.app */;
+			productType = "com.apple.product-type.application";
 		};
 		BB0000030000000000000001 /* CardSampleGameTests */ = {
 			isa = PBXNativeTarget;
@@ -605,6 +632,7 @@
 				6352A5DDAB8A087797D247C9 /* ContentValidationTests.swift in Sources */,
 				C80DC6128F371177237472A1 /* ConditionValidatorTests.swift in Sources */,
 				0869558992AD64C9C9AC00CB /* LocalizationValidatorTests.swift in Sources */,
+				0A1C2D3E4F5A6B7C8D9E0F1A /* LocalizationCompletenessTests.swift in Sources */,
 				8B5C529E75755A127084F62A /* SourcePathResolver.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

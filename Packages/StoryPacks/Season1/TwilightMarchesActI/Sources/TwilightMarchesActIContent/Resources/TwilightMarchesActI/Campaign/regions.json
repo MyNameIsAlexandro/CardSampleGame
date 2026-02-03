@@ -1,128 +1,171 @@
 [
   {
-    "id": "village",
-    "title": {
-      "en": "Border Village",
-      "ru": "Пограничная Деревня"
+    "anchor_id" : "anchor_breach_shrine",
+    "degradation_weight" : 2,
+    "description" : {
+      "en" : "A tear in reality where darkness seeps through",
+      "ru" : "Разрыв в реальности, откуда сочится тьма"
     },
-    "description": {
-      "en": "A small village on the edge of the realm",
-      "ru": "Небольшая деревня на краю королевства"
-    },
-    "region_type": "settlement",
-    "neighbor_ids": ["oak", "forest", "swamp"],
-    "initially_discovered": true,
-    "anchor_id": "anchor_village_chapel",
-    "event_pool_ids": ["pool_village", "pool_common"],
-    "initial_state": "stable",
-    "degradation_weight": 1
+    "event_pool_ids" : [
+      "pool_breach",
+      "pool_common"
+    ],
+    "id" : "breach",
+    "initial_state" : "breach",
+    "initially_discovered" : false,
+    "neighbor_ids" : [
+      "swamp",
+      "mountain",
+      "dark_lowland"
+    ],
+    "region_type" : "wasteland",
+    "title" : {
+      "en" : "The Breach",
+      "ru" : "Разлом"
+    }
   },
   {
-    "id": "oak",
-    "title": {
-      "en": "Sacred Oak",
-      "ru": "Священный Дуб"
+    "degradation_weight" : 2,
+    "description" : {
+      "en" : "A forsaken land consumed by darkness",
+      "ru" : "Проклятая земля, поглощённая тьмой"
     },
-    "description": {
-      "en": "An ancient oak radiating divine power",
-      "ru": "Древний дуб, излучающий божественную силу"
-    },
-    "region_type": "sacred",
-    "neighbor_ids": ["village", "forest"],
-    "initially_discovered": false,
-    "anchor_id": "anchor_sacred_oak",
-    "event_pool_ids": ["pool_sacred", "pool_common"],
-    "initial_state": "stable",
-    "degradation_weight": 1
+    "event_pool_ids" : [
+      "pool_boss",
+      "pool_breach"
+    ],
+    "id" : "dark_lowland",
+    "initial_state" : "breach",
+    "initially_discovered" : false,
+    "neighbor_ids" : [
+      "breach"
+    ],
+    "region_type" : "wasteland",
+    "title" : {
+      "en" : "Dark Lowland",
+      "ru" : "Тёмная Низина"
+    }
   },
   {
-    "id": "forest",
-    "title": {
-      "en": "Dark Forest",
-      "ru": "Тёмный Лес"
+    "anchor_id" : "anchor_sacred_oak",
+    "degradation_weight" : 1,
+    "description" : {
+      "en" : "An ancient oak radiating divine power",
+      "ru" : "Древний дуб, излучающий божественную силу"
     },
-    "description": {
-      "en": "A dense forest shrouded in shadow",
-      "ru": "Густой лес, окутанный тенью"
-    },
-    "region_type": "forest",
-    "neighbor_ids": ["village", "oak", "mountain"],
-    "initially_discovered": false,
-    "anchor_id": "anchor_forest_idol",
-    "event_pool_ids": ["pool_forest", "pool_common"],
-    "initial_state": "borderland",
-    "degradation_weight": 1
+    "event_pool_ids" : [
+      "pool_sacred",
+      "pool_common"
+    ],
+    "id" : "oak",
+    "initial_state" : "stable",
+    "initially_discovered" : false,
+    "neighbor_ids" : [
+      "village",
+      "forest"
+    ],
+    "region_type" : "sacred",
+    "title" : {
+      "en" : "Sacred Oak",
+      "ru" : "Священный Дуб"
+    }
   },
   {
-    "id": "swamp",
-    "title": {
-      "en": "Cursed Swamp",
-      "ru": "Проклятое Болото"
+    "anchor_id" : "anchor_village_chapel",
+    "degradation_weight" : 1,
+    "description" : {
+      "en" : "A small village on the edge of the realm",
+      "ru" : "Небольшая деревня на краю королевства"
     },
-    "description": {
-      "en": "A murky swamp tainted by dark magic",
-      "ru": "Мрачное болото, отравленное тёмной магией"
-    },
-    "region_type": "swamp",
-    "neighbor_ids": ["village", "breach"],
-    "initially_discovered": false,
-    "anchor_id": "anchor_swamp_spring",
-    "event_pool_ids": ["pool_swamp", "pool_common"],
-    "initial_state": "borderland",
-    "degradation_weight": 1
+    "event_pool_ids" : [
+      "pool_village",
+      "pool_common"
+    ],
+    "id" : "village",
+    "initial_state" : "stable",
+    "initially_discovered" : true,
+    "neighbor_ids" : [
+      "oak",
+      "forest",
+      "swamp"
+    ],
+    "region_type" : "settlement",
+    "title" : {
+      "en" : "Border Village",
+      "ru" : "Пограничная Деревня"
+    }
   },
   {
-    "id": "mountain",
-    "title": {
-      "en": "Mountain Pass",
-      "ru": "Горный Перевал"
+    "anchor_id" : "anchor_forest_idol",
+    "degradation_weight" : 1,
+    "description" : {
+      "en" : "A dense forest shrouded in shadow",
+      "ru" : "Густой лес, окутанный тенью"
     },
-    "description": {
-      "en": "A treacherous pass through the mountains",
-      "ru": "Опасный путь через горы"
-    },
-    "region_type": "mountain",
-    "neighbor_ids": ["forest", "breach"],
-    "initially_discovered": false,
-    "anchor_id": "anchor_mountain_barrow",
-    "event_pool_ids": ["pool_mountain", "pool_common"],
-    "initial_state": "borderland",
-    "degradation_weight": 1
+    "event_pool_ids" : [
+      "pool_forest",
+      "pool_common"
+    ],
+    "id" : "forest",
+    "initial_state" : "borderland",
+    "initially_discovered" : false,
+    "neighbor_ids" : [
+      "village",
+      "oak",
+      "mountain"
+    ],
+    "region_type" : "forest",
+    "title" : {
+      "en" : "Dark Forest",
+      "ru" : "Тёмный Лес"
+    }
   },
   {
-    "id": "breach",
-    "title": {
-      "en": "The Breach",
-      "ru": "Разлом"
+    "anchor_id" : "anchor_swamp_spring",
+    "degradation_weight" : 1,
+    "description" : {
+      "en" : "A murky swamp tainted by dark magic",
+      "ru" : "Мрачное болото, отравленное тёмной магией"
     },
-    "description": {
-      "en": "A tear in reality where darkness seeps through",
-      "ru": "Разрыв в реальности, откуда сочится тьма"
-    },
-    "region_type": "wasteland",
-    "neighbor_ids": ["swamp", "mountain", "dark_lowland"],
-    "initially_discovered": false,
-    "anchor_id": "anchor_breach_shrine",
-    "event_pool_ids": ["pool_breach", "pool_common"],
-    "initial_state": "breach",
-    "degradation_weight": 2
+    "event_pool_ids" : [
+      "pool_swamp",
+      "pool_common"
+    ],
+    "id" : "swamp",
+    "initial_state" : "borderland",
+    "initially_discovered" : false,
+    "neighbor_ids" : [
+      "village",
+      "breach"
+    ],
+    "region_type" : "swamp",
+    "title" : {
+      "en" : "Cursed Swamp",
+      "ru" : "Проклятое Болото"
+    }
   },
   {
-    "id": "dark_lowland",
-    "title": {
-      "en": "Dark Lowland",
-      "ru": "Тёмная Низина"
+    "anchor_id" : "anchor_mountain_barrow",
+    "degradation_weight" : 1,
+    "description" : {
+      "en" : "A treacherous pass through the mountains",
+      "ru" : "Опасный путь через горы"
     },
-    "description": {
-      "en": "A forsaken land consumed by darkness",
-      "ru": "Проклятая земля, поглощённая тьмой"
-    },
-    "region_type": "wasteland",
-    "neighbor_ids": ["breach"],
-    "initially_discovered": false,
-    "anchor_id": null,
-    "event_pool_ids": ["pool_boss", "pool_breach"],
-    "initial_state": "breach",
-    "degradation_weight": 2
+    "event_pool_ids" : [
+      "pool_mountain",
+      "pool_common"
+    ],
+    "id" : "mountain",
+    "initial_state" : "borderland",
+    "initially_discovered" : false,
+    "neighbor_ids" : [
+      "forest",
+      "breach"
+    ],
+    "region_type" : "mountain",
+    "title" : {
+      "en" : "Mountain Pass",
+      "ru" : "Горный Перевал"
+    }
   }
 ]

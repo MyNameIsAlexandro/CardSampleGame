@@ -1,589 +1,722 @@
 [
   {
-    "id": "wild_beast",
-    "name": {
-      "en": "Wild Beast",
-      "ru": "Дикий Зверь"
-    },
-    "description": {
-      "en": "A feral creature driven mad by the encroaching Navi.",
-      "ru": "Дикое существо, обезумевшее от наступающей Нави."
-    },
-    "health": 8,
-    "power": 3,
-    "defense": 1,
-    "difficulty": 1,
-    "enemy_type": "beast",
-    "rarity": "common",
-    "abilities": [],
-    "loot_card_ids": [
-      "beast_hide"
-    ],
-    "faith_reward": 2,
-    "balance_delta": 0,
-    "lore": {
-      "en": "Elders say the beasts were peaceful once, before the boundary thinned. Now hunger and Navi corruption drive them to madness.",
-      "ru": "Старики говорят, звери были мирными, пока граница не истончилась. Теперь голод и порча Нави сводят их с ума."
-    },
-    "tactics_nav": {
-      "en": "Spirits of Nav may calm the beast — approach with resonance offerings.",
-      "ru": "Духи Нави могут успокоить зверя — подойди с дарами резонанса."
-    },
-    "tactics_yav": {
-      "en": "Steel and strength. Strike fast before it can lunge.",
-      "ru": "Сталь и сила. Бей быстро, пока не бросился."
-    },
-    "tactics_prav": {
-      "en": "The light of Prav burns corruption away. Holy words may pacify.",
-      "ru": "Свет Прави выжигает порчу. Святое слово может усмирить."
-    },
-    "weaknesses": ["fire", "silver"],
-    "strengths": ["poison"]
-  },
-  {
-    "id": "leshy",
-    "name": {
-      "en": "Leshy",
-      "ru": "Леший"
-    },
-    "description": {
-      "en": "Ancient forest guardian whose anger grows with the corruption. His spirit is bound to the resonance of the world.",
-      "ru": "Древний страж леса, чей гнев растёт вместе с порчей. Его дух связан с резонансом мира."
-    },
-    "health": 50,
-    "power": 4,
-    "defense": 2,
-    "will": 30,
-    "difficulty": 2,
-    "enemy_type": "spirit",
-    "rarity": "uncommon",
-    "resonance_behavior": {
-      "deepNav": {
-        "power_delta": 2,
-        "defense_delta": 0,
-        "health_delta": 10,
-        "will_delta": 5
-      },
-      "nav": {
-        "power_delta": 1,
-        "defense_delta": 0,
-        "health_delta": 5,
-        "will_delta": 2
-      },
-      "yav": {
-        "power_delta": 0,
-        "defense_delta": 0,
-        "health_delta": 0,
-        "will_delta": 0
-      },
-      "prav": {
-        "power_delta": -1,
-        "defense_delta": 0,
-        "health_delta": -5,
-        "will_delta": -2
-      },
-      "deepPrav": {
-        "power_delta": -2,
-        "defense_delta": -1,
-        "health_delta": -10,
-        "will_delta": -5
-      }
-    },
-    "abilities": [
+    "abilities" : [
       {
-        "id": "forest_rage",
-        "name": {
-          "en": "Forest Rage",
-          "ru": "Ярость Леса"
+        "description" : {
+          "en" : "Reduces all damage taken.",
+          "ru" : "Уменьшает весь получаемый урон."
         },
-        "description": {
-          "en": "Deals extra damage when below half health.",
-          "ru": "Наносит дополнительный урон при здоровье ниже половины."
+        "effect" : {
+          "armor" : 2
         },
-        "effect": {
-          "bonus_damage": 2
+        "id" : "stone_skin",
+        "name" : {
+          "en" : "Stone Skin",
+          "ru" : "Каменная Кожа"
         }
       }
     ],
-    "loot_card_ids": [
-      "forest_blessing"
-    ],
-    "faith_reward": 5,
-    "balance_delta": 5,
-    "lore": {
-      "en": "The Leshy remembers when the forest was whole. His rage is the rage of a world dying. He fights not from malice, but grief.",
-      "ru": "Леший помнит, когда лес был цел. Его ярость — ярость умирающего мира. Он сражается не от злобы, а от горя."
+    "balance_delta" : 10,
+    "defense" : 3,
+    "description" : {
+      "en" : "An ancient spirit of the mountain passes, testing travelers.",
+      "ru" : "Древний дух горных перевалов, испытывающий путников."
     },
-    "tactics_nav": {
-      "en": "The Leshy is of Nav. Speak in the tongue of spirits, offer resonance, and he may relent.",
-      "ru": "Леший — существо Нави. Говори на языке духов, предложи резонанс, и он может отступить."
-    },
-    "tactics_yav": {
-      "en": "His bark is thick — aim for the eyes. Fire disrupts his regeneration.",
-      "ru": "Его кора толста — цель в глаза. Огонь нарушает регенерацию."
-    },
-    "tactics_prav": {
-      "en": "Blessings of Prav weaken his hold on the forest. Purify the ground beneath him.",
-      "ru": "Благословения Прави ослабляют его власть над лесом. Очисти землю под ним."
-    },
-    "weaknesses": ["fire", "holy"],
-    "strengths": ["poison", "nature"]
-  },
-  {
-    "id": "mountain_spirit",
-    "name": {
-      "en": "Mountain Spirit",
-      "ru": "Горный Дух"
-    },
-    "description": {
-      "en": "An ancient spirit of the mountain passes, testing travelers.",
-      "ru": "Древний дух горных перевалов, испытывающий путников."
-    },
-    "health": 15,
-    "power": 5,
-    "defense": 3,
-    "will": 20,
-    "difficulty": 3,
-    "enemy_type": "spirit",
-    "rarity": "rare",
-    "abilities": [
-      {
-        "id": "stone_skin",
-        "name": {
-          "en": "Stone Skin",
-          "ru": "Каменная Кожа"
-        },
-        "description": {
-          "en": "Reduces all damage taken.",
-          "ru": "Уменьшает весь получаемый урон."
-        },
-        "effect": {
-          "armor": 2
-        }
-      }
-    ],
-    "loot_card_ids": [
+    "difficulty" : 3,
+    "enemy_type" : "spirit",
+    "faith_reward" : 8,
+    "health" : 15,
+    "id" : "mountain_spirit",
+    "loot_card_ids" : [
       "mountain_blessing"
     ],
-    "faith_reward": 8,
-    "balance_delta": 10,
-    "lore": {
-      "en": "Mountain spirits test those who would cross their domain. They are neither good nor evil — only ancient.",
-      "ru": "Горные духи испытывают тех, кто осмелится пересечь их владения. Они ни добры, ни злы — лишь древны."
+    "lore" : {
+      "en" : "Mountain spirits test those who would cross their domain. They are neither good nor evil — only ancient.",
+      "ru" : "Горные духи испытывают тех, кто осмелится пересечь их владения. Они ни добры, ни злы — лишь древны."
     },
-    "tactics_nav": {
-      "en": "Resonance of the deep — the spirit respects those who walk between worlds.",
-      "ru": "Резонанс глубин — дух уважает тех, кто ходит между мирами."
+    "name" : {
+      "en" : "Mountain Spirit",
+      "ru" : "Горный Дух"
     },
-    "tactics_yav": {
-      "en": "Brute force barely scratches stone. Seek cracks in the armor — strike precisely.",
-      "ru": "Грубая сила едва царапает камень. Ищи трещины в броне — бей точно."
+    "power" : 5,
+    "rarity" : "rare",
+    "strengths" : [
+      "fire",
+      "physical"
+    ],
+    "tactics_nav" : {
+      "en" : "Resonance of the deep — the spirit respects those who walk between worlds.",
+      "ru" : "Резонанс глубин — дух уважает тех, кто ходит между мирами."
     },
-    "tactics_prav": {
-      "en": "Ancient prayers to the mountain can still the spirit. Offer faith, not violence.",
-      "ru": "Древние молитвы горам могут утихомирить дух. Предложи веру, а не насилие."
+    "tactics_prav" : {
+      "en" : "Ancient prayers to the mountain can still the spirit. Offer faith, not violence.",
+      "ru" : "Древние молитвы горам могут утихомирить дух. Предложи веру, а не насилие."
     },
-    "weaknesses": ["lightning"],
-    "strengths": ["fire", "physical"]
+    "tactics_yav" : {
+      "en" : "Brute force barely scratches stone. Seek cracks in the armor — strike precisely.",
+      "ru" : "Грубая сила едва царапает камень. Ищи трещины в броне — бей точно."
+    },
+    "weaknesses" : [
+      "lightning"
+    ],
+    "will" : 20
   },
   {
-    "id": "risen_dead",
-    "name": {
-      "en": "Risen Dead",
-      "ru": "Восставший Мертвец"
-    },
-    "description": {
-      "en": "A corpse animated by Navi energy, mindlessly aggressive.",
-      "ru": "Труп, оживлённый энергией Нави, бездумно агрессивный."
-    },
-    "health": 10,
-    "power": 4,
-    "defense": 1,
-    "difficulty": 2,
-    "enemy_type": "undead",
-    "rarity": "common",
-    "abilities": [],
-    "loot_card_ids": [],
-    "faith_reward": 3,
-    "balance_delta": -5,
-    "lore": {
-      "en": "When Navi creeps too close, the dead stir. They remember nothing — not name, not purpose. Only hunger remains.",
-      "ru": "Когда Навь подползает слишком близко, мёртвые шевелятся. Они не помнят ничего — ни имени, ни цели. Остаётся лишь голод."
-    },
-    "tactics_nav": {
-      "en": "The undead are puppets of Navi energy. A skilled practitioner can sever the threads.",
-      "ru": "Нежить — марионетки энергии Нави. Умелый практик может обрубить нити."
-    },
-    "tactics_yav": {
-      "en": "Hack the limbs. They feel no pain, so aim to dismember, not wound.",
-      "ru": "Руби конечности. Они не чувствуют боли, так что цель — расчленить, а не ранить."
-    },
-    "tactics_prav": {
-      "en": "Holy fire and blessed weapons. The light of Prav is their bane.",
-      "ru": "Святой огонь и благословлённое оружие. Свет Прави — их погибель."
-    },
-    "weaknesses": ["fire", "holy"],
-    "strengths": ["poison", "fear"],
-    "pattern": [
-      {"type": "attack", "value": 4},
-      {"type": "attack", "value": 4},
-      {"type": "block", "value": 0}
-    ]
-  },
-  {
-    "id": "swamp_hag",
-    "name": {
-      "en": "Swamp Hag",
-      "ru": "Болотная Ведьма"
-    },
-    "description": {
-      "en": "A twisted creature of the swamp, wielding dark magic.",
-      "ru": "Искажённое существо болот, владеющее тёмной магией."
-    },
-    "health": 8,
-    "power": 6,
-    "defense": 1,
-    "difficulty": 3,
-    "enemy_type": "demon",
-    "rarity": "uncommon",
-    "abilities": [
+    "abilities" : [
       {
-        "id": "curse_touch",
-        "name": {
-          "en": "Curse Touch",
-          "ru": "Проклятое Касание"
+        "description" : {
+          "en" : "Applies weakness curse on hit.",
+          "ru" : "Накладывает проклятие слабости при ударе."
         },
-        "description": {
-          "en": "Applies weakness curse on hit.",
-          "ru": "Накладывает проклятие слабости при ударе."
+        "effect" : {
+          "apply_curse" : "weakness"
         },
-        "effect": {
-          "apply_curse": "weakness"
+        "id" : "curse_touch",
+        "name" : {
+          "en" : "Curse Touch",
+          "ru" : "Проклятое Касание"
         }
       }
     ],
-    "loot_card_ids": [
+    "balance_delta" : -10,
+    "defense" : 1,
+    "description" : {
+      "en" : "A twisted creature of the swamp, wielding dark magic.",
+      "ru" : "Искажённое существо болот, владеющее тёмной магией."
+    },
+    "difficulty" : 3,
+    "enemy_type" : "demon",
+    "faith_reward" : 6,
+    "health" : 8,
+    "id" : "swamp_hag",
+    "loot_card_ids" : [
       "witch_knowledge"
     ],
-    "faith_reward": 6,
-    "balance_delta": -10,
-    "lore": {
-      "en": "She was human once — a healer who delved too deep into Navi arts. Now she is neither alive nor dead, cursing all who wander near.",
-      "ru": "Когда-то она была человеком — целительницей, что слишком глубоко погрузилась в искусства Нави. Теперь она ни жива, ни мертва, проклиная всех, кто забредает поблизости."
+    "lore" : {
+      "en" : "She was human once — a healer who delved too deep into Navi arts. Now she is neither alive nor dead, cursing all who wander near.",
+      "ru" : "Когда-то она была человеком — целительницей, что слишком глубоко погрузилась в искусства Нави. Теперь она ни жива, ни мертва, проклиная всех, кто забредает поблизости."
     },
-    "tactics_nav": {
-      "en": "She respects power. Show mastery of dark resonance and she may bargain.",
-      "ru": "Она уважает силу. Покажи владение тёмным резонансом, и она может пойти на сделку."
+    "name" : {
+      "en" : "Swamp Hag",
+      "ru" : "Болотная Ведьма"
     },
-    "tactics_yav": {
-      "en": "Her curses weaken warriors. Cleanse yourself before engaging, and strike before she can cast.",
-      "ru": "Её проклятия ослабляют воинов. Очистись перед боем и бей, пока она не успела наложить чары."
+    "pattern" : [
+      {
+        "type" : "attack",
+        "value" : 6
+      },
+      {
+        "type" : "ritual",
+        "value" : -10
+      },
+      {
+        "type" : "heal",
+        "value" : 3
+      }
+    ],
+    "power" : 6,
+    "rarity" : "uncommon",
+    "strengths" : [
+      "poison",
+      "curse"
+    ],
+    "tactics_nav" : {
+      "en" : "She respects power. Show mastery of dark resonance and she may bargain.",
+      "ru" : "Она уважает силу. Покажи владение тёмным резонансом, и она может пойти на сделку."
     },
-    "tactics_prav": {
-      "en": "Prayers and holy water. Her dark magic crumbles before true faith.",
-      "ru": "Молитвы и святая вода. Её тёмная магия рассыпается перед истинной верой."
+    "tactics_prav" : {
+      "en" : "Prayers and holy water. Her dark magic crumbles before true faith.",
+      "ru" : "Молитвы и святая вода. Её тёмная магия рассыпается перед истинной верой."
     },
-    "weaknesses": ["holy", "silver"],
-    "strengths": ["poison", "curse"],
-    "pattern": [
-      {"type": "attack", "value": 6},
-      {"type": "ritual", "value": -10},
-      {"type": "heal", "value": 3}
+    "tactics_yav" : {
+      "en" : "Her curses weaken warriors. Cleanse yourself before engaging, and strike before she can cast.",
+      "ru" : "Её проклятия ослабляют воинов. Очистись перед боем и бей, пока она не успела наложить чары."
+    },
+    "weaknesses" : [
+      "holy",
+      "silver"
     ]
   },
   {
-    "id": "leshy_guardian_boss",
-    "name": {
-      "en": "Leshy Guardian",
-      "ru": "Леший-Хранитель"
-    },
-    "description": {
-      "en": "The ancient guardian of the boundary between worlds. A formidable foe.",
-      "ru": "Древний хранитель границы между мирами. Грозный противник."
-    },
-    "health": 25,
-    "power": 7,
-    "defense": 4,
-    "will": 40,
-    "difficulty": 5,
-    "enemy_type": "boss",
-    "rarity": "legendary",
-    "abilities": [
+    "abilities" : [
       {
-        "id": "nature_wrath",
-        "name": {
-          "en": "Nature's Wrath",
-          "ru": "Гнев Природы"
+        "description" : {
+          "en" : "Reduces incoming damage.",
+          "ru" : "Уменьшает входящий урон."
         },
-        "description": {
-          "en": "Regenerates health each turn.",
-          "ru": "Восстанавливает здоровье каждый ход."
+        "effect" : {
+          "armor" : 2
         },
-        "effect": {
-          "regeneration": 3
+        "id" : "cursed_armor",
+        "name" : {
+          "en" : "Cursed Armor",
+          "ru" : "Проклятые Доспехи"
+        }
+      }
+    ],
+    "balance_delta" : -5,
+    "defense" : 3,
+    "description" : {
+      "en" : "A fallen warrior bound to eternal service by dark magic. His rusted armor still holds power.",
+      "ru" : "Павший воин, привязанный к вечной службе тёмной магией. Его ржавые доспехи всё ещё хранят силу."
+    },
+    "difficulty" : 3,
+    "enemy_type" : "undead",
+    "faith_reward" : 6,
+    "health" : 14,
+    "id" : "cursed_knight",
+    "loot_card_ids" : [
+      "cursed_plate"
+    ],
+    "lore" : {
+      "en" : "He once swore an oath to protect this land. Death did not release him — the oath twisted into a curse, and now he guards nothing but his own torment.",
+      "ru" : "Когда-то он поклялся защищать эту землю. Смерть не освободила его — клятва обратилась проклятием, и теперь он стережёт лишь собственные мучения."
+    },
+    "name" : {
+      "en" : "Cursed Knight",
+      "ru" : "Проклятый Рыцарь"
+    },
+    "pattern" : [
+      {
+        "type" : "attack",
+        "value" : 5
+      },
+      {
+        "type" : "block",
+        "value" : 0
+      },
+      {
+        "type" : "attack",
+        "value" : 5
+      }
+    ],
+    "power" : 5,
+    "rarity" : "uncommon",
+    "strengths" : [
+      "physical",
+      "poison"
+    ],
+    "tactics_nav" : {
+      "en" : "The curse that binds him is of Navi. A skilled practitioner can unravel it.",
+      "ru" : "Проклятие, связывающее его, из Нави. Умелый практик может распутать его."
+    },
+    "tactics_prav" : {
+      "en" : "A prayer of release may break the curse. Otherwise, holy fire melts cursed steel.",
+      "ru" : "Молитва освобождения может разрушить проклятие. Иначе — святой огонь плавит проклятую сталь."
+    },
+    "tactics_yav" : {
+      "en" : "His armor is thick. Find the gaps — strike at joints and visor.",
+      "ru" : "Его броня толста. Ищи бреши — бей по суставам и забралу."
+    },
+    "weaknesses" : [
+      "holy",
+      "fire"
+    ]
+  },
+  {
+    "abilities" : [
+
+    ],
+    "balance_delta" : 0,
+    "defense" : 1,
+    "description" : {
+      "en" : "A feral creature driven mad by the encroaching Navi.",
+      "ru" : "Дикое существо, обезумевшее от наступающей Нави."
+    },
+    "difficulty" : 1,
+    "enemy_type" : "beast",
+    "faith_reward" : 2,
+    "health" : 8,
+    "id" : "wild_beast",
+    "loot_card_ids" : [
+      "beast_hide"
+    ],
+    "lore" : {
+      "en" : "Elders say the beasts were peaceful once, before the boundary thinned. Now hunger and Navi corruption drive them to madness.",
+      "ru" : "Старики говорят, звери были мирными, пока граница не истончилась. Теперь голод и порча Нави сводят их с ума."
+    },
+    "name" : {
+      "en" : "Wild Beast",
+      "ru" : "Дикий Зверь"
+    },
+    "power" : 3,
+    "rarity" : "common",
+    "strengths" : [
+      "poison"
+    ],
+    "tactics_nav" : {
+      "en" : "Spirits of Nav may calm the beast — approach with resonance offerings.",
+      "ru" : "Духи Нави могут успокоить зверя — подойди с дарами резонанса."
+    },
+    "tactics_prav" : {
+      "en" : "The light of Prav burns corruption away. Holy words may pacify.",
+      "ru" : "Свет Прави выжигает порчу. Святое слово может усмирить."
+    },
+    "tactics_yav" : {
+      "en" : "Steel and strength. Strike fast before it can lunge.",
+      "ru" : "Сталь и сила. Бей быстро, пока не бросился."
+    },
+    "weaknesses" : [
+      "fire",
+      "silver"
+    ]
+  },
+  {
+    "abilities" : [
+      {
+        "description" : {
+          "en" : "Distorts reality around it, weakening attacks.",
+          "ru" : "Искажает реальность вокруг себя, ослабляя атаки."
+        },
+        "effect" : {
+          "armor" : 1
+        },
+        "id" : "reality_warp",
+        "name" : {
+          "en" : "Reality Warp",
+          "ru" : "Искажение Реальности"
+        }
+      }
+    ],
+    "balance_delta" : -8,
+    "defense" : 2,
+    "description" : {
+      "en" : "A massive aberration that crawls through breaches between worlds. Its very presence corrodes reality.",
+      "ru" : "Массивная аберрация, проползающая сквозь разломы между мирами. Само её присутствие разъедает реальность."
+    },
+    "difficulty" : 4,
+    "enemy_type" : "spirit",
+    "faith_reward" : 12,
+    "health" : 18,
+    "id" : "breach_crawler",
+    "loot_card_ids" : [
+      "void_shard"
+    ],
+    "lore" : {
+      "en" : "Born from the space between worlds, the Crawler knows neither mercy nor malice. It simply consumes — reality, sanity, hope — all dissolve in its wake.",
+      "ru" : "Рождённый из пространства между мирами, Ползучий не знает ни жалости, ни злобы. Он просто поглощает — реальность, рассудок, надежду — всё растворяется на его пути."
+    },
+    "name" : {
+      "en" : "Breach Crawler",
+      "ru" : "Ползучий Ужас"
+    },
+    "pattern" : [
+      {
+        "type" : "attack",
+        "value" : 6
+      },
+      {
+        "type" : "attack",
+        "value" : 6
+      },
+      {
+        "type" : "block",
+        "value" : 0
+      },
+      {
+        "type" : "heal",
+        "value" : 4
+      }
+    ],
+    "power" : 6,
+    "rarity" : "rare",
+    "strengths" : [
+      "physical",
+      "poison",
+      "shadow"
+    ],
+    "tactics_nav" : {
+      "en" : "It is of the void between Nav and Yav. Only the deepest resonance can push it back.",
+      "ru" : "Оно из пустоты между Навью и Явью. Лишь глубочайший резонанс может оттеснить его."
+    },
+    "tactics_prav" : {
+      "en" : "The light of Prav is anathema to breach creatures. Seal the rift and it weakens.",
+      "ru" : "Свет Прави — проклятие для существ из разлома. Запечатай разлом, и оно ослабнет."
+    },
+    "tactics_yav" : {
+      "en" : "Physical attacks barely scratch it. Focus on sustained pressure — it heals slowly.",
+      "ru" : "Физические атаки едва царапают его. Сосредоточься на постоянном давлении — оно медленно исцеляется."
+    },
+    "weaknesses" : [
+      "holy",
+      "lightning"
+    ]
+  },
+  {
+    "abilities" : [
+
+    ],
+    "balance_delta" : -5,
+    "defense" : 1,
+    "description" : {
+      "en" : "A corpse animated by Navi energy, mindlessly aggressive.",
+      "ru" : "Труп, оживлённый энергией Нави, бездумно агрессивный."
+    },
+    "difficulty" : 2,
+    "enemy_type" : "undead",
+    "faith_reward" : 3,
+    "health" : 10,
+    "id" : "risen_dead",
+    "loot_card_ids" : [
+
+    ],
+    "lore" : {
+      "en" : "When Navi creeps too close, the dead stir. They remember nothing — not name, not purpose. Only hunger remains.",
+      "ru" : "Когда Навь подползает слишком близко, мёртвые шевелятся. Они не помнят ничего — ни имени, ни цели. Остаётся лишь голод."
+    },
+    "name" : {
+      "en" : "Risen Dead",
+      "ru" : "Восставший Мертвец"
+    },
+    "pattern" : [
+      {
+        "type" : "attack",
+        "value" : 4
+      },
+      {
+        "type" : "attack",
+        "value" : 4
+      },
+      {
+        "type" : "block",
+        "value" : 0
+      }
+    ],
+    "power" : 4,
+    "rarity" : "common",
+    "strengths" : [
+      "poison",
+      "fear"
+    ],
+    "tactics_nav" : {
+      "en" : "The undead are puppets of Navi energy. A skilled practitioner can sever the threads.",
+      "ru" : "Нежить — марионетки энергии Нави. Умелый практик может обрубить нити."
+    },
+    "tactics_prav" : {
+      "en" : "Holy fire and blessed weapons. The light of Prav is their bane.",
+      "ru" : "Святой огонь и благословлённое оружие. Свет Прави — их погибель."
+    },
+    "tactics_yav" : {
+      "en" : "Hack the limbs. They feel no pain, so aim to dismember, not wound.",
+      "ru" : "Руби конечности. Они не чувствуют боли, так что цель — расчленить, а не ранить."
+    },
+    "weaknesses" : [
+      "fire",
+      "holy"
+    ]
+  },
+  {
+    "abilities" : [
+      {
+        "description" : {
+          "en" : "Powerful magical attack.",
+          "ru" : "Мощная магическая атака."
+        },
+        "effect" : {
+          "bonus_damage" : 3
+        },
+        "id" : "dark_bolt",
+        "name" : {
+          "en" : "Dark Bolt",
+          "ru" : "Тёмная Молния"
+        }
+      }
+    ],
+    "balance_delta" : -10,
+    "defense" : 1,
+    "description" : {
+      "en" : "A mage who delved too deep into forbidden Navi arts. Wields devastating magic and can influence minds.",
+      "ru" : "Маг, слишком глубоко погрузившийся в запретные искусства Нави. Владеет разрушительной магией и может влиять на разум."
+    },
+    "difficulty" : 4,
+    "enemy_type" : "demon",
+    "faith_reward" : 10,
+    "health" : 10,
+    "id" : "dark_sorcerer",
+    "loot_card_ids" : [
+      "sorcerers_tome"
+    ],
+    "lore" : {
+      "en" : "He sought knowledge beyond mortal limits. The Navi answered, and now he is more shadow than man — a conduit for dark power that consumes all it touches.",
+      "ru" : "Он искал знания за пределами смертных. Навь ответила, и теперь он больше тень, чем человек — проводник тёмной силы, пожирающей всё, к чему прикасается."
+    },
+    "name" : {
+      "en" : "Dark Sorcerer",
+      "ru" : "Тёмный Колдун"
+    },
+    "pattern" : [
+      {
+        "type" : "attack",
+        "value" : 7
+      },
+      {
+        "type" : "ritual",
+        "value" : -8
+      },
+      {
+        "type" : "attack",
+        "value" : 7
+      },
+      {
+        "type" : "heal",
+        "value" : 3
+      }
+    ],
+    "power" : 7,
+    "rarity" : "rare",
+    "strengths" : [
+      "shadow",
+      "curse"
+    ],
+    "tactics_nav" : {
+      "en" : "He respects raw dark power. Show mastery greater than his, and he may yield.",
+      "ru" : "Он уважает грубую тёмную силу. Покажи мастерство выше его, и он может уступить."
+    },
+    "tactics_prav" : {
+      "en" : "Holy wards can deflect his spells. Counter his darkness with pure light.",
+      "ru" : "Святые обереги могут отразить его заклинания. Противопоставь его тьме чистый свет."
+    },
+    "tactics_yav" : {
+      "en" : "Close the distance fast — his magic is devastating at range but weak up close.",
+      "ru" : "Сократи дистанцию быстро — его магия разрушительна на расстоянии, но слаба вблизи."
+    },
+    "weaknesses" : [
+      "holy",
+      "silver"
+    ],
+    "will" : 8
+  },
+  {
+    "abilities" : [
+      {
+        "description" : {
+          "en" : "Deals extra damage when below half health.",
+          "ru" : "Наносит дополнительный урон при здоровье ниже половины."
+        },
+        "effect" : {
+          "bonus_damage" : 2
+        },
+        "id" : "forest_rage",
+        "name" : {
+          "en" : "Forest Rage",
+          "ru" : "Ярость Леса"
+        }
+      }
+    ],
+    "balance_delta" : 5,
+    "defense" : 2,
+    "description" : {
+      "en" : "Ancient forest guardian whose anger grows with the corruption. His spirit is bound to the resonance of the world.",
+      "ru" : "Древний страж леса, чей гнев растёт вместе с порчей. Его дух связан с резонансом мира."
+    },
+    "difficulty" : 2,
+    "enemy_type" : "spirit",
+    "faith_reward" : 5,
+    "health" : 50,
+    "id" : "leshy",
+    "loot_card_ids" : [
+      "forest_blessing"
+    ],
+    "lore" : {
+      "en" : "The Leshy remembers when the forest was whole. His rage is the rage of a world dying. He fights not from malice, but grief.",
+      "ru" : "Леший помнит, когда лес был цел. Его ярость — ярость умирающего мира. Он сражается не от злобы, а от горя."
+    },
+    "name" : {
+      "en" : "Leshy",
+      "ru" : "Леший"
+    },
+    "power" : 4,
+    "rarity" : "uncommon",
+    "resonance_behavior" : {
+      "deepNav" : {
+        "defense_delta" : 0,
+        "health_delta" : 10,
+        "power_delta" : 2,
+        "will_delta" : 5
+      },
+      "deepPrav" : {
+        "defense_delta" : -1,
+        "health_delta" : -10,
+        "power_delta" : -2,
+        "will_delta" : -5
+      },
+      "nav" : {
+        "defense_delta" : 0,
+        "health_delta" : 5,
+        "power_delta" : 1,
+        "will_delta" : 2
+      },
+      "prav" : {
+        "defense_delta" : 0,
+        "health_delta" : -5,
+        "power_delta" : -1,
+        "will_delta" : -2
+      },
+      "yav" : {
+        "defense_delta" : 0,
+        "health_delta" : 0,
+        "power_delta" : 0,
+        "will_delta" : 0
+      }
+    },
+    "strengths" : [
+      "poison",
+      "nature"
+    ],
+    "tactics_nav" : {
+      "en" : "The Leshy is of Nav. Speak in the tongue of spirits, offer resonance, and he may relent.",
+      "ru" : "Леший — существо Нави. Говори на языке духов, предложи резонанс, и он может отступить."
+    },
+    "tactics_prav" : {
+      "en" : "Blessings of Prav weaken his hold on the forest. Purify the ground beneath him.",
+      "ru" : "Благословения Прави ослабляют его власть над лесом. Очисти землю под ним."
+    },
+    "tactics_yav" : {
+      "en" : "His bark is thick — aim for the eyes. Fire disrupts his regeneration.",
+      "ru" : "Его кора толста — цель в глаза. Огонь нарушает регенерацию."
+    },
+    "weaknesses" : [
+      "fire",
+      "holy"
+    ],
+    "will" : 30
+  },
+  {
+    "abilities" : [
+      {
+        "description" : {
+          "en" : "Regenerates health each turn.",
+          "ru" : "Восстанавливает здоровье каждый ход."
+        },
+        "effect" : {
+          "regeneration" : 3
+        },
+        "id" : "nature_wrath",
+        "name" : {
+          "en" : "Nature's Wrath",
+          "ru" : "Гнев Природы"
         }
       },
       {
-        "id": "ancient_armor",
-        "name": {
-          "en": "Ancient Armor",
-          "ru": "Древняя Броня"
+        "description" : {
+          "en" : "Thick bark reduces damage.",
+          "ru" : "Толстая кора уменьшает урон."
         },
-        "description": {
-          "en": "Thick bark reduces damage.",
-          "ru": "Толстая кора уменьшает урон."
+        "effect" : {
+          "armor" : 2
         },
-        "effect": {
-          "armor": 2
+        "id" : "ancient_armor",
+        "name" : {
+          "en" : "Ancient Armor",
+          "ru" : "Древняя Броня"
         }
       }
     ],
-    "loot_card_ids": [
+    "balance_delta" : 20,
+    "defense" : 4,
+    "description" : {
+      "en" : "The ancient guardian of the boundary between worlds. A formidable foe.",
+      "ru" : "Древний хранитель границы между мирами. Грозный противник."
+    },
+    "difficulty" : 5,
+    "enemy_type" : "boss",
+    "faith_reward" : 20,
+    "health" : 25,
+    "id" : "leshy_guardian_boss",
+    "loot_card_ids" : [
       "guardian_seal",
       "ancient_power"
     ],
-    "faith_reward": 20,
-    "balance_delta": 20,
-    "lore": {
-      "en": "The Guardian has stood at the boundary since before memory. He is the forest's last champion, and he will not yield while a single tree still stands.",
-      "ru": "Хранитель стоит на границе с незапамятных времён. Он последний защитник леса, и не отступит, пока стоит хоть одно дерево."
+    "lore" : {
+      "en" : "The Guardian has stood at the boundary since before memory. He is the forest's last champion, and he will not yield while a single tree still stands.",
+      "ru" : "Хранитель стоит на границе с незапамятных времён. Он последний защитник леса, и не отступит, пока стоит хоть одно дерево."
     },
-    "tactics_nav": {
-      "en": "He is the deepest spirit of Nav. Only true communion with the dark forest may reach him.",
-      "ru": "Он — глубочайший дух Нави. Лишь истинное единение с тёмным лесом может до него достучаться."
+    "name" : {
+      "en" : "Leshy Guardian",
+      "ru" : "Леший-Хранитель"
     },
-    "tactics_yav": {
-      "en": "His armor regenerates. You must overwhelm his healing — constant pressure, no respite.",
-      "ru": "Его броня регенерирует. Нужно превзойти его исцеление — постоянное давление, без передышки."
+    "power" : 7,
+    "rarity" : "legendary",
+    "strengths" : [
+      "poison",
+      "nature",
+      "physical"
+    ],
+    "tactics_nav" : {
+      "en" : "He is the deepest spirit of Nav. Only true communion with the dark forest may reach him.",
+      "ru" : "Он — глубочайший дух Нави. Лишь истинное единение с тёмным лесом может до него достучаться."
     },
-    "tactics_prav": {
-      "en": "The most powerful blessings of Prav can crack his ancient bark. Combine holy attacks with purification.",
-      "ru": "Сильнейшие благословения Прави могут расколоть его древнюю кору. Сочетай святые атаки с очищением."
+    "tactics_prav" : {
+      "en" : "The most powerful blessings of Prav can crack his ancient bark. Combine holy attacks with purification.",
+      "ru" : "Сильнейшие благословения Прави могут расколоть его древнюю кору. Сочетай святые атаки с очищением."
     },
-    "weaknesses": ["fire", "holy", "lightning"],
-    "strengths": ["poison", "nature", "physical"]
+    "tactics_yav" : {
+      "en" : "His armor regenerates. You must overwhelm his healing — constant pressure, no respite.",
+      "ru" : "Его броня регенерирует. Нужно превзойти его исцеление — постоянное давление, без передышки."
+    },
+    "weaknesses" : [
+      "fire",
+      "holy",
+      "lightning"
+    ],
+    "will" : 40
   },
   {
-    "id": "shadow_wolf",
-    "name": {
-      "en": "Shadow Wolf",
-      "ru": "Теневой Волк"
+    "abilities" : [
+
+    ],
+    "balance_delta" : -3,
+    "defense" : 0,
+    "description" : {
+      "en" : "A swift predator corrupted by Navi energy. Its shadowy form flickers between realms.",
+      "ru" : "Стремительный хищник, искажённый энергией Нави. Его теневая форма мерцает между мирами."
     },
-    "description": {
-      "en": "A swift predator corrupted by Navi energy. Its shadowy form flickers between realms.",
-      "ru": "Стремительный хищник, искажённый энергией Нави. Его теневая форма мерцает между мирами."
+    "difficulty" : 1,
+    "enemy_type" : "beast",
+    "faith_reward" : 2,
+    "health" : 6,
+    "id" : "shadow_wolf",
+    "loot_card_ids" : [
+      "shadow_fang"
+    ],
+    "lore" : {
+      "en" : "Once they hunted in packs under moonlight. Now the shadow has claimed them, and they hunt alone — silent, relentless, hungry.",
+      "ru" : "Когда-то они охотились стаями при свете луны. Теперь тень поглотила их, и они охотятся поодиночке — бесшумно, неустанно, голодно."
     },
-    "health": 6,
-    "power": 4,
-    "defense": 0,
-    "difficulty": 1,
-    "enemy_type": "beast",
-    "rarity": "common",
-    "abilities": [],
-    "loot_card_ids": ["shadow_fang"],
-    "faith_reward": 2,
-    "balance_delta": -3,
-    "lore": {
-      "en": "Once they hunted in packs under moonlight. Now the shadow has claimed them, and they hunt alone — silent, relentless, hungry.",
-      "ru": "Когда-то они охотились стаями при свете луны. Теперь тень поглотила их, и они охотятся поодиночке — бесшумно, неустанно, голодно."
+    "name" : {
+      "en" : "Shadow Wolf",
+      "ru" : "Теневой Волк"
     },
-    "tactics_nav": {
-      "en": "The wolf respects the dark. Show dominance through Navi resonance.",
-      "ru": "Волк уважает тьму. Покажи превосходство через резонанс Нави."
-    },
-    "tactics_yav": {
-      "en": "Fast but fragile. One solid strike can bring it down.",
-      "ru": "Быстрый, но хрупкий. Один крепкий удар может свалить его."
-    },
-    "tactics_prav": {
-      "en": "Holy light burns away the shadow that sustains it.",
-      "ru": "Святой свет выжигает тень, которая поддерживает его."
-    },
-    "weaknesses": ["fire", "holy"],
-    "strengths": ["shadow"],
-    "pattern": [
-      {"type": "attack", "value": 4},
-      {"type": "attack", "value": 4}
-    ]
-  },
-  {
-    "id": "cursed_knight",
-    "name": {
-      "en": "Cursed Knight",
-      "ru": "Проклятый Рыцарь"
-    },
-    "description": {
-      "en": "A fallen warrior bound to eternal service by dark magic. His rusted armor still holds power.",
-      "ru": "Павший воин, привязанный к вечной службе тёмной магией. Его ржавые доспехи всё ещё хранят силу."
-    },
-    "health": 14,
-    "power": 5,
-    "defense": 3,
-    "difficulty": 3,
-    "enemy_type": "undead",
-    "rarity": "uncommon",
-    "abilities": [
+    "pattern" : [
       {
-        "id": "cursed_armor",
-        "name": {
-          "en": "Cursed Armor",
-          "ru": "Проклятые Доспехи"
-        },
-        "description": {
-          "en": "Reduces incoming damage.",
-          "ru": "Уменьшает входящий урон."
-        },
-        "effect": {
-          "armor": 2
-        }
+        "type" : "attack",
+        "value" : 4
+      },
+      {
+        "type" : "attack",
+        "value" : 4
       }
     ],
-    "loot_card_ids": ["cursed_plate"],
-    "faith_reward": 6,
-    "balance_delta": -5,
-    "lore": {
-      "en": "He once swore an oath to protect this land. Death did not release him — the oath twisted into a curse, and now he guards nothing but his own torment.",
-      "ru": "Когда-то он поклялся защищать эту землю. Смерть не освободила его — клятва обратилась проклятием, и теперь он стережёт лишь собственные мучения."
-    },
-    "tactics_nav": {
-      "en": "The curse that binds him is of Navi. A skilled practitioner can unravel it.",
-      "ru": "Проклятие, связывающее его, из Нави. Умелый практик может распутать его."
-    },
-    "tactics_yav": {
-      "en": "His armor is thick. Find the gaps — strike at joints and visor.",
-      "ru": "Его броня толста. Ищи бреши — бей по суставам и забралу."
-    },
-    "tactics_prav": {
-      "en": "A prayer of release may break the curse. Otherwise, holy fire melts cursed steel.",
-      "ru": "Молитва освобождения может разрушить проклятие. Иначе — святой огонь плавит проклятую сталь."
-    },
-    "weaknesses": ["holy", "fire"],
-    "strengths": ["physical", "poison"],
-    "pattern": [
-      {"type": "attack", "value": 5},
-      {"type": "block", "value": 0},
-      {"type": "attack", "value": 5}
-    ]
-  },
-  {
-    "id": "dark_sorcerer",
-    "name": {
-      "en": "Dark Sorcerer",
-      "ru": "Тёмный Колдун"
-    },
-    "description": {
-      "en": "A mage who delved too deep into forbidden Navi arts. Wields devastating magic and can influence minds.",
-      "ru": "Маг, слишком глубоко погрузившийся в запретные искусства Нави. Владеет разрушительной магией и может влиять на разум."
-    },
-    "health": 10,
-    "power": 7,
-    "defense": 1,
-    "will": 8,
-    "difficulty": 4,
-    "enemy_type": "demon",
-    "rarity": "rare",
-    "abilities": [
-      {
-        "id": "dark_bolt",
-        "name": {
-          "en": "Dark Bolt",
-          "ru": "Тёмная Молния"
-        },
-        "description": {
-          "en": "Powerful magical attack.",
-          "ru": "Мощная магическая атака."
-        },
-        "effect": {
-          "bonus_damage": 3
-        }
-      }
+    "power" : 4,
+    "rarity" : "common",
+    "strengths" : [
+      "shadow"
     ],
-    "loot_card_ids": ["sorcerers_tome"],
-    "faith_reward": 10,
-    "balance_delta": -10,
-    "lore": {
-      "en": "He sought knowledge beyond mortal limits. The Navi answered, and now he is more shadow than man — a conduit for dark power that consumes all it touches.",
-      "ru": "Он искал знания за пределами смертных. Навь ответила, и теперь он больше тень, чем человек — проводник тёмной силы, пожирающей всё, к чему прикасается."
+    "tactics_nav" : {
+      "en" : "The wolf respects the dark. Show dominance through Navi resonance.",
+      "ru" : "Волк уважает тьму. Покажи превосходство через резонанс Нави."
     },
-    "tactics_nav": {
-      "en": "He respects raw dark power. Show mastery greater than his, and he may yield.",
-      "ru": "Он уважает грубую тёмную силу. Покажи мастерство выше его, и он может уступить."
+    "tactics_prav" : {
+      "en" : "Holy light burns away the shadow that sustains it.",
+      "ru" : "Святой свет выжигает тень, которая поддерживает его."
     },
-    "tactics_yav": {
-      "en": "Close the distance fast — his magic is devastating at range but weak up close.",
-      "ru": "Сократи дистанцию быстро — его магия разрушительна на расстоянии, но слаба вблизи."
+    "tactics_yav" : {
+      "en" : "Fast but fragile. One solid strike can bring it down.",
+      "ru" : "Быстрый, но хрупкий. Один крепкий удар может свалить его."
     },
-    "tactics_prav": {
-      "en": "Holy wards can deflect his spells. Counter his darkness with pure light.",
-      "ru": "Святые обереги могут отразить его заклинания. Противопоставь его тьме чистый свет."
-    },
-    "weaknesses": ["holy", "silver"],
-    "strengths": ["shadow", "curse"],
-    "pattern": [
-      {"type": "attack", "value": 7},
-      {"type": "ritual", "value": -8},
-      {"type": "attack", "value": 7},
-      {"type": "heal", "value": 3}
-    ]
-  },
-  {
-    "id": "breach_crawler",
-    "name": {
-      "en": "Breach Crawler",
-      "ru": "Ползучий Ужас"
-    },
-    "description": {
-      "en": "A massive aberration that crawls through breaches between worlds. Its very presence corrodes reality.",
-      "ru": "Массивная аберрация, проползающая сквозь разломы между мирами. Само её присутствие разъедает реальность."
-    },
-    "health": 18,
-    "power": 6,
-    "defense": 2,
-    "difficulty": 4,
-    "enemy_type": "spirit",
-    "rarity": "rare",
-    "abilities": [
-      {
-        "id": "reality_warp",
-        "name": {
-          "en": "Reality Warp",
-          "ru": "Искажение Реальности"
-        },
-        "description": {
-          "en": "Distorts reality around it, weakening attacks.",
-          "ru": "Искажает реальность вокруг себя, ослабляя атаки."
-        },
-        "effect": {
-          "armor": 1
-        }
-      }
-    ],
-    "loot_card_ids": ["void_shard"],
-    "faith_reward": 12,
-    "balance_delta": -8,
-    "lore": {
-      "en": "Born from the space between worlds, the Crawler knows neither mercy nor malice. It simply consumes — reality, sanity, hope — all dissolve in its wake.",
-      "ru": "Рождённый из пространства между мирами, Ползучий не знает ни жалости, ни злобы. Он просто поглощает — реальность, рассудок, надежду — всё растворяется на его пути."
-    },
-    "tactics_nav": {
-      "en": "It is of the void between Nav and Yav. Only the deepest resonance can push it back.",
-      "ru": "Оно из пустоты между Навью и Явью. Лишь глубочайший резонанс может оттеснить его."
-    },
-    "tactics_yav": {
-      "en": "Physical attacks barely scratch it. Focus on sustained pressure — it heals slowly.",
-      "ru": "Физические атаки едва царапают его. Сосредоточься на постоянном давлении — оно медленно исцеляется."
-    },
-    "tactics_prav": {
-      "en": "The light of Prav is anathema to breach creatures. Seal the rift and it weakens.",
-      "ru": "Свет Прави — проклятие для существ из разлома. Запечатай разлом, и оно ослабнет."
-    },
-    "weaknesses": ["holy", "lightning"],
-    "strengths": ["physical", "poison", "shadow"],
-    "pattern": [
-      {"type": "attack", "value": 6},
-      {"type": "attack", "value": 6},
-      {"type": "block", "value": 0},
-      {"type": "heal", "value": 4}
+    "weaknesses" : [
+      "fire",
+      "holy"
     ]
   }
 ]

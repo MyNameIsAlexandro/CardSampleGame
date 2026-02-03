@@ -17,7 +17,7 @@ extension TwilightGameEngine {
 
         // 2. Resonance
         if result.resonanceDelta != 0 {
-            adjustResonance(by: result.resonanceDelta)
+            adjustResonance(by: Float(result.resonanceDelta))
         }
 
         // 3. Fate deck sync

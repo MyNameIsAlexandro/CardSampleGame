@@ -1,4 +1,9 @@
 import SpriteKit
+import Foundation
+
+private func L(_ key: String) -> String {
+    NSLocalizedString(key, bundle: .main, comment: "")
+}
 
 /// Visual representation of a Fate card draw in SpriteKit combat.
 /// Shows a card back, flips to reveal the modifier value.
@@ -74,7 +79,7 @@ public final class FateCardNode: SKNode {
         faceNode.fillColor = color
 
         if isCritical {
-            valueLabel.text = "CRIT"
+            valueLabel.text = L("combat.fate.crit")
         } else {
             valueLabel.text = value > 0 ? "+\(value)" : "\(value)"
         }

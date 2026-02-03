@@ -18,7 +18,7 @@ struct EventView: View {
     @State private var selectedChoice: EventChoice?
     @State private var showingResult = false
     @State private var resultMessage: String = ""
-    @State private var combatMonster: Card?
+    @State private var showingCombat = false
     @State private var echoCombatConfig: EchoCombatConfig?
     @State private var combatVictory: Bool?
 
@@ -96,7 +96,7 @@ struct EventView: View {
             } message: {
                 Text(resultMessage)
             }
-            .fullScreenCover(item: $combatMonster) { _ in
+            .fullScreenCover(isPresented: $showingCombat) {
                 if let config = echoCombatConfig {
                     CombatSceneView(
                         enemyDefinition: config.enemyDefinition,
@@ -113,10 +113,10 @@ struct EventView: View {
                             let isVictory: Bool
                             if case .victory = result.outcome { isVictory = true } else { isVictory = false }
                             let stats = CombatView.CombatStats(
-                                turnsPlayed: 0,
-                                totalDamageDealt: 0,
-                                totalDamageTaken: 0,
-                                cardsPlayed: 0
+                                turnsPlayed: result.turnsPlayed,
+                                totalDamageDealt: result.totalDamageDealt,
+                                totalDamageTaken: result.totalDamageTaken,
+                                cardsPlayed: result.cardsPlayed
                             )
                             let outcome: CombatView.CombatOutcome = isVictory
                                 ? .victory(stats: stats)
@@ -135,13 +135,6 @@ struct EventView: View {
                             default: type = .light
                             }
                             HapticManager.shared.play(type)
-                        }
-                    )
-                } else {
-                    CombatView(
-                        engineVM: vm,
-                        onCombatEnd: { outcome in
-                            handleCombatEnd(outcome: outcome)
                         }
                     )
                 }
@@ -386,14 +379,9 @@ struct EventView: View {
         // Setup combat in engine first, then show fullScreenCover
         vm.engine.combat.setupCombatEnemy(adjustedMonster)
 
-        // Try to use EchoEngine (SpriteKit) if EnemyDefinition exists
-        if let _ = ContentRegistry.shared.getEnemy(id: monster.id) {
-            echoCombatConfig = vm.engine.makeEchoCombatConfig()
-        } else {
-            echoCombatConfig = nil
-        }
-
-        combatMonster = adjustedMonster
+        // Always use SpriteKit combat — build config directly from Card
+        echoCombatConfig = vm.engine.makeEchoCombatConfig(for: adjustedMonster)
+        showingCombat = true
     }
 
     func handleCombatEnd(outcome: CombatView.CombatOutcome) {
@@ -405,7 +393,7 @@ struct EventView: View {
         // Combat already shows its own victory/defeat screen, no need for additional alert
         // Just close combat and dismiss event view
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            combatMonster = nil
+            showingCombat = false
             // Small delay before dismissing to allow animation to complete
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                 onDismiss()

@@ -1,338 +1,375 @@
 [
   {
-    "id": "defender_blessing",
-    "name": "Defender's Blessing",
-    "name_ru": "Благословение Защитника",
-    "card_type": "special",
-    "rarity": "rare",
-    "description": "A reward for completing the main quest. Permanently increases defense by 2.",
-    "description_ru": "Награда за выполнение основного квеста. Постоянно увеличивает защиту на 2.",
-    "icon": "shield.checkered",
-    "expansion_set": "twilightMarches",
-    "ownership": "universal",
-    "abilities": [
+    "abilities" : [
       {
-        "id": "permanent_defense",
-        "name": "Sacred Protection",
-        "name_ru": "Священная Защита",
-        "description": "+2 defense permanently",
-        "description_ru": "+2 к защите навсегда",
-        "effect": {"permanent_stat": {"stat": "defense", "amount": 2}}
+        "description" : "Gain 4 defense",
+        "effect" : {
+          "custom" : ""
+        },
+        "id" : "cursed_defense",
+        "name" : "Cursed Defense"
       }
     ],
-    "faith_cost": 0,
-    "balance": "light",
-    "power": null,
-    "defense": 2,
-    "health": null,
-    "realm": "prav"
+    "balance" : "dark",
+    "card_type" : "special",
+    "defense" : 4,
+    "description" : {
+      "en" : "A piece of the cursed knight's armor. Still holds protective power.",
+      "ru" : "A piece of the cursed knight's armor. Still holds protective power."
+    },
+    "exhaust" : false,
+    "expansion_set" : "twilightMarches",
+    "faith_cost" : 0,
+    "icon" : "shield.lefthalf.filled",
+    "id" : "cursed_plate",
+    "name" : {
+      "en" : "Cursed Plate",
+      "ru" : "Cursed Plate"
+    },
+    "ownership" : "universal",
+    "rarity" : "uncommon",
+    "realm" : "nav"
   },
   {
-    "id": "anchor_power",
-    "name": "Anchor's Power",
-    "name_ru": "Сила Якоря",
-    "card_type": "special",
-    "rarity": "rare",
-    "description": "Draw from the anchors' power. Heal 5 and gain 1 faith.",
-    "description_ru": "Черпать силу из якорей. Лечит 5 и даёт 1 веру.",
-    "icon": "anchor",
-    "expansion_set": "twilightMarches",
-    "ownership": "universal",
-    "abilities": [
+    "abilities" : [
       {
-        "id": "anchor_heal",
-        "name": "Anchor's Blessing",
-        "name_ru": "Благословение Якоря",
-        "description": "Heal 5, gain 1 faith",
-        "description_ru": "Лечит 5, даёт 1 веру",
-        "effect": {"heal": 5, "faith": 1}
+        "description" : "Wisdom 5 + Draw 1 card",
+        "effect" : {
+          "custom" : ""
+        },
+        "id" : "forbidden_knowledge",
+        "name" : "Forbidden Knowledge"
       }
     ],
-    "faith_cost": 0,
-    "balance": "light",
-    "power": null,
-    "defense": null,
-    "health": null,
-    "realm": "prav"
+    "balance" : "dark",
+    "card_type" : "special",
+    "description" : {
+      "en" : "A book of forbidden knowledge. Grants dark wisdom and insight.",
+      "ru" : "A book of forbidden knowledge. Grants dark wisdom and insight."
+    },
+    "exhaust" : false,
+    "expansion_set" : "twilightMarches",
+    "faith_cost" : 1,
+    "icon" : "book.fill",
+    "id" : "sorcerers_tome",
+    "name" : {
+      "en" : "Sorcerer's Tome",
+      "ru" : "Sorcerer's Tome"
+    },
+    "ownership" : "universal",
+    "rarity" : "rare",
+    "realm" : "prav"
   },
   {
-    "id": "forest_blessing",
-    "name": "Forest Blessing",
-    "name_ru": "Благословение Леса",
-    "card_type": "special",
-    "rarity": "uncommon",
-    "description": "Loot from defeating a Leshy. Heal 3 in forest regions.",
-    "description_ru": "Добыча с побеждённого Лешего. Лечит 3 в лесных регионах.",
-    "icon": "leaf",
-    "expansion_set": "twilightMarches",
-    "ownership": "universal",
-    "abilities": [
+    "abilities" : [
       {
-        "id": "forest_heal",
-        "name": "Nature's Gift",
-        "name_ru": "Дар Природы",
-        "description": "Heal 3 in forest",
-        "description_ru": "Лечит 3 в лесу",
-        "effect": {"heal": 3}
+        "description" : "Gain 2 defense",
+        "effect" : {
+          "custom" : ""
+        },
+        "id" : "hide_armor",
+        "name" : "Tough Hide"
       }
     ],
-    "faith_cost": 0,
-    "balance": "neutral",
-    "power": null,
-    "defense": null,
-    "health": null,
-    "realm": "yav"
+    "balance" : "neutral",
+    "card_type" : "special",
+    "defense" : 2,
+    "description" : {
+      "en" : "Tough hide from a wild beast. Grants 2 defense this turn.",
+      "ru" : "Tough hide from a wild beast. Grants 2 defense this turn."
+    },
+    "exhaust" : false,
+    "expansion_set" : "twilightMarches",
+    "faith_cost" : 0,
+    "icon" : "shield",
+    "id" : "beast_hide",
+    "name" : {
+      "en" : "Beast Hide",
+      "ru" : "Beast Hide"
+    },
+    "ownership" : "universal",
+    "rarity" : "common",
+    "realm" : "yav"
   },
   {
-    "id": "mountain_blessing",
-    "name": "Mountain Blessing",
-    "name_ru": "Благословение Гор",
-    "card_type": "special",
-    "rarity": "rare",
-    "description": "Reward from the Mountain Spirit. +3 defense for one battle.",
-    "description_ru": "Награда от Горного Духа. +3 к защите на одну битву.",
-    "icon": "mountain.2",
-    "expansion_set": "twilightMarches",
-    "ownership": "universal",
-    "abilities": [
+    "abilities" : [
       {
-        "id": "mountain_armor",
-        "name": "Stone Skin",
-        "name_ru": "Каменная Кожа",
-        "description": "+3 defense for battle",
-        "description_ru": "+3 к защите на битву",
-        "effect": {"temporary_stat": {"stat": "defense", "amount": 3, "duration": 1}}
+        "description" : "Heal 3 in forest",
+        "effect" : {
+          "heal" : 3
+        },
+        "id" : "forest_heal",
+        "name" : "Nature's Gift"
       }
     ],
-    "faith_cost": 0,
-    "balance": "neutral",
-    "power": null,
-    "defense": 3,
-    "health": null,
-    "realm": "yav"
+    "balance" : "neutral",
+    "card_type" : "special",
+    "description" : {
+      "en" : "Loot from defeating a Leshy. Heal 3 in forest regions.",
+      "ru" : "Loot from defeating a Leshy. Heal 3 in forest regions."
+    },
+    "exhaust" : false,
+    "expansion_set" : "twilightMarches",
+    "faith_cost" : 0,
+    "icon" : "leaf",
+    "id" : "forest_blessing",
+    "name" : {
+      "en" : "Forest Blessing",
+      "ru" : "Forest Blessing"
+    },
+    "ownership" : "universal",
+    "rarity" : "uncommon",
+    "realm" : "yav"
   },
   {
-    "id": "witch_knowledge",
-    "name": "Witch's Knowledge",
-    "name_ru": "Знание Ведьмы",
-    "card_type": "special",
-    "rarity": "uncommon",
-    "description": "Dark wisdom from the swamp witch. Draw 2 cards.",
-    "description_ru": "Тёмная мудрость от болотной ведьмы. Взять 2 карты.",
-    "icon": "book.closed",
-    "expansion_set": "twilightMarches",
-    "ownership": "universal",
-    "abilities": [
+    "abilities" : [
       {
-        "id": "draw_cards",
-        "name": "Ancient Wisdom",
-        "name_ru": "Древняя Мудрость",
-        "description": "Draw 2 cards",
-        "description_ru": "Взять 2 карты",
-        "effect": {"draw_cards": 2}
+        "description" : "Deal 4 damage, lose 1 faith",
+        "effect" : {
+          "damage" : {
+            "amount" : 4,
+            "type" : "physical"
+          }
+        },
+        "id" : "void_blast",
+        "name" : "Void Blast"
       }
     ],
-    "faith_cost": 1,
-    "balance": "dark",
-    "power": null,
-    "defense": null,
-    "health": null,
-    "realm": "nav"
+    "balance" : "dark",
+    "card_type" : "special",
+    "description" : {
+      "en" : "A fragment of the void between worlds. Powerful but corrupting.",
+      "ru" : "A fragment of the void between worlds. Powerful but corrupting."
+    },
+    "exhaust" : false,
+    "expansion_set" : "twilightMarches",
+    "faith_cost" : 0,
+    "icon" : "diamond.fill",
+    "id" : "void_shard",
+    "name" : {
+      "en" : "Void Shard",
+      "ru" : "Void Shard"
+    },
+    "ownership" : "universal",
+    "power" : 4,
+    "rarity" : "epic",
+    "realm" : "nav"
   },
   {
-    "id": "beast_hide",
-    "name": "Beast Hide",
-    "name_ru": "Шкура Зверя",
-    "card_type": "special",
-    "rarity": "common",
-    "description": "Tough hide from a wild beast. Grants 2 defense this turn.",
-    "description_ru": "Жёсткая шкура дикого зверя. Даёт 2 защиты в этот ход.",
-    "icon": "shield",
-    "expansion_set": "twilightMarches",
-    "ownership": "universal",
-    "abilities": [
+    "abilities" : [
       {
-        "id": "hide_armor",
-        "name": "Tough Hide",
-        "name_ru": "Жёсткая Шкура",
-        "description": "Gain 2 defense",
-        "description_ru": "Получить 2 защиты",
-        "effect": {"temporary_stat": {"stat": "defense", "amount": 2, "duration": 1}}
+        "description" : "+2 defense permanently",
+        "effect" : {
+          "custom" : ""
+        },
+        "id" : "permanent_defense",
+        "name" : "Sacred Protection"
       }
     ],
-    "faith_cost": 0,
-    "balance": "neutral",
-    "power": null,
-    "defense": 2,
-    "health": null,
-    "realm": "yav"
+    "balance" : "light",
+    "card_type" : "special",
+    "defense" : 2,
+    "description" : {
+      "en" : "A reward for completing the main quest. Permanently increases defense by 2.",
+      "ru" : "A reward for completing the main quest. Permanently increases defense by 2."
+    },
+    "exhaust" : false,
+    "expansion_set" : "twilightMarches",
+    "faith_cost" : 0,
+    "icon" : "shield.checkered",
+    "id" : "defender_blessing",
+    "name" : {
+      "en" : "Defender's Blessing",
+      "ru" : "Defender's Blessing"
+    },
+    "ownership" : "universal",
+    "rarity" : "rare",
+    "realm" : "prav"
   },
   {
-    "id": "guardian_seal",
-    "name": "Guardian Seal",
-    "name_ru": "Печать Стража",
-    "card_type": "special",
-    "rarity": "legendary",
-    "description": "Ancient seal of the Leshy Guardian. Shifts balance towards light.",
-    "description_ru": "Древняя печать Лешего-Стража. Сдвигает баланс к свету.",
-    "icon": "seal",
-    "expansion_set": "twilightMarches",
-    "ownership": "universal",
-    "abilities": [
+    "abilities" : [
       {
-        "id": "seal_blessing",
-        "name": "Guardian's Blessing",
-        "name_ru": "Благословение Стража",
-        "description": "Shift balance towards light",
-        "description_ru": "Сдвиг баланса к свету",
-        "effect": {"shift_balance": {"towards": "light", "amount": 3}}
+        "description" : "Shift balance towards light",
+        "effect" : {
+          "custom" : ""
+        },
+        "id" : "seal_blessing",
+        "name" : "Guardian's Blessing"
       }
     ],
-    "faith_cost": 2,
-    "balance": "light",
-    "power": null,
-    "defense": null,
-    "health": null,
-    "realm": "prav"
+    "balance" : "light",
+    "card_type" : "special",
+    "description" : {
+      "en" : "Ancient seal of the Leshy Guardian. Shifts balance towards light.",
+      "ru" : "Ancient seal of the Leshy Guardian. Shifts balance towards light."
+    },
+    "exhaust" : false,
+    "expansion_set" : "twilightMarches",
+    "faith_cost" : 2,
+    "icon" : "seal",
+    "id" : "guardian_seal",
+    "name" : {
+      "en" : "Guardian Seal",
+      "ru" : "Guardian Seal"
+    },
+    "ownership" : "universal",
+    "rarity" : "legendary",
+    "realm" : "prav"
   },
   {
-    "id": "ancient_power",
-    "name": "Ancient Power",
-    "name_ru": "Древняя Сила",
-    "card_type": "special",
-    "rarity": "legendary",
-    "description": "Raw power of the forest guardian. Permanently increases strength.",
-    "description_ru": "Первозданная сила лесного стража. Навсегда увеличивает силу.",
-    "icon": "bolt",
-    "expansion_set": "twilightMarches",
-    "ownership": "universal",
-    "abilities": [
+    "abilities" : [
       {
-        "id": "ancient_might",
-        "name": "Ancient Might",
-        "name_ru": "Древняя Мощь",
-        "description": "+1 permanent power",
-        "description_ru": "+1 к силе навсегда",
-        "effect": {"permanent_stat": {"stat": "power", "amount": 1}}
+        "description" : "Heal 5, gain 1 faith",
+        "effect" : {
+          "heal" : 5
+        },
+        "id" : "anchor_heal",
+        "name" : "Anchor's Blessing"
       }
     ],
-    "faith_cost": 3,
-    "balance": "neutral",
-    "power": 3,
-    "defense": null,
-    "health": null,
-    "realm": "prav"
+    "balance" : "light",
+    "card_type" : "special",
+    "description" : {
+      "en" : "Draw from the anchors' power. Heal 5 and gain 1 faith.",
+      "ru" : "Draw from the anchors' power. Heal 5 and gain 1 faith."
+    },
+    "exhaust" : false,
+    "expansion_set" : "twilightMarches",
+    "faith_cost" : 0,
+    "icon" : "anchor",
+    "id" : "anchor_power",
+    "name" : {
+      "en" : "Anchor's Power",
+      "ru" : "Anchor's Power"
+    },
+    "ownership" : "universal",
+    "rarity" : "rare",
+    "realm" : "prav"
   },
   {
-    "id": "shadow_fang",
-    "name": "Shadow Fang",
-    "name_ru": "Теневой Клык",
-    "card_type": "special",
-    "rarity": "rare",
-    "description": "A fang torn from a shadow wolf. Strikes with dark speed.",
-    "description_ru": "Клык, вырванный у теневого волка. Бьёт с тёмной скоростью.",
-    "icon": "bolt.slash",
-    "expansion_set": "twilightMarches",
-    "ownership": "universal",
-    "abilities": [
+    "abilities" : [
       {
-        "id": "shadow_strike",
-        "name": "Shadow Strike",
-        "name_ru": "Теневой Удар",
-        "description": "Deal 6 damage",
-        "description_ru": "Нанести 6 урона",
-        "effect": {"damage": {"amount": 6, "type": "physical"}}
+        "description" : "+1 permanent power",
+        "effect" : {
+          "custom" : ""
+        },
+        "id" : "ancient_might",
+        "name" : "Ancient Might"
       }
     ],
-    "faith_cost": 0,
-    "balance": "dark",
-    "power": 6,
-    "defense": null,
-    "health": null,
-    "realm": "nav"
+    "balance" : "neutral",
+    "card_type" : "special",
+    "description" : {
+      "en" : "Raw power of the forest guardian. Permanently increases strength.",
+      "ru" : "Raw power of the forest guardian. Permanently increases strength."
+    },
+    "exhaust" : false,
+    "expansion_set" : "twilightMarches",
+    "faith_cost" : 3,
+    "icon" : "bolt",
+    "id" : "ancient_power",
+    "name" : {
+      "en" : "Ancient Power",
+      "ru" : "Ancient Power"
+    },
+    "ownership" : "universal",
+    "power" : 3,
+    "rarity" : "legendary",
+    "realm" : "prav"
   },
   {
-    "id": "cursed_plate",
-    "name": "Cursed Plate",
-    "name_ru": "Проклятая Пластина",
-    "card_type": "special",
-    "rarity": "uncommon",
-    "description": "A piece of the cursed knight's armor. Still holds protective power.",
-    "description_ru": "Часть доспехов проклятого рыцаря. Всё ещё хранит защитную силу.",
-    "icon": "shield.lefthalf.filled",
-    "expansion_set": "twilightMarches",
-    "ownership": "universal",
-    "abilities": [
+    "abilities" : [
       {
-        "id": "cursed_defense",
-        "name": "Cursed Defense",
-        "name_ru": "Проклятая Защита",
-        "description": "Gain 4 defense",
-        "description_ru": "Получить 4 защиты",
-        "effect": {"temporary_stat": {"stat": "defense", "amount": 4, "duration": 1}}
+        "description" : "Draw 2 cards",
+        "effect" : {
+          "custom" : ""
+        },
+        "id" : "draw_cards",
+        "name" : "Ancient Wisdom"
       }
     ],
-    "faith_cost": 0,
-    "balance": "dark",
-    "power": null,
-    "defense": 4,
-    "health": null,
-    "realm": "nav"
+    "balance" : "dark",
+    "card_type" : "special",
+    "description" : {
+      "en" : "Dark wisdom from the swamp witch. Draw 2 cards.",
+      "ru" : "Dark wisdom from the swamp witch. Draw 2 cards."
+    },
+    "exhaust" : false,
+    "expansion_set" : "twilightMarches",
+    "faith_cost" : 1,
+    "icon" : "book.closed",
+    "id" : "witch_knowledge",
+    "name" : {
+      "en" : "Witch's Knowledge",
+      "ru" : "Witch's Knowledge"
+    },
+    "ownership" : "universal",
+    "rarity" : "uncommon",
+    "realm" : "nav"
   },
   {
-    "id": "sorcerers_tome",
-    "name": "Sorcerer's Tome",
-    "name_ru": "Фолиант Колдуна",
-    "card_type": "special",
-    "rarity": "rare",
-    "description": "A book of forbidden knowledge. Grants dark wisdom and insight.",
-    "description_ru": "Книга запретных знаний. Дарует тёмную мудрость и прозрение.",
-    "icon": "book.fill",
-    "expansion_set": "twilightMarches",
-    "ownership": "universal",
-    "abilities": [
+    "abilities" : [
       {
-        "id": "forbidden_knowledge",
-        "name": "Forbidden Knowledge",
-        "name_ru": "Запретные Знания",
-        "description": "Wisdom 5 + Draw 1 card",
-        "description_ru": "Мудрость 5 + Взять 1 карту",
-        "effect": {"wisdom": 5, "draw_cards": 1}
+        "description" : "+3 defense for battle",
+        "effect" : {
+          "custom" : ""
+        },
+        "id" : "mountain_armor",
+        "name" : "Stone Skin"
       }
     ],
-    "faith_cost": 1,
-    "balance": "dark",
-    "power": null,
-    "defense": null,
-    "health": null,
-    "realm": "prav"
+    "balance" : "neutral",
+    "card_type" : "special",
+    "defense" : 3,
+    "description" : {
+      "en" : "Reward from the Mountain Spirit. +3 defense for one battle.",
+      "ru" : "Reward from the Mountain Spirit. +3 defense for one battle."
+    },
+    "exhaust" : false,
+    "expansion_set" : "twilightMarches",
+    "faith_cost" : 0,
+    "icon" : "mountain.2",
+    "id" : "mountain_blessing",
+    "name" : {
+      "en" : "Mountain Blessing",
+      "ru" : "Mountain Blessing"
+    },
+    "ownership" : "universal",
+    "rarity" : "rare",
+    "realm" : "yav"
   },
   {
-    "id": "void_shard",
-    "name": "Void Shard",
-    "name_ru": "Осколок Пустоты",
-    "card_type": "special",
-    "rarity": "epic",
-    "description": "A fragment of the void between worlds. Powerful but corrupting.",
-    "description_ru": "Фрагмент пустоты между мирами. Могущественный, но развращающий.",
-    "icon": "diamond.fill",
-    "expansion_set": "twilightMarches",
-    "ownership": "universal",
-    "abilities": [
+    "abilities" : [
       {
-        "id": "void_blast",
-        "name": "Void Blast",
-        "name_ru": "Взрыв Пустоты",
-        "description": "Deal 4 damage, lose 1 faith",
-        "description_ru": "Нанести 4 урона, потерять 1 веру",
-        "effect": {"damage": {"amount": 4, "type": "dark"}, "faith": -1}
+        "description" : "Deal 6 damage",
+        "effect" : {
+          "damage" : {
+            "amount" : 6,
+            "type" : "physical"
+          }
+        },
+        "id" : "shadow_strike",
+        "name" : "Shadow Strike"
       }
     ],
-    "faith_cost": 0,
-    "balance": "dark",
-    "power": 4,
-    "defense": null,
-    "health": null,
-    "realm": "nav"
+    "balance" : "dark",
+    "card_type" : "special",
+    "description" : {
+      "en" : "A fang torn from a shadow wolf. Strikes with dark speed.",
+      "ru" : "A fang torn from a shadow wolf. Strikes with dark speed."
+    },
+    "exhaust" : false,
+    "expansion_set" : "twilightMarches",
+    "faith_cost" : 0,
+    "icon" : "bolt.slash",
+    "id" : "shadow_fang",
+    "name" : {
+      "en" : "Shadow Fang",
+      "ru" : "Shadow Fang"
+    },
+    "ownership" : "universal",
+    "power" : 6,
+    "rarity" : "rare",
+    "realm" : "nav"
   }
 ]

@@ -628,6 +628,7 @@ public final class ContentRegistry {
         for (id, hero) in pack.heroes {
             mergedHeroes[id] = hero
             heroRegistry.register(hero)
+            HeroRegistry.shared.register(hero)
         }
         #if DEBUG
         if !pack.heroes.isEmpty {

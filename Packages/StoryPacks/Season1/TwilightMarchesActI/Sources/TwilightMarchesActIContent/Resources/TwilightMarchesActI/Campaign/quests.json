@@ -1,188 +1,243 @@
- [
+[
   {
-    "id": "quest_main_act1",
-    "title": {
-      "en": "Path of the Defender",
-      "ru": "Путь Защитника"
+    "auto_start" : false,
+    "availability" : {
+      "forbidden_flags" : [
+
+      ],
+      "required_flags" : [
+
+      ]
     },
-    "description": {
-      "en": "The village is in danger. The Navi grows stronger each day. You must strengthen the three main anchors and protect the boundary between worlds.",
-      "ru": "Деревня в опасности. Навь усиливается с каждым днем. Вы должны укрепить три главных якоря и защитить границу между мирами."
+    "completion_rewards" : {
+      "balance_delta" : 15,
+      "card_ids" : [
+        "defender_blessing",
+        "anchor_power"
+      ],
+      "resource_changes" : {
+        "faith" : 20
+      },
+      "set_flags" : [
+        "act1_complete"
+      ]
     },
-    "objectives": [
+    "description" : {
+      "en" : "The village is in danger. The Navi grows stronger each day. You must strengthen the three main anchors and protect the boundary between worlds.",
+      "ru" : "Деревня в опасности. Навь усиливается с каждым днем. Вы должны укрепить три главных якоря и защитить границу между мирами."
+    },
+    "failure_penalties" : {
+      "balance_delta" : -20,
+      "card_ids" : [
+
+      ],
+      "resource_changes" : {
+
+      },
+      "set_flags" : [
+        "act1_failed"
+      ]
+    },
+    "id" : "quest_main_act1",
+    "objectives" : [
       {
-        "id": "obj_learn_anchors",
-        "description": {
-          "en": "Learn about the three main anchors from the village elder",
-          "ru": "Узнать о трех главных якорях от старосты"
+        "alternative_next_ids" : [
+
+        ],
+        "completion_condition" : {
+          "flag_set" : "main_quest_started"
         },
-        "hint": {
-          "en": "Visit the village and speak with the elder",
-          "ru": "Посетите деревню и поговорите со старостой"
+        "description" : {
+          "en" : "Learn about the three main anchors from the village elder",
+          "ru" : "Узнать о трех главных якорях от старосты"
         },
-        "completion_condition": {"flag_set": "main_quest_started"},
-        "target_value": 1,
-        "is_optional": false,
-        "next_objective_id": "obj_find_oak",
-        "alternative_next_ids": []
+        "hint" : {
+          "en" : "Visit the village and speak with the elder",
+          "ru" : "Посетите деревню и поговорите со старостой"
+        },
+        "id" : "obj_learn_anchors",
+        "is_optional" : false,
+        "next_objective_id" : "obj_find_oak",
+        "target_value" : 1
       },
       {
-        "id": "obj_find_oak",
-        "description": {
-          "en": "Find the Sacred Oak",
-          "ru": "Найти Священный Дуб"
+        "alternative_next_ids" : [
+
+        ],
+        "completion_condition" : {
+          "visit_region" : "oak"
         },
-        "hint": {
-          "en": "The Sacred Oak is located in the Oak region",
-          "ru": "Священный Дуб находится в регионе Дуба"
+        "description" : {
+          "en" : "Find the Sacred Oak",
+          "ru" : "Найти Священный Дуб"
         },
-        "completion_condition": {"visit_region": "oak"},
-        "target_value": 1,
-        "is_optional": false,
-        "next_objective_id": "obj_strengthen_oak",
-        "alternative_next_ids": []
+        "hint" : {
+          "en" : "The Sacred Oak is located in the Oak region",
+          "ru" : "Священный Дуб находится в регионе Дуба"
+        },
+        "id" : "obj_find_oak",
+        "is_optional" : false,
+        "next_objective_id" : "obj_strengthen_oak",
+        "target_value" : 1
       },
       {
-        "id": "obj_strengthen_oak",
-        "description": {
-          "en": "Strengthen the Oak or find an ally",
-          "ru": "Укрепить Дуб или найти союзника"
+        "alternative_next_ids" : [
+
+        ],
+        "completion_condition" : {
+          "flag_set" : "oak_strengthened"
         },
-        "hint": {
-          "en": "Use faith to strengthen the Sacred Oak's connection to the earth",
-          "ru": "Используйте веру, чтобы укрепить связь Священного Дуба с землей"
+        "description" : {
+          "en" : "Strengthen the Oak or find an ally",
+          "ru" : "Укрепить Дуб или найти союзника"
         },
-        "completion_condition": {"flag_set": "oak_strengthened"},
-        "target_value": 1,
-        "is_optional": false,
-        "next_objective_id": "obj_explore_breach",
-        "alternative_next_ids": []
+        "hint" : {
+          "en" : "Use faith to strengthen the Sacred Oak's connection to the earth",
+          "ru" : "Используйте веру, чтобы укрепить связь Священного Дуба с землей"
+        },
+        "id" : "obj_strengthen_oak",
+        "is_optional" : false,
+        "next_objective_id" : "obj_explore_breach",
+        "target_value" : 1
       },
       {
-        "id": "obj_explore_breach",
-        "description": {
-          "en": "Investigate the Navi breach in the Dark Lowland",
-          "ru": "Исследовать прорыв Нави в Чёрной Низине"
+        "alternative_next_ids" : [
+
+        ],
+        "completion_condition" : {
+          "visit_region" : "dark_lowland"
         },
-        "hint": {
-          "en": "Travel to the Dark Lowland through the Breach region",
-          "ru": "Отправляйтесь в Тёмную Низину через регион Разлома"
+        "description" : {
+          "en" : "Investigate the Navi breach in the Dark Lowland",
+          "ru" : "Исследовать прорыв Нави в Чёрной Низине"
         },
-        "completion_condition": {"visit_region": "dark_lowland"},
-        "target_value": 1,
-        "is_optional": false,
-        "next_objective_id": "obj_defeat_guardian",
-        "alternative_next_ids": []
+        "hint" : {
+          "en" : "Travel to the Dark Lowland through the Breach region",
+          "ru" : "Отправляйтесь в Тёмную Низину через регион Разлома"
+        },
+        "id" : "obj_explore_breach",
+        "is_optional" : false,
+        "next_objective_id" : "obj_defeat_guardian",
+        "target_value" : 1
       },
       {
-        "id": "obj_defeat_guardian",
-        "description": {
-          "en": "Defeat the Leshy Guardian",
-          "ru": "Победить Лешего-Хранителя"
+        "alternative_next_ids" : [
+
+        ],
+        "completion_condition" : {
+          "flag_set" : "leshy_guardian_defeated"
         },
-        "hint": {
-          "en": "The Leshy Guardian awaits in the Dark Lowland. Prepare well before facing him.",
-          "ru": "Леший-Хранитель ожидает в Тёмной Низине. Хорошо подготовьтесь перед встречей с ним."
+        "description" : {
+          "en" : "Defeat the Leshy Guardian",
+          "ru" : "Победить Лешего-Хранителя"
         },
-        "completion_condition": {"flag_set": "leshy_guardian_defeated"},
-        "target_value": 1,
-        "is_optional": false,
-        "next_objective_id": null,
-        "alternative_next_ids": []
+        "hint" : {
+          "en" : "The Leshy Guardian awaits in the Dark Lowland. Prepare well before facing him.",
+          "ru" : "Леший-Хранитель ожидает в Тёмной Низине. Хорошо подготовьтесь перед встречей с ним."
+        },
+        "id" : "obj_defeat_guardian",
+        "is_optional" : false,
+        "target_value" : 1
       }
     ],
-    "quest_kind": "main",
-    "availability": {
-      "required_flags": [],
-      "forbidden_flags": [],
-      "min_pressure": null,
-      "max_pressure": null,
-      "min_balance": null,
-      "max_balance": null,
-      "region_states": null,
-      "region_ids": null
-    },
-    "auto_start": false,
-    "completion_rewards": {
-      "resource_changes": {"faith": 20},
-      "set_flags": ["act1_complete"],
-      "card_ids": ["defender_blessing", "anchor_power"],
-      "balance_delta": 15
-    },
-    "failure_penalties": {
-      "resource_changes": {},
-      "set_flags": ["act1_failed"],
-      "card_ids": [],
-      "balance_delta": -20
+    "quest_kind" : "main",
+    "title" : {
+      "en" : "Path of the Defender",
+      "ru" : "Путь Защитника"
     }
   },
   {
-    "id": "quest_lost_child",
-    "title": {
-      "en": "Crying in the Forest",
-      "ru": "Плач в Лесу"
+    "auto_start" : false,
+    "availability" : {
+      "forbidden_flags" : [
+        "child_saved"
+      ],
+      "region_ids" : [
+        "forest",
+        "swamp"
+      ],
+      "region_states" : [
+        "borderland",
+        "breach"
+      ],
+      "required_flags" : [
+
+      ]
     },
-    "description": {
-      "en": "You hear a child's cry in the thicket. The locals say a child went missing three days ago.",
-      "ru": "Вы слышите детский плач в чаще. Местные говорят, что ребенок пропал три дня назад."
+    "completion_rewards" : {
+      "balance_delta" : 15,
+      "card_ids" : [
+
+      ],
+      "resource_changes" : {
+        "faith" : 5
+      },
+      "set_flags" : [
+        "child_saved_reward"
+      ]
     },
-    "objectives": [
+    "description" : {
+      "en" : "You hear a child's cry in the thicket. The locals say a child went missing three days ago.",
+      "ru" : "Вы слышите детский плач в чаще. Местные говорят, что ребенок пропал три дня назад."
+    },
+    "failure_penalties" : {
+      "balance_delta" : 0,
+      "card_ids" : [
+
+      ],
+      "resource_changes" : {
+
+      },
+      "set_flags" : [
+
+      ]
+    },
+    "id" : "quest_lost_child",
+    "objectives" : [
       {
-        "id": "obj_find_child",
-        "description": {
-          "en": "Find the lost child in the forest",
-          "ru": "Найти потерянного ребенка в лесу"
+        "alternative_next_ids" : [
+
+        ],
+        "completion_condition" : {
+          "flag_set" : "child_found"
         },
-        "hint": {
-          "en": "Search the forest carefully",
-          "ru": "Тщательно обыщите лес"
+        "description" : {
+          "en" : "Find the lost child in the forest",
+          "ru" : "Найти потерянного ребенка в лесу"
         },
-        "completion_condition": {"flag_set": "child_found"},
-        "target_value": 1,
-        "is_optional": false,
-        "next_objective_id": "obj_return_child",
-        "alternative_next_ids": []
+        "hint" : {
+          "en" : "Search the forest carefully",
+          "ru" : "Тщательно обыщите лес"
+        },
+        "id" : "obj_find_child",
+        "is_optional" : false,
+        "next_objective_id" : "obj_return_child",
+        "target_value" : 1
       },
       {
-        "id": "obj_return_child",
-        "description": {
-          "en": "Return the child safely to the village",
-          "ru": "Вернуть ребенка в деревню в безопасности"
+        "alternative_next_ids" : [
+
+        ],
+        "completion_condition" : {
+          "flag_set" : "child_saved"
         },
-        "hint": {
-          "en": "Bring the child back to the village",
-          "ru": "Отведите ребенка обратно в деревню"
+        "description" : {
+          "en" : "Return the child safely to the village",
+          "ru" : "Вернуть ребенка в деревню в безопасности"
         },
-        "completion_condition": {"flag_set": "child_saved"},
-        "target_value": 1,
-        "is_optional": false,
-        "next_objective_id": null,
-        "alternative_next_ids": []
+        "hint" : {
+          "en" : "Bring the child back to the village",
+          "ru" : "Отведите ребенка обратно в деревню"
+        },
+        "id" : "obj_return_child",
+        "is_optional" : false,
+        "target_value" : 1
       }
     ],
-    "quest_kind": "side",
-    "availability": {
-      "required_flags": [],
-      "forbidden_flags": ["child_saved"],
-      "min_pressure": null,
-      "max_pressure": null,
-      "min_balance": null,
-      "max_balance": null,
-      "region_states": ["borderland", "breach"],
-      "region_ids": ["forest", "swamp"]
-    },
-    "auto_start": false,
-    "completion_rewards": {
-      "resource_changes": {"faith": 5},
-      "set_flags": ["child_saved_reward"],
-      "card_ids": [],
-      "balance_delta": 15
-    },
-    "failure_penalties": {
-      "resource_changes": {},
-      "set_flags": [],
-      "card_ids": [],
-      "balance_delta": 0
+    "quest_kind" : "side",
+    "title" : {
+      "en" : "Crying in the Forest",
+      "ru" : "Плач в Лесу"
     }
   }
 ]

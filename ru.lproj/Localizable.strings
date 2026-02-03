@@ -19,6 +19,7 @@
 "phase.player.turn" = "Ход игрока";
 "phase.enemy.turn" = "Ход врага";
 "phase.end.turn" = "Конец хода";
+"phase.combat" = "Бой";
 
 // MARK: - Card Types
 "card.type.character" = "Персонаж";
@@ -58,6 +59,7 @@
 "rules.phase.player.turn" = "Ваш ход! У вас есть 3 действия: атакуйте (1 действие), играйте карты (1 действие), используйте способности. Враг не атакует в эту фазу.";
 "rules.phase.enemy.turn" = "Ход врага! Враг автоматически атакует вас. Подготовьтесь к урону.";
 "rules.phase.endturn" = "Сбросьте сыгранные карты и доберите до размера руки.";
+"rules.phase.combat" = "Бросьте кости и используйте способности, чтобы победить врагов.";
 
 "rules.cards.title" = "Типы карт";
 "rules.cards.content" = "Оружие усиливает атаку, Заклинания дают магические эффекты, Броня защищает от урона, Предметы дают особые способности, а Благословения предоставляют временные бонусы. Стройте колоду с умом!";
@@ -353,7 +355,6 @@
 // Интерфейс игры
 "ui.menu.button" = "Меню";
 "ui.exit" = "Выход";
-"ui.result" = "Результат: %d";
 "ui.progress.saved" = "Ваш прогресс успешно сохранён.";
 
 // Победа/Поражение
@@ -1106,3 +1107,40 @@
 "combat_phase_next_round" = "Раунд %@";
 "combat_feedback_weak" = "СЛАБОСТЬ!";
 "combat_feedback_resist" = "БЛОК";
+
+// MARK: - SpriteKit Combat (EchoScenes)
+"encounter.log.player.attack" = "Вы наносите %d урона";
+"encounter.log.player.missed" = "Промах!";
+"encounter.log.enemy.damage" = "Враг наносит %d урона";
+"encounter.log.enemy.blocked" = "Атака врага заблокирована!";
+"encounter.log.enemy.heals" = "Враг восстанавливает %d здоровья";
+"encounter.log.enemy.ritual" = "Ритуал врага (%@)";
+"encounter.log.enemy.defends" = "Враг защищается";
+"encounter.log.no.energy" = "Недостаточно энергии!";
+"encounter.log.round.start" = "— Раунд %d —";
+"encounter.log.player.influence" = "Влияние: %d урона воле";
+"encounter.log.influence.impossible" = "Этого врага нельзя убедить";
+"encounter.log.track.switch" = "Переключение на %@";
+"encounter.intent.ritual" = "Ритуал";
+"encounter.intent.defend" = "Защита";
+"encounter.intent.buff" = "Усиление";
+"encounter.intent.debuff" = "Ослабление";
+"encounter.intent.prepare" = "Подготовка";
+"encounter.phase.label" = "Фаза: %@";
+"encounter.result.rounds" = "Раундов: %d";
+"encounter.result.hp" = "Здоровье: %d";
+"encounter.result.enemy.hp" = "Здоровье врага: %d";
+"combat.discard.title" = "Сброс (%d)";
+"combat.exhaust.title" = "Истощённые (%d)";
+"combat.pile.empty" = "Пусто";
+"combat.tap.to.close" = "Нажмите, чтобы закрыть";
+"combat.card.cost" = "Стоимость: %d ⚡";
+"combat.keyword.exhaust" = "Истощение";
+"combat.fate.defense.label" = "Защита";
+"combat.enemy.turn" = "ХОД ВРАГА";
+"combat.round.start" = "Раунд %d";
+"combat.fate.crit" = "КРИТ";
+"combat.fate.tap" = "Нажмите, чтобы открыть";
+"combat.card.deal.damage" = "Нанести %d урона";
+"combat.card.heal" = "Исцелить %d HP";
+"combat.card.draw" = "Взять %d карт";
