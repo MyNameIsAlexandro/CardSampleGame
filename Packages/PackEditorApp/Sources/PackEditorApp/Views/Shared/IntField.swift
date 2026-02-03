@@ -12,7 +12,7 @@ struct IntField: View {
             TextField(label, value: $value, format: .number)
                 .multilineTextAlignment(.trailing)
                 .frame(width: 80)
-            Stepper("", value: $value, in: range ?? Int.min...Int.max)
+            Stepper("", value: $value, in: range ?? -999_999...999_999)
                 .labelsHidden()
         }
     }

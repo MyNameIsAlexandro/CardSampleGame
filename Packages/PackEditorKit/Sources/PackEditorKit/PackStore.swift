@@ -82,16 +82,43 @@ public class PackStore {
 
     public func entityName(for id: String, in category: ContentCategory) -> String {
         switch category {
-        case .enemies: return enemies[id]?.name.displayString ?? id
-        case .cards: return cards[id]?.name.displayString ?? id
-        case .events: return events[id]?.title.displayString ?? id
-        case .regions: return regions[id]?.title.displayString ?? id
-        case .heroes: return heroes[id]?.name.displayString ?? id
-        case .fateCards: return fateCards[id]?.name ?? id
-        case .quests: return quests[id]?.title.displayString ?? id
-        case .behaviors: return id
-        case .anchors: return anchors[id]?.title.displayString ?? id
-        case .balance: return "Balance Configuration"
+        case .enemies:
+            guard let entity = enemies[id] else { return id }
+            return safeDisplayString(entity.name) ?? id
+        case .cards:
+            guard let entity = cards[id] else { return id }
+            return safeDisplayString(entity.name) ?? id
+        case .events:
+            guard let entity = events[id] else { return id }
+            return safeDisplayString(entity.title) ?? id
+        case .regions:
+            guard let entity = regions[id] else { return id }
+            return safeDisplayString(entity.title) ?? id
+        case .heroes:
+            guard let entity = heroes[id] else { return id }
+            return safeDisplayString(entity.name) ?? id
+        case .fateCards:
+            return fateCards[id]?.name ?? id
+        case .quests:
+            guard let entity = quests[id] else { return id }
+            return safeDisplayString(entity.title) ?? id
+        case .behaviors:
+            return id
+        case .anchors:
+            guard let entity = anchors[id] else { return id }
+            return safeDisplayString(entity.title) ?? id
+        case .balance:
+            return "Balance Configuration"
+        }
+    }
+
+    /// Safe accessor for LocalizableText display string that catches any potential errors
+    private func safeDisplayString(_ text: LocalizableText) -> String? {
+        switch text {
+        case .inline(let localized):
+            return localized.en.isEmpty ? nil : localized.en
+        case .key(let stringKey):
+            return stringKey.rawValue.isEmpty ? nil : stringKey.rawValue
         }
     }
 

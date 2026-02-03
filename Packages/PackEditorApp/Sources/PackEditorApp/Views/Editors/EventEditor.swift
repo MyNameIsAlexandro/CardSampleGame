@@ -32,21 +32,22 @@ struct EventEditor: View {
             }
 
             Section("Choices (\(event.choices.count))") {
-                ForEach(event.choices.indices, id: \.self) { index in
-                    DisclosureGroup(event.choices[index].label.displayString) {
-                        TextField("ID", text: $event.choices[index].id)
+                ForEach(Array(event.choices.enumerated()), id: \.element.id) { index, choice in
+                    DisclosureGroup(choice.label.displayString) {
+                        TextField("ID", text: choiceIdBinding(at: index))
 
-                        LocalizedTextField(label: "Label", text: $event.choices[index].label)
+                        LocalizedTextField(label: "Label", text: choiceLabelBinding(at: index))
 
                         LocalizedTextField(label: "Tooltip", text: tooltipBinding(at: index))
 
                         LabeledContent("Requirements",
-                                       value: String(describing: event.choices[index].requirements ?? "None" as Any))
+                                       value: String(describing: choice.requirements ?? "None" as Any))
 
                         LabeledContent("Consequences",
-                                       value: String(describing: event.choices[index].consequences))
+                                       value: String(describing: choice.consequences))
 
                         Button(role: .destructive) {
+                            guard index < event.choices.count else { return }
                             event.choices.remove(at: index)
                         } label: {
                             Label("Remove Choice", systemImage: "minus.circle")
@@ -57,7 +58,7 @@ struct EventEditor: View {
                 Button {
                     event.choices.append(
                         ChoiceDefinition(
-                            id: "choice_new",
+                            id: "choice_new_\(UUID().uuidString.prefix(4))",
                             label: .inline(LocalizedString(en: "New Choice", ru: "Новый выбор")),
                             consequences: ChoiceConsequences()
                         )
@@ -78,13 +79,45 @@ struct EventEditor: View {
 
     private func tooltipBinding(at index: Int) -> Binding<LocalizableText> {
         Binding(
-            get: { event.choices[index].tooltip ?? .inline(LocalizedString(en: "", ru: "")) },
+            get: {
+                guard index < event.choices.count else { return .inline(LocalizedString(en: "", ru: "")) }
+                return event.choices[index].tooltip ?? .inline(LocalizedString(en: "", ru: ""))
+            },
             set: { newValue in
+                guard index < event.choices.count else { return }
                 if case .inline(let ls) = newValue, ls.en.isEmpty && ls.ru.isEmpty {
                     event.choices[index].tooltip = nil
                 } else {
                     event.choices[index].tooltip = newValue
                 }
+            }
+        )
+    }
+
+    // MARK: - Safe Choice Bindings
+
+    private func choiceIdBinding(at index: Int) -> Binding<String> {
+        Binding(
+            get: {
+                guard index < event.choices.count else { return "" }
+                return event.choices[index].id
+            },
+            set: { newValue in
+                guard index < event.choices.count else { return }
+                event.choices[index].id = newValue
+            }
+        )
+    }
+
+    private func choiceLabelBinding(at index: Int) -> Binding<LocalizableText> {
+        Binding(
+            get: {
+                guard index < event.choices.count else { return .inline(LocalizedString(en: "", ru: "")) }
+                return event.choices[index].label
+            },
+            set: { newValue in
+                guard index < event.choices.count else { return }
+                event.choices[index].label = newValue
             }
         )
     }

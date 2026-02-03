@@ -54,13 +54,14 @@ struct CardEditor: View {
             }
 
             Section("Abilities (\(card.abilities.count))") {
-                ForEach(card.abilities.indices, id: \.self) { index in
-                    DisclosureGroup(card.abilities[index].name.isEmpty ? "Ability \(index)" : card.abilities[index].name) {
-                        TextField("ID", text: $card.abilities[index].id)
-                        TextField("Name", text: $card.abilities[index].name)
-                        TextField("Description", text: $card.abilities[index].description)
-                        AbilityEffectEditor(effect: $card.abilities[index].effect)
+                ForEach(Array(card.abilities.enumerated()), id: \.element.id) { index, ability in
+                    DisclosureGroup(ability.name.isEmpty ? "Ability \(index)" : ability.name) {
+                        TextField("ID", text: abilityBinding(at: index, keyPath: \.id))
+                        TextField("Name", text: abilityBinding(at: index, keyPath: \.name))
+                        TextField("Description", text: abilityBinding(at: index, keyPath: \.description))
+                        AbilityEffectEditor(effect: abilityEffectBinding(at: index))
                         Button(role: .destructive) {
+                            guard index < card.abilities.count else { return }
                             card.abilities.remove(at: index)
                         } label: {
                             Label("Remove Ability", systemImage: "minus.circle.fill")
@@ -69,7 +70,7 @@ struct CardEditor: View {
                     }
                 }
                 Button {
-                    card.abilities.append(CardAbility(id: "new_ability", name: "New Ability", description: "", effect: .custom("none")))
+                    card.abilities.append(CardAbility(id: "new_ability_\(UUID().uuidString.prefix(4))", name: "New Ability", description: "", effect: .custom("none")))
                 } label: {
                     Label("Add Ability", systemImage: "plus.circle")
                 }
@@ -126,6 +127,34 @@ struct CardEditor: View {
         Binding(
             get: { card.curseType?.rawValue ?? "" },
             set: { card.curseType = $0.isEmpty ? nil : CurseType(rawValue: $0) }
+        )
+    }
+
+    // MARK: - Safe Ability Bindings
+
+    private func abilityBinding(at index: Int, keyPath: WritableKeyPath<CardAbility, String>) -> Binding<String> {
+        Binding(
+            get: {
+                guard index < card.abilities.count else { return "" }
+                return card.abilities[index][keyPath: keyPath]
+            },
+            set: { newValue in
+                guard index < card.abilities.count else { return }
+                card.abilities[index][keyPath: keyPath] = newValue
+            }
+        )
+    }
+
+    private func abilityEffectBinding(at index: Int) -> Binding<AbilityEffect> {
+        Binding(
+            get: {
+                guard index < card.abilities.count else { return .custom("none") }
+                return card.abilities[index].effect
+            },
+            set: { newValue in
+                guard index < card.abilities.count else { return }
+                card.abilities[index].effect = newValue
+            }
         )
     }
 }

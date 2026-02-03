@@ -29,18 +29,21 @@ struct FateCardEditor: View {
             }
 
             Section {
-                ForEach(card.resonanceRules.indices, id: \.self) { index in
+                ForEach(Array(card.resonanceRules.enumerated()), id: \.offset) { index, _ in
                     HStack {
                         VStack {
-                            Picker("Zone", selection: $card.resonanceRules[index].zone) {
+                            Picker("Zone", selection: resonanceZoneBinding(at: index)) {
                                 ForEach(ResonanceZone.allCases, id: \.self) { zone in
                                     Text(zone.rawValue).tag(zone)
                                 }
                             }
-                            IntField(label: "Modify Value", value: $card.resonanceRules[index].modifyValue)
+                            IntField(label: "Modify Value", value: resonanceModifyValueBinding(at: index))
                             TextField("Visual Effect", text: optionalString(forResonanceRuleAt: index))
                         }
-                        Button(role: .destructive) { card.resonanceRules.remove(at: index) } label: {
+                        Button(role: .destructive) {
+                            guard index < card.resonanceRules.count else { return }
+                            card.resonanceRules.remove(at: index)
+                        } label: {
                             Image(systemName: "minus.circle.fill")
                         }.buttonStyle(.plain).foregroundStyle(.red)
                     }
@@ -55,16 +58,19 @@ struct FateCardEditor: View {
             }
 
             Section {
-                ForEach(card.onDrawEffects.indices, id: \.self) { index in
+                ForEach(Array(card.onDrawEffects.enumerated()), id: \.offset) { index, _ in
                     HStack {
                         VStack {
-                            Picker("Type", selection: $card.onDrawEffects[index].type) {
+                            Picker("Type", selection: drawEffectTypeBinding(at: index)) {
                                 Text("shiftResonance").tag(FateEffectType.shiftResonance)
                                 Text("shiftTension").tag(FateEffectType.shiftTension)
                             }
-                            IntField(label: "Value", value: $card.onDrawEffects[index].value)
+                            IntField(label: "Value", value: drawEffectValueBinding(at: index))
                         }
-                        Button(role: .destructive) { card.onDrawEffects.remove(at: index) } label: {
+                        Button(role: .destructive) {
+                            guard index < card.onDrawEffects.count else { return }
+                            card.onDrawEffects.remove(at: index)
+                        } label: {
                             Image(systemName: "minus.circle.fill")
                         }.buttonStyle(.plain).foregroundStyle(.red)
                     }
@@ -81,13 +87,16 @@ struct FateCardEditor: View {
             Section {
                 Toggle("Has Choice Options", isOn: hasChoiceOptions)
                 if let choices = card.choiceOptions {
-                    ForEach(choices.indices, id: \.self) { index in
+                    ForEach(Array(choices.enumerated()), id: \.offset) { index, _ in
                         HStack {
                             VStack {
                                 TextField("Label", text: choiceLabel(at: index))
                                 TextField("Effect", text: choiceEffect(at: index))
                             }
-                            Button(role: .destructive) { card.choiceOptions?.remove(at: index) } label: {
+                            Button(role: .destructive) {
+                                guard let count = card.choiceOptions?.count, index < count else { return }
+                                card.choiceOptions?.remove(at: index)
+                            } label: {
                                 Image(systemName: "minus.circle.fill")
                             }.buttonStyle(.plain).foregroundStyle(.red)
                         }
@@ -154,8 +163,14 @@ struct FateCardEditor: View {
     /// Binding for a resonance rule's optional visualEffect at a given index.
     private func optionalString(forResonanceRuleAt index: Int) -> Binding<String> {
         Binding<String>(
-            get: { card.resonanceRules[index].visualEffect ?? "" },
-            set: { card.resonanceRules[index].visualEffect = $0.isEmpty ? nil : $0 }
+            get: {
+                guard index < card.resonanceRules.count else { return "" }
+                return card.resonanceRules[index].visualEffect ?? ""
+            },
+            set: {
+                guard index < card.resonanceRules.count else { return }
+                card.resonanceRules[index].visualEffect = $0.isEmpty ? nil : $0
+            }
         )
     }
 
@@ -170,16 +185,84 @@ struct FateCardEditor: View {
     /// Binding for a choice option's label at a given index.
     private func choiceLabel(at index: Int) -> Binding<String> {
         Binding<String>(
-            get: { card.choiceOptions?[index].label ?? "" },
-            set: { card.choiceOptions?[index].label = $0 }
+            get: {
+                guard let choices = card.choiceOptions, index < choices.count else { return "" }
+                return choices[index].label
+            },
+            set: {
+                guard card.choiceOptions != nil, index < (card.choiceOptions?.count ?? 0) else { return }
+                card.choiceOptions?[index].label = $0
+            }
         )
     }
 
     /// Binding for a choice option's effect at a given index.
     private func choiceEffect(at index: Int) -> Binding<String> {
         Binding<String>(
-            get: { card.choiceOptions?[index].effect ?? "" },
-            set: { card.choiceOptions?[index].effect = $0 }
+            get: {
+                guard let choices = card.choiceOptions, index < choices.count else { return "" }
+                return choices[index].effect
+            },
+            set: {
+                guard card.choiceOptions != nil, index < (card.choiceOptions?.count ?? 0) else { return }
+                card.choiceOptions?[index].effect = $0
+            }
+        )
+    }
+
+    // MARK: - Safe Resonance Rule Bindings
+
+    private func resonanceZoneBinding(at index: Int) -> Binding<ResonanceZone> {
+        Binding(
+            get: {
+                guard index < card.resonanceRules.count else { return .yav }
+                return card.resonanceRules[index].zone
+            },
+            set: { newValue in
+                guard index < card.resonanceRules.count else { return }
+                card.resonanceRules[index].zone = newValue
+            }
+        )
+    }
+
+    private func resonanceModifyValueBinding(at index: Int) -> Binding<Int> {
+        Binding(
+            get: {
+                guard index < card.resonanceRules.count else { return 0 }
+                return card.resonanceRules[index].modifyValue
+            },
+            set: { newValue in
+                guard index < card.resonanceRules.count else { return }
+                card.resonanceRules[index].modifyValue = newValue
+            }
+        )
+    }
+
+    // MARK: - Safe Draw Effect Bindings
+
+    private func drawEffectTypeBinding(at index: Int) -> Binding<FateEffectType> {
+        Binding(
+            get: {
+                guard index < card.onDrawEffects.count else { return .shiftResonance }
+                return card.onDrawEffects[index].type
+            },
+            set: { newValue in
+                guard index < card.onDrawEffects.count else { return }
+                card.onDrawEffects[index].type = newValue
+            }
+        )
+    }
+
+    private func drawEffectValueBinding(at index: Int) -> Binding<Int> {
+        Binding(
+            get: {
+                guard index < card.onDrawEffects.count else { return 0 }
+                return card.onDrawEffects[index].value
+            },
+            set: { newValue in
+                guard index < card.onDrawEffects.count else { return }
+                card.onDrawEffects[index].value = newValue
+            }
         )
     }
 }

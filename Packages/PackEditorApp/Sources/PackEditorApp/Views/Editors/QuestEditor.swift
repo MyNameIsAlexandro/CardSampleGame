@@ -31,22 +31,29 @@ struct QuestEditor: View {
             }
 
             Section("Objectives (\(quest.objectives.count))") {
-                ForEach(quest.objectives.indices, id: \.self) { index in
-                    DisclosureGroup(quest.objectives[index].id) {
-                        TextField("ID", text: $quest.objectives[index].id)
-                        LocalizedTextField(label: "Description", text: $quest.objectives[index].description)
-                        if let hint = quest.objectives[index].hint {
+                ForEach(Array(quest.objectives.enumerated()), id: \.element.id) { index, objective in
+                    DisclosureGroup(objective.id) {
+                        TextField("ID", text: objectiveBinding(at: index, keyPath: \.id))
+                        LocalizedTextField(label: "Description", text: objectiveLocalizedBinding(at: index, keyPath: \.description))
+                        if let hint = objective.hint {
                             LabeledContent("Hint", value: hint.displayString)
                         }
-                        LabeledContent("Completion Condition", value: completionConditionDescription(quest.objectives[index].completionCondition))
-                        IntField(label: "Target Value", value: $quest.objectives[index].targetValue)
-                        Toggle("Optional", isOn: $quest.objectives[index].isOptional)
+                        LabeledContent("Completion Condition", value: completionConditionDescription(objective.completionCondition))
+                        IntField(label: "Target Value", value: objectiveIntBinding(at: index, keyPath: \.targetValue))
+                        Toggle("Optional", isOn: objectiveBoolBinding(at: index, keyPath: \.isOptional))
                         TextField("Next Objective ID", text: Binding(
-                            get: { quest.objectives[index].nextObjectiveId ?? "" },
-                            set: { quest.objectives[index].nextObjectiveId = $0.isEmpty ? nil : $0 }
+                            get: {
+                                guard index < quest.objectives.count else { return "" }
+                                return quest.objectives[index].nextObjectiveId ?? ""
+                            },
+                            set: {
+                                guard index < quest.objectives.count else { return }
+                                quest.objectives[index].nextObjectiveId = $0.isEmpty ? nil : $0
+                            }
                         ))
-                        StringListEditor(label: "Alternative Next IDs", items: $quest.objectives[index].alternativeNextIds)
+                        StringListEditor(label: "Alternative Next IDs", items: objectiveArrayBinding(at: index, keyPath: \.alternativeNextIds))
                         Button(role: .destructive) {
+                            guard index < quest.objectives.count else { return }
                             quest.objectives.remove(at: index)
                         } label: {
                             Label("Remove Objective", systemImage: "minus.circle")
@@ -55,7 +62,7 @@ struct QuestEditor: View {
                 }
                 Button {
                     quest.objectives.append(ObjectiveDefinition(
-                        id: "obj_new",
+                        id: "obj_new_\(UUID().uuidString.prefix(4))",
                         description: .inline(LocalizedString(en: "New Objective", ru: "Новая цель")),
                         completionCondition: .manual
                     ))
@@ -104,5 +111,72 @@ struct QuestEditor: View {
 
     private func resourceChangesDescription(_ changes: [String: Int]) -> String {
         changes.map { "\($0.key): \($0.value)" }.joined(separator: ", ")
+    }
+
+    // MARK: - Safe Objective Bindings
+
+    private func objectiveBinding(at index: Int, keyPath: WritableKeyPath<ObjectiveDefinition, String>) -> Binding<String> {
+        Binding(
+            get: {
+                guard index < quest.objectives.count else { return "" }
+                return quest.objectives[index][keyPath: keyPath]
+            },
+            set: { newValue in
+                guard index < quest.objectives.count else { return }
+                quest.objectives[index][keyPath: keyPath] = newValue
+            }
+        )
+    }
+
+    private func objectiveLocalizedBinding(at index: Int, keyPath: WritableKeyPath<ObjectiveDefinition, LocalizableText>) -> Binding<LocalizableText> {
+        Binding(
+            get: {
+                guard index < quest.objectives.count else { return .inline(LocalizedString(en: "", ru: "")) }
+                return quest.objectives[index][keyPath: keyPath]
+            },
+            set: { newValue in
+                guard index < quest.objectives.count else { return }
+                quest.objectives[index][keyPath: keyPath] = newValue
+            }
+        )
+    }
+
+    private func objectiveIntBinding(at index: Int, keyPath: WritableKeyPath<ObjectiveDefinition, Int>) -> Binding<Int> {
+        Binding(
+            get: {
+                guard index < quest.objectives.count else { return 0 }
+                return quest.objectives[index][keyPath: keyPath]
+            },
+            set: { newValue in
+                guard index < quest.objectives.count else { return }
+                quest.objectives[index][keyPath: keyPath] = newValue
+            }
+        )
+    }
+
+    private func objectiveBoolBinding(at index: Int, keyPath: WritableKeyPath<ObjectiveDefinition, Bool>) -> Binding<Bool> {
+        Binding(
+            get: {
+                guard index < quest.objectives.count else { return false }
+                return quest.objectives[index][keyPath: keyPath]
+            },
+            set: { newValue in
+                guard index < quest.objectives.count else { return }
+                quest.objectives[index][keyPath: keyPath] = newValue
+            }
+        )
+    }
+
+    private func objectiveArrayBinding(at index: Int, keyPath: WritableKeyPath<ObjectiveDefinition, [String]>) -> Binding<[String]> {
+        Binding(
+            get: {
+                guard index < quest.objectives.count else { return [] }
+                return quest.objectives[index][keyPath: keyPath]
+            },
+            set: { newValue in
+                guard index < quest.objectives.count else { return }
+                quest.objectives[index][keyPath: keyPath] = newValue
+            }
+        )
     }
 }

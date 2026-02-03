@@ -107,21 +107,12 @@ struct EnemyEditor: View {
 
             Section("Behavior Pattern (\(enemy.pattern?.count ?? 0) steps)") {
                 if let pattern = enemy.pattern {
-                    ForEach(pattern.indices, id: \.self) { index in
+                    ForEach(Array(pattern.enumerated()), id: \.offset) { index, _ in
                         HStack {
-                            TextField("Type", text: Binding(
-                                get: { enemy.pattern?[index].type.rawValue ?? "" },
-                                set: { newVal in
-                                    if let t = IntentType(rawValue: newVal) {
-                                        enemy.pattern?[index].type = t
-                                    }
-                                }
-                            ))
-                            IntField(label: "Value", value: Binding(
-                                get: { enemy.pattern?[index].value ?? 0 },
-                                set: { enemy.pattern?[index].value = $0 }
-                            ))
+                            TextField("Type", text: patternTypeBinding(at: index))
+                            IntField(label: "Value", value: patternValueBinding(at: index))
                             Button(role: .destructive) {
+                                guard enemy.pattern != nil, index < (enemy.pattern?.count ?? 0) else { return }
                                 enemy.pattern?.remove(at: index)
                                 if enemy.pattern?.isEmpty == true { enemy.pattern = nil }
                             } label: {
@@ -143,13 +134,14 @@ struct EnemyEditor: View {
             }
 
             Section("Abilities (\(enemy.abilities.count))") {
-                ForEach(enemy.abilities.indices, id: \.self) { index in
+                ForEach(Array(enemy.abilities.enumerated()), id: \.element.id) { index, ability in
                     VStack(alignment: .leading, spacing: 6) {
-                        TextField("ID", text: $enemy.abilities[index].id)
-                        LocalizedTextField(label: "Name", text: $enemy.abilities[index].name)
-                        LocalizedTextField(label: "Description", text: $enemy.abilities[index].description)
-                        LabeledContent("Effect", value: String(describing: enemy.abilities[index].effect))
+                        TextField("ID", text: abilityIdBinding(at: index))
+                        LocalizedTextField(label: "Name", text: abilityNameBinding(at: index))
+                        LocalizedTextField(label: "Description", text: abilityDescBinding(at: index))
+                        LabeledContent("Effect", value: String(describing: ability.effect))
                         Button(role: .destructive) {
+                            guard index < enemy.abilities.count else { return }
                             enemy.abilities.remove(at: index)
                         } label: {
                             Label("Remove Ability", systemImage: "minus.circle")
@@ -160,7 +152,7 @@ struct EnemyEditor: View {
                 Button {
                     enemy.abilities.append(
                         EnemyAbility(
-                            id: "ability_new",
+                            id: "ability_new_\(UUID().uuidString.prefix(4))",
                             name: .inline(LocalizedString(en: "New Ability", ru: "Новая способность")),
                             description: .inline(LocalizedString(en: "Description", ru: "Описание")),
                             effect: .bonusDamage(0)
@@ -172,5 +164,76 @@ struct EnemyEditor: View {
             }
         }
         .formStyle(.grouped)
+    }
+
+    // MARK: - Safe Pattern Bindings
+
+    private func patternTypeBinding(at index: Int) -> Binding<String> {
+        Binding(
+            get: {
+                guard let p = enemy.pattern, index < p.count else { return "" }
+                return p[index].type.rawValue
+            },
+            set: { newVal in
+                guard enemy.pattern != nil, index < (enemy.pattern?.count ?? 0) else { return }
+                if let t = IntentType(rawValue: newVal) {
+                    enemy.pattern?[index].type = t
+                }
+            }
+        )
+    }
+
+    private func patternValueBinding(at index: Int) -> Binding<Int> {
+        Binding(
+            get: {
+                guard let p = enemy.pattern, index < p.count else { return 0 }
+                return p[index].value
+            },
+            set: { newValue in
+                guard enemy.pattern != nil, index < (enemy.pattern?.count ?? 0) else { return }
+                enemy.pattern?[index].value = newValue
+            }
+        )
+    }
+
+    // MARK: - Safe Ability Bindings
+
+    private func abilityIdBinding(at index: Int) -> Binding<String> {
+        Binding(
+            get: {
+                guard index < enemy.abilities.count else { return "" }
+                return enemy.abilities[index].id
+            },
+            set: { newValue in
+                guard index < enemy.abilities.count else { return }
+                enemy.abilities[index].id = newValue
+            }
+        )
+    }
+
+    private func abilityNameBinding(at index: Int) -> Binding<LocalizableText> {
+        Binding(
+            get: {
+                guard index < enemy.abilities.count else { return .inline(LocalizedString(en: "", ru: "")) }
+                return enemy.abilities[index].name
+            },
+            set: { newValue in
+                guard index < enemy.abilities.count else { return }
+                enemy.abilities[index].name = newValue
+            }
+        )
+    }
+
+    private func abilityDescBinding(at index: Int) -> Binding<LocalizableText> {
+        Binding(
+            get: {
+                guard index < enemy.abilities.count else { return .inline(LocalizedString(en: "", ru: "")) }
+                return enemy.abilities[index].description
+            },
+            set: { newValue in
+                guard index < enemy.abilities.count else { return }
+                enemy.abilities[index].description = newValue
+            }
+        )
     }
 }

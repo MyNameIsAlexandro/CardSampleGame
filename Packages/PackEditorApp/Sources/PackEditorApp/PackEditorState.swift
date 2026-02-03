@@ -34,10 +34,42 @@ class PackEditorState: ObservableObject {
         let tab = EditorTab()
         do {
             try tab.store.loadPack(from: url)
+            #if DEBUG
+            print("PackEditor: Successfully loaded pack from \(url.lastPathComponent)")
+            print("  - Enemies: \(tab.store.enemies.count)")
+            print("  - Cards: \(tab.store.cards.count)")
+            print("  - Events: \(tab.store.events.count)")
+            print("  - Regions: \(tab.store.regions.count)")
+            print("  - Heroes: \(tab.store.heroes.count)")
+            print("  - FateCards: \(tab.store.fateCards.count)")
+            print("  - Quests: \(tab.store.quests.count)")
+            print("  - Behaviors: \(tab.store.behaviors.count)")
+            print("  - Anchors: \(tab.store.anchors.count)")
+            #endif
             tabs.append(tab)
             switchToTab(tab)
         } catch {
             print("PackEditor: Failed to load pack: \(error)")
+            #if DEBUG
+            if let decodingError = error as? DecodingError {
+                switch decodingError {
+                case .typeMismatch(let type, let context):
+                    print("  → typeMismatch: expected \(type)")
+                    print("  → path: \(context.codingPath.map { $0.stringValue }.joined(separator: "."))")
+                    print("  → description: \(context.debugDescription)")
+                case .valueNotFound(let type, let context):
+                    print("  → valueNotFound: \(type)")
+                    print("  → path: \(context.codingPath.map { $0.stringValue }.joined(separator: "."))")
+                case .keyNotFound(let key, let context):
+                    print("  → keyNotFound: \(key.stringValue)")
+                    print("  → path: \(context.codingPath.map { $0.stringValue }.joined(separator: "."))")
+                case .dataCorrupted(let context):
+                    print("  → dataCorrupted: \(context.debugDescription)")
+                @unknown default:
+                    print("  → unknown decoding error")
+                }
+            }
+            #endif
         }
     }
 

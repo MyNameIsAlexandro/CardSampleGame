@@ -9,24 +9,44 @@ struct EntityListView: View {
 
     var body: some View {
         if let category = tab.selectedCategory {
-            let ids = filteredIds(for: category)
-            List(selection: $tab.selectedEntityId) {
-                ForEach(ids, id: \.self) { id in
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(tab.entityName(for: id, in: category))
-                            .fontWeight(.medium)
-                        Text(id)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+            let ids = safeFilteredIds(for: category)
+            VStack(spacing: 0) {
+                // Local filter field (not .searchable to avoid toolbar conflict)
+                HStack {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundStyle(.secondary)
+                    TextField("Filter...", text: $searchText)
+                        .textFieldStyle(.plain)
+                    if !searchText.isEmpty {
+                        Button {
+                            searchText = ""
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .tag(id)
                 }
-                .onMove { from, to in
-                    guard searchText.isEmpty else { return }
-                    tab.moveEntities(for: category, from: from, to: to)
+                .padding(8)
+                .background(.bar)
+
+                List(selection: $tab.selectedEntityId) {
+                    ForEach(ids, id: \.self) { id in
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(safeEntityName(for: id, in: category))
+                                .fontWeight(.medium)
+                            Text(id)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .tag(id)
+                    }
+                    .onMove { from, to in
+                        guard searchText.isEmpty else { return }
+                        tab.moveEntities(for: category, from: from, to: to)
+                    }
                 }
             }
-            .searchable(text: $searchText, prompt: Text(String(localized: "entityList.filterPrompt \(category.localizedName.lowercased())", bundle: .module)))
             .navigationSplitViewColumnWidth(min: 200, ideal: 250)
             .toolbar {
                 ToolbarItemGroup(placement: .primaryAction) {
@@ -124,5 +144,24 @@ struct EntityListView: View {
             id.localizedCaseInsensitiveContains(searchText) ||
             tab.entityName(for: id, in: category).localizedCaseInsensitiveContains(searchText)
         }
+    }
+
+    // MARK: - Safe Accessors
+
+    /// Safe wrapper for filtered IDs retrieval with debug logging
+    private func safeFilteredIds(for category: ContentCategory) -> [String] {
+        let ids = filteredIds(for: category)
+        #if DEBUG
+        if ids.isEmpty && searchText.isEmpty {
+            print("EntityListView: No entities found for category '\(category.rawValue)'")
+        }
+        #endif
+        return ids
+    }
+
+    /// Safe wrapper for entity name retrieval
+    private func safeEntityName(for id: String, in category: ContentCategory) -> String {
+        let name = tab.entityName(for: id, in: category)
+        return name.isEmpty ? id : name
     }
 }

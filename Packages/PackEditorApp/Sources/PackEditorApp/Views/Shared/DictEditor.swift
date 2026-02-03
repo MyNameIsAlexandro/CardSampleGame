@@ -24,6 +24,7 @@ struct DictEditor: View {
                 .buttonStyle(.plain)
                 .foregroundStyle(.red)
             }
+            .id("\(label)-\(key)") // Unique ID for each row
         }
         Button {
             // Find a unique key name

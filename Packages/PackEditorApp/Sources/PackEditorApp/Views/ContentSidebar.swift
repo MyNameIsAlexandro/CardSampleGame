@@ -60,7 +60,10 @@ struct ContentSidebar: View {
         .listStyle(.sidebar)
         .navigationSplitViewColumnWidth(min: 180, ideal: 200)
         .onChange(of: tab.selectedCategory) { _ in
-            tab.selectedEntityId = nil
+            // Defer state change to avoid "Publishing changes from within view updates"
+            Task { @MainActor in
+                tab.selectedEntityId = nil
+            }
         }
     }
 }

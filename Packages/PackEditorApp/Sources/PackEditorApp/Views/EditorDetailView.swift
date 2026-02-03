@@ -11,92 +11,95 @@ struct EditorDetailView: View {
         ScrollView {
             switch tab.selectedCategory {
             case .enemies:
-                if let id = tab.selectedEntityId, tab.enemies[id] != nil {
+                if let id = tab.selectedEntityId, let snapshot = tab.enemies[id] {
                     EnemyEditor(enemy: undoBinding(
-                        get: { tab.enemies[id]! },
+                        get: { tab.enemies[id] ?? snapshot },
                         set: { tab.enemies[id] = $0 },
                         label: "Edit Enemy"
                     ))
                 }
             case .cards:
-                if let id = tab.selectedEntityId, tab.cards[id] != nil {
+                if let id = tab.selectedEntityId, let snapshot = tab.cards[id] {
                     CardEditor(card: undoBinding(
-                        get: { tab.cards[id]! },
+                        get: { tab.cards[id] ?? snapshot },
                         set: { tab.cards[id] = $0 },
                         label: "Edit Card"
                     ))
                 }
             case .events:
-                if let id = tab.selectedEntityId, tab.events[id] != nil {
+                if let id = tab.selectedEntityId, let snapshot = tab.events[id] {
                     EventEditor(event: undoBinding(
-                        get: { tab.events[id]! },
+                        get: { tab.events[id] ?? snapshot },
                         set: { tab.events[id] = $0 },
                         label: "Edit Event"
                     ))
                 }
             case .regions:
-                if let id = tab.selectedEntityId, tab.regions[id] != nil {
+                if let id = tab.selectedEntityId, let snapshot = tab.regions[id] {
                     RegionEditor(region: undoBinding(
-                        get: { tab.regions[id]! },
+                        get: { tab.regions[id] ?? snapshot },
                         set: { tab.regions[id] = $0 },
                         label: "Edit Region"
                     ))
                 }
             case .heroes:
-                if let id = tab.selectedEntityId, tab.heroes[id] != nil {
+                if let id = tab.selectedEntityId, let snapshot = tab.heroes[id] {
                     HeroEditor(hero: undoBinding(
-                        get: { tab.heroes[id]! },
+                        get: { tab.heroes[id] ?? snapshot },
                         set: { tab.heroes[id] = $0 },
                         label: "Edit Hero"
                     ))
                 }
             case .fateCards:
-                if let id = tab.selectedEntityId, tab.fateCards[id] != nil {
+                if let id = tab.selectedEntityId, let snapshot = tab.fateCards[id] {
                     FateCardEditor(card: undoBinding(
-                        get: { tab.fateCards[id]! },
+                        get: { tab.fateCards[id] ?? snapshot },
                         set: { tab.fateCards[id] = $0 },
                         label: "Edit Fate Card"
                     ))
                 }
             case .quests:
-                if let id = tab.selectedEntityId, tab.quests[id] != nil {
+                if let id = tab.selectedEntityId, let snapshot = tab.quests[id] {
                     QuestEditor(quest: undoBinding(
-                        get: { tab.quests[id]! },
+                        get: { tab.quests[id] ?? snapshot },
                         set: { tab.quests[id] = $0 },
                         label: "Edit Quest"
                     ))
                 }
             case .behaviors:
-                if let id = tab.selectedEntityId, tab.behaviors[id] != nil {
+                if let id = tab.selectedEntityId, let snapshot = tab.behaviors[id] {
                     BehaviorEditor(behavior: undoBinding(
-                        get: { tab.behaviors[id]! },
+                        get: { tab.behaviors[id] ?? snapshot },
                         set: { tab.behaviors[id] = $0 },
                         label: "Edit Behavior"
                     ))
                 }
             case .anchors:
-                if let id = tab.selectedEntityId, tab.anchors[id] != nil {
+                if let id = tab.selectedEntityId, let snapshot = tab.anchors[id] {
                     AnchorEditor(anchor: undoBinding(
-                        get: { tab.anchors[id]! },
+                        get: { tab.anchors[id] ?? snapshot },
                         set: { tab.anchors[id] = $0 },
                         label: "Edit Anchor"
                     ))
                 }
             case .balance:
-                if tab.balanceConfig != nil {
+                if let snapshot = tab.balanceConfig {
                     BalanceEditor(config: undoBinding(
-                        get: { tab.balanceConfig! },
+                        get: { tab.balanceConfig ?? snapshot },
                         set: { tab.balanceConfig = $0 },
                         label: "Edit Balance"
                     ))
                 }
             case .none:
-                if tab.manifest != nil {
+                if let snapshot = tab.manifest {
                     ManifestEditor(manifest: Binding(
-                        get: { tab.manifest! },
-                        set: {
-                            tab.manifest = $0
-                            tab.isDirty = true
+                        get: { tab.manifest ?? snapshot },
+                        set: { [weak tab] newValue in
+                            tab?.manifest = newValue
+                            // Defer isDirty change to avoid "Publishing changes from within view updates"
+                            Task { @MainActor in
+                                tab?.isDirty = true
+                            }
                         }
                     ))
                 } else {
@@ -161,16 +164,19 @@ struct EditorDetailView: View {
     ) -> Binding<T> {
         Binding(
             get: get,
-            set: { newValue in
+            set: { [weak tab, weak undoManager] newValue in
                 let oldValue = get()
                 set(newValue)
-                tab.isDirty = true
-                undoManager?.registerUndo(withTarget: tab) { tab in
-                    set(oldValue)
-                    tab.isDirty = true
-                    tab.objectWillChange.send()
+                // Defer state changes to avoid "Publishing changes from within view updates"
+                Task { @MainActor in
+                    tab?.isDirty = true
+                    undoManager?.registerUndo(withTarget: tab!) { tab in
+                        set(oldValue)
+                        tab.isDirty = true
+                        tab.objectWillChange.send()
+                    }
+                    undoManager?.setActionName(label)
                 }
-                undoManager?.setActionName(label)
             }
         )
     }
