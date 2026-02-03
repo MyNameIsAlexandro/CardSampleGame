@@ -135,3 +135,17 @@ Full details:
 - PackEditorKit extracted as standalone SPM package (96 tests)
 - Fate Deck, Resonance, EnemyIntent systems fully integrated
 - Total test coverage: 606 SPM + 96 PackEditorKit = 702+ tests
+
+## Post-Epic: Tech Debt Closure (2026-02-03)
+
+**F1) Legacy Adapters — CLOSED**
+- WorldMapView uses pure Engine-First architecture
+- No legacy init/branches/comments remain
+- Gate test: `testNoLegacyInitializationInViews()` passes
+
+**F2) AssetRegistry Safety — CLOSED**
+- 3-level fallback chain: primary asset → fallback asset → SF Symbol
+- No direct `UIImage(named:)` in Views/ViewModels
+- Gate tests: `testMissingAssetHandling_returnsPlaceholder()`, `testAssetRegistry_returnsFallbackForMissingAssets()`, `testNoDirectUIImageNamedInViewsAndViewModels()` pass
+
+**All technical debt from AUDIT_FIXLIST.md is now resolved.**

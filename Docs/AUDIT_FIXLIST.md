@@ -226,34 +226,39 @@
 
 ---
 
-# F) Technical Debt (Non-Blocking, но обязателен к удалению до v3.1)
+# F) Technical Debt — ✅ ЗАКРЫТО (2026-02-03)
 
-> Эти пункты **не блокируют** текущую приёмку, но их нельзя тянуть бесконечно.
-> Они должны быть закрыты **до следующего крупного релиза контента** (v3.1), иначе архитектурная чистота деградирует.
+> Все пункты технического долга закрыты. Gate-тесты проходят.
 
-## F1) Legacy Adapters / Legacy Initialization в WorldMapView
-**Наблюдение:** в `WorldMapView` остаются комментарии/инициализаторы про Legacy Initialization.
+## F1) ✅ Legacy Adapters / Legacy Initialization в WorldMapView — ИСПРАВЛЕНО
+**Статус:** Закрыто. WorldMapView использует чистую Engine-First архитектуру.
 
-### Требования
-- Удалить legacy-инициализаторы и комментарии, связанные с legacy-flow.
-- Любая инициализация должна идти через Engine-first путь (View → Intent → ViewModel → Engine → State).
+### Что сделано
+- WorldMapView содержит только Engine-First инициализацию
+- Нет legacy init/ветки/комментарии
+- Все View → Intent → ViewModel → Engine → State
 
-### Acceptance
-- В `WorldMapView` отсутствуют legacy init/ветки/комментарии.
-- Gate (скан): `testNoLegacyInitializationInViews()`.
+### Acceptance / Gate tests
+- ✅ `testNoLegacyInitializationInViews()` — проходит
+- ✅ `testNoLegacyInitializationCommentsInWorldMapView()` — проходит
 
 ---
 
-## F2) AssetRegistry safety (защита от отсутствующих картинок)
-**Наблюдение:** файл `AssetRegistry.swift` присутствует, но нужно подтвердить и закрепить гарантию.
+## F2) ✅ AssetRegistry safety (защита от отсутствующих картинок) — ИСПРАВЛЕНО
+**Статус:** Закрыто. AssetRegistry возвращает SF Symbol fallback для отсутствующих ассетов.
 
-### Требования
-- AssetRegistry обязан возвращать placeholder при отсутствии ассета (никаких “розовых квадратов” / пустых изображений).
-- Запрещены прямые `UIImage(named:)` в UI и VM — только через AssetRegistry.
+### Что сделано
+- AssetRegistry реализует 3-уровневый fallback chain:
+  1. Основной ассет (e.g., `region_forest`)
+  2. Fallback ассет (e.g., `unknown_region`)
+  3. SF Symbol (e.g., `mappin.circle`)
+- SafeImage и AssetValidator обеспечивают дополнительную защиту
+- Прямые `UIImage(named:)` запрещены в Views и ViewModels
 
-### Acceptance
-- Тест: `testMissingAssetHandling_returnsPlaceholder()`
-- Gate (скан): `testNoDirectUIImageNamedInViewsAndViewModels()`.
+### Acceptance / Gate tests
+- ✅ `testMissingAssetHandling_returnsPlaceholder()` — проходит
+- ✅ `testAssetRegistry_returnsFallbackForMissingAssets()` — проходит
+- ✅ `testNoDirectUIImageNamedInViewsAndViewModels()` — проходит
 
 ---
 
@@ -305,6 +310,8 @@
 ## Warnings (не блокируют приёмку)
 - **B2)** Binary pack — задокументировано, запланировано на v2.0 (см. `CONTENT_PACK_GUIDE.md`)
 
-## Tech Debt (до v3.1)
-- **F1)** Legacy Adapters / Legacy Initialization в WorldMapView
-- **F2)** AssetRegistry safety (placeholder для отсутствующих ассетов)
+## Tech Debt
+- ✅ ~~**F1)** Legacy Adapters / Legacy Initialization в WorldMapView~~ — ЗАКРЫТО
+- ✅ ~~**F2)** AssetRegistry safety (placeholder для отсутствующих ассетов)~~ — ЗАКРЫТО
+
+**Весь технический долг закрыт.**
