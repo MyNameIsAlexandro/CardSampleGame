@@ -91,3 +91,11 @@ iOSInjectionProject/
 
 # Mac
 .DS_Store
+
+# Local QA artifacts
+TestResults/
+TestReport/
+TestReport.xcresult/
+*.xcresult/
+app-strict-concurrency.log
+app-strict-concurrency.diagnostics
