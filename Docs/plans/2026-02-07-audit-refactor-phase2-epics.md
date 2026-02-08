@@ -576,7 +576,7 @@ Deliverables:
     - `Docs/QA/QUALITY_CONTROL_MODEL.md`,
     - `Docs/QA/TESTING_GUIDE.md`,
     - `Docs/plans/2026-02-07-audit-refactor-phase2-epics.md`.
-  - fails on stale epic markers for critical contracts (`Epic 28`, `Epic 30`, `Epic 47`, `Epic 48`) and stale backlog epoch marker (`post-Epic 48`).
+  - fails on stale epic markers for critical contracts (`Epic 28`, `Epic 30`, `Epic 47`, `Epic 48`) and stale backlog epoch marker (`post-Epic N`, where `N` is auto-detected latest `DONE` epic).
 - Wired budgeted docs-sync quality gate `docs_sync` into:
   - `.github/workflows/tests.yml` (`content-validation` job),
   - `.github/ci/run_release_check.sh` (local unified release run).

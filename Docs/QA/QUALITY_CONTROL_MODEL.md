@@ -167,6 +167,8 @@ This document is the canonical control point for validating product health after
   - `INV_RESUME47_GateTests`
   - `ContentRegistryRegistrySyncTests`
   - Epic status markers for `Epic 28`, `Epic 30`, `Epic 47`, `Epic 48`.
+  - Backlog epoch marker must match auto-detected latest `DONE` epic:
+    - `Pending backlog (post-Epic N)` where `N = max(done_epic_number)`.
 
 ## 7. CI Quality Budget & Flake Control (Epic 31)
 

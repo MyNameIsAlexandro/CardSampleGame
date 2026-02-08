@@ -183,7 +183,8 @@ This check enforces:
   - `.github/ci/validate_docs_sync.sh`
 - Enforced contracts:
   - determinism/scheme smoke tokens in workflow vs docs,
-  - epic status markers (`Epic 28`, `Epic 30`, `Epic 47`, `Epic 48`) in ledger.
+  - epic status markers (`Epic 28`, `Epic 30`, `Epic 47`, `Epic 48`) in ledger,
+  - dynamic backlog epoch marker parity (`Pending backlog (post-Epic N)` with latest `DONE` epic).
 - RC implication:
   - `docs_sync` is required in `rc_build_content` and therefore in `rc_full`.
 

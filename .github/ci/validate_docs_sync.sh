@@ -84,8 +84,26 @@ for marker in "${epic_done_markers[@]}"; do
   fi
 done
 
-if ! grep -Fq "Pending backlog (post-Epic 48)" "${ledger_doc}"; then
-  echo "Epic ledger header is stale: expected post-Epic 48 backlog marker"
+latest_done_epic="$(
+  awk '
+    /^### Epic [0-9]+ \[DONE\]/ {
+      epic = $3 + 0
+      if (epic > max) { max = epic }
+    }
+    END {
+      if (max > 0) { print max }
+    }
+  ' "${ledger_doc}"
+)"
+
+if [[ -z "${latest_done_epic}" ]]; then
+  echo "Epic ledger has no DONE epic headings: ${ledger_doc}"
+  failures=$((failures + 1))
+fi
+
+expected_backlog_marker="Pending backlog (post-Epic ${latest_done_epic})"
+if ! grep -Fq "${expected_backlog_marker}" "${ledger_doc}"; then
+  echo "Epic ledger header is stale: expected ${expected_backlog_marker}"
   failures=$((failures + 1))
 fi
 
