@@ -8,14 +8,14 @@ let package = Package(
         .library(name: "EchoEngine", targets: ["EchoEngine"])
     ],
     dependencies: [
-        .package(url: "https://github.com/fireblade-engine/ecs.git", from: "0.17.5"),
+        .package(path: "../ThirdParty/FirebladeECS"),
         .package(path: "../TwilightEngine")
     ],
     targets: [
         .target(
             name: "EchoEngine",
             dependencies: [
-                .product(name: "FirebladeECS", package: "ecs"),
+                .product(name: "FirebladeECS", package: "FirebladeECS"),
                 "TwilightEngine"
             ]
         ),
