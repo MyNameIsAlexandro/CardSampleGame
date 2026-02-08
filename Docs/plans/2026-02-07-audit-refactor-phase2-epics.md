@@ -39,6 +39,8 @@ Scope: architecture correctness + quality gates. This is **not** gameplay/produc
 - `Epic 43`: DONE (app-layer external-combat bridges de-extended: `EchoCombatBridge`/`EchoEncounterBridge` are adapter types, call-sites migrated, and static gate blocks `extension TwilightGameEngine` reintroduction in `Views/Combat`).
 - `Epic 47`: DONE (save/resume fault-injection matrix added with interrupted-write fallback recovery, partial snapshot resume, and deterministic fingerprint parity checks).
 - `Epic 48`: DONE (documentation sync validator gate added; CI/RC now fail on mandatory contract drift across epic ledger + QA model + testing guide).
+- `Epic 49`: DONE (`run_quality_gate.sh` now renders `summary.md` as latest-only per gate ID; duplicate historical attempts remain in `gates.jsonl` only).
+- `Epic 50`: DONE (local release runner now hard-gates on clean tracked working tree via `validate_repo_hygiene.sh --require-clean-tree` before any gate execution).
 - `App strict-concurrency note`: app strict build baseline is green (no compiler file/line warnings/errors) with local `Packages/ThirdParty/FirebladeECS` override.
 - `Release readiness checkpoint (local)`: `run_release_check.sh` passed with `rc_engine_twilight`, `rc_app`, `rc_build_content`, and `rc_full`.
 
@@ -489,7 +491,7 @@ Acceptance:
 - App no longer adds `extension TwilightGameEngine` in `Views/Combat`.
 - Canonical adapter entry points are represented by plain mapper/service types and keep gate allowlists green.
 
-## Pending backlog (post-Epic 48)
+## Pending backlog (post-Epic 50)
 
 ### Epic 44 [DONE] — Replay Fixture Governance
 
@@ -586,3 +588,34 @@ Deliverables:
 Acceptance:
 - CI gate validates epic ledger + QA model + testing guide consistency for mandatory contracts.
 - Release profile fails if required architecture/test contract docs are stale.
+
+### Epic 49 [DONE] — Latest-Only Quality Summary Rendering
+
+Goal: keep dashboard summary signal clean when gates are re-run, while preserving full run history for forensics.
+
+Deliverables:
+- Updated `.github/ci/run_quality_gate.sh` summary rendering:
+  - `TestResults/QualityDashboard/summary.md` is rebuilt from `gates.jsonl` on each gate run.
+  - Summary keeps one row per `gate_id` (latest result wins).
+  - Historical attempts remain append-only in `TestResults/QualityDashboard/gates.jsonl`.
+- Updated QA docs (`QUALITY_CONTROL_MODEL.md`, `TESTING_GUIDE.md`) to document the “latest-only summary + raw history in JSONL” contract.
+
+Acceptance:
+- Re-running the same gate ID updates a single row in `summary.md` instead of appending duplicates.
+- RC/profile checks continue to read latest gate state from `gates.jsonl` without behavior drift.
+
+### Epic 50 [DONE] — Release Runner Clean-Tree Hard Gate
+
+Goal: prevent expensive local release runs from starting on a dirty tracked tree, which invalidates release-readiness signal.
+
+Deliverables:
+- Extended `.github/ci/validate_repo_hygiene.sh` with optional mode:
+  - `--require-clean-tree` fails when `git status --porcelain --untracked-files=no` is non-empty.
+  - keeps canonical lockfile + transient-artifact checks unchanged.
+- Wired hard preflight check into `.github/ci/run_release_check.sh`:
+  - runs `validate_repo_hygiene.sh --require-clean-tree` before cleanup/preflight/test/build gates.
+- Updated QA docs (`QUALITY_CONTROL_MODEL.md`, `TESTING_GUIDE.md`) to document hard clean-tree precheck behavior for local release runs.
+
+Acceptance:
+- `run_release_check.sh` aborts immediately on tracked working-tree drift.
+- CI profile validation logic stays unchanged (still driven by `gates.jsonl`/RC profiles).

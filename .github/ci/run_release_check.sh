@@ -23,6 +23,7 @@ registry_file=".github/flaky-quarantine.csv"
 
 mkdir -p "${dashboard_dir}"
 
+bash .github/ci/validate_repo_hygiene.sh --require-clean-tree
 bash .github/ci/clean_test_artifacts.sh
 CI_RESOLVE_IOS_DESTINATION=1 bash .github/ci/preflight_ci_environment.sh "${dashboard_dir}" "${scheme}"
 

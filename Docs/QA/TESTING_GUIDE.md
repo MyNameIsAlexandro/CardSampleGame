@@ -117,6 +117,7 @@ swift test --package-path Packages/TwilightEngine \
 - Each CI gate writes duration + status metadata into:
   - `TestResults/QualityDashboard/summary.md`
   - `TestResults/QualityDashboard/gates.jsonl`
+- `summary.md` keeps one latest row per gate ID (last execution wins); `gates.jsonl` preserves the raw append-only gate history.
 - Epic 37 inventory/drift artifact:
   - `TestResults/QualityDashboard/gate_inventory.json`
   - `TestResults/QualityDashboard/gate_drift_report.md`
@@ -155,6 +156,9 @@ bash .github/ci/validate_release_profile.sh \
 
 # Unified local release check
 bash .github/ci/run_release_check.sh TestResults/QualityDashboard CardSampleGame
+
+# Pre-check only: fail on tracked working tree drift
+bash .github/ci/validate_repo_hygiene.sh --require-clean-tree
 ```
 
 ## 8. Flaky Quarantine (Epic 31)
@@ -176,6 +180,7 @@ bash .github/ci/validate_repo_hygiene.sh
 This check enforces:
 - single canonical lockfile path (`CardSampleGame.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved`),
 - no tracked transient artifacts (`xcresult`, local logs, temporary reports).
+- in hard mode (`--require-clean-tree`), no tracked working-tree changes.
 
 ## 9.1 Documentation Sync Gate (Epic 48)
 

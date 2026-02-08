@@ -148,6 +148,7 @@ This document is the canonical control point for validating product health after
   - `CardSampleGame.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved`
 - Repository hygiene gate:
   - `.github/ci/validate_repo_hygiene.sh` enforces canonical lockfile path and blocks tracked transient artifacts.
+  - optional hard mode (`--require-clean-tree`) enforces zero tracked working-tree drift.
 - Dependency graph expectation:
   - `EchoEngine` resolves `FirebladeECS` from local path override.
 
@@ -179,6 +180,7 @@ This document is the canonical control point for validating product health after
     - `TestResults/QualityDashboard/gates.jsonl`
     - `TestResults/QualityDashboard/gate_inventory.json`
     - `TestResults/QualityDashboard/gate_drift_report.md`
+  - render `summary.md` as a latest-only snapshot per gate ID (last result wins); full attempt history remains in `gates.jsonl`.
 - CI normalizes app-runner variability with:
   - `.github/ci/select_ios_destination.sh` (resolves valid simulator `name+OS` for current Xcode image),
   - `.github/ci/run_xcodebuild.sh` (`xcpretty` optional, plain `xcodebuild` fallback).
@@ -236,6 +238,7 @@ This document is the canonical control point for validating product health after
   - `release-readiness-profile` job aggregates all dashboards and validates `rc_full`.
 - Unified local release checkpoint:
   - `.github/ci/run_release_check.sh` runs app/engine/build/content gates and validates `rc_engine_twilight`, `rc_app`, `rc_build_content`, `rc_full`.
+  - local run is hard-gated by `validate_repo_hygiene.sh --require-clean-tree` before any test/build step starts.
 - RC reports are published into dashboard artifacts:
   - `TestResults/QualityDashboard/release_profile_rc_engine_twilight.md`
   - `TestResults/QualityDashboard/release_profile_rc_app.md`
