@@ -1,485 +1,198 @@
 # Testing Guide
 
-**Project:** Сумрачные Пределы (Twilight Marches)
-**Last Updated:** 2026-01-29
+**Last updated:** 2026-02-08  
+**Primary QA source of truth:** `Docs/QA/QUALITY_CONTROL_MODEL.md`
 
-> **📜 PROJECT_BIBLE.md — конституция проекта (Source of Truth).**
-> ENGINE_ARCHITECTURE.md — SoT для кода/контрактов.
+This guide is the operational runner for day-to-day checks.  
+Policy, contracts, and gate definitions live in `QUALITY_CONTROL_MODEL.md`.
 
----
+## 1. Test Topology
 
-## Table of Contents
+- **Engine package tests**: `Packages/TwilightEngine/Tests/TwilightEngineTests`
+- **App tests**: `CardSampleGameTests`
+- **CI orchestration**: `.github/workflows/tests.yml`
 
-1. [Test Architecture](#1-test-architecture)
-2. [Test Categories](#2-test-categories)
-3. [TDD Test Models](#3-tdd-test-models)
-4. [Running Tests](#4-running-tests)
-5. [Test File Reference](#5-test-file-reference)
-6. [Spec-to-Test Traceability Matrix](#6-spec-to-test-traceability-matrix)
-7. [Writing New Tests](#7-writing-new-tests)
-8. [Test Coverage Goals](#8-test-coverage-goals)
-9. [Encounter System Test Model](#9-encounter-system-test-model)
-
----
-
-## 1. Test Architecture
-
-Tests are organized in two locations:
-
-```
-CardSampleGame/
-├── CardSampleGameTests/           # App-level tests
-│   ├── GateTests/                 # Quality gates (must pass for merge)
-│   ├── Unit/                      # Unit tests
-│   └── Views/                     # View tests
-│
-└── Packages/TwilightEngine/
-    └── Tests/
-        ├── TwilightEngineTests/   # Engine core tests
-        └── PackAuthoringTests/    # Pack compiler tests
-```
-
-### Test Targets
-
-| Target | Purpose | Location |
-|--------|---------|----------|
-| `CardSampleGameTests` | App integration, UI, Gate tests | `CardSampleGameTests/` |
-| `TwilightEngineTests` | Core engine logic, combat, content | `Packages/TwilightEngine/Tests/` |
-| `PackAuthoringTests` | Pack validation, compilation | `Packages/TwilightEngine/Tests/` |
-
----
-
-## 2. Test Categories
-
-### 2.1 Gate Tests (Must Pass)
-
-Gate tests are **blocking** — PRs cannot merge if these fail.
-
-> **RULE: XCTSkip запрещён в gate tests.** Невозможность проверки = FAIL. Если тест не может выполниться (missing resource, unsupported platform) — это блокер, а не skip.
-
-> **RULE: Gate tests запрещено помечать как flaky/optional.** Нестабильный gate = сломанный gate. Если тест flaky — его нужно починить или удалить, но не "смягчать".
-
-| Test File | Purpose |
-|-----------|---------|
-| `AuditGateTests.swift` | Architecture rules, file hygiene |
-| `DesignSystemComplianceTests.swift` | No magic numbers, use design tokens |
-| `LocalizationValidatorTests.swift` | All strings localized |
-| `ContentValidationTests.swift` | JSON content valid (см. §2.1.1) |
-| `CodeHygieneTests.swift` | No TODOs in production, no debug code |
-| `SaveLoadRoundTripTests.swift` | Save/Load integrity (см. §2.1.2) |
-
-#### 2.1.1 ContentValidationTests Requirements
-
-`ContentValidationTests` должен включать проверки для data-driven combat:
-
-| Check | Description |
-|-------|-------------|
-| `enemies.behavior_id` exists | Все `behavior_id` в enemies.json ссылаются на существующие behaviors |
-| Fate cards unique IDs | Все `id` в fate_deck уникальны |
-| Fate card suit valid | `suit` ∈ {nav, prav, yav, neutral} |
-| Choice cards complete | Карты с `type: "choice"` имеют оба варианта (safe/risk) |
-| Conditions parsable | Все `condition` в behaviors.json парсятся без ошибок |
-
-#### 2.1.2 SaveLoadRoundTripTests Requirements
-
-Gate для offline sessions (Project Bible requirement):
-
-| Check | Description |
-|-------|-------------|
-| Round-trip equality | `save → load → save` даёт идентичные данные по ключевым полям |
-| Combat state preserved | Состояние боя (HP, WP, intent, phase) сохраняется |
-| Fate deck order preserved | Точный порядок карт в draw pile и discard pile сохраняется (защита от save scumming) |
-| RNG state preserved | WorldRNG seed/state сохраняется (для weighted selection и других random) |
-| Resonance preserved | World resonance value сохраняется |
-| PackSet preserved | Save хранит `packId` + `packVersion`; load отказывает при несовместимости |
-| CoreVersion preserved | Save хранит `coreVersion`; load предупреждает/отказывает при major mismatch |
-
-### 2.2 Unit Tests
-
-| Test File | Covers |
-|-----------|--------|
-| `FateDeckManagerTests.swift` | Fate deck draw, shuffle, reshuffle |
-| `FateAttackTests.swift` | Fate-based attack calculations |
-| `FateSkillCheckTests.swift` | Skill checks with Fate |
-| `CombatSpiritTests.swift` | Dual track spirit damage |
-| `CombatEngineFirstTests.swift` | Combat lifecycle, effects |
-| `ResonanceEngineTests.swift` | Resonance zones, modifiers |
-| `EnemyDefinitionTests.swift` | Enemy loading, resonance modifiers |
-| `TimeSystemTests.swift` | Day/night cycle, time costs |
-
-### 2.3 TDD Test Models (New Features)
-
-| Test File | Feature | Status |
-|-----------|---------|--------|
-| `DualTrackCombatTests.swift` | Dual Track + Active Defense combat | 🔴 RED (TDD) |
-
-> **CI Exclusion:** TDD model tests (RED) **не запускаются в CI gate**, пока не переведены в GREEN. Механизм: фильтр `--skip DualTrackCombat` в CI pipeline (см. §4.3).
-
-> **Definition of Done:** После перевода фичи в DONE соответствующие тесты **обязательно** переводятся из TDD-модели в обычные unit/integration и удаляются из skip-листа. Фича не считается завершённой, пока её тесты не в CI gate.
-
-### 2.4 Integration Tests
-
-| Test File | Covers |
-|-----------|--------|
-| `GameplayFlowTests.swift` | Full game flow scenarios |
-| `Phase3ContractTests.swift` | API contract validation |
-| `RegressionPlaythroughTests.swift` | Playthrough regression |
-
----
-
-## 3. TDD Test Models
-
-### 3.1 DualTrackCombatTests.swift
-
-**Reference:** `Docs/Design/COMBAT_DIPLOMACY_SPEC.md`
-
-This is a **TDD model** — tests are written BEFORE implementation.
-Many tests will fail (RED) until the engine code is implemented.
-
-#### Test Scenarios
-
-| Test | Spec Section | Status |
-|------|--------------|--------|
-| `testEnemyHasDualTracks` | 1.2 Dual Track | 🟢 Should pass |
-| `testPhysicalAttackReducesHPOnly` | 3.1 Attack Formula | 🔴 Needs E1 |
-| `testSpiritualInfluenceReducesWPOnly` | 3.2 Influence Formula | 🟢 Existing |
-| `testActiveDefenseUsesFateCard` | 3.3 Defense Formula | 🔴 Needs implementation |
-| `testCriticalDefenseZeroDamage` | 3.3 Critical Defense | 🔴 Needs implementation |
-| `testIntentGeneratedAtRoundStart` | 2 Enemy Intent | 🟢 Implemented |
-| `testEscalationPenaltyOnSwitchToPhysical` | 5.2 Escalation | 🔴 Needs E6 |
-| `testEscalationSurpriseDamageBonus` | 5.2 Escalation | 🔴 Needs E6 |
-| `testDeEscalationRageShieldApplied` | 5.1 De-escalation | 🔴 Needs E6 |
-| `testEscalationUsesBalancePackValue` | 5 Balance Pack | 🔴 Needs Balance Pack |
-| `testKillPriorityWhenBothZero` | 1.2 Kill Priority | 🔴 Needs E4 |
-| `testPacifyWhenWPZeroHPRemains` | 1.2 Pacify | 🟢 Existing |
-| `testMultiEnemyPerEntityOutcome` | 1.2 Multi-Enemy | 🔴 Needs implementation |
-| `testMultiEnemyAllPacifiedIsNonviolent` | 1.2 Multi-Enemy | 🔴 Needs implementation |
-| `testWaitActionConservesFateCard` | 2 Wait Action | 🟢 Implemented |
-| `testWaitHasNoHiddenFateDeckSideEffects` | 2 Wait (no side effects) | 🔴 Needs verification |
-| `testMulliganReplacesSelectedCards` | 2 Mulligan | 🟢 Implemented |
-| `testResonanceCostPenaltyInDeepZones` | 4.1 Zone Effects | 🔴 Needs E7 |
-| `testIntentUpdatesOnConditionChange` | 6.2 Behaviors | 🔴 Needs E3 |
-
-### 3.2 CombatContentValidationTests (Planned Gate / TDD Model)
-
-> **Status Note:** Эти проверки считаются gate **только после реализации** ContentRegistry и ConditionParser. До этого они остаются TDD model и **не входят в CI gate**. После реализации — переносятся в `ContentValidationTests.swift` и становятся blocking.
-
-| Test | Gate Requirement | Status |
-|------|------------------|--------|
-| `testAllBehaviorReferencesExist` | behavior_id refs exist | 🔴 Needs ContentRegistry |
-| `testFateCardIdsUnique` | Unique IDs | 🔴 Needs ContentRegistry |
-| `testFateCardSuitsValid` | Valid suit values | 🔴 Needs ContentRegistry |
-| `testChoiceCardsHaveBothOptions` | Choice cards complete | 🔴 Needs ContentRegistry |
-| `testValueFormulaWhitelist` | Formulas in whitelist | 🔴 Needs ContentRegistry |
-| `testValueFormulaMultipliersExist` | MULTIPLIER_ID exists in balance | 🔴 Needs BalancePack |
-| `testBehaviorConditionsParsable` | Conditions parse | 🔴 Needs ConditionParser |
-| `testIntentTypesValid` | intent.type ∈ IntentType enum | 🔴 Needs ContentRegistry |
-| `testFateCardKeywordsValid` | keyword ∈ FateKeyword enum | 🔴 Needs ContentRegistry |
-
-### 3.3 UniversalFateKeywordTests (TDD Model)
-
-> **Status Note:** Эти тесты определяют поведение Universal Fate Keyword системы. Они станут unit tests после реализации KeywordResolver.
-
-| Test | Spec Section | Status |
-|------|--------------|--------|
-| `testKeywordInterpretationByContext` | §3.5.2 Interpretation Matrix | 🔴 Needs KeywordResolver |
-| `testMatchBonusWhenSuitMatchesAction` | §3.5.3 Match Bonus | 🔴 Needs MatchBonus impl |
-| `testMismatchGivesOnlyValue` | §3.5.3 Match Bonus | 🔴 Needs MatchBonus impl |
-| `testAllKeywordsHaveAllContextEffects` | §3.5.4 Core Keywords | 🔴 Needs full matrix |
-
-#### How to Use TDD Model
-
-1. Run tests: `swift test --filter DualTrackCombat`
-2. See RED failures
-3. Implement engine code to make tests GREEN
-4. Refactor while keeping tests GREEN
-
----
-
-## 4. Running Tests
-
-### 4.1 All Tests
+## 2. Core Commands
 
 ```bash
-# App tests (requires simulator)
-xcodebuild test -scheme CardSampleGame \
-  -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
+# Full TwilightEngine package tests
+swift test --package-path Packages/TwilightEngine
 
-# Engine tests (no simulator needed)
-cd Packages/TwilightEngine && swift test
+# Epic 28 schema compatibility smoke
+swift test --package-path Packages/TwilightEngine \
+  --filter INV_SCHEMA28_GateTests
+
+# Epic 30 replay determinism smoke
+swift test --package-path Packages/TwilightEngine \
+  --filter INV_REPLAY30_GateTests
+
+# App save/load + architecture gates
+xcodebuild test -project CardSampleGame.xcodeproj \
+  -scheme CardSampleGame \
+  -destination "$(bash .github/ci/select_ios_destination.sh --scheme CardSampleGame)" \
+  -only-testing:CardSampleGameTests/SaveLoadTests \
+  -only-testing:CardSampleGameTests/AuditArchitectureBoundaryGateTests \
+  -only-testing:CardSampleGameTests/AuditGateTests
 ```
 
-### 4.2 Specific Test Categories
+## 3. CI Gate Mapping
+
+- **SPM package matrix**: all package tests.
+- **TwilightEngine strict concurrency gate**: fails on strict-concurrency diagnostics.
+- **TwilightEngine determinism/schema smoke**:
+  - `INV_RNG_GateTests`
+  - `INV_SCHEMA28_GateTests`
+  - `INV_REPLAY30_GateTests`
+  - `INV_RESUME47_GateTests`
+  - `ContentRegistryRegistrySyncTests`
+- **App strict concurrency gate**: `xcodebuild build` with `SWIFT_STRICT_CONCURRENCY=complete`.
+- **App gate layers**:
+  - quality/l10n/design gates,
+  - content validation gates,
+  - unit/view suites (`HeroRegistryTests`, `SaveLoadTests`, `ContentManagerTests`, `ContentRegistryTests`, `PackLoaderTests`, `HeroPanelTests`),
+  - audit core suite in `AuditGateTests` (asset/content/save/runtime contracts),
+  - audit architecture suite in `AuditArchitectureBoundaryGateTests` (Epic 29/33/34/36/42/43 boundaries: critical state assignment scan, RNG-service access scan, arena sandbox gate + `UInt64.random` ban, explicit `.startCombat/.commitExternalCombat/EchoCombatBridge.applyCombatResult` allowlists, direct `.combatFinish` ban, combat-bridge no-extension gate, ViewModel/model UI-import bans, ViewModel→View type-reference ban, Engine/Core allowlist scan).
+  - Epic 35 external-combat stress determinism checks in `ExternalCombatPersistenceTests` (resume fingerprint stability across repeated save/load + interrupted-commit parity after resume cycles; event lock clears consistently on combat commit).
+- **Destination/tooling stability helpers**:
+  - `.github/ci/select_ios_destination.sh` resolves a concrete simulator `name+OS` from current Xcode runtime set.
+  - `.github/ci/run_xcodebuild.sh` uses `xcpretty` when available and falls back to plain `xcodebuild` otherwise.
+  - `.github/ci/clean_test_artifacts.sh` removes stale local/CI test artifacts before gate execution.
+  - `.github/ci/preflight_ci_environment.sh` writes `toolchain_snapshot.md` into `TestResults/QualityDashboard`.
+- **RC profile enforcement (Epic 38/39)**:
+  - `spm-packages` validates `rc_engine_twilight` for `TwilightEngine`.
+  - `app-tests` validates `rc_app` after inventory/drift generation.
+  - `build-validation` publishes `build_cardsamplegame` and `build_packeditor` gates.
+  - `content-validation` publishes `content_json_lint`, `repo_hygiene`, and `docs_sync` gates.
+  - `release-readiness-profile` validates aggregated `rc_full` from all artifacts.
+  - both profiles require zero active quarantine entries.
+
+## 4. Save Schema Migration Checks (Epic 28)
+
+- Engine-level matrix and key-contract tests:
+  - `Packages/TwilightEngine/Tests/TwilightEngineTests/GateTests/INV_SCHEMA28_GateTests.swift`
+- App wrapper legacy-file compatibility:
+  - `CardSampleGameTests/Unit/SaveLoadTests.swift`
+  - `testSaveManagerLoadsLegacySchemaPayloadsFromDisk`
+
+## 5. Replay Contract Checks (Epic 30)
+
+- Canonical action-trace replay gate:
+  - `Packages/TwilightEngine/Tests/TwilightEngineTests/GateTests/INV_REPLAY30_GateTests.swift`
+- Versioned replay fixtures:
+  - `Packages/TwilightEngine/Tests/TwilightEngineTests/Fixtures/Replay/epic30_smoke_seed_424242_v1.json`
+  - `Packages/TwilightEngine/Tests/TwilightEngineTests/Fixtures/Replay/epic30_smoke_seed_808080_v1.json`
+- Coverage:
+  - canonical trace schema round-trip stability,
+  - same-seed replay fingerprint stability,
+  - checkpoint restore vs linear replay fingerprint parity,
+  - different-seed divergence,
+  - fixture drift diagnostics (fingerprints + first step mismatch + suggested expected block).
+- Controlled fixture update flow:
 
 ```bash
-# Gate tests only
-xcodebuild test -scheme CardSampleGame \
-  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
-  -only-testing:CardSampleGameTests/DesignSystemComplianceTests
-
-# Combat tests
-cd Packages/TwilightEngine && swift test --filter Combat
-
-# Fate system tests
-cd Packages/TwilightEngine && swift test --filter Fate
-
-# TDD model tests
-cd Packages/TwilightEngine && swift test --filter DualTrackCombat
+REPLAY_FIXTURE_UPDATE=1 \
+swift test --package-path Packages/TwilightEngine \
+  --filter INV_REPLAY30_GateTests
 ```
 
-### 4.3 CI Pipeline
+## 5.1 Save/Resume Fault Injection (Epic 47)
 
-Gate tests run automatically on every PR:
+- Gate suite:
+  - `Packages/TwilightEngine/Tests/TwilightEngineTests/GateTests/INV_RESUME47_GateTests.swift`
+- Coverage:
+  - interrupted save-write simulation with fallback recovery from last valid checkpoint,
+  - partial snapshot resume path with migration-default fields omitted,
+  - repeated mixed recoveries with deterministic baseline parity.
+- Drift checks:
+  - final fingerprint and step fingerprint parity versus baseline,
+  - no drift in `rngState`, `currentEventId`, `pendingEncounterState`, `pendingExternalCombatSeed`.
 
-```yaml
-# .github/workflows/tests.yml
-- name: Gate Tests (App)
-  run: |
-    xcodebuild test \
-      -only-testing:CardSampleGameTests/AuditGateTests \
-      -only-testing:CardSampleGameTests/DesignSystemComplianceTests \
-      -only-testing:CardSampleGameTests/LocalizationValidatorTests \
-      -only-testing:CardSampleGameTests/ContentValidationTests \
-      -only-testing:CardSampleGameTests/SaveLoadRoundTripTests
-
-- name: Engine Tests (excluding TDD RED)
-  run: |
-    cd Packages/TwilightEngine && swift test \
-      --skip DualTrackCombatTests \
-      --skip DualTrackCombatIntegrationTests
+```bash
+swift test --package-path Packages/TwilightEngine \
+  --filter INV_RESUME47_GateTests
 ```
 
-> **TDD Model Policy:** Тесты с пометкой 🔴 RED исключены из CI через `--skip`. Когда тест переведён в GREEN, его удаляют из skip-листа и добавляют в обычный прогон.
+## 6. CI Quality Dashboard (Epic 31)
 
-> **SwiftPM Compatibility:** Синтаксис `--skip` зависит от версии SwiftPM. При обновлении toolchain необходимо проверить и обновить команды в §4.3. Формат: `--skip <TestSuiteName>` (swift 5.7+).
+- Each CI gate writes duration + status metadata into:
+  - `TestResults/QualityDashboard/summary.md`
+  - `TestResults/QualityDashboard/gates.jsonl`
+- Epic 37 inventory/drift artifact:
+  - `TestResults/QualityDashboard/gate_inventory.json`
+  - `TestResults/QualityDashboard/gate_drift_report.md`
+- Runner: `.github/ci/run_quality_gate.sh` (budget enforcement + failure taxonomy).
+- Inventory generator: `.github/ci/generate_gate_inventory_report.sh`.
 
-> **Skip List Hygiene:** CI обязан проверять, что skip-список пустеет по мере перевода тестов в GREEN. Правило: если тест в skip-листе более 30 дней без progress — это блокер для merge. Нельзя "держать" тесты в skip годами.
+## 7. Release Candidate Profile (Epic 38/39)
 
-> **Enforcement:** CI job `check-skip-list-age` проверяет файл `.github/tdd-skip-list.yml`. Формат:
-> ```yaml
-> skipped_tests:
->   - name: DualTrackCombatTests
->     added: 2026-01-28
->     reason: "TDD model for Dual Track combat"
->     tracking_issue: "#123"
-> ```
-> Job валится если `(today - added) > 30 days` и нет обновления `tracking_issue`.
->
-> **Required Artifact:** Workflow обязателен и хранится в `.github/workflows/check-skip-list-age.yml`. Отсутствие файла = CI failure.
+- Enforcer: `.github/ci/validate_release_profile.sh`.
+- Input: `TestResults/QualityDashboard/gates.jsonl` produced by `run_quality_gate.sh`.
+- Output reports:
+  - `TestResults/QualityDashboard/release_profile_rc_engine_twilight.md`
+  - `TestResults/QualityDashboard/release_profile_rc_app.md`
+  - `TestResults/QualityDashboard/release_profile_rc_build_content.md`
+  - `TestResults/QualityDashboard/release_profile_rc_full.md`
+- Fails if gate is missing/not passed, if runtime or configured budget exceeds RC threshold, or if quarantine has active entries.
 
-> **Release Gate:** CI должен проверять, что `.github/workflows/check-skip-list-age.yml` существует в репозитории. Если файл отсутствует — PR не может быть замержен.
+```bash
+# Validate TwilightEngine RC subset (run in TwilightEngine SPM job context)
+bash .github/ci/validate_release_profile.sh \
+  --profile rc_engine_twilight \
+  --dashboard-dir TestResults/QualityDashboard \
+  --registry .github/flaky-quarantine.csv
 
----
+# Validate App RC subset (run in app-tests job context)
+bash .github/ci/validate_release_profile.sh \
+  --profile rc_app \
+  --dashboard-dir TestResults/QualityDashboard \
+  --registry .github/flaky-quarantine.csv
 
-## 5. Test File Reference
+# Validate full RC profile (run in aggregated release-readiness context)
+bash .github/ci/validate_release_profile.sh \
+  --profile rc_full \
+  --dashboard-dir TestResults/QualityDashboard \
+  --registry .github/flaky-quarantine.csv
 
-### TwilightEngineTests/
-
-| File | Tests | Spec Reference |
-|------|-------|----------------|
-| `CombatEngineFirstTests.swift` | Basic combat, effects | ENGINE_ARCHITECTURE.md |
-| `CombatSpiritTests.swift` | Spirit track, pacification | COMBAT_DIPLOMACY_SPEC.md §1.2 |
-| `DualTrackCombatTests.swift` | Full Dual Track system | COMBAT_DIPLOMACY_SPEC.md |
-| `DataSeparationTests.swift` | Data/code separation | ENGINE_ARCHITECTURE.md |
-| `EnemyDefinitionTests.swift` | Enemy loading | SPEC_CAMPAIGN_PACK.md |
-| `FateAttackTests.swift` | Fate attack calc | COMBAT_DIPLOMACY_SPEC.md §3.1 |
-| `FateDeckManagerTests.swift` | Deck mechanics | GDD Pillar 5 |
-| `FateSkillCheckTests.swift` | Skill checks | EXPLORATION_CORE_DESIGN.md |
-| `GameplayFlowTests.swift` | Game flow | GDD |
-| `Phase3ContractTests.swift` | API contracts | ENGINE_ARCHITECTURE.md |
-| `RegressionPlaythroughTests.swift` | Playthrough | QA_ACT_I_CHECKLIST.md |
-| `ResonanceEngineTests.swift` | Resonance zones | COMBAT_DIPLOMACY_SPEC.md §4 |
-| `TimeSystemTests.swift` | Day/night, time | EXPLORATION_CORE_DESIGN.md |
-
-### CardSampleGameTests/GateTests/
-
-| File | Gates | Failure = Blocker |
-|------|-------|-------------------|
-| `AuditGateTests.swift` | Architecture rules | Yes |
-| `CodeHygieneTests.swift` | No debug code | Yes |
-| `ConditionValidatorTests.swift` | Condition expressions | Yes |
-| `ContentValidationTests.swift` | JSON validation | Yes |
-| `DesignSystemComplianceTests.swift` | Design tokens | Yes |
-| `ExpressionParserTests.swift` | Expression syntax | Yes |
-| `LocalizationValidatorTests.swift` | L10n coverage | Yes |
-| `SaveLoadRoundTripTests.swift` | Save/Load integrity | Yes |
-
----
-
-## 6. Spec-to-Test Traceability Matrix
-
-Critical spec requirements must have explicit test coverage. This matrix tracks the mapping.
-
-### 6.1 COMBAT_DIPLOMACY_SPEC.md Traceability
-
-| Spec Section | Requirement | Test File | Test Name |
-|--------------|-------------|-----------|-----------|
-| §1.2 Kill Priority | HP=0 → Kill (regardless of WP) | `DualTrackCombatTests` | `testKillPriorityWhenBothZero` |
-| §1.2 Pacify | WP=0 && HP>0 → Pacify | `DualTrackCombatTests` | `testPacifyWhenWPZeroHPRemains` |
-| §1.2 Multi-Enemy | Per-entity outcome tracking | `DualTrackCombatTests` | `testMultiEnemyPerEntityOutcome` |
-| §1.2 Multi-Enemy | All pacified = nonviolent | `DualTrackCombatTests` | `testMultiEnemyAllPacifiedIsNonviolent` |
-| §3.1 Attack Formula | Physical attack reduces HP only | `DualTrackCombatTests` | `testPhysicalAttackReducesHPOnly` |
-| §3.2 Influence Formula | Spirit influence reduces WP only | `DualTrackCombatTests` | `testSpiritualInfluenceReducesWPOnly` |
-| §3.3 Active Defense | Defense uses Fate card | `DualTrackCombatTests` | `testActiveDefenseUsesFateCard` |
-| §3.3 Critical Defense | CRIT = 0 damage | `DualTrackCombatTests` | `testCriticalDefenseZeroDamage` |
-| §5 Balance Pack | Values from config, not hardcoded | `DualTrackCombatTests` | `testEscalationUsesBalancePackValue` |
-| §5.1 De-escalation | Rage shield applied | `DualTrackCombatTests` | `testDeEscalationRageShieldApplied` |
-| §5.2 Escalation | -15 resonance penalty (default) | `DualTrackCombatTests` | `testEscalationPenaltyOnSwitchToPhysical` |
-| §5.2 Escalation | x1.5 surprise damage (default) | `DualTrackCombatTests` | `testEscalationSurpriseDamageBonus` |
-| §2 Intent | Intent generated at round start | `DualTrackCombatTests` | `testIntentGeneratedAtRoundStart` |
-| §2 Wait Action | Wait conserves Fate card | `DualTrackCombatTests` | `testWaitActionConservesFateCard` |
-| §2 Wait Action | No hidden FateDeck side effects | `DualTrackCombatTests` | `testWaitHasNoHiddenFateDeckSideEffects` |
-| §2 Mulligan | Mulligan replaces cards | `DualTrackCombatTests` | `testMulliganReplacesSelectedCards` |
-| §6.2 Behaviors | behavior_id refs exist | `CombatContentValidationTests` | `testAllBehaviorReferencesExist` |
-| §6.2 Behaviors | value_formula whitelist | `CombatContentValidationTests` | `testValueFormulaWhitelist` |
-| §6.2 Behaviors | MULTIPLIER_ID exists | `CombatContentValidationTests` | `testValueFormulaMultipliersExist` |
-| §6.2 Behaviors | intent.type valid | `CombatContentValidationTests` | `testIntentTypesValid` |
-| §6.2 Behaviors | Conditions parsable | `CombatContentValidationTests` | `testBehaviorConditionsParsable` |
-| §6.3 Fate Cards | Unique IDs | `CombatContentValidationTests` | `testFateCardIdsUnique` |
-| §6.3 Fate Cards | Valid suit values | `CombatContentValidationTests` | `testFateCardSuitsValid` |
-| §6.3 Fate Cards | Choice cards complete | `CombatContentValidationTests` | `testChoiceCardsHaveBothOptions` |
-| §6.4 Fate Cards | Valid keywords | `CombatContentValidationTests` | `testFateCardKeywordsValid` |
-| §3.5.2 Keywords | Context interpretation | `UniversalFateKeywordTests` | `testKeywordInterpretationByContext` |
-| §3.5.3 Keywords | Match Bonus | `UniversalFateKeywordTests` | `testMatchBonusWhenSuitMatchesAction` |
-| §3.5.3 Keywords | Mismatch handling | `UniversalFateKeywordTests` | `testMismatchGivesOnlyValue` |
-| §3.5.4 Keywords | All contexts covered | `UniversalFateKeywordTests` | `testAllKeywordsHaveAllContextEffects` |
-| §4.1 Zone Effects | Deep zone cost modifiers | `DualTrackCombatTests` | `testResonanceCostPenaltyInDeepZones` |
-| §6.2 Behaviors | Dynamic intent update | `DualTrackCombatTests` | `testIntentUpdatesOnConditionChange` |
-
-### 6.2 ENGINE_ARCHITECTURE.md Traceability
-
-| Spec Section | Requirement | Test File | Test Name |
-|--------------|-------------|-----------|-----------|
-| Engine-First | All actions via Engine | `Phase3ContractTests` | `testAllActionsReturnActionResult` |
-| State Tracking | Changes tracked | `Phase3ContractTests` | `testStateChangesAreTracked` |
-| Determinism | Same seed = same result | `Phase3ContractTests` | `testEngineDeterministicWithSeed` |
-| Save/Load | Round-trip equality | `SaveLoadRoundTripTests` | `testSaveLoadRoundTrip` |
-
-### 6.3 Adding New Traceability
-
-When implementing a new spec requirement:
-1. Add entry to this matrix BEFORE writing test
-2. Write test with exact name from matrix
-3. Update Status column when test is GREEN
-
----
-
-## 7. Writing New Tests
-
-### 7.1 Test Naming Convention
-
-```swift
-func test[Feature]_[Scenario]_[ExpectedResult]()
-
-// Examples:
-func testPhysicalAttack_ReducesHP_NotWP()
-func testEscalation_SwitchToPhysical_ShiftsResonance()
-func testKillPriority_BothZero_KillWins()
+# Unified local release check
+bash .github/ci/run_release_check.sh TestResults/QualityDashboard CardSampleGame
 ```
 
-### 7.2 Test Structure (AAA Pattern)
+## 8. Flaky Quarantine (Epic 31)
 
-```swift
-func testSomething() {
-    // Arrange (Given)
-    let engine = TwilightGameEngine()
-    engine.initializeNewGame()
+- Registry: `.github/flaky-quarantine.csv` (CSV, no quoted commas, must keep header).
+- Validation: `.github/ci/validate_flaky_quarantine.sh` (fails on expired entries or missing owner/expiry/issue).
+- Application:
+  - SwiftPM: `.github/ci/quarantine_args.sh --format swiftpm --suite spm:<Package>` emits `--skip <regex>`.
+  - Xcodebuild: `.github/ci/quarantine_args.sh --format xcodebuild --suite xcodebuild:CardSampleGame` emits `-skip-testing:<id>`.
 
-    // Act (When)
-    engine.performAction(.someAction)
+## 9. Package Lockfile Check
 
-    // Assert (Then)
-    XCTAssertEqual(engine.someState, expectedValue)
-}
+Before closing dependency-related tasks:
+
+```bash
+bash .github/ci/validate_repo_hygiene.sh
 ```
 
-### 7.3 TDD Workflow
+This check enforces:
+- single canonical lockfile path (`CardSampleGame.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved`),
+- no tracked transient artifacts (`xcresult`, local logs, temporary reports).
 
-1. **Write test** that describes expected behavior
-2. **Run test** — it should fail (RED)
-3. **Implement code** to make test pass
-4. **Run test** — it should pass (GREEN)
-5. **Refactor** while keeping test GREEN
-6. **Repeat**
+## 9.1 Documentation Sync Gate (Epic 48)
 
----
+- Validator:
+  - `.github/ci/validate_docs_sync.sh`
+- Enforced contracts:
+  - determinism/scheme smoke tokens in workflow vs docs,
+  - epic status markers (`Epic 28`, `Epic 30`, `Epic 47`, `Epic 48`) in ledger.
+- RC implication:
+  - `docs_sync` is required in `rc_build_content` and therefore in `rc_full`.
 
-## 8. Test Coverage Goals
-
-| Module | Target | Current |
-|--------|--------|---------|
-| Combat System | 80% | ~60% |
-| Fate Deck | 90% | ~85% |
-| Content Loading | 70% | ~70% |
-| UI Components | 50% | ~30% |
-
----
-
-## Appendix: Test Dependencies
-
-### TestContentLoader
-
-Utility for loading test content:
-
-```swift
-// In test setUp:
-override class func setUp() {
-    super.setUp()
-    TestContentLoader.loadContentPacksIfNeeded()
-}
+```bash
+bash .github/ci/validate_docs_sync.sh
 ```
 
-### Mock Fate Deck
+## 10. Change Discipline
 
-For deterministic tests:
-
-```swift
-let fateCards = [
-    FateCard(id: "f1", modifier: 2, name: "Fortune")
-]
-engine.setupFateDeck(cards: fateCards)
-```
-
----
-
----
-
-## 9. Encounter System Test Model
-
-> **Подробная документация:** [ENCOUNTER_TEST_MODEL.md](./ENCOUNTER_TEST_MODEL.md)
-> **Карта миграции:** [TEST_MIGRATION_MAP.md](./TEST_MIGRATION_MAP.md)
-
-Encounter System использует **гибридную модель тестирования:** Gate + Layer + Integration + TDD.
-
-### 9.1 Ключевые правила
-
-| Правило | Описание |
-|---------|----------|
-| **Gate < 2s, no nondeterministic RNG** | Gate-тесты < 2 секунд; запрещён system random, seeded RNG допускается |
-| **Gate = no XCTSkip** | Невозможность проверки = FAIL |
-| **TDD/ = только RED** | GREEN тест в TDD/ = CI failure. Немедленный перенос в LayerTests/ или IntegrationTests/ |
-| **INV-xxx ID** | Каждый gate-инвариант имеет уникальный ID: `INV-ENC-001`, `INV-FATE-001`, `INV-BHV-001` |
-| **Snapshot = атомарная замена** | `apply(snapshot)` заменяет состояние целиком, не merge-ит |
-| **Integration = реальный контент** | IntegrationTests/ используют реальный ContentRegistry, не моки |
-
-### 9.2 Структура тестов
-
-```
-TwilightEngineTests/
-├── GateTests/          # INV-ENC, INV-FATE, INV-BHV, INV-CNT инварианты
-├── LayerTests/         # Юнит-тесты по компонентам (EncounterEngine, FateDeck, Behavior, Keyword, Modifier)
-├── IntegrationTests/   # E2E сценарии (Kill path, Pacify path, Flee, Multi-enemy)
-└── TDD/                # Инкубатор (только RED тесты)
-```
-
-### 9.3 Инварианты (сводка)
-
-- **INV-ENC-001..007** — Phase Order, Dual Track Independence, Kill Priority, Transaction Atomicity, Determinism, No External State, One Finish Action
-- **INV-FATE-001..008** — Conservation, Snapshot Isolation, Reshuffle Trigger, Draw Order Determinism, Sticky Card Persistence, Suit Validity, Choice Card Completeness, Keyword Validity
-- **INV-BHV-001..005** — Priority Determinism, Unknown Condition Fail, Default Intent Required, Formula Whitelist, Intent Type Valid
-- **INV-CNT-001..003** — Behavior Refs Exist, Fate Card IDs Unique, Multiplier Refs Exist
-
----
-
-**Document maintained by:** QA Team
-**Review schedule:** After each major feature implementation
+- Add or update tests in the same PR as behavior changes.
+- Keep `QUALITY_CONTROL_MODEL.md` and epic status docs in sync.
+- Do not soften gate failures with skips in mandatory suites.

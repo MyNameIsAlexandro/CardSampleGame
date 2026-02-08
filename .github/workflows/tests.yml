@@ -11,6 +11,23 @@ on:
 
 jobs:
   # ──────────────────────────────────────────────
+  # Job 0: Quality Governance (Policy Validation)
+  # ──────────────────────────────────────────────
+  quality-governance:
+    name: Quality Governance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Flaky Quarantine Registry
+        run: |
+          bash .github/ci/validate_flaky_quarantine.sh .github/flaky-quarantine.csv
+
+      - name: Validate Repository Hygiene
+        run: |
+          bash .github/ci/validate_repo_hygiene.sh
+
+  # ──────────────────────────────────────────────
   # Job 1: SPM Package Tests (swift test, macOS)
   # ──────────────────────────────────────────────
   spm-packages:
@@ -31,8 +48,56 @@ jobs:
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode.app
 
-      - name: Build & Test ${{ matrix.package }}
-        run: swift test --package-path Packages/${{ matrix.package }}
+      - name: Prepare CI Workspace
+        run: |
+          bash .github/ci/clean_test_artifacts.sh
+          bash .github/ci/preflight_ci_environment.sh TestResults/QualityDashboard ${{ matrix.package }}
+
+      - name: Quality Budget - Build & Test ${{ matrix.package }}
+        run: |
+          mkdir -p TestResults/QualityDashboard
+          skip_args="$(bash .github/ci/quarantine_args.sh --format swiftpm --suite "spm:${{ matrix.package }}")"
+          bash .github/ci/run_quality_gate.sh \
+            --id "spm_${{ matrix.package }}_tests" \
+            --budget-sec 1200 \
+            --dashboard-dir TestResults/QualityDashboard \
+            -- "swift test --package-path Packages/${{ matrix.package }} ${skip_args}"
+
+      - name: Quality Budget - Strict Concurrency Gate (TwilightEngine)
+        if: matrix.package == 'TwilightEngine'
+        run: |
+          mkdir -p TestResults/QualityDashboard
+          bash .github/ci/run_quality_gate.sh \
+            --id "spm_twilightengine_strict_concurrency" \
+            --budget-sec 1200 \
+            --dashboard-dir TestResults/QualityDashboard \
+            -- "bash .github/ci/spm_twilightengine_strict_concurrency_gate.sh"
+
+      - name: Quality Budget - Determinism Smoke Gate (TwilightEngine)
+        if: matrix.package == 'TwilightEngine'
+        run: |
+          mkdir -p TestResults/QualityDashboard
+          skip_args="$(bash .github/ci/quarantine_args.sh --format swiftpm --suite spm:TwilightEngine)"
+          bash .github/ci/run_quality_gate.sh \
+            --id "spm_twilightengine_determinism_smoke" \
+            --budget-sec 300 \
+            --dashboard-dir TestResults/QualityDashboard \
+            -- "swift test --package-path Packages/TwilightEngine --filter 'INV_RNG_GateTests|INV_SCHEMA28_GateTests|INV_REPLAY30_GateTests|INV_RESUME47_GateTests|ContentRegistryRegistrySyncTests' ${skip_args}"
+
+      - name: RC Profile - TwilightEngine
+        if: matrix.package == 'TwilightEngine'
+        run: |
+          bash .github/ci/validate_release_profile.sh \
+            --profile rc_engine_twilight \
+            --dashboard-dir TestResults/QualityDashboard \
+            --registry .github/flaky-quarantine.csv
+
+      - name: Upload SPM Quality Dashboard
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: spm-quality-dashboard-${{ matrix.package }}
+          path: TestResults/QualityDashboard/
 
   # ──────────────────────────────────────────────
   # Job 2: App Tests (xcodebuild, iOS)
@@ -46,45 +111,86 @@ jobs:
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode.app
 
+      - name: Prepare CI Workspace
+        run: |
+          bash .github/ci/clean_test_artifacts.sh
+          CI_RESOLVE_IOS_DESTINATION=1 bash .github/ci/preflight_ci_environment.sh TestResults/QualityDashboard CardSampleGame
+
+      - name: "Gate 0: App Strict Concurrency"
+        run: |
+          mkdir -p TestResults/QualityDashboard
+          bash .github/ci/run_quality_gate.sh \
+            --id "app_gate_0_strict_concurrency" \
+            --budget-sec 1200 \
+            --dashboard-dir TestResults/QualityDashboard \
+            -- "bash .github/ci/app_gate0_strict_concurrency.sh"
+
       - name: "Gate 1: Quality Gates"
         run: |
-          xcodebuild test \
-            -scheme CardSampleGame \
-            -destination 'platform=iOS Simulator,name=iPhone 15' \
-            -only-testing:CardSampleGameTests/CodeHygieneTests \
-            -only-testing:CardSampleGameTests/DesignSystemComplianceTests \
-            -only-testing:CardSampleGameTests/ContrastComplianceTests \
-            -only-testing:CardSampleGameTests/LocalizationValidatorTests \
-            -only-testing:CardSampleGameTests/LocalizationCompletenessTests \
-            -resultBundlePath TestResults/QualityGates.xcresult \
-            | xcpretty
+          mkdir -p TestResults/QualityDashboard
+          ios_destination="$(bash .github/ci/select_ios_destination.sh --scheme CardSampleGame)"
+          skip_args="$(bash .github/ci/quarantine_args.sh --format xcodebuild --suite xcodebuild:CardSampleGame)"
+          bash .github/ci/run_quality_gate.sh \
+            --id "app_gate_1_quality" \
+            --budget-sec 1200 \
+            --dashboard-dir TestResults/QualityDashboard \
+            -- "bash .github/ci/run_xcodebuild.sh test -scheme CardSampleGame -destination '${ios_destination}' ${skip_args} -only-testing:CardSampleGameTests/CodeHygieneTests -only-testing:CardSampleGameTests/DesignSystemComplianceTests -only-testing:CardSampleGameTests/ContrastComplianceTests -only-testing:CardSampleGameTests/LocalizationValidatorTests -only-testing:CardSampleGameTests/LocalizationCompletenessTests -resultBundlePath TestResults/QualityGates.xcresult"
 
       - name: "Gate 2: Content Validation"
         run: |
-          xcodebuild test \
-            -scheme CardSampleGame \
-            -destination 'platform=iOS Simulator,name=iPhone 15' \
-            -only-testing:CardSampleGameTests/ContentValidationTests \
-            -only-testing:CardSampleGameTests/ConditionValidatorTests \
-            -only-testing:CardSampleGameTests/ExpressionParserTests \
-            -only-testing:CardSampleGameTests/ProfileGateTests \
-            -only-testing:CardSampleGameTests/AuditGateTests \
-            -resultBundlePath TestResults/ContentValidation.xcresult \
-            | xcpretty
+          mkdir -p TestResults/QualityDashboard
+          ios_destination="$(bash .github/ci/select_ios_destination.sh --scheme CardSampleGame)"
+          skip_args="$(bash .github/ci/quarantine_args.sh --format xcodebuild --suite xcodebuild:CardSampleGame)"
+          bash .github/ci/run_quality_gate.sh \
+            --id "app_gate_2_content_validation" \
+            --budget-sec 1200 \
+            --dashboard-dir TestResults/QualityDashboard \
+            -- "bash .github/ci/run_xcodebuild.sh test -scheme CardSampleGame -destination '${ios_destination}' ${skip_args} -only-testing:CardSampleGameTests/ContentValidationTests -only-testing:CardSampleGameTests/ConditionValidatorTests -only-testing:CardSampleGameTests/ExpressionParserTests -only-testing:CardSampleGameTests/ProfileGateTests -resultBundlePath TestResults/ContentValidation.xcresult"
+
+      - name: "Gate 2A: Audit Core"
+        run: |
+          mkdir -p TestResults/QualityDashboard
+          ios_destination="$(bash .github/ci/select_ios_destination.sh --scheme CardSampleGame)"
+          skip_args="$(bash .github/ci/quarantine_args.sh --format xcodebuild --suite xcodebuild:CardSampleGame)"
+          bash .github/ci/run_quality_gate.sh \
+            --id "app_gate_2a_audit_core" \
+            --budget-sec 1200 \
+            --dashboard-dir TestResults/QualityDashboard \
+            -- "bash .github/ci/run_xcodebuild.sh test -scheme CardSampleGame -destination '${ios_destination}' ${skip_args} -only-testing:CardSampleGameTests/AuditGateTests -resultBundlePath TestResults/AuditCore.xcresult"
+
+      - name: "Gate 2B: Audit Architecture"
+        run: |
+          mkdir -p TestResults/QualityDashboard
+          ios_destination="$(bash .github/ci/select_ios_destination.sh --scheme CardSampleGame)"
+          skip_args="$(bash .github/ci/quarantine_args.sh --format xcodebuild --suite xcodebuild:CardSampleGame)"
+          bash .github/ci/run_quality_gate.sh \
+            --id "app_gate_2b_audit_architecture" \
+            --budget-sec 1200 \
+            --dashboard-dir TestResults/QualityDashboard \
+            -- "bash .github/ci/run_xcodebuild.sh test -scheme CardSampleGame -destination '${ios_destination}' ${skip_args} -only-testing:CardSampleGameTests/AuditArchitectureBoundaryGateTests -resultBundlePath TestResults/AuditArchitecture.xcresult"
 
       - name: "Gate 3: Unit & View Tests"
         run: |
-          xcodebuild test \
-            -scheme CardSampleGame \
-            -destination 'platform=iOS Simulator,name=iPhone 15' \
-            -only-testing:CardSampleGameTests/HeroRegistryTests \
-            -only-testing:CardSampleGameTests/SaveLoadTests \
-            -only-testing:CardSampleGameTests/ContentManagerTests \
-            -only-testing:CardSampleGameTests/ContentRegistryTests \
-            -only-testing:CardSampleGameTests/PackLoaderTests \
-            -only-testing:CardSampleGameTests/HeroPanelTests \
-            -resultBundlePath TestResults/UnitTests.xcresult \
-            | xcpretty
+          mkdir -p TestResults/QualityDashboard
+          ios_destination="$(bash .github/ci/select_ios_destination.sh --scheme CardSampleGame)"
+          skip_args="$(bash .github/ci/quarantine_args.sh --format xcodebuild --suite xcodebuild:CardSampleGame)"
+          bash .github/ci/run_quality_gate.sh \
+            --id "app_gate_3_unit_views" \
+            --budget-sec 1200 \
+            --dashboard-dir TestResults/QualityDashboard \
+            -- "bash .github/ci/run_xcodebuild.sh test -scheme CardSampleGame -destination '${ios_destination}' ${skip_args} -only-testing:CardSampleGameTests/HeroRegistryTests -only-testing:CardSampleGameTests/SaveLoadTests -only-testing:CardSampleGameTests/ContentManagerTests -only-testing:CardSampleGameTests/ContentRegistryTests -only-testing:CardSampleGameTests/PackLoaderTests -only-testing:CardSampleGameTests/HeroPanelTests -resultBundlePath TestResults/UnitTests.xcresult"
+
+      - name: "Gate Inventory Drift Report"
+        run: |
+          mkdir -p TestResults/QualityDashboard
+          bash .github/ci/generate_gate_inventory_report.sh TestResults/QualityDashboard
+
+      - name: "Gate 4: RC App Profile"
+        run: |
+          bash .github/ci/validate_release_profile.sh \
+            --profile rc_app \
+            --dashboard-dir TestResults/QualityDashboard \
+            --registry .github/flaky-quarantine.csv
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
@@ -104,7 +210,6 @@ jobs:
       matrix:
         include:
           - target: CardSampleGame
-            destination: "platform=iOS Simulator,name=iPhone 15"
           - target: PackEditor
             destination: "platform=macOS"
     steps:
@@ -113,12 +218,35 @@ jobs:
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode.app
 
+      - name: Prepare CI Workspace
+        run: |
+          bash .github/ci/clean_test_artifacts.sh
+          bash .github/ci/preflight_ci_environment.sh TestResults/QualityDashboard ${{ matrix.target }}
+
       - name: Build ${{ matrix.target }}
         run: |
-          xcodebuild build \
-            -scheme ${{ matrix.target }} \
-            -destination '${{ matrix.destination }}' \
-            | xcpretty
+          mkdir -p TestResults/QualityDashboard
+          if [ "${{ matrix.target }}" = "CardSampleGame" ]; then
+            ios_destination="$(bash .github/ci/select_ios_destination.sh --scheme CardSampleGame)"
+            bash .github/ci/run_quality_gate.sh \
+              --id "build_cardsamplegame" \
+              --budget-sec 1200 \
+              --dashboard-dir TestResults/QualityDashboard \
+              -- "bash .github/ci/run_xcodebuild.sh build -scheme CardSampleGame -destination '${ios_destination}'"
+          else
+            bash .github/ci/run_quality_gate.sh \
+              --id "build_packeditor" \
+              --budget-sec 1200 \
+              --dashboard-dir TestResults/QualityDashboard \
+              -- "bash .github/ci/run_xcodebuild.sh build -scheme PackEditor -destination '${{ matrix.destination }}'"
+          fi
+
+      - name: Upload Build Quality Dashboard
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build-quality-dashboard-${{ matrix.target }}
+          path: TestResults/QualityDashboard/
 
   # ──────────────────────────────────────────────
   # Job 4: Content Validation
@@ -129,28 +257,117 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Validate JSON files
+      - name: Prepare CI Workspace
         run: |
-          echo "Validating all JSON content files..."
-          fail=0
-          for f in $(find Packages/CharacterPacks Packages/StoryPacks -name '*.json' -type f); do
-            if ! python3 -m json.tool "$f" > /dev/null 2>&1; then
-              echo "❌ Invalid JSON: $f"
-              fail=1
-            fi
-          done
-          if [ "$fail" -eq 1 ]; then
-            echo "JSON validation failed"
+          bash .github/ci/clean_test_artifacts.sh
+          bash .github/ci/preflight_ci_environment.sh TestResults/QualityDashboard content-validation
+
+      - name: Gate: Content JSON Lint
+        run: |
+          mkdir -p TestResults/QualityDashboard
+          bash .github/ci/run_quality_gate.sh \
+            --id "content_json_lint" \
+            --budget-sec 300 \
+            --dashboard-dir TestResults/QualityDashboard \
+            -- "bash .github/ci/content_json_lint.sh"
+
+      - name: Gate: Repository Hygiene
+        run: |
+          mkdir -p TestResults/QualityDashboard
+          bash .github/ci/run_quality_gate.sh \
+            --id "repo_hygiene" \
+            --budget-sec 120 \
+            --dashboard-dir TestResults/QualityDashboard \
+            -- "bash .github/ci/validate_repo_hygiene.sh"
+
+      - name: Gate: Documentation Sync
+        run: |
+          mkdir -p TestResults/QualityDashboard
+          bash .github/ci/run_quality_gate.sh \
+            --id "docs_sync" \
+            --budget-sec 120 \
+            --dashboard-dir TestResults/QualityDashboard \
+            -- "bash .github/ci/validate_docs_sync.sh"
+
+      - name: Upload Content Quality Dashboard
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: content-quality-dashboard
+          path: TestResults/QualityDashboard/
+
+  # ──────────────────────────────────────────────
+  # Job 5: Release Readiness Profile
+  # ──────────────────────────────────────────────
+  release-readiness-profile:
+    name: Release Readiness Profile
+    needs: [spm-packages, app-tests, build-validation, content-validation]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download App Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: app-test-results
+          path: artifacts/app-tests
+
+      - name: Download TwilightEngine Quality Dashboard
+        uses: actions/download-artifact@v4
+        with:
+          name: spm-quality-dashboard-TwilightEngine
+          path: artifacts/spm-twilightengine
+
+      - name: Download Build Dashboard (CardSampleGame)
+        uses: actions/download-artifact@v4
+        with:
+          name: build-quality-dashboard-CardSampleGame
+          path: artifacts/build-cardsamplegame
+
+      - name: Download Build Dashboard (PackEditor)
+        uses: actions/download-artifact@v4
+        with:
+          name: build-quality-dashboard-PackEditor
+          path: artifacts/build-packeditor
+
+      - name: Download Content Dashboard
+        uses: actions/download-artifact@v4
+        with:
+          name: content-quality-dashboard
+          path: artifacts/content
+
+      - name: Merge Gate Dashboards
+        run: |
+          mkdir -p TestResults/QualityDashboard
+          : > TestResults/QualityDashboard/gates.jsonl
+          while IFS= read -r -d '' gate_file; do
+            cat "${gate_file}" >> TestResults/QualityDashboard/gates.jsonl
+          done < <(find artifacts -type f -name gates.jsonl -print0)
+          if [ ! -s TestResults/QualityDashboard/gates.jsonl ]; then
+            echo "No gates.jsonl files found in downloaded artifacts"
             exit 1
           fi
-          echo "✅ All JSON files valid"
+
+      - name: Validate RC Full Profile
+        run: |
+          bash .github/ci/validate_release_profile.sh \
+            --profile rc_full \
+            --dashboard-dir TestResults/QualityDashboard \
+            --registry .github/flaky-quarantine.csv
+
+      - name: Upload Release Readiness Dashboard
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: release-readiness-dashboard
+          path: TestResults/QualityDashboard/
 
   # ──────────────────────────────────────────────
   # Final Gate
   # ──────────────────────────────────────────────
   all-gates-passed:
     name: All Gates Passed
-    needs: [spm-packages, app-tests, build-validation, content-validation]
+    needs: [quality-governance, spm-packages, app-tests, build-validation, content-validation, release-readiness-profile]
     runs-on: ubuntu-latest
     steps:
       - name: All gates passed
