@@ -9,49 +9,29 @@ final class CodeHygieneTests: XCTestCase {
 
     // MARK: - Configuration
 
-    /// Maximum lines per file before warning (for NEW files)
-    /// Legacy files are grandfathered at their current size
+    /// Hard maximum lines per Swift file in the first-party codebase.
     private let maxLinesPerFile = 600
 
     /// Maximum public types per file (for NEW files)
     /// Related small types (enums, helper structs) can stay together
     private let maxTypesPerFile = 5
 
-    /// Files that are exempt from limits (legacy, grandfathered)
-    /// These files existed before Epic 10 enforcement
-    /// New files MUST follow the limits
-    private let legacyFiles: Set<String> = [
-        // Large files (>600 lines)
-        "ExplorationModels.swift",      // 872 lines - exploration domain models
-        "TwilightGameEngine.swift",     // 2247 lines - main engine
-        "ContentRegistry.swift",        // 844 lines - registry
-        "FateCard.swift",               // 8 cohesive fate card types
-        "JSONContentProvider.swift",    // 969 lines - JSON loading
-        // PackValidator.swift moved to PackAuthoring module
-        // Files with many related types (>5 types)
-        "EngineProtocols.swift",        // 30+ protocols - all engine contracts
-        "CodeContentProvider.swift",    // JSON loading types
-        "EventDefinition.swift",        // Event system types
-        "HeroAbility.swift",            // Ability system types
-        "PackTypes.swift",              // Pack-related types
-        "BalanceConfiguration.swift",   // Balance config types (intentionally grouped)
-        "CardDefinition.swift",         // Card system types
-        "CardType.swift",               // Card enums
-        "ContentManager.swift",         // Content management types (cohesive hot-reload API)
-        "GameDefinition.swift",         // Game definition types
-        "QuestDefinition.swift",        // Quest system types
-        "AbilityRegistry.swift",        // Ability loading types
-        "HeroRegistry.swift",           // Hero loading types
-        "HeroDefinition.swift",         // Hero system types
-        // CardRegistry.swift removed — all content via ContentRegistry
-        "EngineSave.swift",             // Save system types
-        "TimeEngine.swift",             // Time system types
-        "TwilightGameAction.swift",     // Action types
-        "PressureEngine.swift",         // Pressure system types
-        "ContentProvider.swift",        // Provider types
-        "MiniGameChallengeDefinition.swift", // MiniGame types
-        "EnemyDefinition.swift",        // Enemy types
-        "EngineTypes.swift",            // Runtime types
+    /// Project roots included in hard line-limit audit.
+    private let lineLimitProjectDirectories = [
+        "App",
+        "Views",
+        "ViewModels",
+        "Utilities",
+        "CardSampleGameTests",
+        "Packages"
+    ]
+
+    /// Path fragments excluded from hard line-limit audit.
+    /// Excludes build outputs and third-party/vendor code only.
+    private let lineLimitExcludedPathFragments = [
+        "/.build/",
+        "/Packages/ThirdParty/",
+        "/.codex_home/"
     ]
 
     /// Directories to audit in TwilightEngine
@@ -200,21 +180,20 @@ final class CodeHygieneTests: XCTestCase {
     // MARK: - 10.2 File Organization Tests
 
     func testFilesDoNotExceedLineLimit() throws {
-        guard let engine = engineRoot else {
-            XCTFail("GATE TEST FAILURE: Could not determine engine root path"); return
+        guard let root = projectRoot else {
+            XCTFail("GATE TEST FAILURE: Could not determine project root path"); return
         }
 
         var violations: [(file: String, lines: Int)] = []
 
-        for dir in engineDirectories {
-            let dirPath = engine.appendingPathComponent(dir)
+        for dir in lineLimitProjectDirectories {
+            let dirPath = root.appendingPathComponent(dir)
+            guard FileManager.default.fileExists(atPath: dirPath.path) else { continue }
             let files = findSwiftFiles(in: dirPath)
 
             for filePath in files {
-                let fileName = URL(fileURLWithPath: filePath).lastPathComponent
-
-                // Skip legacy files (grandfathered)
-                if legacyFiles.contains(fileName) {
+                let relativePath = makeRelativePath(filePath: filePath, projectRoot: root)
+                if shouldSkipLineLimit(relativePath: relativePath) {
                     continue
                 }
 
@@ -222,23 +201,26 @@ final class CodeHygieneTests: XCTestCase {
                 let lineCount = content.components(separatedBy: .newlines).count
 
                 if lineCount > maxLinesPerFile {
-                    violations.append((fileName, lineCount))
+                    violations.append((relativePath, lineCount))
                 }
             }
+        }
+
+        violations.sort {
+            if $0.lines == $1.lines { return $0.file < $1.file }
+            return $0.lines > $1.lines
         }
 
         if !violations.isEmpty {
             let message = violations.map { "  \($0.file): \($0.lines) lines (max \(maxLinesPerFile))" }.joined(separator: "\n")
             XCTFail("""
-                Found \(violations.count) NEW files exceeding line limit:
+                Found \(violations.count) files exceeding hard line limit:
                 \(message)
 
                 Consider splitting into smaller files:
                 - Extract related types into separate files
                 - Move extensions to Type+Extension.swift files
                 - Group by functionality, not just proximity
-
-                If this is intentional, add the file to legacyFiles in CodeHygieneTests.swift
                 """)
         }
     }
@@ -256,11 +238,6 @@ final class CodeHygieneTests: XCTestCase {
 
             for filePath in files {
                 let fileName = URL(fileURLWithPath: filePath).lastPathComponent
-
-                // Skip legacy files (grandfathered)
-                if legacyFiles.contains(fileName) {
-                    continue
-                }
 
                 let content = try String(contentsOfFile: filePath, encoding: .utf8)
                 let publicTypes = findPublicTypeDeclarations(in: content)
@@ -283,8 +260,6 @@ final class CodeHygieneTests: XCTestCase {
                 - Primary type: MyType.swift
                 - Extensions: MyType+Feature.swift
                 - Related small types can stay together if cohesive
-
-                If this is intentional, add the file to legacyFiles in CodeHygieneTests.swift
                 """)
         }
     }
@@ -322,6 +297,19 @@ final class CodeHygieneTests: XCTestCase {
         }
 
         return files
+    }
+
+    private func makeRelativePath(filePath: String, projectRoot: URL) -> String {
+        let rootPath = projectRoot.path.hasSuffix("/") ? projectRoot.path : projectRoot.path + "/"
+        if filePath.hasPrefix(rootPath) {
+            return String(filePath.dropFirst(rootPath.count))
+        }
+        return filePath
+    }
+
+    private func shouldSkipLineLimit(relativePath: String) -> Bool {
+        let normalized = "/" + relativePath
+        return lineLimitExcludedPathFragments.contains { normalized.contains($0) }
     }
 
     /// Find public methods without preceding /// doc comment

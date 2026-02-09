@@ -2,7 +2,7 @@
 
 **Scope:** architecture correctness, determinism, migration safety, CI enforceability.  
 **Status:** source of truth for quality gates.  
-**Last updated:** 2026-02-08
+**Last updated:** 2026-02-09
 
 This document is the canonical control point for validating product health after the Phase 2 audit/refactor stream.
 
@@ -35,19 +35,24 @@ This document is the canonical control point for validating product health after
 - **Schema compatibility smoke (Epic 28):**
   - `INV_SCHEMA28_GateTests`
 - **Strict concurrency:**
-  - `swift test -Xswiftc -strict-concurrency=complete -Xswiftc -warn-concurrency`
+  - `bash .github/ci/spm_twilightengine_strict_concurrency_gate.sh`
+  - Gate uses build-only mode (`swift build --build-tests`) with strict flags, so runtime test flakes do not mask compiler diagnostics.
   - CI fails on compiler diagnostics with file/line coordinates.
 
 ### 2.2 App (CardSampleGameTests)
 
 - **Architecture + mutation boundaries:**
-  - `AuditGateTests`
-  - `AuditArchitectureBoundaryGateTests`
+  - `AuditGateTests` (core runtime/content/save boundary enforcement)
+  - Includes `testEngineJournalUsesCoreStatePrimitives` (journal/resonance core primitive contract)
+  - Includes `testCardSampleGameTestsDoesNotLinkTwilightEngineDirectly` (prevents duplicate TwilightEngine runtime loading in host+tests)
+  - `AuditArchitectureBoundaryGateTests` (active split suite for architecture boundary contracts, used by `app_gate_2b_audit_architecture`)
 - **Save/load integration:**
   - `SaveLoadTests`
   - Includes legacy file-wrapper decode path (`testSaveManagerLoadsLegacySchemaPayloadsFromDisk`).
 - **Quality suites:**
   - `CodeHygieneTests`
+  - Hard line-limit contract: first-party Swift files must stay `<= 600` lines (line-limit has no legacy exemptions; vendor/build artifacts excluded).
+  - Public type-count contract: audited files must stay `<= 5` public types per file (no legacy exemptions).
   - `DesignSystemComplianceTests`
   - `ContrastComplianceTests`
   - `LocalizationValidatorTests`
@@ -61,6 +66,9 @@ This document is the canonical control point for validating product health after
   - `ContentRegistryTests`
   - `PackLoaderTests`
   - `HeroPanelTests`
+- **Runtime test stability contract (Epic 59):**
+  - Do not hardcode balance-derived runtime constants in tests when the active content config is the source of truth.
+  - Do not assert localized narrative copy for gameplay success/failure semantics; assert typed outcomes (`MiniGameOutcome`) and/or state changes.
 
 ## 3. Save Schema Contract (Epic 28)
 
@@ -96,19 +104,34 @@ This document is the canonical control point for validating product health after
 - App static gates enforce boundary rules:
   - block unauthorized `EchoCombatBridge.applyCombatResult(...)` call-sites,
   - block unauthorized `.startCombat(...)` / `.commitExternalCombat(...)` call-sites,
+  - block direct `combat.setupCombatEnemy(...)` app-layer call-sites,
   - block any direct app-layer `.combatFinish(...)` usage,
   - block app-layer `extension TwilightGameEngine` reintroduction in `Views/Combat` bridge files,
   - block app-layer direct assignments to critical engine state fields,
   - block app-layer direct access to `engine.services.rng`,
-  - block `UInt64.random(...)` seed generation in `BattleArenaView` (arena uses dedicated sandbox RNG instance),
+  - block `UInt64.random(...)` seed generation in `BattleArenaView` (arena uses an arena-local deterministic seed generator),
+  - enforce BattleArena sandbox contract via `AuditArchitectureBoundaryGateTests.testBattleArenaRemainsSandboxedFromWorldEngineCommitPath`,
+  - enforce that audit suites do not duplicate test names (`AuditArchitectureBoundaryGateTests.testAuditGateSuitesDoNotDuplicateTestNames`),
+  - enforce typed invalid-action reason contract (`ActionError.invalidAction(reason: InvalidActionReason)`) and block raw string construction (`.invalidAction(reason: "..."`) in `Engine/Core`,
   - block ViewModel imports of UI/render modules (`SwiftUI/UIKit/AppKit/SpriteKit/SceneKit/Echo*`),
   - block model-layer imports of UI/render modules,
   - block ViewModel references to concrete View types.
+- prevent direct `TwilightEngine` package linkage in `CardSampleGameTests` target (host app is the single runtime owner, enforced by `AuditGateTests`).
 - Engine/Core static allowlist gate enforces that critical state mutation points stay centralized in approved files.
 - Stress determinism matrix (Epic 35):
   - `ExternalCombatPersistenceTests` verifies pending external-combat fingerprint stability across repeated save/load cycles,
   - interrupted-combat commit parity is validated after resume round-trips (`commitExternalCombat(.escaped, ...)`).
   - `combatFinish` commit path clears event lock (`currentEventId/currentEvent`) after quest-trigger processing to avoid stale event drift between fresh and resumed sessions.
+
+## 4.1 Core Journal/Resonance Mutation Contract
+
+- Journal writes must use core primitives only:
+  - `resolveRegionName(forRegionId:)`
+  - `appendEventLogEntry(dayNumber:...)`
+- Journal extension must not mutate/read UI mirror fields directly (`publishedRegions`, `publishedEventLog`, `setEventLog(...)`).
+- Resonance updates in engine action flow must go through canonical setter:
+  - `setWorldResonance(_:)` (absolute clamp)
+  - `adjustResonance(by:)` (delta path)
 
 ## 5. Deterministic Replay Contract (Epic 30)
 
@@ -289,3 +312,27 @@ bash .github/ci/run_release_check.sh TestResults/QualityDashboard CardSampleGame
 - Keep CI smoke filters aligned with new gate suites.
 - Update `Docs/plans/2026-02-07-audit-refactor-phase2-epics.md` status.
 - Update this document when quality policy, gates, or contracts change.
+
+## 11. Structural Decomposition Backlog (Post-Epic 59)
+
+- Current monolith hotspots:
+  - `Packages/TwilightEngine/Sources/TwilightEngine/Core/TwilightGameEngine.swift` (`1085` lines after Epic 53 checkpoint #5),
+  - `Packages/TwilightEngine/Sources/TwilightEngine/ContentPacks/ContentRegistry.swift` (`987` lines after current split),
+  - `Views/WorldMapView.swift` (`287` lines after Epic 55 checkpoint #1),
+  - `CardSampleGameTests/GateTests/AuditGateTests.swift` (`2382` lines).
+- Current decomposition checkpoint:
+  - world-state models moved out of engine core into `Core/EngineWorldStateModels.swift`,
+  - read-only engine query API moved into `Core/TwilightGameEngine+ReadOnlyQueries.swift`,
+  - exploration availability query moved into `Core/TwilightGameEngine+ExplorationQueries.swift`,
+  - action validation/time/execution pipeline moved into `Core/TwilightGameEngine+ActionPipeline.swift`,
+  - bootstrap/mapping/validation helpers moved into `Core/TwilightGameEngine+BootstrapAndValidation.swift`,
+  - combat/resonance/external-commit support moved into `Core/TwilightGameEngine+StateSupport.swift`,
+  - persistence snapshot builder moved into `Core/TwilightGameEngine+PersistenceSnapshot.swift`,
+  - world bootstrap model moved into `Core/EngineWorldBootstrapState.swift`,
+  - world map subviews moved out of `Views/WorldMapView.swift` into `Views/WorldMap/EngineRegionDetailView.swift`, `Views/WorldMap/EngineRegionCardView.swift`, `Views/WorldMap/EngineEventLogView.swift`, and `Views/WorldMap/EventLogEntryView.swift`,
+  - `BalancePackAccess` moved out of `ContentRegistry.swift` into `ContentPacks/BalancePackAccess.swift`.
+- Validation policy for decomposition waves:
+  - mandatory: TwilightEngine determinism/schema smoke (`INV_RNG`, `INV_SCHEMA28`, `INV_REPLAY30`, `INV_RESUME47`, `ContentRegistryRegistrySyncTests`),
+  - mandatory: app architecture gate suite (`AuditGateTests`, `AuditArchitectureBoundaryGateTests`) when simulator infrastructure is available.
+- Infra risk note:
+  - `xcodebuild` test runs may fail with runner bootstrap crash (`Early unexpected exit`) unrelated to compile/contracts; classify as `infra_transient` and re-run under CI/local simulator health check before regression triage.

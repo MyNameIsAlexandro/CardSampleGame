@@ -1,6 +1,6 @@
 # Testing Guide
 
-**Last updated:** 2026-02-08  
+**Last updated:** 2026-02-09  
 **Primary QA source of truth:** `Docs/QA/QUALITY_CONTROL_MODEL.md`
 
 This guide is the operational runner for day-to-day checks.  
@@ -26,6 +26,9 @@ swift test --package-path Packages/TwilightEngine \
 swift test --package-path Packages/TwilightEngine \
   --filter INV_REPLAY30_GateTests
 
+# TwilightEngine strict concurrency diagnostics gate (build-only)
+bash .github/ci/spm_twilightengine_strict_concurrency_gate.sh
+
 # App save/load + architecture gates
 xcodebuild test -project CardSampleGame.xcodeproj \
   -scheme CardSampleGame \
@@ -38,7 +41,9 @@ xcodebuild test -project CardSampleGame.xcodeproj \
 ## 3. CI Gate Mapping
 
 - **SPM package matrix**: all package tests.
-- **TwilightEngine strict concurrency gate**: fails on strict-concurrency diagnostics.
+- **TwilightEngine strict concurrency gate**:
+  - runs in build-only mode (`swift build --build-tests` + strict flags),
+  - fails on strict-concurrency diagnostics only.
 - **TwilightEngine determinism/schema smoke**:
   - `INV_RNG_GateTests`
   - `INV_SCHEMA28_GateTests`
@@ -50,8 +55,12 @@ xcodebuild test -project CardSampleGame.xcodeproj \
   - quality/l10n/design gates,
   - content validation gates,
   - unit/view suites (`HeroRegistryTests`, `SaveLoadTests`, `ContentManagerTests`, `ContentRegistryTests`, `PackLoaderTests`, `HeroPanelTests`),
-  - audit core suite in `AuditGateTests` (asset/content/save/runtime contracts),
-  - audit architecture suite in `AuditArchitectureBoundaryGateTests` (Epic 29/33/34/36/42/43 boundaries: critical state assignment scan, RNG-service access scan, arena sandbox gate + `UInt64.random` ban, explicit `.startCombat/.commitExternalCombat/EchoCombatBridge.applyCombatResult` allowlists, direct `.combatFinish` ban, combat-bridge no-extension gate, ViewModel/model UI-import bans, ViewModel→View type-reference ban, Engine/Core allowlist scan).
+  - audit core suite in `AuditGateTests` (asset/content/save/runtime contracts and journal/runtime boundary checks),
+  - `CodeHygieneTests` enforces hard `<=600` line limit and `<=5` public types per file for first-party Swift code (excluding vendor/build artifacts; no legacy exemptions),
+  - `AuditGateTests.testEngineJournalUsesCoreStatePrimitives` enforces core journal/resonance mutation primitives (`resolveRegionName`, `appendEventLogEntry`, `setWorldResonance`) and blocks fallback to UI mirror state access.
+  - `AuditGateTests.testCardSampleGameTestsDoesNotLinkTwilightEngineDirectly` blocks direct `TwilightEngine` linkage in `CardSampleGameTests` target to avoid host+test runtime duplication warnings (`Class ... is implemented in both`).
+  - audit architecture suite in `AuditArchitectureBoundaryGateTests` is an active split gate (`app_gate_2b_audit_architecture`) for static boundary enforcement (Epic 29/33/34/36/42/43: critical state assignment scan, RNG-service access scan, arena sandbox gate + `UInt64.random` ban, explicit `.startCombat/.commitExternalCombat/EchoCombatBridge.applyCombatResult` allowlists, direct `.combatFinish` ban, combat-bridge no-extension gate, ViewModel/model UI-import bans, ViewModel→View type-reference ban, Engine/Core allowlist scan, and anti-duplicate audit test-name gate).
+  - `AuditArchitectureBoundaryGateTests.testEngineInvalidActionUsesTypedReasonCodes` blocks regression to `invalidAction(reason: String)` and raw string reason literals in `Engine/Core`.
   - Epic 35 external-combat stress determinism checks in `ExternalCombatPersistenceTests` (resume fingerprint stability across repeated save/load + interrupted-commit parity after resume cycles; event lock clears consistently on combat commit).
 - **Destination/tooling stability helpers**:
   - `.github/ci/select_ios_destination.sh` resolves a concrete simulator `name+OS` from current Xcode runtime set.
@@ -202,3 +211,5 @@ bash .github/ci/validate_docs_sync.sh
 - Add or update tests in the same PR as behavior changes.
 - Keep `QUALITY_CONTROL_MODEL.md` and epic status docs in sync.
 - Do not soften gate failures with skips in mandatory suites.
+- Runtime semantic assertions must be locale-agnostic (`outcome`/state changes), not localized narrative substring matching.
+- For config-driven engine behavior, tests should assert against active balance/config values, not hardcoded constants.
