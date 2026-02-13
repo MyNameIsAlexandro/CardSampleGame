@@ -59,6 +59,7 @@ forbidden_tracked_patterns=(
   '^TestReport\.xcresult(/|$)'
   '^app-strict-concurrency\.log$'
   '^app-strict-concurrency\.diagnostics$'
+  '^app-strict-concurrency\.all$'
   '\.xcresult(/|$)'
   '\.xcactivitylog$'
 )

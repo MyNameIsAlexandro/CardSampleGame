@@ -8,6 +8,7 @@ paths=(
   "TestResults/UnitTests.xcresult"
   "app-strict-concurrency.log"
   "app-strict-concurrency.diagnostics"
+  "app-strict-concurrency.all"
 )
 
 if [ "$#" -gt 0 ]; then
