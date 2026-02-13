@@ -1,3 +1,8 @@
+/// Файл: Packages/PackEditorKit/Sources/PackEditorKit/ContentCategory.swift
+/// Назначение: Содержит реализацию файла ContentCategory.swift.
+/// Зона ответственности: Реализует пакетный API редактора контента.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 import TwilightEngine
 

@@ -1,6 +1,12 @@
+/// Файл: Views/PlayerHandView.swift
+/// Назначение: Содержит реализацию файла PlayerHandView.swift.
+/// Зона ответственности: Ограничен задачами слоя представления и пользовательского интерфейса.
+/// Контекст: Используется в приложении CardSampleGame и связанных потоках выполнения.
+
 import SwiftUI
 import TwilightEngine
 
+/// Панель руки игрока в бою: выбор карты, быстрые счетчики и play-action.
 struct PlayerHandView: View {
     @ObservedObject var vm: GameEngineObservable
     @Binding var selectedCard: Card?

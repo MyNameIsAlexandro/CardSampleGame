@@ -111,13 +111,19 @@ bash .github/ci/run_quality_gate.sh \
   --id "repo_hygiene" \
   --budget-sec 120 \
   --dashboard-dir "${dashboard_dir}" \
-  -- "bash .github/ci/validate_repo_hygiene.sh"
+  -- "bash .github/ci/validate_repo_hygiene.sh --require-clean-tree"
 
 bash .github/ci/run_quality_gate.sh \
   --id "docs_sync" \
   --budget-sec 120 \
   --dashboard-dir "${dashboard_dir}" \
   -- "bash .github/ci/validate_docs_sync.sh"
+
+bash .github/ci/run_quality_gate.sh \
+  --id "legacy_cleanup" \
+  --budget-sec 120 \
+  --dashboard-dir "${dashboard_dir}" \
+  -- "bash .github/ci/validate_legacy_cleanup.sh"
 
 bash .github/ci/generate_gate_inventory_report.sh "${dashboard_dir}"
 
@@ -126,5 +132,7 @@ bash .github/ci/validate_release_profile.sh --profile rc_engine_twilight --dashb
 bash .github/ci/validate_release_profile.sh --profile rc_app --dashboard-dir "${dashboard_dir}" --registry "${registry_file}"
 bash .github/ci/validate_release_profile.sh --profile rc_build_content --dashboard-dir "${dashboard_dir}" --registry "${registry_file}"
 bash .github/ci/validate_release_profile.sh --profile rc_full --dashboard-dir "${dashboard_dir}" --registry "${registry_file}"
+
+bash .github/ci/validate_repo_hygiene.sh --require-clean-tree
 
 echo "Release check completed successfully."

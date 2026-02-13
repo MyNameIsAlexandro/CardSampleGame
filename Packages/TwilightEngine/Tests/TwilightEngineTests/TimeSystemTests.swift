@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Tests/TwilightEngineTests/TimeSystemTests.swift
+/// Назначение: Содержит реализацию файла TimeSystemTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import TwilightEngine
 
@@ -12,9 +17,7 @@ final class TimeSystemTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        engine = TwilightGameEngine()
-        // Initialize with minimal setup
-        TestContentLoader.loadContentPacksIfNeeded()
+        engine = TestEngineFactory.makeEngine(seed: 42)
         engine.initializeNewGame(playerName: "Test", heroId: nil)
     }
 

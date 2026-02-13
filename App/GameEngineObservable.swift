@@ -1,3 +1,8 @@
+/// Файл: App/GameEngineObservable.swift
+/// Назначение: Содержит реализацию файла GameEngineObservable.swift.
+/// Зона ответственности: Изолирован логикой уровня инициализации и навигации приложения.
+/// Контекст: Используется в приложении CardSampleGame и связанных потоках выполнения.
+
 import SwiftUI
 import TwilightEngine
 
@@ -9,8 +14,8 @@ import TwilightEngine
 final class GameEngineObservable: ObservableObject {
     let engine: TwilightGameEngine
 
-    init(registry: ContentRegistry = .shared) {
-        self.engine = TwilightGameEngine(registry: registry)
+    init(engineServices: EngineServices) {
+        self.engine = TwilightGameEngine(services: engineServices)
         self.engine.onStateChanged = { [weak self] in
             self?.objectWillChange.send()
         }

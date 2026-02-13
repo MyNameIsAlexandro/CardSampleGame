@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Runtime/EventRuntimeState.swift
+/// Назначение: Содержит реализацию файла EventRuntimeState.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 // MARK: - Event Runtime State

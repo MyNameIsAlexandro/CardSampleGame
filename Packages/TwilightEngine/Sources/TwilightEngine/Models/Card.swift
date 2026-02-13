@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Models/Card.swift
+/// Назначение: Содержит реализацию файла Card.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 public struct Card: Identifiable, Codable, Hashable, Sendable {

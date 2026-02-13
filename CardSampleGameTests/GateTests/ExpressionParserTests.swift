@@ -1,3 +1,8 @@
+/// Файл: CardSampleGameTests/GateTests/ExpressionParserTests.swift
+/// Назначение: Содержит реализацию файла ExpressionParserTests.swift.
+/// Зона ответственности: Фиксирует проверяемый контракт и не содержит production-логики.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 import TwilightEngine
 
@@ -136,8 +141,6 @@ final class ExpressionParserTests: XCTestCase {
         // Currently the engine uses typed Availability structs, not string expressions.
         // This test ensures the ExpressionParser infrastructure is ready for string conditions.
 
-        let registry = ContentRegistry.shared
-
         // Verify the parser accepts all known variable names
         for variable in ExpressionParser.knownVariables {
             let result = ExpressionParser.validate("\(variable) > 0")
@@ -150,7 +153,6 @@ final class ExpressionParserTests: XCTestCase {
             XCTAssertNil(result, "Known function '\(function)' should be accepted")
         }
 
-        // Verify registry is accessible
-        XCTAssertNotNil(registry, "ContentRegistry should be accessible")
+        XCTAssertNoThrow(try TestContentLoader.makeStandardRegistry())
     }
 }

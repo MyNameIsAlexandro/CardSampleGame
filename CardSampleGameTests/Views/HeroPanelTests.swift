@@ -1,3 +1,8 @@
+/// Файл: CardSampleGameTests/Views/HeroPanelTests.swift
+/// Назначение: Содержит реализацию файла HeroPanelTests.swift.
+/// Зона ответственности: Фиксирует проверяемый контракт и не содержит production-логики.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 import TwilightEngine
 
@@ -10,15 +15,18 @@ final class HeroPanelTests: XCTestCase {
     // MARK: - Test Engine Setup
 
     var engine: TwilightGameEngine!
+    private var registry: ContentRegistry!
 
-    override func setUp() {
-        super.setUp()
-        TestContentLoader.loadContentPacksIfNeeded()
-        engine = TwilightGameEngine()
+    override func setUpWithError() throws {
+        try super.setUpWithError()
+        let services = try TestContentLoader.makeStandardEngineServices(seed: 0)
+        registry = services.contentRegistry
+        engine = TwilightGameEngine(services: services)
     }
 
     override func tearDown() {
         engine = nil
+        registry = nil
         super.tearDown()
     }
 
@@ -26,8 +34,7 @@ final class HeroPanelTests: XCTestCase {
 
     func testHeroDisplaysCorrectly() {
         // Given: Get first available hero from registry
-        let registry = ContentRegistry.shared.heroRegistry
-        guard let hero = registry.firstHero else {
+        guard let hero = registry.heroRegistry.firstHero else {
             XCTFail("No heroes in registry"); return
         }
 
@@ -40,9 +47,7 @@ final class HeroPanelTests: XCTestCase {
 
     func testAllHeroesHaveValidData() {
         // Verify all heroes have valid data for display
-        let registry = ContentRegistry.shared.heroRegistry
-
-        for hero in registry.allHeroes {
+        for hero in registry.heroRegistry.allHeroes {
             XCTAssertFalse(hero.id.isEmpty, "Hero should have ID")
             XCTAssertFalse(hero.name.isEmpty, "Hero \(hero.id) should have a name")
             XCTAssertFalse(hero.icon.isEmpty, "Hero \(hero.id) should have an icon")

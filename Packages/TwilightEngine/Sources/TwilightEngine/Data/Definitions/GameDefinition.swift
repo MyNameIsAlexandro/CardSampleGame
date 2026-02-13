@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Data/Definitions/GameDefinition.swift
+/// Назначение: Содержит реализацию файла GameDefinition.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 // MARK: - Base Definition Protocol
@@ -37,7 +42,7 @@ public enum LocalizationKeyValidator {
 
 /// Availability conditions for content (events, choices, etc.)
 /// Reference: Docs/EVENT_MODULE_ARCHITECTURE.md, Section 2.3
-public struct Availability: Codable, Hashable {
+public struct Availability: Codable, Hashable, Sendable {
     /// Required flags that must be set
     public var requiredFlags: [String]
 
@@ -89,7 +94,7 @@ public struct Availability: Codable, Hashable {
 // MARK: - Resource Cost/Gain
 
 /// Represents a resource change (cost or gain)
-public struct ResourceChange: Codable, Hashable {
+public struct ResourceChange: Codable, Hashable, Sendable {
     let resourceId: String
     let amount: Int
 
@@ -104,7 +109,7 @@ public struct ResourceChange: Codable, Hashable {
 }
 
 /// Collection of resource changes for a transaction
-public struct ResourceTransaction: Codable, Hashable {
+public struct ResourceTransaction: Codable, Hashable, Sendable {
     let changes: [ResourceChange]
 
     init(changes: [ResourceChange]) {

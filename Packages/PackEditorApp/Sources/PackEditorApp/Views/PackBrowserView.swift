@@ -1,3 +1,8 @@
+/// Файл: Packages/PackEditorApp/Sources/PackEditorApp/Views/PackBrowserView.swift
+/// Назначение: Содержит реализацию файла PackBrowserView.swift.
+/// Зона ответственности: Изолирован своей предметной ответственностью в рамках модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import SwiftUI
 import PackEditorKit
 import TwilightEngine

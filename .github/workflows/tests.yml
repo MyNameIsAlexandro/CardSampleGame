@@ -25,7 +25,7 @@ jobs:
 
       - name: Validate Repository Hygiene
         run: |
-          bash .github/ci/validate_repo_hygiene.sh
+          bash .github/ci/validate_repo_hygiene.sh --require-clean-tree
 
   # ──────────────────────────────────────────────
   # Job 1: SPM Package Tests (swift test, macOS)
@@ -278,7 +278,7 @@ jobs:
             --id "repo_hygiene" \
             --budget-sec 120 \
             --dashboard-dir TestResults/QualityDashboard \
-            -- "bash .github/ci/validate_repo_hygiene.sh"
+            -- "bash .github/ci/validate_repo_hygiene.sh --require-clean-tree"
 
       - name: Gate: Documentation Sync
         run: |
@@ -288,6 +288,15 @@ jobs:
             --budget-sec 120 \
             --dashboard-dir TestResults/QualityDashboard \
             -- "bash .github/ci/validate_docs_sync.sh"
+
+      - name: Gate: Legacy Cleanup
+        run: |
+          mkdir -p TestResults/QualityDashboard
+          bash .github/ci/run_quality_gate.sh \
+            --id "legacy_cleanup" \
+            --budget-sec 120 \
+            --dashboard-dir TestResults/QualityDashboard \
+            -- "bash .github/ci/validate_legacy_cleanup.sh"
 
       - name: Upload Content Quality Dashboard
         uses: actions/upload-artifact@v4

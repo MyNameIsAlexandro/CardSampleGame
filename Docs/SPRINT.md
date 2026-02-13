@@ -5,7 +5,21 @@
 
 ---
 
-## ALL EPICS COMPLETE
+## Phase 2 (Audit/Refactor Stream)
+
+Source of truth:
+- `Docs/plans/2026-02-07-audit-refactor-phase2-epics.md` (epic ledger + backlog)
+- `Docs/QA/QUALITY_CONTROL_MODEL.md` (quality policy + mandatory gates)
+- `Docs/QA/TESTING_GUIDE.md` (how to run gates)
+
+Current focus:
+- `Epic 62` (done): Legacy/runtime cleanup sweep
+- `Epic 63` (done): Near-limit file decomposition wave
+- `Epic 68` (done): File Header Contract Coverage
+
+---
+
+## Phase 1 (Epics 1-14): Complete
 
 Total: 14 epics, 123 tasks, 606 SPM tests + 96 PackEditorKit tests = 702+ total (0 failures), iOS + macOS builds clean.
 

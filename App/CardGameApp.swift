@@ -1,3 +1,8 @@
+/// Файл: App/CardGameApp.swift
+/// Назначение: Содержит реализацию файла CardGameApp.swift.
+/// Зона ответственности: Изолирован логикой уровня инициализации и навигации приложения.
+/// Контекст: Используется в приложении CardSampleGame и связанных потоках выполнения.
+
 import SwiftUI
 import TwilightEngine
 import CoreHeroesContent
@@ -9,8 +14,8 @@ struct CardGameApp: App {
 
     var body: some Scene {
         WindowGroup {
-            if contentLoader.isLoaded {
-                ContentView()
+            if contentLoader.isLoaded, let services = contentLoader.services {
+                ContentView(services: services)
             } else {
                 LoadingView(loader: contentLoader)
             }
@@ -41,12 +46,39 @@ struct LoadingItem: Identifiable {
 @MainActor
 class ContentLoader: ObservableObject {
     @Published var isLoaded = false
+    @Published private(set) var services: AppServices?
     @Published var loadingProgress: Double = 0
     @Published var loadingMessage = L10n.loadingDefault.localized
     @Published var loadingItems: [LoadingItem] = []
     @Published var loadingSummary: String = ""
 
+    private let registry = ContentRegistry()
+    private let localizationManager = LocalizationManager()
+    private let rng = WorldRNG()
+    private let safeAccess: SafeContentAccess
+
+    private static var isVerboseLoggingEnabled: Bool {
+        #if DEBUG
+        guard let rawValue = ProcessInfo.processInfo.environment["TWILIGHT_TEST_VERBOSE"]?.lowercased() else {
+            return false
+        }
+        return rawValue == "1" || rawValue == "true" || rawValue == "yes" || rawValue == "on"
+        #else
+        return false
+        #endif
+    }
+
+    private func verboseLog(_ message: @autoclosure () -> String) {
+        #if DEBUG
+        guard Self.isVerboseLoggingEnabled else {
+            return
+        }
+        print(message())
+        #endif
+    }
+
     init() {
+        self.safeAccess = SafeContentAccess(registry: registry)
         Task {
             await loadContentPacks()
         }
@@ -60,9 +92,7 @@ class ContentLoader: ObservableObject {
 
         guard !packURLs.isEmpty else {
             loadingMessage = L10n.loadingContentNotFound.localized
-            #if DEBUG
-            print("⚠️ No .pack files found")
-            #endif
+            verboseLog("⚠️ No .pack files found")
             finishLoading()
             return
         }
@@ -78,19 +108,8 @@ class ContentLoader: ObservableObject {
     }
 
     private func loadBinaryPacks(urls: [URL]) async {
-        let registry = ContentRegistry.shared
-
-        let result = await Task.detached(priority: .userInitiated) { () -> Result<[LoadedPack], Error> in
-            do {
-                let packs = try registry.loadPacks(from: urls)
-                return .success(packs)
-            } catch {
-                return .failure(error)
-            }
-        }.value
-
-        switch result {
-        case .success(let packs):
+        do {
+            let packs = try registry.loadPacks(from: urls)
             loadingProgress = 0.8
 
             let inventory = registry.totalInventory
@@ -106,23 +125,20 @@ class ContentLoader: ObservableObject {
 
             // Validate content after loading (defensive programming)
             loadingProgress = 0.85
-            let safeAccess = SafeContentAccess.shared
             let validation = safeAccess.validateAllContent()
 
-            #if DEBUG
             if !validation.errors.isEmpty {
-                print("⚠️ Content validation errors:")
+                verboseLog("⚠️ Content validation errors:")
                 for error in validation.errors {
-                    print("  - \(error)")
+                    verboseLog("  - \(error)")
                 }
             }
             if !validation.warnings.isEmpty {
-                print("ℹ️ Content validation warnings:")
+                verboseLog("ℹ️ Content validation warnings:")
                 for warning in validation.warnings {
-                    print("  - \(warning)")
+                    verboseLog("  - \(warning)")
                 }
             }
-            #endif
 
             loadingProgress = 0.9
             loadingMessage = L10n.loadingContentLoaded.localized
@@ -131,22 +147,18 @@ class ContentLoader: ObservableObject {
                              inventory.heroCount + inventory.cardCount + inventory.enemyCount
             loadingSummary = String(format: L10n.loadingSummary.localized, totalItems)
 
-            #if DEBUG
-            print("ContentLoader: Loaded \(packs.count) packs:")
+            verboseLog("ContentLoader: Loaded \(packs.count) packs:")
             for pack in packs {
-                print("  - \(pack.manifest.packId) (\(pack.manifest.packType.rawValue))")
+                verboseLog("  - \(pack.manifest.packId) (\(pack.manifest.packType.rawValue))")
             }
-            print("ContentLoader: Validation \(validation.isValid ? "passed" : "failed with \(validation.errors.count) errors")")
-            #endif
+            verboseLog("ContentLoader: Validation \(validation.isValid ? "passed" : "failed with \(validation.errors.count) errors")")
 
-        case .failure(let error):
+        } catch {
             loadingMessage = L10n.loadingError.localized
             for i in loadingItems.indices {
                 loadingItems[i].status = .failed
             }
-            #if DEBUG
-            print("ContentLoader: Failed to load packs: \(error)")
-            #endif
+            verboseLog("ContentLoader: Failed to load packs: \(error)")
         }
     }
 
@@ -158,22 +170,16 @@ class ContentLoader: ObservableObject {
         // Load character pack (CoreHeroes)
         if let heroesURL = CoreHeroesContent.packURL {
             urls.append(heroesURL)
-            #if DEBUG
-            print("🔍 CoreHeroes pack: \(heroesURL)")
-            #endif
+            verboseLog("🔍 CoreHeroes pack: \(heroesURL)")
         }
 
         // Load story pack (TwilightMarchesActI)
         if let storyURL = TwilightMarchesActIContent.packURL {
             urls.append(storyURL)
-            #if DEBUG
-            print("🔍 TwilightMarchesActI pack: \(storyURL)")
-            #endif
+            verboseLog("🔍 TwilightMarchesActI pack: \(storyURL)")
         }
 
-        #if DEBUG
-        print("🔍 Found \(urls.count) content packs")
-        #endif
+        verboseLog("🔍 Found \(urls.count) content packs")
 
         return urls
     }
@@ -206,6 +212,13 @@ class ContentLoader: ObservableObject {
 
         Task {
             try? await Task.sleep(nanoseconds: 300_000_000)
+            if services == nil {
+                services = AppServices(
+                    rng: rng,
+                    registry: registry,
+                    localizationManager: localizationManager
+                )
+            }
             isLoaded = true
         }
     }

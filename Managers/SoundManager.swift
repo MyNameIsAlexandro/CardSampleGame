@@ -1,10 +1,16 @@
-import AVFoundation
+/// Файл: Managers/SoundManager.swift
+/// Назначение: Содержит реализацию файла SoundManager.swift.
+/// Зона ответственности: Инкапсулирует инфраструктурный сервисный функционал.
+/// Контекст: Используется в приложении CardSampleGame и связанных потоках выполнения.
+
+@preconcurrency import AVFoundation
 
 /// Centralized sound effect manager (UX-03)
 /// Usage: SoundManager.shared.play(.cardDraw)
 ///
 /// Sound files are loaded from the app bundle.
 /// If a sound file is missing, playback is silently skipped.
+@MainActor
 final class SoundManager {
     static let shared = SoundManager()
 
@@ -133,7 +139,9 @@ final class SoundManager {
 
     private func fadeOut(_ player: AVAudioPlayer, duration: TimeInterval) {
         player.setVolume(0, fadeDuration: duration)
-        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+        Task { @MainActor in
+            let nanoseconds = UInt64(max(duration, 0) * 1_000_000_000)
+            try? await Task.sleep(nanoseconds: nanoseconds)
             player.stop()
         }
     }

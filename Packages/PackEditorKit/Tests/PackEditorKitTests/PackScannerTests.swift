@@ -1,3 +1,8 @@
+/// Файл: Packages/PackEditorKit/Tests/PackEditorKitTests/PackScannerTests.swift
+/// Назначение: Содержит реализацию файла PackScannerTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import PackEditorKit
 import TwilightEngine

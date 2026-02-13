@@ -1,8 +1,14 @@
+/// Файл: CardSampleGameTests/GateTests/ProfileGateTests.swift
+/// Назначение: Содержит реализацию файла ProfileGateTests.swift.
+/// Зона ответственности: Фиксирует проверяемый контракт и не содержит production-логики.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import CardSampleGame
 
 /// Gate tests for Epic 13: PlayerProfile system
 /// Validates persistence, knowledge progression, achievement tracking, and profile management
+@MainActor
 final class ProfileGateTests: XCTestCase {
 
     // MARK: - 1. PlayerProfile Codable Round-Trip

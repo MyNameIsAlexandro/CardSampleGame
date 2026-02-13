@@ -1,3 +1,8 @@
+/// Файл: Utilities/DesignSystem.swift
+/// Назначение: Содержит реализацию файла DesignSystem.swift.
+/// Зона ответственности: Предоставляет вспомогательные утилиты и общие примитивы.
+/// Контекст: Используется в приложении CardSampleGame и связанных потоках выполнения.
+
 import SwiftUI
 import UIKit
 
@@ -124,6 +129,14 @@ public enum Sizes {
     public static let dotIndicator: CGFloat = 8
     /// 40pt - Health bar label width
     public static let healthBarLabel: CGFloat = 40
+
+    // MARK: - Menu Layout
+    /// 320pt - Height of the hero selection carousel on the main menu
+    public static let heroCarouselHeight: CGFloat = 320
+    /// 220pt - Bottom spacer to keep scroll content above the menu action panel
+    public static let menuBottomSpacer: CGFloat = 220
+    /// 80pt - Fade height between scroll content and the bottom menu panel
+    public static let menuGradientFadeHeight: CGFloat = 80
 }
 
 // MARK: - Corner Radius
@@ -280,6 +293,7 @@ public enum AppTypography {
 // MARK: - Shadows
 
 /// Shadow styles
+@MainActor
 public enum AppShadows {
     /// Small shadow — warm gold tint
     public static let sm = Shadow(color: Color(red: 0.85, green: 0.65, blue: 0.20).opacity(0.1), radius: 2, x: 0, y: 1)

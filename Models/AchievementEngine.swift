@@ -1,3 +1,8 @@
+/// Файл: Models/AchievementEngine.swift
+/// Назначение: Содержит реализацию файла AchievementEngine.swift.
+/// Зона ответственности: Описывает предметные модели и их инварианты.
+/// Контекст: Используется в приложении CardSampleGame и связанных потоках выполнения.
+
 import Foundation
 
 // MARK: - Achievement Engine

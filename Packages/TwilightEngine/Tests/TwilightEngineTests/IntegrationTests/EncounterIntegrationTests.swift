@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Tests/TwilightEngineTests/IntegrationTests/EncounterIntegrationTests.swift
+/// Назначение: Содержит реализацию файла EncounterIntegrationTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import TwilightEngine
 

@@ -1,3 +1,8 @@
+/// Файл: Packages/EchoEngine/Sources/EchoEngine/Components/StatusEffectComponent.swift
+/// Назначение: Содержит реализацию файла StatusEffectComponent.swift.
+/// Зона ответственности: Реализует боевой пакет EchoEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import FirebladeECS
 
 /// A single active status effect with remaining duration.

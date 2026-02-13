@@ -1,7 +1,11 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/ContentPacks/ContentManager.swift
+/// Назначение: Содержит реализацию файла ContentManager.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 // MARK: - Content Manager
-// Manages pack discovery, validation, loading, and hot-reload
 
 /// Source location for content packs
 public enum PackSource: Equatable, Hashable {
@@ -86,7 +90,7 @@ public enum PackLoadState: Equatable {
 }
 
 /// Validation summary for display
-public struct ValidationSummary: Equatable {
+public struct ValidationSummary: Equatable, Sendable {
     /// Identifier of the validated pack.
     public let packId: String
     /// Number of validation errors found.
@@ -183,54 +187,25 @@ public struct ManagedPack: Identifiable {
     }
 }
 
-extension ManagedPack: Equatable {
-    /// Equatable conformance comparing pack identity and state.
-    public static func == (lhs: ManagedPack, rhs: ManagedPack) -> Bool {
-        lhs.id == rhs.id &&
-        lhs.source == rhs.source &&
-        lhs.state == rhs.state &&
-        lhs.fileSize == rhs.fileSize &&
-        lhs.modifiedAt == rhs.modifiedAt &&
-        lhs.loadedAt == rhs.loadedAt
-    }
-}
-
-/// Errors during content reload
-public enum ContentReloadError: Error, LocalizedError {
-    case packNotFound(packId: String)
-    case notReloadable(reason: String)
-    case validationFailed(summary: ValidationSummary)
-    case loadFailed(underlying: Error)
-
-    /// Localized description of the reload error.
-    public var errorDescription: String? {
-        switch self {
-        case .packNotFound(let id): return "Pack '\(id)' not found"
-        case .notReloadable(let reason): return "Cannot reload: \(reason)"
-        case .validationFailed(let summary): return "Validation failed with \(summary.errorCount) errors"
-        case .loadFailed(let error): return "Load failed: \(error.localizedDescription)"
-        }
-    }
-}
-
 // MARK: - Content Manager
 
-/// Engine-level content management with hot-reload support
-public final class ContentManager {
-    // MARK: - Singleton
-
-    /// Shared singleton instance of the content manager.
-    public static let shared = ContentManager()
-
+/// Engine-level content management with hot-reload support.
+///
+/// This type is safe to use across actor boundaries because all mutable
+/// internal state is synchronized by `queue`.
+public final class ContentManager: @unchecked Sendable {
     // MARK: - State
 
+    private let registry: ContentRegistry
     private var managedPacks: [String: ManagedPack] = [:]
     private let queue = DispatchQueue(label: "content-manager", qos: .userInitiated)
 
     /// External packs folder name
     private let externalPacksFolderName = "Packs"
 
-    public init() {}
+    public init(registry: ContentRegistry) {
+        self.registry = registry
+    }
 
     // MARK: - Pack Discovery
 
@@ -301,7 +276,7 @@ public final class ContentManager {
         let packId = manifest?.packId ?? url.deletingPathExtension().lastPathComponent
 
         // Check if already loaded in ContentRegistry
-        let isLoaded = ContentRegistry.shared.loadedPacks[packId] != nil
+        let isLoaded = registry.loadedPacks[packId] != nil
         let state: PackLoadState = isLoaded ? .loaded : .discovered
 
         return ManagedPack(
@@ -488,7 +463,7 @@ public final class ContentManager {
         updatePackState(packId, state: .loading)
 
         do {
-            let loadedPack = try ContentRegistry.shared.loadPack(from: pack.source.url)
+            let loadedPack = try registry.loadPack(from: pack.source.url)
             updatePackState(packId, state: .loaded)
             queue.sync { managedPacks[packId]?.loadedAt = Date() }
             return loadedPack
@@ -523,7 +498,7 @@ public final class ContentManager {
 
         // 2. Perform safe reload via ContentRegistry
         updatePackState(packId, state: .loading)
-        let result = ContentRegistry.shared.safeReloadPack(packId, from: pack.source.url)
+        let result = registry.safeReloadPack(packId, from: pack.source.url)
 
         switch result {
         case .success(let newPack):
@@ -572,4 +547,3 @@ extension BinaryPackReader {
         return content.manifest
     }
 }
-

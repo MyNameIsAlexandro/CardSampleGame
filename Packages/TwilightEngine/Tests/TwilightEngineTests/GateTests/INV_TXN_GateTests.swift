@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Tests/TwilightEngineTests/GateTests/INV_TXN_GateTests.swift
+/// Назначение: Содержит реализацию файла INV_TXN_GateTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import TwilightEngine
 
@@ -9,20 +14,14 @@ final class INV_TXN_GateTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        TestContentLoader.loadContentPacksIfNeeded()
-        WorldRNG.shared.setSeed(42)
-    }
-
-    override func tearDown() {
-        WorldRNG.shared.setSeed(0)
-        super.tearDown()
+        _ = TestContentLoader.sharedLoadedRegistry()
     }
 
     // MARK: - TXN-04: State changes only via performAction
 
     /// INV-TXN-001: performAction(.rest) changes health, returns stateChanges
     func testRestActionChangesHealth() {
-        let engine = TwilightGameEngine()
+        let engine = TestEngineFactory.makeEngine(seed: 42)
         engine.initializeNewGame(playerName: "Test", heroId: nil)
 
         // Damage player first so rest has visible effect
@@ -36,7 +35,7 @@ final class INV_TXN_GateTests: XCTestCase {
 
     /// INV-TXN-002: performAction(.explore) can trigger event
     func testExploreActionMayTriggerEvent() {
-        let engine = TwilightGameEngine()
+        let engine = TestEngineFactory.makeEngine(seed: 42)
         engine.initializeNewGame(playerName: "Test", heroId: nil)
 
         guard !engine.publishedRegions.isEmpty else {
@@ -52,7 +51,7 @@ final class INV_TXN_GateTests: XCTestCase {
 
     /// INV-TXN-003: performAction(.skipTurn) advances day
     func testSkipTurnAdvancesDay() {
-        let engine = TwilightGameEngine()
+        let engine = TestEngineFactory.makeEngine(seed: 42)
         engine.initializeNewGame(playerName: "Test", heroId: nil)
 
         let dayBefore = engine.currentDay
@@ -64,7 +63,7 @@ final class INV_TXN_GateTests: XCTestCase {
 
     /// INV-TXN-004: ActionResult contains stateChanges for tracking
     func testActionResultContainsStateChanges() {
-        let engine = TwilightGameEngine()
+        let engine = TestEngineFactory.makeEngine(seed: 42)
         engine.initializeNewGame(playerName: "Test", heroId: nil)
 
         let result = engine.performAction(.rest)
@@ -77,7 +76,7 @@ final class INV_TXN_GateTests: XCTestCase {
 
     /// INV-TXN-005: Save → Load preserves player state
     func testSaveLoadPreservesPlayerState() {
-        let engine = TwilightGameEngine()
+        let engine = TestEngineFactory.makeEngine(seed: 42)
         engine.initializeNewGame(playerName: "TestHero", heroId: nil)
 
         // Modify state through actions
@@ -87,7 +86,7 @@ final class INV_TXN_GateTests: XCTestCase {
         let save = engine.createEngineSave()
 
         // Restore into fresh engine
-        let engine2 = TwilightGameEngine()
+        let engine2 = TestEngineFactory.makeEngine(seed: 1)
         engine2.initializeNewGame(playerName: "Dummy", heroId: nil)
         engine2.restoreFromEngineSave(save)
 
@@ -102,7 +101,7 @@ final class INV_TXN_GateTests: XCTestCase {
 
     /// INV-TXN-006: Save → Load preserves world state
     func testSaveLoadPreservesWorldState() {
-        let engine = TwilightGameEngine()
+        let engine = TestEngineFactory.makeEngine(seed: 42)
         engine.initializeNewGame(playerName: "Test", heroId: nil)
 
         _ = engine.performAction(.skipTurn)
@@ -110,7 +109,7 @@ final class INV_TXN_GateTests: XCTestCase {
 
         let save = engine.createEngineSave()
 
-        let engine2 = TwilightGameEngine()
+        let engine2 = TestEngineFactory.makeEngine(seed: 1)
         engine2.initializeNewGame(playerName: "Dummy", heroId: nil)
         engine2.restoreFromEngineSave(save)
 
@@ -124,7 +123,7 @@ final class INV_TXN_GateTests: XCTestCase {
 
     /// INV-TXN-007: Save → Load preserves completed events and flags
     func testSaveLoadPreservesEventsAndFlags() {
-        let engine = TwilightGameEngine()
+        let engine = TestEngineFactory.makeEngine(seed: 42)
         engine.initializeNewGame(playerName: "Test", heroId: nil)
 
         guard !engine.publishedRegions.isEmpty else {
@@ -140,7 +139,7 @@ final class INV_TXN_GateTests: XCTestCase {
 
         let save = engine.createEngineSave()
 
-        let engine2 = TwilightGameEngine()
+        let engine2 = TestEngineFactory.makeEngine(seed: 1)
         engine2.initializeNewGame(playerName: "Dummy", heroId: nil)
         engine2.restoreFromEngineSave(save)
 
@@ -150,8 +149,7 @@ final class INV_TXN_GateTests: XCTestCase {
 
     /// INV-TXN-008: Save → Load preserves RNG state (determinism after load)
     func testSaveLoadPreservesRNGState() {
-        WorldRNG.shared.setSeed(55555)
-        let engine = TwilightGameEngine()
+        let engine = TestEngineFactory.makeEngine(seed: 55555)
         engine.initializeNewGame(playerName: "Test", heroId: nil)
 
         _ = engine.performAction(.rest)
@@ -159,14 +157,14 @@ final class INV_TXN_GateTests: XCTestCase {
         let save = engine.createEngineSave()
 
         // Get next RNG value from current state
-        let nextValue1 = WorldRNG.shared.nextInt(in: 0...10000)
+        let nextValue1 = engine.services.rng.nextInt(in: 0...10000)
 
         // Restore — should reset RNG to saved state
-        let engine2 = TwilightGameEngine()
+        let engine2 = TestEngineFactory.makeEngine(seed: 1)
         engine2.initializeNewGame(playerName: "Dummy", heroId: nil)
         engine2.restoreFromEngineSave(save)
 
-        let nextValue2 = WorldRNG.shared.nextInt(in: 0...10000)
+        let nextValue2 = engine2.services.rng.nextInt(in: 0...10000)
 
         XCTAssertEqual(nextValue1, nextValue2, "RNG must produce same value after save/load restore")
     }

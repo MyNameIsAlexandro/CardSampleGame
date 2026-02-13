@@ -1,3 +1,8 @@
+/// Файл: Packages/PackEditorApp/Sources/PackEditorApp/Views/Editors/QuestEditor.swift
+/// Назначение: Содержит реализацию файла QuestEditor.swift.
+/// Зона ответственности: Изолирован своей предметной ответственностью в рамках модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import SwiftUI
 import TwilightEngine
 import PackEditorKit

@@ -1,3 +1,8 @@
+/// Файл: Packages/PackEditorApp/Sources/PackEditorApp/Views/Simulation/SimulationView.swift
+/// Назначение: Содержит реализацию файла SimulationView.swift.
+/// Зона ответственности: Изолирован своей предметной ответственностью в рамках модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import SwiftUI
 import Charts
 import TwilightEngine
@@ -191,7 +196,7 @@ struct SimulationView: View {
         progress = 0
         result = nil
 
-        Task {
+        Task { @MainActor in
             let simResult = await CombatSimulator.run(config: config) { done in
                 progress = done
             }

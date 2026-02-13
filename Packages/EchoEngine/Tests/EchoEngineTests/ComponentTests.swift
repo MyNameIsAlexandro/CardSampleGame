@@ -1,3 +1,8 @@
+/// Файл: Packages/EchoEngine/Tests/EchoEngineTests/ComponentTests.swift
+/// Назначение: Содержит реализацию файла ComponentTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import Testing
 import FirebladeECS
 @testable import EchoEngine

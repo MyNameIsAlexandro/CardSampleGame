@@ -1,3 +1,8 @@
+/// Файл: Packages/EchoScenes/Sources/EchoScenes/Nodes/FateCardNode.swift
+/// Назначение: Содержит реализацию файла FateCardNode.swift.
+/// Зона ответственности: Реализует визуально-сценовый слой EchoScenes.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import SpriteKit
 import Foundation
 

@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Core/TimeEngine.swift
+/// Назначение: Содержит реализацию файла TimeEngine.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 // MARK: - Time Engine Implementation
@@ -120,10 +125,4 @@ public struct TravelAction: TimedAction {
 /// Rest action
 public struct RestAction: TimedAction {
     public let timeCost: Int = 1
-}
-
-/// Exploration action
-public struct ExploreAction: TimedAction {
-    public let isInstant: Bool
-    public var timeCost: Int { isInstant ? 0 : 1 }
 }

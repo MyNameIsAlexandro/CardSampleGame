@@ -1,3 +1,8 @@
+/// Файл: Packages/StoryPacks/Season1/TwilightMarchesActI/Sources/TwilightMarchesActIContent/TwilightMarchesActIContent.swift
+/// Назначение: Содержит реализацию файла TwilightMarchesActIContent.swift.
+/// Зона ответственности: Изолирован своей предметной ответственностью в рамках модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 /// TwilightMarchesActI story pack

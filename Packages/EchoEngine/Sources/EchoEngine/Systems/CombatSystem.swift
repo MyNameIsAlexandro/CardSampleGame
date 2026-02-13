@@ -1,3 +1,8 @@
+/// Файл: Packages/EchoEngine/Sources/EchoEngine/Systems/CombatSystem.swift
+/// Назначение: Содержит реализацию файла CombatSystem.swift.
+/// Зона ответственности: Реализует боевой пакет EchoEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import FirebladeECS
 import TwilightEngine
 

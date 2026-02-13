@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Migration/QuestDefinitionAdapter.swift
+/// Назначение: Содержит реализацию файла QuestDefinitionAdapter.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 // MARK: - Quest Definition Adapter

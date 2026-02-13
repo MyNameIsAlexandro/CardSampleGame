@@ -1,7 +1,13 @@
+/// Файл: Models/ProfileManager.swift
+/// Назначение: Содержит реализацию файла ProfileManager.swift.
+/// Зона ответственности: Описывает предметные модели и их инварианты.
+/// Контекст: Используется в приложении CardSampleGame и связанных потоках выполнения.
+
 import Foundation
 
 // MARK: - Profile Manager
 
+@MainActor
 final class ProfileManager: ObservableObject {
     static let shared = ProfileManager()
 

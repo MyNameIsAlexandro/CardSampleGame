@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Cards/CardDefinition.swift
+/// Назначение: Содержит реализацию файла CardDefinition.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 /// Протокол определения карты (Data Layer)
@@ -240,13 +245,13 @@ public struct StandardCardDefinition: CardDefinition, Codable {
     }
 
     /// Конвертация в игровую Card
-    public func toCard() -> Card {
+    public func toCard(localizationManager: LocalizationManager) -> Card {
         return Card(
             id: id,
-            name: name.resolved,
+            name: name.resolve(using: localizationManager),
             type: cardType,
             rarity: rarity,
-            description: description.resolved,
+            description: description.resolve(using: localizationManager),
             power: power,
             defense: defense,
             health: health,

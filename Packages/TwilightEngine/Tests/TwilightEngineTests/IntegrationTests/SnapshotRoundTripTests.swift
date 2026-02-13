@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Tests/TwilightEngineTests/IntegrationTests/SnapshotRoundTripTests.swift
+/// Назначение: Содержит реализацию файла SnapshotRoundTripTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import TwilightEngine
 
@@ -9,7 +14,7 @@ final class SnapshotRoundTripTests: XCTestCase {
     func testFateDeckSnapshotRoundTrip() {
         // Create a real FateDeckManager
         let cards = FateDeckFixtures.deterministic()
-        let manager = FateDeckManager(cards: cards)
+        let manager = TestFateDeck.makeManager(cards: cards, seed: 42)
         let originalState = manager.getState()
         let originalDrawCount = originalState.drawPile.count
 
@@ -48,7 +53,7 @@ final class SnapshotRoundTripTests: XCTestCase {
     // Snapshot isolation: changes in encounter don't affect original manager
     func testSnapshotAfterAbort() {
         let cards = FateDeckFixtures.deterministic()
-        let manager = FateDeckManager(cards: cards)
+        let manager = TestFateDeck.makeManager(cards: cards, seed: 42)
         let snapshot = manager.getState()
         let drawCountBefore = snapshot.drawPile.count
 
@@ -75,7 +80,7 @@ final class SnapshotRoundTripTests: XCTestCase {
     // Snapshot with sticky cards (via state restoration)
     func testSnapshotPreservesAllCards() {
         let cards = FateDeckFixtures.deterministic()
-        let manager = FateDeckManager(cards: cards)
+        let manager = TestFateDeck.makeManager(cards: cards, seed: 42)
 
         // Draw some cards to populate discard
         _ = manager.drawAndResolve(worldResonance: 0)
@@ -85,7 +90,7 @@ final class SnapshotRoundTripTests: XCTestCase {
         let total = state.drawPile.count + state.discardPile.count
 
         // Create new manager from state
-        let manager2 = FateDeckManager(cards: [])
+        let manager2 = TestFateDeck.makeManager(cards: [], seed: 42)
         manager2.restoreState(state)
         let state2 = manager2.getState()
         let total2 = state2.drawPile.count + state2.discardPile.count

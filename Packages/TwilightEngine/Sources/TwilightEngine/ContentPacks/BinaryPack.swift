@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/ContentPacks/BinaryPack.swift
+/// Назначение: Содержит реализацию файла BinaryPack.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 import Compression
 import CryptoKit
@@ -65,7 +70,7 @@ public struct PackContent: Codable {
         self.cards = pack.cards
         self.enemies = pack.enemies
         self.fateCards = pack.fateCards
-        self.abilities = AbilityRegistry.shared.allAbilities
+        self.abilities = Array(pack.abilities.values)
         self.balanceConfig = pack.balanceConfig
     }
 
@@ -80,6 +85,11 @@ public struct PackContent: Codable {
         pack.cards = cards
         pack.enemies = enemies
         pack.fateCards = fateCards
+        var abilityMap: [String: HeroAbility] = [:]
+        for ability in abilities {
+            abilityMap[ability.id] = ability
+        }
+        pack.abilities = abilityMap
         pack.balanceConfig = balanceConfig
         return pack
     }
@@ -176,10 +186,6 @@ public final class BinaryPackReader {
     /// - Throws: PackLoadError if loading fails
     public static func load(from url: URL) throws -> LoadedPack {
         let content = try loadContent(from: url)
-
-        // Register abilities BEFORE creating LoadedPack
-        AbilityRegistry.shared.registerAll(content.abilities)
-
         return content.toLoadedPack(sourceURL: url)
     }
 

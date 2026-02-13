@@ -13,26 +13,51 @@
 		0A1C2D3E4F5A6B7C8D9E0F1A /* LocalizationCompletenessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2C3D4E5F6A7B8C9D0E1F2A /* LocalizationCompletenessTests.swift */; };
 		6352A5DDAB8A087797D247C9 /* ContentValidationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E948FF6BD58A6370B765AD94 /* ContentValidationTests.swift */; };
 		8B5C529E75755A127084F62A /* SourcePathResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85E6536727E3995B16A50F82 /* SourcePathResolver.swift */; };
-		8F035EDB750B2C0441F077B0 /* WorldMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BEC0AA856AB6706612208E1 /* WorldMapView.swift */; };
-		AA0000130000000000000001 /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000140000000000000001 /* CardView.swift */; };
+			8F035EDB750B2C0441F077B0 /* WorldMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BEC0AA856AB6706612208E1 /* WorldMapView.swift */; };
+			WM0000010000000000000001 /* EventLogEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WM0000020000000000000001 /* EventLogEntryView.swift */; };
+			WM0000030000000000000001 /* EngineRegionCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WM0000040000000000000001 /* EngineRegionCardView.swift */; };
+			WM0000050000000000000001 /* EngineRegionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WM0000060000000000000001 /* EngineRegionDetailView.swift */; };
+			WM0000090000000000000001 /* CardReceivedNotificationOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = WM0000100000000000000001 /* CardReceivedNotificationOverlay.swift */; };
+			WM0000070000000000000001 /* EngineEventLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WM0000080000000000000001 /* EngineEventLogView.swift */; };
+			AA0000130000000000000001 /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000140000000000000001 /* CardView.swift */; };
+			CVD0000100000000000000001 /* CardPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = CVD0001100000000000000001 /* CardPresentation.swift */; };
+			CVD0000200000000000000001 /* CompactCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CVD0001200000000000000001 /* CompactCardView.swift */; };
+			CVD0000300000000000000001 /* HandCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CVD0001300000000000000001 /* HandCardView.swift */; };
 		AA0000150000000000000001 /* PlayerHandView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000160000000000000001 /* PlayerHandView.swift */; };
 		AA0000430000000000000001 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = AA0000450000000000000001 /* Localizable.strings */; };
 		AA0000480000000000000001 /* RulesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000490000000000000001 /* RulesView.swift */; };
 		AA0000520000000000000001 /* GameSave.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000530000000000000001 /* GameSave.swift */; };
 		AA0000540000000000000001 /* StatisticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000550000000000000001 /* StatisticsView.swift */; };
 		APP00101000000000000001 /* CardGameApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = APP00102000000000000001 /* CardGameApp.swift */; };
-		APP00201000000000000001 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = APP00202000000000000001 /* ContentView.swift */; };
+			APP00201000000000000001 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = APP00202000000000000001 /* ContentView.swift */; };
+			APP00301000000000000001 /* BundledPackURLs.swift in Sources */ = {isa = PBXBuildFile; fileRef = APP00302000000000000001 /* BundledPackURLs.swift */; };
+			APP00401000000000000001 /* ContentFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = APP00402000000000000001 /* ContentFlow.swift */; };
+			APP00501000000000000001 /* AppServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = APP00502000000000000001 /* AppServices.swift */; };
+			APS00101000000000000001 /* CharacterSelectionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = APS00102000000000000001 /* CharacterSelectionScreen.swift */; };
+			APS00201000000000000001 /* SaveSlotSelectionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = APS00202000000000000001 /* SaveSlotSelectionScreen.swift */; };
+			APS00301000000000000001 /* LoadSlotSelectionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = APS00302000000000000001 /* LoadSlotSelectionScreen.swift */; };
 		GEO00301000000000000001 /* GameEngineObservable.swift in Sources */ = {isa = PBXBuildFile; fileRef = GEO00302000000000000001 /* GameEngineObservable.swift */; };
 		AS00000000000010 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AS00000000000001 /* Assets.xcassets */; };
 		BB0001150000000000000001 /* SaveLoadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001160000000000000001 /* SaveLoadTests.swift */; };
-		BB0004110000000000000001 /* AuditGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0004120000000000000001 /* AuditGateTests.swift */; };
-		PG00001500000000000000001 /* ProfileGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = PG00001600000000000000001 /* ProfileGateTests.swift */; };
+			BB0004110000000000000001 /* AuditGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0004120000000000000001 /* AuditGateTests.swift */; };
+			BB00AAB10000000000000001 /* AuditArchitectureBoundaryGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB00AAB20000000000000001 /* AuditArchitectureBoundaryGateTests.swift */; };
+			AB36A0010000000000000001 /* AuditArchitectureBoundaryGateTests+ExternalCombatAndMutations.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB36A1010000000000000001 /* AuditArchitectureBoundaryGateTests+ExternalCombatAndMutations.swift */; };
+			AB36A0020000000000000001 /* AuditArchitectureBoundaryGateTests+DependenciesAndHygiene.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB36A1020000000000000001 /* AuditArchitectureBoundaryGateTests+DependenciesAndHygiene.swift */; };
+			AB36A0030000000000000001 /* AuditArchitectureBoundaryGateTests+BridgeCallsiteGates.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB36A1030000000000000001 /* AuditArchitectureBoundaryGateTests+BridgeCallsiteGates.swift */; };
+			AB37B0010000000000000001 /* AuditGateTests+ArchitectureAndIsolation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB37C1010000000000000001 /* AuditGateTests+ArchitectureAndIsolation.swift */; };
+			AB37B0020000000000000001 /* AuditGateTests+StaticAndSerialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB37C1020000000000000001 /* AuditGateTests+StaticAndSerialization.swift */; };
+			AB37B0030000000000000001 /* AuditGateTests+LegacyAndDeterminism.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB37C1030000000000000001 /* AuditGateTests+LegacyAndDeterminism.swift */; };
+			AB37B0040000000000000001 /* AuditGateTests+AssetsAndRuntimeBoundaries.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB37C1040000000000000001 /* AuditGateTests+AssetsAndRuntimeBoundaries.swift */; };
+			PG00001500000000000000001 /* ProfileGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = PG00001600000000000000001 /* ProfileGateTests.swift */; };
 		CC000002000000000000001B /* ContrastComplianceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC000001000000000000001A /* ContrastComplianceTests.swift */; };
 		C80DC6128F371177237472A1 /* ConditionValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72352D1C9BABFA97F62257B /* ConditionValidatorTests.swift */; };
-		CC0000020000000000000001 /* CombatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000010000000000000001 /* CombatView.swift */; };
-		CB0000010000000000000001 /* EncounterBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0000020000000000000001 /* EncounterBridge.swift */; };
-		CB0000030000000000000001 /* EncounterViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0000040000000000000001 /* EncounterViewModel.swift */; };
+		CC0000020000000000000001 /* AppCombatSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000010000000000000001 /* AppCombatSummary.swift */; };
+			CB0000030000000000000001 /* EncounterViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0000040000000000000001 /* EncounterViewModel.swift */; };
+			CB00000B0000000000000001 /* EncounterViewModel+PlayerActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB00000C0000000000000001 /* EncounterViewModel+PlayerActions.swift */; };
+			CB00000D0000000000000001 /* EncounterViewModel+PhaseMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB00000E0000000000000001 /* EncounterViewModel+PhaseMachine.swift */; };
+			CB00000F0000000000000001 /* EncounterViewModel+StateSyncAndLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0000100000000000000001 /* EncounterViewModel+StateSyncAndLog.swift */; };
 		CB0000050000000000000001 /* CombatSubviews.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0000060000000000000001 /* CombatSubviews.swift */; };
+		CB0000090000000000000001 /* CombatOutcomeAndCardsViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB00000A0000000000000001 /* CombatOutcomeAndCardsViews.swift */; };
 		CB0000070000000000000001 /* EchoEncounterBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0000080000000000000001 /* EchoEncounterBridge.swift */; };
 		AA0000000000000000000002 /* EchoCombatBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000001 /* EchoCombatBridge.swift */; };
 		EIV000010000000000000001 /* EnemyIntentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EIV000020000000000000001 /* EnemyIntentView.swift */; };
@@ -48,11 +73,12 @@
 		PG00001100000000000000001 /* CreatureDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = PG00001200000000000000001 /* CreatureDetailView.swift */; };
 		PG00001300000000000000001 /* AchievementsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = PG00001400000000000000001 /* AchievementsView.swift */; };
 		E9601DE7AB72AE3B9035899A /* CodeHygieneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60C1474DB750BB1D0378466E /* CodeHygieneTests.swift */; };
+		CHGXPR010000000000000001 /* CodeHygieneTests+XcodeProjectStructure.swift in Sources */ = {isa = PBXBuildFile; fileRef = CHGXPR020000000000000001 /* CodeHygieneTests+XcodeProjectStructure.swift */; };
+		CHGXPI010000000000000001 /* CodeHygieneTests+XcodeProjectIntegrity.swift in Sources */ = {isa = PBXBuildFile; fileRef = CHGXPI020000000000000001 /* CodeHygieneTests+XcodeProjectIntegrity.swift */; };
 		GG0002010000000000000001 /* HeroSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = GG0002020000000000000001 /* HeroSelectionView.swift */; };
 		HP00000000000010 /* HeroPanelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = HP00000000000001 /* HeroPanelTests.swift */; };
 		HR00000000000010 /* HeroRegistryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = HR00000000000001 /* HeroRegistryTests.swift */; };
 		PKG0001000000000000000001 /* TwilightEngine in Frameworks */ = {isa = PBXBuildFile; productRef = PKG0002000000000000000001 /* TwilightEngine */; };
-		PKG0005000000000000000001 /* TwilightEngine in Frameworks */ = {isa = PBXBuildFile; productRef = PKG0006000000000000000001 /* TwilightEngine */; };
 		PKG0018000000000000000001 /* CoreHeroesContent in Frameworks */ = {isa = PBXBuildFile; productRef = PKG0014000000000000000001 /* CoreHeroesContent */; };
 		PKG0019000000000000000001 /* TwilightMarchesActIContent in Frameworks */ = {isa = PBXBuildFile; productRef = PKG0015000000000000000001 /* TwilightMarchesActIContent */; };
 		PKG0020000000000000000001 /* CoreHeroesContent in Frameworks */ = {isa = PBXBuildFile; productRef = PKG0016000000000000000001 /* CoreHeroesContent */; };
@@ -60,6 +86,10 @@
 		PKG0022000000000000000001 /* PackAuthoring in Frameworks */ = {isa = PBXBuildFile; productRef = PKG0023000000000000000001 /* PackAuthoring */; };
 		TH00000300000000000000001 /* TestContentLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = TH00000200000000000000001 /* TestContentLoader.swift */; };
 		UT00000000000010 /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = UT00000000000001 /* Localization.swift */; };
+		UT00000000000060 /* Localization+CoreAndRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = UT00000000000006 /* Localization+CoreAndRules.swift */; };
+		UT00000000000070 /* Localization+WorldAndNavigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = UT00000000000007 /* Localization+WorldAndNavigation.swift */; };
+		UT00000000000050 /* Localization+AdvancedSystems.swift in Sources */ = {isa = PBXBuildFile; fileRef = UT00000000000005 /* Localization+AdvancedSystems.swift */; };
+		UT00000000000080 /* Localization+RemainingKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = UT00000000000008 /* Localization+RemainingKeys.swift */; };
 
 		UT00000000000030 /* SafeImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = UT00000000000003 /* SafeImage.swift */; };
 		UT00000000000040 /* AssetRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = UT00000000000004 /* AssetRegistry.swift */; };
@@ -70,6 +100,11 @@
 		PHB0000100000000000000001 /* PhaseBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = PHB0000200000000000000001 /* PhaseBanner.swift */; };
 		FDW0000100000000000000001 /* FateDeckWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDW0000200000000000000001 /* FateDeckWidget.swift */; };
 		FCCS000100000000000000001 /* FateCardChoiceSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCCS000200000000000000001 /* FateCardChoiceSheet.swift */; };
+		HSC0000100000000000000001 /* HeroSelectionCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = HSC0000200000000000000001 /* HeroSelectionCard.swift */; };
+		LSC0000100000000000000001 /* LoadSlotCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = LSC0000200000000000000001 /* LoadSlotCard.swift */; };
+		SSC0000100000000000000001 /* SaveSlotCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = SSC0000200000000000000001 /* SaveSlotCard.swift */; };
+		STD0000100000000000000001 /* StatDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = STD0000200000000000000001 /* StatDisplay.swift */; };
+		STM0000100000000000000001 /* StatMini.swift in Sources */ = {isa = PBXBuildFile; fileRef = STM0000200000000000000001 /* StatMini.swift */; };
 		BAV0000100000000000000001 /* BattleArenaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAV0000200000000000000001 /* BattleArenaView.swift */; };
 		ESC0000100000000000000001 /* EnemySelectionCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = ESC0000200000000000000001 /* EnemySelectionCard.swift */; };
 		GOV0000100000000000000001 /* GameOverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = GOV0000200000000000000001 /* GameOverView.swift */; };
@@ -78,6 +113,7 @@
 		HAP0000100000000000000001 /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = HAP0000200000000000000001 /* HapticManager.swift */; };
 		SND0000100000000000000001 /* SoundManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = SND0000200000000000000001 /* SoundManager.swift */; };
 		CM00000100000000000000001 /* ContentManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CM00000200000000000000001 /* ContentManagerView.swift */; };
+		CM00000500000000000000001 /* ContentManagerComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = CM00000600000000000000001 /* ContentManagerComponents.swift */; };
 		CM00000300000000000000001 /* ContentManagerVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = CM00000400000000000000001 /* ContentManagerVM.swift */; };
 		CMT0000100000000000000001 /* ContentManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CMT0000200000000000000001 /* ContentManagerTests.swift */; };
 		PEB0010000000000PE000001 /* PackEditorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEF0010000000000PE000001 /* PackEditorApp.swift */; };
@@ -102,10 +138,20 @@
 		204A28A32636BB8C22E758C3 /* LocalizationValidatorTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalizationValidatorTests.swift; sourceTree = "<group>"; };
 		43D4E3FBE4DC34B63B61E061 /* EventView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EventView.swift; path = EventView.swift; sourceTree = "<group>"; };
 		60C1474DB750BB1D0378466E /* CodeHygieneTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CodeHygieneTests.swift; sourceTree = "<group>"; };
-		6BEC0AA856AB6706612208E1 /* WorldMapView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WorldMapView.swift; path = WorldMapView.swift; sourceTree = "<group>"; };
-		85E6536727E3995B16A50F82 /* SourcePathResolver.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SourcePathResolver.swift; sourceTree = "<group>"; };
+		CHGXPR020000000000000001 /* CodeHygieneTests+XcodeProjectStructure.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "CodeHygieneTests+XcodeProjectStructure.swift"; sourceTree = "<group>"; };
+		CHGXPI020000000000000001 /* CodeHygieneTests+XcodeProjectIntegrity.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "CodeHygieneTests+XcodeProjectIntegrity.swift"; sourceTree = "<group>"; };
+			6BEC0AA856AB6706612208E1 /* WorldMapView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WorldMapView.swift; path = WorldMapView.swift; sourceTree = "<group>"; };
+			WM0000020000000000000001 /* EventLogEntryView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventLogEntryView.swift; sourceTree = "<group>"; };
+			WM0000040000000000000001 /* EngineRegionCardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EngineRegionCardView.swift; sourceTree = "<group>"; };
+			WM0000060000000000000001 /* EngineRegionDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EngineRegionDetailView.swift; sourceTree = "<group>"; };
+			WM0000100000000000000001 /* CardReceivedNotificationOverlay.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CardReceivedNotificationOverlay.swift; sourceTree = "<group>"; };
+			WM0000080000000000000001 /* EngineEventLogView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EngineEventLogView.swift; sourceTree = "<group>"; };
+			85E6536727E3995B16A50F82 /* SourcePathResolver.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SourcePathResolver.swift; sourceTree = "<group>"; };
 		A0CA67A53A024B4CEDD6685C /* DesignSystemComplianceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DesignSystemComplianceTests.swift; sourceTree = "<group>"; };
 		AA0000140000000000000001 /* CardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardView.swift; sourceTree = "<group>"; };
+		CVD0001100000000000000001 /* CardPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardPresentation.swift; sourceTree = "<group>"; };
+		CVD0001200000000000000001 /* CompactCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompactCardView.swift; sourceTree = "<group>"; };
+		CVD0001300000000000000001 /* HandCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandCardView.swift; sourceTree = "<group>"; };
 		AA0000160000000000000001 /* PlayerHandView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerHandView.swift; sourceTree = "<group>"; };
 		AA0000210000000000000001 /* CardSampleGame.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CardSampleGame.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0000400000000000000001 /* CardSampleGame.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CardSampleGame.entitlements; sourceTree = "<group>"; };
@@ -121,19 +167,36 @@
 		PG00001200000000000000001 /* CreatureDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatureDetailView.swift; sourceTree = "<group>"; };
 		PG00001400000000000000001 /* AchievementsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementsView.swift; sourceTree = "<group>"; };
 		AA0000550000000000000001 /* StatisticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsView.swift; sourceTree = "<group>"; };
-		APP00102000000000000001 /* CardGameApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/CardGameApp.swift; sourceTree = SOURCE_ROOT; };
-		APP00202000000000000001 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/ContentView.swift; sourceTree = SOURCE_ROOT; };
-		GEO00302000000000000001 /* GameEngineObservable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App/GameEngineObservable.swift; sourceTree = SOURCE_ROOT; };
+			APP00102000000000000001 /* CardGameApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardGameApp.swift; sourceTree = "<group>"; };
+			APP00202000000000000001 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+			APP00302000000000000001 /* BundledPackURLs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundledPackURLs.swift; sourceTree = "<group>"; };
+			APP00402000000000000001 /* ContentFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentFlow.swift; sourceTree = "<group>"; };
+			APP00502000000000000001 /* AppServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppServices.swift; sourceTree = "<group>"; };
+			APS00102000000000000001 /* CharacterSelectionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharacterSelectionScreen.swift; sourceTree = "<group>"; };
+			APS00202000000000000001 /* SaveSlotSelectionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveSlotSelectionScreen.swift; sourceTree = "<group>"; };
+			APS00302000000000000001 /* LoadSlotSelectionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadSlotSelectionScreen.swift; sourceTree = "<group>"; };
+		GEO00302000000000000001 /* GameEngineObservable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameEngineObservable.swift; sourceTree = "<group>"; };
 		AS00000000000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BB0000010000000000000001 /* CardSampleGameTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CardSampleGameTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB0001160000000000000001 /* SaveLoadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveLoadTests.swift; sourceTree = "<group>"; };
-		BB0004120000000000000001 /* AuditGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditGateTests.swift; sourceTree = "<group>"; };
-		PG00001600000000000000001 /* ProfileGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileGateTests.swift; sourceTree = "<group>"; };
+			BB0004120000000000000001 /* AuditGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditGateTests.swift; sourceTree = "<group>"; };
+			BB00AAB20000000000000001 /* AuditArchitectureBoundaryGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditArchitectureBoundaryGateTests.swift; sourceTree = "<group>"; };
+			AB36A1010000000000000001 /* AuditArchitectureBoundaryGateTests+ExternalCombatAndMutations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuditArchitectureBoundaryGateTests+ExternalCombatAndMutations.swift"; sourceTree = "<group>"; };
+			AB36A1020000000000000001 /* AuditArchitectureBoundaryGateTests+DependenciesAndHygiene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuditArchitectureBoundaryGateTests+DependenciesAndHygiene.swift"; sourceTree = "<group>"; };
+			AB36A1030000000000000001 /* AuditArchitectureBoundaryGateTests+BridgeCallsiteGates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuditArchitectureBoundaryGateTests+BridgeCallsiteGates.swift"; sourceTree = "<group>"; };
+			AB37C1010000000000000001 /* AuditGateTests+ArchitectureAndIsolation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuditGateTests+ArchitectureAndIsolation.swift"; sourceTree = "<group>"; };
+			AB37C1020000000000000001 /* AuditGateTests+StaticAndSerialization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuditGateTests+StaticAndSerialization.swift"; sourceTree = "<group>"; };
+			AB37C1030000000000000001 /* AuditGateTests+LegacyAndDeterminism.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuditGateTests+LegacyAndDeterminism.swift"; sourceTree = "<group>"; };
+			AB37C1040000000000000001 /* AuditGateTests+AssetsAndRuntimeBoundaries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuditGateTests+AssetsAndRuntimeBoundaries.swift"; sourceTree = "<group>"; };
+			PG00001600000000000000001 /* ProfileGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileGateTests.swift; sourceTree = "<group>"; };
 		CC000001000000000000001A /* ContrastComplianceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContrastComplianceTests.swift; sourceTree = "<group>"; };
-		CC0000010000000000000001 /* CombatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombatView.swift; sourceTree = "<group>"; };
-		CB0000020000000000000001 /* EncounterBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncounterBridge.swift; sourceTree = "<group>"; };
-		CB0000040000000000000001 /* EncounterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncounterViewModel.swift; sourceTree = "<group>"; };
+		CC0000010000000000000001 /* AppCombatSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCombatSummary.swift; sourceTree = "<group>"; };
+			CB0000040000000000000001 /* EncounterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncounterViewModel.swift; sourceTree = "<group>"; };
+			CB00000C0000000000000001 /* EncounterViewModel+PlayerActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EncounterViewModel+PlayerActions.swift"; sourceTree = "<group>"; };
+			CB00000E0000000000000001 /* EncounterViewModel+PhaseMachine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EncounterViewModel+PhaseMachine.swift"; sourceTree = "<group>"; };
+			CB0000100000000000000001 /* EncounterViewModel+StateSyncAndLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EncounterViewModel+StateSyncAndLog.swift"; sourceTree = "<group>"; };
 		CB0000060000000000000001 /* CombatSubviews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombatSubviews.swift; sourceTree = "<group>"; };
+		CB00000A0000000000000001 /* CombatOutcomeAndCardsViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombatOutcomeAndCardsViews.swift; sourceTree = "<group>"; };
 		CB0000080000000000000001 /* EchoEncounterBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EchoEncounterBridge.swift; sourceTree = "<group>"; };
 		AA0000000000000000000001 /* EchoCombatBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EchoCombatBridge.swift; sourceTree = "<group>"; };
 		EIV000020000000000000001 /* EnemyIntentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemyIntentView.swift; sourceTree = "<group>"; };
@@ -148,16 +211,25 @@
 		HR00000000000001 /* HeroRegistryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroRegistryTests.swift; sourceTree = "<group>"; };
 		TH00000200000000000000001 /* TestContentLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestContentLoader.swift; sourceTree = "<group>"; };
 		UT00000000000001 /* Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Localization.swift; sourceTree = "<group>"; };
+		UT00000000000005 /* Localization+AdvancedSystems.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Localization+AdvancedSystems.swift"; sourceTree = "<group>"; };
+		UT00000000000006 /* Localization+CoreAndRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Localization+CoreAndRules.swift"; sourceTree = "<group>"; };
+		UT00000000000007 /* Localization+WorldAndNavigation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Localization+WorldAndNavigation.swift"; sourceTree = "<group>"; };
+		UT00000000000008 /* Localization+RemainingKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Localization+RemainingKeys.swift"; sourceTree = "<group>"; };
 
 		UT00000000000003 /* SafeImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafeImage.swift; sourceTree = "<group>"; };
 		UT00000000000004 /* AssetRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetRegistry.swift; sourceTree = "<group>"; };
-		VWC00102000000000000001 /* HeroPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/Components/HeroPanel.swift; sourceTree = SOURCE_ROOT; };
-		RW00000200000000000000001 /* ResonanceWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/Components/ResonanceWidget.swift; sourceTree = SOURCE_ROOT; };
-		DHB0000200000000000000001 /* DualHealthBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/Components/DualHealthBar.swift; sourceTree = SOURCE_ROOT; };
-		ECV0000200000000000000001 /* EnemyCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/Components/EnemyCardView.swift; sourceTree = SOURCE_ROOT; };
-		PHB0000200000000000000001 /* PhaseBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/Components/PhaseBanner.swift; sourceTree = SOURCE_ROOT; };
-		FDW0000200000000000000001 /* FateDeckWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/Components/FateDeckWidget.swift; sourceTree = SOURCE_ROOT; };
-		FCCS000200000000000000001 /* FateCardChoiceSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/Components/FateCardChoiceSheet.swift; sourceTree = SOURCE_ROOT; };
+		VWC00102000000000000001 /* HeroPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroPanel.swift; sourceTree = "<group>"; };
+		HSC0000200000000000000001 /* HeroSelectionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroSelectionCard.swift; sourceTree = "<group>"; };
+		LSC0000200000000000000001 /* LoadSlotCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadSlotCard.swift; sourceTree = "<group>"; };
+		SSC0000200000000000000001 /* SaveSlotCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveSlotCard.swift; sourceTree = "<group>"; };
+		STD0000200000000000000001 /* StatDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatDisplay.swift; sourceTree = "<group>"; };
+		STM0000200000000000000001 /* StatMini.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatMini.swift; sourceTree = "<group>"; };
+		RW00000200000000000000001 /* ResonanceWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResonanceWidget.swift; sourceTree = "<group>"; };
+		DHB0000200000000000000001 /* DualHealthBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DualHealthBar.swift; sourceTree = "<group>"; };
+		ECV0000200000000000000001 /* EnemyCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemyCardView.swift; sourceTree = "<group>"; };
+		PHB0000200000000000000001 /* PhaseBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhaseBanner.swift; sourceTree = "<group>"; };
+		FDW0000200000000000000001 /* FateDeckWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FateDeckWidget.swift; sourceTree = "<group>"; };
+		FCCS000200000000000000001 /* FateCardChoiceSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FateCardChoiceSheet.swift; sourceTree = "<group>"; };
 		BAV0000200000000000000001 /* BattleArenaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BattleArenaView.swift; sourceTree = "<group>"; };
 		ESC0000200000000000000001 /* EnemySelectionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemySelectionCard.swift; sourceTree = "<group>"; };
 		GOV0000200000000000000001 /* GameOverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameOverView.swift; sourceTree = "<group>"; };
@@ -166,7 +238,8 @@
 		HAP0000200000000000000001 /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
 		SND0000200000000000000001 /* SoundManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundManager.swift; sourceTree = "<group>"; };
 		CM00000200000000000000001 /* ContentManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentManagerView.swift; sourceTree = "<group>"; };
-		CM00000400000000000000001 /* ContentManagerVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModels/ContentManagerVM.swift; sourceTree = SOURCE_ROOT; };
+		CM00000600000000000000001 /* ContentManagerComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentManagerComponents.swift; sourceTree = "<group>"; };
+		CM00000400000000000000001 /* ContentManagerVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentManagerVM.swift; sourceTree = "<group>"; };
 		CMT0000200000000000000001 /* ContentManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentManagerTests.swift; sourceTree = "<group>"; };
 		PEF0010000000000PE000001 /* PackEditorApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackEditorApp.swift; sourceTree = "<group>"; };
 		/* CombatSimulator.swift removed — now in PackEditorKit */
@@ -188,7 +261,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				PKG0005000000000000000001 /* TwilightEngine in Frameworks */,
 				PKG0022000000000000000001 /* PackAuthoring in Frameworks */,
 				PKG0020000000000000000001 /* CoreHeroesContent in Frameworks */,
 				PKG0021000000000000000001 /* TwilightMarchesActIContent in Frameworks */,
@@ -212,18 +284,19 @@
 		AA0000240000000000000001 = {
 			isa = PBXGroup;
 			children = (
-				AA0000250000000000000001 /* . */,
+				AA0000250000000000000001 /* SourceRoot */,
 				PEG0010000000000PE000001 /* PackEditor */,
 				BB0003000000000000000001 /* CardSampleGameTests */,
 				AA0000260000000000000001 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		AA0000250000000000000001 /* . */ = {
+		AA0000250000000000000001 /* SourceRoot */ = {
 			isa = PBXGroup;
 			children = (
 				AA0000400000000000000001 /* CardSampleGame.entitlements */,
 				AS00000000000001 /* Assets.xcassets */,
+				APPGRP000000000000000001 /* App */,
 				AA0000270000000000000001 /* Models */,
 				AA0000280000000000000001 /* Views */,
 				VM00000000000001 /* ViewModels */,
@@ -231,7 +304,32 @@
 				MGR0000000000000000000001 /* Managers */,
 				AA0000450000000000000001 /* Localizable.strings */,
 			);
+			name = SourceRoot;
 			path = .;
+			sourceTree = "<group>";
+		};
+			APPGRP000000000000000001 /* App */ = {
+				isa = PBXGroup;
+				children = (
+					APP00102000000000000001 /* CardGameApp.swift */,
+					APP00202000000000000001 /* ContentView.swift */,
+					APP00302000000000000001 /* BundledPackURLs.swift */,
+					APP00402000000000000001 /* ContentFlow.swift */,
+					APP00502000000000000001 /* AppServices.swift */,
+					GEO00302000000000000001 /* GameEngineObservable.swift */,
+					APPSCR000000000000000001 /* Screens */,
+				);
+				path = App;
+			sourceTree = "<group>";
+		};
+		APPSCR000000000000000001 /* Screens */ = {
+			isa = PBXGroup;
+			children = (
+				APS00102000000000000001 /* CharacterSelectionScreen.swift */,
+				APS00202000000000000001 /* SaveSlotSelectionScreen.swift */,
+				APS00302000000000000001 /* LoadSlotSelectionScreen.swift */,
+			);
+			path = Screens;
 			sourceTree = "<group>";
 		};
 		AA0000260000000000000001 /* Products */ = {
@@ -252,8 +350,17 @@
 				PG00000400000000000000001 /* ProfileManager.swift */,
 				PG00000600000000000000001 /* AchievementDefinition.swift */,
 				PG00000800000000000000001 /* AchievementEngine.swift */,
+				MDLCMB000000000000000001 /* Combat */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		MDLCMB000000000000000001 /* Combat */ = {
+			isa = PBXGroup;
+			children = (
+				CC0000010000000000000001 /* AppCombatSummary.swift */,
+			);
+			path = Combat;
 			sourceTree = "<group>";
 		};
 		AA0000280000000000000001 /* Views */ = {
@@ -261,15 +368,20 @@
 			children = (
 				VIEWCOMP00001 /* Components */,
 				AA0000140000000000000001 /* CardView.swift */,
+				CVD0001100000000000000001 /* CardPresentation.swift */,
+				CVD0001200000000000000001 /* CompactCardView.swift */,
+				CVD0001300000000000000001 /* HandCardView.swift */,
 				AA0000160000000000000001 /* PlayerHandView.swift */,
 				AA0000490000000000000001 /* RulesView.swift */,
 				AA0000550000000000000001 /* StatisticsView.swift */,
 				GG0002020000000000000001 /* HeroSelectionView.swift */,
-				43D4E3FBE4DC34B63B61E061 /* EventView.swift */,
-				6BEC0AA856AB6706612208E1 /* WorldMapView.swift */,
-				COMBATGRP000001 /* Combat */,
-				BAV0000200000000000000001 /* BattleArenaView.swift */,
+					43D4E3FBE4DC34B63B61E061 /* EventView.swift */,
+					6BEC0AA856AB6706612208E1 /* WorldMapView.swift */,
+					VWMGRP000000000000000001 /* WorldMap */,
+					COMBATGRP000001 /* Combat */,
+					BAV0000200000000000000001 /* BattleArenaView.swift */,
 				CM00000200000000000000001 /* ContentManagerView.swift */,
+				CM00000600000000000000001 /* ContentManagerComponents.swift */,
 				GOV0000200000000000000001 /* GameOverView.swift */,
 				TOV0000200000000000000001 /* TutorialOverlayView.swift */,
 				STV0000200000000000000001 /* SettingsView.swift */,
@@ -285,7 +397,7 @@
 			children = (
 				TH00000100000000000000001 /* TestHelpers */,
 				BB0003010000000000000001 /* Unit */,
-				BB0003050000000000000001 /* Engine */,
+				BB0003050000000000000001 /* GateTests */,
 				BB0003060000000000000001 /* Views */,
 			);
 			path = CardSampleGameTests;
@@ -301,14 +413,24 @@
 			path = Unit;
 			sourceTree = "<group>";
 		};
-		BB0003050000000000000001 /* Engine */ = {
+		BB0003050000000000000001 /* GateTests */ = {
 			isa = PBXGroup;
 			children = (
-				BB0004120000000000000001 /* AuditGateTests.swift */,
-				PG00001600000000000000001 /* ProfileGateTests.swift */,
-				A0CA67A53A024B4CEDD6685C /* DesignSystemComplianceTests.swift */,
+					BB0004120000000000000001 /* AuditGateTests.swift */,
+					BB00AAB20000000000000001 /* AuditArchitectureBoundaryGateTests.swift */,
+					AB36A1010000000000000001 /* AuditArchitectureBoundaryGateTests+ExternalCombatAndMutations.swift */,
+					AB36A1020000000000000001 /* AuditArchitectureBoundaryGateTests+DependenciesAndHygiene.swift */,
+					AB36A1030000000000000001 /* AuditArchitectureBoundaryGateTests+BridgeCallsiteGates.swift */,
+					AB37C1010000000000000001 /* AuditGateTests+ArchitectureAndIsolation.swift */,
+					AB37C1020000000000000001 /* AuditGateTests+StaticAndSerialization.swift */,
+					AB37C1030000000000000001 /* AuditGateTests+LegacyAndDeterminism.swift */,
+					AB37C1040000000000000001 /* AuditGateTests+AssetsAndRuntimeBoundaries.swift */,
+					PG00001600000000000000001 /* ProfileGateTests.swift */,
+					A0CA67A53A024B4CEDD6685C /* DesignSystemComplianceTests.swift */,
 				CC000001000000000000001A /* ContrastComplianceTests.swift */,
 				60C1474DB750BB1D0378466E /* CodeHygieneTests.swift */,
+				CHGXPR020000000000000001 /* CodeHygieneTests+XcodeProjectStructure.swift */,
+				CHGXPI020000000000000001 /* CodeHygieneTests+XcodeProjectIntegrity.swift */,
 				E948FF6BD58A6370B765AD94 /* ContentValidationTests.swift */,
 				D72352D1C9BABFA97F62257B /* ConditionValidatorTests.swift */,
 				204A28A32636BB8C22E758C3 /* LocalizationValidatorTests.swift */,
@@ -348,6 +470,10 @@
 			isa = PBXGroup;
 			children = (
 				UT00000000000001 /* Localization.swift */,
+				UT00000000000005 /* Localization+AdvancedSystems.swift */,
+				UT00000000000006 /* Localization+CoreAndRules.swift */,
+				UT00000000000007 /* Localization+WorldAndNavigation.swift */,
+				UT00000000000008 /* Localization+RemainingKeys.swift */,
 				UT00000000000003 /* SafeImage.swift */,
 				UT00000000000004 /* AssetRegistry.swift */,
 				DS00000000000001 /* DesignSystem.swift */,
@@ -359,6 +485,11 @@
 			isa = PBXGroup;
 			children = (
 				VWC00102000000000000001 /* HeroPanel.swift */,
+				HSC0000200000000000000001 /* HeroSelectionCard.swift */,
+				STD0000200000000000000001 /* StatDisplay.swift */,
+				STM0000200000000000000001 /* StatMini.swift */,
+				LSC0000200000000000000001 /* LoadSlotCard.swift */,
+				SSC0000200000000000000001 /* SaveSlotCard.swift */,
 				RW00000200000000000000001 /* ResonanceWidget.swift */,
 				DHB0000200000000000000001 /* DualHealthBar.swift */,
 				ECV0000200000000000000001 /* EnemyCardView.swift */,
@@ -372,13 +503,27 @@
 			path = Components;
 			sourceTree = "<group>";
 		};
-		COMBATGRP000001 /* Combat */ = {
+		VWMGRP000000000000000001 /* WorldMap */ = {
 			isa = PBXGroup;
 			children = (
-				CC0000010000000000000001 /* CombatView.swift */,
-				CB0000020000000000000001 /* EncounterBridge.swift */,
-				CB0000040000000000000001 /* EncounterViewModel.swift */,
-				CB0000060000000000000001 /* CombatSubviews.swift */,
+				WM0000020000000000000001 /* EventLogEntryView.swift */,
+				WM0000040000000000000001 /* EngineRegionCardView.swift */,
+				WM0000060000000000000001 /* EngineRegionDetailView.swift */,
+				WM0000080000000000000001 /* EngineEventLogView.swift */,
+				WM0000100000000000000001 /* CardReceivedNotificationOverlay.swift */,
+			);
+			path = WorldMap;
+			sourceTree = "<group>";
+		};
+			COMBATGRP000001 /* Combat */ = {
+				isa = PBXGroup;
+				children = (
+					CB0000040000000000000001 /* EncounterViewModel.swift */,
+					CB00000C0000000000000001 /* EncounterViewModel+PlayerActions.swift */,
+					CB00000E0000000000000001 /* EncounterViewModel+PhaseMachine.swift */,
+					CB0000100000000000000001 /* EncounterViewModel+StateSyncAndLog.swift */,
+					CB0000060000000000000001 /* CombatSubviews.swift */,
+				CB00000A0000000000000001 /* CombatOutcomeAndCardsViews.swift */,
 				CB0000080000000000000001 /* EchoEncounterBridge.swift */,
 				AA0000000000000000000001 /* EchoCombatBridge.swift */,
 			);
@@ -449,7 +594,6 @@
 			);
 			name = CardSampleGameTests;
 			packageProductDependencies = (
-				PKG0006000000000000000001 /* TwilightEngine */,
 				PKG0023000000000000000001 /* PackAuthoring */,
 				PKG0016000000000000000001 /* CoreHeroesContent */,
 				PKG0017000000000000000001 /* TwilightMarchesActIContent */,
@@ -560,14 +704,25 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		AA0000320000000000000001 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				APP00101000000000000001 /* CardGameApp.swift in Sources */,
-				APP00201000000000000001 /* ContentView.swift in Sources */,
-				GEO00301000000000000001 /* GameEngineObservable.swift in Sources */,
-				VWC00101000000000000001 /* HeroPanel.swift in Sources */,
+			AA0000320000000000000001 /* Sources */ = {
+				isa = PBXSourcesBuildPhase;
+				buildActionMask = 2147483647;
+					files = (
+						APP00101000000000000001 /* CardGameApp.swift in Sources */,
+						APP00201000000000000001 /* ContentView.swift in Sources */,
+						APP00301000000000000001 /* BundledPackURLs.swift in Sources */,
+						APP00401000000000000001 /* ContentFlow.swift in Sources */,
+						APP00501000000000000001 /* AppServices.swift in Sources */,
+						APS00101000000000000001 /* CharacterSelectionScreen.swift in Sources */,
+						APS00201000000000000001 /* SaveSlotSelectionScreen.swift in Sources */,
+						APS00301000000000000001 /* LoadSlotSelectionScreen.swift in Sources */,
+					GEO00301000000000000001 /* GameEngineObservable.swift in Sources */,
+					VWC00101000000000000001 /* HeroPanel.swift in Sources */,
+					HSC0000100000000000000001 /* HeroSelectionCard.swift in Sources */,
+					STD0000100000000000000001 /* StatDisplay.swift in Sources */,
+					STM0000100000000000000001 /* StatMini.swift in Sources */,
+					LSC0000100000000000000001 /* LoadSlotCard.swift in Sources */,
+					SSC0000100000000000000001 /* SaveSlotCard.swift in Sources */,
 				RW00000100000000000000001 /* ResonanceWidget.swift in Sources */,
 				DHB0000100000000000000001 /* DualHealthBar.swift in Sources */,
 				ECV0000100000000000000001 /* EnemyCardView.swift in Sources */,
@@ -582,24 +737,40 @@
 				HAP0000100000000000000001 /* HapticManager.swift in Sources */,
 				SND0000100000000000000001 /* SoundManager.swift in Sources */,
 				AA0000130000000000000001 /* CardView.swift in Sources */,
+				CVD0000100000000000000001 /* CardPresentation.swift in Sources */,
+				CVD0000200000000000000001 /* CompactCardView.swift in Sources */,
+				CVD0000300000000000000001 /* HandCardView.swift in Sources */,
 				AA0000150000000000000001 /* PlayerHandView.swift in Sources */,
 				AA0000480000000000000001 /* RulesView.swift in Sources */,
 				AA0000520000000000000001 /* GameSave.swift in Sources */,
 				AA0000540000000000000001 /* StatisticsView.swift in Sources */,
-				01D384D3F190A3976183B126 /* EventView.swift in Sources */,
-				8F035EDB750B2C0441F077B0 /* WorldMapView.swift in Sources */,
-				CC0000020000000000000001 /* CombatView.swift in Sources */,
-				CB0000010000000000000001 /* EncounterBridge.swift in Sources */,
-				CB0000030000000000000001 /* EncounterViewModel.swift in Sources */,
-				CB0000050000000000000001 /* CombatSubviews.swift in Sources */,
+					01D384D3F190A3976183B126 /* EventView.swift in Sources */,
+					8F035EDB750B2C0441F077B0 /* WorldMapView.swift in Sources */,
+					WM0000010000000000000001 /* EventLogEntryView.swift in Sources */,
+					WM0000030000000000000001 /* EngineRegionCardView.swift in Sources */,
+					WM0000050000000000000001 /* EngineRegionDetailView.swift in Sources */,
+					WM0000090000000000000001 /* CardReceivedNotificationOverlay.swift in Sources */,
+					WM0000070000000000000001 /* EngineEventLogView.swift in Sources */,
+					CC0000020000000000000001 /* AppCombatSummary.swift in Sources */,
+					CB0000030000000000000001 /* EncounterViewModel.swift in Sources */,
+					CB00000B0000000000000001 /* EncounterViewModel+PlayerActions.swift in Sources */,
+					CB00000D0000000000000001 /* EncounterViewModel+PhaseMachine.swift in Sources */,
+					CB00000F0000000000000001 /* EncounterViewModel+StateSyncAndLog.swift in Sources */,
+					CB0000050000000000000001 /* CombatSubviews.swift in Sources */,
+				CB0000090000000000000001 /* CombatOutcomeAndCardsViews.swift in Sources */,
 				CB0000070000000000000001 /* EchoEncounterBridge.swift in Sources */,
 				AA0000000000000000000002 /* EchoCombatBridge.swift in Sources */,
 				EIV000010000000000000001 /* EnemyIntentView.swift in Sources */,
 				FRV000010000000000000001 /* FateCardRevealView.swift in Sources */,
 				GG0002010000000000000001 /* HeroSelectionView.swift in Sources */,
 				CM00000100000000000000001 /* ContentManagerView.swift in Sources */,
+				CM00000500000000000000001 /* ContentManagerComponents.swift in Sources */,
 				CM00000300000000000000001 /* ContentManagerVM.swift in Sources */,
 				UT00000000000010 /* Localization.swift in Sources */,
+				UT00000000000050 /* Localization+AdvancedSystems.swift in Sources */,
+				UT00000000000060 /* Localization+CoreAndRules.swift in Sources */,
+				UT00000000000070 /* Localization+WorldAndNavigation.swift in Sources */,
+				UT00000000000080 /* Localization+RemainingKeys.swift in Sources */,
 				UT00000000000030 /* SafeImage.swift in Sources */,
 				UT00000000000040 /* AssetRegistry.swift in Sources */,
 				DS00000000000010 /* DesignSystem.swift in Sources */,
@@ -618,8 +789,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				BB0001150000000000000001 /* SaveLoadTests.swift in Sources */,
-				BB0004110000000000000001 /* AuditGateTests.swift in Sources */,
-				PG00001500000000000000001 /* ProfileGateTests.swift in Sources */,
+					BB0004110000000000000001 /* AuditGateTests.swift in Sources */,
+					BB00AAB10000000000000001 /* AuditArchitectureBoundaryGateTests.swift in Sources */,
+					AB36A0010000000000000001 /* AuditArchitectureBoundaryGateTests+ExternalCombatAndMutations.swift in Sources */,
+					AB36A0020000000000000001 /* AuditArchitectureBoundaryGateTests+DependenciesAndHygiene.swift in Sources */,
+					AB36A0030000000000000001 /* AuditArchitectureBoundaryGateTests+BridgeCallsiteGates.swift in Sources */,
+					AB37B0010000000000000001 /* AuditGateTests+ArchitectureAndIsolation.swift in Sources */,
+					AB37B0020000000000000001 /* AuditGateTests+StaticAndSerialization.swift in Sources */,
+					AB37B0030000000000000001 /* AuditGateTests+LegacyAndDeterminism.swift in Sources */,
+					AB37B0040000000000000001 /* AuditGateTests+AssetsAndRuntimeBoundaries.swift in Sources */,
+					PG00001500000000000000001 /* ProfileGateTests.swift in Sources */,
 				TH00000300000000000000001 /* TestContentLoader.swift in Sources */,
 				CT00000000000010 /* PackLoaderTests.swift in Sources */,
 				CT00000000000020 /* ContentRegistryTests.swift in Sources */,
@@ -629,6 +808,8 @@
 				01856FA4AED657E11739268F /* DesignSystemComplianceTests.swift in Sources */,
 				CC000002000000000000001B /* ContrastComplianceTests.swift in Sources */,
 				E9601DE7AB72AE3B9035899A /* CodeHygieneTests.swift in Sources */,
+				CHGXPR010000000000000001 /* CodeHygieneTests+XcodeProjectStructure.swift in Sources */,
+				CHGXPI010000000000000001 /* CodeHygieneTests+XcodeProjectIntegrity.swift in Sources */,
 				6352A5DDAB8A087797D247C9 /* ContentValidationTests.swift in Sources */,
 				C80DC6128F371177237472A1 /* ConditionValidatorTests.swift in Sources */,
 				0869558992AD64C9C9AC00CB /* LocalizationValidatorTests.swift in Sources */,

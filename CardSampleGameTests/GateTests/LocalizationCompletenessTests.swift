@@ -1,3 +1,8 @@
+/// Файл: CardSampleGameTests/GateTests/LocalizationCompletenessTests.swift
+/// Назначение: Содержит реализацию файла LocalizationCompletenessTests.swift.
+/// Зона ответственности: Фиксирует проверяемый контракт и не содержит production-логики.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 
 /// Gate tests for localization completeness.
@@ -13,20 +18,32 @@ final class LocalizationCompletenessTests: XCTestCase {
         return url
     }
 
-    /// Parse all `static let ... = "key"` values from Localization.swift
+    /// Parse all `static let ... = "key"` values from Utilities/Localization*.swift
     private func parseL10nKeys() throws -> Set<String> {
         guard let root = projectRoot else {
             XCTFail("Could not determine project root"); return []
         }
-        let file = root.appendingPathComponent("Utilities/Localization.swift")
-        let content = try String(contentsOf: file, encoding: .utf8)
+        let utilitiesDir = root.appendingPathComponent("Utilities")
+        let files = try FileManager.default.contentsOfDirectory(
+            at: utilitiesDir,
+            includingPropertiesForKeys: nil
+        )
+        .filter { url in
+            let name = url.lastPathComponent
+            return name.hasPrefix("Localization") && name.hasSuffix(".swift")
+        }
+        .sorted { $0.lastPathComponent < $1.lastPathComponent }
+
         var keys = Set<String>()
         // Pattern: static let someName = "some.key"
         let regex = try NSRegularExpression(pattern: #"static\s+let\s+\w+\s*=\s*"([^"]+)""#)
-        let range = NSRange(content.startIndex..., in: content)
-        for match in regex.matches(in: content, range: range) {
-            if let keyRange = Range(match.range(at: 1), in: content) {
-                keys.insert(String(content[keyRange]))
+        for file in files {
+            let content = try String(contentsOf: file, encoding: .utf8)
+            let range = NSRange(content.startIndex..., in: content)
+            for match in regex.matches(in: content, range: range) {
+                if let keyRange = Range(match.range(at: 1), in: content) {
+                    keys.insert(String(content[keyRange]))
+                }
             }
         }
         return keys

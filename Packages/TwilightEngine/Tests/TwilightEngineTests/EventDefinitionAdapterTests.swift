@@ -1,9 +1,23 @@
+/// Файл: Packages/TwilightEngine/Tests/TwilightEngineTests/EventDefinitionAdapterTests.swift
+/// Назначение: Содержит реализацию файла EventDefinitionAdapterTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import TwilightEngine
 
 final class EventDefinitionAdapterTests: XCTestCase {
 
     // MARK: - Helpers
+
+    private let services = TestEngineFactory.makeServices(seed: 1)
+
+    private func adapt(_ event: EventDefinition) -> GameEvent {
+        event.toGameEvent(
+            registry: services.contentRegistry,
+            localizationManager: services.localizationManager
+        )
+    }
 
     private func makeEvent(
         id: String = "e1",
@@ -35,37 +49,37 @@ final class EventDefinitionAdapterTests: XCTestCase {
 
     func testInlineKindMapsToNarrative() {
         let event = makeEvent(eventKind: .inline)
-        let result = event.toGameEvent()
+        let result = adapt(event)
         XCTAssertEqual(result.eventType, .narrative)
     }
 
     func testMiniGameCombatMapsToCombat() {
         let event = makeEvent(eventKind: .miniGame(.combat))
-        let result = event.toGameEvent()
+        let result = adapt(event)
         XCTAssertEqual(result.eventType, .combat)
     }
 
     func testMiniGameRitualMapsToRitual() {
         let event = makeEvent(eventKind: .miniGame(.ritual))
-        let result = event.toGameEvent()
+        let result = adapt(event)
         XCTAssertEqual(result.eventType, .ritual)
     }
 
     func testMiniGameExplorationMapsToExploration() {
         let event = makeEvent(eventKind: .miniGame(.exploration))
-        let result = event.toGameEvent()
+        let result = adapt(event)
         XCTAssertEqual(result.eventType, .exploration)
     }
 
     func testMiniGameDialogueMapsToNarrative() {
         let event = makeEvent(eventKind: .miniGame(.dialogue))
-        let result = event.toGameEvent()
+        let result = adapt(event)
         XCTAssertEqual(result.eventType, .narrative)
     }
 
     func testMiniGamePuzzleMapsToRitual() {
         let event = makeEvent(eventKind: .miniGame(.puzzle))
-        let result = event.toGameEvent()
+        let result = adapt(event)
         XCTAssertEqual(result.eventType, .ritual)
     }
 
@@ -80,7 +94,7 @@ final class EventDefinitionAdapterTests: XCTestCase {
             isOneTime: true,
             isInstant: true
         )
-        let result = event.toGameEvent()
+        let result = adapt(event)
 
         XCTAssertEqual(result.id, "test_event")
         XCTAssertEqual(result.title, "My Title")
@@ -93,7 +107,7 @@ final class EventDefinitionAdapterTests: XCTestCase {
     func testPressureMapsToTension() {
         let availability = Availability(minPressure: 10, maxPressure: 50)
         let event = makeEvent(availability: availability)
-        let result = event.toGameEvent()
+        let result = adapt(event)
 
         XCTAssertEqual(result.minTension, 10)
         XCTAssertEqual(result.maxTension, 50)
@@ -102,7 +116,7 @@ final class EventDefinitionAdapterTests: XCTestCase {
     func testEmptyFlagsMappedToNil() {
         let availability = Availability(requiredFlags: [], forbiddenFlags: [])
         let event = makeEvent(availability: availability)
-        let result = event.toGameEvent()
+        let result = adapt(event)
 
         XCTAssertNil(result.requiredFlags)
         XCTAssertNil(result.forbiddenFlags)
@@ -111,7 +125,7 @@ final class EventDefinitionAdapterTests: XCTestCase {
     func testNonEmptyFlagsPassThrough() {
         let availability = Availability(requiredFlags: ["flag1"], forbiddenFlags: ["flag2"])
         let event = makeEvent(availability: availability)
-        let result = event.toGameEvent()
+        let result = adapt(event)
 
         XCTAssertEqual(result.requiredFlags, ["flag1"])
         XCTAssertEqual(result.forbiddenFlags, ["flag2"])
@@ -122,7 +136,7 @@ final class EventDefinitionAdapterTests: XCTestCase {
     func testNilRegionStatesReturnsAllStates() {
         let availability = Availability(regionStates: nil)
         let event = makeEvent(availability: availability)
-        let result = event.toGameEvent()
+        let result = adapt(event)
 
         XCTAssertTrue(result.regionStates.contains(.stable))
         XCTAssertTrue(result.regionStates.contains(.borderland))
@@ -133,7 +147,7 @@ final class EventDefinitionAdapterTests: XCTestCase {
     func testSpecificRegionStateMapped() {
         let availability = Availability(regionStates: ["stable"])
         let event = makeEvent(availability: availability)
-        let result = event.toGameEvent()
+        let result = adapt(event)
 
         XCTAssertEqual(result.regionStates, [.stable])
     }
@@ -141,7 +155,7 @@ final class EventDefinitionAdapterTests: XCTestCase {
     func testUnknownRegionStateFilteredOut() {
         let availability = Availability(regionStates: ["stable", "unknown_state"])
         let event = makeEvent(availability: availability)
-        let result = event.toGameEvent()
+        let result = adapt(event)
 
         XCTAssertEqual(result.regionStates, [.stable])
     }
@@ -154,7 +168,7 @@ final class EventDefinitionAdapterTests: XCTestCase {
             label: .text("Pick me"),
             consequences: .none
         )
-        let result = choice.toEventChoice()
+        let result = choice.toEventChoice(localizationManager: services.localizationManager)
 
         XCTAssertEqual(result.id, "c1")
         XCTAssertEqual(result.text, "Pick me")
@@ -167,7 +181,7 @@ final class EventDefinitionAdapterTests: XCTestCase {
             requirements: nil,
             consequences: .none
         )
-        let result = choice.toEventChoice()
+        let result = choice.toEventChoice(localizationManager: services.localizationManager)
         XCTAssertNil(result.requirements)
     }
 
@@ -256,7 +270,7 @@ final class EventDefinitionAdapterTests: XCTestCase {
             consequences: ChoiceConsequences(questProgress: quest)
         )
         let event = makeEvent(choices: [choice])
-        let result = event.toGameEvent()
+        let result = adapt(event)
 
         XCTAssertEqual(result.questLinks, ["q1"])
     }
@@ -274,23 +288,23 @@ final class EventDefinitionAdapterTests: XCTestCase {
 
     func testDifficultyToRarityMapping() {
         // Difficulty 1 → common
-        let r1 = makeEvent(miniGameChallenge: makeChallenge(difficulty: 1, enemyId: "goblin")).toGameEvent()
+        let r1 = adapt(makeEvent(miniGameChallenge: makeChallenge(difficulty: 1, enemyId: "goblin")))
         XCTAssertEqual(r1.monsterCard?.rarity, .common)
 
         // Difficulty 2 → uncommon
-        let r2 = makeEvent(miniGameChallenge: makeChallenge(difficulty: 2, enemyId: "orc")).toGameEvent()
+        let r2 = adapt(makeEvent(miniGameChallenge: makeChallenge(difficulty: 2, enemyId: "orc")))
         XCTAssertEqual(r2.monsterCard?.rarity, .uncommon)
 
         // Difficulty 3 → rare
-        let r3 = makeEvent(miniGameChallenge: makeChallenge(difficulty: 3, enemyId: "troll")).toGameEvent()
+        let r3 = adapt(makeEvent(miniGameChallenge: makeChallenge(difficulty: 3, enemyId: "troll")))
         XCTAssertEqual(r3.monsterCard?.rarity, .rare)
 
         // Difficulty 4 → epic
-        let r4 = makeEvent(miniGameChallenge: makeChallenge(difficulty: 4, enemyId: "dragon")).toGameEvent()
+        let r4 = adapt(makeEvent(miniGameChallenge: makeChallenge(difficulty: 4, enemyId: "dragon")))
         XCTAssertEqual(r4.monsterCard?.rarity, .epic)
 
         // Difficulty 6 → legendary
-        let r6 = makeEvent(miniGameChallenge: makeChallenge(difficulty: 6, enemyId: "god")).toGameEvent()
+        let r6 = adapt(makeEvent(miniGameChallenge: makeChallenge(difficulty: 6, enemyId: "god")))
         XCTAssertEqual(r6.monsterCard?.rarity, .legendary)
     }
 }

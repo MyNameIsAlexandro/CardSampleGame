@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Localization/LocalizationValidator.swift
+/// Назначение: Содержит реализацию файла LocalizationValidator.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 // MARK: - Localization Validator
@@ -17,7 +22,7 @@ public final class LocalizationValidator {
     // MARK: - Configuration
 
     /// Canonical localization scheme for this project
-    public enum LocalizationScheme {
+    public enum LocalizationScheme: Sendable {
         /// Inline translations in JSON: { "en": "...", "ru": "..." }
         case inlineOnly
 
@@ -33,7 +38,7 @@ public final class LocalizationValidator {
 
     // MARK: - Validation Results
 
-    public struct ValidationResult {
+    public struct ValidationResult: Sendable {
         public let isValid: Bool
         public let scheme: LocalizationScheme
         public let inlineCount: Int

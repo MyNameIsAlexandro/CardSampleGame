@@ -1,3 +1,8 @@
+/// Файл: CardSampleGameTests/TestHelpers/SourcePathResolver.swift
+/// Назначение: Содержит реализацию файла SourcePathResolver.swift.
+/// Зона ответственности: Фиксирует проверяемый контракт и не содержит production-логики.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import Foundation
 
 /// Centralizes source file path resolution for gate tests.

@@ -92,6 +92,9 @@ iOSInjectionProject/
 # Mac
 .DS_Store
 
+# Codex (local agent state)
+.codex_home/
+
 # Local QA artifacts
 TestResults/
 TestReport/

@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Data/Definitions/QuestDefinition.swift
+/// Назначение: Содержит реализацию файла QuestDefinition.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 // MARK: - Quest Definition
@@ -277,7 +282,7 @@ public enum CompletionCondition: Codable, Hashable {
 // MARK: - Quest Completion Rewards
 
 /// Rewards/penalties for quest completion (Engine-specific, distinct from legacy QuestRewards)
-public struct QuestCompletionRewards: Codable, Hashable {
+public struct QuestCompletionRewards: Codable, Hashable, Sendable {
     /// Resource changes
     public var resourceChanges: [String: Int]
 

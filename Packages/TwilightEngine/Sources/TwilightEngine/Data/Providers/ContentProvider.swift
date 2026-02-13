@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Data/Providers/ContentProvider.swift
+/// Назначение: Содержит реализацию файла ContentProvider.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 // MARK: - Content Provider Protocol
@@ -65,7 +70,7 @@ public protocol ContentProvider {
 // MARK: - Content Validation Error
 
 /// Error found during content validation
-public struct ContentValidationError: Equatable, CustomStringConvertible {
+public struct ContentValidationError: Equatable, CustomStringConvertible, Sendable {
     /// Type of validation error
     public let type: ErrorType
 
@@ -79,7 +84,7 @@ public struct ContentValidationError: Equatable, CustomStringConvertible {
         return "[\(type.rawValue)] \(definitionId): \(message)"
     }
 
-    public enum ErrorType: String, Equatable {
+    public enum ErrorType: String, Equatable, Sendable {
         case duplicateId = "DUPLICATE_ID"
         case brokenReference = "BROKEN_REFERENCE"
         case invalidRange = "INVALID_RANGE"

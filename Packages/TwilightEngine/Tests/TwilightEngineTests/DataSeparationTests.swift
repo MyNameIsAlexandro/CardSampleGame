@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Tests/TwilightEngineTests/DataSeparationTests.swift
+/// Назначение: Содержит реализацию файла DataSeparationTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import TwilightEngine
 

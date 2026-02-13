@@ -1,0 +1,536 @@
+{
+  "checkpointSteps" : [
+    2,
+    6,
+    9
+  ],
+  "expected" : {
+    "checkpointed" : {
+      "finalState" : {
+        "activeQuestIds" : [
+          "quest_main_act1"
+        ],
+        "completedEventIds" : [
+
+        ],
+        "completedQuestIds" : [
+
+        ],
+        "currentRegionId" : "village",
+        "day" : 7,
+        "deckCardIds" : [
+
+        ],
+        "discardCardIds" : [
+
+        ],
+        "handCardIds" : [
+
+        ],
+        "isGameOver" : false,
+        "isInCombat" : false,
+        "pendingEncounterStatePresent" : false,
+        "playerBalance" : 50,
+        "playerFaith" : 8,
+        "playerHealth" : 26,
+        "questStages" : {
+          "quest_main_act1" : 0
+        },
+        "regions" : [
+          {
+            "anchorAlignment" : "dark",
+            "anchorId" : "anchor_breach_shrine",
+            "anchorIntegrity" : 15,
+            "id" : "breach",
+            "reputation" : 0,
+            "state" : "breach",
+            "type" : "wasteland",
+            "visited" : false
+          },
+          {
+            "id" : "dark_lowland",
+            "reputation" : 0,
+            "state" : "breach",
+            "type" : "wasteland",
+            "visited" : false
+          },
+          {
+            "anchorAlignment" : "neutral",
+            "anchorId" : "anchor_forest_idol",
+            "anchorIntegrity" : 55,
+            "id" : "forest",
+            "reputation" : 0,
+            "state" : "borderland",
+            "type" : "forest",
+            "visited" : false
+          },
+          {
+            "anchorAlignment" : "neutral",
+            "anchorId" : "anchor_mountain_barrow",
+            "anchorIntegrity" : 50,
+            "id" : "mountain",
+            "reputation" : 0,
+            "state" : "breach",
+            "type" : "mountain",
+            "visited" : false
+          },
+          {
+            "anchorAlignment" : "light",
+            "anchorId" : "anchor_sacred_oak",
+            "anchorIntegrity" : 90,
+            "id" : "oak",
+            "reputation" : 0,
+            "state" : "stable",
+            "type" : "sacred",
+            "visited" : false
+          },
+          {
+            "anchorAlignment" : "dark",
+            "anchorId" : "anchor_swamp_spring",
+            "anchorIntegrity" : 45,
+            "id" : "swamp",
+            "reputation" : 0,
+            "state" : "borderland",
+            "type" : "swamp",
+            "visited" : false
+          },
+          {
+            "anchorAlignment" : "light",
+            "anchorId" : "anchor_village_chapel",
+            "anchorIntegrity" : 85,
+            "id" : "village",
+            "reputation" : 0,
+            "state" : "stable",
+            "type" : "settlement",
+            "visited" : false
+          }
+        ],
+        "resonanceMilli" : 0,
+        "rngSeed" : 424242,
+        "rngState" : 6551401175885868242,
+        "worldFlags" : {
+
+        },
+        "worldTension" : 21
+      },
+      "fingerprint" : {
+        "finalStateFingerprint" : "eyJhY3RpdmVRdWVzdElkcyI6WyJxdWVzdF9tYWluX2FjdDEiXSwiY29tcGxldGVkRXZlbnRJZHMiOltdLCJjb21wbGV0ZWRRdWVzdElkcyI6W10sImN1cnJlbnRSZWdpb25JZCI6InZpbGxhZ2UiLCJkYXkiOjcsImRlY2tDYXJkSWRzIjpbXSwiZGlzY2FyZENhcmRJZHMiOltdLCJoYW5kQ2FyZElkcyI6W10sImlzR2FtZU92ZXIiOmZhbHNlLCJpc0luQ29tYmF0IjpmYWxzZSwicGVuZGluZ0VuY291bnRlclN0YXRlUHJlc2VudCI6ZmFsc2UsInBsYXllckJhbGFuY2UiOjUwLCJwbGF5ZXJGYWl0aCI6OCwicGxheWVySGVhbHRoIjoyNiwicXVlc3RTdGFnZXMiOnsicXVlc3RfbWFpbl9hY3QxIjowfSwicmVnaW9ucyI6W3siYW5jaG9yQWxpZ25tZW50IjoiZGFyayIsImFuY2hvcklkIjoiYW5jaG9yX2JyZWFjaF9zaHJpbmUiLCJhbmNob3JJbnRlZ3JpdHkiOjE1LCJpZCI6ImJyZWFjaCIsInJlcHV0YXRpb24iOjAsInN0YXRlIjoiYnJlYWNoIiwidHlwZSI6Indhc3RlbGFuZCIsInZpc2l0ZWQiOmZhbHNlfSx7ImlkIjoiZGFya19sb3dsYW5kIiwicmVwdXRhdGlvbiI6MCwic3RhdGUiOiJicmVhY2giLCJ0eXBlIjoid2FzdGVsYW5kIiwidmlzaXRlZCI6ZmFsc2V9LHsiYW5jaG9yQWxpZ25tZW50IjoibmV1dHJhbCIsImFuY2hvcklkIjoiYW5jaG9yX2ZvcmVzdF9pZG9sIiwiYW5jaG9ySW50ZWdyaXR5Ijo1NSwiaWQiOiJmb3Jlc3QiLCJyZXB1dGF0aW9uIjowLCJzdGF0ZSI6ImJvcmRlcmxhbmQiLCJ0eXBlIjoiZm9yZXN0IiwidmlzaXRlZCI6ZmFsc2V9LHsiYW5jaG9yQWxpZ25tZW50IjoibmV1dHJhbCIsImFuY2hvcklkIjoiYW5jaG9yX21vdW50YWluX2JhcnJvdyIsImFuY2hvckludGVncml0eSI6NTAsImlkIjoibW91bnRhaW4iLCJyZXB1dGF0aW9uIjowLCJzdGF0ZSI6ImJyZWFjaCIsInR5cGUiOiJtb3VudGFpbiIsInZpc2l0ZWQiOmZhbHNlfSx7ImFuY2hvckFsaWdubWVudCI6ImxpZ2h0IiwiYW5jaG9ySWQiOiJhbmNob3Jfc2FjcmVkX29hayIsImFuY2hvckludGVncml0eSI6OTAsImlkIjoib2FrIiwicmVwdXRhdGlvbiI6MCwic3RhdGUiOiJzdGFibGUiLCJ0eXBlIjoic2FjcmVkIiwidmlzaXRlZCI6ZmFsc2V9LHsiYW5jaG9yQWxpZ25tZW50IjoiZGFyayIsImFuY2hvcklkIjoiYW5jaG9yX3N3YW1wX3NwcmluZyIsImFuY2hvckludGVncml0eSI6NDUsImlkIjoic3dhbXAiLCJyZXB1dGF0aW9uIjowLCJzdGF0ZSI6ImJvcmRlcmxhbmQiLCJ0eXBlIjoic3dhbXAiLCJ2aXNpdGVkIjpmYWxzZX0seyJhbmNob3JBbGlnbm1lbnQiOiJsaWdodCIsImFuY2hvcklkIjoiYW5jaG9yX3ZpbGxhZ2VfY2hhcGVsIiwiYW5jaG9ySW50ZWdyaXR5Ijo4NSwiaWQiOiJ2aWxsYWdlIiwicmVwdXRhdGlvbiI6MCwic3RhdGUiOiJzdGFibGUiLCJ0eXBlIjoic2V0dGxlbWVudCIsInZpc2l0ZWQiOmZhbHNlfV0sInJlc29uYW5jZU1pbGxpIjowLCJybmdTZWVkIjo0MjQyNDIsInJuZ1N0YXRlIjo2NTUxNDAxMTc1ODg1ODY4MjQyLCJ3b3JsZEZsYWdzIjp7fSwid29ybGRUZW5zaW9uIjoyMX0=",
+        "stepDigestFingerprint" : "W3siYWN0aW9uIjoiZXhwbG9yZSIsImN1cnJlbnRFdmVudElkIjoiZXZlbnRfY2FtcF9yZXN0IiwiY3VycmVudFJlZ2lvbklkIjoidmlsbGFnZSIsImRheSI6MSwiZmFpdGgiOjgsImhlYWx0aCI6MjAsImlkIjoiczAxIiwicm5nU3RhdGUiOjcyNjk1MjI0Nzc4Mjk1MjgzNjcsInN0ZXAiOjEsInN1Y2Nlc3MiOnRydWUsInRlbnNpb24iOjE1fSx7ImFjdGlvbiI6ImRpc21pc3NDdXJyZW50RXZlbnQiLCJjdXJyZW50UmVnaW9uSWQiOiJ2aWxsYWdlIiwiZGF5IjoxLCJmYWl0aCI6OCwiaGVhbHRoIjoyMCwiaWQiOiJzMDIiLCJybmdTdGF0ZSI6NzI2OTUyMjQ3NzgyOTUyODM2Nywic3RlcCI6Miwic3VjY2VzcyI6dHJ1ZSwidGVuc2lvbiI6MTV9LHsiYWN0aW9uIjoicmVzdCIsImN1cnJlbnRSZWdpb25JZCI6InZpbGxhZ2UiLCJkYXkiOjIsImZhaXRoIjo4LCJoZWFsdGgiOjIzLCJpZCI6InMwMyIsInJuZ1N0YXRlIjo3MjY5NTIyNDc3ODI5NTI4MzY3LCJzdGVwIjozLCJzdWNjZXNzIjp0cnVlLCJ0ZW5zaW9uIjoxNX0seyJhY3Rpb24iOiJza2lwVHVybiIsImN1cnJlbnRSZWdpb25JZCI6InZpbGxhZ2UiLCJkYXkiOjMsImZhaXRoIjo4LCJoZWFsdGgiOjIzLCJpZCI6InMwNCIsInJuZ1N0YXRlIjo2NjgxNTU0ODc1MjE5MzYyMzA4LCJzdGVwIjo0LCJzdWNjZXNzIjp0cnVlLCJ0ZW5zaW9uIjoxOH0seyJhY3Rpb24iOiJleHBsb3JlIiwiY3VycmVudEV2ZW50SWQiOiJldmVudF93YW5kZXJlciIsImN1cnJlbnRSZWdpb25JZCI6InZpbGxhZ2UiLCJkYXkiOjQsImZhaXRoIjo4LCJoZWFsdGgiOjIzLCJpZCI6InMwNSIsInJuZ1N0YXRlIjozNDMwMjQ3Mzg1NTQ1MjkxMzkyLCJzdGVwIjo1LCJzdWNjZXNzIjp0cnVlLCJ0ZW5zaW9uIjoxOH0seyJhY3Rpb24iOiJkaXNtaXNzQ3VycmVudEV2ZW50IiwiY3VycmVudFJlZ2lvbklkIjoidmlsbGFnZSIsImRheSI6NCwiZmFpdGgiOjgsImhlYWx0aCI6MjMsImlkIjoiczA2Iiwicm5nU3RhdGUiOjM0MzAyNDczODU1NDUyOTEzOTIsInN0ZXAiOjYsInN1Y2Nlc3MiOnRydWUsInRlbnNpb24iOjE4fSx7ImFjdGlvbiI6InNraXBUdXJuIiwiY3VycmVudFJlZ2lvbklkIjoidmlsbGFnZSIsImRheSI6NSwiZmFpdGgiOjgsImhlYWx0aCI6MjMsImlkIjoiczA3Iiwicm5nU3RhdGUiOjM0MzAyNDczODU1NDUyOTEzOTIsInN0ZXAiOjcsInN1Y2Nlc3MiOnRydWUsInRlbnNpb24iOjE4fSx7ImFjdGlvbiI6ImV4cGxvcmUiLCJjdXJyZW50RXZlbnRJZCI6ImV2ZW50X3dpbGRfYmVhc3QiLCJjdXJyZW50UmVnaW9uSWQiOiJ2aWxsYWdlIiwiZGF5Ijo2LCJmYWl0aCI6OCwiaGVhbHRoIjoyMywiaWQiOiJzMDgiLCJybmdTdGF0ZSI6NjU1MTQwMTE3NTg4NTg2ODI0Miwic3RlcCI6OCwic3VjY2VzcyI6dHJ1ZSwidGVuc2lvbiI6MjF9LHsiYWN0aW9uIjoiZGlzbWlzc0N1cnJlbnRFdmVudCIsImN1cnJlbnRSZWdpb25JZCI6InZpbGxhZ2UiLCJkYXkiOjYsImZhaXRoIjo4LCJoZWFsdGgiOjIzLCJpZCI6InMwOSIsInJuZ1N0YXRlIjo2NTUxNDAxMTc1ODg1ODY4MjQyLCJzdGVwIjo5LCJzdWNjZXNzIjp0cnVlLCJ0ZW5zaW9uIjoyMX0seyJhY3Rpb24iOiJyZXN0IiwiY3VycmVudFJlZ2lvbklkIjoidmlsbGFnZSIsImRheSI6NywiZmFpdGgiOjgsImhlYWx0aCI6MjYsImlkIjoiczEwIiwicm5nU3RhdGUiOjY1NTE0MDExNzU4ODU4NjgyNDIsInN0ZXAiOjEwLCJzdWNjZXNzIjp0cnVlLCJ0ZW5zaW9uIjoyMX1d",
+        "traceFingerprint" : "eyJzY2hlbWFWZXJzaW9uIjoxLCJzdGVwcyI6W3siYWN0aW9uIjoiZXhwbG9yZSIsImlkIjoiczAxIn0seyJhY3Rpb24iOiJkaXNtaXNzQ3VycmVudEV2ZW50IiwiaWQiOiJzMDIifSx7ImFjdGlvbiI6InJlc3QiLCJpZCI6InMwMyJ9LHsiYWN0aW9uIjoic2tpcFR1cm4iLCJpZCI6InMwNCJ9LHsiYWN0aW9uIjoiZXhwbG9yZSIsImlkIjoiczA1In0seyJhY3Rpb24iOiJkaXNtaXNzQ3VycmVudEV2ZW50IiwiaWQiOiJzMDYifSx7ImFjdGlvbiI6InNraXBUdXJuIiwiaWQiOiJzMDcifSx7ImFjdGlvbiI6ImV4cGxvcmUiLCJpZCI6InMwOCJ9LHsiYWN0aW9uIjoiZGlzbWlzc0N1cnJlbnRFdmVudCIsImlkIjoiczA5In0seyJhY3Rpb24iOiJyZXN0IiwiaWQiOiJzMTAifV0sInRyYWNlSWQiOiJlcGljMzBfc21va2VfdHJhY2UifQ=="
+      },
+      "stepDigests" : [
+        {
+          "action" : "explore",
+          "currentEventId" : "event_camp_rest",
+          "currentRegionId" : "village",
+          "day" : 1,
+          "faith" : 8,
+          "health" : 20,
+          "id" : "s01",
+          "rngState" : 7269522477829528367,
+          "step" : 1,
+          "success" : true,
+          "tension" : 15
+        },
+        {
+          "action" : "dismissCurrentEvent",
+          "currentRegionId" : "village",
+          "day" : 1,
+          "faith" : 8,
+          "health" : 20,
+          "id" : "s02",
+          "rngState" : 7269522477829528367,
+          "step" : 2,
+          "success" : true,
+          "tension" : 15
+        },
+        {
+          "action" : "rest",
+          "currentRegionId" : "village",
+          "day" : 2,
+          "faith" : 8,
+          "health" : 23,
+          "id" : "s03",
+          "rngState" : 7269522477829528367,
+          "step" : 3,
+          "success" : true,
+          "tension" : 15
+        },
+        {
+          "action" : "skipTurn",
+          "currentRegionId" : "village",
+          "day" : 3,
+          "faith" : 8,
+          "health" : 23,
+          "id" : "s04",
+          "rngState" : 6681554875219362308,
+          "step" : 4,
+          "success" : true,
+          "tension" : 18
+        },
+        {
+          "action" : "explore",
+          "currentEventId" : "event_wanderer",
+          "currentRegionId" : "village",
+          "day" : 4,
+          "faith" : 8,
+          "health" : 23,
+          "id" : "s05",
+          "rngState" : 3430247385545291392,
+          "step" : 5,
+          "success" : true,
+          "tension" : 18
+        },
+        {
+          "action" : "dismissCurrentEvent",
+          "currentRegionId" : "village",
+          "day" : 4,
+          "faith" : 8,
+          "health" : 23,
+          "id" : "s06",
+          "rngState" : 3430247385545291392,
+          "step" : 6,
+          "success" : true,
+          "tension" : 18
+        },
+        {
+          "action" : "skipTurn",
+          "currentRegionId" : "village",
+          "day" : 5,
+          "faith" : 8,
+          "health" : 23,
+          "id" : "s07",
+          "rngState" : 3430247385545291392,
+          "step" : 7,
+          "success" : true,
+          "tension" : 18
+        },
+        {
+          "action" : "explore",
+          "currentEventId" : "event_wild_beast",
+          "currentRegionId" : "village",
+          "day" : 6,
+          "faith" : 8,
+          "health" : 23,
+          "id" : "s08",
+          "rngState" : 6551401175885868242,
+          "step" : 8,
+          "success" : true,
+          "tension" : 21
+        },
+        {
+          "action" : "dismissCurrentEvent",
+          "currentRegionId" : "village",
+          "day" : 6,
+          "faith" : 8,
+          "health" : 23,
+          "id" : "s09",
+          "rngState" : 6551401175885868242,
+          "step" : 9,
+          "success" : true,
+          "tension" : 21
+        },
+        {
+          "action" : "rest",
+          "currentRegionId" : "village",
+          "day" : 7,
+          "faith" : 8,
+          "health" : 26,
+          "id" : "s10",
+          "rngState" : 6551401175885868242,
+          "step" : 10,
+          "success" : true,
+          "tension" : 21
+        }
+      ]
+    },
+    "linear" : {
+      "finalState" : {
+        "activeQuestIds" : [
+          "quest_main_act1"
+        ],
+        "completedEventIds" : [
+
+        ],
+        "completedQuestIds" : [
+
+        ],
+        "currentRegionId" : "village",
+        "day" : 7,
+        "deckCardIds" : [
+
+        ],
+        "discardCardIds" : [
+
+        ],
+        "handCardIds" : [
+
+        ],
+        "isGameOver" : false,
+        "isInCombat" : false,
+        "pendingEncounterStatePresent" : false,
+        "playerBalance" : 50,
+        "playerFaith" : 8,
+        "playerHealth" : 26,
+        "questStages" : {
+          "quest_main_act1" : 0
+        },
+        "regions" : [
+          {
+            "anchorAlignment" : "dark",
+            "anchorId" : "anchor_breach_shrine",
+            "anchorIntegrity" : 15,
+            "id" : "breach",
+            "reputation" : 0,
+            "state" : "breach",
+            "type" : "wasteland",
+            "visited" : false
+          },
+          {
+            "id" : "dark_lowland",
+            "reputation" : 0,
+            "state" : "breach",
+            "type" : "wasteland",
+            "visited" : false
+          },
+          {
+            "anchorAlignment" : "neutral",
+            "anchorId" : "anchor_forest_idol",
+            "anchorIntegrity" : 55,
+            "id" : "forest",
+            "reputation" : 0,
+            "state" : "borderland",
+            "type" : "forest",
+            "visited" : false
+          },
+          {
+            "anchorAlignment" : "neutral",
+            "anchorId" : "anchor_mountain_barrow",
+            "anchorIntegrity" : 50,
+            "id" : "mountain",
+            "reputation" : 0,
+            "state" : "breach",
+            "type" : "mountain",
+            "visited" : false
+          },
+          {
+            "anchorAlignment" : "light",
+            "anchorId" : "anchor_sacred_oak",
+            "anchorIntegrity" : 90,
+            "id" : "oak",
+            "reputation" : 0,
+            "state" : "stable",
+            "type" : "sacred",
+            "visited" : false
+          },
+          {
+            "anchorAlignment" : "dark",
+            "anchorId" : "anchor_swamp_spring",
+            "anchorIntegrity" : 45,
+            "id" : "swamp",
+            "reputation" : 0,
+            "state" : "borderland",
+            "type" : "swamp",
+            "visited" : false
+          },
+          {
+            "anchorAlignment" : "light",
+            "anchorId" : "anchor_village_chapel",
+            "anchorIntegrity" : 85,
+            "id" : "village",
+            "reputation" : 0,
+            "state" : "stable",
+            "type" : "settlement",
+            "visited" : false
+          }
+        ],
+        "resonanceMilli" : 0,
+        "rngSeed" : 424242,
+        "rngState" : 6551401175885868242,
+        "worldFlags" : {
+
+        },
+        "worldTension" : 21
+      },
+      "fingerprint" : {
+        "finalStateFingerprint" : "eyJhY3RpdmVRdWVzdElkcyI6WyJxdWVzdF9tYWluX2FjdDEiXSwiY29tcGxldGVkRXZlbnRJZHMiOltdLCJjb21wbGV0ZWRRdWVzdElkcyI6W10sImN1cnJlbnRSZWdpb25JZCI6InZpbGxhZ2UiLCJkYXkiOjcsImRlY2tDYXJkSWRzIjpbXSwiZGlzY2FyZENhcmRJZHMiOltdLCJoYW5kQ2FyZElkcyI6W10sImlzR2FtZU92ZXIiOmZhbHNlLCJpc0luQ29tYmF0IjpmYWxzZSwicGVuZGluZ0VuY291bnRlclN0YXRlUHJlc2VudCI6ZmFsc2UsInBsYXllckJhbGFuY2UiOjUwLCJwbGF5ZXJGYWl0aCI6OCwicGxheWVySGVhbHRoIjoyNiwicXVlc3RTdGFnZXMiOnsicXVlc3RfbWFpbl9hY3QxIjowfSwicmVnaW9ucyI6W3siYW5jaG9yQWxpZ25tZW50IjoiZGFyayIsImFuY2hvcklkIjoiYW5jaG9yX2JyZWFjaF9zaHJpbmUiLCJhbmNob3JJbnRlZ3JpdHkiOjE1LCJpZCI6ImJyZWFjaCIsInJlcHV0YXRpb24iOjAsInN0YXRlIjoiYnJlYWNoIiwidHlwZSI6Indhc3RlbGFuZCIsInZpc2l0ZWQiOmZhbHNlfSx7ImlkIjoiZGFya19sb3dsYW5kIiwicmVwdXRhdGlvbiI6MCwic3RhdGUiOiJicmVhY2giLCJ0eXBlIjoid2FzdGVsYW5kIiwidmlzaXRlZCI6ZmFsc2V9LHsiYW5jaG9yQWxpZ25tZW50IjoibmV1dHJhbCIsImFuY2hvcklkIjoiYW5jaG9yX2ZvcmVzdF9pZG9sIiwiYW5jaG9ySW50ZWdyaXR5Ijo1NSwiaWQiOiJmb3Jlc3QiLCJyZXB1dGF0aW9uIjowLCJzdGF0ZSI6ImJvcmRlcmxhbmQiLCJ0eXBlIjoiZm9yZXN0IiwidmlzaXRlZCI6ZmFsc2V9LHsiYW5jaG9yQWxpZ25tZW50IjoibmV1dHJhbCIsImFuY2hvcklkIjoiYW5jaG9yX21vdW50YWluX2JhcnJvdyIsImFuY2hvckludGVncml0eSI6NTAsImlkIjoibW91bnRhaW4iLCJyZXB1dGF0aW9uIjowLCJzdGF0ZSI6ImJyZWFjaCIsInR5cGUiOiJtb3VudGFpbiIsInZpc2l0ZWQiOmZhbHNlfSx7ImFuY2hvckFsaWdubWVudCI6ImxpZ2h0IiwiYW5jaG9ySWQiOiJhbmNob3Jfc2FjcmVkX29hayIsImFuY2hvckludGVncml0eSI6OTAsImlkIjoib2FrIiwicmVwdXRhdGlvbiI6MCwic3RhdGUiOiJzdGFibGUiLCJ0eXBlIjoic2FjcmVkIiwidmlzaXRlZCI6ZmFsc2V9LHsiYW5jaG9yQWxpZ25tZW50IjoiZGFyayIsImFuY2hvcklkIjoiYW5jaG9yX3N3YW1wX3NwcmluZyIsImFuY2hvckludGVncml0eSI6NDUsImlkIjoic3dhbXAiLCJyZXB1dGF0aW9uIjowLCJzdGF0ZSI6ImJvcmRlcmxhbmQiLCJ0eXBlIjoic3dhbXAiLCJ2aXNpdGVkIjpmYWxzZX0seyJhbmNob3JBbGlnbm1lbnQiOiJsaWdodCIsImFuY2hvcklkIjoiYW5jaG9yX3ZpbGxhZ2VfY2hhcGVsIiwiYW5jaG9ySW50ZWdyaXR5Ijo4NSwiaWQiOiJ2aWxsYWdlIiwicmVwdXRhdGlvbiI6MCwic3RhdGUiOiJzdGFibGUiLCJ0eXBlIjoic2V0dGxlbWVudCIsInZpc2l0ZWQiOmZhbHNlfV0sInJlc29uYW5jZU1pbGxpIjowLCJybmdTZWVkIjo0MjQyNDIsInJuZ1N0YXRlIjo2NTUxNDAxMTc1ODg1ODY4MjQyLCJ3b3JsZEZsYWdzIjp7fSwid29ybGRUZW5zaW9uIjoyMX0=",
+        "stepDigestFingerprint" : "W3siYWN0aW9uIjoiZXhwbG9yZSIsImN1cnJlbnRFdmVudElkIjoiZXZlbnRfY2FtcF9yZXN0IiwiY3VycmVudFJlZ2lvbklkIjoidmlsbGFnZSIsImRheSI6MSwiZmFpdGgiOjgsImhlYWx0aCI6MjAsImlkIjoiczAxIiwicm5nU3RhdGUiOjcyNjk1MjI0Nzc4Mjk1MjgzNjcsInN0ZXAiOjEsInN1Y2Nlc3MiOnRydWUsInRlbnNpb24iOjE1fSx7ImFjdGlvbiI6ImRpc21pc3NDdXJyZW50RXZlbnQiLCJjdXJyZW50UmVnaW9uSWQiOiJ2aWxsYWdlIiwiZGF5IjoxLCJmYWl0aCI6OCwiaGVhbHRoIjoyMCwiaWQiOiJzMDIiLCJybmdTdGF0ZSI6NzI2OTUyMjQ3NzgyOTUyODM2Nywic3RlcCI6Miwic3VjY2VzcyI6dHJ1ZSwidGVuc2lvbiI6MTV9LHsiYWN0aW9uIjoicmVzdCIsImN1cnJlbnRSZWdpb25JZCI6InZpbGxhZ2UiLCJkYXkiOjIsImZhaXRoIjo4LCJoZWFsdGgiOjIzLCJpZCI6InMwMyIsInJuZ1N0YXRlIjo3MjY5NTIyNDc3ODI5NTI4MzY3LCJzdGVwIjozLCJzdWNjZXNzIjp0cnVlLCJ0ZW5zaW9uIjoxNX0seyJhY3Rpb24iOiJza2lwVHVybiIsImN1cnJlbnRSZWdpb25JZCI6InZpbGxhZ2UiLCJkYXkiOjMsImZhaXRoIjo4LCJoZWFsdGgiOjIzLCJpZCI6InMwNCIsInJuZ1N0YXRlIjo2NjgxNTU0ODc1MjE5MzYyMzA4LCJzdGVwIjo0LCJzdWNjZXNzIjp0cnVlLCJ0ZW5zaW9uIjoxOH0seyJhY3Rpb24iOiJleHBsb3JlIiwiY3VycmVudEV2ZW50SWQiOiJldmVudF93YW5kZXJlciIsImN1cnJlbnRSZWdpb25JZCI6InZpbGxhZ2UiLCJkYXkiOjQsImZhaXRoIjo4LCJoZWFsdGgiOjIzLCJpZCI6InMwNSIsInJuZ1N0YXRlIjozNDMwMjQ3Mzg1NTQ1MjkxMzkyLCJzdGVwIjo1LCJzdWNjZXNzIjp0cnVlLCJ0ZW5zaW9uIjoxOH0seyJhY3Rpb24iOiJkaXNtaXNzQ3VycmVudEV2ZW50IiwiY3VycmVudFJlZ2lvbklkIjoidmlsbGFnZSIsImRheSI6NCwiZmFpdGgiOjgsImhlYWx0aCI6MjMsImlkIjoiczA2Iiwicm5nU3RhdGUiOjM0MzAyNDczODU1NDUyOTEzOTIsInN0ZXAiOjYsInN1Y2Nlc3MiOnRydWUsInRlbnNpb24iOjE4fSx7ImFjdGlvbiI6InNraXBUdXJuIiwiY3VycmVudFJlZ2lvbklkIjoidmlsbGFnZSIsImRheSI6NSwiZmFpdGgiOjgsImhlYWx0aCI6MjMsImlkIjoiczA3Iiwicm5nU3RhdGUiOjM0MzAyNDczODU1NDUyOTEzOTIsInN0ZXAiOjcsInN1Y2Nlc3MiOnRydWUsInRlbnNpb24iOjE4fSx7ImFjdGlvbiI6ImV4cGxvcmUiLCJjdXJyZW50RXZlbnRJZCI6ImV2ZW50X3dpbGRfYmVhc3QiLCJjdXJyZW50UmVnaW9uSWQiOiJ2aWxsYWdlIiwiZGF5Ijo2LCJmYWl0aCI6OCwiaGVhbHRoIjoyMywiaWQiOiJzMDgiLCJybmdTdGF0ZSI6NjU1MTQwMTE3NTg4NTg2ODI0Miwic3RlcCI6OCwic3VjY2VzcyI6dHJ1ZSwidGVuc2lvbiI6MjF9LHsiYWN0aW9uIjoiZGlzbWlzc0N1cnJlbnRFdmVudCIsImN1cnJlbnRSZWdpb25JZCI6InZpbGxhZ2UiLCJkYXkiOjYsImZhaXRoIjo4LCJoZWFsdGgiOjIzLCJpZCI6InMwOSIsInJuZ1N0YXRlIjo2NTUxNDAxMTc1ODg1ODY4MjQyLCJzdGVwIjo5LCJzdWNjZXNzIjp0cnVlLCJ0ZW5zaW9uIjoyMX0seyJhY3Rpb24iOiJyZXN0IiwiY3VycmVudFJlZ2lvbklkIjoidmlsbGFnZSIsImRheSI6NywiZmFpdGgiOjgsImhlYWx0aCI6MjYsImlkIjoiczEwIiwicm5nU3RhdGUiOjY1NTE0MDExNzU4ODU4NjgyNDIsInN0ZXAiOjEwLCJzdWNjZXNzIjp0cnVlLCJ0ZW5zaW9uIjoyMX1d",
+        "traceFingerprint" : "eyJzY2hlbWFWZXJzaW9uIjoxLCJzdGVwcyI6W3siYWN0aW9uIjoiZXhwbG9yZSIsImlkIjoiczAxIn0seyJhY3Rpb24iOiJkaXNtaXNzQ3VycmVudEV2ZW50IiwiaWQiOiJzMDIifSx7ImFjdGlvbiI6InJlc3QiLCJpZCI6InMwMyJ9LHsiYWN0aW9uIjoic2tpcFR1cm4iLCJpZCI6InMwNCJ9LHsiYWN0aW9uIjoiZXhwbG9yZSIsImlkIjoiczA1In0seyJhY3Rpb24iOiJkaXNtaXNzQ3VycmVudEV2ZW50IiwiaWQiOiJzMDYifSx7ImFjdGlvbiI6InNraXBUdXJuIiwiaWQiOiJzMDcifSx7ImFjdGlvbiI6ImV4cGxvcmUiLCJpZCI6InMwOCJ9LHsiYWN0aW9uIjoiZGlzbWlzc0N1cnJlbnRFdmVudCIsImlkIjoiczA5In0seyJhY3Rpb24iOiJyZXN0IiwiaWQiOiJzMTAifV0sInRyYWNlSWQiOiJlcGljMzBfc21va2VfdHJhY2UifQ=="
+      },
+      "stepDigests" : [
+        {
+          "action" : "explore",
+          "currentEventId" : "event_camp_rest",
+          "currentRegionId" : "village",
+          "day" : 1,
+          "faith" : 8,
+          "health" : 20,
+          "id" : "s01",
+          "rngState" : 7269522477829528367,
+          "step" : 1,
+          "success" : true,
+          "tension" : 15
+        },
+        {
+          "action" : "dismissCurrentEvent",
+          "currentRegionId" : "village",
+          "day" : 1,
+          "faith" : 8,
+          "health" : 20,
+          "id" : "s02",
+          "rngState" : 7269522477829528367,
+          "step" : 2,
+          "success" : true,
+          "tension" : 15
+        },
+        {
+          "action" : "rest",
+          "currentRegionId" : "village",
+          "day" : 2,
+          "faith" : 8,
+          "health" : 23,
+          "id" : "s03",
+          "rngState" : 7269522477829528367,
+          "step" : 3,
+          "success" : true,
+          "tension" : 15
+        },
+        {
+          "action" : "skipTurn",
+          "currentRegionId" : "village",
+          "day" : 3,
+          "faith" : 8,
+          "health" : 23,
+          "id" : "s04",
+          "rngState" : 6681554875219362308,
+          "step" : 4,
+          "success" : true,
+          "tension" : 18
+        },
+        {
+          "action" : "explore",
+          "currentEventId" : "event_wanderer",
+          "currentRegionId" : "village",
+          "day" : 4,
+          "faith" : 8,
+          "health" : 23,
+          "id" : "s05",
+          "rngState" : 3430247385545291392,
+          "step" : 5,
+          "success" : true,
+          "tension" : 18
+        },
+        {
+          "action" : "dismissCurrentEvent",
+          "currentRegionId" : "village",
+          "day" : 4,
+          "faith" : 8,
+          "health" : 23,
+          "id" : "s06",
+          "rngState" : 3430247385545291392,
+          "step" : 6,
+          "success" : true,
+          "tension" : 18
+        },
+        {
+          "action" : "skipTurn",
+          "currentRegionId" : "village",
+          "day" : 5,
+          "faith" : 8,
+          "health" : 23,
+          "id" : "s07",
+          "rngState" : 3430247385545291392,
+          "step" : 7,
+          "success" : true,
+          "tension" : 18
+        },
+        {
+          "action" : "explore",
+          "currentEventId" : "event_wild_beast",
+          "currentRegionId" : "village",
+          "day" : 6,
+          "faith" : 8,
+          "health" : 23,
+          "id" : "s08",
+          "rngState" : 6551401175885868242,
+          "step" : 8,
+          "success" : true,
+          "tension" : 21
+        },
+        {
+          "action" : "dismissCurrentEvent",
+          "currentRegionId" : "village",
+          "day" : 6,
+          "faith" : 8,
+          "health" : 23,
+          "id" : "s09",
+          "rngState" : 6551401175885868242,
+          "step" : 9,
+          "success" : true,
+          "tension" : 21
+        },
+        {
+          "action" : "rest",
+          "currentRegionId" : "village",
+          "day" : 7,
+          "faith" : 8,
+          "health" : 26,
+          "id" : "s10",
+          "rngState" : 6551401175885868242,
+          "step" : 10,
+          "success" : true,
+          "tension" : 21
+        }
+      ]
+    }
+  },
+  "fixtureId" : "epic30_smoke_seed_424242_v1",
+  "fixtureVersion" : 1,
+  "seed" : 424242,
+  "trace" : {
+    "schemaVersion" : 1,
+    "steps" : [
+      {
+        "action" : "explore",
+        "id" : "s01"
+      },
+      {
+        "action" : "dismissCurrentEvent",
+        "id" : "s02"
+      },
+      {
+        "action" : "rest",
+        "id" : "s03"
+      },
+      {
+        "action" : "skipTurn",
+        "id" : "s04"
+      },
+      {
+        "action" : "explore",
+        "id" : "s05"
+      },
+      {
+        "action" : "dismissCurrentEvent",
+        "id" : "s06"
+      },
+      {
+        "action" : "skipTurn",
+        "id" : "s07"
+      },
+      {
+        "action" : "explore",
+        "id" : "s08"
+      },
+      {
+        "action" : "dismissCurrentEvent",
+        "id" : "s09"
+      },
+      {
+        "action" : "rest",
+        "id" : "s10"
+      }
+    ],
+    "traceId" : "epic30_smoke_trace"
+  }
+}

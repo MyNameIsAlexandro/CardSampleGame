@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Tests/TwilightEngineTests/Helpers/EncounterContextFixtures.swift
+/// Назначение: Содержит реализацию файла EncounterContextFixtures.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import Foundation
 @testable import TwilightEngine
 
@@ -114,8 +119,7 @@ enum FateDeckFixtures {
 
     /// FateDeckState from deterministic cards (for EncounterContext)
     static func deterministicState() -> FateDeckState {
-        let manager = FateDeckManager(cards: deterministic())
-        return manager.getState()
+        TestFateDeck.makeState(cards: deterministic(), seed: 42)
     }
 
     /// Single critical card

@@ -1,29 +1,36 @@
+/// Файл: Views/BattleArenaView.swift
+/// Назначение: Содержит реализацию файла BattleArenaView.swift.
+/// Зона ответственности: Ограничен задачами слоя представления и пользовательского интерфейса.
+/// Контекст: Используется в приложении CardSampleGame и связанных потоках выполнения.
+
 import SwiftUI
 import TwilightEngine
 import EchoScenes
 import EchoEngine
 
-/// Quick Battle mode: pick hero, pick enemy, fight
+/// Экран тренировочного боя (Arena).
+/// Работает в sandbox-режиме: запускает отдельный бой без прямой мутации world-state.
 struct BattleArenaView: View {
-    @ObservedObject var vm: GameEngineObservable
+    let services: AppServices
     let onExit: () -> Void
 
     @State private var selectedHeroId: String?
     @State private var selectedEnemyId: String?
     @State private var showingCombat = false
-    @State private var lastOutcome: CombatView.CombatOutcome?
+    @State private var lastOutcome: AppCombatOutcome?
+    @State private var arenaSeedState: UInt64 = Self.initialArenaSeed
 
     private var availableHeroes: [HeroDefinition] {
-        HeroRegistry.shared.availableHeroes()
+        services.registry.heroRegistry.availableHeroes()
     }
 
     private var availableEnemies: [EnemyDefinition] {
-        ContentRegistry.shared.getAllEnemies().sorted { $0.difficulty < $1.difficulty }
+        services.registry.getAllEnemies().sorted { $0.difficulty < $1.difficulty }
     }
 
     private var selectedEnemy: EnemyDefinition? {
         guard let id = selectedEnemyId else { return nil }
-        return ContentRegistry.shared.getEnemy(id: id)
+        return services.registry.getEnemy(id: id)
     }
 
     var body: some View {
@@ -119,6 +126,20 @@ struct BattleArenaView: View {
         selectedHeroId != nil && selectedEnemyId != nil
     }
 
+    private func nextArenaSeed() -> UInt64 {
+        var updatedState = arenaSeedState
+        updatedState ^= updatedState << 13
+        updatedState ^= updatedState >> 7
+        updatedState ^= updatedState << 17
+
+        if updatedState == 0 {
+            updatedState = Self.initialArenaSeed
+        }
+
+        arenaSeedState = updatedState
+        return updatedState
+    }
+
     private func startBattle() {
         guard selectedHeroId != nil,
               selectedEnemy != nil else { return }
@@ -132,27 +153,22 @@ struct BattleArenaView: View {
     @ViewBuilder
     private var spriteKitCombatView: some View {
         if let heroId = selectedHeroId,
-           let hero = HeroRegistry.shared.hero(id: heroId),
+           let hero = services.registry.heroRegistry.hero(id: heroId),
            let enemy = selectedEnemy {
-            let startingDeck = hero.startingDeckCardIDs.compactMap {
-                ContentRegistry.shared.getCard(id: $0)
-            }.map { $0.toCard() }
-            let fateCards = ContentRegistry.shared.getAllFateCards()
+            let startingDeck = services.cardFactory.createStartingDeck(forHero: heroId)
+            let fateCards = services.registry.getAllFateCards()
 
             CombatSceneView(
                 enemyDefinition: enemy,
-                playerName: hero.name.localized,
+                playerName: hero.name.resolve(using: services.localizationManager),
                 playerHealth: hero.baseStats.health,
                 playerStrength: hero.baseStats.strength,
                 playerDeck: startingDeck,
                 fateCards: fateCards,
-                resonance: vm.engine.resonanceValue,
-                seed: WorldRNG.shared.nextSeed(),
+                resonance: 0,
+                seed: nextArenaSeed(),
                 onCombatEndWithResult: { result in
-                    // Apply combat result to engine state
-                    vm.engine.applyEchoCombatResult(result)
-
-                    let stats = CombatView.CombatStats(
+                    let stats = AppCombatStats(
                         turnsPlayed: result.turnsPlayed,
                         totalDamageDealt: result.totalDamageDealt,
                         totalDamageTaken: result.totalDamageTaken,
@@ -196,7 +212,7 @@ struct BattleArenaView: View {
         .padding(.horizontal)
     }
 
-    private func lastOutcomeView(_ outcome: CombatView.CombatOutcome) -> some View {
+    private func lastOutcomeView(_ outcome: AppCombatOutcome) -> some View {
         HStack(spacing: Spacing.md) {
             Image(systemName: outcome.isVictory ? "checkmark.circle.fill" : "xmark.circle.fill")
                 .font(.title2)
@@ -213,4 +229,6 @@ struct BattleArenaView: View {
         .cornerRadius(CornerRadius.lg)
         .padding(.horizontal)
     }
+
+    private static let initialArenaSeed: UInt64 = 0x0B47_A11C_E000_0001
 }

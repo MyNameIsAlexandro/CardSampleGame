@@ -1,23 +1,32 @@
+/// Файл: Packages/TwilightEngine/Tests/TwilightEngineTests/EventPipelineTests.swift
+/// Назначение: Содержит реализацию файла EventPipelineTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import TwilightEngine
+import TwilightEngineDevTools
 
 final class EventPipelineTests: XCTestCase {
 
     var selector: EventSelector!
     var resolver: EventResolver!
     var pipeline: EventPipeline!
+    var rng: WorldRNG!
 
     override func setUp() {
         super.setUp()
         selector = EventSelector()
         resolver = EventResolver()
         pipeline = EventPipeline(selector: selector, resolver: resolver)
+        rng = WorldRNG(seed: 42)
     }
 
     override func tearDown() {
         selector = nil
         resolver = nil
         pipeline = nil
+        rng = nil
         super.tearDown()
     }
 
@@ -207,7 +216,7 @@ final class EventPipelineTests: XCTestCase {
         let events: [GameEvent] = []
 
         // When
-        let result = selector.weightedSelect(from: events)
+        let result = selector.weightedSelect(from: events, rng: rng)
 
         // Then
         XCTAssertNil(result, "Should return nil for empty array")
@@ -219,7 +228,7 @@ final class EventPipelineTests: XCTestCase {
         let events = [event]
 
         // When
-        let result = selector.weightedSelect(from: events)
+        let result = selector.weightedSelect(from: events, rng: rng)
 
         // Then
         XCTAssertNotNil(result)
@@ -234,7 +243,7 @@ final class EventPipelineTests: XCTestCase {
         let events = [event1, event2, event3]
 
         // When
-        let result = selector.weightedSelect(from: events)
+        let result = selector.weightedSelect(from: events, rng: rng)
 
         // Then
         XCTAssertNotNil(result)
@@ -510,6 +519,6 @@ final class EventPipelineTests: XCTestCase {
 
         // Then
         XCTAssertFalse(result.available, "Invalid choice index should not be available")
-        XCTAssertEqual(result.reason, "Invalid choice index")
+        XCTAssertEqual(result.reason, .invalidChoiceIndex(index: 99, maxIndex: 0))
     }
 }

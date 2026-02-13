@@ -1,3 +1,8 @@
+/// Файл: Packages/EchoEngine/Tests/EchoEngineTests/IntegrationTests.swift
+/// Назначение: Содержит реализацию файла IntegrationTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import Testing
 import FirebladeECS
 import TwilightEngine

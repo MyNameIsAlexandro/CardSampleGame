@@ -1,3 +1,8 @@
+/// Файл: Packages/EchoEngine/Sources/EchoEngine/Components/Render/ParticleComponent.swift
+/// Назначение: Содержит реализацию файла ParticleComponent.swift.
+/// Зона ответственности: Реализует боевой пакет EchoEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import FirebladeECS
 
 public final class ParticleComponent: Component {

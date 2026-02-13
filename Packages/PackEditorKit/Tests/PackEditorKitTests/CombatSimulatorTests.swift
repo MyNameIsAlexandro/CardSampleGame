@@ -1,3 +1,8 @@
+/// Файл: Packages/PackEditorKit/Tests/PackEditorKitTests/CombatSimulatorTests.swift
+/// Назначение: Содержит реализацию файла CombatSimulatorTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import PackEditorKit
 

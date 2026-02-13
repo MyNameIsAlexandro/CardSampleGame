@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/ContentPacks/SafeContentAccess.swift
+/// Назначение: Содержит реализацию файла SafeContentAccess.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 // MARK: - Safe Content Access
@@ -5,12 +10,6 @@ import Foundation
 /// Provides safe, validated access to content with comprehensive error handling.
 /// Use this instead of direct ContentRegistry access in production code.
 public final class SafeContentAccess {
-
-    // MARK: - Singleton
-
-    /// Shared instance wrapping ContentRegistry.shared
-    public static let shared = SafeContentAccess(registry: ContentRegistry.shared)
-
     // MARK: - Properties
 
     private let registry: ContentRegistry
@@ -451,31 +450,5 @@ public final class SafeContentAccess {
     public func resetValidation() {
         validationPerformed = false
         cachedValidationErrors = []
-    }
-}
-
-// MARK: - Content Access Error
-
-/// Error when accessing content fails
-public enum ContentAccessError: Error, LocalizedError {
-    case notFound(type: String, id: String)
-    case incompleteContent(type: String, id: String, missing: [String])
-    case insufficientContent(type: String, required: Int, found: Int)
-    case noPlayableContent(reason: String)
-    case validationFailed(errors: [ContentValidationError])
-
-    public var errorDescription: String? {
-        switch self {
-        case .notFound(let type, let id):
-            return "\(type) '\(id)' not found in loaded content"
-        case .incompleteContent(let type, let id, let missing):
-            return "\(type) '\(id)' is incomplete, missing: \(missing.joined(separator: ", "))"
-        case .insufficientContent(let type, let required, let found):
-            return "Insufficient \(type): required \(required), found \(found)"
-        case .noPlayableContent(let reason):
-            return "No playable content: \(reason)"
-        case .validationFailed(let errors):
-            return "Content validation failed with \(errors.count) errors"
-        }
     }
 }

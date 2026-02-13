@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Core/TwilightGameAction.swift
+/// Назначение: Содержит реализацию файла TwilightGameAction.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 // MARK: - Game Actions
@@ -19,6 +24,9 @@ public enum TwilightGameAction: TimedAction, Equatable {
     /// Trade at market (if available)
     case trade
 
+    /// Buy a card from market (if market initialized for current region/day)
+    case marketBuy(cardId: String)
+
     /// Strengthen anchor in current region
     case strengthenAnchor
 
@@ -32,9 +40,22 @@ public enum TwilightGameAction: TimedAction, Equatable {
     /// Resolve a mini-game result
     case resolveMiniGame(input: MiniGameInput)
 
+    /// Draw and resolve Fate card outside combat
+    case drawFateCard
+
     // MARK: - Combat Setup
     /// Start combat with encounter
     case startCombat(encounterId: String)
+
+    /// Commit external combat result into world state
+    case combatFinish(
+        outcome: CombatEndOutcome,
+        transaction: EncounterTransaction,
+        updatedFateDeck: FateDeckState?
+    )
+
+    /// Store/clear pending external combat snapshot for save-resume
+    case combatStoreEncounterState(EncounterSaveState?)
 
     /// Initialize combat: shuffle deck and draw initial hand
     case combatInitialize
@@ -89,6 +110,9 @@ public enum TwilightGameAction: TimedAction, Equatable {
         case .trade:
             return 0  // Trading doesn't cost time
 
+        case .marketBuy:
+            return 0  // Market interactions are instant
+
         case .strengthenAnchor:
             return 1
 
@@ -101,8 +125,17 @@ public enum TwilightGameAction: TimedAction, Equatable {
         case .resolveMiniGame:
             return 0  // Mini-game is part of event
 
+        case .drawFateCard:
+            return 0
+
         case .startCombat:
             return 0  // Combat is part of event
+
+        case .combatFinish:
+            return 0
+
+        case .combatStoreEncounterState:
+            return 0
 
         case .combatInitialize:
             return 0  // Setup, no time cost
@@ -155,204 +188,9 @@ public struct MiniGameInput: Equatable {
     }
 }
 
-// MARK: - Action Result
-
-/// Result of performing a game action
-public struct ActionResult: Equatable {
-    /// Whether the action succeeded
-    public let success: Bool
-
-    /// Error if action failed
-    public let error: ActionError?
-
-    /// State changes that occurred
-    public let stateChanges: [StateChange]
-
-    /// Events triggered by this action
-    public let triggeredEvents: [String]
-
-    /// New current event (if any)
-    public let currentEvent: String?
-
-    /// Combat started (if any)
-    public let combatStarted: Bool
-
-    /// Game ended (if any)
-    public let gameEnded: GameEndResult?
-
-    // MARK: - Convenience Initializers
-
-    public init(
-        success: Bool,
-        error: ActionError?,
-        stateChanges: [StateChange],
-        triggeredEvents: [String],
-        currentEvent: String?,
-        combatStarted: Bool,
-        gameEnded: GameEndResult?
-    ) {
-        self.success = success
-        self.error = error
-        self.stateChanges = stateChanges
-        self.triggeredEvents = triggeredEvents
-        self.currentEvent = currentEvent
-        self.combatStarted = combatStarted
-        self.gameEnded = gameEnded
-    }
-
-    public static func success(
-        changes: [StateChange] = [],
-        triggeredEvents: [String] = [],
-        currentEvent: String? = nil,
-        combatStarted: Bool = false
-    ) -> ActionResult {
-        ActionResult(
-            success: true,
-            error: nil,
-            stateChanges: changes,
-            triggeredEvents: triggeredEvents,
-            currentEvent: currentEvent,
-            combatStarted: combatStarted,
-            gameEnded: nil
-        )
-    }
-
-    public static func failure(_ error: ActionError) -> ActionResult {
-        ActionResult(
-            success: false,
-            error: error,
-            stateChanges: [],
-            triggeredEvents: [],
-            currentEvent: nil,
-            combatStarted: false,
-            gameEnded: nil
-        )
-    }
-
-    public static func gameOver(_ result: GameEndResult) -> ActionResult {
-        ActionResult(
-            success: true,
-            error: nil,
-            stateChanges: [],
-            triggeredEvents: [],
-            currentEvent: nil,
-            combatStarted: false,
-            gameEnded: result
-        )
-    }
-}
-
-// MARK: - Action Error
-
-/// Errors that can occur when performing actions
-public enum ActionError: Error, Equatable {
-    // Validation errors
-    case invalidAction(reason: String)
-    case regionNotAccessible(regionId: String)
-    case regionNotNeighbor(regionId: String)
-    case actionNotAvailableInRegion(action: String, regionType: String)
-
-    // Resource errors
-    case insufficientResources(resource: String, required: Int, available: Int)
-    case healthTooLow
-
-    // State errors
-    case gameNotInProgress
-    case combatInProgress
-    case eventInProgress
-    case noActiveEvent
-    case noActiveCombat
-
-    // Event errors
-    case eventNotFound(eventId: String)
-    case invalidChoiceIndex(index: Int, maxIndex: Int)
-    case choiceRequirementsNotMet(reason: String)
-
-    // Combat errors
-    case cardNotInHand(cardId: String)
-    case notEnoughActions
-    case invalidTarget
-
-    public var localizedDescription: String {
-        switch self {
-        case .invalidAction(let reason):
-            return L10n.errorInvalidAction.localized(with: reason)
-        case .regionNotAccessible(let id):
-            return L10n.errorRegionNotAccessible.localized(with: id)
-        case .regionNotNeighbor(let id):
-            return L10n.errorRegionNotNeighbor.localized(with: id)
-        case .actionNotAvailableInRegion(let action, let type):
-            return L10n.errorActionNotAvailable.localized(with: action, type)
-        case .insufficientResources(let resource, let required, let available):
-            return L10n.errorInsufficientResources.localized(with: resource, required, available)
-        case .healthTooLow:
-            return L10n.errorHealthTooLow.localized
-        case .gameNotInProgress:
-            return L10n.errorGameNotInProgress.localized
-        case .combatInProgress:
-            return L10n.errorCombatInProgress.localized
-        case .eventInProgress:
-            return L10n.errorEventInProgress.localized
-        case .noActiveEvent:
-            return L10n.errorNoActiveEvent.localized
-        case .noActiveCombat:
-            return L10n.errorNoActiveCombat.localized
-        case .eventNotFound(let id):
-            return L10n.errorEventNotFound.localized(with: id)
-        case .invalidChoiceIndex(let index, let max):
-            return L10n.errorInvalidChoiceIndex.localized(with: index, max)
-        case .choiceRequirementsNotMet(let reason):
-            return L10n.errorChoiceRequirementsNotMet.localized(with: reason)
-        case .cardNotInHand(let id):
-            return L10n.errorCardNotInHand.localized(with: id)
-        case .notEnoughActions:
-            return L10n.errorNotEnoughActions.localized
-        case .invalidTarget:
-            return L10n.errorInvalidTarget.localized
-        }
-    }
-}
-
-// MARK: - State Change
-
-/// A single state change from an action
-public enum StateChange: Equatable {
-    // Player changes
-    case healthChanged(delta: Int, newValue: Int)
-    case faithChanged(delta: Int, newValue: Int)
-    case balanceChanged(delta: Int, newValue: Int)
-    case strengthChanged(delta: Int, newValue: Int)
-
-    // World changes
-    case resonanceChanged(delta: Float, newValue: Float)
-    case tensionChanged(delta: Int, newValue: Int)
-    case dayAdvanced(newDay: Int)
-    case regionChanged(regionId: String)
-    case regionStateChanged(regionId: String, newState: String)
-    case anchorIntegrityChanged(anchorId: String, delta: Int, newValue: Int)
-    case anchorAlignmentChanged(anchorId: String, newAlignment: String)
-
-    // Flags and progress
-    case flagSet(key: String, value: Bool)
-    case questProgressed(questId: String, newStage: Int)
-    case eventCompleted(eventId: String)
-    case questStarted(questId: String)
-    case objectiveCompleted(questId: String, objectiveId: String)
-    case questCompleted(questId: String)
-    case questFailed(questId: String)
-
-    // Cards and deck
-    case cardAdded(cardId: String, zone: String)
-    case cardRemoved(cardId: String, zone: String)
-    case cardMoved(cardId: String, fromZone: String, toZone: String)
-
-    // Combat
-    case enemyDamaged(enemyId: String, damage: Int, newHealth: Int)
-    case enemyWillDamaged(enemyId: String, damage: Int, newWill: Int)
-    case enemyDefeated(enemyId: String)
-    case enemyPacified(enemyId: String)
-    case combatEnded(victory: Bool)
-
-    // Custom
-    case custom(key: String, description: String)
+/// Canonical outcome for committing external combat result into engine state.
+public enum CombatEndOutcome: Codable, Equatable {
+    case victory
+    case defeat
+    case escaped
 }

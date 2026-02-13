@@ -1,115 +1,208 @@
-# CardSampleGame / ECHO: Legends of the Veil — Context & Rules (v3.0)
+# CardSampleGame / ECHO: Legends of the Veil — Engineering Contract (v4.1, 2026-02-12)
 
-**Project type:** Narrative Co-op Deckbuilder RPG (iOS)
-**Core principle:** Engine-First + Data-Driven content (JSON)
-**Non-negotiables:** no UUID for content, no system RNG, state changes only via actions, tests for Engine.
-
----
-
-## 🧱 Architecture (Layered Cake)
-
-### 1) Core Layer — `Packages/TwilightEngine`
-- Pure Swift logic only. **No UI imports** (`SwiftUI`/`UIKit` запрещены в Engine).
-- Single source of truth: `WorldState`, `ResonanceState`, `FateDeck` (+ derived projections).
-- Any state mutation goes **only** through `GameAction` (reducers/handlers). No "reach-in and mutate".
-- **Sub-manager pattern:** `TwilightGameEngine` delegates domain state to focused managers:
-  - `engine.combat` → `EngineCombatManager` (combat state, enemy, fate draws)
-  - `engine.deck` → `EngineDeckManager` (playerDeck, playerHand, playerDiscard, draw/mulligan)
-  - `engine.player` → `EnginePlayerManager` (health, faith, balance, stats, curses, hero abilities)
-- Each manager holds `unowned let engine` back-reference, is `ObservableObject` with `@Published` state.
-- Views read via `engine.player.health`, `engine.deck.playerHand`, etc.
-
-### 1b) ECS Layer — `Packages/EchoEngine` (FirebladeECS)
-- ECS-based game logic using [FirebladeECS](https://github.com/fireblade-engine/ecs) (Nexus, Entity, Component, Family).
-- Imports shared types from TwilightEngine (Card, EnemyDefinition, WorldRNG, FateCard, FateDeckManager).
-- **Components** are `final class` (FirebladeECS requirement): HealthComponent, CombatStateComponent, DeckComponent, PlayerTagComponent, EnemyTagComponent, IntentComponent, FateDeckComponent, ResonanceComponent.
-- **Systems** are stateless: CombatSystem, AISystem, DeckSystem.
-- **CombatSimulation** orchestrates a full headless combat encounter (owns Nexus + systems).
-- Family iteration: use `.firstElement()` helper (not `.first`) because Family conforms to `LazySequenceProtocol`.
-- Tests: `swift test --package-path Packages/EchoEngine`
-
-### 2) Data Layer — Content Packs (JSON)
-- **CharacterPacks:** `Packages/CharacterPacks/` — heroes, cards, abilities (e.g., `CoreHeroes`)
-- **StoryPacks:** `Packages/StoryPacks/` — campaigns, enemies, events, regions (e.g., `Season1/TwilightMarchesActI`)
-- All gameplay entities defined in JSON: enemies, cards, heroes, locations, rules, etc.
-- **IDs:** strict `String` (`definitionId`). **UUID for content is forbidden.**
-- Instances in runtime (e.g., a spawned enemy) may have separate **instanceId**, but it must be deterministic/serializable.
-
-### 3) App Layer — `App/`, `Views/`
-- Pattern: **MVVM + Intents**.
-- Views are dumb: render state, send intents/actions.
-- Design System only: no hardcoded colors/sizes (`AppColors`, `Spacing`, `AppFonts`).
+**Тип проекта:** Narrative Co-op Deckbuilder RPG (iOS)  
+**Ядро:** Engine-First + Deterministic Runtime + Data-Driven Content  
+**Цель:** зафиксировать обязательные инженерные правила, чтобы развитие продукта не требовало повторного архитектурного рефакторинга.
 
 ---
 
-## 🛡 Hard Rules (Must Follow)
+## 0) Иерархия правил
 
-### Engine & Game Logic
-- **No System RNG:** запрещено `Int.random()`, `UUID()` as randomness, `GameplayKit` RNG напрямую.
-  Use only `FateDeckManager` / `WorldRNG` (seeded & serializable).
-- **Time is discrete:** world time/day changes only via `TimeEngine.advance()` (one tick pipeline).
-- **Stable saves:** `EngineSave` must never "fallback to uuidString".
-  If a required `definitionId` is missing → fail fast (explicit error), don't silently repair.
-- **Strict boundaries:** App never mutates Engine state directly; only dispatches `GameAction`.
+При конфликте применяются правила в этом порядке:
 
-### Concurrency & Swift
-- Prefer immutability/value types in Engine.
-- Be explicit about Sendable/actor boundaries where relevant (Swift 6 strictness).
-- No hidden global singletons in Engine.
+1. **Gate-тесты и CI-контракты** (`CardSampleGameTests/GateTests`, `Packages/TwilightEngine/Tests`).
+2. **Этот документ** (`CLAUDE.md`).
+3. Остальная документация (`Docs/**`).
 
-### UI & Assets
-- No raw `Image("name")` in UI. Use `SafeImage` / `AssetRegistry`.
-- No magic numbers: prefer `Spacing.*`, `AppFonts.*`, `AppColors.*`.
-
-### Testing (Engine)
-- TDD is mandatory for `Packages/TwilightEngine`.
-- No `XCTSkip` as a "solution".
-- Prefer `TestContentLoader` to inject deterministic content and seeds.
+Изменение инварианта считается завершённым только при обновлении **кода + тестов + документации** в одном change set.
 
 ---
 
-## 🧩 Patterns We Use
+## 1) Архитектурные инварианты (не обсуждаются)
 
-- **Registry pattern** for content loading:
-  - `ContentRegistry` loads JSON packs → validates → exposes typed definitions by `definitionId`.
-- **Provider pattern** for data access:
-  - Engine depends on protocols (e.g., `ContentProviding`, `RNGProviding`), concrete impl injected.
-- **Action/Reducer pipeline**:
-  - `GameAction` -> `Reducer/Handler` -> new `WorldState` (+ emitted events/log).
-- **Fate Deck instead of dice**:
-  - `FateDeck` (-1/0/+1/Crit), modified by Resonance; deterministic & serializable.
+### 1.1 Engine-First и action pipeline
+- Единственный источник истины — runtime-state в `TwilightGameEngine`.
+- Любая мутация состояния — только через канонический action/facade-путь.
+- App/UI/Bridge не мутируют engine state напрямую.
 
----
+### 1.2 Границы слоёв
+- `Packages/TwilightEngine` — pure logic, без UI-фреймворков (`SwiftUI`, `UIKit`, `AppKit`, `SpriteKit`, `SceneKit`).
+- App/Views — presentation + intent dispatch.
+- Bridge — адаптер данных, не место для доменной логики ядра.
 
-## 🔑 Glossary (Canonical Meanings)
+### 1.3 Determinism-first
+- Системный RNG запрещён в gameplay-потоке.
+- Seed внешнего боя рождается внутри engine action-пути (`.startCombat`), не в App.
+- Save/load/resume обязаны быть воспроизводимыми для одного pack set и одинакового входного состояния.
 
-- **Resonance:** global scale (-100…100): Nav (-100) / Yav (0) / Prav (+100)
-- **Fate Deck:** RNG replacement; do not bypass it.
-- **Unified Resolution:** combat & diplomacy share the same resolution pipeline.
-- **Dual Health:** enemies have `HP` (Body) + `Will` (Mind).
+### 1.4 External combat как транзакция
+- Старт боя: engine отдаёт snapshot/seed/context.
+- Завершение боя: engine принимает единый commit через канонический API (`commitExternalCombat` / action).
+- Любые `pending*` поля изменяются только ядром.
 
----
-
-## 🧪 Useful Commands (Project Defaults)
-
-- Run SPM package tests:
-  - `swift test --package-path Packages/TwilightEngine`
-  - `swift test --package-path Packages/EchoEngine`
-  - `swift test --package-path Packages/EchoScenes`
-  - `swift test --package-path Packages/PackEditorKit`
-  - `swift test --package-path Packages/PackEditorApp`
-- Run App tests (Xcode):
-  - `xcodebuild test -scheme CardSampleGame -destination 'platform=iOS Simulator,name=iPhone 15'`
-- Project dump:
-  - `python3 DevTools/collect_project_v4.py`
-- Update docs:
-  - `python3 DevTools/update_docs_v3.py`
+### 1.5 Arena/Quick Battle изоляция
+- Arena — sandbox-режим.
+- Arena не потребляет RNG мирового движка.
+- Arena не коммитит результат в main world-engine state (если это не отдельный явно поддержанный режим с собственным контрактом и тестами).
 
 ---
 
-## ✅ Working Agreement for Claude
+## 2) Контракты по модулям
 
-1) Before coding, identify the layer you are editing (Engine vs App vs JSON).
-2) If touching JSON, validate conditions & IDs (no UUID; definitionId required).
-3) If adding mechanics, route through `GameAction` and write/extend Engine tests.
-4) When uncertain about a rule/meaning — **ask**, don't invent.
+### 2.1 `Packages/TwilightEngine`
+- Только типизированные причины invalid action:
+  - `ActionError.invalidAction(reason: InvalidActionReason)` — да
+  - `ActionError.invalidAction(reason: String)` — нет
+- `pendingEncounterState` и аналогичные поля — `public private(set)`.
+- Публичные обходные API для RNG/seed (`nextSeed(...)`) запрещены.
+- `TwilightGameEngine` обязан делегировать домены в sub-managers/facades, а не концентрировать всю логику в одном месте.
+
+### 2.2 Bridge/App слой
+- Bridge не расширяет engine доменной логикой.
+- App не пишет напрямую в engine внутренние поля (`pendingEncounterState`, `pendingExternalCombatSeed`, `currentEventId` и т.д.).
+- Любой state change из UI должен иметь явный intent/action в engine-контракте.
+
+### 2.3 DevTools изоляция
+- `TwilightEngineDevTools` не участвует в production graph.
+- Legacy pipeline (`EventPipeline`, `MiniGameDispatcher`) допускается только в devtools/тестовом контуре и не может быть неявно активирован в runtime.
+
+---
+
+## 3) Контент и паки
+
+### 3.1 IDs и целостность
+- Все content IDs — стабильные `String`.
+- UUID/random IDs для контента запрещены.
+- Отсутствие обязательного `definitionId` — fail-fast, без silent auto-repair.
+
+### 3.2 Runtime vs Authoring
+- Runtime читает только бинарные `.pack` (`BinaryPackReader`, `ContentRegistry.loadPacks`).
+- `PackLoader`/`PackCompiler`/`PackValidator` — authoring toolchain, не production runtime.
+
+### 3.3 Совместимость локализованных карт
+- При authoring decode порядок:
+  1) `PackCardDefinition` (legacy `name_ru` / `description_ru`)
+  2) `StandardCardDefinition`
+- Это обязательный backward compatibility слой для исторического контента.
+
+### 3.4 После изменений контент-пайплайна
+- Пересобрать и перевалидировать `.pack` ресурсы.
+- Обязательный прогон `BundledPacksValidationTests`.
+- При изменении формата сейва/контента — добавить миграционный тест и документировать версию.
+
+---
+
+## 4) Локализация (hard contract)
+
+### 4.1 Engine и системные сообщения
+- В engine нельзя закреплять RU/EN текст как «истину».
+- User-facing системные сообщения — через key-based слой (`L10n` / `LocalizationManager`).
+
+### 4.2 Runtime резолв и resume-path
+- Локализация резолвится через централизованный resolver, а не через произвольный `Locale.current`.
+- В resume/external-combat bridge данные должны пере-локализовываться по текущему registry/locale перед показом пользователю.
+
+### 4.3 UI токены и утечки ключей
+- SF Symbols рендерятся только как `Image(systemName:)`.
+- Отображение `Text("cross.fill")`, `Text("icon.*")` и любых raw service keys запрещено.
+- Появление raw ключей/токенов в UI считается дефектом блокирующего уровня и закрывается регрессионным тестом.
+
+---
+
+## 5) Стандарты кода и декомпозиции
+
+### 5.1 Жёсткие лимиты first-party кода
+- Swift-файл: максимум **600 строк**.
+- Файл engine: максимум **5 top-level типов**.
+- Принцип: `1 file = 1 main type`, расширения — `Type+Feature.swift`.
+- Legacy whitelist для first-party кода не допускается.
+- Исключения только для внешнего кода: `/.build/`, `/Packages/ThirdParty/`, `/.codex_home/`.
+
+### 5.2 Обязательный заголовок файла
+Для production/test Swift-файлов:
+
+```swift
+/// Файл: ...
+/// Назначение: ...
+/// Зона ответственности: ...
+/// Контекст: ...
+```
+
+### 5.3 Запрет на техдолг в runtime
+- `TODO`/`FIXME` в production-коде запрещены.
+- Временное решение допустимо только как краткоживущий migration seam с тестом, issue-ссылкой и явным планом удаления.
+- Мёртвый код, неиспользуемые классы и legacy-костыли удаляются, а не прячутся за флагами без плана вывода.
+
+---
+
+## 6) Тестовая модель и Quality Gates
+
+### 6.1 Минимальный набор перед интеграцией
+- `AuditArchitectureBoundaryGateTests`
+- `AuditGateTests`
+- `CodeHygieneTests`
+- `LocalizationCompletenessTests`
+- `LocalizationValidatorTests`
+- `BundledPacksValidationTests`
+- Плюс релевантные тесты изменённого модуля.
+
+### 6.2 Контроль инвариантов
+- Каждому архитектурному дефекту соответствует отдельный регрессионный тест (или gate), который падает до фикса и проходит после.
+- Для save/load/resume и RNG обязательны детерминизм-проверки (snapshot/replay/property-style при необходимости).
+
+### 6.3 Release проверки
+- Hard-contract проверка:
+  - `bash .github/ci/run_release_check.sh TestResults/QualityDashboard CardSampleGame`
+  - Требует clean tree (`--require-clean-tree`).
+- Snapshot-проверка текущего рабочего среза:
+  - `bash .github/ci/run_release_check_snapshot.sh TestResults/QualityDashboard CardSampleGame`
+
+### 6.4 Синхронизация документации
+- При изменении gate-контрактов обязательно обновить:
+  - `Docs/QA/QUALITY_CONTROL_MODEL.md`
+  - `Docs/QA/TESTING_GUIDE.md`
+  - `TestResults/QualityDashboard/gate_inventory.json`
+
+---
+
+## 7) Структура проекта и Xcode
+
+- Группы в Xcode должны отражать файловую структуру на диске.
+- Новые файлы добавляются в правильные модульные зоны (`App`, `Views`, `ViewModels`, `Packages/*`), без «свалок» в root.
+- Любая крупная декомпозиция сопровождается переносом файлов и обновлением project structure gate.
+- Документация и контракты для модулей обновляются одновременно с переносом.
+
+---
+
+## 8) Definition of Done для фичи/рефакторинга
+
+1. Зафиксирован инвариант, который не должен ломаться.
+2. Изменения внесены только в разрешённых слоях.
+3. Добавлен/обновлён регрессионный тест под конкретный риск.
+4. Прогнаны релевантные gate-тесты и модульные тесты.
+5. Обновлены `CLAUDE.md`/`Docs/**` при изменении контракта.
+6. Нет новых нарушений hygiene, localization, determinism.
+
+---
+
+## 9) Запрещённые паттерны (быстрый список)
+
+- Прямые присваивания engine-критичных полей из App/Views.
+- Доступ из App/Views к `engine.services.rng` / `WorldRNG.shared`.
+- Любой системный RNG в gameplay (`Int.random`, `UInt64.random`, `UUID()` как источник случайности).
+- `.invalidAction(reason: "raw string")` в engine.
+- Импорт `TwilightEngineDevTools` в production.
+- `Text(...icon token...)` вместо `Image(systemName:)`.
+- Коммит arena-результата в main world-engine.
+- Оставление мёртвого кода и временных костылей без плана удаления.
+
+---
+
+## 10) Полезные команды
+
+- TwilightEngine tests:
+  - `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift test --package-path Packages/TwilightEngine`
+- Targeted app architecture gate:
+  - `bash .github/ci/run_xcodebuild.sh test -scheme CardSampleGame -destination "$(bash .github/ci/select_ios_destination.sh --scheme CardSampleGame)" -only-testing:CardSampleGameTests/AuditArchitectureBoundaryGateTests`
+- Snapshot release check:
+  - `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer bash .github/ci/run_release_check_snapshot.sh TestResults/QualityDashboard CardSampleGame`

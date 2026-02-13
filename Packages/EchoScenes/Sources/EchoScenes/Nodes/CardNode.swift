@@ -1,3 +1,8 @@
+/// Файл: Packages/EchoScenes/Sources/EchoScenes/Nodes/CardNode.swift
+/// Назначение: Содержит реализацию файла CardNode.swift.
+/// Зона ответственности: Реализует визуально-сценовый слой EchoScenes.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import SpriteKit
 import TwilightEngine
 import Foundation

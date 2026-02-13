@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Core/EnemyIntent.swift
+/// Назначение: Содержит реализацию файла EnemyIntent.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 // MARK: - Enemy Intent System
@@ -129,9 +134,8 @@ public struct EnemyIntentGenerator {
         enemyHealth: Int,
         enemyMaxHealth: Int,
         turnNumber: Int,
-        rng: WorldRNG? = nil
+        rng: WorldRNG
     ) -> EnemyIntent {
-        let rng = rng ?? WorldRNG.shared
         let healthPercent = Double(enemyHealth) / Double(max(1, enemyMaxHealth))
 
         // Low health - defensive options

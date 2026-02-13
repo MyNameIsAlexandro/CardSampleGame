@@ -1,3 +1,8 @@
+/// Файл: CardSampleGameTests/Unit/ContentPackTests/ContentManagerTests.swift
+/// Назначение: Содержит реализацию файла ContentManagerTests.swift.
+/// Зона ответственности: Фиксирует проверяемый контракт и не содержит production-логики.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 import TwilightEngine
 import CoreHeroesContent
@@ -10,6 +15,8 @@ final class ContentManagerTests: XCTestCase {
 
     // MARK: - Properties
 
+    private var registry: ContentRegistry!
+    private var contentManager: ContentManager!
     private var characterPackURL: URL?
     private var storyPackURL: URL?
 
@@ -17,9 +24,8 @@ final class ContentManagerTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        // Reset managers before each test
-        ContentRegistry.shared.resetForTesting()
-        ContentManager.shared.reset()
+        registry = ContentRegistry()
+        contentManager = ContentManager(registry: registry)
 
         // Use TestContentLoader for robust URL discovery
         characterPackURL = TestContentLoader.characterPackURL
@@ -27,8 +33,8 @@ final class ContentManagerTests: XCTestCase {
     }
 
     override func tearDown() {
-        ContentRegistry.shared.resetForTesting()
-        ContentManager.shared.reset()
+        contentManager = nil
+        registry = nil
         characterPackURL = nil
         storyPackURL = nil
         super.tearDown()
@@ -42,7 +48,7 @@ final class ContentManagerTests: XCTestCase {
         if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // When - Discover packs with bundled URLs
-        let discovered = ContentManager.shared.discoverPacks(bundledURLs: [characterPackURL!, storyPackURL!])
+        let discovered = contentManager.discoverPacks(bundledURLs: [characterPackURL!, storyPackURL!])
 
         // Then - Both packs should be discovered
         XCTAssertEqual(discovered.count, 2)
@@ -56,7 +62,7 @@ final class ContentManagerTests: XCTestCase {
         if characterPackURL == nil { XCTFail("CoreHeroes pack not available"); return }
 
         // When
-        let discovered = ContentManager.shared.discoverPacks(bundledURLs: [characterPackURL!])
+        let discovered = contentManager.discoverPacks(bundledURLs: [characterPackURL!])
 
         // Then - Should be marked as bundled source
         XCTAssertEqual(discovered.count, 1)
@@ -71,7 +77,7 @@ final class ContentManagerTests: XCTestCase {
         if characterPackURL == nil { XCTFail("CoreHeroes pack not available"); return }
 
         // When
-        let discovered = ContentManager.shared.discoverPacks(bundledURLs: [characterPackURL!])
+        let discovered = contentManager.discoverPacks(bundledURLs: [characterPackURL!])
 
         // Then - Should have manifest loaded
         XCTAssertEqual(discovered.count, 1)
@@ -83,7 +89,7 @@ final class ContentManagerTests: XCTestCase {
         if characterPackURL == nil { XCTFail("CoreHeroes pack not available"); return }
 
         // When
-        let discovered = ContentManager.shared.discoverPacks(bundledURLs: [characterPackURL!])
+        let discovered = contentManager.discoverPacks(bundledURLs: [characterPackURL!])
 
         // Then - Should start in discovered state (not loaded yet)
         XCTAssertEqual(discovered.count, 1)
@@ -96,10 +102,10 @@ final class ContentManagerTests: XCTestCase {
         if characterPackURL == nil { XCTFail("CoreHeroes pack not available"); return }
 
         // Given - Discover pack first
-        _ = ContentManager.shared.discoverPacks(bundledURLs: [characterPackURL!])
+        _ = contentManager.discoverPacks(bundledURLs: [characterPackURL!])
 
         // When - Validate pack
-        let summary = await ContentManager.shared.validatePack("core-heroes")
+        let summary = await contentManager.validatePack("core-heroes")
 
         // Then - Should be valid
         XCTAssertEqual(summary.packId, "core-heroes")
@@ -111,7 +117,7 @@ final class ContentManagerTests: XCTestCase {
         if characterPackURL == nil { XCTFail("CoreHeroes pack not available"); return }
 
         // When - Validate pack file directly
-        let summary = await ContentManager.shared.validatePackFile(at: characterPackURL!)
+        let summary = await contentManager.validatePackFile(at: characterPackURL!)
 
         // Then
         XCTAssertEqual(summary.errorCount, 0)
@@ -121,7 +127,7 @@ final class ContentManagerTests: XCTestCase {
 
     func testValidateNonExistentPackReturnsError() async {
         // When - Validate non-existent pack
-        let summary = await ContentManager.shared.validatePack("non-existent-pack")
+        let summary = await contentManager.validatePack("non-existent-pack")
 
         // Then - Should return error
         XCTAssertEqual(summary.errorCount, 1)
@@ -135,27 +141,27 @@ final class ContentManagerTests: XCTestCase {
         if characterPackURL == nil { XCTFail("CoreHeroes pack not available"); return }
 
         // Given - Discover pack
-        _ = ContentManager.shared.discoverPacks(bundledURLs: [characterPackURL!])
+        _ = contentManager.discoverPacks(bundledURLs: [characterPackURL!])
 
         // When - Load pack
-        let loadedPack = try await ContentManager.shared.loadPack("core-heroes")
+        let loadedPack = try await contentManager.loadPack("core-heroes")
 
         // Then
         XCTAssertEqual(loadedPack.manifest.packId, "core-heroes")
-        XCTAssertTrue(ContentRegistry.shared.loadedPackIds.contains("core-heroes"))
+        XCTAssertTrue(registry.loadedPackIds.contains("core-heroes"))
     }
 
     func testLoadPackUpdatesState() async throws {
         if characterPackURL == nil { XCTFail("CoreHeroes pack not available"); return }
 
         // Given
-        _ = ContentManager.shared.discoverPacks(bundledURLs: [characterPackURL!])
+        _ = contentManager.discoverPacks(bundledURLs: [characterPackURL!])
 
         // When
-        _ = try await ContentManager.shared.loadPack("core-heroes")
+        _ = try await contentManager.loadPack("core-heroes")
 
         // Then - Get pack state
-        let pack = ContentManager.shared.getPack("core-heroes")
+        let pack = contentManager.getPack("core-heroes")
         XCTAssertEqual(pack?.state, .loaded)
         XCTAssertNotNil(pack?.loadedAt)
     }
@@ -163,7 +169,7 @@ final class ContentManagerTests: XCTestCase {
     func testLoadNonExistentPackThrows() async {
         // When/Then - Loading non-existent pack should throw
         do {
-            _ = try await ContentManager.shared.loadPack("non-existent")
+            _ = try await contentManager.loadPack("non-existent")
             XCTFail("Should have thrown error")
         } catch {
             // Expected
@@ -177,10 +183,10 @@ final class ContentManagerTests: XCTestCase {
         if characterPackURL == nil { XCTFail("CoreHeroes pack not available"); return }
 
         // Given
-        _ = ContentManager.shared.discoverPacks(bundledURLs: [characterPackURL!])
+        _ = contentManager.discoverPacks(bundledURLs: [characterPackURL!])
 
         // When
-        let allPacks = ContentManager.shared.getAllPacks()
+        let allPacks = contentManager.getAllPacks()
 
         // Then
         XCTAssertEqual(allPacks.count, 1)
@@ -191,10 +197,10 @@ final class ContentManagerTests: XCTestCase {
         if characterPackURL == nil { XCTFail("CoreHeroes pack not available"); return }
 
         // Given
-        _ = ContentManager.shared.discoverPacks(bundledURLs: [characterPackURL!])
+        _ = contentManager.discoverPacks(bundledURLs: [characterPackURL!])
 
         // When
-        let pack = ContentManager.shared.getPack("core-heroes")
+        let pack = contentManager.getPack("core-heroes")
 
         // Then
         XCTAssertNotNil(pack)
@@ -203,7 +209,7 @@ final class ContentManagerTests: XCTestCase {
 
     func testGetPackReturnsNilForUnknownPack() {
         // When
-        let pack = ContentManager.shared.getPack("unknown-pack")
+        let pack = contentManager.getPack("unknown-pack")
 
         // Then
         XCTAssertNil(pack)
@@ -213,10 +219,10 @@ final class ContentManagerTests: XCTestCase {
         if characterPackURL == nil { XCTFail("CoreHeroes pack not available"); return }
 
         // Given - Discover bundled pack
-        _ = ContentManager.shared.discoverPacks(bundledURLs: [characterPackURL!])
+        _ = contentManager.discoverPacks(bundledURLs: [characterPackURL!])
 
         // When
-        let bundled = ContentManager.shared.getBundledPacks()
+        let bundled = contentManager.getBundledPacks()
 
         // Then
         XCTAssertEqual(bundled.count, 1)
@@ -233,10 +239,10 @@ final class ContentManagerTests: XCTestCase {
         if characterPackURL == nil { XCTFail("CoreHeroes pack not available"); return }
 
         // Given
-        _ = ContentManager.shared.discoverPacks(bundledURLs: [characterPackURL!])
+        _ = contentManager.discoverPacks(bundledURLs: [characterPackURL!])
 
         // When
-        let canReload = ContentManager.shared.canReload("core-heroes")
+        let canReload = contentManager.canReload("core-heroes")
 
         // Then - Bundled packs cannot be hot-reloaded
         XCTAssertFalse(canReload)
@@ -246,11 +252,11 @@ final class ContentManagerTests: XCTestCase {
         if characterPackURL == nil { XCTFail("CoreHeroes pack not available"); return }
 
         // Given - Discover and load pack
-        _ = ContentManager.shared.discoverPacks(bundledURLs: [characterPackURL!])
-        _ = try await ContentManager.shared.loadPack("core-heroes")
+        _ = contentManager.discoverPacks(bundledURLs: [characterPackURL!])
+        _ = try await contentManager.loadPack("core-heroes")
 
         // When - Try to reload bundled pack
-        let result = await ContentManager.shared.safeReloadPack("core-heroes")
+        let result = await contentManager.safeReloadPack("core-heroes")
 
         // Then - Should fail with notReloadable error
         switch result {
@@ -271,7 +277,7 @@ final class ContentManagerTests: XCTestCase {
         if characterPackURL == nil { XCTFail("CoreHeroes pack not available"); return }
 
         // Given
-        let discovered = ContentManager.shared.discoverPacks(bundledURLs: [characterPackURL!])
+        let discovered = contentManager.discoverPacks(bundledURLs: [characterPackURL!])
 
         // Then
         XCTAssertTrue(discovered[0].canValidate)
@@ -281,7 +287,7 @@ final class ContentManagerTests: XCTestCase {
         if characterPackURL == nil { XCTFail("CoreHeroes pack not available"); return }
 
         // Given
-        let discovered = ContentManager.shared.discoverPacks(bundledURLs: [characterPackURL!])
+        let discovered = contentManager.discoverPacks(bundledURLs: [characterPackURL!])
 
         // Then
         XCTAssertGreaterThan(discovered[0].fileSize, 0)
@@ -291,7 +297,7 @@ final class ContentManagerTests: XCTestCase {
         if characterPackURL == nil { XCTFail("CoreHeroes pack not available"); return }
 
         // Given
-        let discovered = ContentManager.shared.discoverPacks(bundledURLs: [characterPackURL!])
+        let discovered = contentManager.discoverPacks(bundledURLs: [characterPackURL!])
 
         // Then - Should have recent modification date (within last year)
         let oneYearAgo = Date().addingTimeInterval(-365 * 24 * 60 * 60)

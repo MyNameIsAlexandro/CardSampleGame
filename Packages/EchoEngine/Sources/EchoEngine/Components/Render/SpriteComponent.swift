@@ -1,3 +1,8 @@
+/// Файл: Packages/EchoEngine/Sources/EchoEngine/Components/Render/SpriteComponent.swift
+/// Назначение: Содержит реализацию файла SpriteComponent.swift.
+/// Зона ответственности: Реализует боевой пакет EchoEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import FirebladeECS
 import CoreGraphics
 

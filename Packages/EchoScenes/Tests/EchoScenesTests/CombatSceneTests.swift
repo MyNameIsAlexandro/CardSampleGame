@@ -1,3 +1,8 @@
+/// Файл: Packages/EchoScenes/Tests/EchoScenesTests/CombatSceneTests.swift
+/// Назначение: Содержит реализацию файла CombatSceneTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import Testing
 import SpriteKit
 import EchoEngine

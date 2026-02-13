@@ -1,3 +1,8 @@
+/// Файл: Views/Components/HeroPanel.swift
+/// Назначение: Содержит реализацию файла HeroPanel.swift.
+/// Зона ответственности: Ограничен задачами слоя представления и пользовательского интерфейса.
+/// Контекст: Используется в приложении CardSampleGame и связанных потоках выполнения.
+
 import SwiftUI
 import TwilightEngine
 
@@ -314,7 +319,7 @@ struct HeroPanel_Previews: PreviewProvider {
     }
 
     static var previewVM: GameEngineObservable {
-        let vm = GameEngineObservable()
+        let vm = GameEngineObservable(engineServices: EngineServices.makeDefault())
         // Preview data would be set here
         return vm
     }

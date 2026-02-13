@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/ContentPacks/ConditionValidator.swift
+/// Назначение: Содержит реализацию файла ConditionValidator.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 // MARK: - Condition Validator
@@ -34,7 +39,7 @@ public final class ConditionValidator {
     // MARK: - Validation Results
 
     /// Result of condition validation
-    public struct ValidationResult {
+    public struct ValidationResult: Sendable {
         public let isValid: Bool
         public let errors: [String]
         public let warnings: [String]

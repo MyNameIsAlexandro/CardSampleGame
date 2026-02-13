@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Tests/TwilightEngineTests/GateTests/INV_SAV8_GateTests.swift
+/// Назначение: Содержит реализацию файла INV_SAV8_GateTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import TwilightEngine
 
@@ -8,20 +13,14 @@ final class INV_SAV8_GateTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        TestContentLoader.loadContentPacksIfNeeded()
-        WorldRNG.shared.setSeed(42)
-    }
-
-    override func tearDown() {
-        WorldRNG.shared.setSeed(0)
-        super.tearDown()
+        _ = TestContentLoader.sharedLoadedRegistry()
     }
 
     // MARK: - SAV-02: Fate Deck Persistence
 
     /// Fate deck state is included in EngineSave
     func testFateDeckState_includedInSave() {
-        let engine = TwilightGameEngine()
+        let engine = TestEngineFactory.makeEngine(seed: 42)
         engine.initializeNewGame(playerName: "Test", heroId: nil)
 
         // Draw a card to change deck state
@@ -39,7 +38,7 @@ final class INV_SAV8_GateTests: XCTestCase {
 
     /// Fate deck state round-trips through save/load
     func testFateDeckState_roundTrip() {
-        let engine = TwilightGameEngine()
+        let engine = TestEngineFactory.makeEngine(seed: 42)
         engine.initializeNewGame(playerName: "Test", heroId: nil)
 
         // Draw some cards to modify state
@@ -78,7 +77,7 @@ final class INV_SAV8_GateTests: XCTestCase {
         // fateDeckState defaults to nil — should not crash
         XCTAssertNil(save.fateDeckState)
 
-        let engine = TwilightGameEngine()
+        let engine = TestEngineFactory.makeEngine(seed: 42)
         engine.initializeNewGame(playerName: "Test", heroId: nil)
 
         // Restore old save — should not crash, deck state unchanged

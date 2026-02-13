@@ -1,16 +1,22 @@
+/// Файл: Views/HeroSelectionView.swift
+/// Назначение: Содержит реализацию файла HeroSelectionView.swift.
+/// Зона ответственности: Ограничен задачами слоя представления и пользовательского интерфейса.
+/// Контекст: Используется в приложении CardSampleGame и связанных потоках выполнения.
+
 import SwiftUI
 import TwilightEngine
 
 /// Экран выбора героя при начале новой игры
 /// Герои загружаются из HeroRegistry (data-driven)
 struct HeroSelectionView: View {
+    let registry: ContentRegistry
     let onHeroSelected: (String) -> Void  // Возвращает heroId
 
     @State private var selectedHeroId: String?
 
     /// Все доступные герои из реестра
     private var availableHeroes: [HeroDefinition] {
-        HeroRegistry.shared.availableHeroes()
+        registry.heroRegistry.availableHeroes()
     }
 
     var body: some View {
@@ -54,12 +60,12 @@ struct HeroSelectionView: View {
                 // Кнопка подтверждения
                 VStack(spacing: Spacing.sm) {
                     if let heroId = selectedHeroId,
-                       let hero = HeroRegistry.shared.hero(id: heroId) {
+                       let hero = registry.heroRegistry.hero(id: heroId) {
                         Button(action: {
                             onHeroSelected(heroId)
                         }) {
                             HStack {
-                                Text(hero.icon)
+                                Image(systemName: hero.icon)
                                 Text("Начать игру за \(hero.name.localized)")
                                     .fontWeight(.semibold)
                             }
@@ -103,7 +109,7 @@ struct HeroCard: View {
         VStack(alignment: .leading, spacing: Spacing.md) {
             // Заголовок
             HStack {
-                Text(hero.icon)
+                Image(systemName: hero.icon)
                     .font(.title)
 
                 VStack(alignment: .leading, spacing: Spacing.xxxs) {
@@ -189,7 +195,7 @@ struct StatBadge: View {
 }
 
 #Preview {
-    HeroSelectionView { heroId in
+    HeroSelectionView(registry: ContentRegistry()) { heroId in
         print("Selected: \(heroId)")
     }
 }

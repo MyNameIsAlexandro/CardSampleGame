@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Core/FateDeckManager.swift
+/// Назначение: Содержит реализацию файла FateDeckManager.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 // MARK: - Fate Draw Result
@@ -26,7 +31,7 @@ public struct FateDrawResult: Codable, Equatable {
 // MARK: - Fate Deck State (Save/Load)
 
 /// Serializable state of the Fate Deck
-public struct FateDeckState: Codable, Equatable {
+public struct FateDeckState: Codable, Equatable, Sendable {
     public let drawPile: [FateCard]
     public let discardPile: [FateCard]
 
@@ -56,7 +61,7 @@ public final class FateDeckManager {
 
     /// Initialize with a set of cards and an RNG instance.
     /// Cards are shuffled into the draw pile immediately.
-    public init(cards: [FateCard], rng: WorldRNG = .shared) {
+    public init(cards: [FateCard], rng: WorldRNG) {
         self.rng = rng
         self.drawPile = cards
         self.discardPile = []

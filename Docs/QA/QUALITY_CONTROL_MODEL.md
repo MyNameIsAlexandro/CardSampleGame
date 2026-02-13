@@ -2,7 +2,9 @@
 
 **Scope:** architecture correctness, determinism, migration safety, CI enforceability.  
 **Status:** source of truth for quality gates.  
-**Last updated:** 2026-02-09
+**Policy sync:** `CLAUDE.md` v4.1 engineering contract  
+**Last updated:** 2026-02-12  
+**Phase 2 checkpoint:** Epic 66
 
 This document is the canonical control point for validating product health after the Phase 2 audit/refactor stream.
 
@@ -21,7 +23,8 @@ This document is the canonical control point for validating product health after
    - Includes focused smoke filters for fast non-regression.
 4. **Documentation contract**
    - `Docs/plans/2026-02-07-audit-refactor-phase2-epics.md` is the epic status ledger.
-   - This file is the quality policy and test model baseline.
+   - `CLAUDE.md` defines the engineering policy baseline for development behavior.
+   - This file defines enforceable QA/CI control model and gate baseline.
 
 ## 2. Mandatory Gates
 
@@ -32,6 +35,9 @@ This document is the canonical control point for validating product health after
   - `INV_REPLAY30_GateTests`
   - `INV_RESUME47_GateTests`
   - `ContentRegistryRegistrySyncTests`
+- **Content/runtime localization integrity:**
+  - `BundledPacksValidationTests`
+  - `LocalizationResolutionTests`
 - **Schema compatibility smoke (Epic 28):**
   - `INV_SCHEMA28_GateTests`
 - **Strict concurrency:**
@@ -49,10 +55,19 @@ This document is the canonical control point for validating product health after
 - **Save/load integration:**
   - `SaveLoadTests`
   - Includes legacy file-wrapper decode path (`testSaveManagerLoadsLegacySchemaPayloadsFromDisk`).
+  - Includes resume-path localization contract (`testEchoEncounterBridgeRelocalizesResumeDeckCardsFromRegistry`).
 - **Quality suites:**
   - `CodeHygieneTests`
   - Hard line-limit contract: first-party Swift files must stay `<= 600` lines (line-limit has no legacy exemptions; vendor/build artifacts excluded).
-  - Public type-count contract: audited files must stay `<= 5` public types per file (no legacy exemptions).
+  - Type-count contract: audited engine files must stay `<= 5` top-level types per file (no legacy exemptions).
+  - File-header contract: first-party Swift files must start with canonical 4-line header:
+    - `/// Файл: <relative path>`
+    - `/// Назначение: ...`
+    - `/// Зона ответственности: ...`
+    - `/// Контекст: ...`
+  - Header exclusions are explicit and minimal:
+    - vendor/build/internal agent paths (`Packages/ThirdParty`, `.build`, `.codex_home`),
+    - SwiftPM manifest files (`Package.swift`, tools-version line must stay first).
   - `DesignSystemComplianceTests`
   - `ContrastComplianceTests`
   - `LocalizationValidatorTests`
@@ -66,9 +81,18 @@ This document is the canonical control point for validating product health after
   - `ContentRegistryTests`
   - `PackLoaderTests`
   - `HeroPanelTests`
+- **Localization/token rendering boundary:**
+  - `AuditArchitectureBoundaryGateTests.testHeroAndAbilityIconsAreNotRenderedAsRawTokens`
+  - gate scans first-party `App/**` + `Views/**` and forbids `Text(...icon...)` token rendering.
+  - `SaveLoadTests.testEchoEncounterBridgeRelocalizesResumeDeckCardsFromRegistry`
+  - gate verifies stale resume snapshots are relocalized via active `ContentRegistry` + `LocalizationManager` before UI render.
 - **Runtime test stability contract (Epic 59):**
   - Do not hardcode balance-derived runtime constants in tests when the active content config is the source of truth.
   - Do not assert localized narrative copy for gameplay success/failure semantics; assert typed outcomes (`MiniGameOutcome`) and/or state changes.
+- **Test observability contract (Epic 64):**
+  - Green-path test runs must stay quiet by default (no ad-hoc diagnostic floods from loaders/fixtures).
+  - Verbose diagnostics are opt-in via `TWILIGHT_TEST_VERBOSE=1` and are used only for focused local debugging.
+  - Scope includes app + engine test helpers and content-loading debug traces (`CardSampleGameTests/TestHelpers/TestContentLoader.swift`, `Packages/TwilightEngine/Tests/TwilightEngineTests/Helpers/TestContentLoader.swift`, `App/CardGameApp.swift`, `Packages/TwilightEngine/Sources/TwilightEngine/ContentPacks/ContentRegistry.swift`).
 
 ## 3. Save Schema Contract (Epic 28)
 
@@ -101,6 +125,9 @@ This document is the canonical control point for validating product health after
   - `commitExternalCombat(...)` facade on `TwilightGameEngine`.
 - Quick Battle/Arena is sandboxed:
   - does not commit combat result to the world save path.
+  - does not call world-engine seed APIs or world RNG directly.
+- Resume external-combat payloads are relocalized before presentation:
+  - bridge must map display fields (cards/fate labels) from active content registry and resolver locale, not from stale serialized strings.
 - App static gates enforce boundary rules:
   - block unauthorized `EchoCombatBridge.applyCombatResult(...)` call-sites,
   - block unauthorized `.startCombat(...)` / `.commitExternalCombat(...)` call-sites,
@@ -171,7 +198,7 @@ This document is the canonical control point for validating product health after
   - `CardSampleGame.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved`
 - Repository hygiene gate:
   - `.github/ci/validate_repo_hygiene.sh` enforces canonical lockfile path and blocks tracked transient artifacts.
-  - optional hard mode (`--require-clean-tree`) enforces zero tracked working-tree drift.
+  - hard mode (`--require-clean-tree`) enforces zero tracked working-tree drift and is mandatory in CI quality governance/content-validation and local `run_release_check.sh`.
 - Dependency graph expectation:
   - `EchoEngine` resolves `FirebladeECS` from local path override.
 
@@ -184,6 +211,7 @@ This document is the canonical control point for validating product health after
   - workflow smoke filter tokens in `.github/workflows/tests.yml`,
   - QA policy in `Docs/QA/QUALITY_CONTROL_MODEL.md`,
   - operational guide in `Docs/QA/TESTING_GUIDE.md`,
+  - architecture spec in `Docs/Technical/ENGINE_ARCHITECTURE.md`,
   - epic status ledger in `Docs/plans/2026-02-07-audit-refactor-phase2-epics.md`.
 - Mandatory contract markers:
   - `INV_SCHEMA28_GateTests`
@@ -191,6 +219,10 @@ This document is the canonical control point for validating product health after
   - `INV_RESUME47_GateTests`
   - `ContentRegistryRegistrySyncTests`
   - Epic status markers for `Epic 28`, `Epic 30`, `Epic 47`, `Epic 48`.
+  - Date parity across source-of-truth docs (`Last updated` / `Status snapshot` / `Last updated (ISO)`).
+  - Phase-2 checkpoint parity across source-of-truth docs:
+    - `**Phase 2 checkpoint:** Epic N` must match in QA/testing/architecture docs.
+    - the same `Epic N` must be marked `DONE` in epic ledger.
   - Backlog epoch marker must match auto-detected latest `DONE` epic:
     - `Pending backlog (post-Epic N)` where `N = max(done_epic_number)`.
 
@@ -206,7 +238,8 @@ This document is the canonical control point for validating product health after
   - render `summary.md` as a latest-only snapshot per gate ID (last result wins); full attempt history remains in `gates.jsonl`.
 - CI normalizes app-runner variability with:
   - `.github/ci/select_ios_destination.sh` (resolves valid simulator `name+OS` for current Xcode image),
-  - `.github/ci/run_xcodebuild.sh` (`xcpretty` optional, plain `xcodebuild` fallback).
+  - `.github/ci/run_xcodebuild.sh` (`xcpretty` optional, plain `xcodebuild` fallback, transient simulator/bootstrap auto-retry for test invocations).
+    - retry controls: `XCODEBUILD_MAX_ATTEMPTS` and `XCODEBUILD_RETRY_DELAY_SEC`.
   - `.github/ci/clean_test_artifacts.sh` (clears stale `xcresult`/log artifacts before gates),
   - `.github/ci/preflight_ci_environment.sh` (captures toolchain snapshot per job in quality dashboard artifact).
   - `.github/ci/generate_gate_inventory_report.sh` (builds CI/tests/docs inventory + drift report in quality dashboard artifact).
@@ -248,6 +281,7 @@ This document is the canonical control point for validating product health after
   - `content_json_lint` (`<=300s`)
   - `repo_hygiene` (`<=120s`)
   - `docs_sync` (`<=120s`)
+  - `legacy_cleanup` (`<=120s`)
 - Profile `rc_full` requires all gates from:
   - `rc_engine_twilight`
   - `rc_app`
@@ -256,12 +290,12 @@ This document is the canonical control point for validating product health after
   - `spm-packages` job validates `rc_engine_twilight` for `TwilightEngine`.
   - `app-tests` job validates `rc_app` after gate inventory generation.
   - `build-validation` writes `build_cardsamplegame` / `build_packeditor` through `run_quality_gate.sh`.
-  - `content-validation` writes `content_json_lint` and `repo_hygiene` through `run_quality_gate.sh`.
-  - `content-validation` writes `docs_sync` through `run_quality_gate.sh`.
+  - `content-validation` writes `content_json_lint`, `repo_hygiene`, `docs_sync`, `legacy_cleanup` through `run_quality_gate.sh`.
   - `release-readiness-profile` job aggregates all dashboards and validates `rc_full`.
 - Unified local release checkpoint:
   - `.github/ci/run_release_check.sh` runs app/engine/build/content gates and validates `rc_engine_twilight`, `rc_app`, `rc_build_content`, `rc_full`.
   - local run is hard-gated by `validate_repo_hygiene.sh --require-clean-tree` before any test/build step starts.
+  - optional local diagnostic wrapper `.github/ci/run_release_check_snapshot.sh` runs the same hard-gated flow against a temporary snapshot worktree of the current dirty tree (no policy downgrade).
 - RC reports are published into dashboard artifacts:
   - `TestResults/QualityDashboard/release_profile_rc_engine_twilight.md`
   - `TestResults/QualityDashboard/release_profile_rc_app.md`
@@ -311,28 +345,63 @@ bash .github/ci/run_release_check.sh TestResults/QualityDashboard CardSampleGame
 - Update/extend gate tests before or with behavior changes.
 - Keep CI smoke filters aligned with new gate suites.
 - Update `Docs/plans/2026-02-07-audit-refactor-phase2-epics.md` status.
-- Update this document when quality policy, gates, or contracts change.
+- Update `CLAUDE.md` and this document together when policy/contracts change.
+- If content loading/compilation logic changes, recompile bundled `.pack` artifacts and validate with `BundledPacksValidationTests`.
 
-## 11. Structural Decomposition Backlog (Post-Epic 59)
+## 11. Structural Decomposition Baseline (Post-Epic 63)
 
-- Current monolith hotspots:
-  - `Packages/TwilightEngine/Sources/TwilightEngine/Core/TwilightGameEngine.swift` (`1085` lines after Epic 53 checkpoint #5),
-  - `Packages/TwilightEngine/Sources/TwilightEngine/ContentPacks/ContentRegistry.swift` (`987` lines after current split),
-  - `Views/WorldMapView.swift` (`287` lines after Epic 55 checkpoint #1),
-  - `CardSampleGameTests/GateTests/AuditGateTests.swift` (`2382` lines).
-- Current decomposition checkpoint:
-  - world-state models moved out of engine core into `Core/EngineWorldStateModels.swift`,
-  - read-only engine query API moved into `Core/TwilightGameEngine+ReadOnlyQueries.swift`,
-  - exploration availability query moved into `Core/TwilightGameEngine+ExplorationQueries.swift`,
-  - action validation/time/execution pipeline moved into `Core/TwilightGameEngine+ActionPipeline.swift`,
-  - bootstrap/mapping/validation helpers moved into `Core/TwilightGameEngine+BootstrapAndValidation.swift`,
-  - combat/resonance/external-commit support moved into `Core/TwilightGameEngine+StateSupport.swift`,
-  - persistence snapshot builder moved into `Core/TwilightGameEngine+PersistenceSnapshot.swift`,
-  - world bootstrap model moved into `Core/EngineWorldBootstrapState.swift`,
-  - world map subviews moved out of `Views/WorldMapView.swift` into `Views/WorldMap/EngineRegionDetailView.swift`, `Views/WorldMap/EngineRegionCardView.swift`, `Views/WorldMap/EngineEventLogView.swift`, and `Views/WorldMap/EventLogEntryView.swift`,
-  - `BalancePackAccess` moved out of `ContentRegistry.swift` into `ContentPacks/BalancePackAccess.swift`.
+- Near-limit policy checkpoint:
+  - no first-party Swift files remain at `>=550` lines (decomposition wave closed in Epic 63),
+  - hard hygiene contract remains `<=600` lines per file.
+- Current hotspot watchlist (budgeted by architecture gate at `<=600`):
+  - `Packages/TwilightEngine/Sources/TwilightEngine/Core/TwilightGameEngine.swift` (`520` lines),
+  - `Packages/TwilightEngine/Sources/TwilightEngine/ContentPacks/ContentRegistry.swift` (`404` lines),
+  - `Views/WorldMap/EngineRegionDetailView.swift` (`546` lines),
+  - `CardSampleGameTests/GateTests/AuditGateTests+LegacyAndDeterminism.swift` (`511` lines).
+- Latest decomposition checkpoint (Epic 63 closeout):
+  - action-pipeline time cluster extracted to `Core/TwilightGameEngine+ActionPipeline+Time.swift`,
+  - encounter suit-matching helpers extracted to `Encounter/EncounterEngine+SuitMatching.swift`,
+  - `ManagedPack` equality extracted to `ContentPacks/ManagedPack+Equatable.swift`,
+  - gate-suite helper/migration logic redistributed across existing `AuditGateTests+*` and `CodeHygieneTests+*` modules to keep files below near-limit threshold.
 - Validation policy for decomposition waves:
   - mandatory: TwilightEngine determinism/schema smoke (`INV_RNG`, `INV_SCHEMA28`, `INV_REPLAY30`, `INV_RESUME47`, `ContentRegistryRegistrySyncTests`),
   - mandatory: app architecture gate suite (`AuditGateTests`, `AuditArchitectureBoundaryGateTests`) when simulator infrastructure is available.
 - Infra risk note:
   - `xcodebuild` test runs may fail with runner bootstrap crash (`Early unexpected exit`) unrelated to compile/contracts; classify as `infra_transient` and re-run under CI/local simulator health check before regression triage.
+
+## 12. Engineering Policy Baseline (CLAUDE Sync)
+
+This section mirrors development policy from `CLAUDE.md` into QA language so quality gates and implementation behavior stay aligned.
+
+### 12.1 Rule precedence
+
+When rules conflict, enforce in this order:
+
+1. Gate tests and CI contracts.
+2. `CLAUDE.md` engineering contract.
+3. Supporting docs/specs.
+
+### 12.2 Non-negotiable implementation constraints
+
+- Engine state mutations are action-driven only.
+- Invalid actions use typed reason codes (`InvalidActionReason`), not raw string payloads.
+- `pendingEncounterState` remains read-only outside engine internals (`public private(set)`).
+- Public `nextSeed(...)` facade exposure is prohibited.
+- Runtime uses binary `.pack` loading path only; authoring loader (`PackLoader`) is not a production runtime dependency.
+- After pack-pipeline changes, bundled pack localization/runtime integrity must be revalidated (`BundledPacksValidationTests`).
+- Localization resolution must follow resolver locale (`LocalizationManager.currentLocale`) in engine pathways.
+- Resume/external-combat bridge must relocalize UI-facing display strings from active registry/resolver before rendering.
+- UI symbol tokens must render via `Image(systemName:)`; raw token text rendering is prohibited.
+- Arena/Quick Battle remains sandboxed from world-state commit path and world RNG consumption.
+- First-party hygiene gates are absolute (`<=600` lines, `<=5` top-level types in engine files) with no legacy whitelist.
+- Production code must remain free of `TODO`/`FIXME` markers.
+
+### 12.3 Quality gate intent
+
+The test model is not a coverage vanity layer; it is a hard architecture-control layer designed to prevent:
+
+- action-pipeline bypasses,
+- determinism drift (RNG/save/resume/replay),
+- schema migration regressions,
+- boundary leaks between Engine/App/bridge layers,
+- localization and content-pipeline regressions.

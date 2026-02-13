@@ -1,3 +1,8 @@
+/// Файл: Packages/PackEditorApp/Sources/PackEditorApp/Views/TabBarView.swift
+/// Назначение: Содержит реализацию файла TabBarView.swift.
+/// Зона ответственности: Изолирован своей предметной ответственностью в рамках модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import SwiftUI
 
 struct TabBarView: View {

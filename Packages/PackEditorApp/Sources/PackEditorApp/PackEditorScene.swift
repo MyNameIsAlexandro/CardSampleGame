@@ -1,3 +1,8 @@
+/// Файл: Packages/PackEditorApp/Sources/PackEditorApp/PackEditorScene.swift
+/// Назначение: Содержит реализацию файла PackEditorScene.swift.
+/// Зона ответственности: Изолирован своей предметной ответственностью в рамках модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import SwiftUI
 
 /// Public entry point: the PackEditor scene (WindowGroup + Commands).

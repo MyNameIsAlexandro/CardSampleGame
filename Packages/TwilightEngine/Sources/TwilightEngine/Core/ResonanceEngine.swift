@@ -1,9 +1,14 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Core/ResonanceEngine.swift
+/// Назначение: Содержит реализацию файла ResonanceEngine.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 // MARK: - Resonance Zone
 
 /// Zones of world resonance, from deep Nav to deep Prav
-public enum ResonanceZone: String, Codable, Hashable, CaseIterable {
+public enum ResonanceZone: String, Codable, Hashable, CaseIterable, Sendable {
     case deepNav   // -100..-61
     case nav       // -60..-21
     case yav       // -20..20
@@ -14,7 +19,7 @@ public enum ResonanceZone: String, Codable, Hashable, CaseIterable {
 // MARK: - Resonance Shift
 
 /// Record of a resonance change (for logging/analytics)
-public struct ResonanceShift: Codable, Equatable {
+public struct ResonanceShift: Codable, Equatable, Sendable {
     public let amount: Float
     public let source: String
     public let resultingValue: Float

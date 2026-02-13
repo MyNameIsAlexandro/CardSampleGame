@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Localization/StringKey.swift
+/// Назначение: Содержит реализацию файла StringKey.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 // MARK: - String Key
@@ -6,7 +11,7 @@ import Foundation
 
 /// A key that references a localized string in the pack's string tables.
 /// Format: "namespace.entity.field" (e.g., "card.strike.name", "hero.ragnar.description")
-public struct StringKey: Hashable {
+public struct StringKey: Hashable, Sendable {
     // MARK: - Properties
 
     /// The raw string value of the key

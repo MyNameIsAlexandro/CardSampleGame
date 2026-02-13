@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Tests/TwilightEngineTests/MultiEnemyEncounterTests.swift
+/// Назначение: Содержит реализацию файла MultiEnemyEncounterTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import TwilightEngine
 
@@ -15,7 +20,7 @@ final class MultiEnemyEncounterTests: XCTestCase {
     }
 
     private func makeFateDeckState(count: Int = 15) -> FateDeckState {
-        FateDeckManager(cards: makeFateDeck(count: count)).getState()
+        TestFateDeck.makeState(cards: makeFateDeck(count: count))
     }
 
     /// Standard hero for multi-enemy tests
@@ -248,7 +253,7 @@ final class MultiEnemyEncounterTests: XCTestCase {
         let surgeCards: [FateCard] = (0..<15).map { i in
             FateCard(id: "surge_\(i)", modifier: 2, name: "Surge Card", keyword: .surge)
         }
-        let deckState = FateDeckManager(cards: surgeCards).getState()
+        let deckState = TestFateDeck.makeState(cards: surgeCards)
 
         let ctx = EncounterContext(
             hero: standardHero,

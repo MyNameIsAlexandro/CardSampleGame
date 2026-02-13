@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Tests/TwilightEngineTests/LayerTests/EncounterEngineTests.swift
+/// Назначение: Содержит реализацию файла EncounterEngineTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import TwilightEngine
 
@@ -45,7 +50,7 @@ final class EncounterEngineTests: XCTestCase {
         let ctx = EncounterContext(
             hero: EncounterHero(id: "hero", hp: 100, maxHp: 100, strength: 5, armor: 2),
             enemies: [EncounterEnemy(id: "e1", name: "Attacker", hp: 50, maxHp: 50, power: 100, defense: 0)],
-            fateDeckSnapshot: FateDeckManager(cards: FateDeckFixtures.criticalOnly()).getState(),
+            fateDeckSnapshot: TestFateDeck.makeState(cards: FateDeckFixtures.criticalOnly(), seed: 42),
             modifiers: [],
             rules: EncounterRules(),
             rngSeed: 42

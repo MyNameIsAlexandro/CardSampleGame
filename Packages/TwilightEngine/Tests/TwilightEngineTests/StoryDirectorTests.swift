@@ -1,17 +1,25 @@
+/// Файл: Packages/TwilightEngine/Tests/TwilightEngineTests/StoryDirectorTests.swift
+/// Назначение: Содержит реализацию файла StoryDirectorTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import TwilightEngine
 
 final class StoryDirectorTests: XCTestCase {
 
     private var director: BaseStoryDirector!
+    private var contentRegistry: ContentRegistry!
 
     override func setUp() {
         super.setUp()
-        director = BaseStoryDirector()
+        contentRegistry = ContentRegistry()
+        director = BaseStoryDirector(contentRegistry: contentRegistry)
     }
 
     override func tearDown() {
         director = nil
+        contentRegistry = nil
         super.tearDown()
     }
 
@@ -210,23 +218,15 @@ final class StoryDirectorTests: XCTestCase {
     // MARK: - selectEvent
 
     func testSelectEvent_returnsNilWhenNoEventsAvailable() {
-        // With default ContentRegistry.shared, if no events are registered
-        // for our test context, selectEvent should return nil for a non-existent region
         let context = makeContext(
             currentRegionId: "nonexistent_region_xyz",
             worldFlags: ["impossible_flag_xyz_123": true]
         )
         var rng = WorldRNG(seed: 42 as UInt64)
 
-        // We use a context with impossible required flags so nothing passes filtering
-        _ = Availability(requiredFlags: ["impossible_flag_xyz_123_not_set"])
-        // Since we cannot inject events, we test that the method handles empty pools gracefully
-        // by relying on the registry having no events matching an absurd filter
         let result = director.selectEvent(forRegion: "nonexistent_region_xyz", context: context, using: &rng)
 
-        // Result may or may not be nil depending on what is in ContentRegistry.shared,
-        // but the method should not crash
-        _ = result
+        XCTAssertNil(result)
     }
 
     // MARK: - checkVictoryConditions

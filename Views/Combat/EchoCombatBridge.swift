@@ -1,51 +1,45 @@
+/// Файл: Views/Combat/EchoCombatBridge.swift
+/// Назначение: Содержит реализацию файла EchoCombatBridge.swift.
+/// Зона ответственности: Ограничен задачами слоя представления и пользовательского интерфейса.
+/// Контекст: Используется в приложении CardSampleGame и связанных потоках выполнения.
+
 import Foundation
 import TwilightEngine
 import EchoEngine
 
 // MARK: - EchoCombatResult → TwilightGameEngine Bridge
 
-extension TwilightGameEngine {
+/// Адаптер результата боя EchoEngine в action-пайплайн TwilightEngine.
+enum EchoCombatBridge {
 
-    /// Apply EchoCombatResult back to engine state (HP, resonance, fate deck, faith, loot).
-    /// Mirrors `applyEncounterResult(_:)` from EncounterBridge.
-    func applyEchoCombatResult(_ result: EchoCombatResult) {
-        // 1. HP delta
-        if result.hpDelta != 0 {
-            let newHP = max(0, player.health + result.hpDelta)
-            player.setHealth(newHP)
+    /// Canonical adapter from Echo combat result into engine action pipeline.
+    /// Keeps all world-state mutations inside `commitExternalCombat(...)`.
+    @discardableResult
+    static func applyCombatResult(
+        _ result: EchoCombatResult,
+        to engine: TwilightGameEngine
+    ) -> ActionResult {
+        let transaction = EncounterTransaction(
+            hpDelta: result.hpDelta,
+            faithDelta: result.faithDelta,
+            resonanceDelta: Float(result.resonanceDelta),
+            worldFlags: [:],
+            lootCardIds: result.lootCardIds
+        )
+
+        switch result.outcome {
+        case .victory:
+            return engine.commitExternalCombat(
+                outcome: .victory,
+                transaction: transaction,
+                updatedFateDeck: result.updatedFateDeckState
+            )
+        case .defeat:
+            return engine.commitExternalCombat(
+                outcome: .defeat,
+                transaction: transaction,
+                updatedFateDeck: result.updatedFateDeckState
+            )
         }
-
-        // 2. Resonance
-        if result.resonanceDelta != 0 {
-            adjustResonance(by: Float(result.resonanceDelta))
-        }
-
-        // 3. Fate deck sync
-        if let deckState = result.updatedFateDeckState {
-            if let fd = fateDeck {
-                fd.restoreState(deckState)
-            } else {
-                let cards = deckState.drawPile + deckState.discardPile
-                if !cards.isEmpty {
-                    setupFateDeck(cards: cards)
-                    fateDeck?.restoreState(deckState)
-                }
-            }
-        }
-
-        // 4. Faith reward
-        if result.faithDelta > 0 {
-            player.applyFaithDelta(result.faithDelta)
-        }
-
-        // 5. Loot cards
-        for cardId in result.lootCardIds {
-            if let card = CardFactory.shared.getCard(id: cardId) {
-                deck.addToDeck(card)
-            }
-        }
-
-        // 6. End combat
-        combat.endCombat()
     }
 }

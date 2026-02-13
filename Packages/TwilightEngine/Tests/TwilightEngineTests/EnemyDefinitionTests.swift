@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Tests/TwilightEngineTests/EnemyDefinitionTests.swift
+/// Назначение: Содержит реализацию файла EnemyDefinitionTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import TwilightEngine
 
@@ -297,7 +302,7 @@ final class EnemyDefinitionTests: XCTestCase {
         let enemy = try makeDecoder().decode(EnemyDefinition.self, from: json)
 
         // When: Converting to card
-        let card = enemy.toCard()
+        let card = enemy.toCard(localizationManager: LocalizationManager())
 
         // Then: Card should have correct values
         // Card name depends on system locale - just verify it's one of the localized values

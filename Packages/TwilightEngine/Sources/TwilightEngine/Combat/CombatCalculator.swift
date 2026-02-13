@@ -1,209 +1,11 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Combat/CombatCalculator.swift
+/// Назначение: Содержит реализацию файла CombatCalculator.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
-/// Attack result with full breakdown
-public struct CombatResult {
-    public let isHit: Bool
-    public let attackRoll: AttackRoll
-    public let defenseValue: Int
-    public let damageCalculation: DamageCalculation?
-    public let specialEffects: [CombatEffect]
-
-    public init(
-        isHit: Bool,
-        attackRoll: AttackRoll,
-        defenseValue: Int,
-        damageCalculation: DamageCalculation?,
-        specialEffects: [CombatEffect]
-    ) {
-        self.isHit = isHit
-        self.attackRoll = attackRoll
-        self.defenseValue = defenseValue
-        self.damageCalculation = damageCalculation
-        self.specialEffects = specialEffects
-    }
-
-    /// Text description for log
-    public var logDescription: String {
-        var lines: [String] = []
-
-        // Заголовок результата
-        if isHit {
-            lines.append(L10n.calcHit.localized)
-        } else {
-            lines.append(L10n.calcMiss.localized)
-        }
-
-        // Бросок атаки
-        lines.append(L10n.calcAttackVsDefense.localized(with: attackRoll.total, defenseValue))
-
-        // Разбивка атаки
-        var attackParts: [String] = []
-        attackParts.append(L10n.calcStrength.localized(with: attackRoll.baseStrength))
-
-        if attackRoll.diceRolls.count == 1 {
-            attackParts.append("🎲\(attackRoll.diceRolls[0])")
-        } else {
-            let diceStr = attackRoll.diceRolls.map { "🎲\($0)" }.joined(separator: "+")
-            attackParts.append("(\(diceStr)=\(attackRoll.diceTotal))")
-        }
-
-        if attackRoll.bonusDice > 0 {
-            attackParts.append(L10n.calcBonusDice.localized(with: attackRoll.bonusDice))
-        }
-        if attackRoll.bonusDamage > 0 {
-            attackParts.append(L10n.calcBonusDamage.localized(with: attackRoll.bonusDamage))
-        }
-
-        lines.append("   = \(attackParts.joined(separator: " + "))")
-
-        // Модификаторы
-        for effect in attackRoll.modifiers {
-            lines.append("   \(effect.icon) \(effect.description): \(effect.value > 0 ? "+" : "")\(effect.value)")
-        }
-
-        // Расчёт урона (если попадание)
-        if isHit, let damage = damageCalculation {
-            lines.append(L10n.calcDamage.localized(with: damage.total))
-            lines.append(L10n.calcBaseDamage.localized(with: damage.base))
-
-            for modifier in damage.modifiers {
-                lines.append("   \(modifier.icon) \(modifier.description): \(modifier.value > 0 ? "+" : "")\(modifier.value)")
-            }
-        }
-
-        // Спецэффекты
-        for effect in specialEffects {
-            lines.append("\(effect.icon) \(effect.description)")
-        }
-
-        return lines.joined(separator: "\n")
-    }
-}
-
-/// Attack roll
-public struct AttackRoll {
-    public let baseStrength: Int
-    public let diceRolls: [Int]
-    public let bonusDice: Int
-    public let bonusDamage: Int
-    public let modifiers: [CombatModifier]
-
-    public init(baseStrength: Int, diceRolls: [Int], bonusDice: Int, bonusDamage: Int, modifiers: [CombatModifier]) {
-        self.baseStrength = baseStrength
-        self.diceRolls = diceRolls
-        self.bonusDice = bonusDice
-        self.bonusDamage = bonusDamage
-        self.modifiers = modifiers
-    }
-
-    public var diceTotal: Int {
-        diceRolls.reduce(0, +)
-    }
-
-    public var total: Int {
-        baseStrength + diceTotal + bonusDamage + modifiers.reduce(0) { $0 + $1.value }
-    }
-}
-
-/// Damage calculation
-public struct DamageCalculation {
-    public let base: Int
-    public let modifiers: [CombatModifier]
-
-    public init(base: Int, modifiers: [CombatModifier]) {
-        self.base = base
-        self.modifiers = modifiers
-    }
-
-    public var total: Int {
-        max(1, base + modifiers.reduce(0) { $0 + $1.value })
-    }
-}
-
-/// Combat modifier
-public struct CombatModifier {
-    public let source: ModifierSource
-    public let value: Int
-    public let description: String
-
-    public init(source: ModifierSource, value: Int, description: String) {
-        self.source = source
-        self.value = value
-        self.description = description
-    }
-
-    public var icon: String {
-        switch source {
-        case .heroAbility: return "⭐"
-        case .curse: return "💀"
-        case .card: return "🃏"
-        case .equipment: return "🛡️"
-        case .buff: return "✨"
-        case .debuff: return "⚡"
-        case .spirit: return "👻"
-        case .environment: return "🌍"
-        }
-    }
-}
-
-/// Modifier source
-public enum ModifierSource {
-    case heroAbility
-    case curse
-    case card
-    case equipment
-    case buff
-    case debuff
-    case spirit
-    case environment
-}
-
-/// Combat effect (events in combat)
-public struct CombatEffect {
-    public let icon: String
-    public let description: String
-    public let type: CombatEffectType
-
-    public init(icon: String, description: String, type: CombatEffectType) {
-        self.icon = icon
-        self.description = description
-        self.type = type
-    }
-}
-
-/// Combat effect type
-public enum CombatEffectType {
-    case damage
-    case heal
-    case buff
-    case debuff
-    case summon
-    case special
-}
-
-// MARK: - Fate Attack Result
-
-/// Result of an attack resolved via Fate Deck (Unified Resolution System)
-public struct FateAttackResult {
-    public let baseStrength: Int
-    public let effortBonus: Int
-    public let fateDrawResult: FateDrawResult?
-    public let totalAttack: Int
-    public let defenseValue: Int
-    public let isHit: Bool
-    public let damage: Int
-    public let fateDrawEffects: [FateDrawEffect]
-    public let specialEffects: [CombatEffect]
-
-    public var logDescription: String {
-        let fateValue = fateDrawResult?.effectiveValue ?? 0
-        let cardName = fateDrawResult?.card.name ?? "?"
-        let hitStr = isHit ? "HIT(\(damage) dmg)" : "MISS"
-        return "Attack: \(baseStrength) + effort(\(effortBonus)) + fate[\(cardName)](\(fateValue)) = \(totalAttack) vs \(defenseValue) → \(hitStr)"
-    }
-}
-
-/// Combat calculator - computes attack result with full breakdown
+/// Combat calculator - computes attack result with full breakdown.
 public struct CombatCalculator {
 
     // MARK: - Attack with Fate Deck (Unified Resolution)
@@ -219,7 +21,7 @@ public struct CombatCalculator {
         effortCards: Int,
         monsterDefense: Int,
         bonusDamage: Int,
-        rng: WorldRNG = .shared
+        rng: WorldRNG
     ) -> FateAttackResult {
         let baseStrength = context.strength
         let effortBonus = max(0, effortCards)
@@ -301,7 +103,7 @@ public struct CombatCalculator {
         bonusDice: Int,
         bonusDamage: Int,
         isFirstAttack: Bool,
-        rng: WorldRNG = .shared
+        rng: WorldRNG
     ) -> CombatResult {
 
         var modifiers: [CombatModifier] = []
@@ -396,7 +198,7 @@ public struct CombatCalculator {
         enemyCurrentWill: Int,
         fateDeck: FateDeckManager?,
         worldResonance: Float = 0.0,
-        rng: WorldRNG = .shared
+        rng: WorldRNG
     ) -> SpiritAttackResult {
         let baseStat = max(context.wisdom, context.intelligence, 1)
 
@@ -423,115 +225,4 @@ public struct CombatCalculator {
         )
     }
 
-}
-
-/// Result of a spirit/will attack (Pacify path)
-public struct SpiritAttackResult {
-    public let damage: Int
-    public let baseStat: Int
-    public let fateModifier: Int
-    public let newWill: Int
-    public let isPacified: Bool
-    public let fateDrawEffects: [FateDrawEffect]
-
-    public init(damage: Int, baseStat: Int, fateModifier: Int, newWill: Int, isPacified: Bool, fateDrawEffects: [FateDrawEffect] = []) {
-        self.damage = damage
-        self.baseStat = baseStat
-        self.fateModifier = fateModifier
-        self.newWill = newWill
-        self.isPacified = isPacified
-        self.fateDrawEffects = fateDrawEffects
-    }
-
-    public var logDescription: String {
-        var lines: [String] = []
-        lines.append("✨ Spirit Attack")
-        lines.append("   Base: \(baseStat) + Fate: \(fateModifier > 0 ? "+" : "")\(fateModifier) = \(damage) damage")
-        if isPacified {
-            lines.append("   🕊️ Enemy pacified!")
-        }
-        return lines.joined(separator: "\n")
-    }
-}
-
-// MARK: - Combat Player Context
-
-/// Context struct that replaces Player model for combat calculations
-/// Used by CombatCalculator and CombatModule (Engine-First Architecture)
-public struct CombatPlayerContext {
-    public let health: Int
-    public let maxHealth: Int
-    public let faith: Int
-    public let balance: Int
-    public let strength: Int
-    public let wisdom: Int
-    public let intelligence: Int
-    public let activeCurses: [CurseType]
-    public let heroBonusDice: Int
-    public let heroDamageBonus: Int
-
-    public init(
-        health: Int,
-        maxHealth: Int,
-        faith: Int,
-        balance: Int,
-        strength: Int,
-        wisdom: Int = 0,
-        intelligence: Int = 0,
-        activeCurses: [CurseType],
-        heroBonusDice: Int,
-        heroDamageBonus: Int
-    ) {
-        self.health = health
-        self.maxHealth = maxHealth
-        self.faith = faith
-        self.balance = balance
-        self.strength = strength
-        self.wisdom = wisdom
-        self.intelligence = intelligence
-        self.activeCurses = activeCurses
-        self.heroBonusDice = heroBonusDice
-        self.heroDamageBonus = heroDamageBonus
-    }
-
-    /// Check if player has a specific curse
-    public func hasCurse(_ type: CurseType) -> Bool {
-        return activeCurses.contains(type)
-    }
-
-    /// Get bonus dice from hero ability
-    public func getHeroBonusDice(isFirstAttack: Bool) -> Int {
-        // Hero ability logic would check conditions here
-        // For now, return the stored value
-        return heroBonusDice
-    }
-
-    /// Get bonus damage from hero ability
-    public func getHeroDamageBonus(targetFullHP: Bool) -> Int {
-        // Hero ability logic would check conditions here
-        // For now, return the stored value
-        return heroDamageBonus
-    }
-
-    /// Get damage reduction from hero ability (e.g., Priest vs dark sources)
-    public func getHeroDamageReduction(fromDarkSource: Bool) -> Int {
-        // Hero ability logic would check conditions here
-        return 0
-    }
-
-    /// Create from TwilightGameEngine (Engine-First)
-    public static func from(engine: TwilightGameEngine) -> CombatPlayerContext {
-        CombatPlayerContext(
-            health: engine.player.health,
-            maxHealth: engine.player.maxHealth,
-            faith: engine.player.faith,
-            balance: engine.player.balance,
-            strength: engine.player.strength,
-            wisdom: engine.player.wisdom,
-            intelligence: engine.player.intelligence,
-            activeCurses: engine.player.activeCurses.map { $0.type },
-            heroBonusDice: engine.player.getHeroBonusDice(isFirstAttack: true),
-            heroDamageBonus: engine.player.getHeroDamageBonus(targetFullHP: false)
-        )
-    }
 }

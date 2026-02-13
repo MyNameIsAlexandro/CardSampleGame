@@ -1,3 +1,8 @@
+/// Файл: Packages/EchoEngine/Sources/EchoEngine/Components/CombatStateComponent.swift
+/// Назначение: Содержит реализацию файла CombatStateComponent.swift.
+/// Зона ответственности: Реализует боевой пакет EchoEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import FirebladeECS
 
 public enum EchoCombatPhase: String, Sendable {

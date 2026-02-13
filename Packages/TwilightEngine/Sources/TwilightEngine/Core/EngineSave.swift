@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Core/EngineSave.swift
+/// Назначение: Содержит реализацию файла EngineSave.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 // MARK: - Engine Save Structure
@@ -162,12 +167,12 @@ public struct EngineSave: Codable {
 
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
-        version = try c.decode(Int.self, forKey: .version)
-        savedAt = try c.decode(Date.self, forKey: .savedAt)
-        gameDuration = try c.decode(TimeInterval.self, forKey: .gameDuration)
-        coreVersion = try c.decode(String.self, forKey: .coreVersion)
-        activePackSet = try c.decode([String: String].self, forKey: .activePackSet)
-        formatVersion = try c.decode(Int.self, forKey: .formatVersion)
+        version = try c.decodeIfPresent(Int.self, forKey: .version) ?? EngineSave.currentVersion
+        savedAt = try c.decodeIfPresent(Date.self, forKey: .savedAt) ?? Date(timeIntervalSince1970: 0)
+        gameDuration = try c.decodeIfPresent(TimeInterval.self, forKey: .gameDuration) ?? 0
+        coreVersion = try c.decodeIfPresent(String.self, forKey: .coreVersion) ?? EngineSave.currentCoreVersion
+        activePackSet = try c.decodeIfPresent([String: String].self, forKey: .activePackSet) ?? [:]
+        formatVersion = try c.decodeIfPresent(Int.self, forKey: .formatVersion) ?? EngineSave.currentFormatVersion
         primaryCampaignPackId = try c.decodeIfPresent(String.self, forKey: .primaryCampaignPackId)
         playerName = try c.decode(String.self, forKey: .playerName)
         heroId = try c.decodeIfPresent(String.self, forKey: .heroId)
@@ -188,14 +193,14 @@ public struct EngineSave: Codable {
         mainQuestStage = try c.decode(Int.self, forKey: .mainQuestStage)
         activeQuestIds = try c.decode([String].self, forKey: .activeQuestIds)
         completedQuestIds = try c.decode([String].self, forKey: .completedQuestIds)
-        questStages = try c.decode([String: Int].self, forKey: .questStages)
+        questStages = try c.decodeIfPresent([String: Int].self, forKey: .questStages) ?? [:]
         completedEventIds = try c.decode([String].self, forKey: .completedEventIds)
         eventLog = try c.decode([EventLogEntrySave].self, forKey: .eventLog)
         worldFlags = try c.decode([String: Bool].self, forKey: .worldFlags)
         fateDeckState = try c.decodeIfPresent(FateDeckState.self, forKey: .fateDeckState)
         encounterState = try c.decodeIfPresent(EncounterSaveState.self, forKey: .encounterState)
         rngSeed = try c.decode(UInt64.self, forKey: .rngSeed)
-        rngState = try c.decode(UInt64.self, forKey: .rngState)
+        rngState = try c.decodeIfPresent(UInt64.self, forKey: .rngState) ?? rngSeed
     }
 
     // MARK: - Pack Compatibility Validation

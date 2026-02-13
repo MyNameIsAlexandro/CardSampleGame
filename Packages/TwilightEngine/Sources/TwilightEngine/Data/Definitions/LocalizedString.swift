@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Data/Definitions/LocalizedString.swift
+/// Назначение: Содержит реализацию файла LocalizedString.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 // MARK: - Localized String
@@ -6,7 +11,7 @@ import Foundation
 
 /// A string with multiple language variants, loaded from JSON content.
 /// This enables adding new content without rebuilding the app.
-public struct LocalizedString: Codable, Hashable {
+public struct LocalizedString: Codable, Hashable, Sendable {
     // MARK: - Supported Languages
 
     /// English text

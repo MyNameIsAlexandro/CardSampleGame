@@ -1,8 +1,13 @@
+/// Файл: Models/AchievementDefinition.swift
+/// Назначение: Содержит реализацию файла AchievementDefinition.swift.
+/// Зона ответственности: Описывает предметные модели и их инварианты.
+/// Контекст: Используется в приложении CardSampleGame и связанных потоках выполнения.
+
 import Foundation
 
 // MARK: - Achievement Category
 
-enum AchievementCategory: String, Codable, CaseIterable {
+enum AchievementCategory: String, Codable, CaseIterable, Sendable {
     case combat
     case exploration
     case knowledge
@@ -11,13 +16,13 @@ enum AchievementCategory: String, Codable, CaseIterable {
 
 // MARK: - Achievement Definition
 
-struct AchievementDefinition: Identifiable {
+struct AchievementDefinition: Identifiable, Sendable {
     let id: String
     let titleKey: String      // L10n key
     let descriptionKey: String // L10n key
     let icon: String           // SF Symbol name
     let category: AchievementCategory
-    let condition: (PlayerProfile) -> Bool
+    let condition: @Sendable (PlayerProfile) -> Bool
 
     // MARK: - All Achievements (~15)
 

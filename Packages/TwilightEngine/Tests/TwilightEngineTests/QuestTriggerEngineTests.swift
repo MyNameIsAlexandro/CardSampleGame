@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Tests/TwilightEngineTests/QuestTriggerEngineTests.swift
+/// Назначение: Содержит реализацию файла QuestTriggerEngineTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import TwilightEngine
 
@@ -7,7 +12,7 @@ final class QuestTriggerEngineTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        engine = QuestTriggerEngine(contentRegistry: .shared)
+        engine = QuestTriggerEngine(contentRegistry: TestContentLoader.sharedLoadedRegistry())
     }
 
     override func tearDown() {

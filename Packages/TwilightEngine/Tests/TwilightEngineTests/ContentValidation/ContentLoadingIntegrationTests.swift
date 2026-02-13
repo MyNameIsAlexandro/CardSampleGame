@@ -1,5 +1,10 @@
+/// Файл: Packages/TwilightEngine/Tests/TwilightEngineTests/ContentValidation/ContentLoadingIntegrationTests.swift
+/// Назначение: Содержит реализацию файла ContentLoadingIntegrationTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
-@testable import TwilightEngine
+@_spi(Testing) @testable import TwilightEngine
 
 /// Integration tests for content loading with real pack validation
 final class ContentLoadingIntegrationTests: XCTestCase {

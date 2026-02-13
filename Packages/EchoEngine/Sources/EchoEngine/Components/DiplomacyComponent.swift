@@ -1,3 +1,8 @@
+/// Файл: Packages/EchoEngine/Sources/EchoEngine/Components/DiplomacyComponent.swift
+/// Назначение: Содержит реализацию файла DiplomacyComponent.swift.
+/// Зона ответственности: Реализует боевой пакет EchoEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import FirebladeECS
 
 /// Tracks the player's current attack track and escalation/deescalation state.

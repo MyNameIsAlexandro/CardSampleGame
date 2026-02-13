@@ -1,3 +1,8 @@
+/// Файл: Views/Components/FateCardChoiceSheet.swift
+/// Назначение: Содержит реализацию файла FateCardChoiceSheet.swift.
+/// Зона ответственности: Ограничен задачами слоя представления и пользовательского интерфейса.
+/// Контекст: Используется в приложении CardSampleGame и связанных потоках выполнения.
+
 import SwiftUI
 import TwilightEngine
 
@@ -7,7 +12,7 @@ struct FateCardChoiceSheet: View {
     let onChoose: (Int) -> Void
 
     @State private var timeRemaining: Int = 3
-    @State private var timer: Timer?
+    @State private var countdownTask: Task<Void, Never>?
 
     var body: some View {
         VStack(spacing: Spacing.lg) {
@@ -44,23 +49,33 @@ struct FateCardChoiceSheet: View {
                 .monospacedDigit()
         }
         .padding(Spacing.xl)
-        .onAppear { startTimer() }
-        .onDisappear { timer?.invalidate() }
+        .onAppear { startCountdown() }
+        .onDisappear {
+            countdownTask?.cancel()
+            countdownTask = nil
+        }
     }
 
-    private func startTimer() {
-        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
-            if timeRemaining > 1 {
+    private func startCountdown() {
+        countdownTask?.cancel()
+        timeRemaining = 3
+
+        countdownTask = Task { @MainActor in
+            while timeRemaining > 1 && !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                guard !Task.isCancelled else { return }
                 timeRemaining -= 1
-            } else {
-                timer?.invalidate()
-                choose(0) // auto-select safe option
+            }
+
+            if !Task.isCancelled {
+                choose(0)
             }
         }
     }
 
     private func choose(_ index: Int) {
-        timer?.invalidate()
+        countdownTask?.cancel()
+        countdownTask = nil
         onChoose(index)
     }
 }

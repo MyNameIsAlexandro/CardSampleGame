@@ -1,3 +1,8 @@
+/// Файл: Packages/PackEditorApp/Sources/PackEditorApp/Views/Shared/DictEditor.swift
+/// Назначение: Содержит реализацию файла DictEditor.swift.
+/// Зона ответственности: Изолирован своей предметной ответственностью в рамках модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import SwiftUI
 
 /// Editable view for [String: Int] dictionaries.

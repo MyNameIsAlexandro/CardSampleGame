@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Encounter/EncounterSaveState.swift
+/// Назначение: Содержит реализацию файла EncounterSaveState.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 /// Serializable snapshot of an in-progress encounter for mid-combat save/resume.

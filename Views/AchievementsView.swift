@@ -1,3 +1,8 @@
+/// Файл: Views/AchievementsView.swift
+/// Назначение: Содержит реализацию файла AchievementsView.swift.
+/// Зона ответственности: Ограничен задачами слоя представления и пользовательского интерфейса.
+/// Контекст: Используется в приложении CardSampleGame и связанных потоках выполнения.
+
 import SwiftUI
 
 struct AchievementsView: View {

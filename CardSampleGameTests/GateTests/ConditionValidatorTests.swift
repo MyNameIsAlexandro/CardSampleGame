@@ -1,3 +1,8 @@
+/// Файл: CardSampleGameTests/GateTests/ConditionValidatorTests.swift
+/// Назначение: Содержит реализацию файла ConditionValidatorTests.swift.
+/// Зона ответственности: Фиксирует проверяемый контракт и не содержит production-логики.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import TwilightEngine
 
@@ -85,27 +90,7 @@ final class ConditionValidatorTests: XCTestCase {
     // MARK: - Integration Test: All Pack Conditions Valid
 
     func testAllPackConditionsAreValid() throws {
-        // Use shared registry (packs are loaded globally in tests)
-        let registry = ContentRegistry.shared
-
-        // Ensure packs are loaded
-        guard !registry.loadedPackIds.isEmpty else {
-            // Load packs if not already loaded
-            guard let storyPackURL = TestContentLoader.storyPackURL,
-                  let charPackURL = TestContentLoader.characterPackURL else {
-                XCTFail("GATE TEST FAILURE: Could not locate content packs for validation")
-                return
-            }
-
-            do {
-                try registry.loadPack(from: storyPackURL)
-                try registry.loadPack(from: charPackURL)
-            } catch {
-                XCTFail("GATE TEST FAILURE: Failed to load packs: \(error)")
-                return
-            }
-            return try testAllPackConditionsAreValid()
-        }
+        let registry = try TestContentLoader.makeStandardRegistry()
 
         // Validate all loaded packs
         for (packId, pack) in registry.loadedPacks {

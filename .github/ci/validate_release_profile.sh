@@ -86,6 +86,7 @@ case "${profile}" in
       "content_json_lint:300"
       "repo_hygiene:120"
       "docs_sync:120"
+      "legacy_cleanup:120"
     )
     ;;
   rc_full)
@@ -104,6 +105,7 @@ case "${profile}" in
       "content_json_lint:300"
       "repo_hygiene:120"
       "docs_sync:120"
+      "legacy_cleanup:120"
     )
     ;;
   *)

@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Cards/CardFactory.swift
+/// Назначение: Содержит реализацию файла CardFactory.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 // MARK: - Card Factory
@@ -11,21 +16,17 @@ import Foundation
 /// IMPORTANT: No fallback to CardRegistry or any code-based content sources.
 /// All card creation must go through ContentRegistry (pack-driven).
 public final class CardFactory {
-
-    // MARK: - Singleton
-
-    /// Shared singleton instance using the default ContentRegistry.
-    public static let shared = CardFactory()
-
     // MARK: - Dependencies
 
     private let contentRegistry: ContentRegistry
+    private let localizationManager: LocalizationManager
 
     // MARK: - Initialization
 
     /// Creates a CardFactory backed by the given content registry.
-    public init(contentRegistry: ContentRegistry = .shared) {
+    public init(contentRegistry: ContentRegistry, localizationManager: LocalizationManager) {
         self.contentRegistry = contentRegistry
+        self.localizationManager = localizationManager
     }
 
     // MARK: - Card Creation
@@ -36,7 +37,7 @@ public final class CardFactory {
     public func getCard(id: String) -> Card? {
         // ContentRegistry is the ONLY source of cards (pack-driven)
         if let cardDef = contentRegistry.getCard(id: id) {
-            return cardDef.toCard()
+            return cardDef.toCard(localizationManager: localizationManager)
         }
         return nil
     }
@@ -52,7 +53,7 @@ public final class CardFactory {
     /// - Returns: Array of all runtime Card instances
     public func getAllCards() -> [Card] {
         // ContentRegistry is the ONLY source of cards (pack-driven)
-        return contentRegistry.getAllCards().map { $0.toCard() }
+        return contentRegistry.getAllCards().map { $0.toCard(localizationManager: localizationManager) }
     }
 
     /// Get cards by type
@@ -60,7 +61,7 @@ public final class CardFactory {
     /// - Returns: Array of runtime Card instances of that type
     public func getCards(ofType type: CardType) -> [Card] {
         // ContentRegistry is the ONLY source of cards (pack-driven)
-        return contentRegistry.getCards(ofType: type).map { $0.toCard() }
+        return contentRegistry.getCards(ofType: type).map { $0.toCard(localizationManager: localizationManager) }
     }
 
     // MARK: - Starting Decks
@@ -72,7 +73,7 @@ public final class CardFactory {
         // ContentRegistry is the ONLY source of starting decks (pack-driven)
         let cards = contentRegistry.getStartingDeck(forHero: heroId)
         if !cards.isEmpty {
-            return cards.map { $0.toCard() }
+            return cards.map { $0.toCard(localizationManager: localizationManager) }
         }
 
         // Fallback: generic starter deck from ContentRegistry
@@ -98,7 +99,7 @@ public final class CardFactory {
 
         // Get all enemies from ContentRegistry
         for enemy in contentRegistry.getAllEnemies() {
-            deck.append(enemy.toCard())
+            deck.append(enemy.toCard(localizationManager: localizationManager))
         }
 
         return deck
@@ -118,7 +119,7 @@ public final class CardFactory {
                 if card.rarity == .legendary { return false }
                 return true
             }
-            .map { $0.toCard() }
+            .map { $0.toCard(localizationManager: localizationManager) }
     }
 
     // MARK: - Character Cards
@@ -174,7 +175,7 @@ public final class CardFactory {
     /// - Returns: Boss card or nil
     public func createBoss(enemyId: String) -> Card? {
         if let enemy = contentRegistry.getEnemy(id: enemyId) {
-            return enemy.toCard()
+            return enemy.toCard(localizationManager: localizationManager)
         }
         return nil
     }

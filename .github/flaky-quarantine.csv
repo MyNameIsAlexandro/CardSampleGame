@@ -1,0 +1,6 @@
+# Flaky test quarantine registry.
+# Rules:
+# - Every entry must have explicit owner + expiry + issue URL.
+# - Expired entries fail CI.
+# - Keep this list minimal and temporary.
+test_id,owner,expires_on,issue_url,reason,suite,status

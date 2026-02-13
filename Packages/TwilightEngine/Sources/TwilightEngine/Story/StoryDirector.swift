@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Story/StoryDirector.swift
+/// Назначение: Содержит реализацию файла StoryDirector.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 // MARK: - Story Director Protocol
@@ -42,126 +47,6 @@ public protocol StoryDirector {
     func checkDefeatConditions(context: StoryContext) -> DefeatCheck
 }
 
-// MARK: - Story Context
-
-/// All context needed for story decisions
-public struct StoryContext {
-    // World State
-    let currentRegionId: String
-    let regionStates: [String: RegionStateType]
-    let worldTension: Int
-    let currentDay: Int
-
-    // Player State
-    let playerHealth: Int
-    let playerFaith: Int
-    let playerBalance: Int
-
-    // Quest State
-    let activeQuestIds: Set<String>
-    let completedQuestIds: Set<String>
-    let questObjectiveStates: [String: Set<String>]  // questId -> completed objective IDs
-
-    // Flags & History
-    let worldFlags: [String: Bool]
-    let completedEventIds: Set<String>
-    let visitedRegionIds: Set<String>
-
-    // Campaign Info
-    let campaignId: String
-    let actNumber: Int
-}
-
-// MARK: - Story Action
-
-/// Actions that affect story progression
-public enum StoryAction {
-    case visitedRegion(regionId: String)
-    case completedEvent(eventId: String, choiceId: String)
-    case defeatedEnemy(enemyId: String)
-    case dayPassed(newDay: Int)
-    case tensionChanged(newTension: Int)
-    case flagSet(flagName: String, value: Bool)
-    case anchorChanged(regionId: String, newIntegrity: Int)
-}
-
-// MARK: - Story Update
-
-/// Result of story processing - what changed
-public struct StoryUpdate {
-    /// Quest progress updates
-    let questUpdates: [QuestProgressUpdate]
-
-    /// Newly unlocked events
-    let unlockedEvents: [String]
-
-    /// Events that became unavailable
-    let lockedEvents: [String]
-
-    /// World flags to set
-    let flagsToSet: [String: Bool]
-
-    /// Narrative messages to display
-    let narrativeMessages: [LocalizedString]
-
-    /// If set, game has ended
-    let gameEnding: GameEnding?
-
-    public static let none = StoryUpdate(
-        questUpdates: [],
-        unlockedEvents: [],
-        lockedEvents: [],
-        flagsToSet: [:],
-        narrativeMessages: [],
-        gameEnding: nil
-    )
-}
-
-// MARK: - Game Ending
-
-/// How the game ended
-public enum GameEnding {
-    case victory(endingId: String, description: LocalizedString)
-    case defeat(reason: DefeatReason, description: LocalizedString)
-}
-
-public enum DefeatReason {
-    case healthZero
-    case tensionMax
-    case questFailed
-    case anchorDestroyed
-}
-
-// MARK: - Victory/Defeat Checks
-
-public struct VictoryCheck {
-    let isVictory: Bool
-    let endingId: String?
-    let description: LocalizedString?
-}
-
-public struct DefeatCheck {
-    let isDefeat: Bool
-    let reason: DefeatReason?
-    let description: LocalizedString?
-}
-
-// MARK: - Event Pool
-
-/// Pool of events for a specific context
-public struct EventPool {
-    let id: String
-    let events: [EventDefinition]
-    let selectionStrategy: EventSelectionStrategy
-}
-
-public enum EventSelectionStrategy {
-    case weighted      // Use event weights
-    case sequential    // In order (for story events)
-    case random        // Pure random
-    case priority      // Highest priority first
-}
-
 // MARK: - Default Implementation
 
 /// Base implementation with common logic
@@ -170,7 +55,7 @@ public class BaseStoryDirector: StoryDirector {
     let contentRegistry: ContentRegistry
     let questTriggerEngine: QuestTriggerEngine
 
-    init(contentRegistry: ContentRegistry = .shared) {
+    init(contentRegistry: ContentRegistry) {
         self.contentRegistry = contentRegistry
         self.questTriggerEngine = QuestTriggerEngine(contentRegistry: contentRegistry)
     }

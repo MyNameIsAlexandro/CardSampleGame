@@ -1,7 +1,9 @@
 # Testing Guide
 
-**Last updated:** 2026-02-09  
+**Last updated:** 2026-02-12  
+**Phase 2 checkpoint:** Epic 66  
 **Primary QA source of truth:** `Docs/QA/QUALITY_CONTROL_MODEL.md`
+**Policy sync:** `CLAUDE.md` v4.1 engineering contract
 
 This guide is the operational runner for day-to-day checks.  
 Policy, contracts, and gate definitions live in `QUALITY_CONTROL_MODEL.md`.
@@ -36,6 +38,15 @@ xcodebuild test -project CardSampleGame.xcodeproj \
   -only-testing:CardSampleGameTests/SaveLoadTests \
   -only-testing:CardSampleGameTests/AuditArchitectureBoundaryGateTests \
   -only-testing:CardSampleGameTests/AuditGateTests
+
+# Resume-path localization smoke (external combat bridge relocalization)
+xcodebuild test -project CardSampleGame.xcodeproj \
+  -scheme CardSampleGame \
+  -destination "$(bash .github/ci/select_ios_destination.sh --scheme CardSampleGame)" \
+  -only-testing:CardSampleGameTests/SaveLoadTests/testEchoEncounterBridgeRelocalizesResumeDeckCardsFromRegistry
+
+# Optional: enable verbose loader diagnostics for local debugging
+TWILIGHT_TEST_VERBOSE=1 swift test --package-path Packages/TwilightEngine --filter GameplayFlowTests
 ```
 
 ## 3. CI Gate Mapping
@@ -57,14 +68,19 @@ xcodebuild test -project CardSampleGame.xcodeproj \
   - unit/view suites (`HeroRegistryTests`, `SaveLoadTests`, `ContentManagerTests`, `ContentRegistryTests`, `PackLoaderTests`, `HeroPanelTests`),
   - audit core suite in `AuditGateTests` (asset/content/save/runtime contracts and journal/runtime boundary checks),
   - `CodeHygieneTests` enforces hard `<=600` line limit and `<=5` public types per file for first-party Swift code (excluding vendor/build artifacts; no legacy exemptions),
+  - `CodeHygieneTests.testFirstPartySwiftFilesHaveCanonicalFileHeaders` enforces mandatory 4-line Russian file-header contract for first-party Swift files,
   - `AuditGateTests.testEngineJournalUsesCoreStatePrimitives` enforces core journal/resonance mutation primitives (`resolveRegionName`, `appendEventLogEntry`, `setWorldResonance`) and blocks fallback to UI mirror state access.
   - `AuditGateTests.testCardSampleGameTestsDoesNotLinkTwilightEngineDirectly` blocks direct `TwilightEngine` linkage in `CardSampleGameTests` target to avoid host+test runtime duplication warnings (`Class ... is implemented in both`).
   - audit architecture suite in `AuditArchitectureBoundaryGateTests` is an active split gate (`app_gate_2b_audit_architecture`) for static boundary enforcement (Epic 29/33/34/36/42/43: critical state assignment scan, RNG-service access scan, arena sandbox gate + `UInt64.random` ban, explicit `.startCombat/.commitExternalCombat/EchoCombatBridge.applyCombatResult` allowlists, direct `.combatFinish` ban, combat-bridge no-extension gate, ViewModel/model UI-import bans, ViewModel→View type-reference ban, Engine/Core allowlist scan, and anti-duplicate audit test-name gate).
   - `AuditArchitectureBoundaryGateTests.testEngineInvalidActionUsesTypedReasonCodes` blocks regression to `invalidAction(reason: String)` and raw string reason literals in `Engine/Core`.
+  - `SaveLoadTests.testEchoEncounterBridgeRelocalizesResumeDeckCardsFromRegistry` enforces resume-path relocalization for external-combat payload display fields via active `ContentRegistry` + `LocalizationManager` (prevents stale EN/service-token leaks in RU UI).
+  - `AuditArchitectureBoundaryGateTests.testHeroAndAbilityIconsAreNotRenderedAsRawTokens` blocks icon/service-token rendering as plain `Text`.
   - Epic 35 external-combat stress determinism checks in `ExternalCombatPersistenceTests` (resume fingerprint stability across repeated save/load + interrupted-commit parity after resume cycles; event lock clears consistently on combat commit).
+  - Epic 64 test observability hardening keeps loader/runtime debug traces quiet by default; set `TWILIGHT_TEST_VERBOSE=1` to re-enable detailed diagnostics in local debug runs.
 - **Destination/tooling stability helpers**:
   - `.github/ci/select_ios_destination.sh` resolves a concrete simulator `name+OS` from current Xcode runtime set.
-  - `.github/ci/run_xcodebuild.sh` uses `xcpretty` when available and falls back to plain `xcodebuild` otherwise.
+  - `.github/ci/run_xcodebuild.sh` uses `xcpretty` when available, falls back to plain `xcodebuild`, and auto-retries transient simulator/bootstrap failures for test invocations (`test`, `build-for-testing`, `test-without-building`).
+    - knobs: `XCODEBUILD_MAX_ATTEMPTS` (default: `2` for test invocations, `1` otherwise), `XCODEBUILD_RETRY_DELAY_SEC` (default: `8`).
   - `.github/ci/clean_test_artifacts.sh` removes stale local/CI test artifacts before gate execution.
   - `.github/ci/preflight_ci_environment.sh` writes `toolchain_snapshot.md` into `TestResults/QualityDashboard`.
 - **RC profile enforcement (Epic 38/39)**:
@@ -166,6 +182,9 @@ bash .github/ci/validate_release_profile.sh \
 # Unified local release check
 bash .github/ci/run_release_check.sh TestResults/QualityDashboard CardSampleGame
 
+# Unified local release check for dirty working tree (snapshot mode)
+bash .github/ci/run_release_check_snapshot.sh TestResults/QualityDashboard CardSampleGame
+
 # Pre-check only: fail on tracked working tree drift
 bash .github/ci/validate_repo_hygiene.sh --require-clean-tree
 ```
@@ -183,13 +202,14 @@ bash .github/ci/validate_repo_hygiene.sh --require-clean-tree
 Before closing dependency-related tasks:
 
 ```bash
-bash .github/ci/validate_repo_hygiene.sh
+bash .github/ci/validate_repo_hygiene.sh --require-clean-tree
 ```
 
 This check enforces:
 - single canonical lockfile path (`CardSampleGame.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved`),
 - no tracked transient artifacts (`xcresult`, local logs, temporary reports).
-- in hard mode (`--require-clean-tree`), no tracked working-tree changes.
+- no tracked working-tree changes.
+- for local diagnostics on a dirty tree, use `run_release_check_snapshot.sh` (creates a temporary clean snapshot worktree and preserves hard gates).
 
 ## 9.1 Documentation Sync Gate (Epic 48)
 
@@ -197,7 +217,10 @@ This check enforces:
   - `.github/ci/validate_docs_sync.sh`
 - Enforced contracts:
   - determinism/scheme smoke tokens in workflow vs docs,
+  - architecture spec sync via `Docs/Technical/ENGINE_ARCHITECTURE.md`,
   - epic status markers (`Epic 28`, `Epic 30`, `Epic 47`, `Epic 48`) in ledger,
+  - date parity across QA/testing/architecture/ledger source-of-truth docs,
+  - `Phase 2 checkpoint` parity across QA/testing/architecture docs + ledger `DONE` marker,
   - dynamic backlog epoch marker parity (`Pending backlog (post-Epic N)` with latest `DONE` epic).
 - RC implication:
   - `docs_sync` is required in `rc_build_content` and therefore in `rc_full`.
@@ -206,10 +229,48 @@ This check enforces:
 bash .github/ci/validate_docs_sync.sh
 ```
 
+## 9.2 Legacy Cleanup Gate (Epic 57)
+
+- Validator:
+  - `.github/ci/validate_legacy_cleanup.sh`
+- Enforced contracts:
+  - no TODO/FIXME markers in first-party sources,
+  - bridge/adapter entry points must have call-sites (no orphaned adapter files),
+  - compatibility markers `COMPAT_REMOVE_BY: YYYY-MM-DD` must not be expired.
+- RC implication:
+  - `legacy_cleanup` is required in `rc_build_content` and therefore in `rc_full`.
+
+```bash
+bash .github/ci/validate_legacy_cleanup.sh
+```
+
+## 9.3 File Header Contract Gate (Epic 68)
+
+- Enforced by:
+  - `CardSampleGameTests/GateTests/CodeHygieneTests+XcodeProjectStructure.swift`
+  - `CodeHygieneTests.testFirstPartySwiftFilesHaveCanonicalFileHeaders`
+- Contract:
+  - every first-party Swift file must start with:
+    - `/// Файл: <relative path>`
+    - `/// Назначение: ...`
+    - `/// Зона ответственности: ...`
+    - `/// Контекст: ...`
+- Scope:
+  - includes app/tests/packages first-party source,
+  - excludes vendor/build/internal agent paths (`Packages/ThirdParty`, `.build`, `.codex_home`) and `Package.swift` manifests (tools-version must be first line).
+
+```bash
+xcodebuild test -project CardSampleGame.xcodeproj \
+  -scheme CardSampleGame \
+  -destination "$(bash .github/ci/select_ios_destination.sh --scheme CardSampleGame)" \
+  -only-testing:CardSampleGameTests/CodeHygieneTests/testFirstPartySwiftFilesHaveCanonicalFileHeaders
+```
+
 ## 10. Change Discipline
 
 - Add or update tests in the same PR as behavior changes.
 - Keep `QUALITY_CONTROL_MODEL.md` and epic status docs in sync.
+- Keep `CLAUDE.md`, `QUALITY_CONTROL_MODEL.md`, and this guide in sync when contract-level rules change.
 - Do not soften gate failures with skips in mandatory suites.
 - Runtime semantic assertions must be locale-agnostic (`outcome`/state changes), not localized narrative substring matching.
 - For config-driven engine behavior, tests should assert against active balance/config values, not hardcoded constants.

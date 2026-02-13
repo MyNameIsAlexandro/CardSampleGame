@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Data/Definitions/RegionDefinition.swift
+/// Назначение: Содержит реализацию файла RegionDefinition.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 // MARK: - Region Definition
@@ -80,7 +85,7 @@ public struct RegionDefinition: GameDefinition {
 // MARK: - Region State Types
 
 /// Possible states for a region
-public enum RegionStateType: String, Codable, Hashable, CaseIterable {
+public enum RegionStateType: String, Codable, Hashable, CaseIterable, Sendable {
     case stable = "stable"
     case borderland = "borderland"
     case breach = "breach"
@@ -112,4 +117,3 @@ public enum RegionStateType: String, Codable, Hashable, CaseIterable {
         }
     }
 }
-

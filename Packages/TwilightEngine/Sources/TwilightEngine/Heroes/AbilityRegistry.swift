@@ -1,13 +1,13 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Heroes/AbilityRegistry.swift
+/// Назначение: Содержит реализацию файла AbilityRegistry.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 /// Реестр способностей героев - data-driven загрузка из JSON
 /// Заменяет хардкод в HeroAbility.forAbilityId()
 public final class AbilityRegistry {
-
-    // MARK: - Singleton
-
-    public static let shared = AbilityRegistry()
-
     // MARK: - Storage
 
     /// Зарегистрированные способности по ID
@@ -233,4 +233,3 @@ extension AbilityTrigger {
         return mapping[string]
     }
 }
-

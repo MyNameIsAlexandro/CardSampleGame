@@ -1,3 +1,8 @@
+/// Файл: Packages/EchoEngine/Sources/EchoEngine/Services/FateResolutionService.swift
+/// Назначение: Содержит реализацию файла FateResolutionService.swift.
+/// Зона ответственности: Реализует боевой пакет EchoEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import TwilightEngine
 
 /// Rich result from drawing and resolving a Fate Card with keyword interpretation.

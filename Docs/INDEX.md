@@ -100,6 +100,8 @@
 | Документ | Описание |
 |----------|----------|
 | **INDEX.md** | Вы здесь |
+| [SPRINT.md](./SPRINT.md) | Спринт-борд (Epic 1–14) + ссылка на Phase 2 |
+| [plans/2026-02-07-audit-refactor-phase2-epics.md](./plans/2026-02-07-audit-refactor-phase2-epics.md) | Леджер эпиков Phase 2 (audit/refactor) + бэклог (Epic 15+) |
 
 ---
 

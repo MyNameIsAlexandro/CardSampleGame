@@ -1,3 +1,8 @@
+/// Файл: Packages/EchoScenes/Sources/EchoScenes/CombatSceneTheme.swift
+/// Назначение: Содержит реализацию файла CombatSceneTheme.swift.
+/// Зона ответственности: Реализует визуально-сценовый слой EchoScenes.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import SpriteKit
 
 /// Design system colors for SpriteKit combat scenes.

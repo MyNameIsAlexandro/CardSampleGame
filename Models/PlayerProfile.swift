@@ -1,8 +1,13 @@
+/// Файл: Models/PlayerProfile.swift
+/// Назначение: Содержит реализацию файла PlayerProfile.swift.
+/// Зона ответственности: Описывает предметные модели и их инварианты.
+/// Контекст: Используется в приложении CardSampleGame и связанных потоках выполнения.
+
 import Foundation
 
 // MARK: - Knowledge Level
 
-enum KnowledgeLevel: Int, Codable, Equatable, Comparable, CaseIterable {
+enum KnowledgeLevel: Int, Codable, Equatable, Comparable, CaseIterable, Sendable {
     case unknown = 0
     case encountered = 1  // 1st meeting
     case studied = 2      // 3 encounters
@@ -15,7 +20,7 @@ enum KnowledgeLevel: Int, Codable, Equatable, Comparable, CaseIterable {
 
 // MARK: - Creature Knowledge
 
-struct CreatureKnowledge: Codable, Equatable {
+struct CreatureKnowledge: Codable, Equatable, Sendable {
     var level: KnowledgeLevel = .unknown
     var timesEncountered: Int = 0
     var timesDefeated: Int = 0
@@ -55,7 +60,7 @@ struct CreatureKnowledge: Codable, Equatable {
 
 // MARK: - Combat Lifetime Stats
 
-struct CombatLifetimeStats: Codable, Equatable {
+struct CombatLifetimeStats: Codable, Equatable, Sendable {
     var totalFights: Int = 0
     var totalVictories: Int = 0
     var totalDefeats: Int = 0
@@ -69,20 +74,20 @@ struct CombatLifetimeStats: Codable, Equatable {
 
 // MARK: - Achievement Record
 
-struct AchievementRecord: Codable, Equatable {
+struct AchievementRecord: Codable, Equatable, Sendable {
     let achievementId: String
     let unlockedAt: Date
 }
 
 // MARK: - Meta State (reserved for future meta-game)
 
-struct MetaState: Codable, Equatable {
+struct MetaState: Codable, Equatable, Sendable {
     // Empty for now — architectural placeholder
 }
 
 // MARK: - Player Profile
 
-struct PlayerProfile: Codable, Equatable {
+struct PlayerProfile: Codable, Equatable, Sendable {
     var creatureKnowledge: [String: CreatureKnowledge] = [:]
     var combatStats: CombatLifetimeStats = CombatLifetimeStats()
     var achievements: [String: AchievementRecord] = [:]
@@ -127,7 +132,7 @@ struct PlayerProfile: Codable, Equatable {
 
 // MARK: - Encounter Outcome Type (for profile tracking)
 
-enum EncounterOutcomeType: String, Codable {
+enum EncounterOutcomeType: String, Codable, Sendable {
     case defeated   // player killed enemy
     case pacified   // player pacified enemy
     case lost       // player lost

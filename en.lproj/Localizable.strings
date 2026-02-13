@@ -712,6 +712,17 @@
 
 // MARK: - Action Errors
 "error.invalid.action" = "Invalid action: %@";
+"error.invalid.action.no_current_region" = "no current region";
+"error.invalid.action.market_not_initialized" = "market is not initialized";
+"error.invalid.action.card_not_in_market" = "card is not in market";
+"error.invalid.action.unknown_card" = "unknown card id: %@";
+"error.invalid.action.defile_requires_dark_alignment" = "only dark-aligned heroes can defile anchors";
+"error.invalid.action.anchor_already_dark" = "anchor is already dark";
+"error.invalid.action.event_not_combat_encounter" = "event is not a combat encounter";
+"error.invalid.action.fate_deck_unavailable" = "fate deck is unavailable";
+"error.invalid.action.mini_game_unavailable" = "mini-game is unavailable";
+"error.invalid.action.event_not_mini_game" = "event is not a mini-game";
+"error.invalid.action.mini_game_challenge_mismatch" = "mini-game challenge does not match the active event";
 "error.region.not.accessible" = "Region %@ is not accessible";
 "error.region.not.neighbor" = "Region %@ is not a neighbor";
 "error.action.not.available" = "%@ not available in %@ region";
@@ -973,6 +984,8 @@
 "gameover.defeat.title" = "Defeat";
 "gameover.victory.message" = "The world is saved. Your journey ends in triumph.";
 "gameover.defeat.reason" = "Reason: %@";
+"gameover.defeat.reason.world.tension.max" = "World tension reached maximum";
+"gameover.defeat.reason.hero.died" = "The hero has fallen";
 "gameover.return.to.menu" = "Return to Menu";
 "gameover.stats" = "Journey Statistics";
 "gameover.days.survived" = "Days survived: %d";

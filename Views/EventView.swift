@@ -1,11 +1,15 @@
+/// Файл: Views/EventView.swift
+/// Назначение: Содержит реализацию файла EventView.swift.
+/// Зона ответственности: Ограничен задачами слоя представления и пользовательского интерфейса.
+/// Контекст: Используется в приложении CardSampleGame и связанных потоках выполнения.
+
 import SwiftUI
 import TwilightEngine
 import EchoEngine
 import EchoScenes
 
-/// Event view with Engine-First Architecture
-/// - All state mutations go through engine.performAction()
-/// - UI reads state from engine properties
+/// Экран события кампании.
+/// Все изменения состояния проходят через action-пайплайн движка, UI только отображает состояние.
 struct EventView: View {
     // MARK: - Engine-First Architecture
     @ObservedObject var vm: GameEngineObservable
@@ -109,16 +113,16 @@ struct EventView: View {
                         resonance: config.resonance,
                         seed: config.seed,
                         onCombatEndWithResult: { (result: EchoCombatResult) in
-                            vm.engine.applyEchoCombatResult(result)
+                            _ = EchoCombatBridge.applyCombatResult(result, to: vm.engine)
                             let isVictory: Bool
                             if case .victory = result.outcome { isVictory = true } else { isVictory = false }
-                            let stats = CombatView.CombatStats(
+                            let stats = AppCombatStats(
                                 turnsPlayed: result.turnsPlayed,
                                 totalDamageDealt: result.totalDamageDealt,
                                 totalDamageTaken: result.totalDamageTaken,
                                 cardsPlayed: result.cardsPlayed
                             )
-                            let outcome: CombatView.CombatOutcome = isVictory
+                            let outcome: AppCombatOutcome = isVictory
                                 ? .victory(stats: stats)
                                 : .defeat(stats: stats)
                             handleCombatEnd(outcome: outcome)
@@ -354,37 +358,25 @@ struct EventView: View {
 
     // MARK: - Combat Management
 
-    func initiateCombat(choice: EventChoice) {
-        guard let monster = event.monsterCard else { return }
-
-        // Engine-First: Get combat context from engine
-        let regionState = vm.engine.currentRegion?.state ?? .stable
-        let combatContext = CombatContext(
-            regionState: regionState,
-            playerCurses: vm.engine.player.activeCurses.map { $0.type }
-        )
-
-        // Создать врага с модификаторами региона
-        var adjustedMonster = monster
-        if let baseHealth = monster.health {
-            adjustedMonster.health = combatContext.adjustedEnemyHealth(baseHealth)
-        }
-        if let basePower = monster.power {
-            adjustedMonster.power = combatContext.adjustedEnemyPower(basePower)
-        }
-        if let baseDefense = monster.defense {
-            adjustedMonster.defense = combatContext.adjustedEnemyDefense(baseDefense)
+    func initiateCombat(choice _: EventChoice) {
+        let actionResult = vm.engine.performAction(.startCombat(encounterId: event.id))
+        guard actionResult.success else {
+            resultMessage = actionResult.error?.localizedDescription ?? ActionError.noActiveCombat.localizedDescription
+            showingResult = true
+            return
         }
 
-        // Setup combat in engine first, then show fullScreenCover
-        vm.engine.combat.setupCombatEnemy(adjustedMonster)
+        guard let config = EchoEncounterBridge.makeCombatConfig(engine: vm.engine) else {
+            resultMessage = ActionError.noActiveCombat.localizedDescription
+            showingResult = true
+            return
+        }
 
-        // Always use SpriteKit combat — build config directly from Card
-        echoCombatConfig = vm.engine.makeEchoCombatConfig(for: adjustedMonster)
+        echoCombatConfig = config
         showingCombat = true
     }
 
-    func handleCombatEnd(outcome: CombatView.CombatOutcome) {
+    func handleCombatEnd(outcome: AppCombatOutcome) {
         // Apply non-combat consequences from the choice (if victory)
         if outcome.isVictory, let choice = selectedChoice {
             onChoiceSelected(choice)

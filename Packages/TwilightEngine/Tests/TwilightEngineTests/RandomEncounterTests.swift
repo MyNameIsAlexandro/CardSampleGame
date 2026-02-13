@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Tests/TwilightEngineTests/RandomEncounterTests.swift
+/// Назначение: Содержит реализацию файла RandomEncounterTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import Testing
 @testable import TwilightEngine
 
@@ -5,9 +10,7 @@ import Testing
 struct RandomEncounterTests {
 
     private func makeEngine() -> TwilightGameEngine {
-        TestContentLoader.loadContentPacksIfNeeded()
-        let registry = ContentRegistry.shared
-        return TwilightGameEngine(registry: registry)
+        TestEngineFactory.makeEngine(seed: 42)
     }
 
     /// Setup engine with blocked scripted events and safe tension level
@@ -61,7 +64,7 @@ struct RandomEncounterTests {
     @Test("Random encounter monster comes from ContentRegistry")
     func testRandomEncounterUsesRegistryEnemies() {
         let engine = setupForEncounters(tension: 90)
-        let allEnemyIds = Set(ContentRegistry.shared.getAllEnemies().map { $0.id })
+        let allEnemyIds = Set(engine.services.contentRegistry.getAllEnemies().map { $0.id })
         #expect(!allEnemyIds.isEmpty)
 
         guard let event = findRandomEncounter(engine) else {

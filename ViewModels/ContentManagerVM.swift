@@ -1,5 +1,10 @@
+/// Файл: ViewModels/ContentManagerVM.swift
+/// Назначение: Содержит реализацию файла ContentManagerVM.swift.
+/// Зона ответственности: Отвечает за состояние и оркестрацию сценариев экрана.
+/// Контекст: Используется в приложении CardSampleGame и связанных потоках выполнения.
+
 import Foundation
-import SwiftUI
+import Combine
 import TwilightEngine
 
 /// ViewModel for Content Manager UI
@@ -14,6 +19,9 @@ public final class ContentManagerVM: ObservableObject {
 
     /// Bundled pack URLs (injected from app)
     private var bundledPackURLs: [URL] = []
+
+    private let contentManager: ContentManager
+    private let registry: ContentRegistry
 
     // MARK: - Computed Properties
 
@@ -47,12 +55,15 @@ public final class ContentManagerVM: ObservableObject {
     }
 
     public var externalPacksPath: String {
-        ContentManager.shared.externalPacksDirectory().path
+        contentManager.externalPacksDirectory().path
     }
 
     // MARK: - Initialization
 
-    public init() {}
+    public init(contentManager: ContentManager, registry: ContentRegistry) {
+        self.contentManager = contentManager
+        self.registry = registry
+    }
 
     /// Set bundled pack URLs (call from app)
     public func setBundledPackURLs(_ urls: [URL]) {
@@ -67,9 +78,7 @@ public final class ContentManagerVM: ObservableObject {
         lastError = nil
 
         // Discover packs
-        let discovered = await Task.detached { [bundledPackURLs] in
-            ContentManager.shared.discoverPacks(bundledURLs: bundledPackURLs)
-        }.value
+        let discovered = contentManager.discoverPacks(bundledURLs: bundledPackURLs)
 
         packs = discovered.sorted { $0.id < $1.id }
         isScanning = false
@@ -93,7 +102,7 @@ public final class ContentManagerVM: ObservableObject {
         packs[index].state = .validating
 
         // Perform validation
-        let summary = await ContentManager.shared.validatePack(packId)
+        let summary = await contentManager.validatePack(packId)
 
         // Update UI with result
         if let newIndex = packs.firstIndex(where: { $0.id == packId }) {
@@ -110,7 +119,7 @@ public final class ContentManagerVM: ObservableObject {
         lastError = nil
 
         do {
-            _ = try await ContentManager.shared.loadPack(packId)
+            _ = try await contentManager.loadPack(packId)
             if let newIndex = packs.firstIndex(where: { $0.id == packId }) {
                 packs[newIndex].state = .loaded
                 packs[newIndex].loadedAt = Date()
@@ -130,7 +139,7 @@ public final class ContentManagerVM: ObservableObject {
         packs[index].state = .validating
         lastError = nil
 
-        let result = await ContentManager.shared.safeReloadPack(packId)
+        let result = await contentManager.safeReloadPack(packId)
 
         switch result {
         case .success:
@@ -167,28 +176,31 @@ public final class ContentManagerVM: ObservableObject {
         }
     }
 
-    // MARK: - File Operations
+    public func contentSummary(for pack: ManagedPack) -> String {
+        guard let manifest = pack.manifest else { return "Unknown content" }
 
-    #if os(iOS)
-    /// Open external packs folder in Files app
-    public func openExternalPacksFolder() {
-        let url = ContentManager.shared.externalPacksDirectory()
-        // Use shareddocuments URL scheme to open in Files app
-        if let filesURL = URL(string: "shareddocuments://\(url.path)") {
-            UIApplication.shared.open(filesURL)
+        var parts: [String] = []
+
+        if pack.state == .loaded, let loadedPack = registry.loadedPacks[pack.id] {
+            if !loadedPack.heroes.isEmpty { parts.append("\(loadedPack.heroes.count) heroes") }
+            if !loadedPack.cards.isEmpty { parts.append("\(loadedPack.cards.count) cards") }
+            if !loadedPack.regions.isEmpty { parts.append("\(loadedPack.regions.count) regions") }
+            if !loadedPack.events.isEmpty { parts.append("\(loadedPack.events.count) events") }
+            if !loadedPack.quests.isEmpty { parts.append("\(loadedPack.quests.count) quests") }
+            if !loadedPack.enemies.isEmpty { parts.append("\(loadedPack.enemies.count) enemies") }
         }
-    }
-    #endif
 
-    /// Copy path to clipboard
-    public func copyPathToClipboard() {
-        #if os(iOS)
-        UIPasteboard.general.string = externalPacksPath
-        #elseif os(macOS)
-        NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(externalPacksPath, forType: .string)
-        #endif
+        if parts.isEmpty {
+            return manifest.packType.rawValue.capitalized
+        }
+
+        return parts.joined(separator: ", ")
     }
+
+    public func loadedPack(for packId: String) -> LoadedPack? {
+        registry.loadedPacks[packId]
+    }
+
 }
 
 // MARK: - Pack Display Helpers
@@ -216,32 +228,6 @@ extension ManagedPack {
         formatter.dateStyle = .none
         formatter.timeStyle = .short
         return formatter.string(from: loadedAt)
-    }
-
-    /// Content summary string
-    public var contentSummary: String {
-        guard let manifest = manifest else { return "Unknown content" }
-
-        var parts: [String] = []
-
-        // Get counts from ContentRegistry if loaded
-        if case .loaded = state {
-            let registry = ContentRegistry.shared
-            if let pack = registry.loadedPacks[id] {
-                if !pack.heroes.isEmpty { parts.append("\(pack.heroes.count) heroes") }
-                if !pack.cards.isEmpty { parts.append("\(pack.cards.count) cards") }
-                if !pack.regions.isEmpty { parts.append("\(pack.regions.count) regions") }
-                if !pack.events.isEmpty { parts.append("\(pack.events.count) events") }
-                if !pack.quests.isEmpty { parts.append("\(pack.quests.count) quests") }
-                if !pack.enemies.isEmpty { parts.append("\(pack.enemies.count) enemies") }
-            }
-        }
-
-        if parts.isEmpty {
-            return manifest.packType.rawValue.capitalized
-        }
-
-        return parts.joined(separator: ", ")
     }
 
     /// Display name

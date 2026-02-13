@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Tests/TwilightEngineTests/GateTests/INV_RNG_GateTests.swift
+/// Назначение: Содержит реализацию файла INV_RNG_GateTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import TwilightEngine
 
@@ -8,12 +13,7 @@ final class INV_RNG_GateTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        TestContentLoader.loadContentPacksIfNeeded()
-    }
-
-    override func tearDown() {
-        WorldRNG.shared.setSeed(0)
-        super.tearDown()
+        _ = TestContentLoader.sharedLoadedRegistry()
     }
 
     // MARK: - RNG-05: Determinism — seed → full run → identical result
@@ -57,8 +57,7 @@ final class INV_RNG_GateTests: XCTestCase {
         let seed: UInt64 = 42424
 
         // Run 1: seed → actions → save → more actions → capture outcome
-        WorldRNG.shared.setSeed(seed)
-        let engine1 = TwilightGameEngine()
+        let engine1 = TestEngineFactory.makeEngine(seed: seed)
         engine1.initializeNewGame(playerName: "Test", heroId: nil)
 
         guard !engine1.publishedRegions.isEmpty else {
@@ -78,7 +77,7 @@ final class INV_RNG_GateTests: XCTestCase {
         let eventId1 = engine1.currentEvent?.id
 
         // Run 2: restore from save → explore
-        let engine2 = TwilightGameEngine()
+        let engine2 = TestEngineFactory.makeEngine(seed: seed)
         engine2.initializeNewGame(playerName: "Test", heroId: nil)
         engine2.restoreFromEngineSave(save)
 
@@ -93,19 +92,19 @@ final class INV_RNG_GateTests: XCTestCase {
     /// INV-RNG-004: WorldRNG state round-trips through save
     func testRNGStateRoundTrip() {
         let seed: UInt64 = 77777
-        WorldRNG.shared.setSeed(seed)
+        let rng = WorldRNG(seed: seed)
 
         // Advance RNG a few times
-        _ = WorldRNG.shared.nextInt(in: 0...100)
-        _ = WorldRNG.shared.nextInt(in: 0...100)
-        _ = WorldRNG.shared.nextInt(in: 0...100)
+        _ = rng.nextInt(in: 0...100)
+        _ = rng.nextInt(in: 0...100)
+        _ = rng.nextInt(in: 0...100)
 
-        let stateBeforeSave = WorldRNG.shared.currentState()
-        let nextValueBeforeSave = WorldRNG.shared.nextInt(in: 0...1000)
+        let stateBeforeSave = rng.currentState()
+        let nextValueBeforeSave = rng.nextInt(in: 0...1000)
 
         // Restore state
-        WorldRNG.shared.restoreState(stateBeforeSave)
-        let nextValueAfterRestore = WorldRNG.shared.nextInt(in: 0...1000)
+        rng.restoreState(stateBeforeSave)
+        let nextValueAfterRestore = rng.nextInt(in: 0...1000)
 
         XCTAssertEqual(nextValueBeforeSave, nextValueAfterRestore,
                        "RNG must produce same value after state restore")
@@ -122,8 +121,7 @@ final class INV_RNG_GateTests: XCTestCase {
     }
 
     private func runExploreSequence(seed: UInt64) -> ExploreSequenceResult {
-        WorldRNG.shared.setSeed(seed)
-        let engine = TwilightGameEngine()
+        let engine = TestEngineFactory.makeEngine(seed: seed)
         engine.initializeNewGame(playerName: "Test", heroId: nil)
 
         guard !engine.publishedRegions.isEmpty else {

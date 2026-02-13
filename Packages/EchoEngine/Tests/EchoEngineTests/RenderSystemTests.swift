@@ -1,3 +1,8 @@
+/// Файл: Packages/EchoEngine/Tests/EchoEngineTests/RenderSystemTests.swift
+/// Назначение: Содержит реализацию файла RenderSystemTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import Testing
 import SpriteKit
 import FirebladeECS

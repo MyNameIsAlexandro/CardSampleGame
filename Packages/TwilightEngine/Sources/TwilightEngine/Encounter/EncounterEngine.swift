@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Encounter/EncounterEngine.swift
+/// Назначение: Содержит реализацию файла EncounterEngine.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 /// Encounter Engine — processes encounters as pure input→output
@@ -9,37 +14,37 @@ public final class EncounterEngine {
 
     // MARK: - State (read-only externally)
 
-    public private(set) var currentPhase: EncounterPhase
-    public private(set) var currentRound: Int
-    public private(set) var heroHP: Int
-    public private(set) var enemies: [EncounterEnemyState]
-    public private(set) var currentIntent: EnemyIntent?
-    public private(set) var isFinished: Bool
-    public private(set) var mulliganDone: Bool
-    public private(set) var lastAttackTrack: AttackTrack?
-    public private(set) var lastFateDrawResult: FateDrawResult?
+    public internal(set) var currentPhase: EncounterPhase
+    public internal(set) var currentRound: Int
+    public internal(set) var heroHP: Int
+    public internal(set) var enemies: [EncounterEnemyState]
+    public internal(set) var currentIntent: EnemyIntent?
+    public internal(set) var isFinished: Bool
+    public internal(set) var mulliganDone: Bool
+    public internal(set) var lastAttackTrack: AttackTrack?
+    public internal(set) var lastFateDrawResult: FateDrawResult?
     public var fateDeckDrawCount: Int { fateDeck.drawPile.count }
     public var fateDeckDiscardCount: Int { fateDeck.discardPile.count }
 
     // MARK: - Card Hand State
 
-    public private(set) var hand: [Card] = []
-    public private(set) var cardDiscardPile: [Card] = []
-    public private(set) var turnAttackBonus: Int = 0
-    public private(set) var turnDefenseBonus: Int = 0
-    public private(set) var turnInfluenceBonus: Int = 0
-    public private(set) var heroFaith: Int = 0
-    public private(set) var pendingFateChoice: FateCard?
+    public internal(set) var hand: [Card] = []
+    public internal(set) var cardDiscardPile: [Card] = []
+    public internal(set) var turnAttackBonus: Int = 0
+    public internal(set) var turnDefenseBonus: Int = 0
+    public internal(set) var turnInfluenceBonus: Int = 0
+    public internal(set) var heroFaith: Int = 0
+    public internal(set) var pendingFateChoice: FateCard?
     public var heroCardPoolCount: Int { cardPool().count }
     public var heroCardsTotal: Int { context.heroCards.count }
-    private var finishActionUsed: Bool = false
+    var finishActionUsed: Bool = false
 
-    public private(set) var fleeSucceeded: Bool = false
+    public internal(set) var fleeSucceeded: Bool = false
 
-    private let context: EncounterContext
-    private let rng: WorldRNG
-    private var fateDeck: FateDeckManager
-    private var accumulatedResonanceDelta: Float = 0
+    let context: EncounterContext
+    let rng: WorldRNG
+    var fateDeck: FateDeckManager
+    var accumulatedResonanceDelta: Float = 0
 
     // MARK: - Init
 
@@ -495,22 +500,22 @@ public final class EncounterEngine {
         }
     }
 
-    private var effectiveResonance: Float {
+    var effectiveResonance: Float {
         context.worldResonance + accumulatedResonanceDelta
     }
 
-    private var matchMultiplier: Double {
+    var matchMultiplier: Double {
         context.balanceConfig?.matchMultiplier ?? 1.5
     }
 
     /// Returns the resonance-based stat modifier for an enemy in the current zone
-    private func resonanceModifier(for enemy: EncounterEnemyState) -> EnemyModifier {
+    func resonanceModifier(for enemy: EncounterEnemyState) -> EnemyModifier {
         guard let behaviors = enemy.resonanceBehavior else { return EnemyModifier() }
         let zone = ResonanceEngine.zone(for: effectiveResonance)
         return behaviors[zone.rawValue] ?? EnemyModifier()
     }
 
-    private func drawFate() -> FateDrawResult? {
+    func drawFate() -> FateDrawResult? {
         let result = fateDeck.drawAndResolve(worldResonance: effectiveResonance)
         lastFateDrawResult = result
         if let result = result, result.card.cardType == .choice {
@@ -541,311 +546,4 @@ public final class EncounterEngine {
         return .ok([.fateDraw(cardId: choice.id, value: bonusValue)])
     }
 
-    private func findEnemyIndex(id: String) -> Int? {
-        enemies.firstIndex(where: { $0.id == id })
-    }
-
-    /// Suit alignment: nav ↔ physical/defense, prav ↔ spiritual, yav ↔ neutral (matches all)
-    private func isSuitMatch(_ suit: FateCardSuit?, for context: ActionContext) -> Bool {
-        guard let suit = suit else { return false }
-        switch (suit, context) {
-        case (.yav, _): return true
-        case (.nav, .combatPhysical), (.nav, .defense): return true
-        case (.prav, .combatSpiritual), (.prav, .dialogue): return true
-        default: return false
-        }
-    }
-
-    private func isSuitMismatch(_ suit: FateCardSuit?, for context: ActionContext) -> Bool {
-        guard let suit = suit else { return false }
-        switch (suit, context) {
-        case (.yav, _): return false
-        case (.nav, .combatSpiritual), (.nav, .dialogue): return true
-        case (.prav, .combatPhysical), (.prav, .defense): return true
-        default: return false
-        }
-    }
-
-    private func performPhysicalAttack(targetId: String) -> EncounterActionResult {
-        guard let idx = findEnemyIndex(id: targetId) else {
-            return .fail(.invalidTarget)
-        }
-        var changes: [EncounterStateChange] = []
-        var surpriseBonus = 0
-
-        if lastAttackTrack == .spiritual {
-            surpriseBonus = context.balanceConfig?.escalationSurpriseBonus ?? 3
-            let delta: Float = context.balanceConfig?.escalationResonanceShift ?? -5.0
-            accumulatedResonanceDelta += delta
-            changes.append(.resonanceShifted(delta: delta, newValue: context.worldResonance + accumulatedResonanceDelta))
-        }
-
-        var keywordBonus = 0
-        var ignoreArmor = false
-        var vampirism = false
-        var echoCardReturn = false
-        let fateResult = drawFate()
-        if let fateResult = fateResult {
-            changes.append(.fateDraw(cardId: fateResult.card.id, value: fateResult.effectiveValue))
-            if let keyword = fateResult.card.keyword {
-                let effect = KeywordInterpreter.resolveWithAlignment(
-                    keyword: keyword,
-                    context: .combatPhysical,
-                    baseValue: fateResult.effectiveValue,
-                    isMatch: isSuitMatch(fateResult.card.suit, for: .combatPhysical),
-                    isMismatch: isSuitMismatch(fateResult.card.suit, for: .combatPhysical),
-                    matchMultiplier: matchMultiplier
-                )
-                keywordBonus = effect.bonusDamage
-                // Keyword special effects
-                switch effect.special {
-                case "ignore_armor": ignoreArmor = true
-                case "ambush": vampirism = true
-                case "echo_strike": echoCardReturn = true
-                default: break
-                }
-            }
-        }
-
-        // EC-01: Weakness/Strength modifiers
-        var weaknessMultiplier: Double = 1.0
-        if let fateResult = fateResult, let keyword = fateResult.card.keyword {
-            let kw = keyword.rawValue.lowercased()
-            if enemies[idx].weaknesses.contains(kw) {
-                weaknessMultiplier = 1.5
-                changes.append(.weaknessTriggered(enemyId: targetId, keyword: kw))
-            } else if enemies[idx].strengths.contains(kw) {
-                weaknessMultiplier = 0.67
-                changes.append(.resistanceTriggered(enemyId: targetId, keyword: kw))
-            }
-        }
-
-        // EC-02: Ability armor bonus
-        let resMod = resonanceModifier(for: enemies[idx])
-        let abilityArmor = enemies[idx].abilities.reduce(0) { sum, ab in
-            if case .armor(let val) = ab.effect { return sum + val }
-            return sum
-        }
-        let armor = ignoreArmor ? 0 : max(0, enemies[idx].defense + resMod.defenseDelta + abilityArmor)
-        let rawDamage = context.hero.strength + turnAttackBonus - armor + surpriseBonus + keywordBonus
-        let damage = max(1, Int(Double(rawDamage) * weaknessMultiplier))
-        enemies[idx].hp = max(0, enemies[idx].hp - damage)
-        lastAttackTrack = .physical
-
-        changes.append(.enemyHPChanged(enemyId: targetId, delta: -damage, newValue: enemies[idx].hp))
-
-        // Shadow (ambush): vampirism — heal hero for portion of damage dealt
-        if vampirism {
-            let heal = max(1, damage / 2)
-            heroHP = min(context.hero.maxHp, heroHP + heal)
-            changes.append(.playerHPChanged(delta: heal, newValue: heroHP))
-        }
-
-        // Echo: return last played card to hand
-        if echoCardReturn, let lastCard = cardDiscardPile.last {
-            cardDiscardPile.removeLast()
-            hand.append(lastCard)
-        }
-
-        if enemies[idx].hp == 0 {
-            enemies[idx].outcome = .killed
-            changes.append(.enemyKilled(enemyId: targetId))
-        }
-
-        return .ok(changes)
-    }
-
-    private func performSpiritAttack(targetId: String) -> EncounterActionResult {
-        guard let idx = findEnemyIndex(id: targetId) else {
-            return .fail(.invalidTarget)
-        }
-        guard enemies[idx].hasSpiritTrack else {
-            return .fail(.actionNotAllowed)
-        }
-        var changes: [EncounterStateChange] = []
-
-        if lastAttackTrack == .physical {
-            let shieldValue = context.balanceConfig?.deEscalationRageShield ?? 3
-            enemies[idx].rageShield = shieldValue
-            changes.append(.rageShieldApplied(enemyId: targetId, value: shieldValue))
-        }
-
-        var keywordBonus = 0
-        var resonancePush = false
-        var echoCardReturn = false
-        let fateResult = drawFate()
-        if let fateResult = fateResult {
-            changes.append(.fateDraw(cardId: fateResult.card.id, value: fateResult.effectiveValue))
-            if let keyword = fateResult.card.keyword {
-                let effect = KeywordInterpreter.resolveWithAlignment(
-                    keyword: keyword,
-                    context: .combatSpiritual,
-                    baseValue: fateResult.effectiveValue,
-                    isMatch: isSuitMatch(fateResult.card.suit, for: .combatSpiritual),
-                    isMismatch: isSuitMismatch(fateResult.card.suit, for: .combatSpiritual),
-                    matchMultiplier: matchMultiplier
-                )
-                keywordBonus = effect.bonusDamage
-                switch effect.special {
-                case "resonance_push": resonancePush = true
-                case "will_pierce": keywordBonus += 1 // Focus: extra WP pierce
-                case "echo_prayer": echoCardReturn = true
-                default: break
-                }
-            }
-        }
-
-        // Surge (resonance_push): shift resonance toward Prav on spirit attack
-        if resonancePush {
-            let delta: Float = 3.0
-            accumulatedResonanceDelta += delta
-            changes.append(.resonanceShifted(delta: delta, newValue: context.worldResonance + accumulatedResonanceDelta))
-        }
-
-        // EC-01: Weakness/Strength modifiers
-        var weaknessMultiplier: Double = 1.0
-        if let fateResult = fateResult, let keyword = fateResult.card.keyword {
-            let kw = keyword.rawValue.lowercased()
-            if enemies[idx].weaknesses.contains(kw) {
-                weaknessMultiplier = 1.5
-                changes.append(.weaknessTriggered(enemyId: targetId, keyword: kw))
-            } else if enemies[idx].strengths.contains(kw) {
-                weaknessMultiplier = 0.67
-                changes.append(.resistanceTriggered(enemyId: targetId, keyword: kw))
-            }
-        }
-
-        let rawDamage = context.hero.wisdom + turnInfluenceBonus + keywordBonus - enemies[idx].rageShield - enemies[idx].spiritDefense
-        let damage = max(1, Int(Double(rawDamage) * weaknessMultiplier))
-        let currentWP = enemies[idx].wp ?? 0
-        let newWP = max(0, currentWP - damage)
-        enemies[idx].wp = newWP
-        enemies[idx].rageShield = 0
-        lastAttackTrack = .spiritual
-
-        changes.append(.enemyWPChanged(enemyId: targetId, delta: -damage, newValue: newWP))
-
-        // Echo: return last played card to hand
-        if echoCardReturn, let lastCard = cardDiscardPile.last {
-            cardDiscardPile.removeLast()
-            hand.append(lastCard)
-        }
-
-        if newWP == 0 && enemies[idx].hp > 0 {
-            enemies[idx].outcome = .pacified
-            changes.append(.enemyPacified(enemyId: targetId))
-        }
-
-        return .ok(changes)
-    }
-
-    // MARK: - Save/Restore (SAV-03)
-
-    /// Create a serializable snapshot of the current encounter state
-    public func createSaveState() -> EncounterSaveState {
-        EncounterSaveState(
-            currentPhase: currentPhase,
-            currentRound: currentRound,
-            heroHP: heroHP,
-            enemies: enemies,
-            currentIntent: currentIntent,
-            isFinished: isFinished,
-            mulliganDone: mulliganDone,
-            lastAttackTrack: lastAttackTrack,
-            lastFateDrawResult: lastFateDrawResult,
-            hand: hand,
-            cardDiscardPile: cardDiscardPile,
-            turnAttackBonus: turnAttackBonus,
-            turnDefenseBonus: turnDefenseBonus,
-            turnInfluenceBonus: turnInfluenceBonus,
-            heroFaith: heroFaith,
-            pendingFateChoice: pendingFateChoice,
-            finishActionUsed: finishActionUsed,
-            fleeSucceeded: fleeSucceeded,
-            context: context,
-            rngState: rng.currentState(),
-            fateDeckState: fateDeck.getState(),
-            accumulatedResonanceDelta: accumulatedResonanceDelta
-        )
-    }
-
-    /// Restore an encounter from a saved state
-    public static func restore(from state: EncounterSaveState) -> EncounterEngine {
-        let engine = EncounterEngine(context: state.context)
-        // Overwrite all state from save
-        engine.currentPhase = state.currentPhase
-        engine.currentRound = state.currentRound
-        engine.heroHP = state.heroHP
-        engine.enemies = state.enemies
-        engine.currentIntent = state.currentIntent
-        engine.isFinished = state.isFinished
-        engine.mulliganDone = state.mulliganDone
-        engine.lastAttackTrack = state.lastAttackTrack
-        engine.lastFateDrawResult = state.lastFateDrawResult
-        engine.hand = state.hand
-        engine.cardDiscardPile = state.cardDiscardPile
-        engine.turnAttackBonus = state.turnAttackBonus
-        engine.turnDefenseBonus = state.turnDefenseBonus
-        engine.turnInfluenceBonus = state.turnInfluenceBonus
-        engine.heroFaith = state.heroFaith
-        engine.pendingFateChoice = state.pendingFateChoice
-        engine.finishActionUsed = state.finishActionUsed
-        engine.fleeSucceeded = state.fleeSucceeded
-        engine.accumulatedResonanceDelta = state.accumulatedResonanceDelta
-        // Restore RNG and fate deck exact state
-        engine.rng.restoreState(state.rngState)
-        engine.fateDeck.restoreState(state.fateDeckState)
-        return engine
-    }
-}
-
-/// Mutable enemy state within an encounter
-public struct EncounterEnemyState: Equatable, Codable {
-    public let id: String
-    public let name: String
-    public var hp: Int
-    public let maxHp: Int
-    public var wp: Int?
-    public let maxWp: Int?
-    public var power: Int
-    public var defense: Int
-    public var spiritDefense: Int
-    public var rageShield: Int
-    public var outcome: EntityOutcome?
-    public let resonanceBehavior: [String: EnemyModifier]?
-    public let lootCardIds: [String]
-    public let faithReward: Int
-    public let weaknesses: [String]
-    public let strengths: [String]
-    public let abilities: [EnemyAbility]
-
-    public var hasSpiritTrack: Bool { wp != nil }
-    public var isAlive: Bool { hp > 0 }
-    public var isPacified: Bool { wp.map { $0 <= 0 } ?? false && hp > 0 }
-
-    public init(from enemy: EncounterEnemy) {
-        self.id = enemy.id
-        self.name = enemy.name
-        self.hp = enemy.hp
-        self.maxHp = enemy.maxHp
-        self.wp = enemy.wp
-        self.maxWp = enemy.maxWp
-        self.power = enemy.power
-        self.defense = enemy.defense
-        self.spiritDefense = enemy.spiritDefense
-        self.rageShield = 0
-        self.outcome = nil
-        self.resonanceBehavior = enemy.resonanceBehavior
-        self.lootCardIds = enemy.lootCardIds
-        self.faithReward = enemy.faithReward
-        self.weaknesses = enemy.weaknesses
-        self.strengths = enemy.strengths
-        self.abilities = enemy.abilities
-    }
-}
-
-/// Which track was last attacked (for escalation/de-escalation)
-public enum AttackTrack: String, Codable, Equatable {
-    case physical
-    case spiritual
 }

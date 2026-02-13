@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Core/RequirementsEvaluator.swift
+/// Назначение: Содержит реализацию файла RequirementsEvaluator.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 // MARK: - Requirements Evaluator
@@ -84,9 +89,4 @@ public struct RequirementsEvaluator: RequirementsEvaluating {
     }
 }
 
-// MARK: - Shared Instance
-
-/// Глобальный evaluator для проверки требований
-public enum Requirements {
-    public static var evaluator: RequirementsEvaluating = RequirementsEvaluator()
-}
+// No global mutable evaluator: inject `RequirementsEvaluating` where needed.

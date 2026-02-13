@@ -1,3 +1,8 @@
+/// Файл: Packages/PackEditorKit/Sources/PackEditorKit/PackScanner.swift
+/// Назначение: Содержит реализацию файла PackScanner.swift.
+/// Зона ответственности: Реализует пакетный API редактора контента.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 import TwilightEngine
 import PackAuthoring

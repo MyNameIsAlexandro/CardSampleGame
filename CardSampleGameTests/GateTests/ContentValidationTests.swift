@@ -1,3 +1,8 @@
+/// Файл: CardSampleGameTests/GateTests/ContentValidationTests.swift
+/// Назначение: Содержит реализацию файла ContentValidationTests.swift.
+/// Зона ответственности: Фиксирует проверяемый контракт и не содержит production-логики.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import TwilightEngine
 
@@ -13,6 +18,7 @@ final class ContentValidationTests: XCTestCase {
 
     // MARK: - Test Data
 
+    private var registry: ContentRegistry?
     private var loadedPack: LoadedPack?
     private var allRegionIds: Set<String> = []
     private var allEventIds: Set<String> = []
@@ -26,6 +32,20 @@ final class ContentValidationTests: XCTestCase {
     // to avoid hardcoding game-specific content in engine-level tests.
     private var systemFlags: Set<String> = []
     private var knownResources: Set<String> = []
+
+    private var isVerboseLoggingEnabled: Bool {
+        guard let rawValue = ProcessInfo.processInfo.environment["TWILIGHT_TEST_VERBOSE"]?.lowercased() else {
+            return false
+        }
+        return rawValue == "1" || rawValue == "true" || rawValue == "yes" || rawValue == "on"
+    }
+
+    private func verboseLog(_ message: @autoclosure () -> String) {
+        guard isVerboseLoggingEnabled else {
+            return
+        }
+        print(message())
+    }
 
     // Known valid region states (engine-level enum values, not game-specific)
     private let knownRegionStates: Set<String> = [
@@ -41,12 +61,12 @@ final class ContentValidationTests: XCTestCase {
     override func setUpWithError() throws {
         try super.setUpWithError()
 
-        // Load content pack using TestContentLoader
-        TestContentLoader.loadContentPacksIfNeeded()
+        let registry = try TestContentLoader.makeStandardRegistry()
+        self.registry = registry
 
-        // Get loaded pack from registry
-        guard let packId = ContentRegistry.shared.loadedPackIds.first(where: { $0.contains("twilight") || $0.contains("act") }),
-              let pack = ContentRegistry.shared.loadedPacks[packId] else {
+        // Get loaded pack from registry (campaign pack)
+        guard let packId = registry.loadedPackIds.first(where: { $0.contains("twilight") || $0.contains("act") }),
+              let pack = registry.loadedPacks[packId] else {
             XCTFail("CONTENT VALIDATION FAILURE: TwilightMarchesActI pack not loaded - check TestContentLoader"); return
         }
 
@@ -110,7 +130,7 @@ final class ContentValidationTests: XCTestCase {
         // Engine-level resource keys (used by ResourceBalanceConfig and consequences)
         knownResources = ["health", "faith", "supplies", "gold", "balance"]
         // Extend from balance config if available
-        if let config = ContentRegistry.shared.getBalanceConfig() {
+        if let config = registry?.getBalanceConfig() {
             // Balance config confirms these resources exist; no game-specific names needed
             _ = config
         }
@@ -374,8 +394,12 @@ final class ContentValidationTests: XCTestCase {
             referencedCardIds.formUnion(hero.startingDeckCardIDs)
         }
 
-        // Find unknown cards - check ContentRegistry too
-        let allKnownCards = allCardIds.union(Set(ContentRegistry.shared.getAllCards().map { $0.id }))
+        guard let registry else {
+            XCTFail("CONTENT VALIDATION FAILURE: Registry not initialized"); return
+        }
+
+        // Find unknown cards - check the full registry snapshot too (merged packs)
+        let allKnownCards = allCardIds.union(Set(registry.getAllCards().map { $0.id }))
         let unknownCards = referencedCardIds.subtracting(allKnownCards)
 
         if !unknownCards.isEmpty {
@@ -395,7 +419,7 @@ final class ContentValidationTests: XCTestCase {
             XCTFail("CONTENT VALIDATION FAILURE: Pack not loaded"); return
         }
 
-        print("""
+        verboseLog("""
 
             === Content Integrity Report ===
 

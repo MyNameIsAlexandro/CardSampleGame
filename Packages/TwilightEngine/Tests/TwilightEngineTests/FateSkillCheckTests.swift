@@ -1,5 +1,11 @@
+/// Файл: Packages/TwilightEngine/Tests/TwilightEngineTests/FateSkillCheckTests.swift
+/// Назначение: Содержит реализацию файла FateSkillCheckTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import TwilightEngine
+import TwilightEngineDevTools
 
 /// Tests for Fate Deck integration with SkillCheckResolver (Task 4.1)
 final class FateSkillCheckTests: XCTestCase {
@@ -10,7 +16,7 @@ final class FateSkillCheckTests: XCTestCase {
         let resolver = SkillCheckResolver()
         // Create a deck with only +3 cards (guaranteed success)
         let cards = [FateCard(id: "f1", modifier: 3, isCritical: true, isSticky: false, name: "Crit")]
-        resolver.fateDeck = FateDeckManager(cards: cards)
+        resolver.fateDeck = TestFateDeck.makeManager(cards: cards, seed: 42)
 
         let challenge = MiniGameChallenge(
             id: "test",
@@ -24,7 +30,7 @@ final class FateSkillCheckTests: XCTestCase {
             playerResources: [:], worldTension: 0, currentFlags: [:]
         )
 
-        let result = resolver.resolve(challenge: challenge, context: context)
+        let result = resolver.resolve(challenge: challenge, context: context, rng: TestRNG.make(seed: 42))
         // strength(5) + fateModifier(3) = 8 >= difficulty*3 = 3
         XCTAssertTrue(result.stateChanges.contains(.flagSet(key: "test_passed", value: true)),
                       "Skill check with strong fate card should succeed")
@@ -34,7 +40,7 @@ final class FateSkillCheckTests: XCTestCase {
         let resolver = SkillCheckResolver()
         // Create a deck with only -2 cards
         let cards = [FateCard(id: "f1", modifier: -2, isCritical: false, isSticky: true, name: "Curse")]
-        resolver.fateDeck = FateDeckManager(cards: cards)
+        resolver.fateDeck = TestFateDeck.makeManager(cards: cards, seed: 42)
 
         let challenge = MiniGameChallenge(
             id: "test",
@@ -48,7 +54,7 @@ final class FateSkillCheckTests: XCTestCase {
             playerResources: [:], worldTension: 0, currentFlags: [:]
         )
 
-        let result = resolver.resolve(challenge: challenge, context: context)
+        let result = resolver.resolve(challenge: challenge, context: context, rng: TestRNG.make(seed: 42))
         // strength(5) + fateModifier(-2) = 3 < targetNumber(9)
         XCTAssertFalse(result.stateChanges.contains(.flagSet(key: "test_passed", value: true)),
                        "Skill check with bad fate card should fail")
@@ -70,7 +76,7 @@ final class FateSkillCheckTests: XCTestCase {
         )
 
         // Should not crash — falls back to RNG
-        let result = resolver.resolve(challenge: challenge, context: context)
+        let result = resolver.resolve(challenge: challenge, context: context, rng: TestRNG.make(seed: 42))
         XCTAssertTrue(result.completed, "Skill check should complete even without fate deck")
     }
 
@@ -80,7 +86,7 @@ final class FateSkillCheckTests: XCTestCase {
             FateCard(id: "f1", modifier: 0, isCritical: false, isSticky: false, name: "A"),
             FateCard(id: "f2", modifier: 1, isCritical: false, isSticky: false, name: "B"),
         ]
-        let deck = FateDeckManager(cards: cards)
+        let deck = TestFateDeck.makeManager(cards: cards, seed: 42)
         resolver.fateDeck = deck
 
         let challenge = MiniGameChallenge(id: "test", type: .skillCheck, difficulty: 1)
@@ -90,7 +96,7 @@ final class FateSkillCheckTests: XCTestCase {
             playerResources: [:], worldTension: 0, currentFlags: [:]
         )
 
-        _ = resolver.resolve(challenge: challenge, context: context)
+        _ = resolver.resolve(challenge: challenge, context: context, rng: TestRNG.make(seed: 42))
 
         // One card should have been drawn (moved to discard)
         XCTAssertEqual(deck.discardPile.count, 1, "Fate deck should have one card in discard after skill check")
@@ -99,7 +105,7 @@ final class FateSkillCheckTests: XCTestCase {
     // MARK: - Engine Fate Deck Setup
 
     func testEngineSetupFateDeck() {
-        let engine = TwilightGameEngine()
+        let engine = TestEngineFactory.makeEngine(seed: 42)
         XCTAssertNil(engine.fateDeck, "Fate deck should be nil before setup")
 
         let cards = [FateCard(id: "f1", modifier: 0, isCritical: false, isSticky: false, name: "Test")]
@@ -112,9 +118,9 @@ final class FateSkillCheckTests: XCTestCase {
     // MARK: - MiniGameDispatcher Fate Deck Wiring
 
     func testDispatcherPassesFateDeckToResolver() {
-        let dispatcher = MiniGameDispatcher()
+        let dispatcher = MiniGameDispatcher(rng: TestRNG.make(seed: 42))
         let cards = [FateCard(id: "f1", modifier: 3, isCritical: true, isSticky: false, name: "Crit")]
-        let deck = FateDeckManager(cards: cards)
+        let deck = TestFateDeck.makeManager(cards: cards, seed: 42)
         dispatcher.setFateDeck(deck)
 
         let challenge = MiniGameChallenge(

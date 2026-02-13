@@ -718,6 +718,17 @@
 
 // MARK: - Action Errors
 "error.invalid.action" = "Недопустимое действие: %@";
+"error.invalid.action.no_current_region" = "не определен текущий регион";
+"error.invalid.action.market_not_initialized" = "рынок не инициализирован";
+"error.invalid.action.card_not_in_market" = "карта отсутствует на рынке";
+"error.invalid.action.unknown_card" = "неизвестный идентификатор карты: %@";
+"error.invalid.action.defile_requires_dark_alignment" = "осквернять якоря могут только герои Тьмы";
+"error.invalid.action.anchor_already_dark" = "якорь уже принадлежит Тьме";
+"error.invalid.action.event_not_combat_encounter" = "событие не является боевым столкновением";
+"error.invalid.action.fate_deck_unavailable" = "колода судьбы недоступна";
+"error.invalid.action.mini_game_unavailable" = "мини-игра недоступна";
+"error.invalid.action.event_not_mini_game" = "событие не является мини-игрой";
+"error.invalid.action.mini_game_challenge_mismatch" = "испытание мини-игры не соответствует активному событию";
 "error.region.not.accessible" = "Регион %@ недоступен";
 "error.region.not.neighbor" = "Регион %@ не является соседним";
 "error.action.not.available" = "%@ недоступно в регионе типа %@";
@@ -979,6 +990,8 @@
 "gameover.defeat.title" = "Поражение";
 "gameover.victory.message" = "Мир спасён. Ваше путешествие завершилось триумфом.";
 "gameover.defeat.reason" = "Причина: %@";
+"gameover.defeat.reason.world.tension.max" = "Напряжение мира достигло максимума";
+"gameover.defeat.reason.hero.died" = "Герой погиб";
 "gameover.return.to.menu" = "Вернуться в меню";
 "gameover.stats" = "Статистика путешествия";
 "gameover.days.survived" = "Дней прожито: %d";

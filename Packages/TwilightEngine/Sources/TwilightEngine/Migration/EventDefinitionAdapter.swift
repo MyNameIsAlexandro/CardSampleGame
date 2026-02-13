@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Migration/EventDefinitionAdapter.swift
+/// Назначение: Содержит реализацию файла EventDefinitionAdapter.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 // MARK: - Event Definition Adapter
@@ -9,7 +14,11 @@ extension EventDefinition {
     /// Convert EventDefinition to legacy GameEvent for UI compatibility
     /// - Parameter regionId: Optional region ID for context-specific conversion
     /// - Returns: GameEvent compatible with existing UI
-    public func toGameEvent(forRegion regionId: String? = nil, registry: ContentRegistry = .shared) -> GameEvent {
+    public func toGameEvent(
+        forRegion regionId: String? = nil,
+        registry: ContentRegistry,
+        localizationManager: LocalizationManager
+    ) -> GameEvent {
         // Map event kind to legacy event type
         let eventType = mapEventKind(eventKind)
 
@@ -20,16 +29,16 @@ extension EventDefinition {
         let regionTypes = mapRegionTypes(availability.regionIds, registry: registry)
 
         // Convert choices
-        let eventChoices = choices.map { $0.toEventChoice() }
+        let eventChoices = choices.map { $0.toEventChoice(localizationManager: localizationManager) }
 
         // Create monster card for combat events
-        let monsterCard = createMonsterCard(for: miniGameChallenge, registry: registry)
+        let monsterCard = createMonsterCard(for: miniGameChallenge, registry: registry, localizationManager: localizationManager)
 
         return GameEvent(
             id: id,
             eventType: eventType,
-            title: title.localized,
-            description: body.localized,
+            title: title.resolve(using: localizationManager),
+            description: body.resolve(using: localizationManager),
             regionTypes: regionTypes,
             regionStates: regionStates,
             choices: eventChoices,
@@ -83,7 +92,7 @@ extension EventDefinition {
         }
     }
 
-    private func mapRegionTypes(_ regionIds: [String]?, registry: ContentRegistry = .shared) -> [RegionType] {
+    private func mapRegionTypes(_ regionIds: [String]?, registry: ContentRegistry) -> [RegionType] {
         guard let ids = regionIds else {
             return [] // Empty = any region type
         }
@@ -115,13 +124,17 @@ extension EventDefinition {
         return links
     }
 
-    private func createMonsterCard(for challenge: MiniGameChallengeDefinition?, registry: ContentRegistry = .shared) -> Card? {
+    private func createMonsterCard(
+        for challenge: MiniGameChallengeDefinition?,
+        registry: ContentRegistry,
+        localizationManager: LocalizationManager
+    ) -> Card? {
         guard let challenge = challenge,
               let enemyId = challenge.enemyId else { return nil }
 
         // First, try to get enemy from ContentRegistry
         if let enemy = registry.getEnemy(id: enemyId) {
-            return enemy.toCard()
+            return enemy.toCard(localizationManager: localizationManager)
         }
 
         // Fallback: Create from hardcoded stats
@@ -139,7 +152,7 @@ extension EventDefinition {
         )
     }
 
-    private func getEnemyStats(for enemyId: String, difficulty: Int, registry: ContentRegistry = .shared) -> (health: Int, power: Int, defense: Int) {
+    private func getEnemyStats(for enemyId: String, difficulty: Int, registry: ContentRegistry) -> (health: Int, power: Int, defense: Int) {
         // Try to get stats from ContentRegistry (data-driven)
         if let enemyDef = registry.getEnemy(id: enemyId) {
             return (health: enemyDef.health, power: enemyDef.power, defense: enemyDef.defense)
@@ -168,10 +181,10 @@ extension EventDefinition {
 extension ChoiceDefinition {
 
     /// Convert ChoiceDefinition to legacy EventChoice
-    public func toEventChoice() -> EventChoice {
+    public func toEventChoice(localizationManager: LocalizationManager) -> EventChoice {
         return EventChoice(
             id: id,
-            text: label.localized,
+            text: label.resolve(using: localizationManager),
             requirements: requirements?.toEventRequirements(),
             consequences: consequences.toEventConsequences()
         )
@@ -264,4 +277,3 @@ extension ChoiceConsequences {
         return consequences
     }
 }
-

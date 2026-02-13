@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Tests/PackAuthoringTests/PackCompilerTests.swift
+/// Назначение: Содержит реализацию файла PackCompilerTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 import TwilightEngine
 import PackAuthoring

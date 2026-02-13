@@ -1,3 +1,8 @@
+/// Файл: Packages/PackEditorKit/Sources/PackEditorKit/CombatSimulator.swift
+/// Назначение: Содержит реализацию файла CombatSimulator.swift.
+/// Зона ответственности: Реализует пакетный API редактора контента.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 import TwilightEngine
 
@@ -10,7 +15,7 @@ public final class CombatSimulator {
     /// `progress` is called with the number of completed runs.
     public static func run(
         config: SimulationConfig,
-        progress: @escaping @Sendable (Int) -> Void
+        progress: @escaping @MainActor @Sendable (Int) -> Void
     ) async -> SimulationResult {
         let count = config.simulationCount
 
@@ -38,7 +43,7 @@ public final class CombatSimulator {
             for await result in group {
                 collected.append(result)
                 let done = collected.count
-                Task { @MainActor in progress(done) }
+                await progress(done)
             }
             return collected
         }

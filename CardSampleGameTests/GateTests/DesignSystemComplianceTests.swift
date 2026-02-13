@@ -1,3 +1,8 @@
+/// Файл: CardSampleGameTests/GateTests/DesignSystemComplianceTests.swift
+/// Назначение: Содержит реализацию файла DesignSystemComplianceTests.swift.
+/// Зона ответственности: Фиксирует проверяемый контракт и не содержит production-логики.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import CardSampleGame
 

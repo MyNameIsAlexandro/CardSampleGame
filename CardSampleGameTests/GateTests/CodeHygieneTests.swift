@@ -1,3 +1,8 @@
+/// Файл: CardSampleGameTests/GateTests/CodeHygieneTests.swift
+/// Назначение: Содержит реализацию файла CodeHygieneTests.swift.
+/// Зона ответственности: Фиксирует проверяемый контракт и не содержит production-логики.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import CardSampleGame
 
@@ -12,8 +17,8 @@ final class CodeHygieneTests: XCTestCase {
     /// Hard maximum lines per Swift file in the first-party codebase.
     private let maxLinesPerFile = 600
 
-    /// Maximum public types per file (for NEW files)
-    /// Related small types (enums, helper structs) can stay together
+    /// Maximum top-level types per file in TwilightEngine.
+    /// Related small types (enums, helper structs) can stay together if cohesive.
     private let maxTypesPerFile = 5
 
     /// Project roots included in hard line-limit audit.
@@ -37,11 +42,16 @@ final class CodeHygieneTests: XCTestCase {
     /// Directories to audit in TwilightEngine
     private let engineDirectories = [
         "Cards",
+        "Combat",
+        "Config",
         "ContentPacks",
+        "Encounter",
         "Heroes",
         "Core",
         "Data",
         "Models",
+        "Quest",
+        "Story",
         "Runtime"
     ]
 
@@ -93,6 +103,19 @@ final class CodeHygieneTests: XCTestCase {
         }
 
         return nil
+    }
+
+    func loadPbxprojContent() throws -> String {
+        guard let root = projectRoot else {
+            XCTFail("GATE TEST FAILURE: Could not determine project root path")
+            throw NSError(domain: "CodeHygieneTests", code: 1)
+        }
+
+        let pbxproj = root
+            .appendingPathComponent("CardSampleGame.xcodeproj")
+            .appendingPathComponent("project.pbxproj")
+
+        return try String(contentsOf: pbxproj, encoding: .utf8)
     }
 
     // MARK: - 10.1 Documentation Tests
@@ -237,13 +260,19 @@ final class CodeHygieneTests: XCTestCase {
             let files = findSwiftFiles(in: dirPath)
 
             for filePath in files {
-                let fileName = URL(fileURLWithPath: filePath).lastPathComponent
+                let relativePath: String
+                let enginePrefix = engine.path.hasSuffix("/") ? engine.path : engine.path + "/"
+                if filePath.hasPrefix(enginePrefix) {
+                    relativePath = String(filePath.dropFirst(enginePrefix.count))
+                } else {
+                    relativePath = URL(fileURLWithPath: filePath).lastPathComponent
+                }
 
                 let content = try String(contentsOfFile: filePath, encoding: .utf8)
-                let publicTypes = findPublicTypeDeclarations(in: content)
+                let types = findTopLevelTypeDeclarations(in: content)
 
-                if publicTypes.count > maxTypesPerFile {
-                    violations.append((fileName, publicTypes))
+                if types.count > maxTypesPerFile {
+                    violations.append((relativePath, types))
                 }
             }
         }
@@ -253,7 +282,7 @@ final class CodeHygieneTests: XCTestCase {
                 "  \(file): \(types.count) types [\(types.prefix(5).joined(separator: ", "))\(types.count > 5 ? "..." : "")]"
             }.joined(separator: "\n")
             XCTFail("""
-                Found \(violations.count) NEW files with too many public types (max \(maxTypesPerFile)):
+                Found \(violations.count) engine files with too many top-level types (max \(maxTypesPerFile)):
                 \(message)
 
                 Follow "1 file = 1 main type" principle:
@@ -266,183 +295,8 @@ final class CodeHygieneTests: XCTestCase {
 
     // MARK: - Helpers
 
-    private func findFile(named name: String, in directory: URL) -> String? {
-        guard let enumerator = FileManager.default.enumerator(
-            at: directory,
-            includingPropertiesForKeys: [.isRegularFileKey],
-            options: [.skipsHiddenFiles]
-        ) else { return nil }
-
-        for case let fileURL as URL in enumerator {
-            if fileURL.lastPathComponent == name {
-                return fileURL.path
-            }
-        }
-        return nil
-    }
-
-    private func findSwiftFiles(in directory: URL) -> [String] {
-        var files: [String] = []
-
-        guard let enumerator = FileManager.default.enumerator(
-            at: directory,
-            includingPropertiesForKeys: [.isRegularFileKey],
-            options: [.skipsHiddenFiles]
-        ) else { return files }
-
-        for case let fileURL as URL in enumerator {
-            if fileURL.pathExtension == "swift" {
-                files.append(fileURL.path)
-            }
-        }
-
-        return files
-    }
-
-    private func makeRelativePath(filePath: String, projectRoot: URL) -> String {
-        let rootPath = projectRoot.path.hasSuffix("/") ? projectRoot.path : projectRoot.path + "/"
-        if filePath.hasPrefix(rootPath) {
-            return String(filePath.dropFirst(rootPath.count))
-        }
-        return filePath
-    }
-
     private func shouldSkipLineLimit(relativePath: String) -> Bool {
         let normalized = "/" + relativePath
         return lineLimitExcludedPathFragments.contains { normalized.contains($0) }
-    }
-
-    /// Find public methods without preceding /// doc comment
-    private func findUndocumentedPublicMethods(in content: String) -> [String] {
-        var undocumented: [String] = []
-        let lines = content.components(separatedBy: .newlines)
-
-        // Pattern for public func/method declarations
-        let methodPattern = #"^\s*public\s+(static\s+)?func\s+(\w+)"#
-        let methodRegex = try? NSRegularExpression(pattern: methodPattern)
-
-        // Attributes that can appear between doc comment and declaration
-        let attributePattern = #"^\s*@\w+"#
-
-        for (index, line) in lines.enumerated() {
-            guard let regex = methodRegex,
-                  let match = regex.firstMatch(in: line, range: NSRange(line.startIndex..., in: line)) else {
-                continue
-            }
-
-            // Extract method name
-            if let nameRange = Range(match.range(at: 2), in: line) {
-                let methodName = String(line[nameRange])
-
-                // Check if previous non-empty, non-attribute line is a doc comment
-                var prevIndex = index - 1
-                var foundDocComment = false
-
-                while prevIndex >= 0 {
-                    let prevLine = lines[prevIndex].trimmingCharacters(in: .whitespaces)
-                    if prevLine.isEmpty {
-                        prevIndex -= 1
-                        continue
-                    }
-                    // Skip Swift attributes (@discardableResult, @MainActor, etc.)
-                    if prevLine.range(of: attributePattern, options: .regularExpression) != nil {
-                        prevIndex -= 1
-                        continue
-                    }
-                    // Check for doc comment
-                    if prevLine.hasPrefix("///") || prevLine.hasPrefix("*/") {
-                        foundDocComment = true
-                    }
-                    break
-                }
-
-                if !foundDocComment {
-                    undocumented.append(methodName + "()")
-                }
-            }
-        }
-
-        return undocumented
-    }
-
-    /// Find public properties without preceding /// doc comment
-    private func findUndocumentedPublicProperties(in content: String) -> [String] {
-        var undocumented: [String] = []
-        let lines = content.components(separatedBy: .newlines)
-
-        // Pattern for public let/var declarations (not in function bodies)
-        let propPattern = #"^\s*public\s+(static\s+)?(let|var)\s+(\w+)"#
-        let propRegex = try? NSRegularExpression(pattern: propPattern)
-
-        // Attributes that can appear between doc comment and declaration
-        let attributePattern = #"^\s*@\w+"#
-
-        for (index, line) in lines.enumerated() {
-            guard let regex = propRegex,
-                  let match = regex.firstMatch(in: line, range: NSRange(line.startIndex..., in: line)) else {
-                continue
-            }
-
-            // Skip computed properties (they have doc comments on the var line usually)
-            if line.contains("{") && line.contains("return") {
-                continue
-            }
-
-            // Extract property name
-            if let nameRange = Range(match.range(at: 3), in: line) {
-                let propName = String(line[nameRange])
-
-                // Check if previous non-empty, non-attribute line is a doc comment
-                var prevIndex = index - 1
-                var foundDocComment = false
-
-                while prevIndex >= 0 {
-                    let prevLine = lines[prevIndex].trimmingCharacters(in: .whitespaces)
-                    if prevLine.isEmpty {
-                        prevIndex -= 1
-                        continue
-                    }
-                    // Skip Swift attributes
-                    if prevLine.range(of: attributePattern, options: .regularExpression) != nil {
-                        prevIndex -= 1
-                        continue
-                    }
-                    // Check for doc comment
-                    if prevLine.hasPrefix("///") || prevLine.hasPrefix("*/") {
-                        foundDocComment = true
-                    }
-                    break
-                }
-
-                if !foundDocComment {
-                    undocumented.append(propName)
-                }
-            }
-        }
-
-        return undocumented
-    }
-
-    /// Find public type declarations (class, struct, enum, protocol)
-    private func findPublicTypeDeclarations(in content: String) -> [String] {
-        var types: [String] = []
-        let lines = content.components(separatedBy: .newlines)
-
-        // Pattern for public type declarations
-        let typePattern = #"^\s*public\s+(final\s+)?(class|struct|enum|protocol|actor)\s+(\w+)"#
-        let typeRegex = try? NSRegularExpression(pattern: typePattern)
-
-        for line in lines {
-            guard let regex = typeRegex,
-                  let match = regex.firstMatch(in: line, range: NSRange(line.startIndex..., in: line)) else {
-                continue
-            }
-
-            if let nameRange = Range(match.range(at: 3), in: line) {
-                types.append(String(line[nameRange]))
-            }
-        }
-
-        return types
     }
 }

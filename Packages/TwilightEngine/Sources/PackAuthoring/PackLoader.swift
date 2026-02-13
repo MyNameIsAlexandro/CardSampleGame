@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/PackAuthoring/PackLoader.swift
+/// Назначение: Содержит реализацию файла PackLoader.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 import CryptoKit
 import TwilightEngine
@@ -16,6 +21,21 @@ public enum PackLoader {
     /// - Returns: Fully loaded pack
     /// - Throws: PackLoadError if loading fails
     public static func load(manifest: PackManifest, from url: URL) throws -> LoadedPack {
+        try load(manifest: manifest, from: url, localizationManager: LocalizationManager())
+    }
+
+    /// Load a pack from a manifest and source URL
+    /// - Parameters:
+    ///   - manifest: The pack manifest
+    ///   - url: URL to the pack directory
+    ///   - localizationManager: Resolver for pack string tables (shared across loads if desired)
+    /// - Returns: Fully loaded pack
+    /// - Throws: PackLoadError if loading fails
+    public static func load(
+        manifest: PackManifest,
+        from url: URL,
+        localizationManager: LocalizationManager
+    ) throws -> LoadedPack {
         // Verify checksums before loading content (Epic 0.3)
         if let checksums = manifest.checksums {
             try verifyChecksums(checksums, in: url)
@@ -61,12 +81,15 @@ public enum PackLoader {
 
         // Load hero abilities (before heroes, so abilities are available)
         if let abilitiesPath = manifest.abilitiesPath {
-            loadAbilities(from: url.appendingPathComponent(abilitiesPath))
+            pack.abilities = try loadAbilities(from: url.appendingPathComponent(abilitiesPath))
         }
 
         // Load heroes
         if let heroesPath = manifest.heroesPath {
-            pack.heroes = try loadHeroes(from: url.appendingPathComponent(heroesPath))
+            pack.heroes = try loadHeroes(
+                from: url.appendingPathComponent(heroesPath),
+                abilities: pack.abilities
+            )
             #if DEBUG
             print("PackLoader: Loaded \(pack.heroes.count) heroes from \(heroesPath)")
             #endif
@@ -115,7 +138,7 @@ public enum PackLoader {
         // Load localization string tables (Epic 5)
         if let localizationPath = manifest.localizationPath {
             let locURL = url.appendingPathComponent(localizationPath)
-            try LocalizationManager.shared.loadStringTables(
+            try localizationManager.loadStringTables(
                 for: manifest.packId,
                 from: locURL,
                 locales: manifest.supportedLocales
@@ -222,15 +245,39 @@ public enum PackLoader {
         return anchors
     }
 
-    /// Load abilities from JSON file (registers in AbilityRegistry)
-    private static func loadAbilities(from url: URL) {
-        // Abilities are registered globally in AbilityRegistry
-        AbilityRegistry.shared.loadFromJSON(at: url)
+    /// Load abilities from path (file or directory).
+    private static func loadAbilities(from url: URL) throws -> [String: HeroAbility] {
+        var abilities: [String: HeroAbility] = [:]
+
+        func loadFromFile(_ file: URL) throws {
+            let jsonAbilities = try loadJSONArray(JSONAbilityDefinition.self, from: file)
+            for jsonAbility in jsonAbilities {
+                guard let ability = jsonAbility.toHeroAbility() else {
+                    throw PackLoadError.invalidManifest(
+                        reason: "Invalid ability '\(jsonAbility.id)' in \(file.lastPathComponent)"
+                    )
+                }
+                abilities[ability.id] = ability
+            }
+        }
+
+        if isDirectory(url) {
+            for file in try jsonFiles(in: url) {
+                try loadFromFile(file)
+            }
+        } else {
+            try loadFromFile(url)
+        }
+
+        return abilities
     }
 
     /// Load heroes from path (file or directory).
     /// Tries StandardHeroDefinition (editor format) first, falls back to PackHeroDefinition (legacy).
-    private static func loadHeroes(from url: URL) throws -> [String: StandardHeroDefinition] {
+    private static func loadHeroes(
+        from url: URL,
+        abilities: [String: HeroAbility]
+    ) throws -> [String: StandardHeroDefinition] {
         var heroes: [String: StandardHeroDefinition] = [:]
 
         func loadFromFile(_ file: URL) throws {
@@ -239,7 +286,7 @@ public enum PackLoader {
             } else {
                 let fileHeroes = try loadJSONArray(PackHeroDefinition.self, from: file)
                 for hero in fileHeroes {
-                    let standard = hero.toStandard()
+                    let standard = try hero.toStandard(abilities: abilities)
                     heroes[standard.id] = standard
                 }
             }
@@ -254,21 +301,21 @@ public enum PackLoader {
         return heroes
     }
 
-    /// Load cards from path (file or directory) with localization
     /// Load cards from path (file or directory).
-    /// Tries StandardCardDefinition (editor format) first, falls back to PackCardDefinition (legacy).
+    /// Tries PackCardDefinition (legacy with `name_ru` / `description_ru`) first to avoid localization loss,
+    /// then falls back to StandardCardDefinition (editor format).
     private static func loadCards(from url: URL) throws -> [String: StandardCardDefinition] {
         var cards: [String: StandardCardDefinition] = [:]
 
         func loadFromFile(_ file: URL) throws {
-            if let standard = try? loadJSONArray(StandardCardDefinition.self, from: file) {
-                for card in standard { cards[card.id] = card }
-            } else {
-                let fileCards = try loadJSONArray(PackCardDefinition.self, from: file)
-                for card in fileCards {
+            if let legacyCards = try? loadJSONArray(PackCardDefinition.self, from: file) {
+                for card in legacyCards {
                     let standard = card.toStandard()
                     cards[standard.id] = standard
                 }
+            } else {
+                let standardCards = try loadJSONArray(StandardCardDefinition.self, from: file)
+                for card in standardCards { cards[card.id] = card }
             }
         }
 
@@ -458,193 +505,5 @@ public enum PackLoader {
         let data = try Data(contentsOf: url)
         let hash = SHA256.hash(data: data)
         return hash.map { String(format: "%02x", $0) }.joined()
-    }
-}
-
-// MARK: - Pack Hero Definition
-
-/// JSON структура для stats героя
-private struct PackHeroStats: Codable {
-    public let health: Int
-    public let maxHealth: Int
-    public let strength: Int
-    public let dexterity: Int
-    public let constitution: Int
-    public let intelligence: Int
-    public let wisdom: Int
-    public let charisma: Int
-    public let faith: Int
-    public let maxFaith: Int
-    public let startingBalance: Int
-
-    public func toHeroStats() -> HeroStats {
-        HeroStats(
-            health: health,
-            maxHealth: maxHealth,
-            strength: strength,
-            dexterity: dexterity,
-            constitution: constitution,
-            intelligence: intelligence,
-            wisdom: wisdom,
-            charisma: charisma,
-            faith: faith,
-            maxFaith: maxFaith,
-            startingBalance: startingBalance
-        )
-    }
-}
-
-/// JSON-совместимое определение героя для загрузки из Content Pack
-/// Статы загружаются из JSON (data-driven)
-private struct PackHeroDefinition: Codable {
-    public let id: String
-    public let heroClass: String?
-    public let name: String
-    public let nameRu: String?
-    public let description: String
-    public let descriptionRu: String?
-    public let icon: String
-    public let baseStats: PackHeroStats
-    public let abilityId: String
-    public let startingDeckCardIds: [String]
-    public let availability: String?
-
-    /// Конвертация в StandardHeroDefinition
-    public func toStandard() -> StandardHeroDefinition {
-        // Определяем доступность
-        let heroAvailability: HeroAvailability
-        switch availability?.lowercased() {
-        case "always_available", nil:
-            heroAvailability = .alwaysAvailable
-        case let str where str?.hasPrefix("requires_unlock:") == true:
-            let condition = String(str!.dropFirst("requires_unlock:".count))
-            heroAvailability = .requiresUnlock(condition: condition)
-        case let str where str?.hasPrefix("dlc:") == true:
-            let packId = String(str!.dropFirst("dlc:".count))
-            heroAvailability = .dlc(packID: packId)
-        default:
-            heroAvailability = .alwaysAvailable
-        }
-
-        // Convert legacy name/nameRu to LocalizableText
-        // If nameRu is provided, create inline LocalizedString
-        // Otherwise, assume it might be a StringKey (if it looks like one) or use as single-language text
-        let localizedName: LocalizableText
-        if name.contains(".") && !name.contains(" ") && name.first?.isLowercase == true {
-            // Looks like a StringKey (e.g., "hero.ragnar.name")
-            localizedName = .key(StringKey(name))
-        } else {
-            // Legacy format: inline LocalizedString
-            localizedName = .inline(LocalizedString(en: name, ru: nameRu ?? name))
-        }
-
-        let localizedDescription: LocalizableText
-        if description.contains(".") && !description.contains(" ") && description.first?.isLowercase == true {
-            // Looks like a StringKey
-            localizedDescription = .key(StringKey(description))
-        } else {
-            // Legacy format: inline LocalizedString
-            localizedDescription = .inline(LocalizedString(en: description, ru: descriptionRu ?? description))
-        }
-
-        // Получаем способность по ID
-        guard let ability = HeroAbility.forAbilityId(abilityId) else {
-            #if DEBUG
-            print("PackLoader: ERROR - Unknown ability ID '\(abilityId)' for hero '\(id)'")
-            #endif
-            fatalError("Missing ability definition for '\(abilityId)'. Add it to HeroAbility.forAbilityId() or hero_abilities.json")
-        }
-
-        // Parse hero class from JSON or infer from ID prefix
-        let resolvedClass: HeroClass
-        if let classStr = heroClass, let parsed = HeroClass(rawValue: classStr) {
-            resolvedClass = parsed
-        } else {
-            let prefix = id.split(separator: "_").first.map(String.init) ?? ""
-            resolvedClass = HeroClass(rawValue: prefix) ?? .warrior
-        }
-
-        return StandardHeroDefinition(
-            id: id,
-            heroClass: resolvedClass,
-            name: localizedName,
-            description: localizedDescription,
-            icon: icon,
-            baseStats: baseStats.toHeroStats(),
-            specialAbility: ability,
-            startingDeckCardIDs: startingDeckCardIds,
-            availability: heroAvailability
-        )
-    }
-}
-
-// MARK: - Pack Card Definition
-
-/// JSON-совместимое определение карты для загрузки из Content Pack с локализацией
-private struct PackCardDefinition: Codable {
-    public let id: String
-    public let name: String
-    public let nameRu: String?
-    public let cardType: CardType
-    public let rarity: CardRarity
-    public let description: String
-    public let descriptionRu: String?
-    public let icon: String
-    public let expansionSet: ExpansionSet
-    public let ownership: CardOwnership
-    public let abilities: [CardAbility]
-    public let faithCost: Int
-    public let balance: CardBalance?
-    public let role: CardRole?
-    public let power: Int?
-    public let defense: Int?
-    public let health: Int?
-    public let wisdom: Int?
-    public let realm: Realm?
-    public let curseType: CurseType?
-
-    /// Конвертация в StandardCardDefinition с локализацией
-    public func toStandard() -> StandardCardDefinition {
-        // Convert legacy name/nameRu to LocalizableText
-        // If name looks like a StringKey (lowercase.dot.separated), treat it as key
-        // Otherwise, create inline LocalizedString from legacy format
-        let localizedName: LocalizableText
-        if name.contains(".") && !name.contains(" ") && name.first?.isLowercase == true {
-            // Looks like a StringKey (e.g., "card.strike.name")
-            localizedName = .key(StringKey(name))
-        } else {
-            // Legacy format: inline LocalizedString
-            localizedName = .inline(LocalizedString(en: name, ru: nameRu ?? name))
-        }
-
-        let localizedDescription: LocalizableText
-        if description.contains(".") && !description.contains(" ") && description.first?.isLowercase == true {
-            // Looks like a StringKey
-            localizedDescription = .key(StringKey(description))
-        } else {
-            // Legacy format: inline LocalizedString
-            localizedDescription = .inline(LocalizedString(en: description, ru: descriptionRu ?? description))
-        }
-
-        return StandardCardDefinition(
-            id: id,
-            name: localizedName,
-            cardType: cardType,
-            rarity: rarity,
-            description: localizedDescription,
-            icon: icon,
-            expansionSet: expansionSet,
-            ownership: ownership,
-            abilities: abilities,
-            faithCost: faithCost,
-            balance: balance,
-            role: role,
-            power: power,
-            defense: defense,
-            health: health,
-            wisdom: wisdom,
-            realm: realm,
-            curseType: curseType
-        )
     }
 }

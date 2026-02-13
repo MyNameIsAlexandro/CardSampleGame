@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Tests/TwilightEngineTests/GateTests/INV_FATE_GateTests.swift
+/// Назначение: Содержит реализацию файла INV_FATE_GateTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import TwilightEngine
 
@@ -42,8 +47,7 @@ final class INV_FATE_GateTests: XCTestCase {
 
     // INV-FATE-006: All fate card suits must be valid
     func test_INV_FATE_006_SuitValidity() {
-        TestContentLoader.loadContentPacksIfNeeded()
-        let fateCards = ContentRegistry.shared.getAllFateCards()
+        let fateCards = TestContentLoader.sharedLoadedRegistry().getAllFateCards()
 
         let validSuits: Set<String> = ["nav", "prav", "yav"]
         var invalid: [String] = []
@@ -59,8 +63,7 @@ final class INV_FATE_GateTests: XCTestCase {
 
     // INV-FATE-007: Choice cards must have both options
     func test_INV_FATE_007_ChoiceCardCompleteness() {
-        TestContentLoader.loadContentPacksIfNeeded()
-        let fateCards = ContentRegistry.shared.getAllFateCards()
+        let fateCards = TestContentLoader.sharedLoadedRegistry().getAllFateCards()
 
         let choiceCards = fateCards.filter { $0.cardType == .choice }
         var incomplete: [String] = []

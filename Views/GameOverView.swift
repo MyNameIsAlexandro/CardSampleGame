@@ -1,3 +1,8 @@
+/// Файл: Views/GameOverView.swift
+/// Назначение: Содержит реализацию файла GameOverView.swift.
+/// Зона ответственности: Ограничен задачами слоя представления и пользовательского интерфейса.
+/// Контекст: Используется в приложении CardSampleGame и связанных потоках выполнения.
+
 import SwiftUI
 import TwilightEngine
 
@@ -14,9 +19,18 @@ struct GameOverView: View {
         return false
     }
 
-    private var defeatReason: String? {
+    private var defeatReason: GameEndDefeatReason? {
         if case .defeat(let reason) = result { return reason }
         return nil
+    }
+
+    private func localizedDefeatReason(_ reason: GameEndDefeatReason) -> String {
+        switch reason {
+        case .worldTensionMax:
+            return L10n.gameOverDefeatReasonWorldTensionMax.localized
+        case .heroDied:
+            return L10n.gameOverDefeatReasonHeroDied.localized
+        }
     }
 
     var body: some View {
@@ -58,7 +72,7 @@ struct GameOverView: View {
                         .padding(.horizontal, Spacing.xl)
                         .opacity(showContent ? 1 : 0)
                 } else if let reason = defeatReason {
-                    Text(L10n.gameOverDefeatReason.localized(with: reason))
+                    Text(L10n.gameOverDefeatReason.localized(with: localizedDefeatReason(reason)))
                         .font(.body)
                         .foregroundColor(AppColors.muted)
                         .multilineTextAlignment(.center)

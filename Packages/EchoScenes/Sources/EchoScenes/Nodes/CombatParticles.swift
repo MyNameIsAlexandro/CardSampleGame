@@ -1,3 +1,8 @@
+/// Файл: Packages/EchoScenes/Sources/EchoScenes/Nodes/CombatParticles.swift
+/// Назначение: Содержит реализацию файла CombatParticles.swift.
+/// Зона ответственности: Реализует визуально-сценовый слой EchoScenes.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import SpriteKit
 
 /// Programmatic particle emitters for combat effects (no .sks files needed).

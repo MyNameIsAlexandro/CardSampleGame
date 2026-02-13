@@ -1,17 +1,26 @@
+/// Файл: Packages/TwilightEngine/Tests/TwilightEngineTests/MiniGameDispatcherTests.swift
+/// Назначение: Содержит реализацию файла MiniGameDispatcherTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import TwilightEngine
+import TwilightEngineDevTools
 
 final class MiniGameDispatcherTests: XCTestCase {
 
     var dispatcher: MiniGameDispatcher!
+    var rng: WorldRNG!
 
     override func setUp() {
         super.setUp()
-        dispatcher = MiniGameDispatcher()
+        rng = TestRNG.make(seed: 42)
+        dispatcher = MiniGameDispatcher(rng: rng)
     }
 
     override func tearDown() {
         dispatcher = nil
+        rng = nil
         super.tearDown()
     }
 
@@ -154,7 +163,7 @@ final class MiniGameDispatcherTests: XCTestCase {
         // Try multiple times to observe victory (RNG-based)
         for _ in 0..<10 {
             let result = dispatcher.dispatch(challenge: challenge, context: context)
-            if result.narrativeText?.contains("Победа") == true {
+            if result.outcome == .victory {
                 sawVictory = true
                 victoryResult = result
                 break
@@ -217,7 +226,7 @@ final class MiniGameDispatcherTests: XCTestCase {
         // When: Run multiple times to observe success rate
         for _ in 0..<iterations {
             let result = dispatcher.dispatch(challenge: challenge, context: context)
-            if result.narrativeText?.contains("разгадана") == true {
+            if result.outcome == .victory {
                 successCount += 1
             }
         }
@@ -266,16 +275,11 @@ final class MiniGameDispatcherTests: XCTestCase {
 
         // When: Run multiple times to observe at least one success
         var sawSuccess = false
-        for _ in 0..<20 {
-            let result = dispatcher.dispatch(challenge: challenge, context: context)
-            if result.narrativeText?.contains("пройдена") == true {
-                sawSuccess = true
-                break
-            }
-        }
+        let result = dispatcher.dispatch(challenge: challenge, context: context)
+        if result.outcome == .victory { sawSuccess = true }
 
-        // Then: With strength 7 vs target 6, most rolls should succeed
-        XCTAssertTrue(sawSuccess, "High strength should pass skill check within 10 tries")
+        // Then: With strength 10 vs target 3, this check should pass
+        XCTAssertTrue(sawSuccess, "High strength should pass skill check")
     }
 
     // MARK: - Reward and Penalty Structure Tests
@@ -301,7 +305,7 @@ final class MiniGameDispatcherTests: XCTestCase {
         var result: MiniGameDispatchResult?
         for _ in 0..<20 {
             let attemptResult = dispatcher.dispatch(challenge: challenge, context: context)
-            if attemptResult.narrativeText?.contains("Победа") == true {
+            if attemptResult.outcome == .victory {
                 result = attemptResult
                 break
             }
@@ -334,7 +338,7 @@ final class MiniGameDispatcherTests: XCTestCase {
         var result: MiniGameDispatchResult?
         for _ in 0..<20 {
             let attemptResult = dispatcher.dispatch(challenge: challenge, context: context)
-            if attemptResult.narrativeText?.contains("Поражение") == true {
+            if attemptResult.outcome == .defeat {
                 result = attemptResult
                 break
             }

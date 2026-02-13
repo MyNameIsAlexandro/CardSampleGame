@@ -1,3 +1,8 @@
+/// Файл: Models/GameSave.swift
+/// Назначение: Содержит реализацию файла GameSave.swift.
+/// Зона ответственности: Описывает предметные модели и их инварианты.
+/// Контекст: Используется в приложении CardSampleGame и связанных потоках выполнения.
+
 import Foundation
 import TwilightEngine
 
@@ -49,14 +54,17 @@ enum SaveLoadError: Error, Equatable {
     }
 }
 
+@MainActor
 class SaveManager: ObservableObject {
     static let shared = SaveManager()
 
     private let savesKey = "twilight_marches_engine_saves"
+    @Published private(set) var isLoaded = false
     @Published var saveSlots: [Int: EngineSave] = [:]
 
     init() {
         loadSaves()
+        isLoaded = true
     }
 
     // MARK: - Public API
@@ -69,13 +77,13 @@ class SaveManager: ObservableObject {
     }
 
     /// Load game from slot into engine
-    func loadGame(from slot: Int, engine: TwilightGameEngine) -> Bool {
-        let result = loadGameWithResult(from: slot, engine: engine)
+    func loadGame(from slot: Int, engine: TwilightGameEngine, registry: ContentRegistry) -> Bool {
+        let result = loadGameWithResult(from: slot, engine: engine, registry: registry)
         return result.success
     }
 
     /// Load game from slot with detailed result (for UI error display)
-    func loadGameWithResult(from slot: Int, engine: TwilightGameEngine) -> SaveLoadResult {
+    func loadGameWithResult(from slot: Int, engine: TwilightGameEngine, registry: ContentRegistry) -> SaveLoadResult {
         guard let save = saveSlots[slot] else {
             return SaveLoadResult(
                 success: false,
@@ -85,7 +93,7 @@ class SaveManager: ObservableObject {
         }
 
         // Check compatibility before loading
-        let compatibility = save.validateCompatibility(with: ContentRegistry.shared)
+        let compatibility = save.validateCompatibility(with: registry)
 
         if !compatibility.isLoadable {
             return SaveLoadResult(
@@ -106,9 +114,9 @@ class SaveManager: ObservableObject {
     }
 
     /// Check compatibility of a save without loading it
-    func checkCompatibility(slot: Int) -> SaveCompatibilityResult? {
+    func checkCompatibility(slot: Int, registry: ContentRegistry) -> SaveCompatibilityResult? {
         guard let save = saveSlots[slot] else { return nil }
-        return save.validateCompatibility(with: ContentRegistry.shared)
+        return save.validateCompatibility(with: registry)
     }
 
     /// Get save from slot (for display purposes)

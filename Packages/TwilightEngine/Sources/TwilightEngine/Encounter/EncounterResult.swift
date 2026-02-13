@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Encounter/EncounterResult.swift
+/// Назначение: Содержит реализацию файла EncounterResult.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 /// Result of a completed encounter
@@ -62,7 +67,7 @@ public enum VictoryType: Equatable, Codable {
 }
 
 /// Per-entity outcome in multi-enemy encounters
-public enum EntityOutcome: String, Codable, Equatable {
+public enum EntityOutcome: String, Codable, Equatable, Sendable {
     case killed
     case pacified
     case escaped
@@ -70,7 +75,7 @@ public enum EntityOutcome: String, Codable, Equatable {
 }
 
 /// Transaction: all world state changes from the encounter
-public struct EncounterTransaction: Equatable {
+public struct EncounterTransaction: Equatable, Sendable {
     public let hpDelta: Int
     public let faithDelta: Int
     public let resonanceDelta: Float

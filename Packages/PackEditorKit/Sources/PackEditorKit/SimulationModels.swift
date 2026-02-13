@@ -1,3 +1,8 @@
+/// Файл: Packages/PackEditorKit/Sources/PackEditorKit/SimulationModels.swift
+/// Назначение: Содержит реализацию файла SimulationModels.swift.
+/// Зона ответственности: Реализует пакетный API редактора контента.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 @preconcurrency import TwilightEngine
 

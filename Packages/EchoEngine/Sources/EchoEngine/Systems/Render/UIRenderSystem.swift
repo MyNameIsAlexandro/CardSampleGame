@@ -1,3 +1,8 @@
+/// Файл: Packages/EchoEngine/Sources/EchoEngine/Systems/Render/UIRenderSystem.swift
+/// Назначение: Содержит реализацию файла UIRenderSystem.swift.
+/// Зона ответственности: Реализует боевой пакет EchoEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import SpriteKit
 import FirebladeECS
 

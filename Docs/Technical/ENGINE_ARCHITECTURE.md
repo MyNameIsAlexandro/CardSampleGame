@@ -1,11 +1,78 @@
 # Game Engine v1.0: Technical Architecture Document
 
-**Версия:** 1.4
+**Версия:** 1.11
 **Статус:** Architecture Lock (Source of Truth)
-**Дата:** 1 февраля 2026
+**Дата:** 12 февраля 2026
+**Last updated (ISO):** 2026-02-12
+**Phase 2 checkpoint:** Epic 66
+**Policy sync:** `CLAUDE.md` v4.1 engineering contract
 **Назначение:** Техническая спецификация для реализации переиспользуемого игрового ядра.
 
-**Последние изменения (v1.4):**
+**Последние изменения (v1.11):**
+- Policy sync с `CLAUDE.md` v4.1:
+  - закреплён транзакционный контракт внешнего боя (start/commit только через канонический engine-path),
+  - закреплён runtime resume-l10n контракт: bridge обязан пере-локализовывать user-facing display строки по активному `ContentRegistry` + `LocalizationManager`,
+  - закреплён запрет на отображение service/icon-токенов (`cross.fill`, `icon.*`) как plain text в UI.
+- Runtime quality sync:
+  - absolute hygiene-policy в QA/architecture контуре: first-party `<=600` строк/файл и engine `<=5` top-level типов/файл без legacy whitelist.
+- Epic localization checkpoint:
+  - resume-path relocalization проверяется регрессионным тестом `SaveLoadTests.testEchoEncounterBridgeRelocalizesResumeDeckCardsFromRegistry`.
+
+**Предыдущие изменения (v1.10):**
+- Epic 65: Documentation single-control-point hardening:
+  - документ получил machine-readable метаданные (`Last updated (ISO)` и `Phase 2 checkpoint`),
+  - docs-sync gate валидирует date/checkpoint parity между:
+    - `Docs/Technical/ENGINE_ARCHITECTURE.md`,
+    - `Docs/QA/QUALITY_CONTROL_MODEL.md`,
+    - `Docs/QA/TESTING_GUIDE.md`,
+    - `Docs/plans/2026-02-07-audit-refactor-phase2-epics.md`.
+- Epic 66: Release hygiene hard-stop:
+  - `.github/workflows/tests.yml` и `.github/ci/run_release_check.sh` используют `validate_repo_hygiene.sh --require-clean-tree`,
+  - `validate_docs_sync.sh` блокирует drift, если hard-mode invocation отсутствует в workflow/release-runner контракте.
+
+**Предыдущие изменения (v1.9):**
+- Package decomposition wave expanded from app layer into first-party engine packages:
+  - split `JSONContentProvider+SchemaQuests.swift` into focused schema files (`...SchemaQuests`, `...SchemaQuestConditions`, `...SchemaQuestChoiceCondition`, `...SchemaQuestResourceThresholdCondition`, `...SchemaQuestAvailabilityRewards`, `...SchemaChallenges`),
+  - split `JSONContentProvider+SchemaEvents.swift` into focused modules (`...SchemaEvents`, `...SchemaRegionsAnchors`, `...SchemaEventAvailability`, `...SchemaEventChoices`, `...SchemaEventCombat`),
+  - split `CodeContentProvider+JSONLoading.swift` into focused JSON-loading modules (`...JSONLoading`, `...JSONAvailabilityLoading`, `...JSONChoiceLoading`),
+  - split `EncounterViewModel.swift` into bounded-context app modules (`...EncounterViewModel`, `...EncounterViewModel+PlayerActions`, `...EncounterViewModel+PhaseMachine`, `...EncounterViewModel+StateSyncAndLog`),
+  - split monolithic `Localization.swift` into bounded key modules (`Localization+CoreAndRules`, `Localization+WorldAndNavigation`, `Localization+AdvancedSystems`, `Localization+RemainingKeys`) with full symbol-compatibility preserved,
+  - reduced schema parsing coupling and lowered per-file type concentration in `Data/Providers`.
+- Structural cleanup rules unified across app and first-party packages:
+  - no legacy/type allowlists for first-party code hygiene checks,
+  - vendor/build folders remain excluded only (`Packages/ThirdParty`, `/.build/`, `/.codex_home/`).
+- Russian header comments adopted for key entry-point files during decomposition to reduce reverse-engineering overhead in maintenance.
+
+**Предыдущие изменения (v1.8):**
+- Epic 53 decomposition checkpoint progressed to stabilized baseline:
+  - `TwilightGameEngine.swift` reduced to `520` lines (core mutation points remain explicit in engine core APIs),
+  - action/read-only/persistence/query surfaces extracted into focused `TwilightGameEngine+*.swift` modules.
+- Engine-first boundary contract is now hard-gated and green:
+  - `BattleArenaView` remains sandboxed from world-engine mutation/RNG commit paths (architecture gate),
+  - app-layer direct `engine.services.rng`/`nextSeed` usage is blocked by static gates,
+  - direct app-layer mutation of critical engine fields is blocked by static gates.
+- Quality model hardened and verified:
+  - `CodeHygieneTests` enforces hard `<=600` lines per first-party Swift file (vendor/build excluded only),
+  - `CodeHygieneTests` enforces hard engine type-limit (`<=5` public types per file) without legacy allowlist.
+- Endgame error contract tightened:
+  - defeat reason path uses typed reason codes (`GameEndDefeatReason`) with localization mapping at app layer.
+
+**Предыдущие изменения (v1.6):**
+- Epic 53 decomposition checkpoint #1:
+  - extracted read-only query surface from `TwilightGameEngine.swift` into `Core/TwilightGameEngine+ReadOnlyQueries.swift`,
+  - extracted world bootstrap defaults/model into `Core/EngineWorldBootstrapState.swift`,
+  - reduced `TwilightGameEngine.swift` from `2139` to `2071` lines without widening app mutation permissions.
+
+**Предыдущие изменения (v1.5):**
+- Engine monolith decomposition wave started:
+  - extracted engine world-state models (`EventTrigger`, `EngineRegionState`, `EngineAnchorState`, `CombatState`) into `Core/EngineWorldStateModels.swift`,
+  - kept persistence mutations in `TwilightGameEngine.swift` to preserve `private` boundary integrity.
+- Arena sandbox contract remains explicit:
+  - arena uses local deterministic seed state (no world RNG service reads),
+  - arena does not commit combat result into world save/action pipeline.
+- Added architecture backlog epics (53+) for monolith decomposition and legacy cleanup governance.
+
+**Предыдущие изменения (v1.4):**
 - EchoEngine: Fate Resolution Service (keyword + suit matching)
 - Diplomacy system: playerInfluence(), AttackTrack, escalation/de-escalation
 - Dual victory: CombatOutcome.victory(.killed) / .victory(.pacified)
@@ -698,6 +765,13 @@ struct QuestRuntimeState: Codable {
 | 6 | Instant события не создают бесконечные цепочки | `testNoInfiniteInstantEventChain()` |
 | 7 | Один seed (WorldRNG) → полностью идентичные результаты | `testDeterministicReproducibility()` |
 
+### 6.1 Дополнительные архитектурные инварианты (Phase 2 hard gates)
+
+- Изменение runtime state допускается только через action pipeline/facade в engine.
+- `BattleArena` остаётся sandbox и не использует world RNG / world commit path.
+- Resume/external-combat payload обязан релокализовываться перед рендером по активным registry/locale.
+- UI не рендерит service/icon токены через `Text(...)`; иконки выводятся только как `Image(systemName:)`.
+
 ---
 
 ## 7. Extension Points
@@ -867,6 +941,11 @@ Engine/Data/Definitions/
 
 > См. [CONTENT_PACK_GUIDE.md](./CONTENT_PACK_GUIDE.md#pack-format-roadmap) для деталей roadmap.
 
+**Тестовый API boundary (runtime hygiene):**
+- Тестовые helper-методы `ContentRegistry` (`resetForTesting`, `registerMockContent`, `loadMockPack`, `checkIdCollisions`) помечены как `@_spi(Testing)`.
+- Обычные production-импорты `TwilightEngine` не видят эти методы; доступ разрешён только тестам через SPI.
+- Контракт закреплён gate-проверкой `AuditArchitectureBoundaryGateTests.testContentRegistryTestingHelpersAreSpiOnly`.
+
 ---
 
 ## Приложение A: Текущая реализация
@@ -876,13 +955,18 @@ Engine/Data/Definitions/
 ```
 Engine/
 ├── Core/
-│   ├── EngineProtocols.swift       # Все контракты
+│   ├── EngineProtocols.swift       # Core phase/result types
+│   ├── EngineProtocols+*.swift     # Контракты по доменам (time/pressure/event/...)
 │   ├── TimeEngine.swift            # Управление временем
 │   ├── PressureEngine.swift        # Система давления
 │   ├── EconomyManager.swift        # Транзакции ресурсов
 │   ├── RequirementsEvaluator.swift # Оценка требований
 │   ├── GameLoop.swift              # Оркестратор
-│   ├── TwilightGameAction.swift    # Все игровые действия
+│   ├── TwilightGameAction.swift    # Action enums/input/outcome
+│   ├── TwilightGameActionResult.swift # Result/error/state-change модели
+│   ├── EngineWorldStateModels.swift # Вынесенные world-state модели
+│   ├── EngineWorldBootstrapState.swift # Bootstrap world defaults
+│   ├── TwilightGameEngine+ReadOnlyQueries.swift # Read-only facade
 │   ├── TwilightGameEngine.swift    # Центральный оркестратор
 │   └── CoreGameEngine.swift        # Generic engine (Content Pack aware)
 ├── ContentPacks/                   # Content Pack инфраструктура (runtime)
@@ -890,13 +974,16 @@ Engine/
 │   ├── ContentRegistry.swift       # Runtime content registry
 │   ├── ContentManager.swift        # Pack lifecycle management
 │   ├── BinaryPack.swift            # Binary pack reader/writer
-│   └── PackTypes.swift             # Pack type definitions
+│   ├── PackTypes.swift             # Semantic version + base pack enums
+│   └── PackTypes+*.swift           # LoadedPack/cache/error модели
 ├── Config/
 │   ├── TwilightMarchesConfig.swift # Конфигурация игры
 │   └── DegradationRules.swift      # Правила деградации
 ├── Heroes/                         # Модуль героев
 │   ├── HeroDefinition.swift        # Протоколы определения героев
-│   ├── HeroAbility.swift           # Система способностей
+│   ├── HeroAbility.swift           # Основная модель способности
+│   ├── HeroAbilityConditions.swift # Trigger/condition/cost type models
+│   ├── HeroAbilityEffects.swift    # Effect models
 │   ├── HeroRegistry.swift          # Реестр героев (загрузка из JSON)
 │   └── HEROES_MODULE.md            # Документация модуля
 ├── Cards/                          # Модуль карт
@@ -909,13 +996,22 @@ Engine/
 │   ├── Definitions/                # Definition structures
 │   │   ├── RegionDefinition.swift
 │   │   ├── EventDefinition.swift
+│   │   ├── EventDefinition+*.swift
 │   │   ├── QuestDefinition.swift
 │   │   ├── AnchorDefinition.swift
 │   │   ├── EnemyDefinition.swift
+│   │   ├── EnemyDefinitionAbility.swift
 │   │   └── *Adapter.swift          # Bridge to legacy models
 │   └── Providers/
 │       ├── ContentProvider.swift   # Protocol
+│       ├── CodeContentProvider.swift
+│       ├── CodeContentProvider+JSON*.swift
 │       └── JSONContentProvider.swift
+├── Models/
+│   ├── ExplorationModels.swift     # Region/anchor core models
+│   ├── ExplorationModels+*.swift   # Event/quest/ending/main-quest модели
+│   ├── CardType.swift
+│   └── CardType+Campaign.swift
 └── ENGINE_ARCHITECTURE.md          # Этот документ
 
 ContentPacks/
@@ -964,14 +1060,14 @@ PackCompilerTool/                   # CLI for pack development
 
 ### B.1 Архитектура
 
-Герои загружаются из Content Pack (`heroes.json`) через `HeroRegistry`:
+Герои загружаются из Content Pack (`heroes.json`) через `ContentRegistry.heroRegistry`:
 
 ```swift
-// Получение героя по ID
-let hero = HeroRegistry.shared.hero(id: "warrior_ragnar")
+let contentRegistry = ContentRegistry()
+try contentRegistry.loadPacks(from: packURLs)
 
-// Создание игрока с героем
-let player = Player(name: hero.name, maxHandSize: 5, heroId: "warrior_ragnar")
+// Получение героя по ID
+let hero = contentRegistry.heroRegistry.hero(id: "warrior_ragnar")
 ```
 
 ### B.2 Герои (из heroes.json)
@@ -1063,7 +1159,7 @@ let player = Player(name: hero.name, maxHandSize: 5, heroId: "warrior_ragnar")
 
 ```swift
 // Пример получения героя
-let hero = HeroRegistry.shared.hero(id: "warrior_ragnar")
+let hero = contentRegistry.heroRegistry.hero(id: "warrior_ragnar")
 let startingDeck = hero?.startingDeckCardIDs
 ```
 
@@ -1086,11 +1182,9 @@ let startingDeck = hero?.startingDeckCardIDs
 | expansion | Требует DLC | Карты дополнения |
 
 ```swift
-// Пример получения доступных карт
-let cards = CardRegistry.shared.availableCards(
-    forHeroID: "warrior_ragnar",
-    heroClass: .warrior
-)
+// Пример получения карт из загруженных паков
+let cards = contentRegistry.getAllCards()
+let strike = contentRegistry.getCard(id: "strike_basic")
 ```
 
 ### E.4 Модуль Combat
@@ -1184,9 +1278,8 @@ let result = sim.combatResult  // CombatResult после завершения �
 #### EchoEncounterBridge (Интеграция)
 
 ```swift
-// TwilightGameEngine extension
-let config = engine.makeEchoCombatConfig()   // собирает параметры из engine state
-engine.applyEchoCombatResult(result)          // применяет resonance, faith, loot, fate deck
+let config = EchoEncounterBridge.makeCombatConfig(engine: engine) // собирает параметры из engine state
+EchoCombatBridge.applyCombatResult(result, to: engine)            // commit через action pipeline
 ```
 
 ### E.6 Интеграция модулей (обновлено)
@@ -1218,20 +1311,14 @@ engine.applyEchoCombatResult(result)          // применяет resonance, f
 
 **Добавление DLC пакета:**
 ```swift
-let dlcSource = DLCHeroDataSource(
-    id: "dark_expansion",
-    name: "Dark Expansion",
-    packID: "dark_expansion",
-    heroes: [/* heroes */]
-)
-HeroRegistry.shared.addDataSource(dlcSource)
+let contentRegistry = ContentRegistry()
 
-let cardSource = JSONCardDataSource(
-    id: "dark_cards",
-    name: "Dark Expansion Cards",
-    fileURL: Bundle.main.url(forResource: "dark_cards", withExtension: "json")!
-)
-CardRegistry.shared.addDataSource(cardSource)
+// DLC ships as a compiled `.pack` file (see pack-compiler in PackAuthoring).
+try contentRegistry.loadPack(from: dlcPackURL)
+
+// Heroes/cards from the DLC become part of the canonical registry immediately.
+let dlcHeroes = contentRegistry.heroRegistry.allHeroes
+let dlcCard = contentRegistry.getCard(id: "dark_strike")
 ```
 
 ---

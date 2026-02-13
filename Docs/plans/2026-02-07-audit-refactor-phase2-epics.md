@@ -1,12 +1,13 @@
 # Phase 2 (Post-Epic 14) — Audit & Refactor Backlog
 
 Scope: architecture correctness + quality gates. This is **not** gameplay/product polishing.
+Policy sync baseline: `CLAUDE.md` v4.1 engineering contract.
 
 ## What’s already done (post-Epic 14)
 
 - External combat determinism hardening: external combat seed allocated in `performAction(.startCombat)` and reused (UI reads no longer advance RNG); bridges commit results via `performAction(.combatFinish)`.
 
-## Status snapshot (2026-02-08)
+## Status snapshot (2026-02-12)
 
 - `Epic 15`: DONE (canonical consequences + mini-game action path covered by target tests).
 - `Epic 16`: DONE (typed invalid-action reasons + l10n mapping + gate checks, no raw reason construction in `Engine/Core`).
@@ -35,14 +36,36 @@ Scope: architecture correctness + quality gates. This is **not** gameplay/produc
 - `Epic 39`: DONE (release readiness consolidation: build/content converted to quality-gated artifacts, aggregated `rc_full` validation in CI, and single-command local `run_release_check.sh` orchestration).
 - `Epic 40`: DONE (external combat snapshot/context extraction into TwilightEngine package + app bridge hardening gate to prevent regression).
 - `Epic 41`: DONE (public RNG seed facade removed; app-layer `nextSeed` access blocked by static gates; seed capability anchored to action pipeline).
-- `Epic 42`: DONE (BattleArena sandbox RNG hardening: local deterministic RNG instance in arena flow + static gate ban for `UInt64.random` in `BattleArenaView`).
+- `Epic 42`: DONE (BattleArena sandbox RNG hardening: arena-local deterministic seed generator in arena flow + static gate ban for `UInt64.random` in `BattleArenaView`).
 - `Epic 43`: DONE (app-layer external-combat bridges de-extended: `EchoCombatBridge`/`EchoEncounterBridge` are adapter types, call-sites migrated, and static gate blocks `extension TwilightGameEngine` reintroduction in `Views/Combat`).
 - `Epic 47`: DONE (save/resume fault-injection matrix added with interrupted-write fallback recovery, partial snapshot resume, and deterministic fingerprint parity checks).
 - `Epic 48`: DONE (documentation sync validator gate added; CI/RC now fail on mandatory contract drift across epic ledger + QA model + testing guide).
 - `Epic 49`: DONE (`run_quality_gate.sh` now renders `summary.md` as latest-only per gate ID; duplicate historical attempts remain in `gates.jsonl` only).
 - `Epic 50`: DONE (local release runner now hard-gates on clean tracked working tree via `validate_repo_hygiene.sh --require-clean-tree` before any gate execution).
+- `Epic 58`: DONE (removed compatibility overload shim for `registerMockContent(...)`; tests now rely on a single canonical API with explicit `abilities` support and default empty value).
+- `Epic 59`: DONE (runtime flake stabilization in `GameplayFlowTests`/`MiniGameDispatcherTests`: config-driven initial tension assertion, narrative-text coupling removed in favor of `outcome`, deterministic RNG seed in suite setup/teardown).
+- `Epic 60`: DONE (test-only `ContentRegistry` helpers moved behind SPI boundary; app-level tests decoupled from test-support API; architecture gate added for SPI visibility).
+- `Epic 61`: DONE (absolute engine type-gate expansion with decomposition: split Story/Combat/Quest/Config type carriers so all audited engine directories satisfy `<=5` top-level types per file without legacy exemptions).
+- `Epic 68`: DONE (file-header contract coverage: canonical 4-line Russian header enforced by `CodeHygieneTests` and backfilled across all first-party Swift files).
+- `Epic 53`: DONE (decomposition baseline stabilized: `TwilightGameEngine.swift` reduced to `505` lines; action/query/persistence surfaces split into focused modules; architecture + quality gates green).
+- `Cleanup checkpoint (2026-02-09)`: DONE (removed duplicated BattleArena sandbox gate from `AuditGateTests`; canonicalized it in `AuditArchitectureBoundaryGateTests`; added anti-duplicate gate `testAuditGateSuitesDoNotDuplicateTestNames` to prevent future drift).
 - `App strict-concurrency note`: app strict build baseline is green (no compiler file/line warnings/errors) with local `Packages/ThirdParty/FirebladeECS` override.
 - `Release readiness checkpoint (local)`: `run_release_check.sh` passed with `rc_engine_twilight`, `rc_app`, `rc_build_content`, and `rc_full`.
+- `Current verification checkpoint (2026-02-11)`: green on focused hard gates (`AuditArchitectureBoundaryGateTests` 27/27 incl. `testBattleArenaRemainsSandboxedFromWorldEngineCommitPath`, `AuditGateTests`, `CodeHygieneTests`) + full `swift test --package-path Packages/TwilightEngine` (603/603) + `swift test --package-path Packages/EchoEngine`.
+- `BattleArena RNG/state finding`: CLOSED (`testBattleArenaRemainsSandboxedFromWorldEngineCommitPath` green; arena flow does not call engine RNG or world-state commit path).
+- `Epic 62`: DONE (checkpoint #1: removed dead legacy `CombatView` screen implementation; extracted app-level combat summary models into `AppCombatOutcome`/`AppCombatStats`; event/arena call-sites migrated. checkpoint #2: removed dead external-combat legacy adapter methods from `ExternalCombatSnapshot` extension and finalized architecture gate run with `AuditArchitectureBoundaryGateTests` green).
+- `Epic 63`: DONE (checkpoint #1 complete: decomposed `JSONContentProvider+SchemaQuests.swift` into focused schema modules for quests/conditions/rewards/challenges; checkpoint #2 complete: decomposed `JSONContentProvider+SchemaEvents.swift` into event-core/regions-anchors/availability/choices/combat modules; checkpoint #3 complete: decomposed `CodeContentProvider+JSONLoading.swift` into event/availability/choice loading modules; checkpoint #4 complete: decomposed `EncounterViewModel.swift` into player-actions/phase-machine/state-sync modules; checkpoint #5 complete: decomposed `Localization.swift` into `Localization+CoreAndRules`, `Localization+WorldAndNavigation`, `Localization+AdvancedSystems`, `Localization+RemainingKeys` with symbol-compatibility; checkpoint #6 complete: decomposed `INV_KW_GateTests.swift` into helpers + keyword-effects/flow extensions without behavior changes; checkpoint #7 complete: decomposed `SafeContentAccessTests.swift` into access/readiness-validation extensions with 22/22 suite pass; checkpoint #8 complete: extracted card presentation mapping into `Views/CardPresentation.swift` and split `HandCardView`/`CompactCardView` into dedicated files; checkpoint #9 complete: split `CombatScene+Flow.swift` into orchestration (`CombatScene+Flow.swift`) and low-level arena/effects helpers (`CombatScene+ArenaEffects.swift`) with targeted EchoScenes tests green; checkpoint #10 complete: started app root-menu decomposition by extracting `CharacterSelectionScreen`/`SaveSlotSelectionScreen`/`LoadSlotSelectionScreen` under `App/Screens`, wiring them into `CardSampleGame.xcodeproj`, and stabilizing compile contracts (`SaveManager.isLoaded`, missing design tokens) with focused `xcodebuild` gates green; checkpoint #11 complete: integrated `ContentFlow` as the single navigation model in `ContentView` (removed duplicated start/load/continue state and boolean screen flags), added load-alert UI binding, and confirmed `CodeHygieneTests` + `AuditArchitectureBoundaryGateTests` green after the refactor; checkpoint #12 complete: closed remaining `>=550` near-limit offenders via bounded splits (`TwilightGameEngine+ActionPipeline` time helpers, `EncounterEngine` suit-matching helpers, `ManagedPack` equatable extraction, gate-suite helper relocation), resulting in zero first-party files at `>=550` with `CodeHygieneTests`, `AuditArchitectureBoundaryGateTests`, and `AuditGateTests` green).
+- `Epic 64`: DONE (test observability hardening: noisy test-helper diagnostics are now gated by `TWILIGHT_TEST_VERBOSE`, `GameplayFlowTests` dropped residual ad-hoc stdout logging, and content-loading debug traces in app/engine (`ContentLoader`, `ContentRegistry`) are quiet by default while remaining opt-in for deep diagnostics; focused validations green: `ContentValidationTests`, `AuditGateTests/testAllPrintStatementsAreDebugOnly`, `swift test --filter ContentLoadingIntegrationTests`, `swift test --filter GameplayFlowTests`).
+- `Epic 65`: DONE (documentation single-control-point hardening: `validate_docs_sync.sh` now validates source-of-truth date parity (`Last updated` / `Status snapshot` / `Last updated (ISO)`), Phase-2 checkpoint parity (`**Phase 2 checkpoint:** Epic N`) across QA/testing/architecture docs, and requires ledger `DONE` marker for that checkpoint epic).
+- `Epic 66`: DONE (release hygiene hard-stop is mandatory in CI and local release runner: `validate_repo_hygiene.sh --require-clean-tree` is enforced both before and after release profile execution; docs-sync gate validates this contract in workflow + release runner scripts).
+- `Localization runtime checkpoint`: DONE (external-combat resume payload relocalization hardened via active registry/locale resolution; service/icon token leakage is covered by static UI gate and save/load regression suite).
+
+## Pending backlog (post-Epic 68)
+
+Priority is architectural simplification and long-term maintainability, not feature expansion.
+
+- На текущем срезе открытых epics нет.
+- `Epic 67` и `Epic 68` закрыты и зафиксированы в секции `## Epics` ниже как каноническая детализация deliverables/acceptance.
 
 ## Epics
 
@@ -171,13 +194,14 @@ Goal: enforce non-regression of strict-concurrency guarantees in continuous inte
 
 Deliverables:
 - Extend `.github/workflows/tests.yml` with a dedicated strict-concurrency step for `TwilightEngine`.
+- Route strict diagnostics through `.github/ci/spm_twilightengine_strict_concurrency_gate.sh` in build-only mode (`swift build --build-tests`) to isolate compiler contracts from runtime test flakiness.
 - Fail CI when compiler emits strict-concurrency diagnostics (`warning`/`error`) under:
   - `-Xswiftc -strict-concurrency=complete`
   - `-Xswiftc -warn-concurrency`
 
 Acceptance:
 - CI fails on new strict-concurrency compiler diagnostics in `TwilightEngine`.
-- Existing package test matrix still runs unchanged for other packages.
+- Runtime package behavior remains covered by the regular TwilightEngine test matrix gate.
 
 ### Epic 25 [DONE] — CI Determinism Smoke Gate
 
@@ -468,15 +492,16 @@ Acceptance:
 Goal: ensure Quick Battle uses an isolated RNG contract and cannot regress to world-state RNG/commit coupling.
 
 Deliverables:
-- Replaced `UInt64.random(...)` seed generation in `Views/BattleArenaView.swift` with a dedicated local `WorldRNG` sandbox instance.
-- Added explicit seed helper (`nextBattleSeed`) to keep battle seed generation local and deterministic within arena scope.
-- Hardened static gate in `CardSampleGameTests/GateTests/AuditGateTests.swift`:
-  - `testBattleArenaRemainsSandboxedFromWorldEngineCommitPath` now also forbids `UInt64.random(` in `BattleArenaView.swift`.
+- Replaced `UInt64.random(...)` seed generation in `Views/BattleArenaView.swift` with an arena-local deterministic seed generator.
+- Added explicit seed helper (`nextArenaSeed`) to keep battle seed generation local and deterministic within arena scope.
+- Hardened static gate `testBattleArenaRemainsSandboxedFromWorldEngineCommitPath`:
+  - actively enforced in `CardSampleGameTests/GateTests/AuditArchitectureBoundaryGateTests.swift` (canonical architecture gate target).
+  - gate forbids `UInt64.random(` in `BattleArenaView.swift`.
 
 Acceptance:
 - `BattleArenaView` no longer uses system random for battle seed generation.
 - Arena flow remains isolated from world-engine mutation paths and `engine.services.rng`.
-- Targeted `AuditGateTests` coverage remains green.
+- Targeted `AuditArchitectureBoundaryGateTests` coverage remains green.
 
 ### Epic 43 [DONE] — External Combat Adapter De-Extension
 
@@ -484,14 +509,15 @@ Goal: remove app-layer `TwilightGameEngine` extensions for external combat adapt
 
 Deliverables:
 - Replaced app-layer `extension TwilightGameEngine` adapters in `Views/Combat/EchoCombatBridge.swift` and `Views/Combat/EchoEncounterBridge.swift` with plain adapter/service types.
-- Migrated app and test call-sites to adapter API (`EchoCombatBridge.applyCombatResult(...)`, `EchoEncounterBridge.makeCombatConfig(...)`, `EchoEncounterBridge.storeCombatSnapshot(...)`).
+- Migrated app and test call-sites to adapter API (`EchoCombatBridge.applyCombatResult(...)`, `EchoEncounterBridge.makeCombatConfig(...)`, `EncounterBridge.storeCombatSnapshot(...)`).
 - Hardened static architecture gate in `AuditGateTests` to scan all combat bridge files and fail on `extension TwilightGameEngine` regressions.
+- Added explicit static gate to forbid app-layer direct `combat.setupCombatEnemy(...)` calls (combat start must go through `.startCombat`).
 
 Acceptance:
 - App no longer adds `extension TwilightGameEngine` in `Views/Combat`.
 - Canonical adapter entry points are represented by plain mapper/service types and keep gate allowlists green.
 
-## Pending backlog (post-Epic 50)
+## Historical backlog snapshot (post-Epic 61)
 
 ### Epic 44 [DONE] — Replay Fixture Governance
 
@@ -619,3 +645,263 @@ Deliverables:
 Acceptance:
 - `run_release_check.sh` aborts immediately on tracked working-tree drift.
 - CI profile validation logic stays unchanged (still driven by `gates.jsonl`/RC profiles).
+
+### Epic 51 [DONE] — Core Journal/Resonance Primitive Canonicalization
+
+Goal: remove compatibility shims in core/journal paths and codify a single canonical mutation API for journal and resonance state.
+
+Deliverables:
+- Added explicit core-state primitives in `TwilightGameEngine`:
+  - `resolveRegionName(forRegionId:)`
+  - `appendEventLogEntry(dayNumber:...)`
+  - `setWorldResonance(_:)` (canonical clamp path)
+- Reworked `TwilightGameEngine+Journal.swift` to use core primitives only and avoid UI mirror state coupling (`publishedRegions`, `publishedEventLog`, `setEventLog`).
+- Replaced action-path resonance updates to use `setWorldResonance(_:)` instead of legacy helper semantics.
+- Added active architecture gate `AuditGateTests.testEngineJournalUsesCoreStatePrimitives` to block regression.
+- Updated QA docs (`QUALITY_CONTROL_MODEL.md`, `TESTING_GUIDE.md`) with the core mutation contract.
+
+Acceptance:
+- Journal extension no longer depends on UI mirror state fields.
+- Resonance mutation path in action execution is canonical and explicit.
+- Static gate fails if journal/resonance paths regress to mirror-state or legacy helper usage.
+
+### Epic 52 [DONE] — Test Host Runtime De-Duplication Gate
+
+Goal: eliminate duplicate `TwilightEngine` runtime loading in hosted app tests and lock the fix with a static project gate.
+
+Deliverables:
+- Removed direct `TwilightEngine` linkage from `CardSampleGameTests` target in `CardSampleGame.xcodeproj/project.pbxproj` (tests now consume the host app runtime copy).
+- Added active architecture gate `AuditGateTests.testCardSampleGameTestsDoesNotLinkTwilightEngineDirectly`.
+  - Validates test target package dependencies do not include `TwilightEngine`.
+  - Validates test target frameworks phase does not link `TwilightEngine in Frameworks`.
+- Verified target build graph remains valid (`CardSampleGameTests` still imports TwilightEngine via host-app framework search paths).
+
+Acceptance:
+- Hosted test runs no longer emit `Class ... is implemented in both` for `TwilightEngine`.
+- Gate fails on any reintroduction of direct `TwilightEngine` linkage in `CardSampleGameTests`.
+
+### Epic 53 [DONE] — TwilightGameEngine Monolith Decomposition (Phase A)
+
+Goal: reduce `TwilightGameEngine.swift` complexity without weakening encapsulation or action-pipeline invariants.
+
+Deliverables:
+- [x] Extracted read-only query surface from `TwilightGameEngine.swift` to `Core/TwilightGameEngine+ReadOnlyQueries.swift`.
+- [x] Extracted world bootstrap state model to `Core/EngineWorldBootstrapState.swift` and switched new game/fallback initialization to this model.
+- [x] Extracted exploration availability query + combat/resonance/external-commit support into `Core/TwilightGameEngine+ExplorationQueries.swift` and `Core/TwilightGameEngine+StateSupport.swift`.
+- [x] Extracted action validation/time/execution pipeline helpers into `Core/TwilightGameEngine+ActionPipeline.swift`.
+- [x] Extracted save snapshot builder into `Core/TwilightGameEngine+PersistenceSnapshot.swift` without widening engine private-state visibility.
+- [x] Extracted bootstrap/mapping/validation helpers into `Core/TwilightGameEngine+BootstrapAndValidation.swift`.
+- [x] Preserved mutation-heavy persistence/action internals in `TwilightGameEngine.swift` (no forced `private -> internal` widening).
+- [x] Added decomposition checkpoint updates in QA docs with file-size trend tracking.
+- [x] Phase A completed (monolith reduced below the hard gate; helpers extracted without widening private state).
+
+Acceptance:
+- `TwilightGameEngine.swift` size decreases in measurable steps (`2139 -> 2071 -> 1998 -> 1916 -> 1855 -> 1085 -> 505` through checkpoints #1/#6).
+- No new app-layer direct state mutation paths are introduced (`AuditArchitectureBoundaryGateTests` green).
+- Determinism/schema smoke gates remain green (`INV_RNG`, `INV_SCHEMA28`, `INV_REPLAY30`, `INV_RESUME47`, `ContentRegistryRegistrySyncTests` green).
+
+### Epic 54 [DONE] — ContentRegistry Monolith Decomposition (Phase A)
+
+Goal: reduce `ContentRegistry.swift` size while preserving atomic reload and registry-sync contracts.
+
+Deliverables:
+- Extract independent value types/utilities (`BalancePackAccess` and other non-state-coupled helpers) into standalone files.
+- Keep merge/reload internals co-located with private state until dedicated mutation services are introduced.
+- Maintain deterministic ordering guarantees for registry iteration APIs.
+
+Acceptance:
+- `ContentRegistry.swift` remains below the hard line-limit gate and stays behaviorally equivalent.
+- `ContentRegistryRegistrySyncTests` and replay smoke remain green.
+
+### Epic 55 [DONE] — Large View Decomposition (`WorldMapView`)
+
+Goal: split oversized view composition into domain subviews without moving engine mutations into UI.
+
+Deliverables:
+- Decompose `Views/WorldMapView.swift` into focused view components (status/header/map/actions/overlays).
+- Extracted subviews into dedicated files:
+  - `Views/WorldMap/EventLogEntryView.swift`
+  - `Views/WorldMap/EngineRegionCardView.swift`
+  - `Views/WorldMap/EngineRegionDetailView.swift`
+  - `Views/WorldMap/EngineEventLogView.swift`
+- Keep all world-state commits routed via `performAction`/engine facade methods.
+- Add static gate checks preventing direct engine state assignment from new view components.
+
+Acceptance:
+- `WorldMapView.swift` reduced to `287` lines.
+- App architecture gates continue to pass.
+
+### Epic 56 [DONE] — Gate Suite Modularization (Phase B)
+
+Goal: reduce maintenance risk in giant gate files and improve ownership boundaries.
+
+Deliverables:
+- Split `AuditGateTests.swift` by contract domains (determinism/l10n/content/arch boundaries).
+- Keep gate IDs and CI profile mapping stable.
+- Update quality inventory report expectations if suite names change.
+
+Acceptance:
+- `AuditGateTests.swift` reduced below the hard line-limit gate with no contract loss.
+- `app_gate_2a_audit_core` and `app_gate_2b_audit_architecture` remain profile-compliant.
+
+### Epic 57 [DONE] — Legacy Cleanup Hard Gate
+
+Goal: make dead-code and compatibility-shim drift a failing quality signal.
+
+Deliverables:
+- Removed dead app-layer combat facade:
+  - deleted `Views/Combat/EncounterBridge.swift` (no call-sites; superseded by canonical engine/bridge entry points).
+- Added static hygiene validator:
+  - `.github/ci/validate_legacy_cleanup.sh`
+  - blocks TODO/FIXME markers in first-party sources,
+  - enforces that bridge/adapter entry points have call-sites in production sources,
+  - enforces that `COMPAT_REMOVE_BY: YYYY-MM-DD` markers are not expired (policy hook for future compatibility shims).
+- Added CI/local gate integration under quality dashboard:
+  - `legacy_cleanup` gate in `.github/workflows/tests.yml` (`content-validation` job),
+  - local runner integration in `.github/ci/run_release_check.sh`,
+  - RC profile enforcement via `.github/ci/validate_release_profile.sh` (`rc_build_content`, `rc_full`).
+- Updated QA operational docs:
+  - `Docs/QA/QUALITY_CONTROL_MODEL.md`
+  - `Docs/QA/TESTING_GUIDE.md`
+
+Acceptance:
+- CI fails on reintroduction of blocked legacy patterns.
+- Cleanup status becomes visible in `QualityDashboard` artifacts.
+
+### Epic 58 [DONE] — Test API Shim Removal (`registerMockContent`)
+
+Goal: remove temporary compatibility shim from test content API before release hardening.
+
+Deliverables:
+- Removed backward-compatible overload of `registerMockContent(...)` from `ContentRegistry`.
+- Kept one canonical test API:
+  - `registerMockContent(..., abilities: [String: HeroAbility] = [:], ...)`.
+- Verified existing tests use canonical signature and remain green.
+
+Acceptance:
+- No compatibility overload remains in `ContentRegistry` test-support path.
+- Targeted engine tests (`ContentLoadingIntegrationTests`, `SafeContentAccessTests`, `ContentRegistryRegistrySyncTests`, `INV_REPLAY30_GateTests`) pass.
+
+### Epic 59 [DONE] — Runtime Flake Stabilization (GameplayFlow/MiniGameDispatcher)
+
+Goal: remove non-deterministic and locale-coupled assertions from core runtime suites before further architecture decomposition.
+
+Deliverables:
+- Replaced hardcoded initial tension assertion (`30`) in `GameplayFlowTests.testNewGameCreatesFreshWorldState` with balance-driven expectation from active content config.
+- Removed locale-dependent narrative string matching in `MiniGameDispatcherTests` (e.g., `"разгадана"`, `"пройдена"`, `"Победа"`, `"Поражение"`) and switched to semantic `MiniGameOutcome` checks.
+- Added deterministic suite-level RNG control in `MiniGameDispatcherTests` by injecting a seeded RNG (`TestRNG.make(seed: 42)`) to isolate tests from RNG drift.
+- Verified repeatability with repeated targeted suite runs (`GameplayFlowTests|MiniGameDispatcherTests`) without intermittent failures.
+
+Acceptance:
+- `GameplayFlowTests` no longer assumes fixed initial tension independent of loaded balance packs.
+- `MiniGameDispatcherTests` validate gameplay semantics via typed outcome/state, not localized copy.
+- Repeated targeted runs stay green under unchanged code and environment.
+
+### Epic 60 [DONE] — ContentRegistry Test API Surface Hardening (SPI)
+
+Goal: remove test-only `ContentRegistry` helpers from regular production API visibility without breaking deterministic test workflows.
+
+Deliverables:
+- Marked testing helpers in `ContentRegistry` as SPI-only:
+  - `@_spi(Testing) public func resetForTesting(...)`
+  - `@_spi(Testing) public func registerMockContent(...)`
+  - `@_spi(Testing) public func loadMockPack(...)`
+  - `@_spi(Testing) public func checkIdCollisions(...)`
+- Updated engine content-validation tests to import `TwilightEngine` via SPI (`@_spi(Testing) @testable import TwilightEngine`).
+- Removed app-layer dependency on testing-only API:
+  - `CardSampleGameTests` switched setup/teardown cleanup from `resetForTesting()` to `unloadAllPacks()`.
+  - Removed app-side mock-content test that depended on `registerMockContent(...)`.
+- Added architecture gate: `testContentRegistryTestingHelpersAreSpiOnly`.
+
+Acceptance:
+- Regular `import TwilightEngine` in production code cannot access test helpers.
+- Targeted suites remain green:
+  - `ContentLoadingIntegrationTests`, `SafeContentAccessTests`, `ContentRegistryRegistrySyncTests`,
+  - `ContentRegistryTests`, `ContentManagerTests`, `CodeHygieneTests`,
+  - `AuditArchitectureBoundaryGateTests/testContentRegistryTestingHelpersAreSpiOnly`.
+
+### Epic 61 [DONE] — Absolute Engine Type-Gate Expansion (Top-Level, No Legacy Exemptions)
+
+Goal: make `<=5` top-level-types-per-file gate truly absolute across audited `TwilightEngine` source directories by removing remaining structural offenders.
+
+Deliverables:
+- Decomposed `StoryDirector.swift` by extracting context/check/event-pool types into dedicated files:
+  - `StoryContextModels.swift`
+  - `StoryChecks.swift`
+  - `StoryEventPool.swift`
+- Decomposed `CombatCalculator.swift` by extracting result/effect/context carriers:
+  - `CombatResultModels.swift`
+  - `CombatEffectTypes.swift`
+  - `FateAttackResults.swift`
+  - `CombatPlayerContext.swift`
+- Decomposed `QuestTriggerEngine.swift` by extracting trigger/update models:
+  - `QuestTriggerModels.swift`
+- Decomposed `TwilightMarchesConfig.swift` by extracting curse definitions:
+  - `TwilightMarchesCurseConfig.swift`
+- Expanded `CodeHygieneTests` type-gate coverage to include previously unguarded engine directories:
+  - `Combat`, `Config`, `Encounter`, `Quest`, `Story`.
+
+Acceptance:
+- No file in audited engine directories exceeds `maxTypesPerFile = 5` top-level types.
+- `CodeHygieneTests/testFilesDoNotHaveTooManyTypes` stays green without legacy/type allowlists.
+- `AuditArchitectureBoundaryGateTests` remains green after decomposition.
+
+### Epic 67 [DONE] — Xcode Project Structure Canonicalization
+
+Goal: align the entire Xcode project hierarchy with domain architecture, eliminating mixed/legacy grouping patterns and fragile path references.
+
+Deliverables:
+- Checkpoint 1: canonicalize `App` file references to use group-relative paths and enforce via gate:
+  - `CodeHygieneTests/testXcodeProjectAppGroupUsesGroupRelativePaths`
+- Checkpoint 2: canonicalize `Models/Combat` subgroup and enforce via gate:
+  - `CodeHygieneTests/testXcodeProjectModelsCombatGroupUsesGroupRelativePaths`
+- Checkpoint 3: canonicalize `Views/WorldMap` subgroup and enforce via gate:
+  - `CodeHygieneTests/testXcodeProjectViewsWorldMapGroupUsesGroupRelativePaths`
+- Checkpoint 4: canonicalize `Views/Components` + `ViewModels` file references and enforce via gates:
+  - `CodeHygieneTests/testXcodeProjectViewsComponentsGroupUsesGroupRelativePaths`
+  - `CodeHygieneTests/testXcodeProjectViewModelsGroupUsesGroupRelativePaths`
+- Checkpoint 5: add a non-brittle pbxproj integrity gate + normalize tests group naming:
+  - `CodeHygieneTests/testXcodeProjectHasNoDanglingObjectReferences`
+  - `CardSampleGameTests` group uses `GateTests` naming consistently in pbxproj
+- Checkpoint 6: eliminate duplicated UI components + canonicalize debug pack discovery:
+  - `Views/Components` owns reusable UI cards (`HeroSelectionCard`, `SaveSlotCard`, `LoadSlotCard`, `StatDisplay`, `StatMini`)
+  - `App/BundledPackURLs.swift` replaces legacy `ContentViewComponents.swift`
+  - `CodeHygieneTests/testXcodeProjectViewsComponentsGroupUsesGroupRelativePaths` expanded to cover the new component file refs
+- Checkpoint 7: harden canonical hierarchy gates for root/tests groups:
+  - `CodeHygieneTests/testXcodeProjectRootGroupStaysFeatureOriented`
+  - `CodeHygieneTests/testXcodeProjectTestsGroupUsesCanonicalSubgroups`
+  - `CodeHygieneTests/testXcodeProjectGateTestsGroupAvoidsSourceRootDrift`
+- Build and apply a canonical hierarchy for app + tests + package integration areas:
+  - `App`, `Views` (feature-first), `ViewModels`, `Models`, `Managers`, `Utilities`,
+  - `CardSampleGameTests` (gate/unit/integration/helpers),
+  - package bridge groups with consistent `SOURCE_ROOT`/`<group>` usage rules.
+- Remove stale/orphaned PBX references and duplicate logical entries.
+- Add a static gate that checks:
+  - group-path consistency,
+  - no orphaned file refs in app/test targets,
+  - no reintroduction of flat top-level sprawl in feature folders.
+
+Acceptance:
+- `CardSampleGame.xcodeproj/project.pbxproj` matches canonical structure contract.
+- App/test build phases contain only valid, non-orphaned source references.
+- New structure gate fails on hierarchy drift.
+
+### Epic 68 [DONE] — File Header Contract Coverage
+
+Goal: make file intent explicit across the first-party codebase to reduce reverse-engineering cost and improve maintainability.
+
+Deliverables:
+- Defined a single canonical header format for first-party Swift files (Russian language):
+  - `/// Файл: <relative path>`
+  - `/// Назначение: ...`
+  - `/// Зона ответственности: ...`
+  - `/// Контекст: ...`
+- Extended `CodeHygieneTests` with hard gate:
+  - `testFirstPartySwiftFilesHaveCanonicalFileHeaders`
+  - scope includes app/tests/packages first-party files,
+  - exclusions are only vendor/build/internal agent paths (`Packages/ThirdParty`, `.build`, `.codex_home`) and `Package.swift` manifests.
+- Applied project-wide backfill of canonical headers to all first-party Swift files.
+
+Acceptance:
+- First-party Swift files satisfy 100% header coverage with explicit exclusions only.
+- `CodeHygieneTests/testFirstPartySwiftFilesHaveCanonicalFileHeaders` fails on missing/invalid headers.

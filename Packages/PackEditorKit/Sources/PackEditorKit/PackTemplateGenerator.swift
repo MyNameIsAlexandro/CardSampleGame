@@ -1,3 +1,8 @@
+/// Файл: Packages/PackEditorKit/Sources/PackEditorKit/PackTemplateGenerator.swift
+/// Назначение: Содержит реализацию файла PackTemplateGenerator.swift.
+/// Зона ответственности: Реализует пакетный API редактора контента.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 import TwilightEngine
 

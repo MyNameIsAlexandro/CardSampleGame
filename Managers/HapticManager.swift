@@ -1,7 +1,13 @@
+/// Файл: Managers/HapticManager.swift
+/// Назначение: Содержит реализацию файла HapticManager.swift.
+/// Зона ответственности: Инкапсулирует инфраструктурный сервисный функционал.
+/// Контекст: Используется в приложении CardSampleGame и связанных потоках выполнения.
+
 import UIKit
 
 /// Centralized haptic feedback manager (UX-01)
 /// Usage: HapticManager.shared.play(.light)
+@MainActor
 final class HapticManager {
     static let shared = HapticManager()
 

@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Localization/LocalizableText.swift
+/// Назначение: Содержит реализацию файла LocalizableText.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 // MARK: - Localizable Text
@@ -10,7 +15,7 @@ import Foundation
 ///
 /// This enum enables gradual migration from inline translations to string tables
 /// while maintaining full backward compatibility with existing content packs.
-public enum LocalizableText: Hashable {
+public enum LocalizableText: Hashable, Sendable {
     /// Legacy: embedded translations in the JSON content
     case inline(LocalizedString)
 
@@ -19,44 +24,92 @@ public enum LocalizableText: Hashable {
 
     // MARK: - Resolution
 
-    /// Resolve to actual text using shared LocalizationManager
+    private static func normalizedLanguageCode(_ rawValue: String?, fallback: String = "en") -> String {
+        guard let rawValue else { return fallback }
+        let trimmed = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return fallback }
+
+        if let separator = trimmed.firstIndex(where: { $0 == "-" || $0 == "_" }) {
+            return String(trimmed[..<separator]).lowercased()
+        }
+        return trimmed.lowercased()
+    }
+
+    private static func appLocaleCode(fallback: String = "en") -> String {
+        if let preferred = Bundle.main.preferredLocalizations.first {
+            return normalizedLanguageCode(preferred, fallback: fallback)
+        }
+        let deviceLocale = Locale.current.language.languageCode?.identifier
+        return normalizedLanguageCode(deviceLocale, fallback: fallback)
+    }
+
+    private static func resolverLocaleCode(_ resolver: StringResolver, fallback: String = "en") -> String {
+        if let localizationManager = resolver as? LocalizationManager {
+            return normalizedLanguageCode(
+                localizationManager.currentLocale,
+                fallback: appLocaleCode(fallback: fallback)
+            )
+        }
+        return appLocaleCode(fallback: fallback)
+    }
+
+    /// Resolve to actual text using the device locale.
+    /// For `.key` values this returns a debug fallback (`[key]`) unless you use `resolve(using:)`.
     public var resolved: String {
         switch self {
         case .inline(let localized):
-            // Use LocalizationManager's current locale for consistency
-            return localized.localized(for: LocalizationManager.shared.currentLocale)
+            return localized.localized(for: Self.appLocaleCode())
         case .key(let stringKey):
-            if let resolved = LocalizationManager.shared.resolve(stringKey) {
-                return resolved
-            }
-            // Fallback: show key in brackets for debugging
             return "[\(stringKey.rawValue)]"
         }
     }
 
-    /// Resolve for a specific locale
+    /// Resolve for a specific locale (inline-only).
+    /// For `.key` values this returns a debug fallback (`[key]`).
     public func resolved(for locale: String) -> String {
         switch self {
         case .inline(let localized):
             return localized.localized(for: locale)
         case .key(let stringKey):
-            if let resolved = LocalizationManager.shared.resolve(stringKey, locale: locale) {
-                return resolved
-            }
             return "[\(stringKey.rawValue)]"
         }
     }
 
-    /// Resolve with pack context for proper fallback chain
+    /// Resolve with pack context (inline-only).
+    /// For `.key` values this returns a debug fallback (`[key]`).
     public func resolved(packContext: String?) -> String {
         switch self {
         case .inline(let localized):
-            return localized.localized(for: LocalizationManager.shared.currentLocale)
+            return localized.localized(for: Self.appLocaleCode())
         case .key(let stringKey):
-            if let resolved = LocalizationManager.shared.resolve(stringKey, packContext: packContext) {
-                return resolved
-            }
             return "[\(stringKey.rawValue)]"
+        }
+    }
+
+    public func resolve(using resolver: StringResolver) -> String {
+        switch self {
+        case .inline(let localized):
+            return localized.localized(for: Self.resolverLocaleCode(resolver))
+        case .key(let stringKey):
+            return resolver.resolve(stringKey) ?? "[\(stringKey.rawValue)]"
+        }
+    }
+
+    public func resolve(using resolver: StringResolver, locale: String) -> String {
+        switch self {
+        case .inline(let localized):
+            return localized.localized(for: locale)
+        case .key(let stringKey):
+            return resolver.resolve(stringKey, locale: locale) ?? "[\(stringKey.rawValue)]"
+        }
+    }
+
+    public func resolve(using resolver: StringResolver, packContext: String?) -> String {
+        switch self {
+        case .inline(let localized):
+            return localized.localized(for: Self.resolverLocaleCode(resolver))
+        case .key(let stringKey):
+            return resolver.resolve(stringKey, packContext: packContext) ?? "[\(stringKey.rawValue)]"
         }
     }
 

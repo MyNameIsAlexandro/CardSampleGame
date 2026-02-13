@@ -1,3 +1,8 @@
+/// Файл: Packages/CharacterPacks/CoreHeroes/Sources/CoreHeroesContent/CoreHeroesContent.swift
+/// Назначение: Содержит реализацию файла CoreHeroesContent.swift.
+/// Зона ответственности: Изолирован своей предметной ответственностью в рамках модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 /// CoreHeroes content pack

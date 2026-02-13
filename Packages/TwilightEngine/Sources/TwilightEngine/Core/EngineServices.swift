@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Core/EngineServices.swift
+/// Назначение: Содержит реализацию файла EngineServices.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 // MARK: - Engine Services (Dependency Container)
@@ -11,21 +16,32 @@ public struct EngineServices {
     /// Content registry for loading and querying game data.
     public let contentRegistry: ContentRegistry
 
+    /// Localization manager for content-pack string tables.
+    public let localizationManager: LocalizationManager
+
     /// Rules for region degradation.
     public let degradationRules: DegradationRuleSet
 
     public init(
-        rng: WorldRNG = .shared,
-        contentRegistry: ContentRegistry = .shared,
+        rng: WorldRNG,
+        contentRegistry: ContentRegistry,
+        localizationManager: LocalizationManager,
         degradationRules: DegradationRuleSet? = nil
     ) {
         self.rng = rng
         self.contentRegistry = contentRegistry
+        self.localizationManager = localizationManager
         self.degradationRules = degradationRules ?? TwilightDegradationRules(
             anchorConfig: contentRegistry.getBalanceConfig()?.anchor
         )
     }
 
-    /// Default services using shared instances (backward compatibility).
-    public static let `default` = EngineServices()
+    public static func makeDefault() -> EngineServices {
+        let registry = ContentRegistry()
+        return EngineServices(
+            rng: WorldRNG(),
+            contentRegistry: registry,
+            localizationManager: LocalizationManager()
+        )
+    }
 }

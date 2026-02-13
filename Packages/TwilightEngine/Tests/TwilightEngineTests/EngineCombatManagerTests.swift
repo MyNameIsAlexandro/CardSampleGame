@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Tests/TwilightEngineTests/EngineCombatManagerTests.swift
+/// Назначение: Содержит реализацию файла EngineCombatManagerTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import Testing
 @testable import TwilightEngine
 
@@ -5,9 +10,7 @@ import Testing
 struct EngineCombatManagerTests {
 
     private func makeEngine() -> TwilightGameEngine {
-        TestContentLoader.loadContentPacksIfNeeded()
-        let registry = ContentRegistry.shared
-        return TwilightGameEngine(registry: registry)
+        TestEngineFactory.makeEngine(seed: 42)
     }
 
     private func makeEnemy(

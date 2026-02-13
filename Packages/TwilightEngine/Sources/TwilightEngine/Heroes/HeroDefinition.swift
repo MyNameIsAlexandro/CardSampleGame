@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Heroes/HeroDefinition.swift
+/// Назначение: Содержит реализацию файла HeroDefinition.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 /// Hero class archetype — determines playstyle and card restrictions (FR-HRO-003)

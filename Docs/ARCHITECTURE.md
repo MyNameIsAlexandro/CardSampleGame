@@ -126,7 +126,7 @@
 - **Mid-combat save**: `pendingEncounterState: EncounterSaveState?` — saved/restored in EngineSave
 - **Auto-save**: every 3 days + after combat (via WorldMapView onChange observers)
 - **Game Over**: `isGameOver` / `gameResult` → `GameOverView` fullScreenCover → menu
-- **RNG**: `WorldRNG.shared` — seeded, deterministic xorshift64
+- **RNG**: `engine.services.rng` — seeded, deterministic xorshift64 (no global singleton)
 - **End conditions**: tension ≥ 100 → defeat, HP ≤ 0 → defeat, quest flag → victory
 - **Loot helpers**: `applyFaithDelta()`, `addToDeck()` — called by EncounterBridge
 
@@ -150,7 +150,7 @@
 - **Enemies**: `[EncounterEnemy]` — each has lootCardIds, faithReward, behaviorId, resonanceBehavior
 - **Rules**: `EncounterRules` (maxRounds, canFlee, customVictory)
 - **Summon pool**: `[String: EncounterEnemy]` — enemies available for summon
-- **RNG seed**: `WorldRNG.shared.next()` per encounter (unique per battle)
+- **RNG seed**: derived from `engine.services.rng.nextSeed()` per encounter (unique per battle)
 
 ### KeywordInterpreter
 - **Entry**: `resolveWithAlignment(keyword:context:isMatch:isMismatch:matchMultiplier:)`
@@ -160,10 +160,10 @@
 - **Mismatch**: suit opposes → keyword nullified (0 damage, no special)
 
 ### ContentRegistry
-- **Singleton**: `ContentRegistry.shared`
-- **Load**: `registerPack()` from binary .pack files
+- **Owner**: created in the app composition root (`AppServices`) and injected via `EngineServices`
+- **Load**: `loadPack()` / `loadPacks()` from binary `.pack` files
 - **Query**: `getEnemy(id:)`, `getCard(id:)`, `getAvailableEvents(forRegion:)`, etc.
-- **Immutable** at runtime
+- **Immutable** at runtime (read-only snapshot for gameplay)
 
 ### Resonance
 - **Range**: -100 (deep Nav) to +100 (deep Prav)

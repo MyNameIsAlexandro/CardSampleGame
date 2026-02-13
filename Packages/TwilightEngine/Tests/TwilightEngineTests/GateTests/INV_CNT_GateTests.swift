@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Tests/TwilightEngineTests/GateTests/INV_CNT_GateTests.swift
+/// Назначение: Содержит реализацию файла INV_CNT_GateTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import TwilightEngine
 
@@ -29,8 +34,7 @@ final class INV_CNT_GateTests: XCTestCase {
 
     // INV-CNT-002: All fate card IDs must be globally unique
     func test_INV_CNT_002_FateCardIdsUnique() {
-        TestContentLoader.loadContentPacksIfNeeded()
-        let fateCards = ContentRegistry.shared.getAllFateCards()
+        let fateCards = TestContentLoader.sharedLoadedRegistry().getAllFateCards()
         var seen = Set<String>()
         var dupes: [String] = []
 

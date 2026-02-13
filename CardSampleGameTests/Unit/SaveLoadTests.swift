@@ -1,3 +1,8 @@
+/// Файл: CardSampleGameTests/Unit/SaveLoadTests.swift
+/// Назначение: Содержит реализацию файла SaveLoadTests.swift.
+/// Зона ответственности: Фиксирует проверяемый контракт и не содержит production-логики.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 import TwilightEngine
 
@@ -5,16 +10,21 @@ import TwilightEngine
 
 /// Engine-First Save/Load Tests
 /// Tests the EngineSave-based save system (no legacy GameSave)
+@MainActor
 final class SaveLoadTests: XCTestCase {
 
     var engine: TwilightGameEngine!
     var saveManager: SaveManager!
+    private var registry: ContentRegistry!
 
-    override func setUp() {
-        super.setUp()
-        TestContentLoader.loadContentPacksIfNeeded()
-        engine = TwilightGameEngine()
-        engine.initializeNewGame(playerName: "Test Hero", heroId: nil)
+    override func setUpWithError() throws {
+        try super.setUpWithError()
+        let services = try TestContentLoader.makeStandardEngineServices(seed: 0)
+        registry = services.contentRegistry
+        engine = TwilightGameEngine(services: services)
+
+        let heroId = try XCTUnwrap(registry.heroRegistry.firstHero?.id, "No heroes loaded for SaveLoadTests")
+        engine.initializeNewGame(playerName: "Test Hero", heroId: heroId)
         saveManager = SaveManager()
 
         // Clear test slots
@@ -29,8 +39,8 @@ final class SaveLoadTests: XCTestCase {
             saveManager.deleteSave(from: slot)
         }
         engine = nil
+        registry = nil
         saveManager = nil
-        WorldRNG.shared.setSeed(0)
         super.tearDown()
     }
 
@@ -151,9 +161,10 @@ final class SaveLoadTests: XCTestCase {
         saveManager.saveGame(to: 100, engine: engine)
         let savedHealth = engine.player.health
 
-        let newEngine = TwilightGameEngine()
-        TestContentLoader.loadContentPacksIfNeeded()
-        XCTAssertTrue(saveManager.loadGame(from: 100, engine: newEngine))
+        let newEngine = TwilightGameEngine(
+            services: EngineServices(rng: WorldRNG(seed: 0), contentRegistry: registry, localizationManager: engine.services.localizationManager)
+        )
+        XCTAssertTrue(saveManager.loadGame(from: 100, engine: newEngine, registry: registry))
 
         XCTAssertEqual(newEngine.player.health, savedHealth)
     }
@@ -162,9 +173,10 @@ final class SaveLoadTests: XCTestCase {
         saveManager.saveGame(to: 100, engine: engine)
         let savedFaith = engine.player.faith
 
-        let newEngine = TwilightGameEngine()
-        TestContentLoader.loadContentPacksIfNeeded()
-        XCTAssertTrue(saveManager.loadGame(from: 100, engine: newEngine))
+        let newEngine = TwilightGameEngine(
+            services: EngineServices(rng: WorldRNG(seed: 0), contentRegistry: registry, localizationManager: engine.services.localizationManager)
+        )
+        XCTAssertTrue(saveManager.loadGame(from: 100, engine: newEngine, registry: registry))
 
         XCTAssertEqual(newEngine.player.faith, savedFaith)
     }
@@ -173,9 +185,10 @@ final class SaveLoadTests: XCTestCase {
         saveManager.saveGame(to: 100, engine: engine)
         let savedBalance = engine.player.balance
 
-        let newEngine = TwilightGameEngine()
-        TestContentLoader.loadContentPacksIfNeeded()
-        XCTAssertTrue(saveManager.loadGame(from: 100, engine: newEngine))
+        let newEngine = TwilightGameEngine(
+            services: EngineServices(rng: WorldRNG(seed: 0), contentRegistry: registry, localizationManager: engine.services.localizationManager)
+        )
+        XCTAssertTrue(saveManager.loadGame(from: 100, engine: newEngine, registry: registry))
 
         XCTAssertEqual(newEngine.player.balance, savedBalance)
     }
@@ -186,9 +199,10 @@ final class SaveLoadTests: XCTestCase {
         saveManager.saveGame(to: 100, engine: engine)
         let savedDay = engine.currentDay
 
-        let newEngine = TwilightGameEngine()
-        TestContentLoader.loadContentPacksIfNeeded()
-        XCTAssertTrue(saveManager.loadGame(from: 100, engine: newEngine))
+        let newEngine = TwilightGameEngine(
+            services: EngineServices(rng: WorldRNG(seed: 0), contentRegistry: registry, localizationManager: engine.services.localizationManager)
+        )
+        XCTAssertTrue(saveManager.loadGame(from: 100, engine: newEngine, registry: registry))
 
         XCTAssertEqual(newEngine.currentDay, savedDay)
     }
@@ -200,11 +214,72 @@ final class SaveLoadTests: XCTestCase {
         saveManager.saveGame(to: 100, engine: engine)
         let savedTension = engine.worldTension
 
-        let newEngine = TwilightGameEngine()
-        TestContentLoader.loadContentPacksIfNeeded()
-        XCTAssertTrue(saveManager.loadGame(from: 100, engine: newEngine))
+        let newEngine = TwilightGameEngine(
+            services: EngineServices(rng: WorldRNG(seed: 0), contentRegistry: registry, localizationManager: engine.services.localizationManager)
+        )
+        XCTAssertTrue(saveManager.loadGame(from: 100, engine: newEngine, registry: registry))
 
         XCTAssertEqual(newEngine.worldTension, savedTension)
+    }
+
+    func testEchoEncounterBridgeRelocalizesResumeDeckCardsFromRegistry() throws {
+        let localizedCard = try XCTUnwrap(
+            registry.getCard(id: "strike_basic")?.toCard(localizationManager: engine.services.localizationManager),
+            "Missing strike_basic in loaded test content"
+        )
+
+        let staleCard = Card(
+            id: "strike_basic_2",
+            name: "STALE_STRIKE_NAME",
+            type: .attack,
+            description: "STALE_STRIKE_DESCRIPTION"
+        )
+
+        let context = EncounterContext(
+            hero: EncounterHero(
+                id: "test_hero",
+                hp: engine.player.health,
+                maxHp: engine.player.maxHealth,
+                strength: engine.player.strength,
+                armor: 0
+            ),
+            enemies: [EncounterEnemy(
+                id: "test_enemy",
+                name: "Test Enemy",
+                hp: 10,
+                maxHp: 10,
+                power: 2,
+                defense: 1
+            )],
+            fateDeckSnapshot: FateDeckState(drawPile: [], discardPile: []),
+            modifiers: [],
+            rules: EncounterRules(),
+            rngSeed: 42,
+            rngState: 42,
+            worldResonance: 0,
+            heroCards: [staleCard],
+            heroFaith: engine.player.faith
+        )
+        let savedState = EncounterEngine(context: context).createSaveState()
+
+        let config = try XCTUnwrap(
+            EchoEncounterBridge.makeCombatConfig(from: savedState, engine: engine, registry: registry)
+        )
+        let bridgedCard = try XCTUnwrap(config.playerDeck.first)
+
+        XCTAssertEqual(bridgedCard.id, staleCard.id, "Bridge must preserve runtime instance id")
+        XCTAssertEqual(bridgedCard.name, localizedCard.name, "Bridge must relocalize card name from registry definition")
+        XCTAssertEqual(
+            bridgedCard.description,
+            localizedCard.description,
+            "Bridge must relocalize card description from registry definition"
+        )
+        XCTAssertNotEqual(bridgedCard.name, staleCard.name, "Stale save payload text must not leak into resumed combat")
+        XCTAssertNotEqual(
+            bridgedCard.description,
+            staleCard.description,
+            "Stale save payload text must not leak into resumed combat"
+        )
     }
 
     // MARK: - Delete Save
@@ -265,9 +340,10 @@ final class SaveLoadTests: XCTestCase {
 
         saveManager.saveGame(to: 100, engine: engine)
 
-        let newEngine = TwilightGameEngine()
-        TestContentLoader.loadContentPacksIfNeeded()
-        XCTAssertTrue(saveManager.loadGame(from: 100, engine: newEngine))
+        let newEngine = TwilightGameEngine(
+            services: EngineServices(rng: WorldRNG(seed: 0), contentRegistry: registry, localizationManager: engine.services.localizationManager)
+        )
+        XCTAssertTrue(saveManager.loadGame(from: 100, engine: newEngine, registry: registry))
 
         // Verify all fields match
         XCTAssertEqual(newEngine.player.name, engine.player.name)
@@ -320,7 +396,7 @@ final class SaveLoadTests: XCTestCase {
         // activePackSet may be empty if no packs loaded - that's OK for test
 
         // 3. Verify compatibility check works for current save
-        let compatibility = save.validateCompatibility(with: ContentRegistry.shared)
+        let compatibility = save.validateCompatibility(with: registry)
         XCTAssertTrue(compatibility.isLoadable, "Save with current packs should be loadable")
 
         // 4. Test incompatible save (format version too new)
@@ -359,12 +435,12 @@ final class SaveLoadTests: XCTestCase {
         )
 
         // 5. Verify incompatible save is rejected
-        let incompatibleResult = incompatibleSave.validateCompatibility(with: ContentRegistry.shared)
+        let incompatibleResult = incompatibleSave.validateCompatibility(with: registry)
         XCTAssertFalse(incompatibleResult.isLoadable, "Save with future format should not be loadable")
         XCTAssertFalse(incompatibleResult.errorMessages.isEmpty, "Should have error messages")
 
         // 6. Test SaveManager returns detailed result
-        let loadResult = saveManager.loadGameWithResult(from: 100, engine: engine)
+        let loadResult = saveManager.loadGameWithResult(from: 100, engine: engine, registry: registry)
         XCTAssertTrue(loadResult.success, "Loading current save should succeed")
         XCTAssertNil(loadResult.error, "No error for successful load")
     }
@@ -380,9 +456,9 @@ final class SaveLoadTests: XCTestCase {
 
         // If packs are loaded, primaryCampaignPackId should be set
         // If no packs loaded (test environment), it can be nil - that's OK
-        if !ContentRegistry.shared.loadedPacks.isEmpty {
+        if !registry.loadedPacks.isEmpty {
             // At least one pack loaded - check if it's a campaign/full pack
-            let hasCampaignPack = ContentRegistry.shared.loadedPacks.values
+            let hasCampaignPack = registry.loadedPacks.values
                 .contains { $0.manifest.packType == .campaign || $0.manifest.packType == .full }
 
             if hasCampaignPack {
@@ -391,13 +467,13 @@ final class SaveLoadTests: XCTestCase {
         }
 
         // Either way, the save should be valid
-        let compatibility = save.validateCompatibility(with: ContentRegistry.shared)
+        let compatibility = save.validateCompatibility(with: registry)
         XCTAssertTrue(compatibility.isLoadable, "Save should be loadable")
     }
 
     func testLoadGameWithResultReturnsSaveNotFoundError() {
         // Try to load from empty slot
-        let result = saveManager.loadGameWithResult(from: 999, engine: engine)
+        let result = saveManager.loadGameWithResult(from: 999, engine: engine, registry: registry)
 
         XCTAssertFalse(result.success, "Loading from empty slot should fail")
         XCTAssertNotNil(result.error, "Should have error")

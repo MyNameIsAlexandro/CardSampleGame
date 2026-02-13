@@ -1,3 +1,8 @@
+/// Файл: Packages/EchoScenes/Sources/EchoScenes/CombatSceneView.swift
+/// Назначение: Содержит реализацию файла CombatSceneView.swift.
+/// Зона ответственности: Реализует визуально-сценовый слой EchoScenes.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import SwiftUI
 import SpriteKit
 import EchoEngine

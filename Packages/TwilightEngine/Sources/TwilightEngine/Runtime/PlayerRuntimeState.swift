@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Runtime/PlayerRuntimeState.swift
+/// Назначение: Содержит реализацию файла PlayerRuntimeState.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 // MARK: - Player Runtime State
@@ -170,7 +175,7 @@ public struct PlayerRuntimeState: Codable, Equatable {
 
     /// Shuffle discard into draw pile
     /// Uses deterministic RNG for reproducibility
-    mutating func shuffleDiscardIntoDraw(rng: WorldRNG = .shared) {
+    mutating func shuffleDiscardIntoDraw(rng: WorldRNG) {
         drawPile.append(contentsOf: discardPile)
         discardPile.removeAll()
         rng.shuffle(&drawPile)

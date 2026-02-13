@@ -1,3 +1,8 @@
+/// Файл: CardSampleGameTests/GateTests/ContrastComplianceTests.swift
+/// Назначение: Содержит реализацию файла ContrastComplianceTests.swift.
+/// Зона ответственности: Фиксирует проверяемый контракт и не содержит production-логики.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 
 /// WCAG 2.1 Contrast Compliance Gate Tests

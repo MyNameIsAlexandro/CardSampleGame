@@ -428,7 +428,7 @@ Full stage acceptance for Audit v2.1. Every blocker from `AUDIT_FIXLIST_v2_1_ACC
 
 #### 1.5 RNG state в Save/Load
 - **Было:** `rngSeed: UInt64?`, `rngState: UInt64?` — optional с fallback
-- **Стало:** `rngSeed: UInt64`, `rngState: UInt64` — обязательные поля, одна строка для restore: `WorldRNG.shared.restoreState(save.rngState)`
+- **Стало:** `rngSeed: UInt64`, `rngState: UInt64` — обязательные поля, restore через `services.rng.restoreState(save.rngState)`
 - **Gate test:** `testEngineSaveContainsRNGState()` — проверяет non-optional типы в исходнике
 - **Файлы:** `EngineSave.swift`, `TwilightGameEngine.swift`, `SaveLoadTests.swift`
 

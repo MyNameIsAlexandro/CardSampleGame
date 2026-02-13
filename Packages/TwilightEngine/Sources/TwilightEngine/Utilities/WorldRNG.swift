@@ -1,11 +1,13 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Utilities/WorldRNG.swift
+/// Назначение: Содержит реализацию файла WorldRNG.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 /// Deterministic random number generator for world events
 /// Uses a seeded approach for reproducible results
 public final class WorldRNG {
-    /// Shared singleton instance with default seed.
-    public static let shared = WorldRNG()
-
     private var seed: UInt64
     private var state: UInt64
 

@@ -323,9 +323,13 @@ ContentPacks/TwilightMarches/   # Дополнительный пак
 
 ```swift
 // Автоматически выбирается язык системы
-let hero = HeroRegistry.shared.hero(id: "warrior_ragnar")
-print(hero.name)        // "Рагнар" (если система на русском)
-print(hero.description) // "Бывший командир..."
+let contentRegistry = ContentRegistry()
+try contentRegistry.loadPacks(from: packURLs)
+
+let localizationManager = LocalizationManager()
+let hero = contentRegistry.heroRegistry.hero(id: "warrior_ragnar")
+print(hero?.name.resolve(using: localizationManager) ?? "")
+print(hero?.description.resolve(using: localizationManager) ?? "")
 ```
 
 ---
@@ -335,34 +339,42 @@ print(hero.description) // "Бывший командир..."
 ### HeroRegistry
 
 ```swift
-// Герои загружаются автоматически из heroes.json при старте приложения
+let contentRegistry = ContentRegistry()
+try contentRegistry.loadPacks(from: packURLs)
 
 // Получить героя по ID
-let hero = HeroRegistry.shared.hero(id: "warrior_ragnar")
+let hero = contentRegistry.heroRegistry.hero(id: "warrior_ragnar")
 
 // Все герои
-let allHeroes = HeroRegistry.shared.allHeroes
+let allHeroes = contentRegistry.heroRegistry.allHeroes
 
 // Доступные герои (с учётом DLC/разблокировок)
-let available = HeroRegistry.shared.availableHeroes()
+let available = contentRegistry.heroRegistry.availableHeroes()
 ```
 
 ### CardRegistry
 
 ```swift
-// Получить стартовую колоду для героя
-let deck = CardRegistry.shared.startingDeck(forHeroID: "warrior_ragnar")
+let contentRegistry = ContentRegistry()
+try contentRegistry.loadPacks(from: packURLs)
+
+// Получить стартовую колоду (IDs) для героя
+let hero = contentRegistry.heroRegistry.hero(id: "warrior_ragnar")
+let deckCardIds = hero?.startingDeckCardIDs ?? []
 
 // Получить карту по ID
-let card = CardRegistry.shared.card(id: "strike_basic")
+let card = contentRegistry.getCard(id: "strike_basic")
 ```
 
 ### Создание игрока
 
 ```swift
-// Player автоматически загружает статы из HeroRegistry
-let player = Player(name: hero.name, maxHandSize: 5, heroId: "warrior_ragnar")
-player.deck = CardRegistry.shared.startingDeck(forHeroID: "warrior_ragnar")
+let contentRegistry = ContentRegistry()
+try contentRegistry.loadPacks(from: packURLs)
+
+let heroId = "warrior_ragnar"
+let hero = contentRegistry.heroRegistry.hero(id: heroId)
+let startingDeckCardIds = hero?.startingDeckCardIDs ?? []
 ```
 
 ---
@@ -640,14 +652,17 @@ swift run pack-compiler compile \
 #### ContentManager (Engine)
 
 ```swift
+let registry = ContentRegistry()
+let contentManager = ContentManager(registry: registry)
+
 // Обнаружение паков
-let packs = ContentManager.shared.discoverPacks(bundledURLs: bundledURLs)
+let packs = contentManager.discoverPacks(bundledURLs: bundledURLs)
 
 // Валидация пака
-let summary = await ContentManager.shared.validatePack(packId)
+let summary = await contentManager.validatePack(packId)
 
 // Безопасная перезагрузка с откатом при ошибке
-let result = await ContentManager.shared.safeReloadPack(packId)
+let result = await contentManager.safeReloadPack(packId)
 switch result {
 case .success(let loadedPack):
     print("Pack reloaded: \(loadedPack.manifest.packId)")
@@ -660,7 +675,8 @@ case .failure(let error):
 
 ```swift
 // Атомарная перезагрузка с откатом
-let result = ContentRegistry.shared.safeReloadPack(packId, from: url)
+let registry = ContentRegistry()
+let result = registry.safeReloadPack(packId, from: url)
 switch result {
 case .success(let newPack):
     // Новый контент загружен

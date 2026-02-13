@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Tests/TwilightEngineTests/GateTests/INV_DEBT11_GateTests.swift
+/// Назначение: Содержит реализацию файла INV_DEBT11_GateTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import TwilightEngine
 
@@ -5,17 +10,6 @@ import XCTest
 /// Verifies Codable round-trips, snapshot/restore, backward compat, difficulty levels.
 /// Gate rules: < 2s, no XCTSkip, no non-deterministic RNG.
 final class INV_DEBT11_GateTests: XCTestCase {
-
-    override func setUp() {
-        super.setUp()
-        TestContentLoader.loadContentPacksIfNeeded()
-        WorldRNG.shared.setSeed(42)
-    }
-
-    override func tearDown() {
-        WorldRNG.shared.setSeed(0)
-        super.tearDown()
-    }
 
     // MARK: - DEBT-01: VictoryType Codable Round-Trip
 

@@ -1,3 +1,8 @@
+/// Файл: CardSampleGameTests/GateTests/LocalizationValidatorTests.swift
+/// Назначение: Содержит реализацию файла LocalizationValidatorTests.swift.
+/// Зона ответственности: Фиксирует проверяемый контракт и не содержит production-логики.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import TwilightEngine
 
@@ -38,24 +43,7 @@ final class LocalizationValidatorTests: XCTestCase {
     // MARK: - Gate Test: No Mixed Localization Schema
 
     func testNoMixedLocalizationSchema() throws {
-        // Load real packs
-        let registry = ContentRegistry.shared
-
-        // Ensure packs are loaded
-        if registry.loadedPackIds.isEmpty {
-            guard let storyPackURL = TestContentLoader.storyPackURL,
-                  let charPackURL = TestContentLoader.characterPackURL else {
-                XCTFail("GATE TEST FAILURE: Could not locate content packs")
-                return
-            }
-            do {
-                try registry.loadPack(from: storyPackURL)
-                try registry.loadPack(from: charPackURL)
-            } catch {
-                XCTFail("GATE TEST FAILURE: Failed to load packs: \(error)")
-                return
-            }
-        }
+        let registry = try TestContentLoader.makeStandardRegistry()
 
         // Validate all loaded packs
         for (packId, pack) in registry.loadedPacks {

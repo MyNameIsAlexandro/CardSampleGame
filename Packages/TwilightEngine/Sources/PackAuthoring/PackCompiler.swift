@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/PackAuthoring/PackCompiler.swift
+/// Назначение: Содержит реализацию файла PackCompiler.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 import TwilightEngine
 

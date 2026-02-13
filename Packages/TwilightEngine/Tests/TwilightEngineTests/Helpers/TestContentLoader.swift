@@ -1,56 +1,120 @@
+/// Файл: Packages/TwilightEngine/Tests/TwilightEngineTests/Helpers/TestContentLoader.swift
+/// Назначение: Содержит реализацию файла TestContentLoader.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import Foundation
 @testable import TwilightEngine
 
-/// Helper для загрузки ContentPacks в тестовом окружении пакета TwilightEngine
-/// Загружает паки из директории проекта (CoreHeroes + TwilightMarchesActI)
+/// Helper for loading ContentPacks in TwilightEngine SwiftPM tests.
+/// Loads packs from the project directory (CoreHeroes + TwilightMarchesActI).
 enum TestContentLoader {
 
-    /// Lock to prevent concurrent content loading from parallel test suites
-    private static let lock = NSLock()
+    private struct CacheState {
+        var sharedRegistry: ContentRegistry?
+        var cachedPackURLs: [URL]?
+    }
 
-    /// Флаг, показывающий загружены ли паки
-    private(set) static var isLoaded = false
+    private final class Locked<Value>: @unchecked Sendable {
+        private let lock = NSLock()
+        private var value: Value
 
-    /// Загрузить ContentPacks из исходной директории
-    /// Безопасно вызывать многократно - загрузка произойдёт только один раз
-    static func loadContentPacksIfNeeded() {
-        lock.lock()
-        defer { lock.unlock() }
-
-        let registry = ContentRegistry.shared
-
-        // Always check actual registry state, not just isLoaded flag.
-        // Other test classes may call resetForTesting() which clears the registry.
-        guard registry.loadedPackIds.isEmpty else {
-            isLoaded = true
-            return
+        init(_ value: Value) {
+            self.value = value
         }
 
-        let packURLs = findContentPacksURLs()
-
-        guard !packURLs.isEmpty else {
-            print("⚠️ TestContentLoader: ContentPacks not found")
-            return
-        }
-
-        do {
-            try registry.loadPacks(from: packURLs)
-            print("✅ TestContentLoader: Loaded \(packURLs.count) packs")
-            isLoaded = true
-        } catch {
-            print("❌ TestContentLoader: Failed to load packs: \(error)")
+        func withLock<R>(_ body: (inout Value) -> R) -> R {
+            lock.lock()
+            defer { lock.unlock() }
+            return body(&value)
         }
     }
 
-    /// Найти пути к ContentPacks
+    private static let cache = Locked(CacheState())
+
+    private static var isVerboseLoggingEnabled: Bool {
+        guard let rawValue = ProcessInfo.processInfo.environment["TWILIGHT_TEST_VERBOSE"]?.lowercased() else {
+            return false
+        }
+        return rawValue == "1" || rawValue == "true" || rawValue == "yes" || rawValue == "on"
+    }
+
+    private static func verboseLog(_ message: @autoclosure () -> String) {
+        guard isVerboseLoggingEnabled else {
+            return
+        }
+        print(message())
+    }
+
+    static func sharedLoadedRegistry() -> ContentRegistry {
+        cache.withLock { state in
+
+            if let sharedRegistry = state.sharedRegistry, !sharedRegistry.loadedPackIds.isEmpty {
+                return sharedRegistry
+            }
+
+            let registry = ContentRegistry()
+
+            let packURLs = state.cachedPackURLs ?? findContentPacksURLs()
+            state.cachedPackURLs = packURLs
+
+            guard !packURLs.isEmpty else {
+                verboseLog("⚠️ TestContentLoader: ContentPacks not found")
+                state.sharedRegistry = registry
+                return registry
+            }
+
+            do {
+                try registry.loadPacks(from: packURLs)
+                verboseLog("✅ TestContentLoader: Loaded \(packURLs.count) packs (shared)")
+            } catch {
+                verboseLog("❌ TestContentLoader: Failed to load packs (shared): \(error)")
+            }
+
+            state.sharedRegistry = registry
+            return registry
+        }
+    }
+
+    static func makeLoadedRegistry() -> ContentRegistry {
+        let registry = ContentRegistry()
+        loadContentPacksIfNeeded(into: registry)
+        return registry
+    }
+
+    static func loadContentPacksIfNeeded(into registry: ContentRegistry) {
+        cache.withLock { state in
+
+            guard registry.loadedPackIds.isEmpty else {
+                return
+            }
+
+            let packURLs = state.cachedPackURLs ?? findContentPacksURLs()
+            state.cachedPackURLs = packURLs
+
+            guard !packURLs.isEmpty else {
+                verboseLog("⚠️ TestContentLoader: ContentPacks not found")
+                return
+            }
+
+            do {
+                try registry.loadPacks(from: packURLs)
+                verboseLog("✅ TestContentLoader: Loaded \(packURLs.count) packs")
+            } catch {
+                verboseLog("❌ TestContentLoader: Failed to load packs: \(error)")
+            }
+        }
+    }
+
     private static func findContentPacksURLs() -> [URL] {
-        // Путь от файла теста к корню проекта:
+        // Path from this test helper to project root:
         // TwilightEngineTests/Helpers/TestContentLoader.swift
-        //   → TwilightEngineTests
-        //   → Tests
-        //   → TwilightEngine
-        //   → Packages
-        //   → ProjectRoot
+        //   -> Helpers
+        //   -> TwilightEngineTests
+        //   -> Tests
+        //   -> TwilightEngine
+        //   -> Packages
+        //   -> ProjectRoot
         let testFilePath = URL(fileURLWithPath: #filePath)
         let projectRoot = testFilePath
             .deletingLastPathComponent()  // Helpers
@@ -62,7 +126,7 @@ enum TestContentLoader {
 
         var urls: [URL] = []
 
-        // Character pack (CoreHeroes) — must point to .pack file, not directory
+        // Character pack (CoreHeroes) - must point to .pack file, not directory.
         let coreHeroesPath = projectRoot
             .appendingPathComponent("Packages")
             .appendingPathComponent("CharacterPacks")
@@ -76,7 +140,7 @@ enum TestContentLoader {
             urls.append(coreHeroesPath)
         }
 
-        // Story pack (TwilightMarchesActI) — must point to .pack file, not directory
+        // Story pack (TwilightMarchesActI) - must point to .pack file, not directory.
         let storyPackPath = projectRoot
             .appendingPathComponent("Packages")
             .appendingPathComponent("StoryPacks")
@@ -91,16 +155,6 @@ enum TestContentLoader {
             urls.append(storyPackPath)
         }
 
-        if urls.isEmpty {
-            print("❌ TestContentLoader: ContentPacks not found")
-        }
-
         return urls
-    }
-
-    /// Сбросить состояние (для изолированных тестов)
-    static func reset() {
-        ContentRegistry.shared.unloadAllPacks()
-        isLoaded = false
     }
 }

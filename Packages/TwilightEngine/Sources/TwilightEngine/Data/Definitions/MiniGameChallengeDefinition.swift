@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Data/Definitions/MiniGameChallengeDefinition.swift
+/// Назначение: Содержит реализацию файла MiniGameChallengeDefinition.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 // MARK: - Mini-Game Challenge Definition
@@ -247,7 +252,7 @@ public enum MiniGameOutcome: String, Codable, Hashable {
 
 /// State changes from a mini-game (diff-only, no direct mutation)
 /// Reference: EVENT_MODULE_ARCHITECTURE.md, Invariant #2
-public struct MiniGameDiff: Codable, Hashable {
+public struct MiniGameDiff: Codable, Hashable, Sendable {
     /// Resource changes
     public let resourceChanges: [String: Int]
 

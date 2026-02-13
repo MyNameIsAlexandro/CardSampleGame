@@ -28,6 +28,11 @@ let package = Package(
             path: "Sources/TwilightEngine"
         ),
         .target(
+            name: "TwilightEngineDevTools",
+            dependencies: ["TwilightEngine"],
+            path: "Sources/TwilightEngineDevTools"
+        ),
+        .target(
             name: "PackAuthoring",
             dependencies: ["TwilightEngine"],
             path: "Sources/PackAuthoring"
@@ -39,8 +44,11 @@ let package = Package(
         ),
         .testTarget(
             name: "TwilightEngineTests",
-            dependencies: ["TwilightEngine"],
-            path: "Tests/TwilightEngineTests"
+            dependencies: ["TwilightEngine", "TwilightEngineDevTools"],
+            path: "Tests/TwilightEngineTests",
+            resources: [
+                .process("Fixtures/Replay")
+            ]
         ),
         .testTarget(
             name: "PackAuthoringTests",

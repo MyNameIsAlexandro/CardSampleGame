@@ -1,3 +1,8 @@
+/// Файл: Views/Components/FateCardRevealView.swift
+/// Назначение: Содержит реализацию файла FateCardRevealView.swift.
+/// Зона ответственности: Ограничен задачами слоя представления и пользовательского интерфейса.
+/// Контекст: Используется в приложении CardSampleGame и связанных потоках выполнения.
+
 import SwiftUI
 import TwilightEngine
 

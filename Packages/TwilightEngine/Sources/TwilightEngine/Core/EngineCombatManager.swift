@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Core/EngineCombatManager.swift
+/// Назначение: Содержит реализацию файла EngineCombatManager.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 /// Manages all combat state and logic for the engine.
@@ -155,7 +160,8 @@ public final class EngineCombatManager {
                 enemyPower: enemyPower,
                 enemyHealth: combatEnemyHealth,
                 enemyMaxHealth: enemy.health ?? 10,
-                turnNumber: combatTurnNumber
+                turnNumber: combatTurnNumber,
+                rng: engine.services.rng
             )
 
         case .combatPlayerAttackWithFate(let bonusDamage):

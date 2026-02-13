@@ -1,3 +1,8 @@
+/// Файл: CardSampleGameTests/Unit/ContentPackTests/ContentRegistryTests.swift
+/// Назначение: Содержит реализацию файла ContentRegistryTests.swift.
+/// Зона ответственности: Фиксирует проверяемый контракт и не содержит production-логики.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 import TwilightEngine
 import CoreHeroesContent
@@ -10,6 +15,7 @@ final class ContentRegistryTests: XCTestCase {
 
     // MARK: - Properties
 
+    private var registry: ContentRegistry!
     private var characterPackURL: URL?
     private var storyPackURL: URL?
 
@@ -17,8 +23,7 @@ final class ContentRegistryTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        // Reset registry before each test
-        ContentRegistry.shared.resetForTesting()
+        registry = ContentRegistry()
 
         // Use TestContentLoader for robust URL discovery (with file path fallback)
         characterPackURL = TestContentLoader.characterPackURL
@@ -26,7 +31,7 @@ final class ContentRegistryTests: XCTestCase {
     }
 
     override func tearDown() {
-        ContentRegistry.shared.resetForTesting()
+        registry = nil
         characterPackURL = nil
         storyPackURL = nil
         super.tearDown()
@@ -40,12 +45,12 @@ final class ContentRegistryTests: XCTestCase {
         if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // When - Load both packs using multi-pack loader
-        let packs = try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
+        let packs = try registry.loadPacks(from: [characterPackURL!, storyPackURL!])
 
         // Then
         XCTAssertEqual(packs.count, 2)
-        XCTAssertTrue(ContentRegistry.shared.loadedPackIds.contains("core-heroes"))
-        XCTAssertTrue(ContentRegistry.shared.loadedPackIds.contains("twilight-marches-act1"))
+        XCTAssertTrue(registry.loadedPackIds.contains("core-heroes"))
+        XCTAssertTrue(registry.loadedPackIds.contains("twilight-marches-act1"))
     }
 
     func testLoadPackRegistersContent() throws {
@@ -54,27 +59,27 @@ final class ContentRegistryTests: XCTestCase {
         if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // When
-        try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
+        try registry.loadPacks(from: [characterPackURL!, storyPackURL!])
 
         // Then
-        XCTAssertGreaterThan(ContentRegistry.shared.getAllCards().count, 0)
-        XCTAssertGreaterThan(ContentRegistry.shared.getAllHeroes().count, 0)
-        XCTAssertGreaterThan(ContentRegistry.shared.getAllRegions().count, 0)
+        XCTAssertGreaterThan(registry.getAllCards().count, 0)
+        XCTAssertGreaterThan(registry.getAllHeroes().count, 0)
+        XCTAssertGreaterThan(registry.getAllRegions().count, 0)
     }
 
     func testLoadPackUpdatesBalanceConfig() throws {
         // Given - No balance config before loading
-        XCTAssertNil(ContentRegistry.shared.getBalanceConfig())
+        XCTAssertNil(registry.getBalanceConfig())
 
         // Skip if packs not available
         if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
         if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // When
-        try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
+        try registry.loadPacks(from: [characterPackURL!, storyPackURL!])
 
         // Then
-        XCTAssertNotNil(ContentRegistry.shared.getBalanceConfig())
+        XCTAssertNotNil(registry.getBalanceConfig())
     }
 
     func testCannotLoadSamePackTwice() throws {
@@ -82,10 +87,10 @@ final class ContentRegistryTests: XCTestCase {
         if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
 
         // Given
-        try ContentRegistry.shared.loadPack(from: characterPackURL!)
+        try registry.loadPack(from: characterPackURL!)
 
         // Then - Should throw when trying to load again
-        XCTAssertThrowsError(try ContentRegistry.shared.loadPack(from: characterPackURL!)) { error in
+        XCTAssertThrowsError(try registry.loadPack(from: characterPackURL!)) { error in
             if case PackLoadError.packAlreadyLoaded(let packId) = error {
                 XCTAssertEqual(packId, "core-heroes")
             } else {
@@ -102,17 +107,17 @@ final class ContentRegistryTests: XCTestCase {
         if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
-        try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
+        try registry.loadPacks(from: [characterPackURL!, storyPackURL!])
 
         // When - Try to get a known card
-        let allCards = ContentRegistry.shared.getAllCards()
+        let allCards = registry.getAllCards()
         guard let firstCard = allCards.first else {
             XCTFail("No cards loaded")
             return
         }
 
         // Then
-        let fetchedCard = ContentRegistry.shared.getCard(id: firstCard.id)
+        let fetchedCard = registry.getCard(id: firstCard.id)
         XCTAssertNotNil(fetchedCard)
         XCTAssertEqual(fetchedCard?.id, firstCard.id)
     }
@@ -123,17 +128,17 @@ final class ContentRegistryTests: XCTestCase {
         if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
-        try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
+        try registry.loadPacks(from: [characterPackURL!, storyPackURL!])
 
         // When
-        let allHeroes = ContentRegistry.shared.getAllHeroes()
+        let allHeroes = registry.getAllHeroes()
         guard let firstHero = allHeroes.first else {
             XCTFail("No heroes loaded")
             return
         }
 
         // Then
-        let fetchedHero = ContentRegistry.shared.getHero(id: firstHero.id)
+        let fetchedHero = registry.getHero(id: firstHero.id)
         XCTAssertNotNil(fetchedHero)
         XCTAssertEqual(fetchedHero?.id, firstHero.id)
     }
@@ -144,12 +149,12 @@ final class ContentRegistryTests: XCTestCase {
         if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
-        try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
+        try registry.loadPacks(from: [characterPackURL!, storyPackURL!])
 
         // Then
-        XCTAssertNil(ContentRegistry.shared.getCard(id: "nonexistent_card"))
-        XCTAssertNil(ContentRegistry.shared.getHero(id: "nonexistent_hero"))
-        XCTAssertNil(ContentRegistry.shared.getRegion(id: "nonexistent_region"))
+        XCTAssertNil(registry.getCard(id: "nonexistent_card"))
+        XCTAssertNil(registry.getHero(id: "nonexistent_hero"))
+        XCTAssertNil(registry.getRegion(id: "nonexistent_region"))
     }
 
     // MARK: - Starting Deck Tests
@@ -160,15 +165,15 @@ final class ContentRegistryTests: XCTestCase {
         if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
-        try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
-        let allHeroes = ContentRegistry.shared.getAllHeroes()
+        try registry.loadPacks(from: [characterPackURL!, storyPackURL!])
+        let allHeroes = registry.getAllHeroes()
         guard let hero = allHeroes.first else {
             XCTFail("No heroes loaded")
             return
         }
 
         // When
-        let startingDeck = ContentRegistry.shared.getStartingDeck(forHero: hero.id)
+        let startingDeck = registry.getStartingDeck(forHero: hero.id)
 
         // Then
         XCTAssertFalse(startingDeck.isEmpty, "Hero should have starting deck")
@@ -183,14 +188,14 @@ final class ContentRegistryTests: XCTestCase {
         if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
-        try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
+        try registry.loadPacks(from: [characterPackURL!, storyPackURL!])
 
         // When - Unload character pack
-        ContentRegistry.shared.unloadPack("core-heroes")
+        registry.unloadPack("core-heroes")
 
         // Then - Only character pack content should be gone
-        XCTAssertFalse(ContentRegistry.shared.loadedPackIds.contains("core-heroes"))
-        XCTAssertTrue(ContentRegistry.shared.loadedPackIds.contains("twilight-marches-act1"))
+        XCTAssertFalse(registry.loadedPackIds.contains("core-heroes"))
+        XCTAssertTrue(registry.loadedPackIds.contains("twilight-marches-act1"))
     }
 
     func testUnloadAllPacks() throws {
@@ -199,16 +204,16 @@ final class ContentRegistryTests: XCTestCase {
         if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
-        try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
-        XCTAssertGreaterThan(ContentRegistry.shared.getAllCards().count, 0)
+        try registry.loadPacks(from: [characterPackURL!, storyPackURL!])
+        XCTAssertGreaterThan(registry.getAllCards().count, 0)
 
         // When
-        ContentRegistry.shared.unloadAllPacks()
+        registry.unloadAllPacks()
 
         // Then
-        XCTAssertEqual(ContentRegistry.shared.getAllCards().count, 0)
-        XCTAssertEqual(ContentRegistry.shared.getAllHeroes().count, 0)
-        XCTAssertTrue(ContentRegistry.shared.loadedPackIds.isEmpty)
+        XCTAssertEqual(registry.getAllCards().count, 0)
+        XCTAssertEqual(registry.getAllHeroes().count, 0)
+        XCTAssertTrue(registry.loadedPackIds.isEmpty)
     }
 
     // MARK: - Validation Tests
@@ -219,10 +224,10 @@ final class ContentRegistryTests: XCTestCase {
         if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
-        try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
+        try registry.loadPacks(from: [characterPackURL!, storyPackURL!])
 
         // When
-        let errors = ContentRegistry.shared.validateAllContent()
+        let errors = registry.validateAllContent()
 
         // Then - Should have no critical errors (warnings are OK)
         let criticalErrors = errors.filter { $0.type == .brokenReference }
@@ -237,10 +242,10 @@ final class ContentRegistryTests: XCTestCase {
         if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
-        try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
+        try registry.loadPacks(from: [characterPackURL!, storyPackURL!])
 
         // When
-        let inventory = ContentRegistry.shared.totalInventory
+        let inventory = registry.totalInventory
 
         // Then
         XCTAssertGreaterThan(inventory.cardCount, 0)
@@ -256,8 +261,8 @@ final class ContentRegistryTests: XCTestCase {
         if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
-        try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
-        let provider: ContentProvider = ContentRegistry.shared
+        try registry.loadPacks(from: [characterPackURL!, storyPackURL!])
+        let provider: ContentProvider = registry
 
         // When/Then - Should work as ContentProvider
         XCTAssertFalse(provider.getAllRegionDefinitions().isEmpty, "Should have regions")
@@ -273,10 +278,10 @@ final class ContentRegistryTests: XCTestCase {
         if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
-        try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
+        try registry.loadPacks(from: [characterPackURL!, storyPackURL!])
 
         // When
-        let characterPacks = ContentRegistry.shared.getCharacterPacks()
+        let characterPacks = registry.getCharacterPacks()
 
         // Then
         XCTAssertEqual(characterPacks.count, 1)
@@ -289,10 +294,10 @@ final class ContentRegistryTests: XCTestCase {
         if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
-        try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
+        try registry.loadPacks(from: [characterPackURL!, storyPackURL!])
 
         // When
-        let storyPacks = ContentRegistry.shared.getStoryPacks()
+        let storyPacks = registry.getStoryPacks()
 
         // Then
         XCTAssertEqual(storyPacks.count, 1)
@@ -301,19 +306,19 @@ final class ContentRegistryTests: XCTestCase {
 
     func testIsReadyForGameplay() throws {
         // Given - No packs loaded
-        XCTAssertFalse(ContentRegistry.shared.isReadyForGameplay)
+        XCTAssertFalse(registry.isReadyForGameplay)
 
         // Skip if packs not available
         if characterPackURL == nil { XCTFail("CoreHeroes pack not available - Bundle.module resolution issue"); return }
         if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // When - Load only character pack
-        try ContentRegistry.shared.loadPack(from: characterPackURL!)
-        XCTAssertFalse(ContentRegistry.shared.isReadyForGameplay)
+        try registry.loadPack(from: characterPackURL!)
+        XCTAssertFalse(registry.isReadyForGameplay)
 
         // When - Load story pack
-        try ContentRegistry.shared.loadPack(from: storyPackURL!)
-        XCTAssertTrue(ContentRegistry.shared.isReadyForGameplay)
+        try registry.loadPack(from: storyPackURL!)
+        XCTAssertTrue(registry.isReadyForGameplay)
     }
 
     // MARK: - Season/Campaign Query Tests
@@ -324,10 +329,10 @@ final class ContentRegistryTests: XCTestCase {
         if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
-        try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
+        try registry.loadPacks(from: [characterPackURL!, storyPackURL!])
 
         // When
-        let season1Packs = ContentRegistry.shared.getPacksBySeason("season1")
+        let season1Packs = registry.getPacksBySeason("season1")
 
         // Then - TwilightMarchesActI should be in season1
         XCTAssertEqual(season1Packs.count, 1)
@@ -340,10 +345,10 @@ final class ContentRegistryTests: XCTestCase {
         if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
-        try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
+        try registry.loadPacks(from: [characterPackURL!, storyPackURL!])
 
         // When
-        let campaignPacks = ContentRegistry.shared.getPacksByCampaign("twilight-marches")
+        let campaignPacks = registry.getPacksByCampaign("twilight-marches")
 
         // Then
         XCTAssertEqual(campaignPacks.count, 1)
@@ -357,10 +362,10 @@ final class ContentRegistryTests: XCTestCase {
         if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
-        try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
+        try registry.loadPacks(from: [characterPackURL!, storyPackURL!])
 
         // When
-        let seasons = ContentRegistry.shared.getAvailableSeasons()
+        let seasons = registry.getAvailableSeasons()
 
         // Then - Should include season1 from TwilightMarchesActI
         XCTAssertTrue(seasons.contains("season1"))
@@ -372,10 +377,10 @@ final class ContentRegistryTests: XCTestCase {
         if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
-        try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
+        try registry.loadPacks(from: [characterPackURL!, storyPackURL!])
 
         // When
-        let campaigns = ContentRegistry.shared.getCampaignsInSeason("season1")
+        let campaigns = registry.getCampaignsInSeason("season1")
 
         // Then
         XCTAssertTrue(campaigns.contains("twilight-marches"))
@@ -387,10 +392,10 @@ final class ContentRegistryTests: XCTestCase {
         if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
-        try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
+        try registry.loadPacks(from: [characterPackURL!, storyPackURL!])
 
         // When - With only Act I loaded, campaign is "complete" (sequential from 1)
-        let isComplete = ContentRegistry.shared.isCampaignComplete("twilight-marches")
+        let isComplete = registry.isCampaignComplete("twilight-marches")
 
         // Then - Act I starts at order 1, so it's complete for what's loaded
         XCTAssertTrue(isComplete)
@@ -402,10 +407,10 @@ final class ContentRegistryTests: XCTestCase {
         if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
-        try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
+        try registry.loadPacks(from: [characterPackURL!, storyPackURL!])
 
         // When - Try to get next pack after Act I (Act II not loaded)
-        let nextPack = ContentRegistry.shared.getNextPackInCampaign(after: "twilight-marches-act1")
+        let nextPack = registry.getNextPackInCampaign(after: "twilight-marches-act1")
 
         // Then - Should be nil since Act II isn't loaded
         XCTAssertNil(nextPack)
@@ -417,10 +422,10 @@ final class ContentRegistryTests: XCTestCase {
         if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
-        try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
+        try registry.loadPacks(from: [characterPackURL!, storyPackURL!])
 
         // When - Check if Act I has all required packs (it shouldn't require any)
-        let hasRequired = ContentRegistry.shared.hasAllRequiredPacks(for: "twilight-marches-act1")
+        let hasRequired = registry.hasAllRequiredPacks(for: "twilight-marches-act1")
 
         // Then - Act I is the first act, so no required packs
         XCTAssertTrue(hasRequired)
@@ -432,38 +437,17 @@ final class ContentRegistryTests: XCTestCase {
         if storyPackURL == nil { XCTFail("TwilightMarchesActI pack not available"); return }
 
         // Given
-        try ContentRegistry.shared.loadPacks(from: [characterPackURL!, storyPackURL!])
+        try registry.loadPacks(from: [characterPackURL!, storyPackURL!])
 
         // When - Get packs for non-existent season
-        let noSeasonPacks = ContentRegistry.shared.getPacksBySeason("nonexistent")
+        let noSeasonPacks = registry.getPacksBySeason("nonexistent")
 
         // Then - Should be empty
         XCTAssertTrue(noSeasonPacks.isEmpty)
 
         // And - CoreHeroes should not appear in season1 (it has no season)
-        let characterPacks = ContentRegistry.shared.getCharacterPacks()
+        let characterPacks = registry.getCharacterPacks()
         XCTAssertNil(characterPacks.first?.manifest.season)
     }
 
-    // MARK: - Mock Content Tests
-
-    func testRegisterMockContent() {
-        // Given
-        let mockRegion = RegionDefinition(
-            id: "test_region",
-            title: .inline(LocalizedString(en: "Test", ru: "Тест")),
-            description: .inline(LocalizedString(en: "Test region", ru: "Тестовый регион")),
-            regionType: "test",
-            neighborIds: []
-        )
-
-        // When
-        ContentRegistry.shared.registerMockContent(
-            regions: ["test_region": mockRegion]
-        )
-
-        // Then
-        XCTAssertNotNil(ContentRegistry.shared.getRegion(id: "test_region"))
-        XCTAssertEqual(ContentRegistry.shared.getAllRegions().count, 1)
-    }
 }

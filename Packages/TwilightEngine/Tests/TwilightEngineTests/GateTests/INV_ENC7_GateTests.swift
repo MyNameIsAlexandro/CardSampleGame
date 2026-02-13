@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Tests/TwilightEngineTests/GateTests/INV_ENC7_GateTests.swift
+/// Назначение: Содержит реализацию файла INV_ENC7_GateTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import TwilightEngine
 
@@ -5,17 +10,6 @@ import XCTest
 /// Covers: defend, flee, loot, summon, and bridge fixes.
 /// Gate rules: < 2s, no XCTSkip, no non-deterministic RNG.
 final class INV_ENC7_GateTests: XCTestCase {
-
-    override func setUp() {
-        super.setUp()
-        TestContentLoader.loadContentPacksIfNeeded()
-        WorldRNG.shared.setSeed(42)
-    }
-
-    override func tearDown() {
-        WorldRNG.shared.setSeed(0)
-        super.tearDown()
-    }
 
     // MARK: - Helpers
 
@@ -27,7 +21,8 @@ final class INV_ENC7_GateTests: XCTestCase {
         enemyWP: Int? = nil,
         lootCardIds: [String] = [],
         faithReward: Int = 0,
-        summonPool: [String: EncounterEnemy] = [:]
+        summonPool: [String: EncounterEnemy] = [:],
+        rngSeed: UInt64 = 42
     ) -> EncounterContext {
         let hero = EncounterHero(id: "hero", hp: 30, maxHp: 30, strength: 5, armor: 2, wisdom: 3)
         let enemy = EncounterEnemy(
@@ -53,7 +48,7 @@ final class INV_ENC7_GateTests: XCTestCase {
             fateDeckSnapshot: FateDeckState(drawPile: fateCards, discardPile: []),
             modifiers: [],
             rules: EncounterRules(canFlee: canFlee),
-            rngSeed: 42,
+            rngSeed: rngSeed,
             summonPool: summonPool
         )
     }
@@ -130,8 +125,6 @@ final class INV_ENC7_GateTests: XCTestCase {
 
     /// Flee with high fate card succeeds
     func testFlee_successWithHighFate() {
-        // Seed RNG so first fate draw is high (>= 5)
-        WorldRNG.shared.setSeed(100)
         let ctx = makeContext(canFlee: true)
         let engine = EncounterEngine(context: ctx)
         advanceToPlayerAction(engine)
@@ -227,21 +220,39 @@ final class INV_ENC7_GateTests: XCTestCase {
 
     /// Different RNG seeds produce different encounter sequences
     func testRNGSeed_differentSeedsProduceDifferentResults() {
-        func runEncounter(seed: UInt64) -> Int {
-            WorldRNG.shared.setSeed(seed)
-            let ctx = makeContext()
+        func fingerprint(seed: UInt64, rounds: Int = 6) -> String {
+            let ctx = makeContext(rngSeed: seed)
             let engine = EncounterEngine(context: ctx)
-            advanceToPlayerAction(engine)
-            _ = engine.performAction(.attack(targetId: "test_enemy"))
-            return engine.enemies[0].hp
+            var pieces: [String] = []
+            pieces.reserveCapacity(rounds)
+
+            for _ in 0..<rounds {
+                if let intent = engine.currentIntent {
+                    pieces.append("\(intent.type.rawValue):\(intent.value)")
+                } else {
+                    pieces.append("nil:-1")
+                }
+
+                _ = engine.advancePhase() // intent → playerAction
+                _ = engine.advancePhase() // playerAction → enemyResolution
+                _ = engine.advancePhase() // enemyResolution → roundEnd
+                _ = engine.advancePhase() // roundEnd → intent (+1 round, auto-generates intent)
+            }
+
+            return pieces.joined(separator: "|")
         }
 
-        let result1 = runEncounter(seed: 111)
-        let result2 = runEncounter(seed: 222)
-        // With different seeds, fate cards drawn may differ, leading to different damage
-        // At minimum, both should be valid (enemy HP reduced)
-        XCTAssertLessThan(result1, 20, "Seed 111 should deal damage")
-        XCTAssertLessThan(result2, 20, "Seed 222 should deal damage")
+        var uniqueFingerprints = Set<String>()
+        for seed in 0..<64 {
+            uniqueFingerprints.insert(fingerprint(seed: UInt64(seed)))
+            if uniqueFingerprints.count >= 2 { break }
+        }
+
+        XCTAssertGreaterThanOrEqual(
+            uniqueFingerprints.count,
+            2,
+            "Different RNG seeds must produce different intent fingerprints within a small seed range"
+        )
     }
 
     // MARK: - ENC-D07: Summon Intent

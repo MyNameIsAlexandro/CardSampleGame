@@ -1,9 +1,14 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Encounter/KeywordInterpreter.swift
+/// Назначение: Содержит реализацию файла KeywordInterpreter.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 
 // MARK: - Action Context
 
 /// Context in which a fate card keyword is interpreted
-public enum ActionContext: String, CaseIterable {
+public enum ActionContext: String, CaseIterable, Sendable {
     case combatPhysical
     case combatSpiritual
     case exploration
@@ -15,7 +20,7 @@ public enum ActionContext: String, CaseIterable {
 // MARK: - Keyword Effect
 
 /// Result of interpreting a keyword in a given context
-public struct KeywordEffect: Equatable {
+public struct KeywordEffect: Equatable, Sendable {
     public let bonusDamage: Int
     public let bonusValue: Int
     public let special: String?

@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Localization/LocalizationManager.swift
+/// Назначение: Содержит реализацию файла LocalizationManager.swift.
+/// Зона ответственности: Реализует контракт движка TwilightEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import Foundation
 import Combine
 import os.log
@@ -23,14 +28,31 @@ public protocol StringResolver {
 /// 4. Core pack string table, fallback locale (en)
 /// 5. Return nil (caller shows warning + bracketed key)
 public final class LocalizationManager: ObservableObject, StringResolver {
-    // MARK: - Singleton
-
-    public static let shared = LocalizationManager()
-
     // MARK: - Constants
 
     private static let corePackId = "core"
     private static let fallbackLocale = "en"
+
+    private static func normalizeLocaleCode(_ rawValue: String?) -> String? {
+        guard let rawValue else { return nil }
+        let trimmed = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+
+        if let separator = trimmed.firstIndex(where: { $0 == "-" || $0 == "_" }) {
+            return String(trimmed[..<separator]).lowercased()
+        }
+        return trimmed.lowercased()
+    }
+
+    private static func initialLocaleCode() -> String {
+        if let bundleLocale = normalizeLocaleCode(Bundle.main.preferredLocalizations.first) {
+            return bundleLocale
+        }
+        if let deviceLocale = normalizeLocaleCode(Locale.current.language.languageCode?.identifier) {
+            return deviceLocale
+        }
+        return fallbackLocale
+    }
 
     // MARK: - Published Properties
 
@@ -54,9 +76,8 @@ public final class LocalizationManager: ObservableObject, StringResolver {
     // MARK: - Initialization
 
     public init() {
-        // Initialize with device locale or fallback
-        let deviceLocale = Locale.current.language.languageCode?.identifier ?? Self.fallbackLocale
-        self.currentLocale = deviceLocale
+        // Initialize with active app locale, then fallback to device locale.
+        self.currentLocale = Self.initialLocaleCode()
     }
 
     // MARK: - Loading

@@ -1,3 +1,8 @@
+/// Файл: Views/TutorialOverlayView.swift
+/// Назначение: Содержит реализацию файла TutorialOverlayView.swift.
+/// Зона ответственности: Ограничен задачами слоя представления и пользовательского интерфейса.
+/// Контекст: Используется в приложении CardSampleGame и связанных потоках выполнения.
+
 import SwiftUI
 
 struct TutorialOverlayView: View {

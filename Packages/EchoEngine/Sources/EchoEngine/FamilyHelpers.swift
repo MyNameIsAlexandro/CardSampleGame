@@ -1,3 +1,8 @@
+/// Файл: Packages/EchoEngine/Sources/EchoEngine/FamilyHelpers.swift
+/// Назначение: Содержит реализацию файла FamilyHelpers.swift.
+/// Зона ответственности: Реализует боевой пакет EchoEngine в пределах модуля.
+/// Контекст: Используется в переиспользуемом пакетном модуле проекта.
+
 import FirebladeECS
 
 /// Helper to get the first element from a Family iterator (LazySequence).

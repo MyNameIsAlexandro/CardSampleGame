@@ -1,3 +1,8 @@
+/// Файл: Views/Combat/EncounterViewModel.swift
+/// Назначение: Содержит реализацию файла EncounterViewModel.swift.
+/// Зона ответственности: Ограничен задачами слоя представления и пользовательского интерфейса.
+/// Контекст: Используется в приложении CardSampleGame и связанных потоках выполнения.
+
 import SwiftUI
 import TwilightEngine
 
@@ -8,6 +13,7 @@ import TwilightEngine
 ///
 /// The phase loop pauses whenever a Fate Card is drawn, showing FateCardRevealView.
 /// On dismiss the loop resumes from where it left off.
+@MainActor
 final class EncounterViewModel: ObservableObject {
 
     // MARK: - Mirrored State
@@ -69,6 +75,22 @@ final class EncounterViewModel: ObservableObject {
     private(set) var cardsPlayedCount: Int = 0
     private(set) var fateCardsDrawnCount: Int = 0
 
+    func addDamageDealt(_ value: Int) {
+        totalDamageDealt += value
+    }
+
+    func addDamageTaken(_ value: Int) {
+        totalDamageTaken += value
+    }
+
+    func incrementCardsPlayed() {
+        cardsPlayedCount += 1
+    }
+
+    func incrementFateCardsDrawn() {
+        fateCardsDrawnCount += 1
+    }
+
     // MARK: - Fate Animation
 
     @Published var showFateReveal: Bool = false
@@ -91,13 +113,13 @@ final class EncounterViewModel: ObservableObject {
     }
 
     /// Non-nil engine; callers must ensure startEncounter() was called.
-    private var eng: EncounterEngine {
+    var eng: EncounterEngine {
         guard let engine else { fatalError("EncounterEngine not initialized — call startEncounter() first") }
         return engine
     }
 
     /// Continuation point after fate reveal is dismissed.
-    private var pendingContinuation: (() -> Void)?
+    var pendingContinuation: (() -> Void)?
 
     // MARK: - Init
 
@@ -143,433 +165,6 @@ final class EncounterViewModel: ObservableObject {
         // Show mulligan if player has cards AND pool has replacements
         if !hand.isEmpty && heroDeckCount > 0 {
             showMulligan = true
-        }
-    }
-
-    // MARK: - Mulligan
-
-    func toggleMulliganCard(id: String) {
-        if mulliganSelection.contains(id) {
-            mulliganSelection.remove(id)
-        } else {
-            mulliganSelection.insert(id)
-        }
-    }
-
-    func confirmMulligan() {
-        if !mulliganSelection.isEmpty {
-            let result = eng.performAction(.mulligan(cardIds: Array(mulliganSelection)))
-            if result.success {
-                processStateChanges(result.stateChanges)
-            }
-        }
-        mulliganSelection = []
-        showMulligan = false
-        syncState()
-    }
-
-    func skipMulligan() {
-        mulliganSelection = []
-        showMulligan = false
-    }
-
-    // MARK: - Player Actions
-
-    func performAttack() {
-        guard phase == .playerAction, !isProcessingEnemyTurn, let target = selectedTarget else { return }
-        fateContext = .attack
-        let result = eng.performAction(.attack(targetId: target.id))
-        if !result.success { return }
-        HapticManager.shared.play(.medium)
-        SoundManager.shared.play(.attackHit)
-        lastChanges = result.stateChanges
-        processStateChanges(result.stateChanges)
-        syncState()
-
-        // If fate card was drawn, pause for reveal; otherwise continue
-        if showFateReveal {
-            pendingContinuation = { [weak self] in self?.advanceAfterPlayerAction() }
-        } else {
-            advanceAfterPlayerAction()
-        }
-    }
-
-    func performInfluence() {
-        guard phase == .playerAction, !isProcessingEnemyTurn, let target = selectedTarget else { return }
-        guard target.hasSpiritTrack else { return }
-        fateContext = .attack
-        let result = eng.performAction(.spiritAttack(targetId: target.id))
-        if !result.success { return }
-        HapticManager.shared.play(.medium)
-        SoundManager.shared.play(.influence)
-        lastChanges = result.stateChanges
-        processStateChanges(result.stateChanges)
-        syncState()
-
-        if showFateReveal {
-            pendingContinuation = { [weak self] in self?.advanceAfterPlayerAction() }
-        } else {
-            advanceAfterPlayerAction()
-        }
-    }
-
-    func performWait() {
-        guard phase == .playerAction, !isProcessingEnemyTurn else { return }
-        let result = eng.performAction(.wait)
-        if !result.success { return }
-        HapticManager.shared.play(.light)
-        lastChanges = result.stateChanges
-        logEntry(L10n.encounterLogPlayerWaits.localized)
-        syncState()
-        advanceAfterPlayerAction()
-    }
-
-    func dismissFateReveal() {
-        showFateReveal = false
-        lastFateResult = nil
-
-        // Resume the paused phase loop
-        if let continuation = pendingContinuation {
-            pendingContinuation = nil
-            continuation()
-        }
-    }
-
-    func resolveFateChoice(optionIndex: Int) {
-        let result = eng.performAction(.resolveFateChoice(optionIndex: optionIndex))
-        lastChanges = result.stateChanges
-        processStateChanges(result.stateChanges)
-        showFateChoice = false
-        pendingFateChoice = nil
-        syncState()
-        // Resume pending continuation if any
-        if let continuation = pendingContinuation {
-            pendingContinuation = nil
-            continuation()
-        }
-    }
-
-    func playCard(_ card: Card) {
-        guard phase == .playerAction, !isProcessingEnemyTurn else { return }
-
-        // Pre-check faith affordability for UI feedback
-        if card.faithCost > heroFaith {
-            insufficientFaithCardId = card.id
-            HapticManager.shared.play(.error)
-            SoundManager.shared.play(.attackBlock)
-            logEntry(L10n.combatFaithInsufficient.localized)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
-                if self?.insufficientFaithCardId == card.id {
-                    self?.insufficientFaithCardId = nil
-                }
-            }
-            return
-        }
-
-        let cardName = card.name
-        let result = eng.performAction(.useCard(cardId: card.id, targetId: enemy?.id))
-        if !result.success {
-            if result.error == .insufficientFaith {
-                insufficientFaithCardId = card.id
-                logEntry(L10n.combatFaithInsufficient.localized)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
-                    if self?.insufficientFaithCardId == card.id {
-                        self?.insufficientFaithCardId = nil
-                    }
-                }
-            }
-            return
-        }
-        lastChanges = result.stateChanges
-        processStateChanges(result.stateChanges)
-        syncState()
-
-        HapticManager.shared.play(.medium)
-        SoundManager.shared.play(.cardPlay)
-        // Show played card name prominently
-        lastPlayedCardName = cardName
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
-            if self?.lastPlayedCardName == cardName {
-                self?.lastPlayedCardName = nil
-            }
-        }
-    }
-
-    func performFlee() {
-        guard phase == .playerAction, !isProcessingEnemyTurn else { return }
-        let fleeResult = eng.performAction(.flee)
-        if !fleeResult.success {
-            if fleeResult.error == .fleeNotAllowed {
-                logEntry(L10n.encounterLogFleeBlocked.localized)
-                HapticManager.shared.play(.error)
-            }
-            return
-        }
-        processStateChanges(fleeResult.stateChanges)
-        syncState()
-
-        if eng.fleeSucceeded {
-            SoundManager.shared.play(.flee)
-            HapticManager.shared.play(.success)
-            finishWithResult()
-        } else {
-            // Failed flee: enemy still gets their turn
-            HapticManager.shared.play(.warning)
-            logEntry(L10n.encounterLogFleeFailed.localized)
-            advanceAfterPlayerAction()
-        }
-    }
-
-    // MARK: - Phase Machine
-
-    private func advanceAfterPlayerAction() {
-        isProcessingEnemyTurn = true
-
-        // Advance to enemy resolution
-        _ = eng.advancePhase()
-        syncState()
-
-        // Check if encounter ended during player action (enemy killed/pacified)
-        if checkEncounterEnd() {
-            isProcessingEnemyTurn = false
-            return
-        }
-
-        // Delay enemy resolution so player sees "Ход врага" phase
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self] in
-            self?.resolveEnemyTurn()
-        }
-    }
-
-    private func resolveEnemyTurn() {
-        // Resolve enemy actions for all alive enemies
-        for enemyState in enemies where enemyState.isAlive && enemyState.outcome == nil {
-            fateContext = .defense
-            let result = eng.resolveEnemyAction(enemyId: enemyState.id)
-            lastChanges = result.stateChanges
-            processStateChanges(result.stateChanges)
-            syncState()
-        }
-
-        // If defense fate card was drawn, pause for reveal; resume in advanceToNextRound
-        if showFateReveal {
-            pendingContinuation = { [weak self] in
-                self?.delayedAdvanceToNextRound()
-            }
-            return
-        }
-
-        delayedAdvanceToNextRound()
-    }
-
-    private func delayedAdvanceToNextRound() {
-        // Brief pause after enemy resolution before next round
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-            self?.advanceToNextRound()
-        }
-    }
-
-    private func advanceToNextRound() {
-        // Check if encounter ended after enemy action
-        if checkEncounterEnd() {
-            isProcessingEnemyTurn = false
-            return
-        }
-
-        let handBefore = eng.hand.map { $0.id }
-
-        // Advance to round end (draws card here)
-        _ = eng.advancePhase()
-        syncState()
-
-        // Check for drawn card
-        let handAfter = eng.hand
-        let newCards = handAfter.filter { !handBefore.contains($0.id) }
-        if let drawn = newCards.first {
-            logEntry(L10n.combatCardDrawn.localized(with: drawn.name))
-            lastDrawnCardId = drawn.id
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
-                if self?.lastDrawnCardId == drawn.id {
-                    self?.lastDrawnCardId = nil
-                }
-            }
-        }
-
-        // Advance to next round intent phase
-        _ = eng.advancePhase()
-        syncState()
-
-        // Generate intents for all alive enemies (show primary enemy's intent)
-        for enemyState in enemies where enemyState.isAlive && enemyState.outcome == nil {
-            let intent = eng.generateIntent(for: enemyState.id)
-            if enemyState.id == (selectedTarget?.id ?? enemies.first(where: { $0.isAlive })?.id) {
-                currentIntent = intent
-                logEntry(L10n.encounterLogRoundEnemyPrepares.localized(with: round, localizedIntentDetail(intent)))
-            }
-        }
-
-        // Advance to player action
-        _ = eng.advancePhase()
-        syncState()
-
-        isProcessingEnemyTurn = false
-    }
-
-    private func checkEncounterEnd() -> Bool {
-        // Check victory: all enemies dead or pacified
-        let allDown = enemies.allSatisfy { !$0.isAlive || $0.isPacified }
-        if !enemies.isEmpty && allDown {
-            finishWithResult()
-            return true
-        }
-        // Check defeat: hero HP <= 0
-        if heroHP <= 0 {
-            finishWithResult()
-            return true
-        }
-        return false
-    }
-
-    private func finishWithResult() {
-        let result = eng.finishEncounter()
-        encounterResult = result
-        isFinished = true
-        showCombatOver = true
-
-        // Victory/defeat feedback
-        if case .victory = result.outcome {
-            HapticManager.shared.play(.success)
-            SoundManager.shared.play(.victory)
-        } else {
-            HapticManager.shared.play(.error)
-            SoundManager.shared.play(.defeat)
-        }
-    }
-
-    // MARK: - State Sync
-
-    private func syncState() {
-        phase = eng.currentPhase
-        round = eng.currentRound
-        heroHP = eng.heroHP
-        enemies = eng.enemies
-        isFinished = eng.isFinished
-        fateDeckDrawCount = eng.fateDeckDrawCount
-        fateDeckDiscardCount = eng.fateDeckDiscardCount
-        hand = eng.hand
-        heroFaith = eng.heroFaith
-        pendingFateChoice = eng.pendingFateChoice
-        heroDiscardCount = eng.cardDiscardPile.count
-        heroDeckCount = eng.heroCardPoolCount
-        turnAttackBonus = eng.turnAttackBonus
-        turnInfluenceBonus = eng.turnInfluenceBonus
-        turnDefenseBonus = eng.turnDefenseBonus
-    }
-
-    // MARK: - Log Helpers
-
-    private func processStateChanges(_ changes: [EncounterStateChange]) {
-        for change in changes {
-            switch change {
-            case .enemyHPChanged(_, let delta, let newValue):
-                if delta < 0 { totalDamageDealt += -delta }
-                logEntry(L10n.encounterLogBodyDamage.localized(with: -delta, newValue))
-            case .enemyWPChanged(_, let delta, let newValue):
-                logEntry(L10n.encounterLogWillDamage.localized(with: -delta, newValue))
-            case .playerHPChanged(let delta, let newValue):
-                if delta < 0 { totalDamageTaken += -delta }
-                if delta < 0 {
-                    HapticManager.shared.play(.heavy)
-                    SoundManager.shared.play(.damageTaken)
-                    logEntry(L10n.encounterLogPlayerTakesDamage.localized(with: -delta, newValue))
-                }
-            case .enemyKilled(let enemyId):
-                let name = eng.enemies.first(where: { $0.id == enemyId })?.name ?? enemyId
-                HapticManager.shared.play(.heavy)
-                SoundManager.shared.play(.enemyDefeated)
-                logEntry(L10n.encounterLogEnemySlain.localized(with: name))
-            case .enemyPacified(let enemyId):
-                let name = eng.enemies.first(where: { $0.id == enemyId })?.name ?? enemyId
-                HapticManager.shared.play(.success)
-                SoundManager.shared.play(.enemyDefeated)
-                logEntry(L10n.encounterLogEnemyPacified.localized(with: name))
-            case .fateDraw(_, let value):
-                fateCardsDrawnCount += 1
-                let cardName: String
-                if let result = eng.lastFateDrawResult {
-                    lastFateResult = result
-                    showFateReveal = true
-                    SoundManager.shared.play(result.isCritical ? .fateCritical : .fateReveal)
-                    HapticManager.shared.play(result.isCritical ? .heavy : .light)
-                    cardName = result.card.name
-                } else {
-                    cardName = "?"
-                }
-                let sign = value >= 0 ? "+" : ""
-                logEntry(L10n.encounterLogFateDraw.localized(with: cardName, "\(sign)\(value)"))
-            case .resonanceShifted(let delta, _):
-                let sign = delta >= 0 ? "+" : ""
-                logEntry(L10n.encounterLogResonanceShift.localized(with: "\(sign)\(String(format: "%.0f", delta))"))
-            case .rageShieldApplied(_, let value):
-                logEntry(L10n.encounterLogRageShield.localized(with: value))
-            case .cardPlayed(_, let name):
-                cardsPlayedCount += 1
-                logEntry(L10n.encounterLogCardPlayed.localized(with: name))
-            case .faithChanged(let delta, _):
-                if delta < 0 {
-                    logEntry(L10n.combatFaithSpent.localized(with: -delta))
-                }
-            case .fateChoicePending:
-                showFateChoice = true
-            case .playerDefended(let bonus):
-                logEntry(L10n.encounterLogPlayerDefends.localized(with: bonus))
-            case .fleeAttempt(let success, let damage):
-                if success {
-                    logEntry(L10n.encounterLogFleeSuccess.localized)
-                } else {
-                    logEntry(L10n.encounterLogFleeDamage.localized(with: damage))
-                }
-            case .enemySummoned(_, let enemyName):
-                logEntry(L10n.encounterLogEnemySummoned.localized(with: enemyName))
-            case .cardDrawn:
-                break
-            case .encounterEnded:
-                break
-            case .weaknessTriggered(let enemyId, let keyword):
-                let name = eng.enemies.first(where: { $0.id == enemyId })?.name ?? enemyId
-                logEntry(L10n.combatWeaknessTriggered.localized(with: name, keyword))
-            case .resistanceTriggered(let enemyId, let keyword):
-                let name = eng.enemies.first(where: { $0.id == enemyId })?.name ?? enemyId
-                logEntry(L10n.combatResistanceTriggered.localized(with: name, keyword))
-            case .abilityTriggered(let enemyId, _, let effect):
-                let name = eng.enemies.first(where: { $0.id == enemyId })?.name ?? enemyId
-                logEntry(L10n.combatAbilityTriggered.localized(with: name, effect))
-            }
-        }
-    }
-
-    private func logEntry(_ text: String) {
-        combatLog.append(text)
-        if combatLog.count > 10 {
-            combatLog.removeFirst()
-        }
-    }
-
-    // MARK: - Intent Localization
-
-    /// Localize intent for combat log (mirrors EnemyIntentView.intentDetail)
-    private func localizedIntentDetail(_ intent: EnemyIntent) -> String {
-        switch intent.type {
-        case .attack: return L10n.combatIntentDetailAttack.localized(with: intent.value)
-        case .ritual: return L10n.combatIntentDetailRitual.localized
-        case .block: return L10n.combatIntentDetailBlock.localized(with: intent.value)
-        case .buff: return L10n.combatIntentDetailBuff.localized(with: intent.value)
-        case .heal: return L10n.combatIntentDetailHeal.localized(with: intent.value)
-        case .summon: return L10n.combatIntentDetailSummon.localized
-        case .prepare: return L10n.combatIntentDetailPrepare.localized
-        case .restoreWP: return L10n.combatIntentDetailRestoreWP.localized(with: intent.value)
-        case .debuff: return L10n.combatIntentDetailDebuff.localized(with: intent.value)
-        case .defend: return L10n.combatIntentDetailDefend.localized(with: intent.value)
         }
     }
 }

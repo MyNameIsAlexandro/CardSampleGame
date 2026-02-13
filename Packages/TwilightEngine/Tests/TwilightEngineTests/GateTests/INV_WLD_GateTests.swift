@@ -1,3 +1,8 @@
+/// Файл: Packages/TwilightEngine/Tests/TwilightEngineTests/GateTests/INV_WLD_GateTests.swift
+/// Назначение: Содержит реализацию файла INV_WLD_GateTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import TwilightEngine
 
@@ -11,12 +16,10 @@ final class INV_WLD_GateTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        TestContentLoader.loadContentPacksIfNeeded()
-        WorldRNG.shared.setSeed(42)
+        _ = TestContentLoader.sharedLoadedRegistry()
     }
 
     override func tearDown() {
-        WorldRNG.shared.setSeed(0)
         super.tearDown()
     }
 
@@ -74,7 +77,7 @@ final class INV_WLD_GateTests: XCTestCase {
 
     /// Engine triggers game over when tension reaches 100
     func testTension100_gameOver() {
-        let engine = TwilightGameEngine()
+        let engine = TestEngineFactory.makeEngine(seed: 42)
         engine.initializeNewGame(playerName: "Test", heroId: nil)
 
         guard !engine.publishedRegions.isEmpty else {
@@ -100,7 +103,7 @@ final class INV_WLD_GateTests: XCTestCase {
 
     /// Tension below 100 does not trigger game over
     func testTensionBelow100_noGameOver() {
-        let engine = TwilightGameEngine()
+        let engine = TestEngineFactory.makeEngine(seed: 42)
         engine.initializeNewGame(playerName: "Test", heroId: nil)
         engine.setWorldTension(50)
         _ = engine.performAction(.rest)
@@ -123,7 +126,7 @@ final class INV_WLD_GateTests: XCTestCase {
 
     /// Tension escalation interval is 3 days
     func testTensionEscalation_intervalIs3Days() {
-        let engine = TwilightGameEngine()
+        let engine = TestEngineFactory.makeEngine(seed: 42)
         engine.initializeNewGame(playerName: "Test", heroId: nil)
 
         guard !engine.publishedRegions.isEmpty else {
@@ -143,8 +146,7 @@ final class INV_WLD_GateTests: XCTestCase {
 
     /// 30-day deterministic simulation: tension rises, no crash
     func testSimulation_30days_deterministic() {
-        WorldRNG.shared.setSeed(12345)
-        let engine = TwilightGameEngine()
+        let engine = TestEngineFactory.makeEngine(seed: 12345)
         engine.initializeNewGame(playerName: "Sim", heroId: nil)
 
         guard !engine.publishedRegions.isEmpty else {
@@ -177,8 +179,7 @@ final class INV_WLD_GateTests: XCTestCase {
     /// Same seed produces identical 30-day simulation
     func testSimulation_30days_sameResult() {
         func runSimulation(seed: UInt64) -> [Int] {
-            WorldRNG.shared.setSeed(seed)
-            let engine = TwilightGameEngine()
+            let engine = TestEngineFactory.makeEngine(seed: seed)
             engine.initializeNewGame(playerName: "Sim", heroId: nil)
             var tensions: [Int] = []
             for _ in 1...30 {
@@ -201,7 +202,7 @@ final class INV_WLD_GateTests: XCTestCase {
 
     /// Anchor alignment is initialized from definition's initialInfluence
     func testAnchorAlignment_initialFromDefinition() {
-        let engine = TwilightGameEngine()
+        let engine = TestEngineFactory.makeEngine(seed: 42)
         engine.initializeNewGame(playerName: "Test", heroId: nil)
 
         // Check that anchors have alignment set (from definition)
@@ -218,7 +219,7 @@ final class INV_WLD_GateTests: XCTestCase {
 
     /// Region alignment is derived from its anchor
     func testRegionAlignment_derivedFromAnchor() {
-        let engine = TwilightGameEngine()
+        let engine = TestEngineFactory.makeEngine(seed: 42)
         engine.initializeNewGame(playerName: "Test", heroId: nil)
 
         for region in engine.regionsArray {
@@ -234,7 +235,7 @@ final class INV_WLD_GateTests: XCTestCase {
 
     /// Light/neutral hero strengthening does not change alignment
     func testStrengthenAnchor_lightHero_keepsAlignment() {
-        let engine = TwilightGameEngine()
+        let engine = TestEngineFactory.makeEngine(seed: 42)
         engine.initializeNewGame(playerName: "Test", heroId: nil)
 
         guard let regionWithAnchor = engine.regionsArray.first(where: { $0.anchor != nil }) else {
@@ -257,7 +258,7 @@ final class INV_WLD_GateTests: XCTestCase {
 
     /// Dark hero strengthening shifts alignment toward dark
     func testStrengthenAnchor_darkHero_shiftsAlignment() {
-        let engine = TwilightGameEngine()
+        let engine = TestEngineFactory.makeEngine(seed: 42)
         engine.initializeNewGame(playerName: "Test", heroId: nil)
 
         guard let regionWithAnchor = engine.regionsArray.first(where: {
@@ -282,7 +283,7 @@ final class INV_WLD_GateTests: XCTestCase {
 
     /// Defile anchor changes alignment to dark
     func testDefileAnchor_changesAlignmentToDark() {
-        let engine = TwilightGameEngine()
+        let engine = TestEngineFactory.makeEngine(seed: 42)
         engine.initializeNewGame(playerName: "Test", heroId: nil)
 
         guard let regionWithAnchor = engine.regionsArray.first(where: {
@@ -304,7 +305,7 @@ final class INV_WLD_GateTests: XCTestCase {
 
     /// Defile requires nav (dark) player alignment
     func testDefileAnchor_requiresNavAlignment() {
-        let engine = TwilightGameEngine()
+        let engine = TestEngineFactory.makeEngine(seed: 42)
         engine.initializeNewGame(playerName: "Test", heroId: nil)
 
         guard let regionWithAnchor = engine.regionsArray.first(where: {
@@ -323,7 +324,7 @@ final class INV_WLD_GateTests: XCTestCase {
 
     /// Cannot defile already dark anchor
     func testDefileAnchor_alreadyDark_fails() {
-        let engine = TwilightGameEngine()
+        let engine = TestEngineFactory.makeEngine(seed: 42)
         engine.initializeNewGame(playerName: "Test", heroId: nil)
 
         guard let regionWithAnchor = engine.regionsArray.first(where: { $0.anchor != nil }) else {

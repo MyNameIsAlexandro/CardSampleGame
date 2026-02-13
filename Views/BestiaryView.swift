@@ -1,3 +1,8 @@
+/// Файл: Views/BestiaryView.swift
+/// Назначение: Содержит реализацию файла BestiaryView.swift.
+/// Зона ответственности: Ограничен задачами слоя представления и пользовательского интерфейса.
+/// Контекст: Используется в приложении CardSampleGame и связанных потоках выполнения.
+
 import SwiftUI
 import TwilightEngine
 
@@ -5,12 +10,14 @@ import TwilightEngine
 // Witcher 3-style creature compendium with progressive knowledge reveal
 
 struct BestiaryView: View {
+    let registry: ContentRegistry
+
     @StateObject private var profileManager = ProfileManager.shared
     @Environment(\.dismiss) var dismiss
     @State private var searchText = ""
 
     private var allEnemies: [EnemyDefinition] {
-        ContentRegistry.shared.getAllEnemies()
+        registry.getAllEnemies()
     }
 
     private var filteredEnemies: [EnemyDefinition] {

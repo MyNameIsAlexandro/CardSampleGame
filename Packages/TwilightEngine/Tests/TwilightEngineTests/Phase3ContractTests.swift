@@ -1,5 +1,11 @@
+/// Файл: Packages/TwilightEngine/Tests/TwilightEngineTests/Phase3ContractTests.swift
+/// Назначение: Содержит реализацию файла Phase3ContractTests.swift.
+/// Зона ответственности: Проверяет контракт пакетного модуля и сценарии регрессий.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 @testable import TwilightEngine
+import TwilightEngineDevTools
 
 /// Phase 3 Contract Tests: GameLoop Integration
 /// Verifies that all actions go through Engine and state changes are correct
@@ -16,14 +22,12 @@ final class Phase3ContractTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        TestContentLoader.loadContentPacksIfNeeded()
-        engine = TwilightGameEngine()
+        engine = TestEngineFactory.makeEngine(seed: 42)
         engine.initializeNewGame(playerName: "Test", heroId: nil)
     }
 
     override func tearDown() {
         engine = nil
-        WorldRNG.shared.setSeed(0)
         super.tearDown()
     }
 
@@ -180,8 +184,8 @@ final class Phase3ContractTests: XCTestCase {
             XCTAssertNotNil(engine.gameResult, "Should have game result")
 
             if case .defeat(let reason) = engine.gameResult {
-                XCTAssertTrue(reason.contains("Напряжение") || reason.contains("tension"),
-                    "Defeat reason should mention tension")
+                XCTAssertEqual(reason, .worldTensionMax,
+                    "Defeat reason should use world tension code")
             } else {
                 XCTFail("Should be defeat, not victory")
             }
@@ -287,10 +291,8 @@ final class Phase3ContractTests: XCTestCase {
 
     func testEngineDeterministicWithSeed() {
         // Run same actions with same seed twice
-        WorldRNG.shared.setSeed(42)
-
-        let engine1 = TwilightGameEngine()
-        engine1.initializeFromContentRegistry(ContentRegistry.shared)
+        let engine1 = TestEngineFactory.makeEngine(seed: 42)
+        engine1.initializeNewGame(playerName: "Determinism", heroId: nil)
 
         // Perform actions
         _ = engine1.performAction(.rest)
@@ -301,10 +303,8 @@ final class Phase3ContractTests: XCTestCase {
         let finalDay1 = engine1.currentDay
 
         // Reset and run again
-        WorldRNG.shared.setSeed(42)
-
-        let engine2 = TwilightGameEngine()
-        engine2.initializeFromContentRegistry(ContentRegistry.shared)
+        let engine2 = TestEngineFactory.makeEngine(seed: 42)
+        engine2.initializeNewGame(playerName: "Determinism", heroId: nil)
 
         _ = engine2.performAction(.rest)
         _ = engine2.performAction(.rest)
@@ -328,11 +328,15 @@ private func describeAction(_ action: TwilightGameAction) -> String {
     case .rest: return "rest"
     case .explore: return "explore"
     case .trade: return "trade"
+    case .marketBuy(let cardId): return "marketBuy(\(cardId))"
     case .strengthenAnchor: return "strengthenAnchor"
     case .defileAnchor: return "defileAnchor"
     case .chooseEventOption(let e, let c): return "choose(\(e), \(c))"
     case .resolveMiniGame(let r): return "miniGame(\(r))"
+    case .drawFateCard: return "drawFateCard"
     case .startCombat(let id): return "combat(\(id))"
+    case .combatFinish(let outcome, _, _): return "combatFinish(\(outcome))"
+    case .combatStoreEncounterState(let state): return "combatStoreEncounterState(\(state != nil ? "saved" : "nil"))"
     case .combatInitialize: return "combatInitialize"
     // Active Defense actions
     case .combatMulligan(let cardIds): return "combatMulligan(\(cardIds.count) cards)"

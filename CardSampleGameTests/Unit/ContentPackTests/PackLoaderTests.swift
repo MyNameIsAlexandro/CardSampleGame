@@ -1,3 +1,8 @@
+/// Файл: CardSampleGameTests/Unit/ContentPackTests/PackLoaderTests.swift
+/// Назначение: Содержит реализацию файла PackLoaderTests.swift.
+/// Зона ответственности: Фиксирует проверяемый контракт и не содержит production-логики.
+/// Контекст: Используется в автоматических тестах и quality gate-проверках.
+
 import XCTest
 import TwilightEngine
 import PackAuthoring

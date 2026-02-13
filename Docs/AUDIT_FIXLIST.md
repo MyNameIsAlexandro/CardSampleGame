@@ -75,8 +75,8 @@
 
 ### Реализация
 - `EngineSave.rngState: UInt64?` — добавлено поле для состояния генератора
-- `createSave()` → `rngSeed: WorldRNG.shared.currentSeed(), rngState: WorldRNG.shared.currentState()`
-- `restoreFromEngineSave()` → `WorldRNG.shared.restoreState(state)`
+- `createSave()` → `rngSeed: services.rng.currentSeed(), rngState: services.rng.currentState()`
+- `restoreFromEngineSave()` → `services.rng.restoreState(state)`
 
 ---
 
