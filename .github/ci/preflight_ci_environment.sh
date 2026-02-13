@@ -67,8 +67,12 @@ resolve_ios_destination_with_retry() {
   if [ "${CI_RESOLVE_IOS_DESTINATION:-0}" = "1" ] \
     && [ -x ".github/ci/select_ios_destination.sh" ] \
     && command -v xcodebuild >/dev/null 2>&1; then
-    resolved_destination="$(resolve_ios_destination_with_retry)"
-    echo "- Resolved iOS destination (${scheme}): ${resolved_destination}"
+    if resolved_destination="$(resolve_ios_destination_with_retry)"; then
+      echo "- Resolved iOS destination (${scheme}): ${resolved_destination}"
+    else
+      echo "- Resolved iOS destination (${scheme}): unavailable"
+      echo "- iOS destination resolution in preflight failed (non-fatal, gates will retry)"
+    fi
   fi
 } > "${snapshot_file}"
 
