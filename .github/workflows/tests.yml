@@ -5,9 +5,20 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ main, claude/* ]
+    branches:
+      - main
+      - 'claude/**'
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   # ──────────────────────────────────────────────
@@ -16,6 +27,7 @@ jobs:
   quality-governance:
     name: Quality Governance
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -33,6 +45,7 @@ jobs:
   spm-packages:
     name: "SPM: ${{ matrix.package }}"
     runs-on: macos-latest
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -105,6 +118,7 @@ jobs:
   app-tests:
     name: App Tests
     runs-on: macos-latest
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
 
@@ -205,6 +219,7 @@ jobs:
   build-validation:
     name: "Build: ${{ matrix.target }}"
     runs-on: macos-latest
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -254,6 +269,7 @@ jobs:
   content-validation:
     name: Content JSON Lint
     runs-on: macos-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -262,7 +278,7 @@ jobs:
           bash .github/ci/clean_test_artifacts.sh
           bash .github/ci/preflight_ci_environment.sh TestResults/QualityDashboard content-validation
 
-      - name: Gate: Content JSON Lint
+      - name: "Gate: Content JSON Lint"
         run: |
           mkdir -p TestResults/QualityDashboard
           bash .github/ci/run_quality_gate.sh \
@@ -271,7 +287,7 @@ jobs:
             --dashboard-dir TestResults/QualityDashboard \
             -- "bash .github/ci/content_json_lint.sh"
 
-      - name: Gate: Repository Hygiene
+      - name: "Gate: Repository Hygiene"
         run: |
           mkdir -p TestResults/QualityDashboard
           bash .github/ci/run_quality_gate.sh \
@@ -280,7 +296,7 @@ jobs:
             --dashboard-dir TestResults/QualityDashboard \
             -- "bash .github/ci/validate_repo_hygiene.sh --require-clean-tree"
 
-      - name: Gate: Documentation Sync
+      - name: "Gate: Documentation Sync"
         run: |
           mkdir -p TestResults/QualityDashboard
           bash .github/ci/run_quality_gate.sh \
@@ -289,7 +305,7 @@ jobs:
             --dashboard-dir TestResults/QualityDashboard \
             -- "bash .github/ci/validate_docs_sync.sh"
 
-      - name: Gate: Legacy Cleanup
+      - name: "Gate: Legacy Cleanup"
         run: |
           mkdir -p TestResults/QualityDashboard
           bash .github/ci/run_quality_gate.sh \
@@ -312,6 +328,7 @@ jobs:
     name: Release Readiness Profile
     needs: [spm-packages, app-tests, build-validation, content-validation]
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -378,6 +395,7 @@ jobs:
     name: All Gates Passed
     needs: [quality-governance, spm-packages, app-tests, build-validation, content-validation, release-readiness-profile]
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: All gates passed
         run: echo "All CI gates passed successfully!"

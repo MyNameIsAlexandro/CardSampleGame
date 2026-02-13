@@ -76,40 +76,44 @@ struct ValidationBadge: View {
 
 // MARK: - Preview
 
-#Preview {
-    VStack(alignment: .leading, spacing: 16) {
-        HStack(spacing: 8) {
-            Text("Error Status:")
-                .font(.caption)
-            ValidationBadge(
-                level: .error,
-                message: "Missing required field: Name is empty"
-            )
+#if DEBUG
+struct ValidationBadge_Previews: PreviewProvider {
+    static var previews: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(spacing: 8) {
+                Text("Error Status:")
+                    .font(.caption)
+                ValidationBadge(
+                    level: .error,
+                    message: "Missing required field: Name is empty"
+                )
+                Spacer()
+            }
+
+            HStack(spacing: 8) {
+                Text("Warning Status:")
+                    .font(.caption)
+                ValidationBadge(
+                    level: .warning,
+                    message: "Content length exceeds recommended maximum of 200 characters"
+                )
+                Spacer()
+            }
+
+            HStack(spacing: 8) {
+                Text("Info Status:")
+                    .font(.caption)
+                ValidationBadge(
+                    level: .info,
+                    message: "This field supports markdown formatting"
+                )
+                Spacer()
+            }
+
             Spacer()
         }
-
-        HStack(spacing: 8) {
-            Text("Warning Status:")
-                .font(.caption)
-            ValidationBadge(
-                level: .warning,
-                message: "Content length exceeds recommended maximum of 200 characters"
-            )
-            Spacer()
-        }
-
-        HStack(spacing: 8) {
-            Text("Info Status:")
-                .font(.caption)
-            ValidationBadge(
-                level: .info,
-                message: "This field supports markdown formatting"
-            )
-            Spacer()
-        }
-
-        Spacer()
+        .padding()
+        .frame(width: 400, height: 200)
     }
-    .padding()
-    .frame(width: 400, height: 200)
 }
+#endif
