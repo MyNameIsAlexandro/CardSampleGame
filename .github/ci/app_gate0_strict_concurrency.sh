@@ -13,7 +13,9 @@ xcodebuild build \
   OTHER_SWIFT_FLAGS='$(inherited) -Xfrontend -warn-concurrency' \
   > "${log_file}" 2>&1 || build_exit=$?
 
-grep -E ":[0-9]+:[0-9]+: (warning|error):" "${log_file}" > "${diagnostics_file}" || true
+grep -E ":[0-9]+:[0-9]+: (warning|error):" "${log_file}" \
+  | grep -Ei "(sendable|non-sendable|actor[- ]isolated|main actor|global actor|nonisolated|concurrency|data race|cross-actor)" \
+  > "${diagnostics_file}" || true
 
 echo "Strict-concurrency diagnostics:"
 if [ -s "${diagnostics_file}" ]; then
@@ -28,7 +30,7 @@ if [ -s "${diagnostics_file}" ]; then
 fi
 
 if [ "${build_exit}" -ne 0 ]; then
-  echo "xcodebuild failed without parseable strict-concurrency diagnostics."
+  echo "xcodebuild failed without strict-concurrency diagnostics match."
   tail -n 200 "${log_file}"
   exit "${build_exit}"
 fi
