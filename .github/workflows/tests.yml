@@ -243,22 +243,17 @@ jobs:
       - name: Prepare CI Workspace
         run: |
           bash .github/ci/clean_test_artifacts.sh
-          if [ "${{ matrix.target }}" = "CardSampleGame" ]; then
-            CI_RESOLVE_IOS_DESTINATION=1 bash .github/ci/preflight_ci_environment.sh TestResults/QualityDashboard ${{ matrix.target }}
-          else
-            bash .github/ci/preflight_ci_environment.sh TestResults/QualityDashboard ${{ matrix.target }}
-          fi
+          bash .github/ci/preflight_ci_environment.sh TestResults/QualityDashboard ${{ matrix.target }}
 
       - name: Build ${{ matrix.target }}
         run: |
           mkdir -p TestResults/QualityDashboard
           if [ "${{ matrix.target }}" = "CardSampleGame" ]; then
-            ios_destination="$(bash .github/ci/select_ios_destination.sh --scheme CardSampleGame)"
             bash .github/ci/run_quality_gate.sh \
               --id "build_cardsamplegame" \
               --budget-sec 1200 \
               --dashboard-dir TestResults/QualityDashboard \
-              -- "XCODEBUILD_MAX_ATTEMPTS=2 bash .github/ci/run_xcodebuild.sh build -scheme CardSampleGame -destination '${ios_destination}'"
+              -- "XCODEBUILD_MAX_ATTEMPTS=2 bash .github/ci/run_xcodebuild.sh build -scheme CardSampleGame -destination 'generic/platform=iOS Simulator'"
           else
             bash .github/ci/run_quality_gate.sh \
               --id "build_packeditor" \
