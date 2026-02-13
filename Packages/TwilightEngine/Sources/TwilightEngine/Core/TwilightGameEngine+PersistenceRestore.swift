@@ -116,7 +116,7 @@ extension TwilightGameEngine {
     func initializeFallbackState() {
         resetGameState()
 
-        player.setName("Герой")
+        player.setName(L10n.playerDefaultName.localized)
         player.setMaxHealth(20)
         player.setHealth(20)
         player.setFaith(10)

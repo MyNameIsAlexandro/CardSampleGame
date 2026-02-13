@@ -716,6 +716,14 @@
 "curse.seal.of.nav.name" = "Печать Нави";
 "curse.seal.of.nav.description" = "Блокирует Sustain карты";
 
+// MARK: - Engine Defaults
+"player.default.name" = "Герой";
+"world.balance.yav.strong" = "Явь сильна";
+"world.balance.twilight" = "Сумрак";
+"world.balance.nav.advances" = "Навь наступает";
+"story.default.victory" = "Победа!";
+"story.default.defeat" = "Поражение";
+
 // MARK: - Action Errors
 "error.invalid.action" = "Недопустимое действие: %@";
 "error.invalid.action.no_current_region" = "не определен текущий регион";

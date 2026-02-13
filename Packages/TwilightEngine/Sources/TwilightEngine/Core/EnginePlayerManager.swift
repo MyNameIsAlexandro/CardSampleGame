@@ -20,7 +20,7 @@ public final class EnginePlayerManager {
     public internal(set) var faith: Int = 3
     public internal(set) var maxFaith: Int = 10
     public internal(set) var balance: Int = 50
-    public internal(set) var name: String = "Герой"
+    public internal(set) var name: String = L10n.playerDefaultName.localized
     public internal(set) var heroId: String?
 
     /// Character stats

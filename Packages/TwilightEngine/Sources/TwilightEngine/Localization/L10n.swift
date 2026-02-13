@@ -140,6 +140,10 @@ public enum L10n: CaseIterable {
     case miniGameSkillCheckVictory
     case miniGameSkillCheckDefeat
 
+    // MARK: - Story Fallbacks
+    case storyDefaultVictory
+    case storyDefaultDefeat
+
     // MARK: - Error Messages
     case errorInvalidAction
     case errorInvalidActionNoCurrentRegion
@@ -189,6 +193,18 @@ public enum L10n: CaseIterable {
     public func localized(with args: CVarArg...) -> String {
         let format = self.localized
         return String(format: format, arguments: args)
+    }
+
+    // MARK: - Localized for Explicit Locale
+
+    public func localized(localeCode: String, fallback: String? = nil) -> String {
+        let normalized = EngineLocaleResolver.normalizedLanguageCode(localeCode)
+        guard let path = Bundle.main.path(forResource: normalized, ofType: "lproj"),
+              let localeBundle = Bundle(path: path) else {
+            return fallback ?? key
+        }
+
+        return NSLocalizedString(key, tableName: nil, bundle: localeBundle, value: fallback ?? key, comment: "")
     }
 
     // MARK: - Key Mapping
@@ -304,6 +320,8 @@ public enum L10n: CaseIterable {
         case .miniGamePuzzleDefeat: return "minigame.puzzle.defeat"
         case .miniGameSkillCheckVictory: return "minigame.skillcheck.victory"
         case .miniGameSkillCheckDefeat: return "minigame.skillcheck.defeat"
+        case .storyDefaultVictory: return "story.default.victory"
+        case .storyDefaultDefeat: return "story.default.defeat"
 
         case .errorInvalidAction: return "error.invalid.action"
         case .errorInvalidActionNoCurrentRegion: return "error.invalid.action.no_current_region"

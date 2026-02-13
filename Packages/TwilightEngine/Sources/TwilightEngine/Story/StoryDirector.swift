@@ -170,12 +170,18 @@ public class BaseStoryDirector: StoryDirector {
         if victoryCheck.isVictory {
             gameEnding = .victory(
                 endingId: victoryCheck.endingId ?? "default",
-                description: victoryCheck.description ?? LocalizedString(en: "Victory!", ru: "Победа!")
+                description: victoryCheck.description ?? LocalizedString(
+                    en: L10n.storyDefaultVictory.localized(localeCode: "en", fallback: "Victory!"),
+                    ru: L10n.storyDefaultVictory.localized(localeCode: "ru", fallback: "Victory!")
+                )
             )
         } else if defeatCheck.isDefeat {
             gameEnding = .defeat(
                 reason: defeatCheck.reason ?? .healthZero,
-                description: defeatCheck.description ?? LocalizedString(en: "Defeat", ru: "Поражение")
+                description: defeatCheck.description ?? LocalizedString(
+                    en: L10n.storyDefaultDefeat.localized(localeCode: "en", fallback: "Defeat"),
+                    ru: L10n.storyDefaultDefeat.localized(localeCode: "ru", fallback: "Defeat")
+                )
             )
         }
 

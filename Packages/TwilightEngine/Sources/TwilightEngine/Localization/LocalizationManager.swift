@@ -33,25 +33,8 @@ public final class LocalizationManager: ObservableObject, StringResolver {
     private static let corePackId = "core"
     private static let fallbackLocale = "en"
 
-    private static func normalizeLocaleCode(_ rawValue: String?) -> String? {
-        guard let rawValue else { return nil }
-        let trimmed = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return nil }
-
-        if let separator = trimmed.firstIndex(where: { $0 == "-" || $0 == "_" }) {
-            return String(trimmed[..<separator]).lowercased()
-        }
-        return trimmed.lowercased()
-    }
-
     private static func initialLocaleCode() -> String {
-        if let bundleLocale = normalizeLocaleCode(Bundle.main.preferredLocalizations.first) {
-            return bundleLocale
-        }
-        if let deviceLocale = normalizeLocaleCode(Locale.current.language.languageCode?.identifier) {
-            return deviceLocale
-        }
-        return fallbackLocale
+        EngineLocaleResolver.currentLanguageCode(fallback: fallbackLocale)
     }
 
     // MARK: - Published Properties

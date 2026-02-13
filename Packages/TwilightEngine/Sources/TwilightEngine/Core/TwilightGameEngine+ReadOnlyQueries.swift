@@ -56,11 +56,11 @@ extension TwilightGameEngine {
     public var worldBalanceDescription: String {
         switch lightDarkBalance {
         case 70...100:
-            return "Явь сильна"
+            return L10n.worldBalanceYavStrong.localized
         case 31..<70:
-            return "Сумрак"
+            return L10n.worldBalanceTwilight.localized
         default:
-            return "Навь наступает"
+            return L10n.worldBalanceNavAdvances.localized
         }
     }
 

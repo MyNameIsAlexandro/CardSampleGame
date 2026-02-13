@@ -179,11 +179,12 @@ extension CardAbility: Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         self.id = try container.decode(String.self, forKey: .id)
+        let activeLanguage = EngineLocaleResolver.currentLanguageCode()
 
         // Handle localized name
         let name = try container.decode(String.self, forKey: .name)
         let nameRu = try container.decodeIfPresent(String.self, forKey: .nameRu)
-        if Locale.current.language.languageCode?.identifier == "ru", let ru = nameRu {
+        if activeLanguage == "ru", let ru = nameRu {
             self.name = ru
         } else {
             self.name = name
@@ -192,7 +193,7 @@ extension CardAbility: Codable {
         // Handle localized description
         let description = try container.decode(String.self, forKey: .description)
         let descriptionRu = try container.decodeIfPresent(String.self, forKey: .descriptionRu)
-        if Locale.current.language.languageCode?.identifier == "ru", let ru = descriptionRu {
+        if activeLanguage == "ru", let ru = descriptionRu {
             self.description = ru
         } else {
             self.description = description

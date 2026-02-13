@@ -129,7 +129,7 @@ public final class TwilightGameEngine {
     /// Mid-combat encounter state for save/resume (SAV-03)
     public private(set) var pendingEncounterState: EncounterSaveState?
     /// Deterministic seed reserved for external combat snapshot/bridge path.
-    internal var pendingExternalCombatSeed: UInt64?
+    public private(set) var pendingExternalCombatSeed: UInt64?
     /// Active external combat enemy tracking for quest/event follow-ups.
     internal var activeCombatEnemyId: String?
 
@@ -233,7 +233,7 @@ public final class TwilightGameEngine {
     ///   - playerName: Character name for display
     ///   - heroId: Hero definition ID from HeroRegistry (data-driven hero system)
     ///   - startingDeck: Starting deck of cards (from CardRegistry.startingDeck)
-    public func initializeNewGame(playerName: String = "Герой", heroId: String? = nil, startingDeck: [Card] = []) {
+    public func initializeNewGame(playerName: String = L10n.playerDefaultName.localized, heroId: String? = nil, startingDeck: [Card] = []) {
         // Reset state
         isGameOver = false
         gameResult = nil

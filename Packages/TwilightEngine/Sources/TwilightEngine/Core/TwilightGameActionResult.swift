@@ -157,7 +157,6 @@ public enum ActionError: Error, Equatable {
     // Event errors
     case eventNotFound(eventId: String)
     case invalidChoiceIndex(index: Int, maxIndex: Int)
-    case choiceRequirementsNotMet(reason: String)
 
     // Combat errors
     case cardNotInHand(cardId: String)
@@ -192,8 +191,6 @@ public enum ActionError: Error, Equatable {
             return L10n.errorEventNotFound.localized(with: id)
         case .invalidChoiceIndex(let index, let max):
             return L10n.errorInvalidChoiceIndex.localized(with: index, max)
-        case .choiceRequirementsNotMet(let reason):
-            return L10n.errorChoiceRequirementsNotMet.localized(with: reason)
         case .cardNotInHand(let id):
             return L10n.errorCardNotInHand.localized(with: id)
         case .notEnoughActions:

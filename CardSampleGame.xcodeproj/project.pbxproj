@@ -33,6 +33,10 @@
 			APP00301000000000000001 /* BundledPackURLs.swift in Sources */ = {isa = PBXBuildFile; fileRef = APP00302000000000000001 /* BundledPackURLs.swift */; };
 			APP00401000000000000001 /* ContentFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = APP00402000000000000001 /* ContentFlow.swift */; };
 			APP00501000000000000001 /* AppServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = APP00502000000000000001 /* AppServices.swift */; };
+			APP00601000000000000001 /* LoadingItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = APP00602000000000000001 /* LoadingItem.swift */; };
+			APP00701000000000000001 /* ContentLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = APP00702000000000000001 /* ContentLoader.swift */; };
+			APP00801000000000000001 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = APP00802000000000000001 /* LoadingView.swift */; };
+			APP00901000000000000001 /* LoadingItemRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = APP00902000000000000001 /* LoadingItemRow.swift */; };
 			APS00101000000000000001 /* CharacterSelectionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = APS00102000000000000001 /* CharacterSelectionScreen.swift */; };
 			APS00201000000000000001 /* SaveSlotSelectionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = APS00202000000000000001 /* SaveSlotSelectionScreen.swift */; };
 			APS00301000000000000001 /* LoadSlotSelectionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = APS00302000000000000001 /* LoadSlotSelectionScreen.swift */; };
@@ -172,6 +176,10 @@
 			APP00302000000000000001 /* BundledPackURLs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundledPackURLs.swift; sourceTree = "<group>"; };
 			APP00402000000000000001 /* ContentFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentFlow.swift; sourceTree = "<group>"; };
 			APP00502000000000000001 /* AppServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppServices.swift; sourceTree = "<group>"; };
+			APP00602000000000000001 /* LoadingItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingItem.swift; sourceTree = "<group>"; };
+			APP00702000000000000001 /* ContentLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentLoader.swift; sourceTree = "<group>"; };
+			APP00802000000000000001 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
+			APP00902000000000000001 /* LoadingItemRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingItemRow.swift; sourceTree = "<group>"; };
 			APS00102000000000000001 /* CharacterSelectionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharacterSelectionScreen.swift; sourceTree = "<group>"; };
 			APS00202000000000000001 /* SaveSlotSelectionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveSlotSelectionScreen.swift; sourceTree = "<group>"; };
 			APS00302000000000000001 /* LoadSlotSelectionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadSlotSelectionScreen.swift; sourceTree = "<group>"; };
@@ -317,9 +325,21 @@
 					APP00402000000000000001 /* ContentFlow.swift */,
 					APP00502000000000000001 /* AppServices.swift */,
 					GEO00302000000000000001 /* GameEngineObservable.swift */,
+					APPLOD000000000000000001 /* Loading */,
 					APPSCR000000000000000001 /* Screens */,
 				);
 				path = App;
+			sourceTree = "<group>";
+		};
+		APPLOD000000000000000001 /* Loading */ = {
+			isa = PBXGroup;
+			children = (
+				APP00602000000000000001 /* LoadingItem.swift */,
+				APP00702000000000000001 /* ContentLoader.swift */,
+				APP00802000000000000001 /* LoadingView.swift */,
+				APP00902000000000000001 /* LoadingItemRow.swift */,
+			);
+			path = Loading;
 			sourceTree = "<group>";
 		};
 		APPSCR000000000000000001 /* Screens */ = {
@@ -713,6 +733,10 @@
 						APP00301000000000000001 /* BundledPackURLs.swift in Sources */,
 						APP00401000000000000001 /* ContentFlow.swift in Sources */,
 						APP00501000000000000001 /* AppServices.swift in Sources */,
+						APP00601000000000000001 /* LoadingItem.swift in Sources */,
+						APP00701000000000000001 /* ContentLoader.swift in Sources */,
+						APP00801000000000000001 /* LoadingView.swift in Sources */,
+						APP00901000000000000001 /* LoadingItemRow.swift in Sources */,
 						APS00101000000000000001 /* CharacterSelectionScreen.swift in Sources */,
 						APS00201000000000000001 /* SaveSlotSelectionScreen.swift in Sources */,
 						APS00301000000000000001 /* LoadSlotSelectionScreen.swift in Sources */,

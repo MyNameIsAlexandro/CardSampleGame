@@ -710,6 +710,14 @@
 "curse.seal.of.nav.name" = "Seal of Nav";
 "curse.seal.of.nav.description" = "Blocks Sustain cards";
 
+// MARK: - Engine Defaults
+"player.default.name" = "Hero";
+"world.balance.yav.strong" = "Yav is strong";
+"world.balance.twilight" = "Twilight";
+"world.balance.nav.advances" = "Nav advances";
+"story.default.victory" = "Victory!";
+"story.default.defeat" = "Defeat";
+
 // MARK: - Action Errors
 "error.invalid.action" = "Invalid action: %@";
 "error.invalid.action.no_current_region" = "no current region";

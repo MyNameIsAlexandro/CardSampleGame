@@ -24,28 +24,13 @@ public enum LocalizableText: Hashable, Sendable {
 
     // MARK: - Resolution
 
-    private static func normalizedLanguageCode(_ rawValue: String?, fallback: String = "en") -> String {
-        guard let rawValue else { return fallback }
-        let trimmed = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return fallback }
-
-        if let separator = trimmed.firstIndex(where: { $0 == "-" || $0 == "_" }) {
-            return String(trimmed[..<separator]).lowercased()
-        }
-        return trimmed.lowercased()
-    }
-
     private static func appLocaleCode(fallback: String = "en") -> String {
-        if let preferred = Bundle.main.preferredLocalizations.first {
-            return normalizedLanguageCode(preferred, fallback: fallback)
-        }
-        let deviceLocale = Locale.current.language.languageCode?.identifier
-        return normalizedLanguageCode(deviceLocale, fallback: fallback)
+        EngineLocaleResolver.currentLanguageCode(fallback: fallback)
     }
 
     private static func resolverLocaleCode(_ resolver: StringResolver, fallback: String = "en") -> String {
         if let localizationManager = resolver as? LocalizationManager {
-            return normalizedLanguageCode(
+            return EngineLocaleResolver.normalizedLanguageCode(
                 localizationManager.currentLocale,
                 fallback: appLocaleCode(fallback: fallback)
             )

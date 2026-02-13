@@ -25,11 +25,7 @@ public struct LocalizedString: Codable, Hashable, Sendable {
     /// Returns the string for the current device locale.
     /// Falls back to English if the current locale is not supported.
     public var localized: String {
-        let languageCode = Locale.current.language.languageCode?.identifier ?? "en"
-        switch languageCode {
-        case "ru": return ru
-        default: return en
-        }
+        localized(for: EngineLocaleResolver.currentLanguageCode())
     }
 
     /// Returns the string for a specific language code.
