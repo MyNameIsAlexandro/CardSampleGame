@@ -28,18 +28,42 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-raw_destinations="$(xcodebuild -showdestinations -scheme "${scheme}")"
+extract_candidates() {
+  local raw="$1"
+  printf '%s\n' "${raw}" \
+    | grep -E "platform: *iOS Simulator" \
+    | while IFS= read -r line; do
+      name="$(printf '%s\n' "${line}" | sed -nE 's/.*name:([^,}]+).*/\1/p')"
+      os="$(printf '%s\n' "${line}" | sed -nE 's/.*OS:([^,}]+).*/\1/p')"
 
-candidates="$(
-  printf '%s\n' "${raw_destinations}" \
-    | grep "platform:iOS Simulator" \
-    | sed -nE 's/.*OS:([^,}]+), name:([^}]+).*/\2|\1/p' \
-    | awk -F'|' '{name=$1; os=$2; sub(/^[[:space:]]+/, "", name); sub(/[[:space:]]+$/, "", name); sub(/^[[:space:]]+/, "", os); sub(/[[:space:]]+$/, "", os); print name "|" os}' \
+      name="$(printf '%s' "${name}" | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')"
+      os="$(printf '%s' "${os}" | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')"
+
+      if [ -n "${name}" ] && [ -n "${os}" ]; then
+        printf '%s|%s\n' "${name}" "${os}"
+      fi
+    done \
     | awk '!seen[$0]++'
-)"
+}
+
+raw_destinations=""
+candidates=""
+for attempt in 1 2 3; do
+  raw_destinations="$(xcodebuild -showdestinations -scheme "${scheme}" 2>&1 || true)"
+  candidates="$(extract_candidates "${raw_destinations}")"
+  if [ -n "${candidates}" ]; then
+    break
+  fi
+
+  if [ "${attempt}" -lt 3 ]; then
+    sleep 2
+  fi
+done
 
 if [ -z "${candidates}" ]; then
   echo "No iOS Simulator destinations found for scheme: ${scheme}" >&2
+  echo "xcodebuild -showdestinations output:" >&2
+  printf '%s\n' "${raw_destinations}" >&2
   exit 1
 fi
 
