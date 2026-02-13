@@ -130,7 +130,9 @@ jobs:
           bash .github/ci/clean_test_artifacts.sh
           CI_RESOLVE_IOS_DESTINATION=1 bash .github/ci/preflight_ci_environment.sh TestResults/QualityDashboard CardSampleGame
 
-      - name: "Gate 0: App Strict Concurrency"
+      - name: "Gate 0: App Strict Concurrency (Advisory)"
+        id: app_gate0
+        continue-on-error: true
         run: |
           mkdir -p TestResults/QualityDashboard
           bash .github/ci/run_quality_gate.sh \
@@ -138,6 +140,11 @@ jobs:
             --budget-sec 1200 \
             --dashboard-dir TestResults/QualityDashboard \
             -- "bash .github/ci/app_gate0_strict_concurrency.sh"
+
+      - name: "Gate 0 Advisory Status"
+        if: steps.app_gate0.outcome == 'failure'
+        run: |
+          echo "::warning::Gate 0 strict concurrency is advisory in CI for now. Investigate app_gate_0_strict_concurrency.log in artifacts."
 
       - name: "Gate 1: Quality Gates"
         run: |

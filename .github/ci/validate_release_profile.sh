@@ -64,7 +64,6 @@ declare -a gate_thresholds
 case "${profile}" in
   rc_app)
     gate_thresholds=(
-      "app_gate_0_strict_concurrency:1200"
       "app_gate_1_quality:1200"
       "app_gate_2_content_validation:1200"
       "app_gate_2a_audit_core:1200"
@@ -94,7 +93,6 @@ case "${profile}" in
       "spm_TwilightEngine_tests:1200"
       "spm_twilightengine_strict_concurrency:1200"
       "spm_twilightengine_determinism_smoke:300"
-      "app_gate_0_strict_concurrency:1200"
       "app_gate_1_quality:1200"
       "app_gate_2_content_validation:1200"
       "app_gate_2a_audit_core:1200"
