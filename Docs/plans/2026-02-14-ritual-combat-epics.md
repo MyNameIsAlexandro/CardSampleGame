@@ -22,7 +22,7 @@ Epics Phase 3 начинаются с **R1** (Ritual), чтобы не пере�
 R0 (Fate Balance) ──→ R1 (Effort) ────────────────┐
                                                     ├──→ R5 (Ritual Zone)
                       R2 (Scene Foundation) ──┬────┤
-                                               │    ├──→ R9 (Integration) ──→ R10 (Validation)
+                                               │    ├──→ R9 (Integration) ──→ R10a (Validation) ──→ R10b (Retirement)
                                                ├──→ R3 (Cards & Drag) ──→ R5
                                                ├──→ R4 (Enemy Idols)
                                                ├──→ R6 (Fate Reveal)
@@ -52,7 +52,8 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 - `R7`: PENDING — Resonance Atmosphere
 - `R8`: PENDING — HUD & Info Layer
 - `R9`: PENDING — Integration & Migration
-- `R10`: PENDING — Vertical Slice Validation
+- `R10a`: PENDING — Vertical Slice Validation
+- `R10b`: PENDING — Legacy Retirement & Cleanup
 
 ---
 
@@ -60,29 +61,25 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 
 ### R0 [PENDING] — Fate Deck Balance Hardening
 
-**Goal:** Закрыть математические дефекты F1–F6 из стресс-аудита Fate Deck (Приложение D COMBAT_DIPLOMACY_SPEC) до построения визуальной надстройки.
+**Goal:** Закрыть математические дефекты F1–F5 из стресс-аудита Fate Deck (Приложение D COMBAT_DIPLOMACY_SPEC) до построения визуальной надстройки. Только контентные и конфигурационные изменения — без изменения семантики engine runtime.
 
 **Dependencies:** Нет (первый epic Phase 3).
 
 **Design ref:** `COMBAT_DIPLOMACY_SPEC.md` Приложение D
 
+**Scope boundary:** Только balance/content/config. Никаких изменений в `FateDeckManager.drawAndResolve()` или resolution pipeline. F6 (bonusValue/special consumption) вынесен в R6 как contract verification.
+
 **Deliverables:**
 
-**F6 (P3) — Verify bonusValue/special consumption:**
-- Аудит: `CombatSystem` в EchoEngine — используется ли `keywordEffect.bonusValue` и `special` из `FateResolution`?
-- Если нет → потерянная механика. Решение: либо подключить (bonusValue → доп. урон / special → effect dispatch), либо удалить и упростить KeywordEffect
-- Результат: код или документированное решение "bonusValue intentionally unused in combat"
+**F5 (P3) — matchMultiplier drift fix:**
+- Подключить `KeywordInterpreter.resolve()` к существующему SoT-ключу `combat.balance.matchMultiplier` (default = **1.5** по COMBAT_DIPLOMACY_SPEC Приложение C)
+- Текущий код hardcoded **2.0** — это drift с SoT. Fix: читать из BalancePack config
+- Не вводить новый ключ — использовать существующий `combat.balance.matchMultiplier`
 
-**F5 (P3) — matchMultiplier в BalancePack:**
-- Вынести `matchMultiplier` из default parameter `KeywordInterpreter.resolve()` в `BalancePack` config
-- Новый ключ: `combat.fate.matchMultiplier` (default = 2.0)
-- `FateResolutionService.resolve()` читает multiplier из config
-
-**F3 (P2) — deepNav doom spiral mitigation:**
-- Ввести пол effectiveValue: `max(effectiveFloor, baseValue + ruleModify)`, `effectiveFloor` из BalancePack (default = -3)
-- Или: cap `resonanceRule.modifyValue` для sticky-карт на ±1
-- Обновить `FateDeckManager.drawAndResolve()` с применением пола
-- Обновить `curse_navi` resonanceRules: deepNav modifyValue -2 → -1
+**F3 (P2) — deepNav doom spiral mitigation (content-only):**
+- Обновить `curse_navi` resonanceRules: deepNav modifyValue **-2 → -1**, nav modifyValue **-1 → -1** (без изменения)
+- Добавить content validation rule: sticky-карты (isSticky=true) должны иметь `|modifyValue| ≤ 1` во всех resonanceRules
+- Никаких runtime floor/cap в engine — решение чисто через контент + валидацию
 
 **F1 (P1) — Surge suit distribution:**
 - Изменить 1 surge-карту с prav на yav (рекомендация: `fate_prav_light_b` → `fate_yav_surge_a`, suit=yav)
@@ -94,15 +91,13 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 - Или: убрать keyword (crit и так +3 base, keyword сверху = overkill)
 - Рекомендация: suit=yav, keyword=surge (нейтральный surge crit)
 
-**F4 (P2) — deepPrav snowball:** Monitor. Kill→Nav самокоррекция. Контрольная точка — R10 vertical slice.
+**F4 (P2) — deepPrav snowball:** Monitor. Kill→Nav самокоррекция. Контрольная точка — R10a vertical slice.
 
 **Acceptance (gate-тесты):**
-- `testEffectiveValueFloorApplied` — effectiveValue ≥ effectiveFloor для всех карт
-- `testMatchMultiplierFromConfig` — matchMultiplier читается из BalancePack, default = 2.0
+- `testMatchMultiplierFromBalancePack` — matchMultiplier читается из `combat.balance.matchMultiplier`, default = 1.5
 - `testSurgeSuitDistribution` — ≥1 surge-карта с suit ≠ prav в fate_deck_core
 - `testCritCardNeutralSuit` — crit card имеет suit=yav (нейтральный)
-- `testKeywordEffectConsumedInCombat` — bonusValue/special из KeywordEffect применяются или документированно отключены
-- `testStickyCardResonanceModifyCapped` — sticky cards: |modifyValue| ≤ 1
+- `testStickyCardResonanceModifyCapped` — sticky cards: |modifyValue| ≤ 1 (content validation)
 
 ---
 
@@ -110,7 +105,7 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 
 **Goal:** Реализовать каноническую механику Effort (PROJECT_BIBLE: `Stat + FateCard + Effort >= Difficulty`) в CombatSimulation.
 
-**Dependencies:** Нет (чистый engine, параллельно с R2).
+**Dependencies:** R0 (matchMultiplier fix и content changes должны быть завершены до расширения CombatSimulation).
 
 **Design ref:** §3.5 (SoT), §11.2 (API)
 
@@ -240,11 +235,13 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 
 ---
 
-### R6 [PENDING] — Fate Reveal
+### R6 [PENDING] — Fate Reveal & Keyword Outcome Contract
 
-**Goal:** Вскрытие Fate-карты как драматический момент раунда.
+**Goal:** Вскрытие Fate-карты как драматический момент раунда. Верификация keyword outcome contract (F6).
 
 **Dependencies:** R2
+
+**Contract note:** R6 использует **текущий** `FateResolution` output без изменения его структуры. Если R1 расширяет FateResolution (Effort-поля) — R6 адаптируется, но не блокируется.
 
 **Design ref:** §8 (Fate Moment, Dynamic Tempo, 3D flip, keyword effects, Fate Choice)
 
@@ -258,8 +255,15 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 - Fate Choice overlay (2 карты парят, тап выбирает)
 - Defensive fate (меньше, быстрее, без затемнения)
 
+**F6 (P3) — Keyword outcome contract verification:**
+- Аудит: `CombatSystem` в EchoEngine — используется ли `keywordEffect.bonusValue` и `keywordEffect.special` из `FateResolution`?
+- Если используется → документировать, добавить gate-тест
+- Если не используется → решение: подключить (bonusValue → доп. урон, special → effect dispatch) или документированно отключить ("bonusValue intentionally unused in combat formula, effects via special only")
+- Результат: контракт зафиксирован, gate-тест добавлен
+
 **Acceptance:**
 - `testFateRevealPreservesExistingDeterminism` — визуал не влияет на FateResolution
+- `testKeywordEffectConsumedOrDocumented` — bonusValue/special из KeywordEffect применяются в CombatSystem или документированно отключены
 - Major fate = затемнение + полный flip + keyword
 - Minor fate = быстрый flip без затемнения
 - Wait = без Fate-карты
@@ -342,9 +346,9 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 
 ---
 
-### R10 [PENDING] — Vertical Slice Validation & Cleanup
+### R10a [PENDING] — Vertical Slice Validation
 
-**Goal:** Проверить Go/No-Go, убрать deprecated код, финальная полировка.
+**Goal:** Проверить Go/No-Go на реальном девайсе. Никакого удаления deprecated-кода — только валидация.
 
 **Dependencies:** R9
 
@@ -371,14 +375,38 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 
 **Deliverables:**
 - Go/No-Go report по всем 10 критериям
-- Удаление deprecated: CombatScene, CombatScene+*.swift
-- Удаление EncounterViewModel combat path (после подтверждения)
 - Финальный прогон всех gate-тестов
+- F4 monitoring checkpoint: deepPrav snowball проверка на vertical slice
+- Smoke test: кампания + arena + resume path на реальном девайсе
 
 **Acceptance:**
 - Все 10 Go/No-Go пройдены
-- 0 deprecated imports в production
 - Все gate-тесты зелёные
+- Старый боевой путь остаётся рабочим как fallback
+
+---
+
+### R10b [PENDING] — Legacy Retirement & Cleanup
+
+**Goal:** Удаление deprecated боевого кода после подтверждённой стабильности нового пути.
+
+**Dependencies:** R10a + 1–2 дня smoke-тестирования кампании и resume path на реальном девайсе
+
+**Safety gate:** R10b начинается **только** после:
+1. R10a Go/No-Go пройдены
+2. Smoke test на реальном девайсе (кампания: 3+ боёв, resume: save→kill→restore)
+3. Явное одобрение на удаление
+
+**Deliverables:**
+- Удаление deprecated: `CombatScene.swift`, `CombatScene+*.swift`
+- Удаление EncounterViewModel combat path (SwiftUI path)
+- Удаление неиспользуемых imports
+- Финальный прогон gate-тестов после удаления
+
+**Acceptance:**
+- `testOldCombatSceneNotImportedInProduction` — 0 deprecated imports
+- Все gate-тесты зелёные после удаления
+- Build clean: iOS + macOS
 
 ---
 
@@ -400,11 +428,9 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 
 | Тест | Epic | Scope |
 |---|---|---|
-| `testEffectiveValueFloorApplied` | R0 | effectiveValue ≥ floor |
-| `testMatchMultiplierFromConfig` | R0 | matchMultiplier из BalancePack |
+| `testMatchMultiplierFromBalancePack` | R0 | matchMultiplier из `combat.balance.matchMultiplier`, default 1.5 |
 | `testSurgeSuitDistribution` | R0 | ≥1 surge != prav |
 | `testCritCardNeutralSuit` | R0 | crit suit=yav |
-| `testKeywordEffectConsumedInCombat` | R0 | bonusValue/special потребляется |
 | `testStickyCardResonanceModifyCapped` | R0 | sticky |modifyValue| ≤ 1 |
 | `testEffortBurnMovesToDiscard` | R1 | Effort → discardPile |
 | `testEffortDoesNotSpendEnergy` | R1 | Effort не тратит energy |
@@ -420,6 +446,7 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 | `testRitualSceneUsesOnlyCombatSimulationAPI` | R2 | scene → только CombatSimulation |
 | `testDragDropProducesCanonicalCommands` | R3 | drag → canonical API |
 | `testFateRevealPreservesExistingDeterminism` | R6 | визуал не влияет на Fate |
+| `testKeywordEffectConsumedOrDocumented` | R6 | bonusValue/special consumed или документированно отключены |
 | `testResonanceAtmosphereIsPurePresentation` | R7 | controller read-only |
 | `testAtmosphereControllerIsReadOnly` | R7 | no mutation calls |
 | `testRitualSceneRestoresFromSnapshot` | R9 | UI восстановление из snapshot |

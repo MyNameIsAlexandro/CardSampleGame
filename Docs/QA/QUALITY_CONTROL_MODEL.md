@@ -130,7 +130,7 @@ Phase 3 (Ritual Combat) вводит 4 новых gate-тест сьюта:
 | F2 | P1 | Crit-карта на 67% эффективнее при Pacify чем при Kill (prav suit + surge) | Контент-ревью после vertical slice |
 | F3 | P2 | deepNav doom spiral: curse sticky -4 effectiveValue, E[total] < 0 | Плейтест deepNav-сценариев |
 | F4 | P2 | deepPrav snowball: E[value]=+1.5, self-reinforcing resonance shifts | Мониторинг |
-| F5 | P3 | matchMultiplier=2.0 hardcoded, не конфигурируем через контент | При вынесении в BalancePack |
+| F5 | P3 | matchMultiplier=2.0 hardcoded (SoT `combat.balance.matchMultiplier`=1.5, drift) | R0: подключить к существующему SoT-ключу |
 | F6 | P3 | bonusValue/special из KeywordEffect не потребляется CombatCalculator | Code review EchoEngine CombatSystem |
 
 **Не блокеры текущего эпика.** Контрольная точка — первый контент-ревью после vertical slice (R9).

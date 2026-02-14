@@ -1220,7 +1220,9 @@ Swing deepNav→deepPrav: **2.417 пунктов** (значимо при diffic
 
 ### D.3 Keyword EV по путям (suit match/mismatch)
 
-Suit matching: nav↔combatPhysical (match), prav↔combatSpiritual (match). Mismatch → keyword suppressed (×0). Match → keyword ×2.
+Suit matching: nav↔combatPhysical (match), prav↔combatSpiritual (match). Mismatch → keyword suppressed (×0). Match → keyword × matchMultiplier.
+
+> **Примечание:** SoT `combat.balance.matchMultiplier` = **1.5** (Приложение C). Код hardcodes 2.0 (F5). Числа ниже посчитаны с кодовым значением 2.0 — пропорции между путями сохраняются при любом множителе.
 
 | Путь | E[keyword bonus] | Matched cards | Suppressed cards |
 |---|---|---|---|
@@ -1237,14 +1239,14 @@ Suit matching: nav↔combatPhysical (match), prav↔combatSpiritual (match). Mis
 | **F2** | P1 | **Crit favors Pacify.** `fate_crit` (base +3, surge, prav): при Kill → +3 total (keyword suppressed); при Pacify → +5 total (keyword ×2). Crit на 67% эффективнее для Pacify. Противоинтуитивно. | Open |
 | **F3** | P2 | **deepNav doom spiral.** `curse_navi` в deepNav: effectiveValue = **-4**. При str=5, diff=6: промах даже с max Effort(2). Curse sticky → permanent deck pollution. E[total Kill] в deepNav = -0.167 (отрицательный — в среднем промах). | Open |
 | **F4** | P2 | **deepPrav snowball.** E[effectiveValue] = +1.5, prav-карты shift resonance +3..+5 → self-reinforcing. Самокоррекция через Kill→Nav работает, но только при осознанном выборе Kill. | Monitor |
-| **F5** | P3 | **matchMultiplier hardcoded.** `matchMultiplier: Double = 2.0` — default parameter в `KeywordInterpreter.resolve()`. Нет content-override через BalancePack. Тюнинг match/mismatch невозможен без code change. | Open |
+| **F5** | P3 | **matchMultiplier hardcoded.** `matchMultiplier: Double = 2.0` — default parameter в `KeywordInterpreter.resolve()`. SoT (`combat.balance.matchMultiplier`, Приложение C) = **1.5**. Drift: код не читает SoT-ключ. Fix: подключить к BalancePack config. | Open |
 | **F6** | P3 | **bonusValue потерян в формуле.** `KeywordEffect.bonusValue` (ward: +1 val, parry) не участвует в `CombatCalculator.calculateAttackWithFate()`. Ward при атаке даёт special "parry", но потребитель special-эффекта не идентифицирован. | Open |
 
 ### D.5 Рекомендации (не блокеры текущего эпика)
 
 1. **F1/F2:** При первом контент-ревью рассмотреть: 1 surge-карту сделать yav или nav; crit сделать yav suit или без keyword.
 2. **F3:** Cap resonance modifyValue для sticky-карт на ±1, или ввести пол effectiveValue (e.g., max(-2, effectiveValue)).
-3. **F5:** Вынести `matchMultiplier` в BalancePack config.
+3. **F5:** Подключить `KeywordInterpreter` к существующему SoT-ключу `combat.balance.matchMultiplier` (default 1.5, Приложение C).
 4. **F6:** Верифицировать, что `CombatSystem` в EchoEngine применяет `keywordEffect.bonusValue` и `special`. Если нет — потерянная механика.
 
 > **Методология:** Полный перебор 12 карт × 5 зон × 2 пути × 5 keywords. Формулы из `CombatCalculator.swift`, keyword-матрица из `KeywordInterpreter.swift`, suit matching из `FateResolutionService.swift`.
