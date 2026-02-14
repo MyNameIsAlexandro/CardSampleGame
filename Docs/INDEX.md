@@ -67,6 +67,7 @@
 | [QUALITY_CONTROL_MODEL.md](./QA/QUALITY_CONTROL_MODEL.md) | Модель контроля качества, обязательные gate-тесты | **ЗАКОН** |
 | [TESTING_GUIDE.md](./QA/TESTING_GUIDE.md) | Руководство по запуску gate/модульных тестов | **GUIDE** |
 | [ENCOUNTER_TEST_MODEL.md](./QA/ENCOUNTER_TEST_MODEL.md) | Тестовая модель EncounterEngine (инварианты, структура) | **МОДУЛЬ** |
+| [RITUAL_COMBAT_TEST_MODEL.md](./QA/RITUAL_COMBAT_TEST_MODEL.md) | Тестовая модель Phase 3 Ritual Combat (Effort, Scene, 66 тестов) | **МОДУЛЬ** |
 | [QA_ACT_I_CHECKLIST.md](./QA/QA_ACT_I_CHECKLIST.md) | Чеклист тестирования Act I |
 
 ### Archive/ — Архив
