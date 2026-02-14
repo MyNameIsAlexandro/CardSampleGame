@@ -1,7 +1,7 @@
 # Ritual Combat Test Model (Phase 3)
 
 **Scope:** Полная тестовая модель Phase 3 — Effort, RitualCombatScene, visual combat overhaul.
-**Status:** Draft — ожидает аудиторского ревью.
+**Status:** Draft v2 — P0/P1 аудиторские правки применены, ожидает финального ревью.
 **Policy sync:** CLAUDE.md v4.1, QUALITY_CONTROL_MODEL.md §2a, ENCOUNTER_TEST_MODEL.md
 **Design ref:** `plans/2026-02-13-ritual-combat-design.md` (v1.2), `plans/2026-02-14-ritual-combat-epics.md`
 **Last updated:** 2026-02-14
@@ -10,24 +10,37 @@
 
 ## 1. Организация файлов
 
+Тесты разделены на два корня по принципу зависимостей:
+- **Engine gates (R0, R1)** — pure logic, без SpriteKit/SwiftUI → SPM engine tests
+- **App gates (R2, R3, R6, R7, R9)** — требуют SpriteKit/View типы → Xcode app tests
+
 ```
 Packages/TwilightEngine/Tests/TwilightEngineTests/
 ├── RitualCombatGates/
 │   ├── FateDeckBalanceGateTests.swift       (R0: 5 тестов)
-│   ├── RitualEffortGateTests.swift          (R1: 11 тестов)
-│   ├── RitualSceneGateTests.swift           (R2+R3: 6 тестов)
-│   ├── RitualAtmosphereGateTests.swift      (R7: 2 теста)
-│   └── RitualIntegrationGateTests.swift     (R6+R9: 6 тестов)
+│   └── RitualEffortGateTests.swift          (R1: 11 тестов)
 ├── LayerTests/
-│   ├── EffortMechanicTests.swift            (R1: unit-тесты CombatSimulation)
-│   ├── FateRevealTests.swift                (R6: unit-тесты FateRevealDirector)
-│   └── DragDropControllerTests.swift        (R3: unit-тесты DragDropController)
+│   └── EffortMechanicTests.swift            (R1: unit-тесты CombatSimulation)
 └── IntegrationTests/
     └── RitualCombatIntegrationTests.swift   (R9: e2e scenario с ContentRegistry)
+
+CardSampleGameTests/
+├── GateTests/RitualCombatGates/
+│   ├── RitualSceneGateTests.swift           (R2+R3: 6 тестов, static scan + SpriteKit)
+│   ├── RitualAtmosphereGateTests.swift      (R7: 2 теста, SpriteKit controller)
+│   └── RitualIntegrationGateTests.swift     (R6+R9: 6 тестов, FateReveal + Scene)
+└── Unit/RitualCombat/
+    ├── FateRevealTests.swift                (R6: unit-тесты FateRevealDirector)
+    └── DragDropControllerTests.swift        (R3: unit-тесты DragDropController)
 ```
 
+**Обоснование разделения:** SPM target `TwilightEngine` не может импортировать SpriteKit/SwiftUI.
+Тесты R2/R3/R7 сканируют или инстанцируют Scene/Controller типы, которые зависят от SpriteKit.
+R6 (FateRevealDirector) и R9 (integration с Scene) тоже требуют View-зависимостей.
+
 **Правила (наследуются от ENCOUNTER_TEST_MODEL.md):**
-- Gate < 2 сек, без system RNG, fixtures hardcoded + fixed seeds
+- Gate < 2 сек per test, без system RNG, fixtures hardcoded + fixed seeds
+- Suite-level budget: ≤ 30 сек на suite (все тесты suite суммарно)
 - 1 файл = 1 компонент (не по фиче)
 - Каждый файл ≤ 600 строк (CLAUDE.md §5.1)
 - INV-{MODULE}-{NNN} именование для инвариантов
@@ -40,7 +53,7 @@ Packages/TwilightEngine/Tests/TwilightEngineTests/
 
 | # | Тест | Suite | Epic | Тип | Что проверяет |
 |---|------|-------|------|-----|---------------|
-| 1 | `testMatchMultiplierFromBalancePack` | FateDeckBalanceGateTests | R0 | Gate+ | matchMultiplier читается из `combat.balance.matchMultiplier`, default = 1.5 |
+| 1 | `testMatchMultiplierFromBalancePack` | FateDeckBalanceGateTests | R0 | Gate+ | система внутренне читает matchMultiplier из BalancePack (не параметр извне), default = 1.5 |
 | 2 | `testSurgeSuitDistribution` | FateDeckBalanceGateTests | R0 | Gate+ | ≥1 surge-карта с suit ≠ prav |
 | 3 | `testCritCardNeutralSuit` | FateDeckBalanceGateTests | R0 | Gate+ | crit card: suit = yav |
 | 4 | `testStickyCardResonanceModifyCapped` | FateDeckBalanceGateTests | R0 | Gate+ | `if card.isSticky → ∀ resonanceRules: abs(modifyValue) ≤ 1` |
@@ -62,7 +75,7 @@ Packages/TwilightEngine/Tests/TwilightEngineTests/
 | 20 | `testDragDropDoesNotMutateECSDirectly` | RitualSceneGateTests | R3 | Gate− | drag path → нет прямой ECS mutation |
 | 21 | `testDragDropControllerHasNoEngineImports` | RitualSceneGateTests | R3 | Gate− | DragDropController → только протокол CombatSimulation |
 | 22 | `testLongPressDoesNotFireAfterDragStart` | RitualSceneGateTests | R3 | Gate− | long-press не активируется после 5px drag threshold |
-| 23 | `testFateRevealPreservesExistingDeterminism` | RitualIntegrationGateTests | R6 | Gate+ | визуальный reveal не меняет FateResolution |
+| 23 | `testFateRevealPreservesExistingDeterminism` | RitualIntegrationGateTests | R6 | Gate+ | FateRevealDirector как observer не вносит side effects в CombatSimulation |
 | 24 | `testRitualCombatNoSystemRNGSources` | RitualIntegrationGateTests | R6 | Gate− | static scan RitualCombat/: запрет random()/UUID()/Date()/arc4random/SystemRandomNumberGenerator/CFAbsoluteTimeGetCurrent |
 | 25 | `testKeywordEffectConsumedOrDocumented` | RitualIntegrationGateTests | R6 | Gate+ | bonusValue/special из KeywordEffect применяются или документированно отключены |
 | 26 | `testResonanceAtmosphereIsPurePresentation` | RitualAtmosphereGateTests | R7 | Gate− | controller read-only |
@@ -101,13 +114,16 @@ Packages/TwilightEngine/Tests/TwilightEngineTests/
 
 **INV-FATE-BAL-001: testMatchMultiplierFromBalancePack**
 ```
-GIVEN: BalancePack с ключом combat.balance.matchMultiplier = 1.5
-WHEN:  KeywordInterpreter.resolve(keyword, context, matchMultiplier: config.matchMultiplier)
+GIVEN: BalancePack загружен с ключом combat.balance.matchMultiplier = 1.5
+       CombatSimulation создан через стандартный путь (без явной передачи multiplier)
+WHEN:  resolve match-keyword (suit совпадает с путём героя)
 THEN:  result.bonusDamage == baseBonusDamage * 1.5 (не * 2.0)
+       — верифицируем, что система прочитала multiplier из BalancePack внутренне
 
-GIVEN: BalancePack без ключа combat.balance.matchMultiplier
-WHEN:  KeywordInterpreter.resolve(keyword, context)
-THEN:  result.bonusDamage == baseBonusDamage * 1.5 (default)
+GIVEN: BalancePack загружен БЕЗ ключа combat.balance.matchMultiplier
+WHEN:  resolve match-keyword (suit совпадает)
+THEN:  result.bonusDamage == baseBonusDamage * 1.5 (default fallback)
+       — верифицируем, что default не hardcoded 2.0
 ```
 
 **INV-FATE-BAL-002: testSurgeSuitDistribution**
@@ -230,7 +246,7 @@ THEN:  result.effortBonus == 0
 GIVEN: seed = 42, одна и та же последовательность действий
 WHEN:  прогон 1: select → burn card_a → burn card_b → commitAttack → результат_1
        прогон 2: select → burn card_a → burn card_b → commitAttack → результат_2
-THEN:  результат_1 == результат_2 (побитово)
+THEN:  результат_1 == результат_2 (семантически: Equatable, не побитово — порядок словарей не гарантирован)
 ```
 
 **INV-EFF-010: testEffortMidCombatSaveLoad**
@@ -331,12 +347,13 @@ THEN:  mock: 0 mutation method calls
 
 **INV-DET-001: testFateRevealPreservesExistingDeterminism**
 ```
-GIVEN: seed = 42, CombatSimulation, FateRevealDirector
-WHEN:  прогон 1: commitAttack → fateResult_1 (с визуальным reveal)
-       прогон 2: commitAttack → fateResult_2 (без визуального reveal)
-THEN:  fateResult_1.value == fateResult_2.value
-       fateResult_1.keyword == fateResult_2.keyword
-       fateResult_1.suit == fateResult_2.suit
+GIVEN: seed = 42, одинаковые начальные условия (hero, enemy, hand, fateDeck)
+WHEN:  прогон A: CombatSimulation + FateRevealDirector подписан → commitAttack → simState_A
+       прогон B: CombatSimulation БЕЗ FateRevealDirector → commitAttack → simState_B
+THEN:  simState_A == simState_B (Equatable)
+       — FateRevealDirector как observer не вносит side effects в CombatSimulation
+       — значение, keyword, suit идентичны
+       — RNG cursor после commitAttack одинаков в обоих прогонах
 ```
 
 **INV-DET-002: testRitualCombatNoSystemRNGSources (STATIC SCAN)**
@@ -349,7 +366,14 @@ WHEN:  scan на паттерны:
        - arc4random / arc4random_uniform
        - SystemRandomNumberGenerator
        - CFAbsoluteTimeGetCurrent
-THEN:  0 вхождений (кроме явно разрешённых animation-only timestamps с комментарием // ANIMATION-ONLY)
+THEN:  0 вхождений (кроме строк с маркером ANIMATION-ONLY)
+
+WHITELIST FORMAT (единственный допустимый маркер исключения):
+       // ANIMATION-ONLY: <reason>
+       Пример: let now = CFAbsoluteTimeGetCurrent() // ANIMATION-ONLY: particle spawn timestamp
+       Маркер должен быть на ТОЙ ЖЕ строке, что и вызов.
+       Тест: regex `(random|UUID|Date\(\)|arc4random|SystemRandomNumberGenerator|CFAbsoluteTimeGetCurrent)`
+             на строки БЕЗ `// ANIMATION-ONLY` → 0 matches
 ```
 
 **INV-CONTRACT-001: testKeywordEffectConsumedOrDocumented**
@@ -532,7 +556,7 @@ End-to-end сценарии с реальным ContentRegistry.
 
 | Сценарий | Ожидание |
 |----------|----------|
-| Same seed + same Effort actions → same outcome | побитовое совпадение |
+| Same seed + same Effort actions → same outcome | семантическое совпадение (Equatable) |
 | Effort на defeated enemy | no crash, victory state |
 | Save → restore → new action → determinism from restore point | consistent forward |
 
