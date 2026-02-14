@@ -125,6 +125,14 @@
 		PEFB010000000000PE000001 /* TwilightEngine in Frameworks */ = {isa = PBXBuildFile; productRef = PEPKG10000000000PE000001 /* TwilightEngine */; };
 		PEFB020000000000PE000001 /* PackAuthoring in Frameworks */ = {isa = PBXBuildFile; productRef = PEPKG20000000000PE000001 /* PackAuthoring */; };
 		PEAPBF0000000000PE000001 /* PackEditorApp in Frameworks */ = {isa = PBXBuildFile; productRef = PEAPPD0000000000PE000001 /* PackEditorApp */; };
+		RC0000020000000000000001 /* RitualCombatScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = RC0000010000000000000001 /* RitualCombatScene.swift */; };
+		RC0000040000000000000001 /* RitualCombatSceneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = RC0000030000000000000001 /* RitualCombatSceneView.swift */; };
+		DD0000020000000000000001 /* DragDropController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0000010000000000000001 /* DragDropController.swift */; };
+		FR0000020000000000000001 /* FateRevealDirector.swift in Sources */ = {isa = PBXBuildFile; fileRef = FR0000010000000000000001 /* FateRevealDirector.swift */; };
+		RA0000020000000000000001 /* ResonanceAtmosphereController.swift in Sources */ = {isa = PBXBuildFile; fileRef = RA0000010000000000000001 /* ResonanceAtmosphereController.swift */; };
+		RG0000020000000000000001 /* RitualSceneGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = RG0000010000000000000001 /* RitualSceneGateTests.swift */; };
+		RG0000040000000000000001 /* RitualAtmosphereGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = RG0000030000000000000001 /* RitualAtmosphereGateTests.swift */; };
+		RG0000060000000000000001 /* RitualIntegrationGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = RG0000050000000000000001 /* RitualIntegrationGateTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -252,6 +260,14 @@
 		PEF0010000000000PE000001 /* PackEditorApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackEditorApp.swift; sourceTree = "<group>"; };
 		/* CombatSimulator.swift removed — now in PackEditorKit */
 		PEP0010000000000PE000001 /* PackEditor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PackEditor.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		RC0000010000000000000001 /* RitualCombatScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RitualCombatScene.swift; sourceTree = "<group>"; };
+		RC0000030000000000000001 /* RitualCombatSceneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RitualCombatSceneView.swift; sourceTree = "<group>"; };
+		DD0000010000000000000001 /* DragDropController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DragDropController.swift; sourceTree = "<group>"; };
+		FR0000010000000000000001 /* FateRevealDirector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FateRevealDirector.swift; sourceTree = "<group>"; };
+		RA0000010000000000000001 /* ResonanceAtmosphereController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResonanceAtmosphereController.swift; sourceTree = "<group>"; };
+		RG0000010000000000000001 /* RitualSceneGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RitualSceneGateTests.swift; sourceTree = "<group>"; };
+		RG0000030000000000000001 /* RitualAtmosphereGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RitualAtmosphereGateTests.swift; sourceTree = "<group>"; };
+		RG0000050000000000000001 /* RitualIntegrationGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RitualIntegrationGateTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -455,8 +471,19 @@
 				D72352D1C9BABFA97F62257B /* ConditionValidatorTests.swift */,
 				204A28A32636BB8C22E758C3 /* LocalizationValidatorTests.swift */,
 				0B2C3D4E5F6A7B8C9D0E1F2A /* LocalizationCompletenessTests.swift */,
+				RCGTGRP0000000000000001 /* RitualCombatGates */,
 			);
 			path = GateTests;
+			sourceTree = "<group>";
+		};
+		RCGTGRP0000000000000001 /* RitualCombatGates */ = {
+			isa = PBXGroup;
+			children = (
+				RG0000010000000000000001 /* RitualSceneGateTests.swift */,
+				RG0000030000000000000001 /* RitualAtmosphereGateTests.swift */,
+				RG0000050000000000000001 /* RitualIntegrationGateTests.swift */,
+			);
+			path = RitualCombatGates;
 			sourceTree = "<group>";
 		};
 		BB0003060000000000000001 /* Views */ = {
@@ -546,6 +573,11 @@
 				CB00000A0000000000000001 /* CombatOutcomeAndCardsViews.swift */,
 				CB0000080000000000000001 /* EchoEncounterBridge.swift */,
 				AA0000000000000000000001 /* EchoCombatBridge.swift */,
+				RC0000010000000000000001 /* RitualCombatScene.swift */,
+				RC0000030000000000000001 /* RitualCombatSceneView.swift */,
+				DD0000010000000000000001 /* DragDropController.swift */,
+				FR0000010000000000000001 /* FateRevealDirector.swift */,
+				RA0000010000000000000001 /* ResonanceAtmosphereController.swift */,
 			);
 			path = Combat;
 			sourceTree = "<group>";
@@ -786,6 +818,11 @@
 				AA0000000000000000000002 /* EchoCombatBridge.swift in Sources */,
 				EIV000010000000000000001 /* EnemyIntentView.swift in Sources */,
 				FRV000010000000000000001 /* FateCardRevealView.swift in Sources */,
+				RC0000020000000000000001 /* RitualCombatScene.swift in Sources */,
+				RC0000040000000000000001 /* RitualCombatSceneView.swift in Sources */,
+				DD0000020000000000000001 /* DragDropController.swift in Sources */,
+				FR0000020000000000000001 /* FateRevealDirector.swift in Sources */,
+				RA0000020000000000000001 /* ResonanceAtmosphereController.swift in Sources */,
 				GG0002010000000000000001 /* HeroSelectionView.swift in Sources */,
 				CM00000100000000000000001 /* ContentManagerView.swift in Sources */,
 				CM00000500000000000000001 /* ContentManagerComponents.swift in Sources */,
@@ -839,6 +876,9 @@
 				0869558992AD64C9C9AC00CB /* LocalizationValidatorTests.swift in Sources */,
 				0A1C2D3E4F5A6B7C8D9E0F1A /* LocalizationCompletenessTests.swift in Sources */,
 				8B5C529E75755A127084F62A /* SourcePathResolver.swift in Sources */,
+				RG0000020000000000000001 /* RitualSceneGateTests.swift in Sources */,
+				RG0000040000000000000001 /* RitualAtmosphereGateTests.swift in Sources */,
+				RG0000060000000000000001 /* RitualIntegrationGateTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

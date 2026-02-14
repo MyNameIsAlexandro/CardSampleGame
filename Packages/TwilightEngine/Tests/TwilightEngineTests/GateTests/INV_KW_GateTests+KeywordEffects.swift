@@ -126,7 +126,7 @@ extension INV_KW_GateTests {
     /// Match multiplier doubles bonusDamage (unit level)
     func testMatchMultiplier_doublesDamage() {
         let base = KeywordInterpreter.resolve(keyword: .surge, context: .combatPhysical, isMatch: false)
-        let matched = KeywordInterpreter.resolve(keyword: .surge, context: .combatPhysical, isMatch: true)
+        let matched = KeywordInterpreter.resolve(keyword: .surge, context: .combatPhysical, isMatch: true, matchMultiplier: 2.0)
         XCTAssertEqual(matched.bonusDamage, base.bonusDamage * 2, "Match should double bonus damage")
     }
 

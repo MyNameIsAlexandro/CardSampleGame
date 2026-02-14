@@ -51,7 +51,7 @@ public struct KeywordInterpreter {
         context: ActionContext,
         baseValue: Int = 0,
         isMatch: Bool = false,
-        matchMultiplier: Double = 2.0
+        matchMultiplier: Double = 1.5
     ) -> KeywordEffect {
         let base = baseEffect(keyword: keyword, context: context)
         if isMatch {
@@ -71,7 +71,7 @@ public struct KeywordInterpreter {
         baseValue: Int = 0,
         isMatch: Bool = false,
         isMismatch: Bool = false,
-        matchMultiplier: Double = 2.0
+        matchMultiplier: Double = 1.5
     ) -> KeywordEffect {
         if isMismatch {
             return KeywordEffect(bonusDamage: 0, bonusValue: 0, special: nil)

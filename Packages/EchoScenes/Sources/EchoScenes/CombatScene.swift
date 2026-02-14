@@ -7,6 +7,7 @@ import SpriteKit
 import FirebladeECS
 import EchoEngine
 import TwilightEngine
+import class EchoEngine.CombatSimulation
 import Foundation
 
 private func L(_ key: String) -> String {
