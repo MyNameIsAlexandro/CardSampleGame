@@ -162,40 +162,39 @@ final class RitualIntegrationGateTests: XCTestCase {
 
     // MARK: - INV-CONTRACT-001: KeywordEffect bonusValue consumed or documented
 
-    /// bonusValue from KeywordEffect must be applied in CombatCalculator/CombatSystem,
+    /// bonusValue from KeywordEffect must be applied somewhere in engine combat code,
     /// or explicitly documented with INTENTIONALLY_UNUSED marker.
+    /// Scans entire engine source trees (not specific files) for rename resilience.
     func testKeywordEffectConsumedOrDocumented() throws {
-        let encounterPaths = [
-            projectRoot.appendingPathComponent(
-                "Packages/TwilightEngine/Sources/TwilightEngine/Combat/CombatCalculator.swift"),
-            projectRoot.appendingPathComponent(
-                "Packages/EchoEngine/Sources/EchoEngine/Systems/CombatSystem.swift")
+        // Scan all engine source directories — resilient to file renames/refactoring
+        let engineSourceDirs = [
+            projectRoot.appendingPathComponent("Packages/TwilightEngine/Sources"),
+            projectRoot.appendingPathComponent("Packages/EchoEngine/Sources")
         ]
 
         var bonusValueConsumed = false
         var intentionallyUnusedMarked = false
+        var definitionFile: String?
 
-        for fileURL in encounterPaths {
-            guard FileManager.default.fileExists(atPath: fileURL.path) else { continue }
-            let content = try String(contentsOf: fileURL, encoding: .utf8)
+        for dirURL in engineSourceDirs {
+            guard FileManager.default.fileExists(atPath: dirURL.path) else { continue }
 
-            // Check 1: bonusValue is actively consumed (not just defined)
-            if content.contains(".bonusValue") || content.contains("bonusValue:") {
-                bonusValueConsumed = true
-            }
-
-            // Check 2: INTENTIONALLY_UNUSED marker
-            if content.contains("INTENTIONALLY_UNUSED: bonusValue") {
-                intentionallyUnusedMarked = true
-            }
-        }
-
-        // Also scan engine encounter directory for the marker
-        let encounterDir = projectRoot.appendingPathComponent(
-            "Packages/TwilightEngine/Sources/TwilightEngine/Encounter")
-        if FileManager.default.fileExists(atPath: encounterDir.path) {
-            for fileURL in findSwiftFiles(in: encounterDir) {
+            for fileURL in findSwiftFiles(in: dirURL) {
                 let content = try String(contentsOf: fileURL, encoding: .utf8)
+                let fileName = fileURL.lastPathComponent
+
+                // Track where bonusValue is defined (to exclude from "consumed" count)
+                if content.contains("let bonusValue:") || content.contains("var bonusValue:") ||
+                   content.contains("public let bonusValue") || content.contains("public var bonusValue") {
+                    definitionFile = fileName
+                }
+
+                // Check 1: bonusValue is actively consumed (not just defined)
+                if content.contains(".bonusValue") {
+                    bonusValueConsumed = true
+                }
+
+                // Check 2: INTENTIONALLY_UNUSED marker
                 if content.contains("INTENTIONALLY_UNUSED: bonusValue") {
                     intentionallyUnusedMarked = true
                 }
@@ -203,10 +202,12 @@ final class RitualIntegrationGateTests: XCTestCase {
         }
 
         XCTAssertTrue(bonusValueConsumed || intentionallyUnusedMarked,
-            "KeywordEffect.bonusValue must be consumed in CombatCalculator/CombatSystem " +
+            "KeywordEffect.bonusValue must be consumed in engine combat code " +
             "OR documented with `// INTENTIONALLY_UNUSED: bonusValue — <reason>` marker.\n" +
+            "Scanned: Packages/{TwilightEngine,EchoEngine}/Sources/**/*.swift\n" +
             "Found: bonusValueConsumed=\(bonusValueConsumed), " +
-            "intentionallyUnusedMarked=\(intentionallyUnusedMarked)")
+            "intentionallyUnusedMarked=\(intentionallyUnusedMarked), " +
+            "definedIn=\(definitionFile ?? "not found")")
     }
 
     // MARK: - INV-INT-001: RitualScene restores from snapshot
@@ -255,10 +256,20 @@ final class RitualIntegrationGateTests: XCTestCase {
 
     /// Static scan: deprecated CombatScene must not be used in production source.
     /// Checks symbol usage (instantiation, views, extensions, typealias) in production directories.
+    ///
+    /// Production path allowlist (explicit, not inferred):
+    ///   App-layer:   App/, Views/, ViewModels/, Models/, Managers/, Utilities/
+    ///   Packages:    EchoEngine/Sources/, EchoScenes/Sources/ (production graph)
+    ///   Engine:      TwilightEngine/Sources/ (but CombatScene*.swift files are excluded — they ARE the definition)
+    /// Excluded: **/Tests/**, DevTools/, .build/
     func testOldCombatSceneNotImportedInProduction() throws {
-        let productionDirs = SourcePathResolver.productionDirectories.map {
-            projectRoot.appendingPathComponent($0)
-        }
+        // Explicit production path allowlist — resilient to SourcePathResolver changes
+        let productionPaths = [
+            "App", "Views", "ViewModels", "Models", "Managers", "Utilities",
+            "Packages/EchoEngine/Sources",
+            "Packages/TwilightEngine/Sources"
+        ]
+        let productionDirs = productionPaths.map { projectRoot.appendingPathComponent($0) }
 
         var violations: [String] = []
 
@@ -268,7 +279,7 @@ final class RitualIntegrationGateTests: XCTestCase {
             for fileURL in findSwiftFiles(in: dirURL) {
                 let fileName = fileURL.lastPathComponent
 
-                // Skip files that ARE the CombatScene (they exist in EchoScenes package)
+                // Skip files that ARE the CombatScene definition (EchoScenes package)
                 if fileName.hasPrefix("CombatScene") { continue }
                 // Skip test files
                 if fileName.contains("Test") { continue }

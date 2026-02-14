@@ -15,11 +15,19 @@ final class FateDeckBalanceGateTests: XCTestCase {
 
     /// Verifies that matchMultiplier is read from BalancePack internally (not passed as parameter)
     /// and affects keyword resolution proportionally.
-    /// Uses surge keyword in combatPhysical (guaranteed numeric bonusDamage = 2 base).
-    /// Compares HP delta across two BalancePack configs (1.0 vs 2.0) for proportionality.
+    ///
+    /// Linearity guarantee: fixture uses armor=0, defense=0, HP=100 (no clip/crit/cap).
+    /// This ensures damage = baseStrength + fateModifier + keywordEffect(multiplier),
+    /// where keywordEffect scales linearly with matchMultiplier.
     func testMatchMultiplierFromBalancePack() {
         // Nav suit + combatPhysical → isMatch = true → multiplier applies
         let surgeCard = FateCard(id: "test_surge", modifier: 1, name: "Surge", suit: .nav, keyword: .surge)
+
+        // --- Baseline: no match → keyword effect without multiplier ---
+        let noMatchCard = FateCard(id: "test_surge_nomatch", modifier: 1, name: "Surge", suit: .yav, keyword: .surge)
+        let damageNoMatch = runAttackAndMeasureDamage(
+            matchMultiplier: 1.0, fateCard: noMatchCard
+        )
 
         // --- Config A: matchMultiplier = 1.0 ---
         let damageA = runAttackAndMeasureDamage(
@@ -31,31 +39,30 @@ final class FateDeckBalanceGateTests: XCTestCase {
             matchMultiplier: 2.0, fateCard: surgeCard
         )
 
-        // Proportionality: keyword contribution with 2.0 must be 2x of 1.0
-        // Total damage = baseDamage + keywordBonus. baseDamage is constant.
-        // So damageB - damageA = keywordBonusB - keywordBonusA = keywordBase * (2.0 - 1.0) = keywordBase
-        // And keywordBonusA = keywordBase * 1.0, keywordBonusB = keywordBase * 2.0
         XCTAssertGreaterThan(damageA, 0, "Attack with surge+match at 1.0x must deal damage")
         XCTAssertGreaterThan(damageB, damageA,
-            "matchMultiplier 2.0 must deal more damage than 1.0 (proportionality)")
+            "matchMultiplier 2.0 must deal more damage than 1.0")
 
-        // Run without match to get base damage (no multiplier effect)
-        let noMatchCard = FateCard(id: "test_surge_nomatch", modifier: 1, name: "Surge", suit: .yav, keyword: .surge)
-        let damageNoMatch = runAttackAndMeasureDamage(
-            matchMultiplier: 1.0, fateCard: noMatchCard
-        )
-        // keywordBonus at 1.0x match = damageA - damageNoMatch (since surge base in noMatch still applies)
-        // Actually noMatch surge still gives bonusDamage=2 (base, no multiplier), match at 1.0x also gives 2
-        // So we test the delta between 2.0x and 1.0x:
-        let keywordDelta = damageB - damageA
-        XCTAssertGreaterThan(keywordDelta, 0,
-            "Keyword effect delta between 2.0x and 1.0x must be positive")
+        // --- Proportionality: matchEffect(2.0x) == 2 * matchEffect(1.0x) ---
+        // matchEffect(X) = damage_at_X - damageNoMatch (isolates match contribution)
+        // Fixture linearity: armor=0, defense=0, HP=100 → no clipping, no crit, pure linear.
+        let matchEffect_1 = damageA - damageNoMatch
+        let matchEffect_2 = damageB - damageNoMatch
+
+        if matchEffect_1 > 0 {
+            XCTAssertEqual(matchEffect_2, 2 * matchEffect_1,
+                "Match effect must scale proportionally: effect(2.0x) == 2 * effect(1.0x). " +
+                "Got effect(1.0x)=\(matchEffect_1), effect(2.0x)=\(matchEffect_2)")
+        } else {
+            // Match at 1.0x adds nothing over noMatch → at least 2.0x must add something
+            XCTAssertGreaterThan(damageB, damageNoMatch,
+                "matchMultiplier 2.0 must deal more damage than no match")
+        }
 
         // --- Default fallback: no matchMultiplier → should use 1.5, not hardcoded 2.0 ---
         let damageDefault = runAttackAndMeasureDamage(
             matchMultiplier: nil, fateCard: surgeCard
         )
-        // Default (1.5) must differ from 2.0
         XCTAssertNotEqual(damageDefault, damageB,
             "Default matchMultiplier must not be 2.0 (hardcoded drift)")
     }
@@ -133,7 +140,8 @@ final class FateDeckBalanceGateTests: XCTestCase {
 
     // MARK: - Helpers
 
-    /// Run a deterministic attack with surge+nav card and measure total HP damage dealt
+    /// Run a deterministic attack and measure total HP damage dealt.
+    /// Fixture guarantees linearity: armor=0, defense=0, HP=100 (no clip/cap/crit interference).
     private func runAttackAndMeasureDamage(
         matchMultiplier: Double?,
         fateCard: FateCard,
