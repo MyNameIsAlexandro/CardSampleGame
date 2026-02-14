@@ -28,7 +28,7 @@ CardSampleGameTests/
 ├── GateTests/RitualCombatGates/
 │   ├── RitualSceneGateTests.swift           (R2+R3: 6 тестов, static scan + SpriteKit)
 │   ├── RitualAtmosphereGateTests.swift      (R7: 2 теста, SpriteKit controller)
-│   └── RitualIntegrationGateTests.swift     (R6+R9: 6 тестов, FateReveal + Scene)
+│   └── RitualIntegrationGateTests.swift     (R6+R9: 7 тестов, FateReveal + Scene)
 └── Unit/RitualCombat/
     ├── FateRevealTests.swift                (R6: unit-тесты FateRevealDirector)
     └── DragDropControllerTests.swift        (R3: unit-тесты DragDropController)
@@ -49,7 +49,7 @@ R6 (FateRevealDirector) и R9 (integration с Scene) тоже требуют Vie
 
 ## 2. Инвентаризация изменений
 
-### 2.1 Новые тесты (31)
+### 2.1 Новые тесты (32)
 
 | # | Тест | Suite | Epic | Тип | Что проверяет |
 |---|------|-------|------|-----|---------------|
@@ -69,21 +69,22 @@ R6 (FateRevealDirector) и R9 (integration с Scene) тоже требуют Vie
 | 14 | `testEffortDeterminism` | RitualEffortGateTests | R1 | Gate+ | replay с Effort + seed → идентичный результат |
 | 15 | `testEffortMidCombatSaveLoad` | RitualEffortGateTests | R1 | Gate+ | save/restore → effortBonus + effortCardIds сохранены |
 | 16 | `testSnapshotContainsEffortFields` | RitualEffortGateTests | R1 | Gate+ | snapshot содержит effortBonus, effortCardIds, selectedCardIds, phase |
-| 17 | `testRitualSceneUsesOnlyCombatSimulationAPI` | RitualSceneGateTests | R2 | Gate− | сцена не мутирует ECS-компоненты напрямую |
+| 17 | `testRitualSceneUsesOnlyCombatSimulationAPI` | RitualSceneGateTests | R2 | Gate− | сцена не обращается к ECS напрямую (ни мутации, ни чтения component(for:)) |
 | 18 | `testRitualSceneHasNoStrongEngineReference` | RitualSceneGateTests | R2 | Gate− | нет strong ref на TwilightGameEngine и bridge (Echo*Bridge); только config/snapshot DTO |
 | 19 | `testDragDropProducesCanonicalCommands` | RitualSceneGateTests | R3 | Gate+ | drag → selectCard / burnForEffort / commitAttack через CombatSimulation |
 | 20 | `testDragDropDoesNotMutateECSDirectly` | RitualSceneGateTests | R3 | Gate− | drag path → нет прямой ECS mutation |
 | 21 | `testDragDropControllerHasNoEngineImports` | RitualSceneGateTests | R3 | Gate− | DragDropController → только протокол CombatSimulation |
 | 22 | `testLongPressDoesNotFireAfterDragStart` | RitualSceneGateTests | R3 | Gate− | long-press не активируется после 5px drag threshold |
 | 23 | `testFateRevealPreservesExistingDeterminism` | RitualIntegrationGateTests | R6 | Gate+ | FateRevealDirector как observer не вносит side effects в CombatSimulation |
-| 24 | `testRitualCombatNoSystemRNGSources` | RitualIntegrationGateTests | R6 | Gate− | static scan RitualCombat/: запрет random()/UUID()/Date()/arc4random/SystemRandomNumberGenerator/CFAbsoluteTimeGetCurrent |
+| 24 | `testRitualCombatNoSystemRNGSources` | RitualIntegrationGateTests | R6 | Gate− | static scan RitualCombat/: запрет random()/UUID()/Date()/arc4random/SystemRandomNumberGenerator/CFAbsoluteTimeGetCurrent/DispatchTime.now/CACurrentMediaTime |
 | 25 | `testKeywordEffectConsumedOrDocumented` | RitualIntegrationGateTests | R6 | Gate+ | bonusValue/special из KeywordEffect применяются или документированно отключены |
 | 26 | `testResonanceAtmosphereIsPurePresentation` | RitualAtmosphereGateTests | R7 | Gate− | controller read-only |
 | 27 | `testAtmosphereControllerIsReadOnly` | RitualAtmosphereGateTests | R7 | Gate− | только getter-свойства (.resonance, .phase, .isOver); запрет func-вызовов на simulation |
 | 28 | `testRitualSceneRestoresFromSnapshot` | RitualIntegrationGateTests | R9 | Gate+ | UI восстановление Bonfire/Circle/Seals/Hand из snapshot |
 | 29 | `testBattleArenaDoesNotCallCommitPathWhenUsingRitualScene` | RitualIntegrationGateTests | R9 | Gate− | Arena sandbox → не вызывает commitExternalCombat |
 | 30 | `testOldCombatSceneNotImportedInProduction` | RitualIntegrationGateTests | R9 | Gate− | deprecated CombatScene файлы не в production graph |
-| 31 | (reserved) | — | R10a | — | Vertical slice replay trace fixture (seed + fingerprint) |
+| 31 | `testFateRevealDirectorHasNoSimulationReference` | RitualIntegrationGateTests | R6 | Gate− | FateRevealDirector не хранит ссылку на CombatSimulation (static scan stored properties) |
+| 32 | (reserved) | — | R10a | — | Vertical slice replay trace fixture (seed + fingerprint) |
 
 **Легенда:** Gate+ = позитивный (контракт выполняется), Gate− = негативный (запрещённое действие не происходит).
 
@@ -275,9 +276,12 @@ THEN:  snapshot.effortBonus != nil
 **INV-SCENE-001: testRitualSceneUsesOnlyCombatSimulationAPI (STATIC SCAN)**
 ```
 GIVEN: исходный код RitualCombatScene.swift
-WHEN:  static scan на прямые обращения к ECS-компонентам (Deck, DeckCard, CombatEntity, etc.)
-THEN:  0 прямых обращений
-       все мутации через: selectCard(), burnForEffort(), commitAttack(), commitInfluence(), skipTurn()
+WHEN:  static scan на прямые обращения к ECS-компонентам:
+       - типы: Deck, DeckCard, CombatEntity, etc.
+       - мутации: .assign(), .create(), .destroy()
+       - чтения: component(for:), getComponent(
+THEN:  0 прямых обращений (ни мутаций, ни чтений ECS)
+       все взаимодействия через: selectCard(), burnForEffort(), commitAttack(), commitInfluence(), skipTurn()
 ```
 
 **INV-SCENE-002: testRitualSceneHasNoStrongEngineReference (STATIC SCAN)**
@@ -343,7 +347,7 @@ THEN:  mock: 0 mutation method calls
        controller output: только visual parameters (color, alpha, particle config)
 ```
 
-### 3.5 RitualIntegrationGateTests (R6+R9) — 6 тестов
+### 3.5 RitualIntegrationGateTests (R6+R9) — 7 тестов
 
 **INV-DET-001: testFateRevealPreservesExistingDeterminism**
 ```
@@ -356,6 +360,15 @@ THEN:  simState_A == simState_B (Equatable)
        — RNG cursor после commitAttack одинаков в обоих прогонах
 ```
 
+**INV-DET-001a: testFateRevealDirectorHasNoSimulationReference (STATIC SCAN)**
+```
+GIVEN: исходный код FateRevealDirector.swift
+WHEN:  scan на stored properties типа CombatSimulation / CombatSimulationProtocol / any *Simulation*
+THEN:  0 stored properties
+       допустимо: получение данных через method parameters (event-driven / callback)
+       — FateRevealDirector = pure observer, не хранит ссылку на simulation
+```
+
 **INV-DET-002: testRitualCombatNoSystemRNGSources (STATIC SCAN)**
 ```
 GIVEN: все .swift файлы в RitualCombat/ папке
@@ -366,13 +379,15 @@ WHEN:  scan на паттерны:
        - arc4random / arc4random_uniform
        - SystemRandomNumberGenerator
        - CFAbsoluteTimeGetCurrent
+       - DispatchTime.now()
+       - CACurrentMediaTime()
 THEN:  0 вхождений (кроме строк с маркером ANIMATION-ONLY)
 
 WHITELIST FORMAT (единственный допустимый маркер исключения):
        // ANIMATION-ONLY: <reason>
        Пример: let now = CFAbsoluteTimeGetCurrent() // ANIMATION-ONLY: particle spawn timestamp
        Маркер должен быть на ТОЙ ЖЕ строке, что и вызов.
-       Тест: regex `(random|UUID|Date\(\)|arc4random|SystemRandomNumberGenerator|CFAbsoluteTimeGetCurrent)`
+       Тест: regex `(random|UUID|Date\(\)|arc4random|SystemRandomNumberGenerator|CFAbsoluteTimeGetCurrent|DispatchTime\.now|CACurrentMediaTime)`
              на строки БЕЗ `// ANIMATION-ONLY` → 0 matches
 ```
 
@@ -395,6 +410,12 @@ THEN:  bonfireNode.isGlowing == true (effort > 0)
        sealNodes.isVisible == true (card in circle → seals visible)
        handNode.cards.count == totalHand - effortCards - selectedCards
        phaseHUD shows "playerAction"
+
+NEGATIVE: inconsistent snapshot
+GIVEN: snapshot с effortBonus=0, effortCardIds=[card_a] (count mismatch)
+WHEN:  CombatSimulation.restore(from: snapshot)
+THEN:  validation error / assert failure
+       — effortBonus MUST == effortCardIds.count (snapshot internal consistency invariant)
 ```
 
 **INV-INT-002: testBattleArenaDoesNotCallCommitPathWhenUsingRitualScene**
@@ -506,13 +527,14 @@ End-to-end сценарии с реальным ContentRegistry.
 
 | Что запрещено | Где сканируем | Тест |
 |---------------|---------------|------|
-| Прямая ECS-мутация в Scene | RitualCombatScene.swift | testRitualSceneUsesOnlyCombatSimulationAPI |
+| Прямой ECS-доступ в Scene (мутация+чтение) | RitualCombatScene.swift | testRitualSceneUsesOnlyCombatSimulationAPI |
 | Strong ref на Engine/Bridge | RitualCombatScene*.swift | testRitualSceneHasNoStrongEngineReference |
 | Прямая ECS-мутация в Drag | DragDropController.swift | testDragDropDoesNotMutateECSDirectly |
 | Engine import в Controller | DragDropController.swift | testDragDropControllerHasNoEngineImports |
 | Long-press после drag | gesture state | testLongPressDoesNotFireAfterDragStart |
 | Mutation calls в Atmosphere | ResonanceAtmosphereController | testAtmosphereControllerIsReadOnly |
 | System RNG в RitualCombat/ | all .swift in folder | testRitualCombatNoSystemRNGSources |
+| FateRevealDirector хранит ref на Simulation | FateRevealDirector.swift | testFateRevealDirectorHasNoSimulationReference |
 | Deprecated import в prod | production targets | testOldCombatSceneNotImportedInProduction |
 | Arena commits to world | BattleArenaView | testBattleArenaDoesNotCallCommitPathWhenUsingRitualScene |
 
@@ -551,6 +573,7 @@ End-to-end сценарии с реальным ContentRegistry.
 | Restore to playerAction with selected card | Circle glow, seals visible |
 | Restore to intent phase | seals hidden, intent token visible |
 | Restore with empty hand | no cards displayed, Wait always available |
+| effortBonus=0, effortCardIds=[card_a] (inconsistent) | assert fail / snapshot validation error — инвариант внутренней согласованности |
 
 ### 7.4 Determinism edge cases
 
@@ -620,6 +643,7 @@ enum SnapshotFixtures {
 | matchMultiplier = SoT (1.5) | INV-FATE-BAL-001 | testMatchBonusEnhanced (modified) | — |
 | Sticky modifyValue ≤ 1 | INV-FATE-BAL-004 | — | — |
 | No system RNG in RitualCombat/ | INV-DET-002 | — | — |
+| FateRevealDirector = pure observer | INV-DET-001a | — | — |
 | Determinism preserved | INV-DET-001, INV-EFF-009 | — | testMidCombatSaveRestoreResume |
 
 ---
@@ -643,9 +667,9 @@ enum SnapshotFixtures {
 
 | Категория | Новых | Модифицированных | Удаляемых (R10b) | Итого новых |
 |-----------|-------|-----------------|------------------|-------------|
-| Gate-тесты | 31 | 0 | 0 | 31 |
+| Gate-тесты | 32 | 0 | 0 | 32 |
 | Layer-тесты | 27 | 3 | 0 | 27 |
 | Integration-тесты | 8 | 0 | 4 (R10b) | 8 |
-| **Итого** | **66** | **3** | **4** | **66** |
+| **Итого** | **67** | **3** | **4** | **67** |
 
 > **Примечание:** 4 удаляемых теста (CombatSceneTests, CombatSceneThemeTests) — только после R10b safety gate.
