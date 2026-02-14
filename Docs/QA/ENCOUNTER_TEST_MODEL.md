@@ -36,8 +36,14 @@ Packages/TwilightEngine/Tests/TwilightEngineTests/
 │   ├── SnapshotRoundTripTests.swift     # FateDeck/PlayerDeck snapshot
 │   └── ContextBuilderTests.swift        # Region→Modifiers pipeline
 │
-└── TDD/                            # Инкубатор (RED tests, вне CI)
-    └── (мигрирующие тесты)
+├── TDD/                            # Инкубатор (RED tests, вне CI)
+│   └── (мигрирующие тесты)
+│
+└── RitualCombatGates/              # Phase 3: Ritual Combat (planned)
+    ├── RitualEffortGateTests.swift  # Effort mechanic invariants (11 tests)
+    ├── RitualSceneGateTests.swift   # Scene → CombatSimulation contract (3 tests)
+    ├── RitualAtmosphereGateTests.swift  # Atmosphere read-only guard (2 tests)
+    └── RitualIntegrationGateTests.swift # Snapshot restore, legacy isolation (2 tests)
 ```
 
 ### Правила

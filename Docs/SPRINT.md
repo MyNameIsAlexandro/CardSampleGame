@@ -5,17 +5,30 @@
 
 ---
 
-## Phase 2 (Audit/Refactor Stream)
+## Phase 3 (Ritual Combat)
 
 Source of truth:
-- `Docs/plans/2026-02-07-audit-refactor-phase2-epics.md` (epic ledger + backlog)
+- `Docs/plans/2026-02-13-ritual-combat-design.md` (design doc, v1.2 approved)
+- `Docs/plans/2026-02-14-ritual-combat-epics.md` (epic ledger)
 - `Docs/QA/QUALITY_CONTROL_MODEL.md` (quality policy + mandatory gates)
 - `Docs/QA/TESTING_GUIDE.md` (how to run gates)
 
 Current focus:
-- `Epic 62` (done): Legacy/runtime cleanup sweep
-- `Epic 63` (done): Near-limit file decomposition wave
-- `Epic 68` (done): File Header Contract Coverage
+- `R1` (pending): Effort Mechanic (engine extension)
+- `R2` (pending): RitualCombatScene Foundation
+
+Next task: R1 и R2 параллельно (R1 = engine, R2 = scene skeleton).
+
+Epics: R1–R10 (10 epics). Dependency graph и полный список — в epic ledger.
+
+---
+
+## Phase 2 (Audit/Refactor Stream): Complete
+
+Source of truth:
+- `Docs/plans/2026-02-07-audit-refactor-phase2-epics.md` (epic ledger + backlog)
+
+Completed epics: 15–68 (all DONE). No open backlog.
 
 ---
 

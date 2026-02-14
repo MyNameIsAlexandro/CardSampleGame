@@ -1049,10 +1049,13 @@ PackCompilerTool/                   # CLI for pack development
 | Initial Faith | 3 | `TwilightResource` |
 | Initial Balance | 50 | `TwilightResource` |
 | **Initial Strength** | **5** | `Player.init` |
-| Combat Dice | d6 | `TwilightCombatConfig` |
+| ~~Combat Dice~~ | ~~d6~~ | ~~`TwilightCombatConfig`~~ | **LEGACY** — заменён Fate Deck |
 | Actions per Turn | 3 | `TwilightCombatConfig` |
 
-**Формула атаки:** `attack = strength + d6 + bonusDice + bonusDamage`
+> **LEGACY:** Формула ниже — архивная (d6-система). Каноническая формула боя использует **Fate Deck**:
+> `Attack = Strength + CardPower + Effort + FateCard.Modifier` (см. [COMBAT_DIPLOMACY_SPEC.md](../Design/COMBAT_DIPLOMACY_SPEC.md) §3.1–§3.3a, [EchoEngine §E.5](#e5-echoengine--ecs-combat-system-v14))
+>
+> ~~`attack = strength + d6 + bonusDice + bonusDamage`~~
 
 ---
 
@@ -1094,7 +1097,12 @@ let hero = contentRegistry.heroRegistry.hero(id: "warrior_ragnar")
 
 ## Приложение C: Эффекты карт в бою (AbilityEffect)
 
-### C.1 Полная формула боя
+### C.1 ~~Полная формула боя~~ (LEGACY — d6-система, архив)
+
+> **Каноническая формула:** см. [COMBAT_DIPLOMACY_SPEC.md](../Design/COMBAT_DIPLOMACY_SPEC.md) §3.1–§3.3a и [EchoEngine §E.5](#e5-echoengine--ecs-combat-system-v14).
+> Боевая система заменена на Fate Deck (карточная механика вместо d6).
+
+<details><summary>Архивная d6-формула (не используется в runtime)</summary>
 
 ```
 1. Бросок кубиков: totalDice = 1 + bonusDice + rangerBonus
@@ -1104,7 +1112,13 @@ let hero = contentRegistry.heroRegistry.hero(id: "warrior_ragnar")
 5. Итоговый урон: damage = baseDamage + curseModifier + heroClassBonus
 ```
 
-### C.2 Реализованные эффекты карт
+</details>
+
+### C.2 ~~Реализованные эффекты карт~~ (LEGACY — d6-система, архив)
+
+> **Каноническая система эффектов:** см. [EchoEngine §E.5](#e5-echoengine--ecs-combat-system-v14) — `AbilityEffect` через `CombatSystem`.
+
+<details><summary>Архивная таблица эффектов (d6-эра)</summary>
 
 | Эффект | Метод в CombatView | Действие |
 |--------|-------------------|----------|
@@ -1119,6 +1133,8 @@ let hero = contentRegistry.heroRegistry.hero(id: "warrior_ragnar")
 | `removeCurse(type)` | `player.removeCurse()` | Снять проклятие |
 | `summonSpirit(power, realm)` | `summonedSpirits.append()` | Призыв духа |
 | `sacrifice(cost, benefit)` | `-cost HP`, бонус | Жертва за силу |
+
+</details>
 
 ### C.3 Призванные духи
 
@@ -1187,7 +1203,12 @@ let cards = contentRegistry.getAllCards()
 let strike = contentRegistry.getCard(id: "strike_basic")
 ```
 
-### E.4 Модуль Combat
+### E.4 ~~Модуль Combat (d6)~~ → LEGACY
+
+> **Каноническая боевая система:** [EchoEngine §E.5](#e5-echoengine--ecs-combat-system-v14) — `CombatSimulation` + `FateResolutionService` + `CombatCalculator.calculateAttackWithFate()`.
+> Ниже — архивный API (d6-эра), сохранён для backward compatibility reference.
+
+<details><summary>Архивный Combat API (d6-эра)</summary>
 
 **Путь:** `Engine/Combat/`
 
@@ -1198,7 +1219,7 @@ let strike = contentRegistry.getCard(id: "strike_basic")
 - `DamageCalculation` — расчёт урона
 
 ```swift
-// Пример расчёта атаки
+// Пример расчёта атаки (LEGACY — d6)
 let result = CombatCalculator.calculatePlayerAttack(
     player: player,
     monsterDefense: 5,
@@ -1210,6 +1231,8 @@ let result = CombatCalculator.calculatePlayerAttack(
 )
 // result.isHit, result.attackRoll, result.damageCalculation
 ```
+
+</details>
 
 ### E.5 EchoEngine — ECS Combat System (v1.4)
 
@@ -1274,6 +1297,44 @@ sim.endTurn()
 sim.resolveEnemyTurn()
 let result = sim.combatResult  // CombatResult после завершения боя
 ```
+
+#### Effort API (Phase 3 — Ritual Combat, planned)
+
+Расширение CombatSimulation для механики Effort (сброс карт для усиления Fate-проверки):
+
+```swift
+// Internal state
+private(set) var effortBonus: Int = 0
+private(set) var effortCardIds: [String] = []
+let maxEffort: Int  // default = 2, из HeroDefinition
+
+// Новые методы
+func burnForEffort(cardId: String) -> Bool   // Сбросить карту из руки, +1 к Fate Test
+func undoBurnForEffort(cardId: String) -> Bool  // Отменить сброс (до commit)
+// commitAttack() / commitInfluence() читают self.effortBonus внутренне
+```
+
+**Инварианты:**
+- `effortBonus` — чистое число, не задействует RNG
+- `effortCardIds ⊆ hand` (до commit), после commit → `discardPile`
+- `effortBonus <= maxEffort` (жёсткий cap)
+- Effort не влияет на Fate Deck (Hand Deck и Fate Deck — разные колоды)
+
+**Snapshot-контракт (mid-combat save):** `effortCardIds`, `effortBonus`, `selectedCardIds`, `phase` обязательны в snapshot.
+
+> **Дизайн:** `plans/2026-02-13-ritual-combat-design.md` §3.5, §11.2
+
+#### RitualCombatScene (Phase 3 — planned)
+
+Единая SpriteKit-сцена для боя, заменяющая SwiftUI CombatView и Arena CombatScene. Работает поверх `CombatSimulation` через drag-and-drop:
+
+- Карты перетаскиваются в Ритуальный Круг → `selectCard()`
+- Карты перетаскиваются в Костёр → `burnForEffort()`
+- Печати (Attack/Influence/Wait) перетаскиваются на врага → `commitAttack()`/`commitInfluence()`
+
+**Архитектурный инвариант:** `ResonanceAtmosphereController` — read-only observer, не вызывает mutation-методы `CombatSimulation`.
+
+> **Дизайн:** `plans/2026-02-13-ritual-combat-design.md` §3–§10
 
 #### EchoEncounterBridge (Интеграция)
 

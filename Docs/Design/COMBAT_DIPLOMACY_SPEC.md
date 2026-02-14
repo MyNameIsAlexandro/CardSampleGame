@@ -269,10 +269,12 @@
 > **Маппинг статов:** `СилаИгрока` = `Мощь` (из четырёх базовых статов). Везде в формулах используется generic-термин для совместимости с разными героями.
 
 ```
-ОбщаяАтака = СилаИгрока + БонусОружия + БонусОтКарт + КартаСудьбы
+ОбщаяАтака = СилаИгрока + БонусОружия + БонусОтКарт + Effort + КартаСудьбы
 Урон = max(0, ОбщаяАтака - БроняВрага)
 HPВрага -= Урон
 ```
+
+> **Effort** — бонус от добровольного сброса карт из руки (0–2, §3.3a). Подробности — ниже.
 
 **Пример:**
 - Сила (3) + Меч (2) + Карта Судьбы (+1) = **6 Атаки**
@@ -290,7 +292,7 @@ HPВрага -= Урон
 > Engine читает `hero.will_stat` и использует соответствующий стат для формулы Влияния.
 
 ```
-ОбщееВлияние = ВоляИгрока + БонусУбеждения + БонусОтКарт + КартаСудьбы
+ОбщееВлияние = ВоляИгрока + БонусУбеждения + БонусОтКарт + Effort + КартаСудьбы
 ДуховныйУрон = max(0, ОбщееВлияние - ДуховнаяБроняВрага)
 WPВрага -= ДуховныйУрон
 ```
@@ -316,6 +318,35 @@ HPИгрока -= ВходящийУрон
 
 > **Заметка дизайна (v1.0):** Текущая формула позволяет 0 урона, если защита превышает атаку. Это намеренно для простоты MVP.
 > **Будущее рассмотрение (v2.0+):** Рассмотреть правило "Минимальный урон", где атаки всегда наносят минимум 1 урона, если не сработала Критическая защита. Это предотвращает бессмертные "танковые" билды.
+
+### 3.3a Механика Effort (Усилие)
+
+**Каноническая формула** (PROJECT_BIBLE, GDD §9.2): `Fate Test = Stat + FateCard + Effort >= Difficulty`
+
+**Определение:** Effort — добровольный сброс карт из руки для усиления Fate-проверки. Каждая сброшенная карта даёт **+1 к итоговому значению теста**.
+
+| Правило | Значение |
+|---|---|
+| Когда | Фаза `playerAction`, до commit |
+| Что можно сбросить | Любая карта из руки, кроме выбранной для действия |
+| Бонус | +1 за карту (линейно) |
+| Жёсткий лимит | **Max 2 карты за commit** (default; `HeroDefinition.maxEffort` может переопределить) |
+| Стоимость энергии | Нет — Effort не тратит Faith |
+| Куда уходит карта | `discardPile` (не `exhaustPile`) |
+| Отмена | До commit — карту можно вернуть |
+
+**Применимость:**
+
+| Тип Fate Test | Effort применяется |
+|---|---|
+| Attack (`commitAttack`) | Да |
+| Influence (`commitInfluence`) | Да |
+| Defense (автоматическая) | Нет |
+| Wait/Skip | Нет |
+
+**Реализация:** `CombatCalculator.calculateAttackWithFate(effortCards:)` уже включает Effort в формулу. API расширения `CombatSimulation` — см. ENGINE_ARCHITECTURE.md §E.5.
+
+> **Подробный дизайн:** `plans/2026-02-13-ritual-combat-design.md` §3.5
 
 ### 3.4 Механика выбора Карты Судьбы
 
@@ -1064,11 +1095,11 @@ public enum ActionContext: String, Codable {
 
 ```
 # АТАКА (Игрок → HP Врага)
-ОбщаяАтака = СилаИгрока + БонусОружия + БонусыКарт + КартаСудьбы
+ОбщаяАтака = СилаИгрока + БонусОружия + БонусыКарт + Effort + КартаСудьбы
 Урон = max(0, ОбщаяАтака - БроняВрага)
 
 # ВЛИЯНИЕ (Игрок → WP Врага)
-ОбщееВлияние = ВоляИгрока + БонусыВлияния + БонусыКарт + КартаСудьбы
+ОбщееВлияние = ВоляИгрока + БонусыВлияния + БонусыКарт + Effort + КартаСудьбы
 ДуховныйУрон = max(0, ОбщееВлияние - ДуховнаяБроняВрага)
 
 # ЗАЩИТА (Враг → HP Игрока)
@@ -1163,6 +1194,63 @@ combat.deescalation.rage.shield
 
 ---
 
+---
+
+## Приложение D: Стресс-аудит Fate Deck (2026-02-14)
+
+Математический аудит распределения value/keyword/suit в `fate_deck_core.json` (12 карт).
+
+### D.1 Распределение колоды
+
+**Масти:** prav 5 (41.7%), yav 4 (33.3%), nav 3 (25.0%)
+**baseValue:** E = +0.333, σ ≈ 1.37, диапазон [-2, +3]
+**Keywords:** surge ×4 (все prav), shadow ×3 (все nav), focus ×2 (все yav), ward ×2 (prav+yav), echo ×1 (yav)
+
+### D.2 effectiveValue по зонам резонанса
+
+| Зона | E[effectiveValue] |
+|---|---|
+| deepNav (-100..-61) | **-0.917** |
+| nav (-60..-21) | -0.333 |
+| yav (-20..+20) | +0.333 |
+| prav (+21..+60) | +0.917 |
+| deepPrav (+61..+100) | **+1.500** |
+
+Swing deepNav→deepPrav: **2.417 пунктов** (значимо при difficulty 5–8).
+
+### D.3 Keyword EV по путям (suit match/mismatch)
+
+Suit matching: nav↔combatPhysical (match), prav↔combatSpiritual (match). Mismatch → keyword suppressed (×0). Match → keyword ×2.
+
+| Путь | E[keyword bonus] | Matched cards | Suppressed cards |
+|---|---|---|---|
+| Kill (combatPhysical) | **+0.75** dmg | 3/12 nav | 5/12 prav |
+| Pacify (combatSpiritual) | **+0.917** dmg | 5/12 prav | 3/12 nav |
+
+**Pacify получает на 22% больше keyword value.** Keyword-система встроенно компенсирует tempo-преимущество Kill-пути.
+
+### D.4 Находки и риски
+
+| ID | Sev | Находка | Статус |
+|---|---|---|---|
+| **F1** | P1 | **Surge suppressed at Kill.** Все 4 surge-карты — prav → MISMATCH при combatPhysical → keyword обнулён. Лучший damage keyword (+2 dmg) недоступен Kill-пути. Потенциальный feel-bad moment. | Open |
+| **F2** | P1 | **Crit favors Pacify.** `fate_crit` (base +3, surge, prav): при Kill → +3 total (keyword suppressed); при Pacify → +5 total (keyword ×2). Crit на 67% эффективнее для Pacify. Противоинтуитивно. | Open |
+| **F3** | P2 | **deepNav doom spiral.** `curse_navi` в deepNav: effectiveValue = **-4**. При str=5, diff=6: промах даже с max Effort(2). Curse sticky → permanent deck pollution. E[total Kill] в deepNav = -0.167 (отрицательный — в среднем промах). | Open |
+| **F4** | P2 | **deepPrav snowball.** E[effectiveValue] = +1.5, prav-карты shift resonance +3..+5 → self-reinforcing. Самокоррекция через Kill→Nav работает, но только при осознанном выборе Kill. | Monitor |
+| **F5** | P3 | **matchMultiplier hardcoded.** `matchMultiplier: Double = 2.0` — default parameter в `KeywordInterpreter.resolve()`. Нет content-override через BalancePack. Тюнинг match/mismatch невозможен без code change. | Open |
+| **F6** | P3 | **bonusValue потерян в формуле.** `KeywordEffect.bonusValue` (ward: +1 val, parry) не участвует в `CombatCalculator.calculateAttackWithFate()`. Ward при атаке даёт special "parry", но потребитель special-эффекта не идентифицирован. | Open |
+
+### D.5 Рекомендации (не блокеры текущего эпика)
+
+1. **F1/F2:** При первом контент-ревью рассмотреть: 1 surge-карту сделать yav или nav; crit сделать yav suit или без keyword.
+2. **F3:** Cap resonance modifyValue для sticky-карт на ±1, или ввести пол effectiveValue (e.g., max(-2, effectiveValue)).
+3. **F5:** Вынести `matchMultiplier` в BalancePack config.
+4. **F6:** Верифицировать, что `CombatSystem` в EchoEngine применяет `keywordEffect.bonusValue` и `special`. Если нет — потерянная механика.
+
+> **Методология:** Полный перебор 12 карт × 5 зон × 2 пути × 5 keywords. Формулы из `CombatCalculator.swift`, keyword-матрица из `KeywordInterpreter.swift`, suit matching из `FateResolutionService.swift`.
+
+---
+
 **Документ утверждён для разработки боевой системы.**
-**Версия:** 1.1
-**Последнее обновление:** 2026-02-01
+**Версия:** 1.2
+**Последнее обновление:** 2026-02-14

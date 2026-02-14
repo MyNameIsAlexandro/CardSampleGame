@@ -6,7 +6,7 @@
 > Все участники проекта обязаны следовать данной карте.
 
 **Проект:** ECHO: Legends of the Veil (раб. назв. «Грань Миров»)
-**Последнее обновление:** 31 января 2026
+**Последнее обновление:** 14 февраля 2026
 
 ---
 
@@ -33,6 +33,7 @@
 | [GAME_DESIGN_DOCUMENT.md](./Design/GAME_DESIGN_DOCUMENT.md) | Полный GDD |
 | [EXPLORATION_CORE_DESIGN.md](./Design/EXPLORATION_CORE_DESIGN.md) | Дизайн механик исследования |
 | [ENCOUNTER_SYSTEM_DESIGN.md](./Design/ENCOUNTER_SYSTEM_DESIGN.md) | Дизайн системы энкаунтеров |
+| [COMBAT_DIPLOMACY_SPEC.md](./Design/COMBAT_DIPLOMACY_SPEC.md) | Спецификация боевой и дипломатической системы (формулы, Effort, Fate) |
 
 ### Technical/ — Техническая документация
 Архитектура движка и реализация.
@@ -79,6 +80,9 @@
 
 | Документ | Описание |
 |----------|----------|
+| [QUALITY_CONTROL_MODEL.md](./QA/QUALITY_CONTROL_MODEL.md) | Модель контроля качества, обязательные gate-тесты | **ЗАКОН** |
+| [TESTING_GUIDE.md](./QA/TESTING_GUIDE.md) | Руководство по запуску gate/модульных тестов | **GUIDE** |
+| [ENCOUNTER_TEST_MODEL.md](./QA/ENCOUNTER_TEST_MODEL.md) | Тестовая модель EncounterEngine (инварианты, структура) | **МОДУЛЬ** |
 | [QA_ACT_I_CHECKLIST.md](./QA/QA_ACT_I_CHECKLIST.md) | Чеклист тестирования Act I |
 
 ### Archive/ — Архив
@@ -102,6 +106,8 @@
 | **INDEX.md** | Вы здесь |
 | [SPRINT.md](./SPRINT.md) | Спринт-борд (Epic 1–14) + ссылка на Phase 2 |
 | [plans/2026-02-07-audit-refactor-phase2-epics.md](./plans/2026-02-07-audit-refactor-phase2-epics.md) | Леджер эпиков Phase 2 (audit/refactor) + бэклог (Epic 15+) |
+| [plans/2026-02-13-ritual-combat-design.md](./plans/2026-02-13-ritual-combat-design.md) | Дизайн Ritual Combat v1.2 (Phase 3, утверждён) |
+| [plans/2026-02-14-ritual-combat-epics.md](./plans/2026-02-14-ritual-combat-epics.md) | Леджер эпиков Phase 3: Ritual Combat (R1–R10) |
 
 ---
 
@@ -135,7 +141,8 @@ CardSampleGame/
 │
 ├── Packages/                    # Swift Packages
 │   ├── TwilightEngine/          # Игровой движок (runtime)
-│   │   └── PackAuthoring/      # Authoring tools (отдельный target)
+│   │   ├── PackAuthoring/      # Authoring tools (отдельный target)
+│   │   └── Tests/              # Engine gate tests (INV_*, LayerTests, IntegrationTests)
 │   ├── CharacterPacks/          # Паки персонажей
 │   │   └── CoreHeroes/
 │   └── StoryPacks/              # Сюжетные паки
@@ -181,5 +188,6 @@ CardSampleGame/
 ## Контакты и ресурсы
 
 - **Репозиторий:** github.com/MyNameIsAlexandro/CardSampleGame
-- **Тесты:** 606+ SPM tests + Xcode tests (all passing)
+- **Тесты:** 700+ (SPM + Xcode, all passing)
 - **Build:** SUCCESS
+- **Текущая фаза:** Phase 3 — Ritual Combat (R1–R10)

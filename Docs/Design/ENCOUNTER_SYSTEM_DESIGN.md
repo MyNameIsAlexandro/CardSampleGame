@@ -9,9 +9,12 @@
 > ENGINE_ARCHITECTURE.md — SoT для кода/контрактов.
 
 **Зависимости:**
-- [COMBAT_DIPLOMACY_SPEC.md](./COMBAT_DIPLOMACY_SPEC.md) — спецификация боевой и дипломатической системы
+- [COMBAT_DIPLOMACY_SPEC.md](./COMBAT_DIPLOMACY_SPEC.md) — спецификация боевой и дипломатической системы (включая Effort)
 - [ENGINE_ARCHITECTURE.md](../Technical/ENGINE_ARCHITECTURE.md) — архитектура движка
 - [GAME_DESIGN_DOCUMENT.md](./GAME_DESIGN_DOCUMENT.md) — игровой дизайн (Уровень 8, секция 9)
+
+**Визуальная реализация (Phase 3):**
+- [Ritual Combat Design](../plans/2026-02-13-ritual-combat-design.md) — SpriteKit-сцена "Стол Волхва", drag-and-drop Effort/Seal mechanics, resonance atmosphere
 
 ---
 

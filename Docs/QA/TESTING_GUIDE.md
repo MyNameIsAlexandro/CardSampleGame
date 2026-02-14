@@ -266,6 +266,53 @@ xcodebuild test -project CardSampleGame.xcodeproj \
   -only-testing:CardSampleGameTests/CodeHygieneTests/testFirstPartySwiftFilesHaveCanonicalFileHeaders
 ```
 
+## 9a. Phase 3: Ritual Combat Tests (planned)
+
+Phase 3 вводит 4 новых test suite. После реализации — запуск:
+
+**Engine-side (Effort mechanic):**
+```bash
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
+  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift test \
+  --package-path Packages/TwilightEngine \
+  --filter "RitualEffortGateTests"
+```
+
+**App-side (Scene + Atmosphere + Integration):**
+```bash
+xcodebuild test -project CardSampleGame.xcodeproj \
+  -scheme CardSampleGame \
+  -destination "$(bash .github/ci/select_ios_destination.sh --scheme CardSampleGame)" \
+  -only-testing:CardSampleGameTests/RitualSceneGateTests \
+  -only-testing:CardSampleGameTests/RitualAtmosphereGateTests \
+  -only-testing:CardSampleGameTests/RitualIntegrationGateTests
+```
+
+**Планируемые gate-тесты (18):**
+
+| Suite | Тест | Инвариант |
+|-------|------|-----------|
+| RitualEffortGateTests | `testEffortBurnMovesToDiscard` | Сброс → discardPile |
+| | `testEffortDoesNotSpendEnergy` | Effort ≠ Faith cost |
+| | `testEffortDoesNotAffectFateDeck` | Hand Deck ≠ Fate Deck |
+| | `testEffortBonusPassedToFateResolve` | +N в формуле |
+| | `testEffortUndoReturnsCardToHand` | Undo до commit |
+| | `testCannotBurnSelectedCard` | Карта в круге ≠ Effort |
+| | `testEffortLimitRespected` | ≤ maxEffort |
+| | `testEffortDefaultZero` | Без Effort = 0 |
+| | `testEffortDeterminism` | Replay determinism |
+| | `testEffortMidCombatSaveLoad` | Snapshot round-trip |
+| | `testSnapshotContainsEffortFields` | Required fields in snapshot |
+| RitualSceneGateTests | `testRitualSceneUsesOnlyCombatSimulationAPI` | No direct ECS access |
+| | `testDragDropProducesCanonicalCommands` | Drag → command |
+| | `testFateRevealPreservesExistingDeterminism` | No new RNG sources |
+| RitualAtmosphereGateTests | `testResonanceAtmosphereIsPurePresentation` | Read-only |
+| | `testAtmosphereControllerIsReadOnly` | No mutation calls |
+| RitualIntegrationGateTests | `testRitualSceneRestoresFromSnapshot` | Snapshot → visual |
+| | `testOldCombatSceneNotImportedInProduction` | No legacy import |
+
+> **Source:** `plans/2026-02-14-ritual-combat-epics.md`, `QUALITY_CONTROL_MODEL.md` §2a
+
 ## 10. Change Discipline
 
 - Add or update tests in the same PR as behavior changes.

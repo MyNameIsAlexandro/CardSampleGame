@@ -94,6 +94,47 @@ This document is the canonical control point for validating product health after
   - Verbose diagnostics are opt-in via `TWILIGHT_TEST_VERBOSE=1` and are used only for focused local debugging.
   - Scope includes app + engine test helpers and content-loading debug traces (`CardSampleGameTests/TestHelpers/TestContentLoader.swift`, `Packages/TwilightEngine/Tests/TwilightEngineTests/Helpers/TestContentLoader.swift`, `App/CardGameApp.swift`, `Packages/TwilightEngine/Sources/TwilightEngine/ContentPacks/ContentRegistry.swift`).
 
+## 2a. Phase 3: Ritual Combat Gates (planned)
+
+Phase 3 (Ritual Combat) вводит 4 новых gate-тест сьюта:
+
+| Suite | Scope | Тестов |
+|-------|-------|--------|
+| `RitualEffortGateTests` | Effort mechanic: burn→discard, no energy cost, no Fate Deck impact, bonus в Fate resolve, undo, limit max 2, determinism, mid-combat save/load | 11 |
+| `RitualSceneGateTests` | RitualCombatScene: использует только CombatSimulation API, drag-drop → canonical commands, Fate reveal сохраняет детерминизм | 3 |
+| `RitualAtmosphereGateTests` | ResonanceAtmosphereController: pure presentation (read-only), no mutation | 2 |
+| `RitualIntegrationGateTests` | Restore from snapshot, no old CombatScene import in production | 2 |
+
+**Итого:** 18 планируемых gate-тестов.
+
+**Инварианты Phase 3:**
+- `effortBonus <= maxEffort` (hard cap)
+- `effortCardIds ⊆ hand` до commit
+- Effort не задействует RNG
+- Effort не влияет на Fate Deck
+- RitualCombatScene работает только через CombatSimulation API
+- ResonanceAtmosphereController — read-only (gate: `testAtmosphereControllerIsReadOnly`)
+- Snapshot содержит `effortCardIds`, `effortBonus`, `selectedCardIds`, `phase`
+- Restore из snapshot → visual state (no replay)
+
+> **Source:** `plans/2026-02-13-ritual-combat-design.md` §11, `plans/2026-02-14-ritual-combat-epics.md`
+> **Status:** planned (реализация — Phase 3 epics R1–R10)
+
+## 2b. Fate Deck Balance Risks (Audit 2026-02-14)
+
+Стресс-аудит `fate_deck_core.json` выявил 6 рисков (подробности — `Design/COMBAT_DIPLOMACY_SPEC.md` Приложение D):
+
+| ID | Sev | Риск | Когда проверять |
+|---|---|---|---|
+| F1 | P1 | Surge keyword (×4, лучший dmg) всегда suppressed при Kill (все prav → mismatch) | Контент-ревью после vertical slice |
+| F2 | P1 | Crit-карта на 67% эффективнее при Pacify чем при Kill (prav suit + surge) | Контент-ревью после vertical slice |
+| F3 | P2 | deepNav doom spiral: curse sticky -4 effectiveValue, E[total] < 0 | Плейтест deepNav-сценариев |
+| F4 | P2 | deepPrav snowball: E[value]=+1.5, self-reinforcing resonance shifts | Мониторинг |
+| F5 | P3 | matchMultiplier=2.0 hardcoded, не конфигурируем через контент | При вынесении в BalancePack |
+| F6 | P3 | bonusValue/special из KeywordEffect не потребляется CombatCalculator | Code review EchoEngine CombatSystem |
+
+**Не блокеры текущего эпика.** Контрольная точка — первый контент-ревью после vertical slice (R9).
+
 ## 3. Save Schema Contract (Epic 28)
 
 ### 3.1 Contract Rules
