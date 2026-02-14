@@ -98,6 +98,7 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 - `testSurgeSuitDistribution` — ≥1 surge-карта с suit ≠ prav в fate_deck_core
 - `testCritCardNeutralSuit` — crit card имеет suit=yav (нейтральный)
 - `testStickyCardResonanceModifyCapped` — `ContentValidationTests`: `if card.isSticky → ∀ resonanceRules: abs(modifyValue) ≤ 1`
+- `testNoStaleCardIdsInContent` — старый id (`fate_prav_light_b`) отсутствует, новый (`fate_yav_surge_a`) присутствует, нет dangling refs в локализациях/fixtures
 
 ---
 
@@ -152,7 +153,7 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 
 **Acceptance:**
 - `testRitualSceneUsesOnlyCombatSimulationAPI` — сцена не мутирует ECS напрямую
-- `testRitualSceneHasNoStrongEngineReference` — `RitualCombatScene` не хранит strong reference на `TwilightGameEngine` (presentation слой не протекает к world state)
+- `testRitualSceneHasNoStrongEngineReference` — `RitualCombatScene` не хранит strong reference на `TwilightGameEngine` и bridge-объекты (`EchoEncounterBridge`, `EchoCombatBridge`); хранит только config/snapshot DTO
 - Scene создаётся без crash, отображает стол с освещением
 - SwiftUI bridge принимает `EchoCombatConfig`, передаёт в сцену
 - Portrait orientation locked
@@ -179,7 +180,9 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 **Acceptance:**
 - `testDragDropProducesCanonicalCommands` — drag → selectCard / burnForEffort
 - `testDragDropDoesNotMutateECSDirectly` — drag path не мутирует ECS-компоненты напрямую (только через CombatSimulation API)
-- Gesture priority: drag (5px) всегда побеждает tooltip (400ms); long-press не активируется после drag start
+- `testDragDropControllerHasNoEngineImports` — `DragDropController` зависит только от протокола CombatSimulation, не импортирует/не хранит ссылку на `TwilightGameEngine`
+- `testLongPressDoesNotFireAfterDragStart` — long-press gesture не активируется после начала drag (5px threshold)
+- Gesture priority: drag (5px) всегда побеждает tooltip (400ms)
 - Drop на Circle → snap + selectCard()
 - Drop на Bonfire → burn particles + burnForEffort()
 - Drop вне зоны → spring return в руку
@@ -265,6 +268,7 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 
 **Acceptance:**
 - `testFateRevealPreservesExistingDeterminism` — визуал не влияет на FateResolution
+- `testRitualCombatNoSystemRNGSources` — статический скан `RitualCombat/*`: запрет `random()`/`UUID()`/`Date()` кроме явно разрешённых animation-only timestamps
 - `testKeywordEffectConsumedOrDocumented` — bonusValue/special из KeywordEffect применяются в CombatSystem или документированно отключены
 - Major fate = затемнение + полный flip + keyword
 - Minor fate = быстрый flip без затемнения
@@ -293,7 +297,7 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 
 **Acceptance:**
 - `testResonanceAtmosphereIsPurePresentation` — controller read-only
-- `testAtmosphereControllerIsReadOnly` — не вызывает mutation-методы CombatSimulation
+- `testAtmosphereControllerIsReadOnly` — разрешены только getter-свойства CombatSimulation (`.resonance`, `.phase`, `.isOver`, computed properties); запрещены любые `func` вызовы на simulation
 - Screenshot test: -50 и +50 визуально не спутать (Go/No-Go #6)
 - Все параметры интерполируются плавно (без дискретных переключений)
 
@@ -343,6 +347,7 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 **Acceptance:**
 - `testRitualSceneRestoresFromSnapshot` — восстановление UI из snapshot
 - `testOldCombatSceneNotImportedInProduction` — deprecated файлы не в production graph
+- `testBattleArenaDoesNotCallCommitPathWhenUsingRitualScene` — Arena sandbox не вызывает `commitExternalCombat` после миграции на RitualCombatScene
 - Save → kill → restore → тот же state (Go/No-Go #10)
 - Arena не коммитит в world-engine state (§1.5 CLAUDE.md)
 
@@ -380,6 +385,7 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 - Финальный прогон всех gate-тестов
 - F4 monitoring checkpoint: deepPrav snowball проверка на vertical slice
 - Smoke test: кампания + arena + resume path на реальном девайсе
+- Фиксация seed + сохранение replay trace как артефакт (для воспроизводимости найденных багов)
 
 **Acceptance:**
 - Все 10 Go/No-Go пройдены
@@ -434,6 +440,7 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 | `testSurgeSuitDistribution` | R0 | ≥1 surge != prav |
 | `testCritCardNeutralSuit` | R0 | crit suit=yav |
 | `testStickyCardResonanceModifyCapped` | R0 | sticky |modifyValue| ≤ 1 |
+| `testNoStaleCardIdsInContent` | R0 | no dangling refs after card rename |
 | `testEffortBurnMovesToDiscard` | R1 | Effort → discardPile |
 | `testEffortDoesNotSpendEnergy` | R1 | Effort не тратит energy |
 | `testEffortDoesNotAffectFateDeck` | R1 | Effort не меняет Fate Deck |
@@ -449,9 +456,13 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 | `testRitualSceneHasNoStrongEngineReference` | R2 | no strong ref to TwilightGameEngine |
 | `testDragDropProducesCanonicalCommands` | R3 | drag → canonical API |
 | `testDragDropDoesNotMutateECSDirectly` | R3 | drag path → no direct ECS mutation |
+| `testDragDropControllerHasNoEngineImports` | R3 | DragDropController → only CombatSimulation protocol |
+| `testLongPressDoesNotFireAfterDragStart` | R3 | gesture priority edge-case |
 | `testFateRevealPreservesExistingDeterminism` | R6 | визуал не влияет на Fate |
+| `testRitualCombatNoSystemRNGSources` | R6 | static scan: no random()/UUID()/Date() in RitualCombat/ |
 | `testKeywordEffectConsumedOrDocumented` | R6 | bonusValue/special consumed или документированно отключены |
 | `testResonanceAtmosphereIsPurePresentation` | R7 | controller read-only |
 | `testAtmosphereControllerIsReadOnly` | R7 | no mutation calls |
 | `testRitualSceneRestoresFromSnapshot` | R9 | UI восстановление из snapshot |
+| `testBattleArenaDoesNotCallCommitPathWhenUsingRitualScene` | R9 | Arena sandbox → no commitExternalCombat |
 | `testOldCombatSceneNotImportedInProduction` | R9 | deprecated не в production |
