@@ -78,8 +78,8 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 
 **F3 (P2) — deepNav doom spiral mitigation (content-only):**
 - Обновить `curse_navi` resonanceRules: deepNav modifyValue **-2 → -1**, nav modifyValue **-1 → -1** (без изменения)
-- Добавить content validation rule: sticky-карты (isSticky=true) должны иметь `|modifyValue| ≤ 1` во всех resonanceRules
-- Никаких runtime floor/cap в engine — решение чисто через контент + валидацию
+- Добавить правило в `ContentValidationTests`: `if card.isSticky == true → ∀ resonanceRules: abs(modifyValue) ≤ 1`
+- Никаких runtime floor/cap в engine — решение чисто через контент + автоматическую валидацию
 
 **F1 (P1) — Surge suit distribution:**
 - Изменить 1 surge-карту с prav на yav (рекомендация: `fate_prav_light_b` → `fate_yav_surge_a`, suit=yav)
@@ -97,7 +97,7 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 - `testMatchMultiplierFromBalancePack` — matchMultiplier читается из `combat.balance.matchMultiplier`, default = 1.5
 - `testSurgeSuitDistribution` — ≥1 surge-карта с suit ≠ prav в fate_deck_core
 - `testCritCardNeutralSuit` — crit card имеет suit=yav (нейтральный)
-- `testStickyCardResonanceModifyCapped` — sticky cards: |modifyValue| ≤ 1 (content validation)
+- `testStickyCardResonanceModifyCapped` — `ContentValidationTests`: `if card.isSticky → ∀ resonanceRules: abs(modifyValue) ≤ 1`
 
 ---
 
