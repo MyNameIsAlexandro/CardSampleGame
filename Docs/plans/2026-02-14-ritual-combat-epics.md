@@ -268,7 +268,7 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 
 **Acceptance:**
 - `testFateRevealPreservesExistingDeterminism` — визуал не влияет на FateResolution
-- `testRitualCombatNoSystemRNGSources` — статический скан `RitualCombat/*`: запрет `random()`/`UUID()`/`Date()` кроме явно разрешённых animation-only timestamps
+- `testRitualCombatNoSystemRNGSources` — статический скан `RitualCombat/*`: запрет `random()`/`UUID()`/`Date()`/`arc4random`/`SystemRandomNumberGenerator`/`CFAbsoluteTimeGetCurrent` кроме явно разрешённых animation-only timestamps
 - `testKeywordEffectConsumedOrDocumented` — bonusValue/special из KeywordEffect применяются в CombatSystem или документированно отключены
 - Major fate = затемнение + полный flip + keyword
 - Minor fate = быстрый flip без затемнения
@@ -459,7 +459,7 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 | `testDragDropControllerHasNoEngineImports` | R3 | DragDropController → only CombatSimulation protocol |
 | `testLongPressDoesNotFireAfterDragStart` | R3 | gesture priority edge-case |
 | `testFateRevealPreservesExistingDeterminism` | R6 | визуал не влияет на Fate |
-| `testRitualCombatNoSystemRNGSources` | R6 | static scan: no random()/UUID()/Date() in RitualCombat/ |
+| `testRitualCombatNoSystemRNGSources` | R6 | static scan: no random()/UUID()/Date()/arc4random/SystemRandomNumberGenerator/CFAbsoluteTimeGetCurrent in RitualCombat/ |
 | `testKeywordEffectConsumedOrDocumented` | R6 | bonusValue/special consumed или документированно отключены |
 | `testResonanceAtmosphereIsPurePresentation` | R7 | controller read-only |
 | `testAtmosphereControllerIsReadOnly` | R7 | no mutation calls |
