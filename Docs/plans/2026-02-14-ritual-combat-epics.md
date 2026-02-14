@@ -179,7 +179,7 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 **Acceptance:**
 - `testDragDropProducesCanonicalCommands` — drag → selectCard / burnForEffort
 - `testDragDropDoesNotMutateECSDirectly` — drag path не мутирует ECS-компоненты напрямую (только через CombatSimulation API)
-- Gesture priority: drag (5px) всегда побеждает tooltip (400ms)
+- Gesture priority: drag (5px) всегда побеждает tooltip (400ms); long-press не активируется после drag start
 - Drop на Circle → snap + selectCard()
 - Drop на Bonfire → burn particles + burnForEffort()
 - Drop вне зоны → spring return в руку
