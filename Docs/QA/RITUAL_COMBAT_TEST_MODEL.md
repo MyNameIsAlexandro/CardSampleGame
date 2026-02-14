@@ -1,7 +1,7 @@
 # Ritual Combat Test Model (Phase 3)
 
 **Scope:** Полная тестовая модель Phase 3 — Effort, RitualCombatScene, visual combat overhaul.
-**Status:** Draft v2 — P0/P1 аудиторские правки применены, ожидает финального ревью.
+**Status:** Draft v3 — P0/P1/P2 аудиторские правки (раунд 2) применены.
 **Policy sync:** CLAUDE.md v4.1, QUALITY_CONTROL_MODEL.md §2a, ENCOUNTER_TEST_MODEL.md
 **Design ref:** `plans/2026-02-13-ritual-combat-design.md` (v1.2), `plans/2026-02-14-ritual-combat-epics.md`
 **Last updated:** 2026-02-14
@@ -28,7 +28,7 @@ CardSampleGameTests/
 ├── GateTests/RitualCombatGates/
 │   ├── RitualSceneGateTests.swift           (R2+R3: 6 тестов, static scan + SpriteKit)
 │   ├── RitualAtmosphereGateTests.swift      (R7: 2 теста, SpriteKit controller)
-│   └── RitualIntegrationGateTests.swift     (R6+R9: 7 тестов, FateReveal + Scene)
+│   └── RitualIntegrationGateTests.swift     (R6+R9+R10a: 8 тестов, FateReveal + Scene + Replay)
 └── Unit/RitualCombat/
     ├── FateRevealTests.swift                (R6: unit-тесты FateRevealDirector)
     └── DragDropControllerTests.swift        (R3: unit-тесты DragDropController)
@@ -39,8 +39,8 @@ CardSampleGameTests/
 R6 (FateRevealDirector) и R9 (integration с Scene) тоже требуют View-зависимостей.
 
 **Правила (наследуются от ENCOUNTER_TEST_MODEL.md):**
-- Gate < 2 сек per test, без system RNG, fixtures hardcoded + fixed seeds
-- Suite-level budget: ≤ 30 сек на suite (все тесты suite суммарно)
+- Gate < 2 сек per test (hard limit), без system RNG, fixtures hardcoded + fixed seeds
+- Suite-level target budget: ≤ 60 сек на suite (soft — CI jitter допустим, но систематическое превышение = красный флаг)
 - 1 файл = 1 компонент (не по фиче)
 - Каждый файл ≤ 600 строк (CLAUDE.md §5.1)
 - INV-{MODULE}-{NNN} именование для инвариантов
@@ -53,7 +53,7 @@ R6 (FateRevealDirector) и R9 (integration с Scene) тоже требуют Vie
 
 | # | Тест | Suite | Epic | Тип | Что проверяет |
 |---|------|-------|------|-----|---------------|
-| 1 | `testMatchMultiplierFromBalancePack` | FateDeckBalanceGateTests | R0 | Gate+ | система внутренне читает matchMultiplier из BalancePack (не параметр извне), default = 1.5 |
+| 1 | `testMatchMultiplierFromBalancePack` | FateDeckBalanceGateTests | R0 | Gate+ | пропорциональность: два BalancePack (1.0 vs 2.0) → effect × 2; default = 1.5 (surge в combatPhysical) |
 | 2 | `testSurgeSuitDistribution` | FateDeckBalanceGateTests | R0 | Gate+ | ≥1 surge-карта с suit ≠ prav |
 | 3 | `testCritCardNeutralSuit` | FateDeckBalanceGateTests | R0 | Gate+ | crit card: suit = yav |
 | 4 | `testStickyCardResonanceModifyCapped` | FateDeckBalanceGateTests | R0 | Gate+ | `if card.isSticky → ∀ resonanceRules: abs(modifyValue) ≤ 1` |
@@ -79,12 +79,12 @@ R6 (FateRevealDirector) и R9 (integration с Scene) тоже требуют Vie
 | 24 | `testRitualCombatNoSystemRNGSources` | RitualIntegrationGateTests | R6 | Gate− | static scan RitualCombat/: запрет random()/UUID()/Date()/arc4random/SystemRandomNumberGenerator/CFAbsoluteTimeGetCurrent/DispatchTime.now/CACurrentMediaTime |
 | 25 | `testKeywordEffectConsumedOrDocumented` | RitualIntegrationGateTests | R6 | Gate+ | bonusValue/special из KeywordEffect применяются или документированно отключены |
 | 26 | `testResonanceAtmosphereIsPurePresentation` | RitualAtmosphereGateTests | R7 | Gate− | controller read-only |
-| 27 | `testAtmosphereControllerIsReadOnly` | RitualAtmosphereGateTests | R7 | Gate− | только getter-свойства (.resonance, .phase, .isOver); запрет func-вызовов на simulation |
+| 27 | `testAtmosphereControllerIsReadOnly` | RitualAtmosphereGateTests | R7 | Gate− | 0 мутационных вызовов (commit/burn/select/advance/resolve); read-only func допустимы |
 | 28 | `testRitualSceneRestoresFromSnapshot` | RitualIntegrationGateTests | R9 | Gate+ | UI восстановление Bonfire/Circle/Seals/Hand из snapshot |
 | 29 | `testBattleArenaDoesNotCallCommitPathWhenUsingRitualScene` | RitualIntegrationGateTests | R9 | Gate− | Arena sandbox → не вызывает commitExternalCombat |
 | 30 | `testOldCombatSceneNotImportedInProduction` | RitualIntegrationGateTests | R9 | Gate− | deprecated CombatScene файлы не в production graph |
 | 31 | `testFateRevealDirectorHasNoSimulationReference` | RitualIntegrationGateTests | R6 | Gate− | FateRevealDirector не хранит ссылку на CombatSimulation (static scan stored properties) |
-| 32 | (reserved) | — | R10a | — | Vertical slice replay trace fixture (seed + fingerprint) |
+| 32 | `testVerticalSliceReplayTrace` | RitualIntegrationGateTests | R10a | Gate+ | Replay trace: fixture `Tests/Fixtures/ritual_replay_trace.json` (seed + action sequence + CombatSnapshot.fingerprint); gate сравнивает replay output fingerprint с эталоном |
 
 **Легенда:** Gate+ = позитивный (контракт выполняется), Gate− = негативный (запрещённое действие не происходит).
 
@@ -114,17 +114,26 @@ R6 (FateRevealDirector) и R9 (integration с Scene) тоже требуют Vie
 ### 3.1 FateDeckBalanceGateTests (R0) — 5 тестов
 
 **INV-FATE-BAL-001: testMatchMultiplierFromBalancePack**
-```
-GIVEN: BalancePack загружен с ключом combat.balance.matchMultiplier = 1.5
-       CombatSimulation создан через стандартный путь (без явной передачи multiplier)
-WHEN:  resolve match-keyword (suit совпадает с путём героя)
-THEN:  result.bonusDamage == baseBonusDamage * 1.5 (не * 2.0)
-       — верифицируем, что система прочитала multiplier из BalancePack внутренне
 
-GIVEN: BalancePack загружен БЕЗ ключа combat.balance.matchMultiplier
-WHEN:  resolve match-keyword (suit совпадает)
-THEN:  result.bonusDamage == baseBonusDamage * 1.5 (default fallback)
-       — верифицируем, что default не hardcoded 2.0
+Тест проверяет, что multiplier читается из BalancePack и пропорционально влияет на эффект.
+Не привязан к конкретному полю (bonusDamage / valueDelta / special) — проверяем через
+пропорциональность двух конфигураций на keyword `surge` в combatPhysical (гарантированно
+даёт числовой damageDelta).
+
+```
+GIVEN: BalancePack_A: combat.balance.matchMultiplier = 1.0
+       BalancePack_B: combat.balance.matchMultiplier = 2.0
+       Одинаковые начальные условия, keyword = surge, suit matches combatPhysical path
+       CombatSimulation создан стандартным путём (multiplier не передаётся как параметр)
+WHEN:  resolve_A = resolve surge с BalancePack_A → числовой effect_A
+       resolve_B = resolve surge с BalancePack_B → числовой effect_B
+THEN:  effect_B == effect_A * 2  (пропорциональность: multiplier 2.0 / 1.0 = 2x)
+       — верифицируем, что система читает multiplier из BalancePack внутренне
+       — тест не зависит от конкретного поля (bonusDamage vs damageDelta)
+
+GIVEN: BalancePack БЕЗ ключа combat.balance.matchMultiplier
+WHEN:  resolve surge → effect_default
+THEN:  effect_default == effect_A * 1.5  (default = 1.5, не hardcoded 2.0)
 ```
 
 **INV-FATE-BAL-002: testSurgeSuitDistribution**
@@ -313,9 +322,14 @@ THEN:  0 прямых мутаций
 **INV-INPUT-003: testDragDropControllerHasNoEngineImports (STATIC SCAN)**
 ```
 GIVEN: исходный код DragDropController.swift
-WHEN:  scan на import TwilightEngine, TwilightGameEngine, EchoEngine (кроме протоколов)
-THEN:  0 прямых импортов engine-типов
-       допустимо: import CombatSimulationProtocol (или аналог)
+WHEN:  scan на запрещённые символы/типы:
+       - import TwilightEngine
+       - TwilightGameEngine / WorldState / WorldRNG
+       - EchoEncounterBridge / EchoCombatBridge
+THEN:  0 вхождений запрещённых символов
+       допустимо: import EchoEngine (для протоколов/DTO)
+       допустимо: CombatSimulationProtocol, CombatSnapshot, EchoCombatConfig
+       — проверка по символам/типам, не только по import строке
 ```
 
 **INV-INPUT-004: testLongPressDoesNotFireAfterDragStart**
@@ -343,21 +357,27 @@ GIVEN: ResonanceAtmosphereController с mock CombatSimulation
 WHEN:  controller.update(resonance: -50)
        controller.update(resonance: 0)
        controller.update(resonance: +50)
-THEN:  mock: 0 mutation method calls
+THEN:  mock: 0 вызовов мутационных методов:
+       selectCard, burnForEffort, commitAttack, commitInfluence, skipTurn,
+       resolveEnemyTurn, advancePhase, resetRound
+       read-only func допустимы (snapshot(), resonance getter и т.п.)
        controller output: только visual parameters (color, alpha, particle config)
 ```
 
-### 3.5 RitualIntegrationGateTests (R6+R9) — 7 тестов
+### 3.5 RitualIntegrationGateTests (R6+R9+R10a) — 8 тестов
 
 **INV-DET-001: testFateRevealPreservesExistingDeterminism**
 ```
 GIVEN: seed = 42, одинаковые начальные условия (hero, enemy, hand, fateDeck)
 WHEN:  прогон A: CombatSimulation + FateRevealDirector подписан → commitAttack → simState_A
        прогон B: CombatSimulation БЕЗ FateRevealDirector → commitAttack → simState_B
-THEN:  simState_A == simState_B (Equatable)
-       — FateRevealDirector как observer не вносит side effects в CombatSimulation
-       — значение, keyword, suit идентичны
-       — RNG cursor после commitAttack одинаков в обоих прогонах
+THEN:  simState_A == simState_B
+       Сравнение по CombatSnapshot.fingerprint (SHA-256 от canonical JSON, sorted keys):
+       — fateResult (value, keyword, suit)
+       — deck states (hand, discard, fateDeck order)
+       — RNG cursor (nextSeedValue)
+       — effortBonus, selectedCardIds, phase
+       FateRevealDirector как observer не вносит side effects в CombatSimulation
 ```
 
 **INV-DET-001a: testFateRevealDirectorHasNoSimulationReference (STATIC SCAN)**
@@ -385,10 +405,11 @@ THEN:  0 вхождений (кроме строк с маркером ANIMATION
 
 WHITELIST FORMAT (единственный допустимый маркер исключения):
        // ANIMATION-ONLY: <reason>
-       Пример: let now = CFAbsoluteTimeGetCurrent() // ANIMATION-ONLY: particle spawn timestamp
        Маркер должен быть на ТОЙ ЖЕ строке, что и вызов.
+       <reason> обязателен и не пустой (regex: `// ANIMATION-ONLY: \S+`).
+       Пример: let now = CFAbsoluteTimeGetCurrent() // ANIMATION-ONLY: particle spawn timestamp
        Тест: regex `(random|UUID|Date\(\)|arc4random|SystemRandomNumberGenerator|CFAbsoluteTimeGetCurrent|DispatchTime\.now|CACurrentMediaTime)`
-             на строки БЕЗ `// ANIMATION-ONLY` → 0 matches
+             на строки БЕЗ `// ANIMATION-ONLY: \S` → 0 matches
 ```
 
 **INV-CONTRACT-001: testKeywordEffectConsumedOrDocumented**
@@ -398,17 +419,25 @@ WHEN:  анализ использования KeywordEffect.bonusValue и Keywo
 THEN:  EITHER:
          bonusValue применяется в CombatCalculator (gate: result.totalAttack includes bonusValue)
        OR:
-         документ-маркер "INTENTIONALLY_UNUSED: bonusValue" в CombatSystem + gate проверяет маркер
+         маркер в исходном коде (inline comment, формат ниже) + gate проверяет наличие маркера
+
+MARKER FORMAT:
+       // INTENTIONALLY_UNUSED: <fieldName> — <reason>
+       Размещается в файле, где поле могло бы использоваться (CombatCalculator / CombatSystem).
+       Пример: // INTENTIONALLY_UNUSED: bonusValue — applied via keyword-specific handler, not generic path
+       Gate scan: regex `INTENTIONALLY_UNUSED: bonusValue` → ≥1 match если bonusValue не в totalAttack
 ```
 
 **INV-INT-001: testRitualSceneRestoresFromSnapshot**
 ```
 GIVEN: snapshot с effortBonus=1, effortCardIds=[card_a], selectedCardIds=[card_b], phase=.playerAction
+       полная рука = [card_a, card_b, card_c, card_d, card_e]
 WHEN:  RitualCombatScene.restore(from: snapshot)
 THEN:  bonfireNode.isGlowing == true (effort > 0)
        circleNode.hasCard == true (selectedCardIds.count > 0)
        sealNodes.isVisible == true (card in circle → seals visible)
-       handNode.cards.count == totalHand - effortCards - selectedCards
+       handNode.cardIds contains [card_c, card_d, card_e]
+       handNode.cardIds does NOT contain card_a (burned) and card_b (selected/in circle)
        phaseHUD shows "playerAction"
 
 NEGATIVE: inconsistent snapshot
@@ -422,16 +451,40 @@ THEN:  validation error / assert failure
 ```
 GIVEN: BattleArenaView с RitualCombatScene (после миграции)
 WHEN:  полный бой: start → play → victory
-THEN:  0 вызовов commitExternalCombat()
-       0 вызовов engine.performAction(.commitExternalCombat(...))
-       Arena sandbox изолирован от world-engine state
+THEN:  0 вызовов по всем commit-путям:
+       - commitExternalCombat()
+       - engine.performAction(.commitExternalCombat(...))
+       - EchoCombatBridge.applyCombatResult(...)
+       Arena допускает только локальный result (display-only), без world commit
 ```
 
 **INV-INT-003: testOldCombatSceneNotImportedInProduction (STATIC SCAN)**
 ```
 GIVEN: все .swift файлы в production targets (не в Tests/)
-WHEN:  scan на: import CombatScene, CombatScene.swift, CombatScene+
-THEN:  0 вхождений (deprecated файлы не в production graph)
+WHEN:  scan на символ-использование:
+       - CombatScene( (инстанцирование)
+       - CombatSceneView / SpriteView(scene: ...CombatScene)
+       - CombatScene+ (extension файлы)
+       - typealias к CombatScene
+       + target membership проверка: CombatScene*.swift не входят в production target
+         (через pbxproj анализ или аналогичный gate из AuditArchitectureBoundaryGateTests)
+THEN:  0 символ-использований в production source
+       0 CombatScene*.swift файлов в production target membership
+```
+
+**INV-REPLAY-001: testVerticalSliceReplayTrace (R10a)**
+```
+GIVEN: fixture файл Tests/Fixtures/ritual_replay_trace.json содержит:
+       {
+         "seed": 42,
+         "actions": ["selectCard:card_b", "burnForEffort:card_a", "commitAttack:enemy_1"],
+         "expectedFingerprint": "<sha256 CombatSnapshot после выполнения>"
+       }
+WHEN:  CombatSimulation(seed: fixture.seed) → выполнить fixture.actions → snapshot
+THEN:  snapshot.fingerprint == fixture.expectedFingerprint
+       — fixture генерируется однократно gate-скриптом при R10a Go/No-Go
+       — формат fingerprint: SHA-256 от canonical JSON CombatSnapshot (sorted keys, no whitespace)
+       — fingerprint пишется gate-скриптом, не вручную
 ```
 
 ---
@@ -532,11 +585,11 @@ End-to-end сценарии с реальным ContentRegistry.
 | Прямая ECS-мутация в Drag | DragDropController.swift | testDragDropDoesNotMutateECSDirectly |
 | Engine import в Controller | DragDropController.swift | testDragDropControllerHasNoEngineImports |
 | Long-press после drag | gesture state | testLongPressDoesNotFireAfterDragStart |
-| Mutation calls в Atmosphere | ResonanceAtmosphereController | testAtmosphereControllerIsReadOnly |
+| Мутационные вызовы в Atmosphere (commit/burn/select/advance) | ResonanceAtmosphereController | testAtmosphereControllerIsReadOnly |
 | System RNG в RitualCombat/ | all .swift in folder | testRitualCombatNoSystemRNGSources |
 | FateRevealDirector хранит ref на Simulation | FateRevealDirector.swift | testFateRevealDirectorHasNoSimulationReference |
 | Deprecated import в prod | production targets | testOldCombatSceneNotImportedInProduction |
-| Arena commits to world | BattleArenaView | testBattleArenaDoesNotCallCommitPathWhenUsingRitualScene |
+| Arena commits to world (direct + bridge) | BattleArenaView | testBattleArenaDoesNotCallCommitPathWhenUsingRitualScene |
 
 ---
 
@@ -640,11 +693,12 @@ enum SnapshotFixtures {
 | Atmosphere → read-only | INV-ATM-001, -002 | — | — |
 | Snapshot → visual restore (no replay) | INV-INT-001 | — | testMidCombatSaveRestoreResume |
 | Arena sandbox → no world commit | INV-INT-002 | — | testArenaDoesNotCommitToWorldEngine |
-| matchMultiplier = SoT (1.5) | INV-FATE-BAL-001 | testMatchBonusEnhanced (modified) | — |
+| matchMultiplier пропорциональность | INV-FATE-BAL-001 | testMatchBonusEnhanced (modified) | — |
 | Sticky modifyValue ≤ 1 | INV-FATE-BAL-004 | — | — |
 | No system RNG in RitualCombat/ | INV-DET-002 | — | — |
 | FateRevealDirector = pure observer | INV-DET-001a | — | — |
 | Determinism preserved | INV-DET-001, INV-EFF-009 | — | testMidCombatSaveRestoreResume |
+| Replay trace fingerprint stable | INV-REPLAY-001 | — | — |
 
 ---
 
