@@ -178,6 +178,7 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 
 **Acceptance:**
 - `testDragDropProducesCanonicalCommands` — drag → selectCard / burnForEffort
+- `testDragDropDoesNotMutateECSDirectly` — drag path не мутирует ECS-компоненты напрямую (только через CombatSimulation API)
 - Gesture priority: drag (5px) всегда побеждает tooltip (400ms)
 - Drop на Circle → snap + selectCard()
 - Drop на Bonfire → burn particles + burnForEffort()
@@ -447,6 +448,7 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 | `testRitualSceneUsesOnlyCombatSimulationAPI` | R2 | scene → только CombatSimulation |
 | `testRitualSceneHasNoStrongEngineReference` | R2 | no strong ref to TwilightGameEngine |
 | `testDragDropProducesCanonicalCommands` | R3 | drag → canonical API |
+| `testDragDropDoesNotMutateECSDirectly` | R3 | drag path → no direct ECS mutation |
 | `testFateRevealPreservesExistingDeterminism` | R6 | визуал не влияет на Fate |
 | `testKeywordEffectConsumedOrDocumented` | R6 | bonusValue/special consumed или документированно отключены |
 | `testResonanceAtmosphereIsPurePresentation` | R7 | controller read-only |
