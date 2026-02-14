@@ -5,7 +5,8 @@
 **Design doc:** `Docs/plans/2026-02-13-ritual-combat-design.md` (v1.2, approved)
 **Policy sync:** CLAUDE.md v4.1
 **Last updated:** 2026-02-14
-**TDD workflow:** Документация → Тесты → Код → Полировка
+**TDD workflow:** Тестовая модель → Gate-тесты (RED) → Код (GREEN) → Полировка
+**Fate Deck audit:** `Design/COMBAT_DIPLOMACY_SPEC.md` Приложение D (F1–F6)
 
 ---
 
@@ -18,19 +19,20 @@ Epics Phase 3 начинаются с **R1** (Ritual), чтобы не пере�
 ## Граф зависимостей
 
 ```
-R1 (Effort) ──────────────────────┐
-                                   ├──→ R5 (Ritual Zone)
-R2 (Scene Foundation) ───┬────────┤
-                          │        ├──→ R9 (Integration) ──→ R10 (Validation)
-                          ├──→ R3 (Cards & Drag) ──→ R5
-                          ├──→ R4 (Enemy Idols)
-                          ├──→ R6 (Fate Reveal)
-                          ├──→ R7 (Resonance Atmosphere)
-                          └──→ R8 (HUD & Info)
+R0 (Fate Balance) ──→ R1 (Effort) ────────────────┐
+                                                    ├──→ R5 (Ritual Zone)
+                      R2 (Scene Foundation) ──┬────┤
+                                               │    ├──→ R9 (Integration) ──→ R10 (Validation)
+                                               ├──→ R3 (Cards & Drag) ──→ R5
+                                               ├──→ R4 (Enemy Idols)
+                                               ├──→ R6 (Fate Reveal)
+                                               ├──→ R7 (Resonance Atmosphere)
+                                               └──→ R8 (HUD & Info)
 ```
 
 **Параллельные потоки:**
-- R1 (engine) параллельно с R2 (scene foundation)
+- R0 → R1 (engine, sequential: R0 фиксит math, R1 строит поверх)
+- R2 (scene foundation) параллельно с R0 + R1
 - R3, R4, R6, R7, R8 параллельны после R2
 - R5 ждёт R1 + R2 + R3
 - R9 ждёт R1–R8
@@ -40,6 +42,7 @@ R2 (Scene Foundation) ───┬────────┤
 
 ## Status Snapshot
 
+- `R0`: PENDING — Fate Deck Balance Hardening (F1–F6)
 - `R1`: PENDING — Effort mechanic (engine extension)
 - `R2`: PENDING — RitualCombatScene foundation
 - `R3`: PENDING — Card system & Drag-Drop
@@ -54,6 +57,54 @@ R2 (Scene Foundation) ───┬────────┤
 ---
 
 ## Epics
+
+### R0 [PENDING] — Fate Deck Balance Hardening
+
+**Goal:** Закрыть математические дефекты F1–F6 из стресс-аудита Fate Deck (Приложение D COMBAT_DIPLOMACY_SPEC) до построения визуальной надстройки.
+
+**Dependencies:** Нет (первый epic Phase 3).
+
+**Design ref:** `COMBAT_DIPLOMACY_SPEC.md` Приложение D
+
+**Deliverables:**
+
+**F6 (P3) — Verify bonusValue/special consumption:**
+- Аудит: `CombatSystem` в EchoEngine — используется ли `keywordEffect.bonusValue` и `special` из `FateResolution`?
+- Если нет → потерянная механика. Решение: либо подключить (bonusValue → доп. урон / special → effect dispatch), либо удалить и упростить KeywordEffect
+- Результат: код или документированное решение "bonusValue intentionally unused in combat"
+
+**F5 (P3) — matchMultiplier в BalancePack:**
+- Вынести `matchMultiplier` из default parameter `KeywordInterpreter.resolve()` в `BalancePack` config
+- Новый ключ: `combat.fate.matchMultiplier` (default = 2.0)
+- `FateResolutionService.resolve()` читает multiplier из config
+
+**F3 (P2) — deepNav doom spiral mitigation:**
+- Ввести пол effectiveValue: `max(effectiveFloor, baseValue + ruleModify)`, `effectiveFloor` из BalancePack (default = -3)
+- Или: cap `resonanceRule.modifyValue` для sticky-карт на ±1
+- Обновить `FateDeckManager.drawAndResolve()` с применением пола
+- Обновить `curse_navi` resonanceRules: deepNav modifyValue -2 → -1
+
+**F1 (P1) — Surge suit distribution:**
+- Изменить 1 surge-карту с prav на yav (рекомендация: `fate_prav_light_b` → `fate_yav_surge_a`, suit=yav)
+- Kill-путь получает 1/12 surge вместо 0/12
+- Общий баланс: surge 3 prav + 1 yav (вместо 4 prav)
+
+**F2 (P1) — Crit card balance:**
+- `fate_crit`: изменить suit с prav на yav (нейтральный, одинаково работает на оба пути)
+- Или: убрать keyword (crit и так +3 base, keyword сверху = overkill)
+- Рекомендация: suit=yav, keyword=surge (нейтральный surge crit)
+
+**F4 (P2) — deepPrav snowball:** Monitor. Kill→Nav самокоррекция. Контрольная точка — R10 vertical slice.
+
+**Acceptance (gate-тесты):**
+- `testEffectiveValueFloorApplied` — effectiveValue ≥ effectiveFloor для всех карт
+- `testMatchMultiplierFromConfig` — matchMultiplier читается из BalancePack, default = 2.0
+- `testSurgeSuitDistribution` — ≥1 surge-карта с suit ≠ prav в fate_deck_core
+- `testCritCardNeutralSuit` — crit card имеет suit=yav (нейтральный)
+- `testKeywordEffectConsumedInCombat` — bonusValue/special из KeywordEffect применяются или документированно отключены
+- `testStickyCardResonanceModifyCapped` — sticky cards: |modifyValue| ≤ 1
+
+---
 
 ### R1 [PENDING] — Effort Mechanic (Engine Extension)
 
@@ -349,6 +400,12 @@ R2 (Scene Foundation) ───┬────────┤
 
 | Тест | Epic | Scope |
 |---|---|---|
+| `testEffectiveValueFloorApplied` | R0 | effectiveValue ≥ floor |
+| `testMatchMultiplierFromConfig` | R0 | matchMultiplier из BalancePack |
+| `testSurgeSuitDistribution` | R0 | ≥1 surge != prav |
+| `testCritCardNeutralSuit` | R0 | crit suit=yav |
+| `testKeywordEffectConsumedInCombat` | R0 | bonusValue/special потребляется |
+| `testStickyCardResonanceModifyCapped` | R0 | sticky |modifyValue| ≤ 1 |
 | `testEffortBurnMovesToDiscard` | R1 | Effort → discardPile |
 | `testEffortDoesNotSpendEnergy` | R1 | Effort не тратит energy |
 | `testEffortDoesNotAffectFateDeck` | R1 | Effort не меняет Fate Deck |

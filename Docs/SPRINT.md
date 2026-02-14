@@ -14,12 +14,13 @@ Source of truth:
 - `Docs/QA/TESTING_GUIDE.md` (how to run gates)
 
 Current focus:
+- `R0` (pending): Fate Deck Balance Hardening (F1–F6 из стресс-аудита)
 - `R1` (pending): Effort Mechanic (engine extension)
 - `R2` (pending): RitualCombatScene Foundation
 
-Next task: R1 и R2 параллельно (R1 = engine, R2 = scene skeleton).
+Next task: Тестовая модель → R0 (balance fixes) → R1 + R2 параллельно.
 
-Epics: R1–R10 (10 epics). Dependency graph и полный список — в epic ledger.
+Epics: R0–R10 (11 epics). Dependency graph и полный список — в epic ledger.
 
 ---
 
