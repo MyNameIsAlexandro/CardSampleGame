@@ -152,6 +152,7 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 
 **Acceptance:**
 - `testRitualSceneUsesOnlyCombatSimulationAPI` — сцена не мутирует ECS напрямую
+- `testRitualSceneHasNoStrongEngineReference` — `RitualCombatScene` не хранит strong reference на `TwilightGameEngine` (presentation слой не протекает к world state)
 - Scene создаётся без crash, отображает стол с освещением
 - SwiftUI bridge принимает `EchoCombatConfig`, передаёт в сцену
 - Portrait orientation locked
@@ -444,6 +445,7 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 | `testEffortMidCombatSaveLoad` | R1 | save/restore с Effort |
 | `testSnapshotContainsEffortFields` | R1 | snapshot хранит все поля |
 | `testRitualSceneUsesOnlyCombatSimulationAPI` | R2 | scene → только CombatSimulation |
+| `testRitualSceneHasNoStrongEngineReference` | R2 | no strong ref to TwilightGameEngine |
 | `testDragDropProducesCanonicalCommands` | R3 | drag → canonical API |
 | `testFateRevealPreservesExistingDeterminism` | R6 | визуал не влияет на Fate |
 | `testKeywordEffectConsumedOrDocumented` | R6 | bonusValue/special consumed или документированно отключены |
