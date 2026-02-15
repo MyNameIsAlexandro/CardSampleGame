@@ -268,14 +268,14 @@ xcodebuild test -project CardSampleGame.xcodeproj \
 
 ## 9a. Phase 3: Ritual Combat Tests (planned)
 
-Phase 3 вводит 4 новых test suite. После реализации — запуск:
+Phase 3 вводит 5 test suites. После реализации — запуск:
 
-**Engine-side (Effort mechanic):**
+**Engine-side (Effort + Balance):**
 ```bash
 DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift test \
   --package-path Packages/TwilightEngine \
-  --filter "RitualEffortGateTests"
+  --filter "RitualEffortGateTests|FateDeckBalanceGateTests"
 ```
 
 **App-side (Scene + Atmosphere + Integration):**
@@ -288,10 +288,15 @@ xcodebuild test -project CardSampleGame.xcodeproj \
   -only-testing:CardSampleGameTests/RitualIntegrationGateTests
 ```
 
-**Планируемые gate-тесты (18):**
+**Gate-тесты (32):**
 
 | Suite | Тест | Инвариант |
 |-------|------|-----------|
+| FateDeckBalanceGateTests | `testMatchMultiplierFromBalancePack` | matchMultiplier из balance config |
+| | `testSurgeSuitDistribution` | Surge suit distribution |
+| | `testCritCardNeutralSuit` | Crit-карта neutral suit |
+| | `testStickyCardResonanceModifyCapped` | Sticky card resonance cap |
+| | `testNoStaleCardIdsInContent` | No stale card IDs |
 | RitualEffortGateTests | `testEffortBurnMovesToDiscard` | Сброс → discardPile |
 | | `testEffortDoesNotSpendEnergy` | Effort ≠ Faith cost |
 | | `testEffortDoesNotAffectFateDeck` | Hand Deck ≠ Fate Deck |
@@ -304,12 +309,21 @@ xcodebuild test -project CardSampleGame.xcodeproj \
 | | `testEffortMidCombatSaveLoad` | Snapshot round-trip |
 | | `testSnapshotContainsEffortFields` | Required fields in snapshot |
 | RitualSceneGateTests | `testRitualSceneUsesOnlyCombatSimulationAPI` | No direct ECS access |
+| | `testRitualSceneHasNoStrongEngineReference` | No engine reference |
 | | `testDragDropProducesCanonicalCommands` | Drag → command |
-| | `testFateRevealPreservesExistingDeterminism` | No new RNG sources |
+| | `testDragDropDoesNotMutateECSDirectly` | No ECS mutation |
+| | `testDragDropControllerHasNoEngineImports` | No engine imports |
+| | `testLongPressDoesNotFireAfterDragStart` | Long-press guard |
 | RitualAtmosphereGateTests | `testResonanceAtmosphereIsPurePresentation` | Read-only |
 | | `testAtmosphereControllerIsReadOnly` | No mutation calls |
 | RitualIntegrationGateTests | `testRitualSceneRestoresFromSnapshot` | Snapshot → visual |
 | | `testOldCombatSceneNotImportedInProduction` | No legacy import |
+| | `testFateRevealDirectorHasNoSimulationReference` | No sim reference |
+| | `testFateRevealPreservesExistingDeterminism` | No new RNG sources |
+| | `testBattleArenaDoesNotCallCommitPathWhenUsingRitualScene` | Arena sandbox |
+| | `testRitualCombatNoSystemRNGSources` | No system RNG |
+| | `testKeywordEffectConsumedOrDocumented` | Keyword consumption |
+| | `testVerticalSliceReplayTrace` | Vertical slice replay determinism |
 
 > **Source:** `plans/2026-02-14-ritual-combat-epics.md`, `QUALITY_CONTROL_MODEL.md` §2a
 

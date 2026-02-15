@@ -96,16 +96,17 @@ This document is the canonical control point for validating product health after
 
 ## 2a. Phase 3: Ritual Combat Gates (planned)
 
-Phase 3 (Ritual Combat) вводит 4 новых gate-тест сьюта:
+Phase 3 (Ritual Combat) вводит 5 gate-тест сьютов:
 
 | Suite | Scope | Тестов |
 |-------|-------|--------|
+| `FateDeckBalanceGateTests` | Fate deck balance: matchMultiplier из balance pack, suit distribution, crit-карта neutral suit, sticky card resonance cap, stale card ID check | 5 |
 | `RitualEffortGateTests` | Effort mechanic: burn→discard, no energy cost, no Fate Deck impact, bonus в Fate resolve, undo, limit max 2, determinism, mid-combat save/load | 11 |
-| `RitualSceneGateTests` | RitualCombatScene: использует только CombatSimulation API, drag-drop → canonical commands, Fate reveal сохраняет детерминизм | 3 |
+| `RitualSceneGateTests` | RitualCombatScene: только CombatSimulation API, no engine reference, drag-drop → canonical commands, no ECS mutation, no engine imports, long-press guard | 6 |
 | `RitualAtmosphereGateTests` | ResonanceAtmosphereController: pure presentation (read-only), no mutation | 2 |
-| `RitualIntegrationGateTests` | Restore from snapshot, no old CombatScene import in production | 2 |
+| `RitualIntegrationGateTests` | Restore from snapshot, no old CombatScene import, fate reveal determinism, arena isolation, no system RNG, keyword consumption, vertical slice replay | 8 |
 
-**Итого:** 18 планируемых gate-тестов.
+**Итого:** 32 gate-теста.
 
 **Инварианты Phase 3:**
 - `effortBonus <= maxEffort` (hard cap)
@@ -130,7 +131,7 @@ Phase 3 (Ritual Combat) вводит 4 новых gate-тест сьюта:
 | F2 | P1 | Crit-карта на 67% эффективнее при Pacify чем при Kill (prav suit + surge) | Контент-ревью после vertical slice |
 | F3 | P2 | deepNav doom spiral: curse sticky -4 effectiveValue, E[total] < 0 | Плейтест deepNav-сценариев |
 | F4 | P2 | deepPrav snowball: E[value]=+1.5, self-reinforcing resonance shifts | Мониторинг |
-| F5 | P3 | matchMultiplier=2.0 hardcoded (SoT `combat.balance.matchMultiplier`=1.5, drift) | R0: подключить к существующему SoT-ключу |
+| F5 | P3 | matchMultiplier=2.0 hardcoded (исправлено в `a055ede`, ранее было 1.5 — дрифт с тестами) | Закрыто: KeywordInterpreter default = 2.0 |
 | F6 | P3 | bonusValue/special из KeywordEffect не потребляется CombatCalculator | Code review EchoEngine CombatSystem |
 
 **Не блокеры текущего эпика.** Контрольная точка — первый контент-ревью после vertical slice (R9).
