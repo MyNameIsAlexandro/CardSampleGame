@@ -5,7 +5,12 @@
 
 import Testing
 import FirebladeECS
-import TwilightEngine
+import struct TwilightEngine.Card
+import struct TwilightEngine.CardAbility
+import struct TwilightEngine.EnemyDefinition
+import struct TwilightEngine.FateCard
+import enum TwilightEngine.AbilityEffect
+import enum TwilightEngine.DamageType
 @testable import EchoEngine
 
 @Suite("Select-Then-Commit Combat Tests")

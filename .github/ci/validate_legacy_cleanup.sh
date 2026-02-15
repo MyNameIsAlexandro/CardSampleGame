@@ -131,17 +131,8 @@ check_no_todo_fixme
 check_compat_remove_by_markers
 
 # Orphaned bridge/adapter call-site checks (production sources only).
-check_callsite \
-  "EchoCombatBridge.applyCombatResult" \
-  "EchoCombatBridge.applyCombatResult(" \
-  "Views/Combat/EchoCombatBridge.swift" \
-  "App" "Views" "ViewModels" "Models" "Managers" "Utilities"
-
-check_callsite \
-  "EchoEncounterBridge.makeCombatConfig" \
-  "EchoEncounterBridge.makeCombatConfig" \
-  "Views/Combat/EchoEncounterBridge.swift" \
-  "App" "Views" "ViewModels" "Models" "Managers" "Utilities"
+# NOTE: EchoCombatBridge and EchoEncounterBridge removed from checks —
+# replaced by RitualCombatBridge (R9). Files kept for test-only usage.
 
 check_callsite \
   "QuestDefinition.toQuest" \

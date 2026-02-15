@@ -5,7 +5,9 @@
 
 import Testing
 import FirebladeECS
-import TwilightEngine
+import struct TwilightEngine.FateCard
+import struct TwilightEngine.EnemyDefinition
+import struct TwilightEngine.LocalizedString
 @testable import EchoEngine
 
 @Suite("Diplomacy Tests")
