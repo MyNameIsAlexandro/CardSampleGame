@@ -187,7 +187,8 @@ extension AuditArchitectureBoundaryGateTests {
         let dirsToScan = ["App", "Views", "ViewModels", "Models", "Utilities"]
         let allowedFiles: Set<String> = [
             "EventView.swift",
-            "EchoCombatBridge.swift"
+            "EchoCombatBridge.swift",
+            "RitualCombatBridge.swift"
         ]
         let pattern = "commitExternalCombat("
 

@@ -280,26 +280,32 @@ final class RitualIntegrationGateTests: XCTestCase {
                 let fileName = fileURL.lastPathComponent
 
                 // Skip files that ARE the CombatScene definition (EchoScenes package)
+                // and Ritual combat files (RitualCombatScene* are the replacement)
                 if fileName.hasPrefix("CombatScene") { continue }
+                if fileName.hasPrefix("RitualCombat") { continue }
                 // Skip test files
                 if fileName.contains("Test") { continue }
 
                 let codeLines = try readCodeLines(from: fileURL)
                 for (line, code) in codeLines {
+                    // Strip RitualCombat references before checking for legacy CombatScene usage
+                    let stripped = code.replacingOccurrences(of: "RitualCombatScene", with: "")
+                                       .replacingOccurrences(of: "RitualCombatResult", with: "")
+                                       .replacingOccurrences(of: "RitualCombatBridge", with: "")
                     // Check for CombatScene instantiation
-                    if code.contains("CombatScene(") {
+                    if stripped.contains("CombatScene(") {
                         violations.append("  \(fileName):\(line): \(code) [symbol: CombatScene(]")
                     }
                     // Check for CombatSceneView usage
-                    if code.contains("CombatSceneView") {
+                    if stripped.contains("CombatSceneView") {
                         violations.append("  \(fileName):\(line): \(code) [symbol: CombatSceneView]")
                     }
                     // Check for inheritance / conformance
-                    if code.contains(": CombatScene") {
+                    if stripped.contains(": CombatScene") {
                         violations.append("  \(fileName):\(line): \(code) [symbol: : CombatScene]")
                     }
                     // Check for typealias to CombatScene
-                    if code.contains("typealias") && code.contains("CombatScene") {
+                    if stripped.contains("typealias") && stripped.contains("CombatScene") {
                         violations.append("  \(fileName):\(line): \(code) [symbol: typealias CombatScene]")
                     }
                 }
