@@ -117,11 +117,28 @@ final class RitualSceneGateTests: XCTestCase {
     // MARK: - INV-INPUT-001: Drag produces canonical commands
 
     /// DragDropController must produce CombatSimulation commands, not raw mutations.
-    /// This is a runtime behavior test — will be RED until R3 implementation.
     func testDragDropProducesCanonicalCommands() {
-        // This test requires DragDropController + mock CombatSimulation to exist.
-        // TDD RED: will fail until R3 creates these types.
-        XCTFail("DragDropController not yet implemented — R3 TDD RED")
+        let controller = DragDropController()
+        var receivedCommands: [DragCommand] = []
+        controller.onCommand = { receivedCommands.append($0) }
+
+        // Tap (no drag) → selectCard
+        controller.beginTouch(cardId: "card_a")
+        controller.endTouch()
+        XCTAssertEqual(receivedCommands.last, .selectCard(cardId: "card_a"))
+
+        // Drag beyond threshold → burnForEffort
+        controller.beginTouch(cardId: "card_b")
+        controller.updateDrag(offset: CGSize(width: 6, height: 0))
+        controller.endTouch()
+        XCTAssertEqual(receivedCommands.last, .burnForEffort(cardId: "card_b"))
+
+        // Cancel → cancelDrag
+        controller.beginTouch(cardId: "card_c")
+        controller.cancel()
+        XCTAssertEqual(receivedCommands.last, .cancelDrag)
+
+        XCTAssertEqual(receivedCommands.count, 3)
     }
 
     // MARK: - INV-INPUT-002: Drag does not mutate ECS directly
@@ -187,9 +204,23 @@ final class RitualSceneGateTests: XCTestCase {
     // MARK: - INV-INPUT-004: Long-press does not fire after drag start
 
     /// Gesture priority: long-press must not activate after drag threshold crossed.
-    /// Runtime behavior test — TDD RED until R3 implementation.
     func testLongPressDoesNotFireAfterDragStart() {
-        // Requires DragDropController with gesture state machine.
-        XCTFail("DragDropController gesture priority not yet implemented — R3 TDD RED")
+        let controller = DragDropController()
+
+        controller.beginTouch(cardId: "card_a")
+        XCTAssertFalse(controller.isLongPressBlocked,
+            "Long-press should be allowed during initial press")
+
+        // Move 6px (> 5px threshold) — drag starts
+        controller.updateDrag(offset: CGSize(width: 6, height: 0))
+
+        XCTAssertTrue(controller.isLongPressBlocked,
+            "Long-press must be blocked after drag threshold crossed")
+
+        if case .dragging = controller.state {
+            // Expected
+        } else {
+            XCTFail("Expected .dragging state after 6px move, got \(controller.state)")
+        }
     }
 }

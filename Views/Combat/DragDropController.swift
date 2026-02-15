@@ -48,12 +48,26 @@ final class DragDropController {
         state = .pressing(cardId: cardId)
     }
 
+    /// Whether long-press is blocked (drag already started or no active touch).
+    var isLongPressBlocked: Bool {
+        switch state {
+        case .pressing: return false
+        case .idle, .dragging, .released: return true
+        }
+    }
+
     /// Update drag position. Produces dragging state if threshold crossed.
     func updateDrag(offset: CGSize) {
-        guard case .pressing(let cardId) = state else { return }
-        let distance = sqrt(offset.width * offset.width + offset.height * offset.height)
-        if distance > dragThreshold {
+        switch state {
+        case .pressing(let cardId):
+            let distance = sqrt(offset.width * offset.width + offset.height * offset.height)
+            if distance > dragThreshold {
+                state = .dragging(cardId: cardId, offset: offset)
+            }
+        case .dragging(let cardId, _):
             state = .dragging(cardId: cardId, offset: offset)
+        case .idle, .released:
+            break
         }
     }
 
