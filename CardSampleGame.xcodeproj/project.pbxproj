@@ -130,6 +130,12 @@
 		DD0000020000000000000001 /* DragDropController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0000010000000000000001 /* DragDropController.swift */; };
 		FR0000020000000000000001 /* FateRevealDirector.swift in Sources */ = {isa = PBXBuildFile; fileRef = FR0000010000000000000001 /* FateRevealDirector.swift */; };
 		RA0000020000000000000001 /* ResonanceAtmosphereController.swift in Sources */ = {isa = PBXBuildFile; fileRef = RA0000010000000000000001 /* ResonanceAtmosphereController.swift */; };
+		R5SN00020000000000000001 /* SealNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = R5SN00010000000000000001 /* SealNode.swift */; };
+		R5RC00020000000000000001 /* RitualCircleNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = R5RC00010000000000000001 /* RitualCircleNode.swift */; };
+		R5BF00020000000000000001 /* BonfireNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = R5BF00010000000000000001 /* BonfireNode.swift */; };
+		R4ID00020000000000000001 /* IdolNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = R4ID00010000000000000001 /* IdolNode.swift */; };
+		R8AM00020000000000000001 /* AmuletNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = R8AM00010000000000000001 /* AmuletNode.swift */; };
+		R8RR00020000000000000001 /* ResonanceRuneNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = R8RR00010000000000000001 /* ResonanceRuneNode.swift */; };
 		RG0000020000000000000001 /* RitualSceneGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = RG0000010000000000000001 /* RitualSceneGateTests.swift */; };
 		RG0000040000000000000001 /* RitualAtmosphereGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = RG0000030000000000000001 /* RitualAtmosphereGateTests.swift */; };
 		RG0000060000000000000001 /* RitualIntegrationGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = RG0000050000000000000001 /* RitualIntegrationGateTests.swift */; };
@@ -265,6 +271,12 @@
 		DD0000010000000000000001 /* DragDropController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DragDropController.swift; sourceTree = "<group>"; };
 		FR0000010000000000000001 /* FateRevealDirector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FateRevealDirector.swift; sourceTree = "<group>"; };
 		RA0000010000000000000001 /* ResonanceAtmosphereController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResonanceAtmosphereController.swift; sourceTree = "<group>"; };
+		R5SN00010000000000000001 /* SealNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SealNode.swift; sourceTree = "<group>"; };
+		R5RC00010000000000000001 /* RitualCircleNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RitualCircleNode.swift; sourceTree = "<group>"; };
+		R5BF00010000000000000001 /* BonfireNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonfireNode.swift; sourceTree = "<group>"; };
+		R4ID00010000000000000001 /* IdolNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdolNode.swift; sourceTree = "<group>"; };
+		R8AM00010000000000000001 /* AmuletNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmuletNode.swift; sourceTree = "<group>"; };
+		R8RR00010000000000000001 /* ResonanceRuneNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResonanceRuneNode.swift; sourceTree = "<group>"; };
 		RG0000010000000000000001 /* RitualSceneGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RitualSceneGateTests.swift; sourceTree = "<group>"; };
 		RG0000030000000000000001 /* RitualAtmosphereGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RitualAtmosphereGateTests.swift; sourceTree = "<group>"; };
 		RG0000050000000000000001 /* RitualIntegrationGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RitualIntegrationGateTests.swift; sourceTree = "<group>"; };
@@ -578,6 +590,12 @@
 				DD0000010000000000000001 /* DragDropController.swift */,
 				FR0000010000000000000001 /* FateRevealDirector.swift */,
 				RA0000010000000000000001 /* ResonanceAtmosphereController.swift */,
+				R5SN00010000000000000001 /* SealNode.swift */,
+				R5RC00010000000000000001 /* RitualCircleNode.swift */,
+				R5BF00010000000000000001 /* BonfireNode.swift */,
+				R4ID00010000000000000001 /* IdolNode.swift */,
+				R8AM00010000000000000001 /* AmuletNode.swift */,
+				R8RR00010000000000000001 /* ResonanceRuneNode.swift */,
 			);
 			path = Combat;
 			sourceTree = "<group>";
@@ -823,6 +841,12 @@
 				DD0000020000000000000001 /* DragDropController.swift in Sources */,
 				FR0000020000000000000001 /* FateRevealDirector.swift in Sources */,
 				RA0000020000000000000001 /* ResonanceAtmosphereController.swift in Sources */,
+				R5SN00020000000000000001 /* SealNode.swift in Sources */,
+				R5RC00020000000000000001 /* RitualCircleNode.swift in Sources */,
+				R5BF00020000000000000001 /* BonfireNode.swift in Sources */,
+				R4ID00020000000000000001 /* IdolNode.swift in Sources */,
+				R8AM00020000000000000001 /* AmuletNode.swift in Sources */,
+				R8RR00020000000000000001 /* ResonanceRuneNode.swift in Sources */,
 				GG0002010000000000000001 /* HeroSelectionView.swift in Sources */,
 				CM00000100000000000000001 /* ContentManagerView.swift in Sources */,
 				CM00000500000000000000001 /* ContentManagerComponents.swift in Sources */,
