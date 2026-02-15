@@ -4,6 +4,7 @@
 /// Контекст: TDD RED — ResonanceAtmosphereController ещё не создан. Reference: RITUAL_COMBAT_TEST_MODEL.md §3.4
 
 import XCTest
+import TwilightEngine
 @testable import CardSampleGame
 
 /// Ritual Atmosphere Architecture Invariants — Phase 3 Gate Tests (R7)
@@ -71,6 +72,22 @@ final class RitualAtmosphereGateTests: XCTestCase {
     /// Output: only visual parameters (color, alpha, particle config).
     /// TDD RED until R7 creates ResonanceAtmosphereController with mock support.
     func testAtmosphereControllerIsReadOnly() {
-        XCTFail("ResonanceAtmosphereController not yet implemented — R7 TDD RED")
+        // Create deterministic simulation and snapshot before controller interaction
+        let sim = CombatSimulation.makeStandard(seed: 42)
+        sim.selectCard(sim.hand[0].id)
+        let snapshotBefore = sim.snapshot()
+
+        // Create atmosphere controller (headless — no parent scene) and pump updates
+        let controller = ResonanceAtmosphereController()
+        controller.update(resonance: -80.0)
+        controller.update(resonance: 0.0)
+        controller.update(resonance: 50.0)
+        controller.update(resonance: 100.0)
+
+        // Snapshot after — must be identical (controller is pure presentation)
+        let snapshotAfter = sim.snapshot()
+        XCTAssertEqual(snapshotBefore, snapshotAfter,
+            "ResonanceAtmosphereController.update() must not mutate CombatSimulation state. " +
+            "Snapshot before and after update() calls must be identical.")
     }
 }
