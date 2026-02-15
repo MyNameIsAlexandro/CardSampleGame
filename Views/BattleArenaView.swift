@@ -5,8 +5,6 @@
 
 import SwiftUI
 import TwilightEngine
-import EchoScenes
-import EchoEngine
 
 /// Экран тренировочного боя (Arena).
 /// Работает в sandbox-режиме: запускает отдельный бой без прямой мутации world-state.
@@ -18,6 +16,7 @@ struct BattleArenaView: View {
     @State private var selectedEnemyId: String?
     @State private var showingCombat = false
     @State private var lastOutcome: AppCombatOutcome?
+    @State private var combatSimulation: CombatSimulation?
     @State private var arenaSeedState: UInt64 = Self.initialArenaSeed
 
     private var availableHeroes: [HeroDefinition] {
@@ -141,8 +140,34 @@ struct BattleArenaView: View {
     }
 
     private func startBattle() {
-        guard selectedHeroId != nil,
-              selectedEnemy != nil else { return }
+        guard let heroId = selectedHeroId,
+              let hero = services.registry.heroRegistry.hero(id: heroId),
+              let enemy = selectedEnemy else { return }
+
+        let startingDeck = services.cardFactory.createStartingDeck(forHero: heroId)
+        let fateCards = services.registry.getAllFateCards()
+
+        let encounterEnemy = EncounterEnemy(
+            id: enemy.id,
+            name: enemy.name.resolve(using: services.localizationManager),
+            hp: enemy.health,
+            maxHp: enemy.health,
+            wp: enemy.will,
+            maxWp: enemy.will,
+            power: enemy.power,
+            defense: enemy.defense
+        )
+
+        combatSimulation = CombatSimulation(
+            hand: startingDeck,
+            heroHP: hero.baseStats.health,
+            heroStrength: hero.baseStats.strength,
+            heroArmor: 0,
+            enemies: [encounterEnemy],
+            fateDeckState: FateDeckState(drawPile: fateCards, discardPile: []),
+            rngSeed: nextArenaSeed(),
+            worldResonance: 0
+        )
 
         lastOutcome = nil
         showingCombat = true
@@ -152,22 +177,10 @@ struct BattleArenaView: View {
 
     @ViewBuilder
     private var spriteKitCombatView: some View {
-        if let heroId = selectedHeroId,
-           let hero = services.registry.heroRegistry.hero(id: heroId),
-           let enemy = selectedEnemy {
-            let startingDeck = services.cardFactory.createStartingDeck(forHero: heroId)
-            let fateCards = services.registry.getAllFateCards()
-
-            CombatSceneView(
-                enemyDefinition: enemy,
-                playerName: hero.name.resolve(using: services.localizationManager),
-                playerHealth: hero.baseStats.health,
-                playerStrength: hero.baseStats.strength,
-                playerDeck: startingDeck,
-                fateCards: fateCards,
-                resonance: 0,
-                seed: nextArenaSeed(),
-                onCombatEndWithResult: { result in
+        if let simulation = combatSimulation {
+            RitualCombatSceneView(
+                simulation: simulation,
+                onCombatEnd: { result in
                     let stats = AppCombatStats(
                         turnsPlayed: result.turnsPlayed,
                         totalDamageDealt: result.totalDamageDealt,

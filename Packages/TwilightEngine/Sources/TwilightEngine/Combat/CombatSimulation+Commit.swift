@@ -95,6 +95,35 @@ extension CombatSimulation {
         )
     }
 
+    // MARK: - Phase Control
+
+    /// Transition to a new combat phase.
+    public func setPhase(_ newPhase: CombatSimulationPhase) {
+        phase = newPhase
+    }
+
+    /// Resolve the enemy turn: each living enemy deals their power as damage to the hero.
+    /// Automatically advances phase to `.playerAction` (or `.finished` if hero is defeated)
+    /// and increments the round counter.
+    ///
+    /// - Returns: Array of (enemyId, damage) pairs for visual feedback.
+    public func resolveEnemyTurn() -> [(enemyId: String, damage: Int)] {
+        var attacks: [(String, Int)] = []
+        for enemy in enemies where enemy.hp > 0 {
+            let damage = enemy.power
+            heroHP = Swift.max(0, heroHP - damage)
+            attacks.append((enemy.id, damage))
+        }
+
+        if heroHP <= 0 {
+            phase = .finished
+        } else {
+            round += 1
+            phase = .playerAction
+        }
+        return attacks
+    }
+
     // MARK: - Restore
 
     /// Recreate a CombatSimulation from a saved snapshot.

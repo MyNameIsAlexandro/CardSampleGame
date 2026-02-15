@@ -1,19 +1,32 @@
 /// Файл: Views/Combat/RitualCombatSceneView.swift
 /// Назначение: SwiftUI-обёртка для RitualCombatScene (SpriteView bridge).
 /// Зона ответственности: Мост SwiftUI ↔ SpriteKit для ритуального боя.
-/// Контекст: Phase 3 Ritual Combat (R2). Паттерн аналогичен CombatSceneView.
+/// Контекст: Phase 3 Ritual Combat (R9). Принимает CombatSimulation и строит сцену.
 
 import SwiftUI
 import SpriteKit
+import TwilightEngine
 
 /// SwiftUI wrapper for `RitualCombatScene`.
-/// Follows the same SpriteView bridge pattern as EchoScenes.CombatSceneView.
+/// Accepts a `CombatSimulation` and wires callbacks before presenting via SpriteView.
 struct RitualCombatSceneView: View {
 
-    let scene: RitualCombatScene
+    let simulation: CombatSimulation
+    var onCombatEnd: ((RitualCombatResult) -> Void)?
+    var onSoundEffect: ((String) -> Void)?
+    var onHaptic: ((String) -> Void)?
 
     var body: some View {
-        SpriteView(scene: scene)
+        SpriteView(scene: makeScene())
             .ignoresSafeArea()
+    }
+
+    private func makeScene() -> RitualCombatScene {
+        let scene = RitualCombatScene(size: RitualCombatScene.sceneSize)
+        scene.onCombatEnd = onCombatEnd
+        scene.onSoundEffect = onSoundEffect
+        scene.onHaptic = onHaptic
+        scene.configure(with: simulation)
+        return scene
     }
 }

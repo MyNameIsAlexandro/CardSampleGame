@@ -5,8 +5,6 @@
 
 import SwiftUI
 import TwilightEngine
-import EchoEngine
-import EchoScenes
 
 /// Экран события кампании.
 /// Все изменения состояния проходят через action-пайплайн движка, UI только отображает состояние.
@@ -23,7 +21,7 @@ struct EventView: View {
     @State private var showingResult = false
     @State private var resultMessage: String = ""
     @State private var showingCombat = false
-    @State private var echoCombatConfig: EchoCombatConfig?
+    @State private var combatSimulation: CombatSimulation?
     @State private var combatVictory: Bool?
 
     // MARK: - Initialization (Engine-First only)
@@ -101,28 +99,18 @@ struct EventView: View {
                 Text(resultMessage)
             }
             .fullScreenCover(isPresented: $showingCombat) {
-                if let config = echoCombatConfig {
-                    CombatSceneView(
-                        enemyDefinition: config.enemyDefinition,
-                        playerName: config.playerName,
-                        playerHealth: config.playerHealth,
-                        playerMaxHealth: config.playerMaxHealth,
-                        playerStrength: config.playerStrength,
-                        playerDeck: config.playerDeck,
-                        fateCards: config.fateCards,
-                        resonance: config.resonance,
-                        seed: config.seed,
-                        onCombatEndWithResult: { (result: EchoCombatResult) in
-                            _ = EchoCombatBridge.applyCombatResult(result, to: vm.engine)
-                            let isVictory: Bool
-                            if case .victory = result.outcome { isVictory = true } else { isVictory = false }
+                if let simulation = combatSimulation {
+                    RitualCombatSceneView(
+                        simulation: simulation,
+                        onCombatEnd: { result in
+                            RitualCombatBridge.applyCombatResult(result, to: vm.engine)
                             let stats = AppCombatStats(
                                 turnsPlayed: result.turnsPlayed,
                                 totalDamageDealt: result.totalDamageDealt,
                                 totalDamageTaken: result.totalDamageTaken,
                                 cardsPlayed: result.cardsPlayed
                             )
-                            let outcome: AppCombatOutcome = isVictory
+                            let outcome: AppCombatOutcome = result.outcome.isVictory
                                 ? .victory(stats: stats)
                                 : .defeat(stats: stats)
                             handleCombatEnd(outcome: outcome)
@@ -366,13 +354,37 @@ struct EventView: View {
             return
         }
 
-        guard let config = EchoEncounterBridge.makeCombatConfig(engine: vm.engine) else {
+        let difficultyRaw = UserDefaults.standard.string(forKey: "gameDifficulty") ?? "normal"
+        let difficulty = DifficultyLevel(rawValue: difficultyRaw) ?? .normal
+        guard let snapshot = vm.engine.makeExternalCombatSnapshot(difficulty: difficulty) else {
             resultMessage = ActionError.noActiveCombat.localizedDescription
             showingResult = true
             return
         }
 
-        echoCombatConfig = config
+        let encounterEnemy = EncounterEnemy(
+            id: snapshot.enemy.id,
+            name: snapshot.enemy.name,
+            hp: snapshot.enemy.hp,
+            maxHp: snapshot.enemy.maxHp,
+            wp: snapshot.enemy.wp,
+            maxWp: snapshot.enemy.maxWp,
+            power: snapshot.enemy.power,
+            defense: snapshot.enemy.defense
+        )
+
+        combatSimulation = CombatSimulation(
+            hand: snapshot.encounterHeroCards,
+            heroHP: snapshot.hero.hp,
+            heroStrength: snapshot.hero.strength,
+            heroArmor: snapshot.hero.armor,
+            enemies: [encounterEnemy],
+            fateDeckState: snapshot.fateDeckState,
+            rngSeed: snapshot.seed,
+            worldResonance: snapshot.resonance,
+            balanceConfig: snapshot.balanceConfig ?? .default
+        )
+
         showingCombat = true
     }
 

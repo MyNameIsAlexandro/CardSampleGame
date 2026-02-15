@@ -5,8 +5,6 @@
 
 import SwiftUI
 import TwilightEngine
-import EchoScenes
-import EchoEngine
 
 /// Корневой координатор экранов приложения.
 /// Управляет маршрутизацией между выбором героя, слотами сохранений, world map и resume боя.
@@ -86,20 +84,11 @@ struct ContentView: View {
             Text(flow.loadAlertMessage ?? "")
         }
         .fullScreenCover(isPresented: $flow.resumingCombat) {
-            if let savedState = vm.engine.pendingEncounterState,
-               let config = EchoEncounterBridge.makeCombatConfig(from: savedState, engine: vm.engine, registry: services.registry) {
-                CombatSceneView(
-                    enemyDefinition: config.enemyDefinition,
-                    playerName: config.playerName,
-                    playerHealth: config.playerHealth,
-                    playerMaxHealth: config.playerMaxHealth,
-                    playerStrength: config.playerStrength,
-                    playerDeck: config.playerDeck,
-                    fateCards: config.fateCards,
-                    resonance: config.resonance,
-                    seed: config.seed,
-                    onCombatEndWithResult: { (result: EchoCombatResult) in
-                        _ = EchoCombatBridge.applyCombatResult(result, to: vm.engine)
+            if let simulation = buildResumeSimulation() {
+                RitualCombatSceneView(
+                    simulation: simulation,
+                    onCombatEnd: { result in
+                        RitualCombatBridge.applyCombatResult(result, to: vm.engine)
                         flow.resumingCombat = false
                         if let slot = flow.selectedSaveSlot {
                             saveManager.saveGame(to: slot, engine: vm.engine)
@@ -197,6 +186,37 @@ struct ContentView: View {
             },
             onLoadGame: { flow.loadGame(from: $0, engine: vm.engine, saveManager: saveManager, registry: services.registry) },
             onDelete: { saveManager.deleteSave(from: $0) }
+        )
+    }
+
+    // MARK: - Combat Resume
+
+    private func buildResumeSimulation() -> CombatSimulation? {
+        guard let savedState = vm.engine.pendingEncounterState else { return nil }
+
+        let encounterEnemies = savedState.enemies.map { state in
+            EncounterEnemy(
+                id: state.id,
+                name: state.name,
+                hp: state.hp,
+                maxHp: state.maxHp,
+                wp: state.wp,
+                maxWp: state.maxWp,
+                power: state.power,
+                defense: state.defense,
+                spiritDefense: state.spiritDefense
+            )
+        }
+
+        return CombatSimulation(
+            hand: savedState.context.heroCards,
+            heroHP: savedState.heroHP,
+            heroStrength: savedState.context.hero.strength,
+            heroArmor: savedState.context.hero.armor,
+            enemies: encounterEnemies,
+            fateDeckState: savedState.fateDeckState,
+            rngSeed: savedState.rngState,
+            worldResonance: savedState.context.worldResonance
         )
     }
 
