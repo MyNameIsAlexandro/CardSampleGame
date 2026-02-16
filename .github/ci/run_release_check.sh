@@ -67,7 +67,7 @@ bash .github/ci/run_quality_gate.sh \
   --id "app_gate_3_unit_views" \
   --budget-sec 1200 \
   --dashboard-dir "${dashboard_dir}" \
-  -- "bash .github/ci/run_xcodebuild.sh test -scheme ${scheme} -destination \"${ios_destination}\" ${skip_args_xcode} -only-testing:CardSampleGameTests/HeroRegistryTests -only-testing:CardSampleGameTests/SaveLoadTests -only-testing:CardSampleGameTests/ContentManagerTests -only-testing:CardSampleGameTests/ContentRegistryTests -only-testing:CardSampleGameTests/PackLoaderTests -only-testing:CardSampleGameTests/HeroPanelTests -resultBundlePath TestResults/UnitTests.${stamp}.xcresult"
+  -- "bash .github/ci/run_xcodebuild.sh test -scheme ${scheme} -destination \"${ios_destination}\" ${skip_args_xcode} -only-testing:CardSampleGameTests/HeroRegistryTests -only-testing:CardSampleGameTests/SaveLoadTests -only-testing:CardSampleGameTests/ContentManagerTests -only-testing:CardSampleGameTests/ContentRegistryTests -only-testing:CardSampleGameTests/PackLoaderTests -only-testing:CardSampleGameTests/HeroPanelTests -only-testing:CardSampleGameTests/RitualSceneGateTests -only-testing:CardSampleGameTests/RitualAtmosphereGateTests -only-testing:CardSampleGameTests/RitualIntegrationGateTests -resultBundlePath TestResults/UnitTests.${stamp}.xcresult"
 
 echo "Running TwilightEngine gates..."
 bash .github/ci/run_quality_gate.sh \

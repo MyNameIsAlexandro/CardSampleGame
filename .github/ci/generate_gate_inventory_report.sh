@@ -9,6 +9,7 @@ docs_files=(
   "Docs/QA/QUALITY_CONTROL_MODEL.md"
   "Docs/QA/TESTING_GUIDE.md"
   "Docs/QA/ENCOUNTER_TEST_MODEL.md"
+  "Docs/QA/RITUAL_COMBAT_TEST_MODEL.md"
 )
 
 mkdir -p "${dashboard_dir}"

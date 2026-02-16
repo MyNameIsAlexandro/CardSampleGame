@@ -199,7 +199,7 @@ jobs:
             --id "app_gate_3_unit_views" \
             --budget-sec 1200 \
             --dashboard-dir TestResults/QualityDashboard \
-            -- "bash .github/ci/run_xcodebuild.sh test -scheme CardSampleGame -destination '${ios_destination}' ${skip_args} -only-testing:CardSampleGameTests/HeroRegistryTests -only-testing:CardSampleGameTests/SaveLoadTests -only-testing:CardSampleGameTests/ContentManagerTests -only-testing:CardSampleGameTests/ContentRegistryTests -only-testing:CardSampleGameTests/PackLoaderTests -only-testing:CardSampleGameTests/HeroPanelTests -resultBundlePath TestResults/UnitTests.xcresult"
+            -- "bash .github/ci/run_xcodebuild.sh test -scheme CardSampleGame -destination '${ios_destination}' ${skip_args} -only-testing:CardSampleGameTests/HeroRegistryTests -only-testing:CardSampleGameTests/SaveLoadTests -only-testing:CardSampleGameTests/ContentManagerTests -only-testing:CardSampleGameTests/ContentRegistryTests -only-testing:CardSampleGameTests/PackLoaderTests -only-testing:CardSampleGameTests/HeroPanelTests -only-testing:CardSampleGameTests/RitualSceneGateTests -only-testing:CardSampleGameTests/RitualAtmosphereGateTests -only-testing:CardSampleGameTests/RitualIntegrationGateTests -resultBundlePath TestResults/UnitTests.xcresult"
 
       - name: "Gate Inventory Drift Report"
         run: |
