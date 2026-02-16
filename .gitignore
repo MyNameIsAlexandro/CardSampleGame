@@ -94,6 +94,10 @@ iOSInjectionProject/
 
 # Codex (local agent state)
 .codex_home/
+.ci-home/
+.claude/phase.json
+.claude/settings.local.json
+/package-lock.json
 
 # Local QA artifacts
 TestResults/
