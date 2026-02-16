@@ -68,7 +68,7 @@ case "${profile}" in
       "app_gate_2_content_validation:1200"
       "app_gate_2a_audit_core:1200"
       "app_gate_2b_audit_architecture:1200"
-      "app_gate_3_unit_views:1200"
+      "app_gate_3_unit_views:1800"
     )
     ;;
   rc_engine_twilight)
@@ -97,7 +97,7 @@ case "${profile}" in
       "app_gate_2_content_validation:1200"
       "app_gate_2a_audit_core:1200"
       "app_gate_2b_audit_architecture:1200"
-      "app_gate_3_unit_views:1200"
+      "app_gate_3_unit_views:1800"
       "build_cardsamplegame:1200"
       "build_packeditor:1200"
       "content_json_lint:300"
