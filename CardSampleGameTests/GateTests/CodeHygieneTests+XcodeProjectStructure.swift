@@ -259,6 +259,41 @@ extension CodeHygieneTests {
         }
     }
 
+    func testAllGateTestSwiftFilesAreIncludedInCardSampleGameTestsTarget() throws {
+        let root = resolveHeaderContractProjectRoot()
+
+        let gateTestsRoot = root.appendingPathComponent("CardSampleGameTests/GateTests")
+        guard FileManager.default.fileExists(atPath: gateTestsRoot.path) else {
+            XCTFail("GATE TEST FAILURE: GateTests directory not found at \(gateTestsRoot.path)")
+            return
+        }
+
+        let gateTestFiles = findSwiftFiles(in: gateTestsRoot)
+            .map { URL(fileURLWithPath: $0).lastPathComponent }
+            .sorted()
+
+        XCTAssertFalse(gateTestFiles.isEmpty, "GATE TEST FAILURE: no Swift files found under GateTests")
+
+        let pbxprojContent = try loadPbxprojContent()
+        var missingSourceEntries: [String] = []
+
+        for fileName in gateTestFiles {
+            let buildPhaseToken = "/* \(fileName) in Sources */"
+            if !pbxprojContent.contains(buildPhaseToken) {
+                missingSourceEntries.append(fileName)
+            }
+        }
+
+        XCTAssertTrue(
+            missingSourceEntries.isEmpty,
+            """
+            Xcode project drift: gate test files are not included in CardSampleGameTests target Sources.
+            Missing build-phase entries:
+            \(missingSourceEntries.joined(separator: "\n"))
+            """
+        )
+    }
+
     func testFirstPartySwiftFilesHaveCanonicalFileHeaders() throws {
         let projectRoot = resolveHeaderContractProjectRoot()
         let files = collectFirstPartySwiftFiles(in: projectRoot)

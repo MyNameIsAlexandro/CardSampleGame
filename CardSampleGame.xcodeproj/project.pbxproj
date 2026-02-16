@@ -53,6 +53,7 @@
 			AB37B0030000000000000001 /* AuditGateTests+LegacyAndDeterminism.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB37C1030000000000000001 /* AuditGateTests+LegacyAndDeterminism.swift */; };
 			AB37B0040000000000000001 /* AuditGateTests+AssetsAndRuntimeBoundaries.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB37C1040000000000000001 /* AuditGateTests+AssetsAndRuntimeBoundaries.swift */; };
 			PG00001500000000000000001 /* ProfileGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = PG00001600000000000000001 /* ProfileGateTests.swift */; };
+		EXPRBF010000000000000001 /* ExpressionParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EXPRFR010000000000000001 /* ExpressionParserTests.swift */; };
 		CC000002000000000000001B /* ContrastComplianceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC000001000000000000001A /* ContrastComplianceTests.swift */; };
 		C80DC6128F371177237472A1 /* ConditionValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72352D1C9BABFA97F62257B /* ConditionValidatorTests.swift */; };
 		CC0000020000000000000001 /* AppCombatSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC0000010000000000000001 /* AppCombatSummary.swift */; };
@@ -220,6 +221,7 @@
 			AB37C1030000000000000001 /* AuditGateTests+LegacyAndDeterminism.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuditGateTests+LegacyAndDeterminism.swift"; sourceTree = "<group>"; };
 			AB37C1040000000000000001 /* AuditGateTests+AssetsAndRuntimeBoundaries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuditGateTests+AssetsAndRuntimeBoundaries.swift"; sourceTree = "<group>"; };
 			PG00001600000000000000001 /* ProfileGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileGateTests.swift; sourceTree = "<group>"; };
+		EXPRFR010000000000000001 /* ExpressionParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpressionParserTests.swift; sourceTree = "<group>"; };
 		CC000001000000000000001A /* ContrastComplianceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContrastComplianceTests.swift; sourceTree = "<group>"; };
 		CC0000010000000000000001 /* AppCombatSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCombatSummary.swift; sourceTree = "<group>"; };
 			CB0000040000000000000001 /* EncounterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncounterViewModel.swift; sourceTree = "<group>"; };
@@ -492,6 +494,7 @@
 					AB37C1030000000000000001 /* AuditGateTests+LegacyAndDeterminism.swift */,
 					AB37C1040000000000000001 /* AuditGateTests+AssetsAndRuntimeBoundaries.swift */,
 					PG00001600000000000000001 /* ProfileGateTests.swift */,
+				EXPRFR010000000000000001 /* ExpressionParserTests.swift */,
 					A0CA67A53A024B4CEDD6685C /* DesignSystemComplianceTests.swift */,
 				CC000001000000000000001A /* ContrastComplianceTests.swift */,
 				60C1474DB750BB1D0378466E /* CodeHygieneTests.swift */,
@@ -919,6 +922,7 @@
 					AB37B0030000000000000001 /* AuditGateTests+LegacyAndDeterminism.swift in Sources */,
 					AB37B0040000000000000001 /* AuditGateTests+AssetsAndRuntimeBoundaries.swift in Sources */,
 					PG00001500000000000000001 /* ProfileGateTests.swift in Sources */,
+				EXPRBF010000000000000001 /* ExpressionParserTests.swift in Sources */,
 				TH00000300000000000000001 /* TestContentLoader.swift in Sources */,
 				CT00000000000010 /* PackLoaderTests.swift in Sources */,
 				CT00000000000020 /* ContentRegistryTests.swift in Sources */,

@@ -60,6 +60,13 @@ forbidden_tracked_patterns=(
   '^app-strict-concurrency\.log$'
   '^app-strict-concurrency\.diagnostics$'
   '^app-strict-concurrency\.all$'
+  '^app-strict-concurrency\.all-diagnostics$'
+  '^\.ci-home(/|$)'
+  '^\.codex_home(/|$)'
+  '^\.claude/phase\.json$'
+  '^\.claude/settings\.local\.json$'
+  '^package-lock\.json$'
+  '(^|/)\.DS_Store$'
   '\.xcresult(/|$)'
   '\.xcactivitylog$'
 )
