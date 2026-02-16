@@ -564,33 +564,36 @@ extension RitualCombatScene {
         guard let sim = simulation else { return }
 
         let heroAlive = sim.heroHP > 0
-        let allKilled = sim.enemies.allSatisfy { $0.hp <= 0 }
+        let anyKilled = sim.enemies.contains { $0.hp <= 0 }
         let anyPacified = sim.enemies.contains { $0.isPacified }
+        let outcome: RitualCombatOutcome = heroAlive && anyKilled
+            ? .victory(.killed)
+            : (heroAlive && anyPacified ? .victory(.pacified) : .defeat)
 
-        // Mixed kill/pacify scenarios default to .pacified (the more merciful path).
-        // allKilled is checked first so pure-kill victories are classified correctly.
-        let outcome: RitualCombatOutcome
-        if heroAlive && allKilled {
-            outcome = .victory(.killed)
-        } else if heroAlive && anyPacified {
-            outcome = .victory(.pacified)
-        } else {
-            outcome = .defeat
+        let defeatedEnemies = sim.enemies.filter { $0.hp <= 0 || $0.isPacified }
+        let rewards = (
+            faith: defeatedEnemies.reduce(0) { $0 + $1.faithReward },
+            loot: defeatedEnemies.flatMap(\.lootCardIds)
+        )
+
+        let transaction: (resonance: Float, faith: Int, loot: [String])
+        switch outcome {
+        case .victory(.killed): transaction = (-5, rewards.faith, rewards.loot)
+        case .victory(.pacified): transaction = (5, rewards.faith, rewards.loot)
+        case .defeat: transaction = (0, 0, [])
         }
 
-        let result = RitualCombatResult(
+        onCombatEnd?(RitualCombatResult(
             outcome: outcome,
             hpDelta: sim.heroHP - initialHeroHP,
-            resonanceDelta: 0,
-            faithDelta: 0,
-            lootCardIds: [],
+            resonanceDelta: transaction.resonance,
+            faithDelta: transaction.faith,
+            lootCardIds: transaction.loot,
             updatedFateDeckState: sim.snapshot().fateDeckState,
             turnsPlayed: sim.round,
             totalDamageDealt: accumulatedDamageDealt,
             totalDamageTaken: accumulatedDamageTaken,
             cardsPlayed: accumulatedCardsPlayed
-        )
-
-        onCombatEnd?(result)
+        ))
     }
 }

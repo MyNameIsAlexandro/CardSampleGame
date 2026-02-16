@@ -367,7 +367,13 @@ struct EventView: View {
             wp: snapshot.enemy.wp,
             maxWp: snapshot.enemy.maxWp,
             power: snapshot.enemy.power,
-            defense: snapshot.enemy.defense
+            defense: snapshot.enemy.defense,
+            resonanceBehavior: snapshot.enemyDefinition.resonanceBehavior,
+            lootCardIds: snapshot.enemyDefinition.lootCardIds,
+            faithReward: snapshot.enemyDefinition.faithReward,
+            weaknesses: snapshot.enemyDefinition.weaknesses ?? [],
+            strengths: snapshot.enemyDefinition.strengths ?? [],
+            abilities: snapshot.enemyDefinition.abilities
         )
 
         let sim = CombatSimulation(

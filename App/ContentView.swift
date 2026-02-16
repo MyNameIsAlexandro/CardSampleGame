@@ -204,7 +204,13 @@ struct ContentView: View {
                 maxWp: state.maxWp,
                 power: state.power,
                 defense: state.defense,
-                spiritDefense: state.spiritDefense
+                spiritDefense: state.spiritDefense,
+                resonanceBehavior: state.resonanceBehavior,
+                lootCardIds: state.lootCardIds,
+                faithReward: state.faithReward,
+                weaknesses: state.weaknesses,
+                strengths: state.strengths,
+                abilities: state.abilities
             )
         }
 

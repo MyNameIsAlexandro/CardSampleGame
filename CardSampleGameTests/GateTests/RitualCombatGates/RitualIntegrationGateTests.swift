@@ -13,6 +13,10 @@ import TwilightEngine
 @MainActor
 final class RitualIntegrationGateTests: XCTestCase {
 
+    private enum RitualGateError: Error {
+        case resultNotEmitted
+    }
+
     // MARK: - Helpers
 
     private let projectRoot = SourcePathResolver.projectRoot
@@ -55,6 +59,57 @@ final class RitualIntegrationGateTests: XCTestCase {
             }
             return (line: index + 1, raw: trimmed)
         }
+    }
+
+    private func makeEnemy(
+        id: String,
+        hp: Int,
+        maxHp: Int,
+        wp: Int?,
+        maxWp: Int?,
+        lootCardIds: [String],
+        faithReward: Int
+    ) -> EncounterEnemy {
+        EncounterEnemy(
+            id: id,
+            name: id,
+            hp: hp,
+            maxHp: maxHp,
+            wp: wp,
+            maxWp: maxWp,
+            power: 3,
+            defense: 0,
+            lootCardIds: lootCardIds,
+            faithReward: faithReward
+        )
+    }
+
+    private func emitRitualResult(
+        enemies: [EncounterEnemy],
+        heroHP: Int = 30
+    ) throws -> RitualCombatResult {
+        let simulation = CombatSimulation(
+            hand: [],
+            heroHP: heroHP,
+            heroStrength: 5,
+            heroArmor: 0,
+            enemies: enemies,
+            fateDeckState: FateDeckState(drawPile: [], discardPile: []),
+            rngSeed: 42,
+            worldResonance: 0
+        )
+
+        let scene = RitualCombatScene(size: RitualCombatScene.sceneSize)
+        var emitted: RitualCombatResult?
+        scene.onCombatEnd = { emitted = $0 }
+        scene.configure(with: simulation)
+        simulation.setPhase(.finished)
+        scene.advancePhase()
+
+        guard let emitted else {
+            throw RitualGateError.resultNotEmitted
+        }
+        return emitted
     }
 
     // MARK: - INV-DET-001: FateRevealDirector does not affect determinism
@@ -394,5 +449,189 @@ final class RitualIntegrationGateTests: XCTestCase {
         XCTAssertNotNil(data1, "Snapshot must be JSON-encodable")
         XCTAssertEqual(data1, data2,
             "Canonical JSON of identical snapshots must be byte-identical (serialization determinism)")
+    }
+
+    // MARK: - INV-CONTRACT-002: Ritual result has non-placeholder transaction contract
+
+    /// Static scan: `RitualCombatResult(...)` must not hardcode zero/empty transaction placeholders.
+    func testRitualResultConstructionHasNoPlaceholderTransactionFields() throws {
+        let candidateFiles = [
+            projectRoot.appendingPathComponent("Views/Combat/RitualCombatScene+Result.swift"),
+            projectRoot.appendingPathComponent("Views/Combat/RitualCombatScene+GameLoop.swift")
+        ]
+
+        var locatedContent: String?
+        for fileURL in candidateFiles where FileManager.default.fileExists(atPath: fileURL.path) {
+            let candidate = try String(contentsOf: fileURL, encoding: .utf8)
+            if candidate.contains("RitualCombatResult(") {
+                locatedContent = candidate
+                break
+            }
+        }
+
+        guard let content = locatedContent else {
+            XCTFail("RitualCombatResult construction not found")
+            return
+        }
+
+        guard let callRange = content.range(of: "RitualCombatResult(") else {
+            XCTFail("RitualCombatResult construction not found")
+            return
+        }
+
+        let resultBlock = String(content[callRange.lowerBound...])
+        XCTAssertFalse(resultBlock.contains("resonanceDelta: 0"),
+            "Ritual result must compute `resonanceDelta`, not hardcode placeholder 0")
+        XCTAssertFalse(resultBlock.contains("faithDelta: 0"),
+            "Ritual result must compute `faithDelta`, not hardcode placeholder 0")
+        XCTAssertFalse(resultBlock.contains("lootCardIds: []"),
+            "Ritual result must compute `lootCardIds`, not hardcode placeholder []")
+    }
+
+    // MARK: - INV-CONTRACT-003: Kill priority + aggregated rewards
+
+    /// Runtime gate: mixed kill+pacify victory resolves as kill and aggregates rewards from all defeated enemies.
+    func testRitualResultMixedOutcomeUsesKillPriorityAndAggregatesRewards() throws {
+        let result = try emitRitualResult(
+            enemies: [
+                makeEnemy(
+                    id: "killed_enemy",
+                    hp: 0,
+                    maxHp: 12,
+                    wp: 4,
+                    maxWp: 4,
+                    lootCardIds: ["wolf_fang"],
+                    faithReward: 2
+                ),
+                makeEnemy(
+                    id: "pacified_enemy",
+                    hp: 10,
+                    maxHp: 10,
+                    wp: 0,
+                    maxWp: 8,
+                    lootCardIds: ["spirit_gem"],
+                    faithReward: 3
+                )
+            ]
+        )
+
+        XCTAssertEqual(result.outcome, .victory(.killed), "Mixed outcome must use kill-priority semantics")
+        XCTAssertEqual(result.resonanceDelta, -5, "Kill-priority victory must shift resonance toward Nav")
+        XCTAssertEqual(result.faithDelta, 5, "Rewards must aggregate faith across all defeated enemies")
+        XCTAssertEqual(result.lootCardIds, ["wolf_fang", "spirit_gem"], "Rewards must include loot of all defeated enemies")
+    }
+
+    /// Runtime gate: pure pacify victory shifts resonance toward Prav and keeps rewards.
+    func testRitualResultPacifyVictoryUsesPravShiftAndRewards() throws {
+        let result = try emitRitualResult(
+            enemies: [
+                makeEnemy(
+                    id: "spirit_enemy",
+                    hp: 9,
+                    maxHp: 9,
+                    wp: 0,
+                    maxWp: 9,
+                    lootCardIds: ["peace_totem"],
+                    faithReward: 4
+                )
+            ]
+        )
+
+        XCTAssertEqual(result.outcome, .victory(.pacified))
+        XCTAssertEqual(result.resonanceDelta, 5, "Pacify victory must shift resonance toward Prav")
+        XCTAssertEqual(result.faithDelta, 4)
+        XCTAssertEqual(result.lootCardIds, ["peace_totem"])
+    }
+
+    /// Runtime gate: defeat always emits zero transaction deltas even if some enemies are already defeated.
+    func testRitualResultDefeatClearsTransactionPayload() throws {
+        let result = try emitRitualResult(
+            enemies: [
+                makeEnemy(
+                    id: "fallen_enemy",
+                    hp: 0,
+                    maxHp: 10,
+                    wp: 3,
+                    maxWp: 3,
+                    lootCardIds: ["fallen_loot"],
+                    faithReward: 2
+                ),
+                makeEnemy(
+                    id: "pacified_enemy",
+                    hp: 8,
+                    maxHp: 8,
+                    wp: 0,
+                    maxWp: 8,
+                    lootCardIds: ["pacified_loot"],
+                    faithReward: 3
+                )
+            ],
+            heroHP: 0
+        )
+
+        XCTAssertEqual(result.outcome, .defeat)
+        XCTAssertEqual(result.resonanceDelta, 0)
+        XCTAssertEqual(result.faithDelta, 0)
+        XCTAssertEqual(result.lootCardIds, [])
+    }
+
+    // MARK: - INV-CONTRACT-004: Snapshot/resume mappings keep reward fields
+
+    /// Static scan: app-layer mappings must preserve external combat payload fields.
+    func testEventAndResumeMappingsPreserveRewardFields() throws {
+        let eventFile = projectRoot.appendingPathComponent("Views/EventView.swift")
+        let contentFile = projectRoot.appendingPathComponent("App/ContentView.swift")
+
+        let eventCode = try String(contentsOf: eventFile, encoding: .utf8)
+        let contentCode = try String(contentsOf: contentFile, encoding: .utf8)
+
+        XCTAssertTrue(
+            eventCode.contains("lootCardIds: snapshot.enemyDefinition.lootCardIds"),
+            "EventView must map lootCardIds from external combat snapshot"
+        )
+        XCTAssertTrue(
+            eventCode.contains("faithReward: snapshot.enemyDefinition.faithReward"),
+            "EventView must map faithReward from external combat snapshot"
+        )
+        XCTAssertTrue(
+            eventCode.contains("resonanceBehavior: snapshot.enemyDefinition.resonanceBehavior"),
+            "EventView must map resonance behavior from external combat snapshot"
+        )
+        XCTAssertTrue(
+            eventCode.contains("weaknesses: snapshot.enemyDefinition.weaknesses ?? []"),
+            "EventView must map weaknesses from external combat snapshot"
+        )
+        XCTAssertTrue(
+            eventCode.contains("strengths: snapshot.enemyDefinition.strengths ?? []"),
+            "EventView must map strengths from external combat snapshot"
+        )
+        XCTAssertTrue(
+            eventCode.contains("abilities: snapshot.enemyDefinition.abilities"),
+            "EventView must map abilities from external combat snapshot"
+        )
+        XCTAssertTrue(
+            contentCode.contains("lootCardIds: state.lootCardIds"),
+            "Resume mapping must preserve lootCardIds from EncounterSaveState"
+        )
+        XCTAssertTrue(
+            contentCode.contains("faithReward: state.faithReward"),
+            "Resume mapping must preserve faithReward from EncounterSaveState"
+        )
+        XCTAssertTrue(
+            contentCode.contains("resonanceBehavior: state.resonanceBehavior"),
+            "Resume mapping must preserve resonanceBehavior from EncounterSaveState"
+        )
+        XCTAssertTrue(
+            contentCode.contains("weaknesses: state.weaknesses"),
+            "Resume mapping must preserve weaknesses from EncounterSaveState"
+        )
+        XCTAssertTrue(
+            contentCode.contains("strengths: state.strengths"),
+            "Resume mapping must preserve strengths from EncounterSaveState"
+        )
+        XCTAssertTrue(
+            contentCode.contains("abilities: state.abilities"),
+            "Resume mapping must preserve abilities from EncounterSaveState"
+        )
     }
 }
