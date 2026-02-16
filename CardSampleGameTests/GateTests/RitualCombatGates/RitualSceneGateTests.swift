@@ -9,6 +9,7 @@ import XCTest
 /// Ritual Scene Architecture Invariants — Phase 3 Gate Tests (R2+R3)
 /// Reference: RITUAL_COMBAT_TEST_MODEL.md §3.3
 /// Rule: < 2 seconds per test, static source scan, no runtime dependencies
+@MainActor
 final class RitualSceneGateTests: XCTestCase {
 
     // MARK: - Helpers
