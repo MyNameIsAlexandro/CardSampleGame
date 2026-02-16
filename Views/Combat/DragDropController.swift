@@ -30,6 +30,7 @@ enum DragCommand: Equatable {
 
 /// Processes touch/drag input and produces canonical combat commands.
 /// Does not import TwilightEngine or access ECS directly.
+@MainActor
 final class DragDropController {
 
     /// Current drag state
@@ -45,7 +46,7 @@ final class DragDropController {
     var onCommand: ((DragCommand) -> Void)?
 
     /// Long-press timer for tooltip
-    private var longPressTimer: Timer?
+    private var longPressWorkItem: DispatchWorkItem?
 
     /// Begin tracking a potential drag on a card.
     func beginTouch(cardId: String) {
@@ -106,14 +107,16 @@ final class DragDropController {
 
     private func startLongPressTimer(cardId: String) {
         cancelLongPressTimer()
-        longPressTimer = Timer.scheduledTimer(withTimeInterval: longPressDuration, repeats: false) { [weak self] _ in
+        let work = DispatchWorkItem { [weak self] in
             guard let self, !self.isLongPressBlocked else { return }
             self.onCommand?(.showTooltip(cardId: cardId))
         }
+        longPressWorkItem = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + longPressDuration, execute: work)
     }
 
     func cancelLongPressTimer() {
-        longPressTimer?.invalidate()
-        longPressTimer = nil
+        longPressWorkItem?.cancel()
+        longPressWorkItem = nil
     }
 }
