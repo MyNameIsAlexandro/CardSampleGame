@@ -60,6 +60,7 @@ private struct RevealData {
 ///   5. Keyword label fade in (0.15s) — shows below card (if applicable)
 ///   6. Damage number arcs to target (0.4s) — if target position provided
 ///   7. Card + overlay fade out (0.2s)
+@MainActor
 final class FateRevealDirector {
 
     // MARK: - State

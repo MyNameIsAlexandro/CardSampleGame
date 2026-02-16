@@ -24,6 +24,7 @@ struct AtmosphereVisuals: Equatable {
 ///   - resonance -100: Hue 270° (Nav purple), high saturation
 ///   - resonance    0: Hue  35° (Yav amber), low saturation
 ///   - resonance +100: Hue  50° (Prav gold), high saturation
+@MainActor
 final class ResonanceAtmosphereController {
 
     // MARK: - Visual State
