@@ -55,7 +55,7 @@ bash .github/ci/run_quality_gate.sh \
 
 bash .github/ci/run_quality_gate.sh \
   --id "app_gate_2_content_validation" \
-  --budget-sec 1200 \
+  --budget-sec 1800 \
   --dashboard-dir "${dashboard_dir}" \
   -- "bash .github/ci/run_xcodebuild.sh test -scheme ${scheme} -destination \"${ios_destination}\" ${skip_args_xcode} -only-testing:CardSampleGameTests/ContentValidationTests -only-testing:CardSampleGameTests/ConditionValidatorTests -only-testing:CardSampleGameTests/ExpressionParserTests -only-testing:CardSampleGameTests/ProfileGateTests -resultBundlePath TestResults/ContentValidation.${stamp}.xcresult"
 

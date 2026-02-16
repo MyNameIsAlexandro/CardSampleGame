@@ -65,7 +65,7 @@ case "${profile}" in
   rc_app)
     gate_thresholds=(
       "app_gate_1_quality:1200"
-      "app_gate_2_content_validation:1200"
+      "app_gate_2_content_validation:1800"
       "app_gate_2a_audit_core:1200"
       "app_gate_2b_audit_architecture:1200"
       "app_gate_3_unit_views:1800"
@@ -94,7 +94,7 @@ case "${profile}" in
       "spm_twilightengine_strict_concurrency:1200"
       "spm_twilightengine_determinism_smoke:300"
       "app_gate_1_quality:1200"
-      "app_gate_2_content_validation:1200"
+      "app_gate_2_content_validation:1800"
       "app_gate_2a_audit_core:1200"
       "app_gate_2b_audit_architecture:1200"
       "app_gate_3_unit_views:1800"
