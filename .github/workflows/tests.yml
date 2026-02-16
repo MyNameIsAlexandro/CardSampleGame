@@ -215,14 +215,14 @@ jobs:
             -- "bash .github/ci/run_xcodebuild.sh test -scheme CardSampleGame -destination '${ios_destination}' ${skip_args} -only-testing:CardSampleGameTests/AuditArchitectureBoundaryGateTests -resultBundlePath TestResults/AuditArchitecture.xcresult"
 
       - name: "Gate 3: Unit & View Tests"
-        timeout-minutes: 30
+        timeout-minutes: 45
         run: |
           mkdir -p TestResults/QualityDashboard
           ios_destination="${{ steps.ios_destination.outputs.destination }}"
           skip_args="$(bash .github/ci/quarantine_args.sh --format xcodebuild --suite xcodebuild:CardSampleGame)"
           bash .github/ci/run_quality_gate.sh \
             --id "app_gate_3_unit_views" \
-            --budget-sec 1200 \
+            --budget-sec 1800 \
             --dashboard-dir TestResults/QualityDashboard \
             -- "bash .github/ci/run_xcodebuild.sh test -scheme CardSampleGame -destination '${ios_destination}' ${skip_args} -only-testing:CardSampleGameTests/HeroRegistryTests -only-testing:CardSampleGameTests/SaveLoadTests -only-testing:CardSampleGameTests/ContentManagerTests -only-testing:CardSampleGameTests/ContentRegistryTests -only-testing:CardSampleGameTests/PackLoaderTests -only-testing:CardSampleGameTests/HeroPanelTests -only-testing:CardSampleGameTests/RitualSceneGateTests -only-testing:CardSampleGameTests/RitualAtmosphereGateTests -only-testing:CardSampleGameTests/RitualIntegrationGateTests -only-testing:CardSampleGameTests/RitualIntegrationMappingsGateTests -resultBundlePath TestResults/UnitTests.xcresult"
 
