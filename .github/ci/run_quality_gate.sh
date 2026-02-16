@@ -140,12 +140,71 @@ start_ts="$(date +%s)"
 started_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
 set +e
-bash -lc "set -o pipefail; $command" 2>&1 | tee "$log_file"
-command_exit="${PIPESTATUS[0]:-1}"
+python3 - "$budget_sec" "$command" "$log_file" <<'PY'
+import os
+import signal
+import subprocess
+import sys
+import threading
+
+timeout_sec = int(sys.argv[1])
+command = sys.argv[2]
+log_path = sys.argv[3]
+
+process = subprocess.Popen(
+    ["bash", "-lc", f"set -o pipefail; {command}"],
+    stdout=subprocess.PIPE,
+    stderr=subprocess.STDOUT,
+    text=True,
+    bufsize=1,
+    preexec_fn=os.setsid,
+)
+
+with open(log_path, "w", encoding="utf-8", errors="replace") as log_file:
+    def pump_output() -> None:
+        assert process.stdout is not None
+        for line in process.stdout:
+            sys.stdout.write(line)
+            sys.stdout.flush()
+            log_file.write(line)
+            log_file.flush()
+
+    output_thread = threading.Thread(target=pump_output, daemon=True)
+    output_thread.start()
+
+    timed_out = False
+    try:
+        process.wait(timeout=timeout_sec)
+    except subprocess.TimeoutExpired:
+        timed_out = True
+        timeout_line = f"Quality gate timed out after {timeout_sec}s; terminating command...\n"
+        sys.stdout.write(timeout_line)
+        sys.stdout.flush()
+        log_file.write(timeout_line)
+        log_file.flush()
+
+        os.killpg(process.pid, signal.SIGTERM)
+        try:
+            process.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            os.killpg(process.pid, signal.SIGKILL)
+            process.wait()
+
+    output_thread.join(timeout=5)
+
+if timed_out:
+    sys.exit(124)
+sys.exit(process.returncode if process.returncode is not None else 1)
+PY
+command_exit=$?
 set -e
 
 end_ts="$(date +%s)"
 duration_sec=$((end_ts - start_ts))
+timed_out=0
+if (( command_exit == 124 )); then
+  timed_out=1
+fi
 
 status="passed"
 failure_class="none"
@@ -156,6 +215,11 @@ if (( command_exit != 0 )); then
 fi
 
 if (( duration_sec > budget_sec )); then
+  status="failed_budget"
+  failure_class="deterministic_budget"
+fi
+
+if (( timed_out == 1 )); then
   status="failed_budget"
   failure_class="deterministic_budget"
 fi
