@@ -67,6 +67,7 @@ jobs:
           bash .github/ci/preflight_ci_environment.sh TestResults/QualityDashboard ${{ matrix.package }}
 
       - name: Quality Budget - Build & Test ${{ matrix.package }}
+        timeout-minutes: 35
         run: |
           mkdir -p TestResults/QualityDashboard
           skip_args="$(bash .github/ci/quarantine_args.sh --format swiftpm --suite "spm:${{ matrix.package }}")"
@@ -78,6 +79,7 @@ jobs:
 
       - name: Quality Budget - Strict Concurrency Gate (TwilightEngine)
         if: matrix.package == 'TwilightEngine'
+        timeout-minutes: 25
         run: |
           mkdir -p TestResults/QualityDashboard
           bash .github/ci/run_quality_gate.sh \
@@ -88,6 +90,7 @@ jobs:
 
       - name: Quality Budget - Determinism Smoke Gate (TwilightEngine)
         if: matrix.package == 'TwilightEngine'
+        timeout-minutes: 10
         run: |
           mkdir -p TestResults/QualityDashboard
           skip_args="$(bash .github/ci/quarantine_args.sh --format swiftpm --suite spm:TwilightEngine)"
@@ -99,6 +102,7 @@ jobs:
 
       - name: RC Profile - TwilightEngine
         if: matrix.package == 'TwilightEngine'
+        timeout-minutes: 10
         run: |
           bash .github/ci/validate_release_profile.sh \
             --profile rc_engine_twilight \
@@ -133,6 +137,7 @@ jobs:
       - name: "Gate 0: App Strict Concurrency (Advisory)"
         id: app_gate0
         continue-on-error: true
+        timeout-minutes: 25
         run: |
           mkdir -p TestResults/QualityDashboard
           bash .github/ci/run_quality_gate.sh \
@@ -148,6 +153,7 @@ jobs:
 
       - name: Resolve iOS destination
         id: ios_destination
+        timeout-minutes: 5
         run: |
           if ! destination="$(bash .github/ci/select_ios_destination.sh --scheme CardSampleGame)"; then
             echo "::error::Failed to resolve iOS destination for CardSampleGame"
@@ -161,6 +167,7 @@ jobs:
           echo "Resolved iOS destination: ${destination}"
 
       - name: "Gate 1: Quality Gates"
+        timeout-minutes: 30
         run: |
           mkdir -p TestResults/QualityDashboard
           ios_destination="${{ steps.ios_destination.outputs.destination }}"
@@ -172,6 +179,7 @@ jobs:
             -- "bash .github/ci/run_xcodebuild.sh test -scheme CardSampleGame -destination '${ios_destination}' ${skip_args} -only-testing:CardSampleGameTests/CodeHygieneTests -only-testing:CardSampleGameTests/DesignSystemComplianceTests -only-testing:CardSampleGameTests/ContrastComplianceTests -only-testing:CardSampleGameTests/LocalizationValidatorTests -only-testing:CardSampleGameTests/LocalizationCompletenessTests -resultBundlePath TestResults/QualityGates.xcresult"
 
       - name: "Gate 2: Content Validation"
+        timeout-minutes: 30
         run: |
           mkdir -p TestResults/QualityDashboard
           ios_destination="${{ steps.ios_destination.outputs.destination }}"
@@ -183,6 +191,7 @@ jobs:
             -- "bash .github/ci/run_xcodebuild.sh test -scheme CardSampleGame -destination '${ios_destination}' ${skip_args} -only-testing:CardSampleGameTests/ContentValidationTests -only-testing:CardSampleGameTests/ConditionValidatorTests -only-testing:CardSampleGameTests/ExpressionParserTests -only-testing:CardSampleGameTests/ProfileGateTests -resultBundlePath TestResults/ContentValidation.xcresult"
 
       - name: "Gate 2A: Audit Core"
+        timeout-minutes: 30
         run: |
           mkdir -p TestResults/QualityDashboard
           ios_destination="${{ steps.ios_destination.outputs.destination }}"
@@ -194,6 +203,7 @@ jobs:
             -- "bash .github/ci/run_xcodebuild.sh test -scheme CardSampleGame -destination '${ios_destination}' ${skip_args} -only-testing:CardSampleGameTests/AuditGateTests -resultBundlePath TestResults/AuditCore.xcresult"
 
       - name: "Gate 2B: Audit Architecture"
+        timeout-minutes: 30
         run: |
           mkdir -p TestResults/QualityDashboard
           ios_destination="${{ steps.ios_destination.outputs.destination }}"
@@ -205,6 +215,7 @@ jobs:
             -- "bash .github/ci/run_xcodebuild.sh test -scheme CardSampleGame -destination '${ios_destination}' ${skip_args} -only-testing:CardSampleGameTests/AuditArchitectureBoundaryGateTests -resultBundlePath TestResults/AuditArchitecture.xcresult"
 
       - name: "Gate 3: Unit & View Tests"
+        timeout-minutes: 30
         run: |
           mkdir -p TestResults/QualityDashboard
           ios_destination="${{ steps.ios_destination.outputs.destination }}"
@@ -216,11 +227,13 @@ jobs:
             -- "bash .github/ci/run_xcodebuild.sh test -scheme CardSampleGame -destination '${ios_destination}' ${skip_args} -only-testing:CardSampleGameTests/HeroRegistryTests -only-testing:CardSampleGameTests/SaveLoadTests -only-testing:CardSampleGameTests/ContentManagerTests -only-testing:CardSampleGameTests/ContentRegistryTests -only-testing:CardSampleGameTests/PackLoaderTests -only-testing:CardSampleGameTests/HeroPanelTests -only-testing:CardSampleGameTests/RitualSceneGateTests -only-testing:CardSampleGameTests/RitualAtmosphereGateTests -only-testing:CardSampleGameTests/RitualIntegrationGateTests -only-testing:CardSampleGameTests/RitualIntegrationMappingsGateTests -resultBundlePath TestResults/UnitTests.xcresult"
 
       - name: "Gate Inventory Drift Report"
+        timeout-minutes: 5
         run: |
           mkdir -p TestResults/QualityDashboard
           bash .github/ci/generate_gate_inventory_report.sh TestResults/QualityDashboard
 
       - name: "Gate 4: RC App Profile"
+        timeout-minutes: 10
         run: |
           bash .github/ci/validate_release_profile.sh \
             --profile rc_app \
@@ -260,6 +273,7 @@ jobs:
           bash .github/ci/preflight_ci_environment.sh TestResults/QualityDashboard ${{ matrix.target }}
 
       - name: Build ${{ matrix.target }}
+        timeout-minutes: 30
         run: |
           mkdir -p TestResults/QualityDashboard
           if [ "${{ matrix.target }}" = "CardSampleGame" ]; then
@@ -299,6 +313,7 @@ jobs:
           bash .github/ci/preflight_ci_environment.sh TestResults/QualityDashboard content-validation
 
       - name: "Gate: Content JSON Lint"
+        timeout-minutes: 8
         run: |
           mkdir -p TestResults/QualityDashboard
           bash .github/ci/run_quality_gate.sh \
@@ -308,6 +323,7 @@ jobs:
             -- "bash .github/ci/content_json_lint.sh"
 
       - name: "Gate: Repository Hygiene"
+        timeout-minutes: 5
         run: |
           mkdir -p TestResults/QualityDashboard
           bash .github/ci/run_quality_gate.sh \
@@ -317,6 +333,7 @@ jobs:
             -- "bash .github/ci/validate_repo_hygiene.sh --require-clean-tree"
 
       - name: "Gate: Documentation Sync"
+        timeout-minutes: 5
         run: |
           mkdir -p TestResults/QualityDashboard
           bash .github/ci/run_quality_gate.sh \
@@ -326,6 +343,7 @@ jobs:
             -- "bash .github/ci/validate_docs_sync.sh"
 
       - name: "Gate: Legacy Cleanup"
+        timeout-minutes: 5
         run: |
           mkdir -p TestResults/QualityDashboard
           bash .github/ci/run_quality_gate.sh \
