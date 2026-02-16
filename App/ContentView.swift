@@ -212,6 +212,7 @@ struct ContentView: View {
             hand: savedState.context.heroCards,
             heroHP: savedState.heroHP,
             heroStrength: savedState.context.hero.strength,
+            heroWisdom: savedState.context.hero.wisdom,
             heroArmor: savedState.context.hero.armor,
             enemies: encounterEnemies,
             fateDeckState: savedState.fateDeckState,

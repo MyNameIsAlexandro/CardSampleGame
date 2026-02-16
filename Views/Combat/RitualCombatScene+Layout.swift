@@ -23,6 +23,7 @@ extension RitualCombatScene {
         buildIdols(centerX: centerX)
         buildRitualZone(centerX: centerX)
         buildHUD(centerX: centerX, sceneW: sceneW)
+        buildCombatLog(centerX: centerX)
     }
 
     // MARK: - Layers
@@ -103,5 +104,55 @@ extension RitualCombatScene {
         rune.zPosition = 30
         addChild(rune)
         resonanceRune = rune
+
+        let roundLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+        roundLabel.name = "roundLabel"
+        roundLabel.fontSize = 13
+        roundLabel.fontColor = SKColor(white: 0.6, alpha: 1)
+        roundLabel.text = "Раунд 1 · Ритуал"
+        roundLabel.horizontalAlignmentMode = .center
+        roundLabel.position = CGPoint(x: centerX, y: 690 - 14)
+        roundLabel.zPosition = 30
+        addChild(roundLabel)
+
+        let fateLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+        fateLabel.name = "fateLabel"
+        fateLabel.fontSize = 12
+        fateLabel.fontColor = SKColor(white: 0.5, alpha: 1)
+        fateLabel.horizontalAlignmentMode = .right
+        fateLabel.text = "🂠 0"
+        fateLabel.position = CGPoint(x: sceneW - 12, y: 690 - 14)
+        fateLabel.zPosition = 30
+        addChild(fateLabel)
+
+        let energyLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+        energyLabel.name = "energyLabel"
+        energyLabel.fontSize = 12
+        energyLabel.fontColor = SKColor(red: 0.5, green: 0.7, blue: 0.9, alpha: 1)
+        energyLabel.horizontalAlignmentMode = .center
+        energyLabel.text = "⚡ 0"
+        energyLabel.position = CGPoint(x: centerX, y: 30)
+        energyLabel.zPosition = 30
+        addChild(energyLabel)
+    }
+
+    // MARK: - Combat Log
+
+    private func buildCombatLog(centerX: CGFloat) {
+        let log = CombatLogOverlay()
+        log.position = CGPoint(x: centerX, y: RitualCombatScene.sceneSize.height / 2)
+        let layer = overlayLayer ?? self
+        layer.addChild(log)
+        combatLog = log
+
+        let toggleBtn = SKLabelNode(fontNamed: "AvenirNext-Bold")
+        toggleBtn.name = "logToggle"
+        toggleBtn.text = "📜"
+        toggleBtn.fontSize = 20
+        toggleBtn.horizontalAlignmentMode = .left
+        toggleBtn.verticalAlignmentMode = .center
+        toggleBtn.position = CGPoint(x: 12, y: RitualCombatScene.sceneSize.height - 14)
+        toggleBtn.zPosition = 35
+        addChild(toggleBtn)
     }
 }

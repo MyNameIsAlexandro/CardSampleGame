@@ -42,8 +42,14 @@ public final class CombatSimulation {
     /// Hero hit points
     public internal(set) var heroHP: Int
 
-    /// Hero base strength
+    /// Hero maximum hit points (immutable, set at combat start)
+    public let heroMaxHP: Int
+
+    /// Hero base strength (physical attack base)
     public let heroStrength: Int
+
+    /// Hero wisdom (spirit attack base)
+    public let heroWisdom: Int
 
     /// Hero armor value
     public let heroArmor: Int
@@ -76,6 +82,7 @@ public final class CombatSimulation {
         hand: [Card],
         heroHP: Int,
         heroStrength: Int,
+        heroWisdom: Int = 0,
         heroArmor: Int,
         enemies: [EncounterEnemy],
         fateDeckState: FateDeckState,
@@ -88,7 +95,9 @@ public final class CombatSimulation {
     ) {
         self.hand = hand
         self.heroHP = heroHP
+        self.heroMaxHP = heroHP
         self.heroStrength = heroStrength
+        self.heroWisdom = heroWisdom > 0 ? heroWisdom : heroStrength
         self.heroArmor = heroArmor
         self.enemies = enemies.map { EncounterEnemyState(from: $0) }
         self.worldResonance = worldResonance
@@ -114,7 +123,9 @@ public final class CombatSimulation {
         reservedEnergy: Int,
         maxEffort: Int,
         heroHP: Int,
+        heroMaxHP: Int,
         heroStrength: Int,
+        heroWisdom: Int,
         heroArmor: Int,
         enemies: [EncounterEnemyState],
         fateDeckState: FateDeckState,
@@ -135,7 +146,9 @@ public final class CombatSimulation {
         self.reservedEnergy = reservedEnergy
         self.maxEffort = maxEffort
         self.heroHP = heroHP
+        self.heroMaxHP = heroMaxHP
         self.heroStrength = heroStrength
+        self.heroWisdom = heroWisdom
         self.heroArmor = heroArmor
         self.enemies = enemies
         self.worldResonance = worldResonance
@@ -155,6 +168,11 @@ public final class CombatSimulation {
     public func selectCard(_ cardId: String) {
         guard hand.contains(where: { $0.id == cardId }) else { return }
         selectedCardIds.insert(cardId)
+    }
+
+    /// Remove a card from the ritual circle selection.
+    public func deselectCard(_ cardId: String) {
+        selectedCardIds.remove(cardId)
     }
 
     // MARK: - Standard Test Fixture

@@ -88,6 +88,15 @@ final class IdolNode: SKNode {
         if let wp = maxWP, wp > 0 {
             setupWPRunes(max: wp)
         }
+        startIdleBreathing()
+    }
+
+    private func startIdleBreathing() {
+        let breathe = SKAction.sequence([
+            SKAction.scale(to: 1.01, duration: 1.5),
+            SKAction.scale(to: 1.0, duration: 1.5)
+        ])
+        frameNode.run(SKAction.repeatForever(breathe), withKey: "idleBreathing")
     }
 
     // MARK: - HP Notches
@@ -198,8 +207,18 @@ final class IdolNode: SKNode {
         let token = SKNode()
         token.position = CGPoint(x: 0, y: IdolNode.frameSize.height / 2 + 18)
 
+        let bgColor: SKColor
+        switch type {
+        case "ATK":
+            bgColor = SKColor(red: 0.90, green: 0.35, blue: 0.35, alpha: 0.85)
+        case "DEF":
+            bgColor = SKColor(red: 0.30, green: 0.50, blue: 0.90, alpha: 0.85)
+        default:
+            bgColor = SKColor(red: 0.60, green: 0.35, blue: 0.80, alpha: 0.85)
+        }
+
         let bg = SKShapeNode(rectOf: CGSize(width: 40, height: 22), cornerRadius: 6)
-        bg.fillColor = SKColor(red: 0.90, green: 0.35, blue: 0.35, alpha: 0.85)
+        bg.fillColor = bgColor
         bg.strokeColor = .clear
         token.addChild(bg)
 
@@ -300,8 +319,8 @@ final class IdolNode: SKNode {
 
     // MARK: - Hover Target
 
-    /// Toggle gold outline for drag-over targeting.
-    func setHoverTarget(_ hovering: Bool) {
+    /// Toggle gold outline for drag-over targeting with optional seal-type anticipation.
+    func setHoverTarget(_ hovering: Bool, sealType: SealType? = nil) {
         if hovering {
             if hoverOutline == nil {
                 let outline = SKShapeNode(rectOf: CGSize(
@@ -315,10 +334,33 @@ final class IdolNode: SKNode {
                 addChild(outline)
                 hoverOutline = outline
             }
+
+            frameNode.removeAction(forKey: "anticipation")
+            switch sealType {
+            case .strike:
+                let compress = SKAction.scaleY(to: 0.95, duration: 0.15)
+                compress.timingMode = .easeOut
+                frameNode.run(compress, withKey: "anticipation")
+            case .speak:
+                let expand = SKAction.scaleX(to: 1.05, duration: 0.15)
+                expand.timingMode = .easeOut
+                frameNode.run(expand, withKey: "anticipation")
+            default:
+                break
+            }
+
             if visualState == .idle { visualState = .hoverTarget }
         } else {
             hoverOutline?.removeFromParent()
             hoverOutline = nil
+
+            frameNode.removeAction(forKey: "anticipation")
+            let reset = SKAction.group([
+                SKAction.scaleX(to: 1.0, duration: 0.1),
+                SKAction.scaleY(to: 1.0, duration: 0.1)
+            ])
+            frameNode.run(reset)
+
             if visualState == .hoverTarget { visualState = .idle }
         }
     }

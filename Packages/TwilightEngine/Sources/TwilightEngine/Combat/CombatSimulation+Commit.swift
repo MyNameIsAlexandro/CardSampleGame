@@ -19,7 +19,7 @@ extension CombatSimulation {
     public func commitAttack(targetId: String) -> FateAttackResult {
         let playerContext = CombatPlayerContext(
             health: heroHP,
-            maxHealth: heroHP,
+            maxHealth: heroMaxHP,
             faith: 0,
             balance: 50,
             strength: heroStrength,
@@ -28,9 +28,14 @@ extension CombatSimulation {
             heroDamageBonus: 0
         )
 
+        let selectedCardPower = hand
+            .filter { selectedCardIds.contains($0.id) }
+            .reduce(0) { $0 + ($1.power ?? 0) }
+
         guard let targetIndex = enemies.firstIndex(where: { $0.id == targetId }) else {
             return FateAttackResult(
                 baseStrength: heroStrength,
+                cardPower: selectedCardPower,
                 effortBonus: effortBonus,
                 fateDrawResult: nil,
                 totalAttack: 0,
@@ -51,6 +56,7 @@ extension CombatSimulation {
             effortCards: effortBonus,
             monsterDefense: target.defense,
             bonusDamage: 0,
+            cardPower: selectedCardPower,
             rng: rng
         )
 
@@ -68,13 +74,69 @@ extension CombatSimulation {
         return result
     }
 
+    /// Commit a spiritual influence against a target enemy's will.
+    ///
+    /// Delegates to `CombatCalculator.calculateSpiritAttack` with current effort bonus.
+    /// Applies WP damage to the target, moves selected cards to discard, resets effort state.
+    ///
+    /// - Parameter targetId: ID of the enemy to influence
+    /// - Returns: Full `SpiritAttackResult` with breakdown
+    public func commitInfluence(targetId: String) -> SpiritAttackResult {
+        let playerContext = CombatPlayerContext(
+            health: heroHP,
+            maxHealth: heroMaxHP,
+            faith: 0,
+            balance: 50,
+            strength: heroStrength,
+            wisdom: heroWisdom,
+            activeCurses: [],
+            heroBonusDice: 0,
+            heroDamageBonus: 0
+        )
+
+        let selectedCardPower = hand
+            .filter { selectedCardIds.contains($0.id) }
+            .reduce(0) { $0 + ($1.power ?? 0) }
+
+        guard let targetIndex = enemies.firstIndex(where: { $0.id == targetId }),
+              let currentWP = enemies[targetIndex].wp else {
+            return SpiritAttackResult(
+                damage: 0, baseStat: 0, cardPower: selectedCardPower, fateModifier: 0,
+                newWill: 0, isPacified: false, fateDrawEffects: []
+            )
+        }
+
+        let result = CombatCalculator.calculateSpiritAttack(
+            context: playerContext,
+            enemyCurrentWill: currentWP,
+            fateDeck: fateDeck,
+            worldResonance: worldResonance,
+            effortCards: effortBonus,
+            bonusDamage: selectedCardPower,
+            rng: rng
+        )
+
+        enemies[targetIndex].wp = result.newWill
+
+        let selectedCards = hand.filter { selectedCardIds.contains($0.id) }
+        hand.removeAll { selectedCardIds.contains($0.id) }
+        discardPile.append(contentsOf: selectedCards)
+        selectedCardIds.removeAll()
+        effortBonus = 0
+        effortCardIds.removeAll()
+
+        return result
+    }
+
     // MARK: - Snapshot
 
     /// Capture a complete snapshot of the current state.
     public func snapshot() -> CombatSnapshot {
         CombatSnapshot(
             heroHP: heroHP,
+            heroMaxHP: heroMaxHP,
             heroStrength: heroStrength,
+            heroWisdom: heroWisdom,
             heroArmor: heroArmor,
             hand: hand,
             discardPile: discardPile,
@@ -109,7 +171,7 @@ extension CombatSimulation {
     /// - Returns: Array of (enemyId, damage) pairs for visual feedback.
     public func resolveEnemyTurn() -> [(enemyId: String, damage: Int)] {
         var attacks: [(String, Int)] = []
-        for enemy in enemies where enemy.hp > 0 {
+        for enemy in enemies where enemy.hp > 0 && !enemy.isPacified {
             let damage = enemy.power
             heroHP = Swift.max(0, heroHP - damage)
             attacks.append((enemy.id, damage))
@@ -139,7 +201,9 @@ extension CombatSimulation {
             reservedEnergy: snapshot.reservedEnergy,
             maxEffort: snapshot.maxEffort,
             heroHP: snapshot.heroHP,
+            heroMaxHP: snapshot.heroMaxHP,
             heroStrength: snapshot.heroStrength,
+            heroWisdom: snapshot.heroWisdom,
             heroArmor: snapshot.heroArmor,
             enemies: snapshot.enemies,
             fateDeckState: snapshot.fateDeckState,

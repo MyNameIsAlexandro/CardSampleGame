@@ -23,6 +23,8 @@ struct RitualCombatSceneView: View {
 
     private func makeScene() -> RitualCombatScene {
         let scene = RitualCombatScene(size: RitualCombatScene.sceneSize)
+        scene.scaleMode = .aspectFill
+        scene.backgroundColor = SKColor(red: 0.08, green: 0.06, blue: 0.10, alpha: 1)
         scene.onCombatEnd = onCombatEnd
         scene.onSoundEffect = onSoundEffect
         scene.onHaptic = onHaptic

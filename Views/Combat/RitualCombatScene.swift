@@ -43,6 +43,7 @@ final class RitualCombatScene: SKScene {
     var dragController: DragDropController?
     var fateDirector: FateRevealDirector?
     var atmosphereController: ResonanceAtmosphereController?
+    var combatLog: CombatLogOverlay?
 
     // MARK: - Layers
 
@@ -64,20 +65,26 @@ final class RitualCombatScene: SKScene {
     var inputEnabled: Bool = false
     var touchStartLocation: CGPoint?
 
-    // MARK: - Lifecycle
+    // MARK: - Card Drag State
 
-    override func didMove(to view: SKView) {
-        super.didMove(to: view)
-        backgroundColor = SKColor(red: 0.08, green: 0.06, blue: 0.10, alpha: 1)
-        scaleMode = .aspectFill
-    }
+    var draggedCardId: String?
+    var originalCardPositions: [String: CGPoint] = [:]
+    var originalCardRotations: [String: CGFloat] = [:]
+
+    // MARK: - Seal Drag State
+
+    var draggingSealType: SealType?
+    var draggingSealGhost: SKNode?
+    var targetingArrow: SKShapeNode?
 
     // MARK: - Configure
 
     /// Configure scene with a pre-built combat simulation.
     func configure(with simulation: CombatSimulation) {
+        self.scaleMode = .aspectFill
+        self.backgroundColor = SKColor(red: 0.08, green: 0.06, blue: 0.10, alpha: 1)
         self.simulation = simulation
-        self.initialHeroHP = simulation.heroHP
+        self.initialHeroHP = simulation.heroMaxHP
         self.initialResonance = simulation.snapshot().worldResonance
         self.accumulatedDamageDealt = 0
         self.accumulatedDamageTaken = 0
@@ -117,14 +124,30 @@ final class RitualCombatScene: SKScene {
         ritualCircle?.updateEffortGlow(effortBonus: sim.effortBonus, maxEffort: sim.maxEffort)
 
         amuletNode?.updateHP(current: sim.heroHP, max: initialHeroHP)
-        resonanceRune?.update(resonance: initialResonance)
-        atmosphereController?.update(resonance: initialResonance)
 
-        let resonanceColor = ResonanceZone.from(resonance: initialResonance).color
+        let liveResonance = sim.snapshot().worldResonance
+        resonanceRune?.update(resonance: liveResonance)
+        atmosphereController?.update(resonance: liveResonance)
+
+        if let roundLabel = childNode(withName: "roundLabel") as? SKLabelNode {
+            let phaseName = phaseDisplayName(sim.phase)
+            roundLabel.text = "Раунд \(sim.round) · \(phaseName)"
+        }
+
+        if let fateLabel = childNode(withName: "fateLabel") as? SKLabelNode {
+            fateLabel.text = "🂠 \(sim.fateDeckCount)"
+        }
+
+        if let energyLabel = childNode(withName: "energyLabel") as? SKLabelNode {
+            energyLabel.text = "⚡ \(sim.energy - sim.reservedEnergy)/\(sim.energy)"
+        }
+
+        let resonanceColor = ResonanceZone.from(resonance: liveResonance).color
         ritualCircle?.updateGlowColor(resonanceColor)
         sealNodes.forEach { $0.updateGlow(color: resonanceColor) }
 
         rebuildHandCards()
+        dimUnplayableCards()
     }
 
     // MARK: - Hand Cards
@@ -135,51 +158,165 @@ final class RitualCombatScene: SKScene {
 
         handCardNodes.values.forEach { $0.removeFromParent() }
         handCardNodes.removeAll()
+        originalCardPositions.removeAll()
+        originalCardRotations.removeAll()
 
         let cards = sim.hand
-        let cardWidth: CGFloat = 52
-        let cardHeight: CGFloat = 74
-        let spacing: CGFloat = 8
-        let totalWidth = CGFloat(cards.count) * (cardWidth + spacing) - spacing
-        let startX = (RitualCombatScene.sceneSize.width - totalWidth) / 2 + cardWidth / 2
-        let y: CGFloat = 90
+        guard !cards.isEmpty else { return }
+
+        let cardSize = RitualTheme.cardSize
+        let scaleFactor = cards.count > RitualTheme.scaleThreshold
+            ? min(1.0, CGFloat(RitualTheme.scaleThreshold) / CGFloat(cards.count))
+            : 1.0
+        let centerX = RitualCombatScene.sceneSize.width / 2
+        let baseY: CGFloat = 85
+        let centerIndex = CGFloat(cards.count - 1) / 2.0
+        let overlapSpacing = min(
+            RitualTheme.baseOverlapSpacing,
+            (RitualCombatScene.sceneSize.width - 40) / CGFloat(cards.count)
+        )
 
         for (i, card) in cards.enumerated() {
             let isSelected = sim.selectedCardIds.contains(card.id)
-            let node = makeCardNode(card: card, size: CGSize(width: cardWidth, height: cardHeight), selected: isSelected)
-            node.position = CGPoint(x: startX + CGFloat(i) * (cardWidth + spacing), y: y)
+            let offset = CGFloat(i) - centerIndex
+            let angle = offset * RitualTheme.fanAngleStep
+            let yOffset = -abs(offset) * RitualTheme.arcYDropPerUnit
+            let selectedLift: CGFloat = isSelected ? RitualTheme.selectedLift : 0
+
+            let position = CGPoint(
+                x: centerX + offset * overlapSpacing,
+                y: baseY + yOffset + selectedLift
+            )
+            let rotation = -angle * .pi / 180
+
+            let node = makeCardNode(card: card, size: cardSize, selected: isSelected)
+            node.position = position
+            node.zRotation = rotation
+            node.zPosition = CGFloat(20 + i)
+            node.setScale(scaleFactor)
             node.name = "card_\(card.id)"
             layer.addChild(node)
             handCardNodes[card.id] = node
+            originalCardPositions[card.id] = position
+            originalCardRotations[card.id] = rotation
+
+            addCardSway(to: node, index: i)
         }
+    }
+
+    private func addCardSway(to node: SKNode, index: Int) {
+        let amp = RitualTheme.swayAmplitude
+        let dur = RitualTheme.swayCycleDuration
+        let stagger = RitualTheme.swayStagger * Double(index)
+
+        let sway = SKAction.sequence([
+            SKAction.wait(forDuration: stagger),
+            SKAction.repeatForever(SKAction.sequence([
+                SKAction.rotate(byAngle: amp, duration: dur / 2),
+                SKAction.rotate(byAngle: -amp * 2, duration: dur),
+                SKAction.rotate(byAngle: amp, duration: dur / 2)
+            ]))
+        ])
+        node.run(sway, withKey: "cardSway")
     }
 
     private func makeCardNode(card: Card, size: CGSize, selected: Bool) -> SKNode {
         let container = SKNode()
 
-        let bg = SKShapeNode(rectOf: size, cornerRadius: 6)
+        let bg = SKShapeNode(rectOf: size, cornerRadius: 8)
         bg.fillColor = selected
-            ? SKColor(red: 0.25, green: 0.50, blue: 0.35, alpha: 1)
-            : SKColor(red: 0.15, green: 0.12, blue: 0.18, alpha: 1)
+            ? SKColor(red: 0.20, green: 0.42, blue: 0.30, alpha: 1)
+            : SKColor(red: 0.12, green: 0.10, blue: 0.16, alpha: 1)
         bg.strokeColor = selected
             ? SKColor(red: 0.40, green: 0.75, blue: 0.50, alpha: 1)
-            : SKColor(red: 0.40, green: 0.35, blue: 0.45, alpha: 1)
-        bg.lineWidth = 1.5
+            : SKColor(red: 0.35, green: 0.30, blue: 0.40, alpha: 1)
+        bg.lineWidth = selected ? 2.0 : 1.5
         container.addChild(bg)
 
-        let label = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
-        label.text = String(card.name.prefix(6))
-        label.fontSize = 10
-        label.fontColor = .white
-        label.verticalAlignmentMode = .center
-        label.horizontalAlignmentMode = .center
-        container.addChild(label)
+        let typeIcon = cardTypeIcon(card.type)
+        let iconLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
+        iconLabel.text = typeIcon
+        iconLabel.fontSize = 18
+        iconLabel.position = CGPoint(x: 0, y: size.height / 2 - 22)
+        iconLabel.verticalAlignmentMode = .center
+        container.addChild(iconLabel)
 
-        if selected {
-            container.position.y += 12
+        let nameLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+        nameLabel.text = String(card.name.prefix(10))
+        nameLabel.fontSize = 10
+        nameLabel.fontColor = .white
+        nameLabel.position = CGPoint(x: 0, y: -2)
+        nameLabel.verticalAlignmentMode = .center
+        nameLabel.horizontalAlignmentMode = .center
+        container.addChild(nameLabel)
+
+        if let power = card.power, power > 0 {
+            let powerLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
+            powerLabel.text = "\(power)"
+            powerLabel.fontSize = 14
+            powerLabel.fontColor = SKColor(red: 0.9, green: 0.8, blue: 0.3, alpha: 1)
+            powerLabel.position = CGPoint(x: -size.width / 2 + 14, y: size.height / 2 - 14)
+            powerLabel.verticalAlignmentMode = .center
+            container.addChild(powerLabel)
         }
 
+        if let cost = card.cost, cost > 0 {
+            let costLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+            costLabel.text = "◉\(cost)"
+            costLabel.fontSize = 10
+            costLabel.fontColor = SKColor(red: 0.5, green: 0.7, blue: 0.9, alpha: 1)
+            costLabel.position = CGPoint(x: size.width / 2 - 16, y: size.height / 2 - 14)
+            costLabel.verticalAlignmentMode = .center
+            container.addChild(costLabel)
+        }
+
+        let descLabel = SKLabelNode(fontNamed: "AvenirNext-Regular")
+        descLabel.text = String(card.description.prefix(18))
+        descLabel.fontSize = 8
+        descLabel.fontColor = SKColor(white: 0.65, alpha: 1)
+        descLabel.position = CGPoint(x: 0, y: -size.height / 2 + 18)
+        descLabel.verticalAlignmentMode = .center
+        descLabel.horizontalAlignmentMode = .center
+        container.addChild(descLabel)
+
         return container
+    }
+
+    func cardTypeIcon(_ type: CardType) -> String {
+        switch type {
+        case .attack, .weapon: return "⚔"
+        case .defense, .armor: return "🛡"
+        case .spell, .ritual: return "✦"
+        case .blessing, .spirit: return "☽"
+        case .item, .artifact: return "◆"
+        default: return "◇"
+        }
+    }
+
+    func phaseDisplayName(_ phase: CombatSimulationPhase) -> String {
+        switch phase {
+        case .playerAction: return "Ритуал"
+        case .resolution: return "Последствия"
+        case .finished: return "Итог"
+        }
+    }
+
+    func setSubPhaseLabel(_ text: String) {
+        guard let roundLabel = childNode(withName: "roundLabel") as? SKLabelNode,
+              let sim = simulation else { return }
+        roundLabel.text = "Раунд \(sim.round) · \(text)"
+    }
+
+    func restorePhaseLabel() {
+        guard let sim = simulation else { return }
+        setSubPhaseLabel(phaseDisplayName(sim.phase))
+    }
+
+    // MARK: - Combat Log
+
+    /// Add a combat log entry.
+    func logEntry(_ text: String, type: CombatLogEntryType = .action) {
+        combatLog?.addEntry(text: text, type: type)
     }
 
     // MARK: - Wire Controllers

@@ -23,7 +23,9 @@ public struct CombatSnapshot: Codable, Equatable {
     // MARK: Hero state
 
     public let heroHP: Int
+    public let heroMaxHP: Int
     public let heroStrength: Int
+    public let heroWisdom: Int
     public let heroArmor: Int
 
     // MARK: Hand management

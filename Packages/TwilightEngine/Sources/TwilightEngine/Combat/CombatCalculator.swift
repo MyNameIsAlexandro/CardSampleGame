@@ -21,6 +21,7 @@ public struct CombatCalculator {
         effortCards: Int,
         monsterDefense: Int,
         bonusDamage: Int,
+        cardPower: Int = 0,
         rng: WorldRNG
     ) -> FateAttackResult {
         let baseStrength = context.strength
@@ -37,7 +38,7 @@ public struct CombatCalculator {
             fateValue = rng.nextInt(in: -1...2)  // fallback if no deck
         }
 
-        let totalAttack = baseStrength + effortBonus + fateValue + bonusDamage
+        let totalAttack = baseStrength + cardPower + effortBonus + fateValue + bonusDamage
         let isHit = totalAttack >= monsterDefense
 
         // Damage calculation
@@ -80,6 +81,7 @@ public struct CombatCalculator {
 
         return FateAttackResult(
             baseStrength: baseStrength,
+            cardPower: cardPower,
             effortBonus: effortBonus,
             fateDrawResult: fateResult,
             totalAttack: totalAttack,
@@ -198,29 +200,36 @@ public struct CombatCalculator {
         enemyCurrentWill: Int,
         fateDeck: FateDeckManager?,
         worldResonance: Float = 0.0,
+        effortCards: Int = 0,
+        bonusDamage: Int = 0,
         rng: WorldRNG
     ) -> SpiritAttackResult {
         let baseStat = max(context.wisdom, context.intelligence, 1)
+        let effortBonus = max(0, effortCards)
 
         // Draw fate card for modifier (resonance-aware)
         let fateModifier: Int
+        var fateResult: FateDrawResult?
         var fateDrawEffects: [FateDrawEffect] = []
         if let deck = fateDeck, let result = deck.drawAndResolve(worldResonance: worldResonance) {
+            fateResult = result
             fateModifier = result.effectiveValue
             fateDrawEffects = result.drawEffects
         } else {
             fateModifier = rng.nextInt(in: -1...2)
         }
 
-        let damage = max(1, baseStat + fateModifier)
+        let damage = max(1, baseStat + effortBonus + fateModifier + bonusDamage)
         let newWill = max(0, enemyCurrentWill - damage)
 
         return SpiritAttackResult(
             damage: damage,
             baseStat: baseStat,
+            cardPower: bonusDamage,
             fateModifier: fateModifier,
             newWill: newWill,
             isPacified: newWill <= 0,
+            fateDrawResult: fateResult,
             fateDrawEffects: fateDrawEffects
         )
     }

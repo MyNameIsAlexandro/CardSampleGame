@@ -20,8 +20,7 @@ struct EventView: View {
     @State private var selectedChoice: EventChoice?
     @State private var showingResult = false
     @State private var resultMessage: String = ""
-    @State private var showingCombat = false
-    @State private var combatSimulation: CombatSimulation?
+    @State private var activeCombat: ActiveEventCombat?
     @State private var combatVictory: Bool?
 
     // MARK: - Initialization (Engine-First only)
@@ -98,38 +97,36 @@ struct EventView: View {
             } message: {
                 Text(resultMessage)
             }
-            .fullScreenCover(isPresented: $showingCombat) {
-                if let simulation = combatSimulation {
-                    RitualCombatSceneView(
-                        simulation: simulation,
-                        onCombatEnd: { result in
-                            RitualCombatBridge.applyCombatResult(result, to: vm.engine)
-                            let stats = AppCombatStats(
-                                turnsPlayed: result.turnsPlayed,
-                                totalDamageDealt: result.totalDamageDealt,
-                                totalDamageTaken: result.totalDamageTaken,
-                                cardsPlayed: result.cardsPlayed
-                            )
-                            let outcome: AppCombatOutcome = result.outcome.isVictory
-                                ? .victory(stats: stats)
-                                : .defeat(stats: stats)
-                            handleCombatEnd(outcome: outcome)
-                        },
-                        onSoundEffect: { SoundManager.shared.play(SoundManager.SoundEffect(rawValue: $0) ?? .buttonTap) },
-                        onHaptic: { name in
-                            let type: HapticManager.HapticType
-                            switch name {
-                            case "light": type = .light
-                            case "medium": type = .medium
-                            case "heavy": type = .heavy
-                            case "success": type = .success
-                            case "error": type = .error
-                            default: type = .light
-                            }
-                            HapticManager.shared.play(type)
+            .fullScreenCover(item: $activeCombat) { combat in
+                RitualCombatSceneView(
+                    simulation: combat.simulation,
+                    onCombatEnd: { result in
+                        RitualCombatBridge.applyCombatResult(result, to: vm.engine)
+                        let stats = AppCombatStats(
+                            turnsPlayed: result.turnsPlayed,
+                            totalDamageDealt: result.totalDamageDealt,
+                            totalDamageTaken: result.totalDamageTaken,
+                            cardsPlayed: result.cardsPlayed
+                        )
+                        let outcome: AppCombatOutcome = result.outcome.isVictory
+                            ? .victory(stats: stats)
+                            : .defeat(stats: stats)
+                        handleCombatEnd(outcome: outcome)
+                    },
+                    onSoundEffect: { SoundManager.shared.play(SoundManager.SoundEffect(rawValue: $0) ?? .buttonTap) },
+                    onHaptic: { name in
+                        let type: HapticManager.HapticType
+                        switch name {
+                        case "light": type = .light
+                        case "medium": type = .medium
+                        case "heavy": type = .heavy
+                        case "success": type = .success
+                        case "error": type = .error
+                        default: type = .light
                         }
-                    )
-                }
+                        HapticManager.shared.play(type)
+                    }
+                )
             }
         }
     }
@@ -373,10 +370,11 @@ struct EventView: View {
             defense: snapshot.enemy.defense
         )
 
-        combatSimulation = CombatSimulation(
+        let sim = CombatSimulation(
             hand: snapshot.encounterHeroCards,
             heroHP: snapshot.hero.hp,
             heroStrength: snapshot.hero.strength,
+            heroWisdom: snapshot.hero.wisdom,
             heroArmor: snapshot.hero.armor,
             enemies: [encounterEnemy],
             fateDeckState: snapshot.fateDeckState,
@@ -385,7 +383,7 @@ struct EventView: View {
             balanceConfig: snapshot.balanceConfig ?? .default
         )
 
-        showingCombat = true
+        activeCombat = ActiveEventCombat(simulation: sim)
     }
 
     func handleCombatEnd(outcome: AppCombatOutcome) {
@@ -397,7 +395,7 @@ struct EventView: View {
         // Combat already shows its own victory/defeat screen, no need for additional alert
         // Just close combat and dismiss event view
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            showingCombat = false
+            activeCombat = nil
             // Small delay before dismissing to allow animation to complete
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                 onDismiss()
@@ -453,6 +451,13 @@ struct EventView: View {
             return .neutral
         }
     }
+}
+
+// MARK: - Active Combat Wrapper
+
+private struct ActiveEventCombat: Identifiable {
+    let id = UUID()
+    let simulation: CombatSimulation
 }
 
 // MARK: - Preview

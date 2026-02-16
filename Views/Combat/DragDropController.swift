@@ -22,6 +22,7 @@ enum DragState: Equatable {
 enum DragCommand: Equatable {
     case selectCard(cardId: String)
     case burnForEffort(cardId: String)
+    case showTooltip(cardId: String)
     case cancelDrag
 }
 
@@ -43,9 +44,13 @@ final class DragDropController {
     /// Command output handler
     var onCommand: ((DragCommand) -> Void)?
 
+    /// Long-press timer for tooltip
+    private var longPressTimer: Timer?
+
     /// Begin tracking a potential drag on a card.
     func beginTouch(cardId: String) {
         state = .pressing(cardId: cardId)
+        startLongPressTimer(cardId: cardId)
     }
 
     /// Whether long-press is blocked (drag already started or no active touch).
@@ -62,6 +67,7 @@ final class DragDropController {
         case .pressing(let cardId):
             let distance = sqrt(offset.width * offset.width + offset.height * offset.height)
             if distance > dragThreshold {
+                cancelLongPressTimer()
                 state = .dragging(cardId: cardId, offset: offset)
             }
         case .dragging(let cardId, _):
@@ -84,9 +90,30 @@ final class DragDropController {
         state = .idle
     }
 
+    /// Reset state without firing command. Used when scene handles zone routing.
+    func reset() {
+        state = .idle
+    }
+
     /// Cancel current interaction.
     func cancel() {
+        cancelLongPressTimer()
         state = .idle
         onCommand?(.cancelDrag)
+    }
+
+    // MARK: - Long Press Timer
+
+    private func startLongPressTimer(cardId: String) {
+        cancelLongPressTimer()
+        longPressTimer = Timer.scheduledTimer(withTimeInterval: longPressDuration, repeats: false) { [weak self] _ in
+            guard let self, !self.isLongPressBlocked else { return }
+            self.onCommand?(.showTooltip(cardId: cardId))
+        }
+    }
+
+    func cancelLongPressTimer() {
+        longPressTimer?.invalidate()
+        longPressTimer = nil
     }
 }

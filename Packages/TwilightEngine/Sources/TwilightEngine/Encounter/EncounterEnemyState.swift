@@ -27,7 +27,7 @@ public struct EncounterEnemyState: Equatable, Codable {
 
     public var hasSpiritTrack: Bool { wp != nil }
     public var isAlive: Bool { hp > 0 }
-    public var isPacified: Bool { wp.map { $0 <= 0 } ?? false && hp > 0 }
+    public var isPacified: Bool { (wp.map { $0 <= 0 } ?? false) && hp > 0 }
 
     public init(from enemy: EncounterEnemy) {
         self.id = enemy.id

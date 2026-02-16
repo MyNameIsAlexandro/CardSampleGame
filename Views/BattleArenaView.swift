@@ -14,9 +14,8 @@ struct BattleArenaView: View {
 
     @State private var selectedHeroId: String?
     @State private var selectedEnemyId: String?
-    @State private var showingCombat = false
     @State private var lastOutcome: AppCombatOutcome?
-    @State private var combatSimulation: CombatSimulation?
+    @State private var activeCombat: ActiveCombat?
     @State private var arenaSeedState: UInt64 = Self.initialArenaSeed
 
     private var availableHeroes: [HeroDefinition] {
@@ -116,8 +115,37 @@ struct BattleArenaView: View {
         }
         .background(AppColors.backgroundSystem.ignoresSafeArea())
         .navigationBarHidden(true)
-        .fullScreenCover(isPresented: $showingCombat) {
-            spriteKitCombatView
+        .fullScreenCover(item: $activeCombat) { combat in
+            RitualCombatSceneView(
+                simulation: combat.simulation,
+                onCombatEnd: { result in
+                    let stats = AppCombatStats(
+                        turnsPlayed: result.turnsPlayed,
+                        totalDamageDealt: result.totalDamageDealt,
+                        totalDamageTaken: result.totalDamageTaken,
+                        cardsPlayed: result.cardsPlayed
+                    )
+                    if case .victory = result.outcome {
+                        lastOutcome = .victory(stats: stats)
+                    } else {
+                        lastOutcome = .defeat(stats: stats)
+                    }
+                    activeCombat = nil
+                },
+                onSoundEffect: { SoundManager.shared.play(SoundManager.SoundEffect(rawValue: $0) ?? .buttonTap) },
+                onHaptic: { name in
+                    let type: HapticManager.HapticType
+                    switch name {
+                    case "light": type = .light
+                    case "medium": type = .medium
+                    case "heavy": type = .heavy
+                    case "success": type = .success
+                    case "error": type = .error
+                    default: type = .light
+                    }
+                    HapticManager.shared.play(type)
+                }
+            )
         }
     }
 
@@ -158,7 +186,7 @@ struct BattleArenaView: View {
             defense: enemy.defense
         )
 
-        combatSimulation = CombatSimulation(
+        let sim = CombatSimulation(
             hand: startingDeck,
             heroHP: hero.baseStats.health,
             heroStrength: hero.baseStats.strength,
@@ -170,45 +198,7 @@ struct BattleArenaView: View {
         )
 
         lastOutcome = nil
-        showingCombat = true
-    }
-
-    // MARK: - SpriteKit Combat
-
-    @ViewBuilder
-    private var spriteKitCombatView: some View {
-        if let simulation = combatSimulation {
-            RitualCombatSceneView(
-                simulation: simulation,
-                onCombatEnd: { result in
-                    let stats = AppCombatStats(
-                        turnsPlayed: result.turnsPlayed,
-                        totalDamageDealt: result.totalDamageDealt,
-                        totalDamageTaken: result.totalDamageTaken,
-                        cardsPlayed: result.cardsPlayed
-                    )
-                    if case .victory = result.outcome {
-                        lastOutcome = .victory(stats: stats)
-                    } else {
-                        lastOutcome = .defeat(stats: stats)
-                    }
-                    showingCombat = false
-                },
-                onSoundEffect: { SoundManager.shared.play(SoundManager.SoundEffect(rawValue: $0) ?? .buttonTap) },
-                onHaptic: { name in
-                    let type: HapticManager.HapticType
-                    switch name {
-                    case "light": type = .light
-                    case "medium": type = .medium
-                    case "heavy": type = .heavy
-                    case "success": type = .success
-                    case "error": type = .error
-                    default: type = .light
-                    }
-                    HapticManager.shared.play(type)
-                }
-            )
-        }
+        activeCombat = ActiveCombat(simulation: sim)
     }
 
     // MARK: - Subviews
@@ -244,4 +234,11 @@ struct BattleArenaView: View {
     }
 
     private static let initialArenaSeed: UInt64 = 0x0B47_A11C_E000_0001
+}
+
+// MARK: - Active Combat Wrapper
+
+private struct ActiveCombat: Identifiable {
+    let id = UUID()
+    let simulation: CombatSimulation
 }
