@@ -10,6 +10,7 @@ import TwilightEngine
 /// Ritual Integration Invariants — Phase 3 Gate Tests (R6+R9+R10a)
 /// Reference: RITUAL_COMBAT_TEST_MODEL.md §3.5
 /// Rule: < 2 seconds per test, static source scan where possible, no system RNG
+@MainActor
 final class RitualIntegrationGateTests: XCTestCase {
 
     // MARK: - Helpers

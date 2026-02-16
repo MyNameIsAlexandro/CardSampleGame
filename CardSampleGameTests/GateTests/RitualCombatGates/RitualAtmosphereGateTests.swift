@@ -10,6 +10,7 @@ import TwilightEngine
 /// Ritual Atmosphere Architecture Invariants — Phase 3 Gate Tests (R7)
 /// Reference: RITUAL_COMBAT_TEST_MODEL.md §3.4
 /// Rule: < 2 seconds per test, static source scan, no runtime dependencies
+@MainActor
 final class RitualAtmosphereGateTests: XCTestCase {
 
     // MARK: - Helpers
