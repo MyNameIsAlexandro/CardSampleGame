@@ -197,7 +197,7 @@ struct SimulationView: View {
         result = nil
 
         Task { @MainActor in
-            let simResult = await CombatSimulator.run(config: config) { done in
+            let simResult = await CombatSimulator.run(config: config) { @MainActor done in
                 progress = done
             }
             isRunning = false
