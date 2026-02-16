@@ -4,8 +4,21 @@ set -euo pipefail
 log_file="app-strict-concurrency.log"
 diagnostics_file="app-strict-concurrency.diagnostics"
 all_concurrency_file="app-strict-concurrency.all"
-destination="${IOS_SIMULATOR_DESTINATION:-$(bash .github/ci/select_ios_destination.sh --scheme CardSampleGame)}"
 app_scope_regex='/(App|Views|ViewModels|Managers|Models|Utilities|PackEditor|DevTools)/[^:]*:[0-9]+:[0-9]+: (warning|error):'
+
+if [[ -n "${IOS_SIMULATOR_DESTINATION:-}" ]]; then
+  destination="${IOS_SIMULATOR_DESTINATION}"
+else
+  if ! destination="$(bash .github/ci/select_ios_destination.sh --scheme CardSampleGame)"; then
+    echo "Failed to resolve iOS simulator destination for Gate 0 strict-concurrency." >&2
+    exit 1
+  fi
+fi
+
+if [[ -z "${destination}" ]]; then
+  echo "Resolved iOS simulator destination is empty for Gate 0 strict-concurrency." >&2
+  exit 1
+fi
 
 build_exit=0
 xcodebuild build \

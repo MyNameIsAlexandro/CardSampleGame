@@ -31,10 +31,10 @@ done
 extract_candidates() {
   local raw="$1"
   printf '%s\n' "${raw}" \
-    | grep -E "platform: *iOS Simulator" \
+    | grep -E "platform:[[:space:]]*iOS Simulator" \
     | while IFS= read -r line; do
-      name="$(printf '%s\n' "${line}" | sed -nE 's/.*name:([^,}]+).*/\1/p')"
-      os="$(printf '%s\n' "${line}" | sed -nE 's/.*OS:([^,}]+).*/\1/p')"
+      name="$(printf '%s\n' "${line}" | sed -nE 's/.*name:[[:space:]]*([^,}]+).*/\1/p')"
+      os="$(printf '%s\n' "${line}" | sed -nE 's/.*OS:[[:space:]]*([^,}]+).*/\1/p')"
 
       name="$(printf '%s' "${name}" | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')"
       os="$(printf '%s' "${os}" | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')"

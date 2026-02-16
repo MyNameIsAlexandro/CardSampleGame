@@ -147,6 +147,7 @@
 		RG0000020000000000000001 /* RitualSceneGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = RG0000010000000000000001 /* RitualSceneGateTests.swift */; };
 		RG0000040000000000000001 /* RitualAtmosphereGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = RG0000030000000000000001 /* RitualAtmosphereGateTests.swift */; };
 		RG0000060000000000000001 /* RitualIntegrationGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = RG0000050000000000000001 /* RitualIntegrationGateTests.swift */; };
+		RG0000080000000000000001 /* RitualIntegrationGateTests+Mappings.swift in Sources */ = {isa = PBXBuildFile; fileRef = RG0000070000000000000001 /* RitualIntegrationGateTests+Mappings.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -296,6 +297,7 @@
 		RG0000010000000000000001 /* RitualSceneGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RitualSceneGateTests.swift; sourceTree = "<group>"; };
 		RG0000030000000000000001 /* RitualAtmosphereGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RitualAtmosphereGateTests.swift; sourceTree = "<group>"; };
 		RG0000050000000000000001 /* RitualIntegrationGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RitualIntegrationGateTests.swift; sourceTree = "<group>"; };
+		RG0000070000000000000001 /* RitualIntegrationGateTests+Mappings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RitualIntegrationGateTests+Mappings.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -510,6 +512,7 @@
 				RG0000010000000000000001 /* RitualSceneGateTests.swift */,
 				RG0000030000000000000001 /* RitualAtmosphereGateTests.swift */,
 				RG0000050000000000000001 /* RitualIntegrationGateTests.swift */,
+				RG0000070000000000000001 /* RitualIntegrationGateTests+Mappings.swift */,
 			);
 			path = RitualCombatGates;
 			sourceTree = "<group>";
@@ -935,6 +938,7 @@
 				RG0000020000000000000001 /* RitualSceneGateTests.swift in Sources */,
 				RG0000040000000000000001 /* RitualAtmosphereGateTests.swift in Sources */,
 				RG0000060000000000000001 /* RitualIntegrationGateTests.swift in Sources */,
+				RG0000080000000000000001 /* RitualIntegrationGateTests+Mappings.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

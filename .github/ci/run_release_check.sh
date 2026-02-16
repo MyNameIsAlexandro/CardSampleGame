@@ -27,7 +27,15 @@ bash .github/ci/validate_repo_hygiene.sh --require-clean-tree
 bash .github/ci/clean_test_artifacts.sh
 CI_RESOLVE_IOS_DESTINATION=1 bash .github/ci/preflight_ci_environment.sh "${dashboard_dir}" "${scheme}"
 
-ios_destination="$(bash .github/ci/select_ios_destination.sh --scheme "${scheme}")"
+if ! ios_destination="$(bash .github/ci/select_ios_destination.sh --scheme "${scheme}")"; then
+  echo "Failed to resolve iOS destination for scheme '${scheme}'." >&2
+  exit 1
+fi
+if [[ -z "${ios_destination}" ]]; then
+  echo "Resolved iOS destination is empty for scheme '${scheme}'." >&2
+  exit 1
+fi
+
 skip_args_xcode="$(bash .github/ci/quarantine_args.sh --format xcodebuild --suite xcodebuild:CardSampleGame)"
 skip_args_spm="$(bash .github/ci/quarantine_args.sh --format swiftpm --suite spm:TwilightEngine)"
 stamp="$(date +%Y%m%d%H%M%S)"
@@ -67,7 +75,7 @@ bash .github/ci/run_quality_gate.sh \
   --id "app_gate_3_unit_views" \
   --budget-sec 1200 \
   --dashboard-dir "${dashboard_dir}" \
-  -- "bash .github/ci/run_xcodebuild.sh test -scheme ${scheme} -destination \"${ios_destination}\" ${skip_args_xcode} -only-testing:CardSampleGameTests/HeroRegistryTests -only-testing:CardSampleGameTests/SaveLoadTests -only-testing:CardSampleGameTests/ContentManagerTests -only-testing:CardSampleGameTests/ContentRegistryTests -only-testing:CardSampleGameTests/PackLoaderTests -only-testing:CardSampleGameTests/HeroPanelTests -only-testing:CardSampleGameTests/RitualSceneGateTests -only-testing:CardSampleGameTests/RitualAtmosphereGateTests -only-testing:CardSampleGameTests/RitualIntegrationGateTests -resultBundlePath TestResults/UnitTests.${stamp}.xcresult"
+  -- "bash .github/ci/run_xcodebuild.sh test -scheme ${scheme} -destination \"${ios_destination}\" ${skip_args_xcode} -only-testing:CardSampleGameTests/HeroRegistryTests -only-testing:CardSampleGameTests/SaveLoadTests -only-testing:CardSampleGameTests/ContentManagerTests -only-testing:CardSampleGameTests/ContentRegistryTests -only-testing:CardSampleGameTests/PackLoaderTests -only-testing:CardSampleGameTests/HeroPanelTests -only-testing:CardSampleGameTests/RitualSceneGateTests -only-testing:CardSampleGameTests/RitualAtmosphereGateTests -only-testing:CardSampleGameTests/RitualIntegrationGateTests -only-testing:CardSampleGameTests/RitualIntegrationMappingsGateTests -resultBundlePath TestResults/UnitTests.${stamp}.xcresult"
 
 echo "Running TwilightEngine gates..."
 bash .github/ci/run_quality_gate.sh \

@@ -146,10 +146,24 @@ jobs:
         run: |
           echo "::warning::Gate 0 strict concurrency is advisory in CI for now. Investigate app_gate_0_strict_concurrency.log in artifacts."
 
+      - name: Resolve iOS destination
+        id: ios_destination
+        run: |
+          if ! destination="$(bash .github/ci/select_ios_destination.sh --scheme CardSampleGame)"; then
+            echo "::error::Failed to resolve iOS destination for CardSampleGame"
+            exit 1
+          fi
+          if [ -z "${destination}" ]; then
+            echo "::error::Resolved iOS destination is empty for CardSampleGame"
+            exit 1
+          fi
+          echo "destination=${destination}" >> "$GITHUB_OUTPUT"
+          echo "Resolved iOS destination: ${destination}"
+
       - name: "Gate 1: Quality Gates"
         run: |
           mkdir -p TestResults/QualityDashboard
-          ios_destination="$(bash .github/ci/select_ios_destination.sh --scheme CardSampleGame)"
+          ios_destination="${{ steps.ios_destination.outputs.destination }}"
           skip_args="$(bash .github/ci/quarantine_args.sh --format xcodebuild --suite xcodebuild:CardSampleGame)"
           bash .github/ci/run_quality_gate.sh \
             --id "app_gate_1_quality" \
@@ -160,7 +174,7 @@ jobs:
       - name: "Gate 2: Content Validation"
         run: |
           mkdir -p TestResults/QualityDashboard
-          ios_destination="$(bash .github/ci/select_ios_destination.sh --scheme CardSampleGame)"
+          ios_destination="${{ steps.ios_destination.outputs.destination }}"
           skip_args="$(bash .github/ci/quarantine_args.sh --format xcodebuild --suite xcodebuild:CardSampleGame)"
           bash .github/ci/run_quality_gate.sh \
             --id "app_gate_2_content_validation" \
@@ -171,7 +185,7 @@ jobs:
       - name: "Gate 2A: Audit Core"
         run: |
           mkdir -p TestResults/QualityDashboard
-          ios_destination="$(bash .github/ci/select_ios_destination.sh --scheme CardSampleGame)"
+          ios_destination="${{ steps.ios_destination.outputs.destination }}"
           skip_args="$(bash .github/ci/quarantine_args.sh --format xcodebuild --suite xcodebuild:CardSampleGame)"
           bash .github/ci/run_quality_gate.sh \
             --id "app_gate_2a_audit_core" \
@@ -182,7 +196,7 @@ jobs:
       - name: "Gate 2B: Audit Architecture"
         run: |
           mkdir -p TestResults/QualityDashboard
-          ios_destination="$(bash .github/ci/select_ios_destination.sh --scheme CardSampleGame)"
+          ios_destination="${{ steps.ios_destination.outputs.destination }}"
           skip_args="$(bash .github/ci/quarantine_args.sh --format xcodebuild --suite xcodebuild:CardSampleGame)"
           bash .github/ci/run_quality_gate.sh \
             --id "app_gate_2b_audit_architecture" \
@@ -193,13 +207,13 @@ jobs:
       - name: "Gate 3: Unit & View Tests"
         run: |
           mkdir -p TestResults/QualityDashboard
-          ios_destination="$(bash .github/ci/select_ios_destination.sh --scheme CardSampleGame)"
+          ios_destination="${{ steps.ios_destination.outputs.destination }}"
           skip_args="$(bash .github/ci/quarantine_args.sh --format xcodebuild --suite xcodebuild:CardSampleGame)"
           bash .github/ci/run_quality_gate.sh \
             --id "app_gate_3_unit_views" \
             --budget-sec 1200 \
             --dashboard-dir TestResults/QualityDashboard \
-            -- "bash .github/ci/run_xcodebuild.sh test -scheme CardSampleGame -destination '${ios_destination}' ${skip_args} -only-testing:CardSampleGameTests/HeroRegistryTests -only-testing:CardSampleGameTests/SaveLoadTests -only-testing:CardSampleGameTests/ContentManagerTests -only-testing:CardSampleGameTests/ContentRegistryTests -only-testing:CardSampleGameTests/PackLoaderTests -only-testing:CardSampleGameTests/HeroPanelTests -only-testing:CardSampleGameTests/RitualSceneGateTests -only-testing:CardSampleGameTests/RitualAtmosphereGateTests -only-testing:CardSampleGameTests/RitualIntegrationGateTests -resultBundlePath TestResults/UnitTests.xcresult"
+            -- "bash .github/ci/run_xcodebuild.sh test -scheme CardSampleGame -destination '${ios_destination}' ${skip_args} -only-testing:CardSampleGameTests/HeroRegistryTests -only-testing:CardSampleGameTests/SaveLoadTests -only-testing:CardSampleGameTests/ContentManagerTests -only-testing:CardSampleGameTests/ContentRegistryTests -only-testing:CardSampleGameTests/PackLoaderTests -only-testing:CardSampleGameTests/HeroPanelTests -only-testing:CardSampleGameTests/RitualSceneGateTests -only-testing:CardSampleGameTests/RitualAtmosphereGateTests -only-testing:CardSampleGameTests/RitualIntegrationGateTests -only-testing:CardSampleGameTests/RitualIntegrationMappingsGateTests -resultBundlePath TestResults/UnitTests.xcresult"
 
       - name: "Gate Inventory Drift Report"
         run: |
