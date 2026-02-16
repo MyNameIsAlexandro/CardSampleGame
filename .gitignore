@@ -102,3 +102,5 @@ TestReport.xcresult/
 *.xcresult/
 app-strict-concurrency.log
 app-strict-concurrency.diagnostics
+app-strict-concurrency.all
+app-strict-concurrency.all-diagnostics
