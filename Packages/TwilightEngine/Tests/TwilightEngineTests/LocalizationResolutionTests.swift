@@ -41,4 +41,36 @@ final class LocalizationResolutionTests: XCTestCase {
         XCTAssertEqual(englishCard.name, "Focus")
         XCTAssertEqual(englishCard.description, "Draw 1 card")
     }
+
+    func testStandardCardDefinitionDecodingSupportsLegacyNameRuFields() throws {
+        let json = """
+        [
+          {
+            "id": "legacy_focus",
+            "name": "Focus",
+            "name_ru": "Концентрация",
+            "card_type": "special",
+            "description": "Draw 1 card",
+            "description_ru": "Возьми 1 карту"
+          }
+        ]
+        """
+
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let data = try XCTUnwrap(json.data(using: .utf8))
+        let cards = try decoder.decode([StandardCardDefinition].self, from: data)
+        let cardDefinition = try XCTUnwrap(cards.first)
+
+        let localizationManager = LocalizationManager()
+        localizationManager.setLocale("ru")
+        let russianCard = cardDefinition.toCard(localizationManager: localizationManager)
+        XCTAssertEqual(russianCard.name, "Концентрация")
+        XCTAssertEqual(russianCard.description, "Возьми 1 карту")
+
+        localizationManager.setLocale("en")
+        let englishCard = cardDefinition.toCard(localizationManager: localizationManager)
+        XCTAssertEqual(englishCard.name, "Focus")
+        XCTAssertEqual(englishCard.description, "Draw 1 card")
+    }
 }

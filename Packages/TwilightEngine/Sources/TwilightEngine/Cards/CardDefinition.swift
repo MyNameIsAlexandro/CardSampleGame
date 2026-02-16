@@ -216,11 +216,16 @@ public struct StandardCardDefinition: CardDefinition, Codable {
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        let legacyContainer = try decoder.container(keyedBy: LegacyCodingKeys.self)
         id = try container.decode(String.self, forKey: .id)
-        name = try container.decode(LocalizableText.self, forKey: .name)
+        let decodedName = try container.decode(LocalizableText.self, forKey: .name)
+        let legacyNameRu = try legacyContainer.decodeIfPresent(String.self, forKey: .nameRu)
+        name = Self.mergingLegacyVariant(base: decodedName, ru: legacyNameRu)
         cardType = try container.decode(CardType.self, forKey: .cardType)
         rarity = try container.decodeIfPresent(CardRarity.self, forKey: .rarity) ?? .common
-        description = try container.decode(LocalizableText.self, forKey: .description)
+        let decodedDescription = try container.decode(LocalizableText.self, forKey: .description)
+        let legacyDescriptionRu = try legacyContainer.decodeIfPresent(String.self, forKey: .descriptionRu)
+        description = Self.mergingLegacyVariant(base: decodedDescription, ru: legacyDescriptionRu)
         icon = try container.decodeIfPresent(String.self, forKey: .icon) ?? "🃏"
         expansionSet = try container.decodeIfPresent(ExpansionSet.self, forKey: .expansionSet) ?? .baseSet
         ownership = try container.decodeIfPresent(CardOwnership.self, forKey: .ownership) ?? .universal
@@ -242,6 +247,26 @@ public struct StandardCardDefinition: CardDefinition, Codable {
         case id, name, cardType, rarity, description, icon, expansionSet, ownership
         case abilities, faithCost, balance, role, power, defense, health, wisdom
         case realm, curseType, exhaust, cost
+    }
+
+    private enum LegacyCodingKeys: String, CodingKey {
+        case nameRu
+        case descriptionRu
+    }
+
+    private static func mergingLegacyVariant(base: LocalizableText, ru: String?) -> LocalizableText {
+        guard let ru, !ru.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return base
+        }
+
+        guard case .inline(let localized) = base else {
+            return base
+        }
+
+        if localized.ru == localized.en {
+            return .inline(LocalizedString(en: localized.en, ru: ru))
+        }
+        return base
     }
 
     /// Конвертация в игровую Card
