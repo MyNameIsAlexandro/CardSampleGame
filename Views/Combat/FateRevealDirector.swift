@@ -407,7 +407,7 @@ final class FateRevealDirector {
         label.horizontalAlignmentMode = .center
         label.name = "fate_value"
         if isCritical {
-            label.text = "CRIT"
+            label.text = L10n.combatFateCrit.localized
         } else {
             label.text = value > 0 ? "+\(value)" : "\(value)"
         }

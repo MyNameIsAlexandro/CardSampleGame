@@ -88,6 +88,14 @@ extension L10n {
     static let achievementsCategoryKnowledge = "achievements.category.knowledge"
     static let achievementsCategoryMastery = "achievements.category.mastery"
 
+    // MARK: - Combat Feedback (EnemyCardView)
+    static let combatFeedbackWeak = "combat_feedback_weak"
+    static let combatFeedbackResist = "combat_feedback_resist"
+    static let combatFeedbackRegen = "combat.feedback.regen"
+
+    // MARK: - Combat Log
+    static let combatLogTitle = "combat.log.title"
+
     // MARK: - EC-01/EC-02: Weakness/Strength & Enemy Abilities
     static let combatWeaknessTriggered = "combat.weakness_triggered"
     static let combatResistanceTriggered = "combat.resistance_triggered"

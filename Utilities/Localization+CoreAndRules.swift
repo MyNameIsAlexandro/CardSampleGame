@@ -13,6 +13,12 @@ extension L10n {
     static let characterAbilities = "character.abilities"
     static let buttonStartAdventure = "button.start.adventure"
     static let buttonSelectHeroFirst = "button.select.hero.first"
+    static let heroSelectSubtitle = "hero.select.subtitle"
+    static let heroStartGame = "hero.start.game"
+
+    // Stats (short labels)
+    static let statFaith = "stat.faith"
+    static let statIntelligenceShort = "stat.intelligence.short"
 
     // Game Board
     static let buttonOk = "button.ok"

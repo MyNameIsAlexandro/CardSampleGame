@@ -65,7 +65,7 @@ final class CombatLogOverlay: SKNode {
         contentNode = SKNode()
 
         titleLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
-        titleLabel.text = "Боевой журнал"
+        titleLabel.text = L10n.combatLogTitle.localized
         titleLabel.fontSize = 12
         titleLabel.fontColor = SKColor(white: 0.7, alpha: 1)
         titleLabel.horizontalAlignmentMode = .center

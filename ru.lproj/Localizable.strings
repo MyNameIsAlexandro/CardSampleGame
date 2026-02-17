@@ -36,6 +36,8 @@
 "stat.health" = "Здоровье";
 "stat.power" = "Сила";
 "stat.defense" = "Защита";
+"stat.faith" = "Вера";
+"stat.intelligence.short" = "Инт";
 
 // MARK: - Rarity
 "rarity.common" = "Обычная";
@@ -362,12 +364,7 @@
 // Подсказки для иконок
 "tooltip.balance" = "Баланс между Светом и Тьмой";
 
-// MARK: - Регионы (Audit v1.1 Issue #2)
-
-// Состояние региона
-"region.state.stable" = "Стабильный";
-"region.state.borderland" = "Пограничье";
-"region.state.breach" = "Разлом";
+// MARK: - Region UI (Audit v1.1 Issue #2)
 
 // Информация о регионе
 "region.reputation" = "Репутация: %d";
@@ -378,7 +375,6 @@
 "action.trade" = "Торговать";
 "action.strengthen.anchor" = "Укрепить Якорь";
 "action.explore" = "Исследовать";
-"action.explore.region" = "Исследовать";
 
 // MARK: - Combat UI (Engine-First Migration)
 
@@ -486,11 +482,6 @@
 "button.great" = "Отлично!";
 "you.are.here" = "Вы здесь";
 
-// Region descriptions
-"region.desc.stable" = "Регион спокоен. Влияние Нави минимально. Здесь безопасно отдыхать и торговать.";
-"region.desc.borderland" = "Регион балансирует между Явью и Навью. Повышенная опасность, но и больше возможностей.";
-"region.desc.breach" = "Навь активно проникает в регион. Очень опасно. Требуется восстановление якоря.";
-
 // Combat modifiers
 "enemy.defense" = "Защита врагов:";
 "enemy.health" = "Здоровье врагов:";
@@ -499,16 +490,8 @@
 "anchor.of.yav" = "Якорь Яви";
 "anchor.integrity" = "Целостность:";
 
-// Balance names
-"balance.light" = "Свет";
-"balance.neutral" = "Нейтрально";
-"balance.dark" = "Тьма";
-
 // Actions
 "available.actions" = "Доступные действия";
-"day.word.1" = "день";
-"day.word.234" = "дня";
-"action.travel.to" = "Отправиться (%d %@)";
 "action.region.far" = "Регион далеко";
 "action.move.to.region.hint" = "Переместитесь в регион, чтобы взаимодействовать с ним";
 "action.region.not.directly.accessible" = "Регион недоступен напрямую - сначала идите в соседний регион";
@@ -518,14 +501,6 @@
 
 // Journal
 "journal.empty" = "Журнал пуст. Ваши приключения ещё впереди...";
-"journal.title" = "Журнал";
-
-// Confirmations
-"confirmation.title" = "Подтверждение";
-"confirm.rest" = "Отдохнуть в этом месте? Вы восстановите %d здоровья.";
-"confirm.trade" = "Торговая система пока не реализована.";
-"confirm.strengthen.anchor" = "Укрепить якорь? Это стоит %d веры и добавит %d%% целостности.";
-"confirm.explore" = "Исследовать регион? Это займёт день.";
 
 // Log entries
 
@@ -538,6 +513,8 @@
 // MARK: - HeroSelectionView / HeroPanel
 
 "hero.class.default" = "Странник";
+"hero.select.subtitle" = "Каждый герой имеет уникальные характеристики и способности";
+"hero.start.game" = "Начать игру за %@";
 
 // MARK: - GameBoardView
 
@@ -635,8 +612,6 @@
 
 // MARK: - WorldMapView - Actions
 "action.travel.to" = "Отправиться (%d %@)";
-"action.rest.heal" = "Отдохнуть (+%d ❤️)";
-"action.trade.name" = "Торговать";
 "action.explore.region" = "Исследовать";
 "day.word.1" = "день";
 "day.word.234" = "дня";
@@ -694,6 +669,8 @@
 
 // MARK: - Combat UI strings
 "combat.turns.stats" = "Ходов: %d, урон нанесён: %d, урон получен: %d";
+"combat.log.title" = "Боевой журнал";
+"combat.feedback.regen" = "+%d HP";
 
 // MARK: - Realm names
 "balance.light" = "Свету";
@@ -1035,37 +1012,6 @@
 "fate.deck.empty" = "Нет карт в сбросе";
 "fate.resonance.modifier" = "Резонанс: %@";
 
-// MARK: - Bestiary (Epic 13)
-"bestiary.title" = "Бестиарий";
-"bestiary.search" = "Искать существ...";
-"bestiary.progress" = "%d / %d открыто";
-"bestiary.knowledge" = "Знание";
-"bestiary.level.unknown" = "Неизвестно";
-"bestiary.level.encountered" = "Встречено";
-"bestiary.level.studied" = "Изучено";
-"bestiary.level.mastered" = "Освоено";
-"bestiary.stats" = "Характеристики";
-"bestiary.lore" = "Предание";
-"bestiary.combat.info" = "Боевые данные";
-"bestiary.weaknesses" = "Уязвимости";
-"bestiary.strengths" = "Сопротивления";
-"bestiary.tactics" = "Тактика фракций";
-"bestiary.personal.stats" = "Ваша история";
-"bestiary.encountered" = "Встреч";
-"bestiary.defeated" = "Убито";
-"bestiary.pacified" = "Усмирено";
-"bestiary.last.met" = "Последняя встреча: день %d";
-"bestiary.unlock.studied" = "Встретьте это существо 3 раза, чтобы открыть полные характеристики, способности и предание.";
-"bestiary.unlock.mastered" = "Победите 5 раз или усмирите 3 раза, чтобы открыть уязвимости и тактику фракций.";
-
-// MARK: - Enemy Types (Epic 13)
-"enemy.type.beast" = "Зверь";
-"enemy.type.spirit" = "Дух";
-"enemy.type.undead" = "Нежить";
-"enemy.type.demon" = "Демон";
-"enemy.type.human" = "Человек";
-"enemy.type.boss" = "Босс";
-
 // MARK: - Achievements (Epic 13)
 "achievements.title" = "Достижения";
 "achievements.unlocked" = "достижений открыто";
@@ -1127,6 +1073,8 @@
 "bestiary.last.met" = "Последняя встреча: день %d";
 "bestiary.unlock.studied" = "Встречайте это существо чаще, чтобы узнать его характеристики и способности.";
 "bestiary.unlock.mastered" = "Побеждайте или усмиряйте это существо, чтобы узнать слабости и тактику.";
+
+// MARK: - Enemy Types (Epic 13)
 "enemy.type.beast" = "Звери";
 "enemy.type.spirit" = "Духи";
 "enemy.type.undead" = "Нежить";

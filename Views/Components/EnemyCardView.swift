@@ -157,7 +157,7 @@ struct EnemyCardView: View {
         ZStack {
             AppColors.success.opacity(Opacity.light)
 
-            Text("WEAK!")
+            Text(L10n.combatFeedbackWeak.localized)
                 .font(.headline.bold())
                 .foregroundColor(AppColors.success)
         }
@@ -168,7 +168,7 @@ struct EnemyCardView: View {
         ZStack {
             AppColors.muted.opacity(Opacity.light)
 
-            Text("RESIST")
+            Text(L10n.combatFeedbackResist.localized)
                 .font(.headline.bold())
                 .foregroundColor(AppColors.muted)
         }
@@ -178,7 +178,7 @@ struct EnemyCardView: View {
     private func regenIndicator(amount: Int) -> some View {
         VStack {
             Spacer()
-            Text("+\(amount) HP")
+            Text(L10n.combatFeedbackRegen.localized(with: amount))
                 .font(.caption.bold())
                 .foregroundColor(AppColors.success)
                 .padding(Spacing.xxs)

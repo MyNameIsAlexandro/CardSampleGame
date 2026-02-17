@@ -336,19 +336,19 @@ extension CardOwnership {
     var accessDescription: String {
         switch self {
         case .universal:
-            return "Доступна всем"
+            return L10n.cardOwnershipUniversal.localized
 
         case .heroSignature(let heroID):
-            return "Сигнатурная карта героя: \(heroID)"
+            return "\(L10n.cardOwnershipHeroSignature.localized): \(heroID)"
 
         case .classSpecific(let className):
-            return "Карта класса: \(className)"
+            return "\(L10n.cardOwnershipClassSpecific.localized): \(className)"
 
         case .expansion(let setID):
-            return "Требуется дополнение: \(setID)"
+            return "\(L10n.cardOwnershipExpansion.localized): \(setID)"
 
         case .requiresUnlock(let condition):
-            return "Требуется: \(condition)"
+            return "\(L10n.cardOwnershipRequiresUnlock.localized): \(condition)"
 
         case .composite(let requirements):
             let descriptions = requirements.map { $0.accessDescription }

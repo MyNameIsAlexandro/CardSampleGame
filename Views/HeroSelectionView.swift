@@ -24,11 +24,11 @@ struct HeroSelectionView: View {
             VStack(spacing: 0) {
                 // Заголовок
                 VStack(spacing: Spacing.sm) {
-                    Text("Выберите героя")
+                    Text(L10n.characterSelectTitle.localized)
                         .font(AppTypography.largeTitle)
                         .fontWeight(.bold)
 
-                    Text("Каждый герой имеет уникальные характеристики и способности")
+                    Text(L10n.heroSelectSubtitle.localized)
                         .font(.subheadline)
                         .foregroundColor(AppColors.muted)
                         .multilineTextAlignment(.center)
@@ -66,7 +66,7 @@ struct HeroSelectionView: View {
                         }) {
                             HStack {
                                 Image(systemName: hero.icon)
-                                Text("Начать игру за \(hero.name.localized)")
+                                Text(L10n.heroStartGame.localized(with: hero.name.localized))
                                     .fontWeight(.semibold)
                             }
                             .frame(maxWidth: .infinity)
@@ -77,7 +77,7 @@ struct HeroSelectionView: View {
                         }
                         .padding(.horizontal)
                     } else {
-                        Text("Выберите героя")
+                        Text(L10n.buttonSelectHeroFirst.localized)
                             .foregroundColor(AppColors.muted)
                             .padding()
                     }
@@ -135,9 +135,9 @@ struct HeroCard: View {
             let stats = hero.baseStats
             HStack(spacing: Spacing.lg) {
                 StatBadge(icon: "heart.fill", value: stats.health, label: "HP", color: AppColors.health)
-                StatBadge(icon: "hand.raised.fill", value: stats.strength, label: "Сила", color: AppColors.power)
-                StatBadge(icon: "sparkles", value: stats.faith, label: "Вера", color: AppColors.faith)
-                StatBadge(icon: "brain.head.profile", value: stats.intelligence, label: "Инт", color: AppColors.dark)
+                StatBadge(icon: "hand.raised.fill", value: stats.strength, label: L10n.cardStatStrength.localized, color: AppColors.power)
+                StatBadge(icon: "sparkles", value: stats.faith, label: L10n.statFaith.localized, color: AppColors.faith)
+                StatBadge(icon: "brain.head.profile", value: stats.intelligence, label: L10n.statIntelligenceShort.localized, color: AppColors.dark)
             }
 
             // Особая способность

@@ -20,7 +20,6 @@ struct AppServices {
 
     var registry: ContentRegistry { engineServices.contentRegistry }
     var localizationManager: LocalizationManager { engineServices.localizationManager }
-    var rng: WorldRNG { engineServices.rng }
 
     init(rng: WorldRNG, registry: ContentRegistry, localizationManager: LocalizationManager) {
         let engineServices = EngineServices(

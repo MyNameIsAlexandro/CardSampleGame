@@ -34,6 +34,8 @@
 "stat.health" = "Health";
 "stat.power" = "Power";
 "stat.defense" = "Defense";
+"stat.faith" = "Faith";
+"stat.intelligence.short" = "Int";
 
 // MARK: - Rarity
 "rarity.common" = "Common";
@@ -189,7 +191,7 @@
 "trait.dragon" = "Dragon";
 "trait.ancient" = "Ancient";
 
-// MARK: - Twilight Marches (Сумрачные Пределы)
+// MARK: - Twilight Marches
 
 // Game Title
 "tm.game.title" = "Twilight Marches";
@@ -344,11 +346,6 @@
 
 // MARK: - Region UI (Audit v1.1 Issue #2)
 
-// Region States
-"region.state.stable" = "Stable";
-"region.state.borderland" = "Borderland";
-"region.state.breach" = "Breach";
-
 // Region Info
 "region.reputation" = "Reputation: %d";
 
@@ -358,7 +355,6 @@
 "action.trade" = "Trade";
 "action.strengthen.anchor" = "Strengthen Anchor";
 "action.explore" = "Explore";
-"action.explore.region" = "Explore";
 
 // MARK: - Combat UI (Engine-First Migration)
 
@@ -466,11 +462,6 @@
 "button.great" = "Great!";
 "you.are.here" = "You are here";
 
-// Region descriptions
-"region.desc.stable" = "Region is stable. Nav influence is minimal. Safe to rest and trade here.";
-"region.desc.borderland" = "Region is between Yav and Nav. Higher danger, but more opportunities.";
-"region.desc.breach" = "Nav is actively penetrating the region. Very dangerous. Anchor needs restoration.";
-
 // Combat modifiers
 "enemy.defense" = "Enemy Defense:";
 "enemy.health" = "Enemy Health:";
@@ -479,16 +470,8 @@
 "anchor.of.yav" = "Anchor of Yav";
 "anchor.integrity" = "Integrity:";
 
-// Balance names
-"balance.light" = "Light";
-"balance.neutral" = "Neutral";
-"balance.dark" = "Dark";
-
 // Actions
 "available.actions" = "Available Actions";
-"day.word.1" = "day";
-"day.word.234" = "days";
-"action.travel.to" = "Travel (%d %@)";
 "action.region.far" = "Region is far";
 "action.move.to.region.hint" = "Move to region to interact with it";
 "action.region.not.directly.accessible" = "Region not directly accessible - go to adjacent region first";
@@ -498,14 +481,6 @@
 
 // Journal
 "journal.empty" = "Journal is empty. Your adventures are yet to come...";
-"journal.title" = "Journal";
-
-// Confirmations
-"confirmation.title" = "Confirmation";
-"confirm.rest" = "Rest here? You will restore %d health.";
-"confirm.trade" = "Trading system is not yet implemented.";
-"confirm.strengthen.anchor" = "Strengthen anchor? This costs %d faith and adds %d%% integrity.";
-"confirm.explore" = "Explore region? This will take a day.";
 
 // Log entries
 
@@ -518,6 +493,8 @@
 // MARK: - HeroSelectionView / HeroPanel
 
 "hero.class.default" = "Wanderer";
+"hero.select.subtitle" = "Each hero has unique stats and abilities";
+"hero.start.game" = "Start game as %@";
 
 // MARK: - GameBoardView
 
@@ -615,8 +592,6 @@
 
 // MARK: - WorldMapView - Actions
 "action.travel.to" = "Travel (%d %@)";
-"action.rest.heal" = "Rest (+%d ❤️)";
-"action.trade.name" = "Trade";
 "action.explore.region" = "Explore";
 "day.word.1" = "day";
 "day.word.234" = "days";
@@ -688,6 +663,8 @@
 
 // MARK: - Combat UI strings
 "combat.turns.stats" = "Turns: %d, damage dealt: %d, damage taken: %d";
+"combat.log.title" = "Combat Log";
+"combat.feedback.regen" = "+%d HP";
 
 // MARK: - Realm names
 "balance.light" = "Light";
@@ -1029,37 +1006,6 @@
 "fate.deck.empty" = "No cards in discard pile";
 "fate.resonance.modifier" = "Resonance: %@";
 
-// MARK: - Bestiary (Epic 13)
-"bestiary.title" = "Bestiary";
-"bestiary.search" = "Search creatures...";
-"bestiary.progress" = "%d / %d discovered";
-"bestiary.knowledge" = "Knowledge";
-"bestiary.level.unknown" = "Unknown";
-"bestiary.level.encountered" = "Encountered";
-"bestiary.level.studied" = "Studied";
-"bestiary.level.mastered" = "Mastered";
-"bestiary.stats" = "Statistics";
-"bestiary.lore" = "Lore";
-"bestiary.combat.info" = "Combat Info";
-"bestiary.weaknesses" = "Weaknesses";
-"bestiary.strengths" = "Resistances";
-"bestiary.tactics" = "Faction Tactics";
-"bestiary.personal.stats" = "Your History";
-"bestiary.encountered" = "Met";
-"bestiary.defeated" = "Slain";
-"bestiary.pacified" = "Pacified";
-"bestiary.last.met" = "Last seen: day %d";
-"bestiary.unlock.studied" = "Encounter this creature 3 times to unlock full stats, abilities and lore.";
-"bestiary.unlock.mastered" = "Defeat 5 times or pacify 3 times to unlock weaknesses and faction tactics.";
-
-// MARK: - Enemy Types (Epic 13)
-"enemy.type.beast" = "Beast";
-"enemy.type.spirit" = "Spirit";
-"enemy.type.undead" = "Undead";
-"enemy.type.demon" = "Demon";
-"enemy.type.human" = "Human";
-"enemy.type.boss" = "Boss";
-
 // MARK: - Achievements (Epic 13)
 "achievements.title" = "Achievements";
 "achievements.unlocked" = "achievements unlocked";
@@ -1121,6 +1067,8 @@
 "bestiary.last.met" = "Last seen on day %d";
 "bestiary.unlock.studied" = "Encounter this creature more to reveal stats and abilities.";
 "bestiary.unlock.mastered" = "Defeat or pacify this creature more to reveal weaknesses and tactics.";
+
+// MARK: - Enemy Types (Epic 13)
 "enemy.type.beast" = "Beasts";
 "enemy.type.spirit" = "Spirits";
 "enemy.type.undead" = "Undead";

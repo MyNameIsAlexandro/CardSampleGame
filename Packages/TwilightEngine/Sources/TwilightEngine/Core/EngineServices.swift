@@ -11,7 +11,8 @@ import Foundation
 /// Replaces global singletons with explicit, injectable services.
 public struct EngineServices {
     /// Deterministic RNG for all game logic.
-    public let rng: WorldRNG
+    /// Internal: gameplay RNG must not be accessible from App/Views layer.
+    let rng: WorldRNG
 
     /// Content registry for loading and querying game data.
     public let contentRegistry: ContentRegistry

@@ -91,4 +91,42 @@ final class RitualAtmosphereGateTests: XCTestCase {
             "ResonanceAtmosphereController.update() must not mutate CombatSimulation state. " +
             "Snapshot before and after update() calls must be identical.")
     }
+
+    // MARK: - INV-ATM-003: HSL interpolation produces correct visual zones
+
+    /// Extreme negative resonance (-100) yields high intensity, elevated alpha (Nav purple zone)
+    func testAtmosphereVisuals_extremeNegativeResonanceProducesHighIntensity() {
+        let controller = ResonanceAtmosphereController()
+        controller.update(resonance: -100.0)
+
+        let visuals = controller.currentVisuals
+        XCTAssertEqual(visuals.particleIntensity, 1.0, accuracy: 0.01,
+            "Resonance -100 must produce full particle intensity (abs(100)/100 = 1.0)")
+        XCTAssertEqual(visuals.ambientAlpha, 0.5, accuracy: 0.01,
+            "Resonance -100 must produce elevated ambient alpha (0.3 + 100/100 * 0.2 = 0.5)")
+    }
+
+    /// Neutral resonance (0) yields zero intensity and base alpha (Yav amber zone)
+    func testAtmosphereVisuals_neutralResonanceProducesBaseValues() {
+        let controller = ResonanceAtmosphereController()
+        controller.update(resonance: 0.0)
+
+        let visuals = controller.currentVisuals
+        XCTAssertEqual(visuals.particleIntensity, 0.0, accuracy: 0.01,
+            "Resonance 0 must produce zero particle intensity (abs(0)/100 = 0.0)")
+        XCTAssertEqual(visuals.ambientAlpha, 0.3, accuracy: 0.01,
+            "Resonance 0 must produce base ambient alpha (0.3 + 0/100 * 0.2 = 0.3)")
+    }
+
+    /// Extreme positive resonance (+100) yields high intensity, elevated alpha (Prav gold zone)
+    func testAtmosphereVisuals_extremePositiveResonanceProducesHighIntensity() {
+        let controller = ResonanceAtmosphereController()
+        controller.update(resonance: 100.0)
+
+        let visuals = controller.currentVisuals
+        XCTAssertEqual(visuals.particleIntensity, 1.0, accuracy: 0.01,
+            "Resonance +100 must produce full particle intensity (abs(100)/100 = 1.0)")
+        XCTAssertEqual(visuals.ambientAlpha, 0.5, accuracy: 0.01,
+            "Resonance +100 must produce elevated ambient alpha (0.3 + 100/100 * 0.2 = 0.5)")
+    }
 }
