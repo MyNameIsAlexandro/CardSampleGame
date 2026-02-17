@@ -48,6 +48,7 @@
 			AB36A0010000000000000001 /* AuditArchitectureBoundaryGateTests+ExternalCombatAndMutations.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB36A1010000000000000001 /* AuditArchitectureBoundaryGateTests+ExternalCombatAndMutations.swift */; };
 			AB36A0020000000000000001 /* AuditArchitectureBoundaryGateTests+DependenciesAndHygiene.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB36A1020000000000000001 /* AuditArchitectureBoundaryGateTests+DependenciesAndHygiene.swift */; };
 			AB36A0030000000000000001 /* AuditArchitectureBoundaryGateTests+BridgeCallsiteGates.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB36A1030000000000000001 /* AuditArchitectureBoundaryGateTests+BridgeCallsiteGates.swift */; };
+			AB36A0040000000000000001 /* AuditArchitectureBoundaryGateTests+LocaleGates.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB36A1040000000000000001 /* AuditArchitectureBoundaryGateTests+LocaleGates.swift */; };
 			AB37B0010000000000000001 /* AuditGateTests+ArchitectureAndIsolation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB37C1010000000000000001 /* AuditGateTests+ArchitectureAndIsolation.swift */; };
 			AB37B0020000000000000001 /* AuditGateTests+StaticAndSerialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB37C1020000000000000001 /* AuditGateTests+StaticAndSerialization.swift */; };
 			AB37B0030000000000000001 /* AuditGateTests+LegacyAndDeterminism.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB37C1030000000000000001 /* AuditGateTests+LegacyAndDeterminism.swift */; };
@@ -216,6 +217,7 @@
 			AB36A1010000000000000001 /* AuditArchitectureBoundaryGateTests+ExternalCombatAndMutations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuditArchitectureBoundaryGateTests+ExternalCombatAndMutations.swift"; sourceTree = "<group>"; };
 			AB36A1020000000000000001 /* AuditArchitectureBoundaryGateTests+DependenciesAndHygiene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuditArchitectureBoundaryGateTests+DependenciesAndHygiene.swift"; sourceTree = "<group>"; };
 			AB36A1030000000000000001 /* AuditArchitectureBoundaryGateTests+BridgeCallsiteGates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuditArchitectureBoundaryGateTests+BridgeCallsiteGates.swift"; sourceTree = "<group>"; };
+			AB36A1040000000000000001 /* AuditArchitectureBoundaryGateTests+LocaleGates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuditArchitectureBoundaryGateTests+LocaleGates.swift"; sourceTree = "<group>"; };
 			AB37C1010000000000000001 /* AuditGateTests+ArchitectureAndIsolation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuditGateTests+ArchitectureAndIsolation.swift"; sourceTree = "<group>"; };
 			AB37C1020000000000000001 /* AuditGateTests+StaticAndSerialization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuditGateTests+StaticAndSerialization.swift"; sourceTree = "<group>"; };
 			AB37C1030000000000000001 /* AuditGateTests+LegacyAndDeterminism.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuditGateTests+LegacyAndDeterminism.swift"; sourceTree = "<group>"; };
@@ -489,6 +491,7 @@
 					AB36A1010000000000000001 /* AuditArchitectureBoundaryGateTests+ExternalCombatAndMutations.swift */,
 					AB36A1020000000000000001 /* AuditArchitectureBoundaryGateTests+DependenciesAndHygiene.swift */,
 					AB36A1030000000000000001 /* AuditArchitectureBoundaryGateTests+BridgeCallsiteGates.swift */,
+					AB36A1040000000000000001 /* AuditArchitectureBoundaryGateTests+LocaleGates.swift */,
 					AB37C1010000000000000001 /* AuditGateTests+ArchitectureAndIsolation.swift */,
 					AB37C1020000000000000001 /* AuditGateTests+StaticAndSerialization.swift */,
 					AB37C1030000000000000001 /* AuditGateTests+LegacyAndDeterminism.swift */,
@@ -917,6 +920,7 @@
 					AB36A0010000000000000001 /* AuditArchitectureBoundaryGateTests+ExternalCombatAndMutations.swift in Sources */,
 					AB36A0020000000000000001 /* AuditArchitectureBoundaryGateTests+DependenciesAndHygiene.swift in Sources */,
 					AB36A0030000000000000001 /* AuditArchitectureBoundaryGateTests+BridgeCallsiteGates.swift in Sources */,
+					AB36A0040000000000000001 /* AuditArchitectureBoundaryGateTests+LocaleGates.swift in Sources */,
 					AB37B0010000000000000001 /* AuditGateTests+ArchitectureAndIsolation.swift in Sources */,
 					AB37B0020000000000000001 /* AuditGateTests+StaticAndSerialization.swift in Sources */,
 					AB37B0030000000000000001 /* AuditGateTests+LegacyAndDeterminism.swift in Sources */,
