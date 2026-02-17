@@ -74,17 +74,62 @@ cleanup_result_bundle_path_if_needed() {
 
 run_once() {
   local log_file="$1"
-  shift
+  local timeout_sec="$2"
+  shift 2
 
+  local timeout_marker="${log_file}.timeout"
+  rm -f "${timeout_marker}" >/dev/null 2>&1 || true
+
+  local exit_code=1
   set +e
-  if command -v xcpretty >/dev/null 2>&1; then
-    xcodebuild "$@" 2>&1 | tee "${log_file}" | xcpretty
-  else
-    xcodebuild "$@" 2>&1 | tee "${log_file}"
-  fi
-  local exit_code="${PIPESTATUS[0]:-1}"
-  set -e
 
+  if [ "${timeout_sec}" -gt 0 ]; then
+    if command -v xcpretty >/dev/null 2>&1; then
+      (
+        set -o pipefail
+        xcodebuild "$@" 2>&1 | tee "${log_file}" | xcpretty
+      ) &
+    else
+      (
+        set -o pipefail
+        xcodebuild "$@" 2>&1 | tee "${log_file}"
+      ) &
+    fi
+    local xcodebuild_pid=$!
+
+    (
+      sleep "${timeout_sec}"
+      if kill -0 "${xcodebuild_pid}" >/dev/null 2>&1; then
+        echo "xcodebuild attempt exceeded ${timeout_sec}s and will be terminated." >&2
+        : > "${timeout_marker}"
+        pkill -TERM -P "${xcodebuild_pid}" >/dev/null 2>&1 || true
+        kill -TERM "${xcodebuild_pid}" >/dev/null 2>&1 || true
+        sleep 5
+        pkill -KILL -P "${xcodebuild_pid}" >/dev/null 2>&1 || true
+        kill -KILL "${xcodebuild_pid}" >/dev/null 2>&1 || true
+      fi
+    ) &
+    local watchdog_pid=$!
+
+    wait "${xcodebuild_pid}"
+    exit_code=$?
+    kill "${watchdog_pid}" >/dev/null 2>&1 || true
+    wait "${watchdog_pid}" >/dev/null 2>&1 || true
+
+    if [ -f "${timeout_marker}" ]; then
+      exit_code=124
+    fi
+  else
+    if command -v xcpretty >/dev/null 2>&1; then
+      xcodebuild "$@" 2>&1 | tee "${log_file}" | xcpretty
+    else
+      xcodebuild "$@" 2>&1 | tee "${log_file}"
+    fi
+    exit_code="${PIPESTATUS[0]:-1}"
+  fi
+
+  set -e
+  rm -f "${timeout_marker}" >/dev/null 2>&1 || true
   return "${exit_code}"
 }
 
@@ -110,6 +155,20 @@ if ! [[ "${retry_delay_sec}" =~ ^[0-9]+$ ]]; then
   exit 2
 fi
 
+attempt_timeout_sec="${XCODEBUILD_ATTEMPT_TIMEOUT_SEC:-}"
+if [[ -z "${attempt_timeout_sec}" ]]; then
+  if is_test_invocation "$@"; then
+    attempt_timeout_sec=480
+  else
+    attempt_timeout_sec=0
+  fi
+fi
+
+if ! [[ "${attempt_timeout_sec}" =~ ^[0-9]+$ ]]; then
+  echo "Invalid XCODEBUILD_ATTEMPT_TIMEOUT_SEC value: ${attempt_timeout_sec}" >&2
+  exit 2
+fi
+
 attempt=1
 while [ "${attempt}" -le "${max_attempts}" ]; do
   if [ "${attempt}" -gt 1 ]; then
@@ -119,7 +178,7 @@ while [ "${attempt}" -le "${max_attempts}" ]; do
   log_file="$(mktemp "${TMPDIR:-/tmp}/xcodebuild-attempt-${attempt}.XXXXXX")"
   echo "xcodebuild attempt ${attempt}/${max_attempts}"
 
-  if run_once "${log_file}" "$@"; then
+  if run_once "${log_file}" "${attempt_timeout_sec}" "$@"; then
     exit_code=0
   else
     exit_code=$?
@@ -130,12 +189,21 @@ while [ "${attempt}" -le "${max_attempts}" ]; do
     exit 0
   fi
 
-  if [ "${attempt}" -ge "${max_attempts}" ] || ! is_transient_simulator_failure "${log_file}"; then
+  timed_out=0
+  if [ "${exit_code}" -eq 124 ]; then
+    timed_out=1
+  fi
+
+  if [ "${attempt}" -ge "${max_attempts}" ] || { [ "${timed_out}" -eq 0 ] && ! is_transient_simulator_failure "${log_file}"; }; then
     echo "xcodebuild failed on attempt ${attempt}/${max_attempts}. Log: ${log_file}" >&2
     exit "${exit_code}"
   fi
 
-  echo "Detected transient simulator/Xcode failure on attempt ${attempt}. Retrying in ${retry_delay_sec}s..."
+  if [ "${timed_out}" -eq 1 ]; then
+    echo "Detected xcodebuild timeout on attempt ${attempt}. Retrying in ${retry_delay_sec}s..."
+  else
+    echo "Detected transient simulator/Xcode failure on attempt ${attempt}. Retrying in ${retry_delay_sec}s..."
+  fi
   recover_simulator_services
   sleep "${retry_delay_sec}"
   attempt=$((attempt + 1))
