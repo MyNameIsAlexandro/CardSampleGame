@@ -64,6 +64,7 @@ final class RitualCombatScene: SKScene {
     var selectedTargetId: String?
     var inputEnabled: Bool = false
     var touchStartLocation: CGPoint?
+    var suppressDefenseRevealForCurrentResolution: Bool = false
 
     // MARK: - Card Drag State
 
@@ -339,5 +340,74 @@ final class RitualCombatScene: SKScene {
         let atmo = ResonanceAtmosphereController()
         atmo.attach(to: self, sceneSize: RitualCombatScene.sceneSize)
         atmosphereController = atmo
+    }
+}
+
+// MARK: - Outcome & Defense Reveal
+
+extension RitualCombatScene {
+
+    func playDefenseReveal(totalDamage: Int, completion: @escaping () -> Void) {
+        guard totalDamage > 0 else {
+            completion()
+            return
+        }
+
+        guard let fateDirector else {
+            completion()
+            return
+        }
+
+        setSubPhaseLabel("Отражение")
+        fateDirector.onRevealComplete = { [weak self] in
+            self?.restorePhaseLabel()
+            completion()
+        }
+        fateDirector.beginReveal(
+            cardName: "Defense",
+            effectiveValue: -totalDamage,
+            isSuitMatch: false,
+            isCritical: totalDamage >= 8,
+            tempo: .minor,
+            targetPosition: amuletNode?.position,
+            damageValue: totalDamage
+        )
+    }
+
+    func emitResult() {
+        guard let sim = simulation else { return }
+
+        let heroAlive = sim.heroHP > 0
+        let anyKilled = sim.enemies.contains { $0.hp <= 0 }
+        let anyPacified = sim.enemies.contains { $0.isPacified }
+        let outcome: RitualCombatOutcome = heroAlive && anyKilled
+            ? .victory(.killed)
+            : (heroAlive && anyPacified ? .victory(.pacified) : .defeat)
+
+        let defeatedEnemies = sim.enemies.filter { $0.hp <= 0 || $0.isPacified }
+        let rewards = (
+            faith: defeatedEnemies.reduce(0) { $0 + $1.faithReward },
+            loot: defeatedEnemies.flatMap(\.lootCardIds)
+        )
+
+        let transaction: (resonance: Float, faith: Int, loot: [String])
+        switch outcome {
+        case .victory(.killed): transaction = (-5, rewards.faith, rewards.loot)
+        case .victory(.pacified): transaction = (5, rewards.faith, rewards.loot)
+        case .defeat: transaction = (0, 0, [])
+        }
+
+        onCombatEnd?(RitualCombatResult(
+            outcome: outcome,
+            hpDelta: sim.heroHP - initialHeroHP,
+            resonanceDelta: transaction.resonance,
+            faithDelta: transaction.faith,
+            lootCardIds: transaction.loot,
+            updatedFateDeckState: sim.snapshot().fateDeckState,
+            turnsPlayed: sim.round,
+            totalDamageDealt: accumulatedDamageDealt,
+            totalDamageTaken: accumulatedDamageTaken,
+            cardsPlayed: accumulatedCardsPlayed
+        ))
     }
 }

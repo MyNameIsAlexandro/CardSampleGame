@@ -22,6 +22,7 @@ extension CombatSimulation {
     /// - Returns: `true` if burn succeeded, `false` if rejected
     @discardableResult
     public func burnForEffort(_ cardId: String) -> Bool {
+        guard phase == .playerAction else { return false }
         guard !selectedCardIds.contains(cardId) else { return false }
         guard effortBonus < maxEffort else { return false }
         guard let index = hand.firstIndex(where: { $0.id == cardId }) else { return false }

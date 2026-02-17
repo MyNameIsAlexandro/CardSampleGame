@@ -19,7 +19,7 @@ final class LocalizationCompletenessTests: XCTestCase {
     }
 
     /// Parse all `static let ... = "key"` values from Utilities/Localization*.swift
-    private func parseL10nKeys() throws -> Set<String> {
+    private func parseAppL10nKeys() throws -> Set<String> {
         guard let root = projectRoot else {
             XCTFail("Could not determine project root"); return []
         }
@@ -47,6 +47,32 @@ final class LocalizationCompletenessTests: XCTestCase {
             }
         }
         return keys
+    }
+
+    /// Parse all engine localization keys from TwilightEngine `L10n.swift`.
+    private func parseEngineL10nKeys() throws -> Set<String> {
+        guard let root = projectRoot else {
+            XCTFail("Could not determine project root"); return []
+        }
+
+        let engineL10nFile = root
+            .appendingPathComponent("Packages/TwilightEngine/Sources/TwilightEngine/Localization/L10n.swift")
+        let content = try String(contentsOf: engineL10nFile, encoding: .utf8)
+
+        var keys = Set<String>()
+        let regex = try NSRegularExpression(pattern: #"case\s+\.\w+\s*:\s*return\s*"([^"]+)""#)
+        let range = NSRange(content.startIndex..., in: content)
+        for match in regex.matches(in: content, range: range) {
+            if let keyRange = Range(match.range(at: 1), in: content) {
+                keys.insert(String(content[keyRange]))
+            }
+        }
+        return keys
+    }
+
+    /// Union of app and engine localization key spaces.
+    private func parseL10nKeys() throws -> Set<String> {
+        try parseAppL10nKeys().union(parseEngineL10nKeys())
     }
 
     /// Parse keys from a .strings file. Returns [key: value] dictionary.

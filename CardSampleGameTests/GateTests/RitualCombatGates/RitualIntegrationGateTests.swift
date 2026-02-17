@@ -457,7 +457,8 @@ final class RitualIntegrationGateTests: XCTestCase {
     func testRitualResultConstructionHasNoPlaceholderTransactionFields() throws {
         let candidateFiles = [
             projectRoot.appendingPathComponent("Views/Combat/RitualCombatScene+Result.swift"),
-            projectRoot.appendingPathComponent("Views/Combat/RitualCombatScene+GameLoop.swift")
+            projectRoot.appendingPathComponent("Views/Combat/RitualCombatScene+GameLoop.swift"),
+            projectRoot.appendingPathComponent("Views/Combat/RitualCombatScene.swift")
         ]
 
         var locatedContent: String?

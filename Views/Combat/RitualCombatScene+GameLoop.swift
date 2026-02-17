@@ -515,6 +515,7 @@ extension RitualCombatScene {
     }
 
     private func performSkipTurn() {
+        suppressDefenseRevealForCurrentResolution = true
         transitionToResolution()
     }
 
@@ -541,6 +542,19 @@ extension RitualCombatScene {
         }
         syncVisuals()
 
+        let shouldShowDefenseReveal = !suppressDefenseRevealForCurrentResolution && !attacks.isEmpty
+        suppressDefenseRevealForCurrentResolution = false
+
+        if shouldShowDefenseReveal {
+            let totalDamage = attacks.reduce(0) { $0 + $1.damage }
+            playDefenseReveal(totalDamage: totalDamage) { [weak self] in
+                self?.run(SKAction.wait(forDuration: 0.2)) { [weak self] in
+                    self?.advancePhase()
+                }
+            }
+            return
+        }
+
         run(SKAction.wait(forDuration: 0.6)) { [weak self] in
             self?.advancePhase()
         }
@@ -556,44 +570,9 @@ extension RitualCombatScene {
             sim.setPhase(.finished)
             advancePhase()
         } else {
+            suppressDefenseRevealForCurrentResolution = false
             transitionToResolution()
         }
     }
 
-    private func emitResult() {
-        guard let sim = simulation else { return }
-
-        let heroAlive = sim.heroHP > 0
-        let anyKilled = sim.enemies.contains { $0.hp <= 0 }
-        let anyPacified = sim.enemies.contains { $0.isPacified }
-        let outcome: RitualCombatOutcome = heroAlive && anyKilled
-            ? .victory(.killed)
-            : (heroAlive && anyPacified ? .victory(.pacified) : .defeat)
-
-        let defeatedEnemies = sim.enemies.filter { $0.hp <= 0 || $0.isPacified }
-        let rewards = (
-            faith: defeatedEnemies.reduce(0) { $0 + $1.faithReward },
-            loot: defeatedEnemies.flatMap(\.lootCardIds)
-        )
-
-        let transaction: (resonance: Float, faith: Int, loot: [String])
-        switch outcome {
-        case .victory(.killed): transaction = (-5, rewards.faith, rewards.loot)
-        case .victory(.pacified): transaction = (5, rewards.faith, rewards.loot)
-        case .defeat: transaction = (0, 0, [])
-        }
-
-        onCombatEnd?(RitualCombatResult(
-            outcome: outcome,
-            hpDelta: sim.heroHP - initialHeroHP,
-            resonanceDelta: transaction.resonance,
-            faithDelta: transaction.faith,
-            lootCardIds: transaction.loot,
-            updatedFateDeckState: sim.snapshot().fateDeckState,
-            turnsPlayed: sim.round,
-            totalDamageDealt: accumulatedDamageDealt,
-            totalDamageTaken: accumulatedDamageTaken,
-            cardsPlayed: accumulatedCardsPlayed
-        ))
-    }
 }

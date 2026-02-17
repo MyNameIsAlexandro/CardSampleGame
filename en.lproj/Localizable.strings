@@ -715,8 +715,25 @@
 "world.balance.yav.strong" = "Yav is strong";
 "world.balance.twilight" = "Twilight";
 "world.balance.nav.advances" = "Nav advances";
+"day.event.tension.increase.title" = "Tension rises";
+"day.event.tension.increase.description" = "World tension reached %d%%";
+"day.event.region.degraded.title" = "Region degrades";
+"day.event.region.degraded.description" = "%@ is now in %@ state";
+"day.event.world.improving.title" = "World recovers";
+"day.event.world.improving.description" = "The forces of Yav grow stronger";
 "story.default.victory" = "Victory!";
 "story.default.defeat" = "Defeat";
+"card.ownership.universal" = "Universal";
+"card.ownership.hero.signature" = "Hero Signature";
+"card.ownership.class.specific" = "Class-Specific";
+"card.ownership.expansion" = "Expansion";
+"card.ownership.requires.unlock" = "Requires Unlock";
+"minigame.combat.victory" = "Combat victory";
+"minigame.combat.defeat" = "Combat defeat";
+"minigame.puzzle.victory" = "Puzzle solved";
+"minigame.puzzle.defeat" = "Puzzle failed";
+"minigame.skillcheck.victory" = "Skill check passed";
+"minigame.skillcheck.defeat" = "Skill check failed";
 
 // MARK: - Action Errors
 "error.invalid.action" = "Invalid action: %@";
@@ -744,6 +761,14 @@
 "error.event.not.found" = "Event %@ not found";
 "error.invalid.choice.index" = "Choice %d invalid (max: %d)";
 "error.choice.requirements.not.met" = "Cannot choose: %@";
+"error.choice.requirements.min.faith" = "Requires at least %d faith";
+"error.choice.requirements.min.health" = "Requires at least %d health";
+"error.choice.requirements.min.balance" = "Requires balance at least %d";
+"error.choice.requirements.max.balance" = "Requires balance at most %d";
+"error.choice.requirements.required.balance" = "Requires %@ alignment";
+"error.choice.requirements.missing.flags" = "Missing required flags: %@";
+"error.choice.requirements.forbidden.flags" = "Forbidden flags present: %@";
+"error.choice.requirements.generic" = "Requirements are not met";
 "error.card.not.in.hand" = "Card %@ not in hand";
 "error.not.enough.actions" = "Not enough actions remaining";
 "error.invalid.target" = "Invalid target";

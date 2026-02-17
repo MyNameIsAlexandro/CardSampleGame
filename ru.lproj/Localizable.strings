@@ -721,8 +721,25 @@
 "world.balance.yav.strong" = "Явь сильна";
 "world.balance.twilight" = "Сумрак";
 "world.balance.nav.advances" = "Навь наступает";
+"day.event.tension.increase.title" = "Напряжение растёт";
+"day.event.tension.increase.description" = "Напряжение мира достигло %d%%";
+"day.event.region.degraded.title" = "Регион деградирует";
+"day.event.region.degraded.description" = "%@ теперь в состоянии %@";
+"day.event.world.improving.title" = "Мир восстанавливается";
+"day.event.world.improving.description" = "Силы Яви укрепляются";
 "story.default.victory" = "Победа!";
 "story.default.defeat" = "Поражение";
+"card.ownership.universal" = "Универсальная";
+"card.ownership.hero.signature" = "Фирменная карта героя";
+"card.ownership.class.specific" = "Классовая";
+"card.ownership.expansion" = "Дополнение";
+"card.ownership.requires.unlock" = "Требуется разблокировка";
+"minigame.combat.victory" = "Победа в бою";
+"minigame.combat.defeat" = "Поражение в бою";
+"minigame.puzzle.victory" = "Головоломка решена";
+"minigame.puzzle.defeat" = "Головоломка провалена";
+"minigame.skillcheck.victory" = "Проверка навыка пройдена";
+"minigame.skillcheck.defeat" = "Проверка навыка провалена";
 
 // MARK: - Action Errors
 "error.invalid.action" = "Недопустимое действие: %@";
@@ -750,6 +767,14 @@
 "error.event.not.found" = "Событие %@ не найдено";
 "error.invalid.choice.index" = "Выбор %d недействителен (максимум: %d)";
 "error.choice.requirements.not.met" = "Невозможно выбрать: %@";
+"error.choice.requirements.min.faith" = "Требуется не менее %d веры";
+"error.choice.requirements.min.health" = "Требуется не менее %d здоровья";
+"error.choice.requirements.min.balance" = "Требуется баланс не ниже %d";
+"error.choice.requirements.max.balance" = "Требуется баланс не выше %d";
+"error.choice.requirements.required.balance" = "Требуется мировоззрение: %@";
+"error.choice.requirements.missing.flags" = "Отсутствуют обязательные флаги: %@";
+"error.choice.requirements.forbidden.flags" = "Присутствуют запрещённые флаги: %@";
+"error.choice.requirements.generic" = "Требования выбора не выполнены";
 "error.card.not.in.hand" = "Карта %@ не в руке";
 "error.not.enough.actions" = "Недостаточно действий";
 "error.invalid.target" = "Недопустимая цель";

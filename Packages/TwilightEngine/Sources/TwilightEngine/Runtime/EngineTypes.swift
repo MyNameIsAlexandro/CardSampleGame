@@ -99,8 +99,8 @@ public struct DayEvent: Identifiable {
     public static func tensionIncrease(day: Int, newTension: Int) -> DayEvent {
         DayEvent(
             day: day,
-            title: "Напряжение растёт",
-            description: "Напряжение мира достигло \(newTension)%",
+            title: L10n.dayEventTensionIncreaseTitle.localized,
+            description: L10n.dayEventTensionIncreaseDescription.localized(with: newTension),
             isNegative: true,
             id: "day_\(day)_tension_increase"
         )
@@ -109,8 +109,8 @@ public struct DayEvent: Identifiable {
     public static func regionDegraded(day: Int, regionName: String, newState: RegionState) -> DayEvent {
         DayEvent(
             day: day,
-            title: "Регион деградирует",
-            description: "\(regionName) теперь в состоянии \(newState.displayName)",
+            title: L10n.dayEventRegionDegradedTitle.localized,
+            description: L10n.dayEventRegionDegradedDescription.localized(with: regionName, newState.displayName),
             isNegative: true,
             id: "day_\(day)_region_degraded_\(regionName.prefix(10).lowercased().replacingOccurrences(of: " ", with: "_"))"
         )
@@ -119,8 +119,8 @@ public struct DayEvent: Identifiable {
     public static func worldImproving(day: Int) -> DayEvent {
         DayEvent(
             day: day,
-            title: "Мир восстанавливается",
-            description: "Силы Яви укрепляются",
+            title: L10n.dayEventWorldImprovingTitle.localized,
+            description: L10n.dayEventWorldImprovingDescription.localized,
             isNegative: false,
             id: "day_\(day)_world_improving"
         )

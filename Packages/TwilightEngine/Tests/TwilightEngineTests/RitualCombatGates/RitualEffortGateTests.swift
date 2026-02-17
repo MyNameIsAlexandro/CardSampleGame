@@ -1,6 +1,6 @@
 /// Файл: Packages/TwilightEngine/Tests/TwilightEngineTests/RitualCombatGates/RitualEffortGateTests.swift
 /// Назначение: Gate-тесты Effort mechanic для Phase 3 Ritual Combat (R1).
-/// Зона ответственности: Проверяет 11 инвариантов Effort: burn, undo, limits, determinism, save/load.
+/// Зона ответственности: Проверяет инварианты Effort: burn, undo, limits, determinism, save/load и phase path.
 /// Контекст: TDD RED — CombatSimulation ещё не реализован. Reference: RITUAL_COMBAT_TEST_MODEL.md §3.2
 
 import XCTest
@@ -24,6 +24,22 @@ final class RitualEffortGateTests: XCTestCase {
     /// Standard fixture: hero (str=5, maxEffort=2), 5 cards, 1 enemy (hp=10, wp=8), seed=42
     private func makeSimulation(seed: UInt64 = 42) -> CombatSimulation {
         CombatSimulation.makeStandard(seed: seed)
+    }
+
+    private func makeMultiEnemySimulation(seed: UInt64 = 42) -> CombatSimulation {
+        let base = CombatSimulation.makeStandard(seed: seed)
+        let enemyA = EncounterEnemy(id: "enemy_a", name: "Enemy A", hp: 12, maxHp: 12, wp: 7, maxWp: 7, defense: 0)
+        let enemyB = EncounterEnemy(id: "enemy_b", name: "Enemy B", hp: 11, maxHp: 11, wp: 6, maxWp: 6, defense: 0)
+        return CombatSimulation(
+            hand: base.hand,
+            heroHP: base.heroHP,
+            heroStrength: base.heroStrength,
+            heroWisdom: base.heroWisdom,
+            heroArmor: base.heroArmor,
+            enemies: [enemyA, enemyB],
+            fateDeckState: base.snapshot().fateDeckState,
+            rngSeed: seed
+        )
     }
 
     // MARK: - INV-EFF-001: Burn moves card to discard (not exhaust)
@@ -245,5 +261,164 @@ final class RitualEffortGateTests: XCTestCase {
             "Snapshot must contain selectedCardIds field")
         XCTAssertNotNil(snapshot.phase,
             "Snapshot must contain phase field")
+    }
+
+    // MARK: - INV-EFF-012: Undo non-existent card (NEGATIVE)
+
+    func testUndoNonExistentCardReturnsFalse() {
+        let sim = makeSimulation()
+
+        let result = sim.undoBurnForEffort("missing_card")
+
+        XCTAssertFalse(result, "Undo must fail for card that was never burned")
+        XCTAssertEqual(sim.effortBonus, 0, "Undo failure must not change effortBonus")
+        XCTAssertTrue(sim.effortCardIds.isEmpty, "Undo failure must not change effortCardIds")
+    }
+
+    // MARK: - INV-EFF-013: Double undo is rejected (NEGATIVE)
+
+    func testUndoAlreadyReturnedCardReturnsFalse() {
+        let sim = makeSimulation()
+        let selectedId = sim.hand[1].id
+        let burnedId = sim.hand[0].id
+
+        sim.selectCard(selectedId)
+        XCTAssertTrue(sim.burnForEffort(burnedId), "Initial burn should succeed")
+        XCTAssertTrue(sim.undoBurnForEffort(burnedId), "First undo should succeed")
+
+        let secondUndo = sim.undoBurnForEffort(burnedId)
+        XCTAssertFalse(secondUndo, "Second undo must fail for already returned card")
+        XCTAssertEqual(sim.effortBonus, 0, "Second undo must not change effortBonus")
+    }
+
+    // MARK: - INV-EFF-014: Effort state resets after commit
+
+    func testEffortResetAfterCommit() {
+        let sim = makeSimulation()
+        let selectedId = sim.hand[2].id
+        let burnedId = sim.hand[0].id
+
+        sim.selectCard(selectedId)
+        XCTAssertTrue(sim.burnForEffort(burnedId))
+        XCTAssertEqual(sim.effortBonus, 1)
+        XCTAssertEqual(sim.effortCardIds, [burnedId])
+
+        _ = sim.commitAttack(targetId: "enemy")
+
+        XCTAssertEqual(sim.effortBonus, 0, "Commit must clear effort bonus")
+        XCTAssertTrue(sim.effortCardIds.isEmpty, "Commit must clear effort card ids")
+        XCTAssertTrue(sim.selectedCardIds.isEmpty, "Commit must clear selected card ids")
+    }
+
+    // MARK: - INV-EFF-015: Skip path does not consume effort
+
+    func testEffortResetAfterSkip() {
+        let sim = makeSimulation()
+        let selectedId = sim.hand[1].id
+        let burnedId = sim.hand[0].id
+
+        sim.selectCard(selectedId)
+        XCTAssertTrue(sim.burnForEffort(burnedId))
+        let effortBefore = sim.effortBonus
+        let effortCardsBefore = sim.effortCardIds
+        let fateDeckBefore = sim.fateDeckCount
+        let fateDiscardBefore = sim.fateDiscardCount
+
+        sim.setPhase(.resolution)
+        _ = sim.resolveEnemyTurn()
+
+        XCTAssertEqual(sim.effortBonus, effortBefore, "Skip path must not consume effort bonus")
+        XCTAssertEqual(sim.effortCardIds, effortCardsBefore, "Skip path must not clear effort cards")
+        XCTAssertEqual(sim.fateDeckCount, fateDeckBefore, "Skip path must not draw Fate card")
+        XCTAssertEqual(sim.fateDiscardCount, fateDiscardBefore, "Skip path must not discard Fate card")
+    }
+
+    // MARK: - INV-EFF-016: Effort bonus applies to influence
+
+    func testEffortBonusInInfluence() {
+        let withEffort = makeSimulation(seed: 123)
+        let withoutEffort = makeSimulation(seed: 123)
+
+        withEffort.selectCard(withEffort.hand[1].id)
+        withoutEffort.selectCard(withoutEffort.hand[1].id)
+        XCTAssertTrue(withEffort.burnForEffort(withEffort.hand[0].id))
+
+        let withEffortResult = withEffort.commitInfluence(targetId: "enemy")
+        let withoutEffortResult = withoutEffort.commitInfluence(targetId: "enemy")
+
+        XCTAssertEqual(
+            withEffortResult.damage,
+            withoutEffortResult.damage + 1,
+            "Single effort burn must add +1 influence damage with identical seed/actions"
+        )
+    }
+
+    // MARK: - INV-EFF-017: Burn outside playerAction is rejected (NEGATIVE)
+
+    func testBurnDuringWrongPhase() {
+        let sim = makeSimulation()
+        let burnCandidate = sim.hand[0].id
+        sim.setPhase(.resolution)
+
+        let result = sim.burnForEffort(burnCandidate)
+
+        XCTAssertFalse(result, "Burn must be rejected outside playerAction phase")
+        XCTAssertEqual(sim.effortBonus, 0, "Rejected burn must not change effort bonus")
+        XCTAssertTrue(sim.hand.contains(where: { $0.id == burnCandidate }),
+            "Rejected burn must leave card in hand")
+    }
+
+    // MARK: - INV-EFF-018: Effort applies only to chosen target in multi-enemy combat
+
+    func testEffortWithMultiEnemy() {
+        let sim = makeMultiEnemySimulation(seed: 42)
+        sim.selectCard(sim.hand[2].id)
+        XCTAssertTrue(sim.burnForEffort(sim.hand[0].id))
+
+        let hpA = sim.enemies[0].hp
+        let hpB = sim.enemies[1].hp
+        _ = sim.commitAttack(targetId: "enemy_a")
+
+        XCTAssertLessThan(sim.enemies[0].hp, hpA, "Targeted enemy must take damage")
+        XCTAssertEqual(sim.enemies[1].hp, hpB, "Non-target enemy must remain unchanged")
+    }
+
+    // MARK: - INV-EFF-019: Mid-combat save/restore supports deterministic resume
+
+    func testMidCombatSaveRestoreResume() {
+        let sim = makeSimulation(seed: 424242)
+        sim.selectCard(sim.hand[1].id)
+        XCTAssertTrue(sim.burnForEffort(sim.hand[0].id))
+
+        let snapshot = sim.snapshot()
+        let resumedA = CombatSimulation.restore(from: snapshot)
+        let resumedB = CombatSimulation.restore(from: snapshot)
+
+        _ = resumedA.commitAttack(targetId: "enemy")
+        resumedA.setPhase(.resolution)
+        _ = resumedA.resolveEnemyTurn()
+
+        _ = resumedB.commitAttack(targetId: "enemy")
+        resumedB.setPhase(.resolution)
+        _ = resumedB.resolveEnemyTurn()
+
+        XCTAssertEqual(resumedA.snapshot(), resumedB.snapshot(),
+            "Resume from identical snapshot must remain deterministic after continuing combat")
+        XCTAssertEqual(resumedA.round, 2, "Resolved round must advance after resume path")
+        XCTAssertEqual(resumedA.phase, .playerAction, "Combat should return to playerAction after enemy turn")
+    }
+
+    // MARK: - INV-EFF-020: Wait path does not draw Fate
+
+    func testWaitPathNoFateDraw() {
+        let sim = makeSimulation(seed: 2026)
+        let drawBefore = sim.fateDeckCount
+        let discardBefore = sim.fateDiscardCount
+
+        sim.setPhase(.resolution)
+        _ = sim.resolveEnemyTurn()
+
+        XCTAssertEqual(sim.fateDeckCount, drawBefore, "Wait path must not consume Fate draw pile")
+        XCTAssertEqual(sim.fateDiscardCount, discardBefore, "Wait path must not change Fate discard pile")
     }
 }
