@@ -5,7 +5,7 @@
 
 import Foundation
 import Combine
-import TwilightEngine
+@preconcurrency import TwilightEngine
 
 /// ViewModel for Content Manager UI
 @MainActor
