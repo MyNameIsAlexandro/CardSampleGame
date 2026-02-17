@@ -4,7 +4,7 @@
 **Status:** Planning
 **Design doc:** `Docs/plans/2026-02-13-ritual-combat-design.md` (v1.2, approved)
 **Policy sync:** CLAUDE.md v4.1
-**Last updated:** 2026-02-14
+**Last updated:** 2026-02-17
 **TDD workflow:** Тестовая модель → Gate-тесты (RED) → Код (GREEN) → Полировка
 **Fate Deck audit:** `Design/COMBAT_DIPLOMACY_SPEC.md` Приложение D (F1–F6)
 
@@ -409,6 +409,9 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 - Получено явное одобрение на удаление legacy combat scene.
 - Удалены deprecated файлы `CombatScene.swift`, `CombatScene+*.swift`, `CombatSceneView.swift` из `EchoScenes`.
 - Верификация `swift build --package-path Packages/EchoScenes` проходит после удаления.
+- Выровнена локализация `story_rewards` (RU) в `TwilightMarchesActI`, пересобран `TwilightMarchesActI.pack`.
+- Добавлен и закреплён gate `testBundledTwilightMarchesStoryRewardsKeepRussianLocalization` (проверка RU-текста + запрет EN==RU drift).
+- Локально подтверждено: `BundledPacksValidationTests` и `LocalizationResolutionTests` — зелёные.
 
 **Deliverables:**
 - Удаление deprecated: `CombatScene.swift`, `CombatScene+*.swift`
@@ -446,6 +449,7 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 | `testCritCardNeutralSuit` | R0 | crit suit=yav |
 | `testStickyCardResonanceModifyCapped` | R0 | sticky |modifyValue| ≤ 1 |
 | `testNoStaleCardIdsInContent` | R0 | no dangling refs after card rename |
+| `testBundledTwilightMarchesStoryRewardsKeepRussianLocalization` | R10b | story reward карты сохраняют корректные RU name/description и не схлопываются в EN |
 | `testEffortBurnMovesToDiscard` | R1 | Effort → discardPile |
 | `testEffortDoesNotSpendEnergy` | R1 | Effort не тратит energy |
 | `testEffortDoesNotAffectFateDeck` | R1 | Effort не меняет Fate Deck |

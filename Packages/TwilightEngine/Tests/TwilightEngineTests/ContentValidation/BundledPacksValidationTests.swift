@@ -66,6 +66,55 @@ final class BundledPacksValidationTests: XCTestCase {
         }
     }
 
+    func testBundledTwilightMarchesStoryRewardsKeepRussianLocalization() throws {
+        let packURLs = Self.findBundledPackURLs()
+        guard let storyPackURL = packURLs.first(where: { $0.lastPathComponent == "TwilightMarchesActI.pack" }) else {
+            XCTFail("TwilightMarchesActI.pack not found in bundled resources")
+            return
+        }
+
+        let content = try BinaryPackReader.loadContent(from: storyPackURL)
+        let expectedRussianCards: [String: (name: String, description: String)] = [
+            "cursed_plate": ("Проклятая Пластина", "Фрагмент доспеха проклятого рыцаря. Он всё ещё хранит защитную силу."),
+            "sorcerers_tome": ("Том Колдуна", "Книга запретных знаний. Дарует тёмную мудрость и прозрение."),
+            "beast_hide": ("Шкура Зверя", "Крепкая шкура дикого зверя. Даёт 2 защиты на этот ход."),
+            "forest_blessing": ("Благословение Леса", "Добыча за победу над Лешим. Исцеляет на 3 в лесных регионах."),
+            "void_shard": ("Осколок Пустоты", "Осколок пустоты между мирами. Мощный, но развращающий."),
+            "defender_blessing": ("Благословение Защитника", "Награда за завершение основного задания. Навсегда увеличивает защиту на 2."),
+            "guardian_seal": ("Печать Хранителя", "Древняя печать Лешего-Хранителя. Смещает баланс к Свету."),
+            "anchor_power": ("Сила Якоря", "Черпает силу якорей. Исцеляет на 5 и даёт 1 веру."),
+            "ancient_power": ("Древняя Сила", "Первородная сила лесного хранителя. Навсегда увеличивает силу."),
+            "witch_knowledge": ("Знание Ведьмы", "Тёмная мудрость болотной ведьмы. Возьмите 2 карты."),
+            "mountain_blessing": ("Благословение Гор", "Награда от Горного Духа. +3 защиты на один бой."),
+            "shadow_fang": ("Клык Тени", "Клык, вырванный у теневого волка. Бьёт с тёмной стремительностью.")
+        ]
+
+        for (cardId, expected) in expectedRussianCards {
+            guard let cardDefinition = content.cards[cardId] else {
+                XCTFail("Missing expected story reward card '\(cardId)' in TwilightMarchesActI.pack")
+                continue
+            }
+
+            guard case .inline(let localizedName) = cardDefinition.name else {
+                XCTFail("Card '\(cardId)' name must use inline localization in bundled pack")
+                continue
+            }
+            XCTAssertEqual(localizedName.ru, expected.name, "Unexpected ru name for '\(cardId)'")
+            XCTAssertNotEqual(localizedName.en, localizedName.ru, "Card '\(cardId)' should not collapse en/ru name values")
+
+            guard case .inline(let localizedDescription) = cardDefinition.description else {
+                XCTFail("Card '\(cardId)' description must use inline localization in bundled pack")
+                continue
+            }
+            XCTAssertEqual(localizedDescription.ru, expected.description, "Unexpected ru description for '\(cardId)'")
+            XCTAssertNotEqual(
+                localizedDescription.en,
+                localizedDescription.ru,
+                "Card '\(cardId)' should not collapse en/ru description values"
+            )
+        }
+    }
+
     func testBundledCoreHeroesStarterCardsResolveToRussianInRuntime() throws {
         let packURLs = Self.findBundledPackURLs()
         let registry = ContentRegistry()
