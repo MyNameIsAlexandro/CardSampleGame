@@ -53,7 +53,7 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 - `R8`: PENDING — HUD & Info Layer
 - `R9`: PENDING — Integration & Migration
 - `R10a`: PENDING — Vertical Slice Validation
-- `R10b`: IN_PROGRESS — Legacy Retirement & Cleanup
+- `R10b`: DONE — Legacy Retirement & Cleanup
 
 ---
 
@@ -394,7 +394,7 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 
 ---
 
-### R10b [IN_PROGRESS] — Legacy Retirement & Cleanup
+### R10b [DONE] — Legacy Retirement & Cleanup
 
 **Goal:** Удаление deprecated боевого кода после подтверждённой стабильности нового пути.
 
@@ -405,13 +405,15 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 2. Smoke test на реальном девайсе (кампания: 3+ боёв, resume: save→kill→restore)
 3. Явное одобрение на удаление
 
-**Progress snapshot (2026-02-17):**
+**Completion snapshot (2026-02-17):**
 - Получено явное одобрение на удаление legacy combat scene.
 - Удалены deprecated файлы `CombatScene.swift`, `CombatScene+*.swift`, `CombatSceneView.swift` из `EchoScenes`.
 - Верификация `swift build --package-path Packages/EchoScenes` проходит после удаления.
 - Выровнена локализация `story_rewards` (RU) в `TwilightMarchesActI`, пересобран `TwilightMarchesActI.pack`.
 - Добавлен и закреплён gate `testBundledTwilightMarchesStoryRewardsKeepRussianLocalization` (проверка RU-текста + запрет EN==RU drift).
 - Локально подтверждено: `BundledPacksValidationTests` и `LocalizationResolutionTests` — зелёные.
+- Пройден `run_release_check.sh` (rc_engine_twilight / rc_app / rc_build_content / rc_full).
+- Локально подтверждены acceptance-критерии: `testOldCombatSceneNotImportedInProduction` зелёный, сборки iOS/macOS зелёные.
 
 **Deliverables:**
 - Удаление deprecated: `CombatScene.swift`, `CombatScene+*.swift`
