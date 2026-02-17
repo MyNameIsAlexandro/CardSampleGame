@@ -53,7 +53,7 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 - `R8`: PENDING — HUD & Info Layer
 - `R9`: PENDING — Integration & Migration
 - `R10a`: PENDING — Vertical Slice Validation
-- `R10b`: PENDING — Legacy Retirement & Cleanup
+- `R10b`: IN_PROGRESS — Legacy Retirement & Cleanup
 
 ---
 
@@ -394,7 +394,7 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 
 ---
 
-### R10b [PENDING] — Legacy Retirement & Cleanup
+### R10b [IN_PROGRESS] — Legacy Retirement & Cleanup
 
 **Goal:** Удаление deprecated боевого кода после подтверждённой стабильности нового пути.
 
@@ -404,6 +404,11 @@ R0 (Fate Balance) ──→ R1 (Effort) ─────────────�
 1. R10a Go/No-Go пройдены
 2. Smoke test на реальном девайсе (кампания: 3+ боёв, resume: save→kill→restore)
 3. Явное одобрение на удаление
+
+**Progress snapshot (2026-02-17):**
+- Получено явное одобрение на удаление legacy combat scene.
+- Удалены deprecated файлы `CombatScene.swift`, `CombatScene+*.swift`, `CombatSceneView.swift` из `EchoScenes`.
+- Верификация `swift build --package-path Packages/EchoScenes` проходит после удаления.
 
 **Deliverables:**
 - Удаление deprecated: `CombatScene.swift`, `CombatScene+*.swift`
