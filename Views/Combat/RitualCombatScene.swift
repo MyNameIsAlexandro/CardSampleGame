@@ -132,7 +132,7 @@ final class RitualCombatScene: SKScene {
 
         if let roundLabel = childNode(withName: "roundLabel") as? SKLabelNode {
             let phaseName = phaseDisplayName(sim.phase)
-            roundLabel.text = "Раунд \(sim.round) · \(phaseName)"
+            roundLabel.text = formattedRoundPhaseLabel(round: sim.round, phaseText: phaseName)
         }
 
         if let fateLabel = childNode(withName: "fateLabel") as? SKLabelNode {
@@ -296,21 +296,25 @@ final class RitualCombatScene: SKScene {
 
     func phaseDisplayName(_ phase: CombatSimulationPhase) -> String {
         switch phase {
-        case .playerAction: return "Ритуал"
-        case .resolution: return "Последствия"
-        case .finished: return "Итог"
+        case .playerAction: return L10n.encounterPhasePlayerAction.localized
+        case .resolution: return L10n.encounterPhaseEnemyResolution.localized
+        case .finished: return L10n.encounterPhaseRoundEnd.localized
         }
     }
 
     func setSubPhaseLabel(_ text: String) {
         guard let roundLabel = childNode(withName: "roundLabel") as? SKLabelNode,
               let sim = simulation else { return }
-        roundLabel.text = "Раунд \(sim.round) · \(text)"
+        roundLabel.text = formattedRoundPhaseLabel(round: sim.round, phaseText: text)
     }
 
     func restorePhaseLabel() {
         guard let sim = simulation else { return }
         setSubPhaseLabel(phaseDisplayName(sim.phase))
+    }
+
+    func formattedRoundPhaseLabel(round: Int, phaseText: String) -> String {
+        "\(L10n.encounterRoundLabel.localized(with: round)) · \(phaseText)"
     }
 
     // MARK: - Combat Log
@@ -358,13 +362,13 @@ extension RitualCombatScene {
             return
         }
 
-        setSubPhaseLabel("Отражение")
+        setSubPhaseLabel(L10n.combatFateDefense.localized)
         fateDirector.onRevealComplete = { [weak self] in
             self?.restorePhaseLabel()
             completion()
         }
         fateDirector.beginReveal(
-            cardName: "Defense",
+            cardName: L10n.combatFateDefense.localized,
             effectiveValue: -totalDamage,
             isSuitMatch: false,
             isCritical: totalDamage >= 8,

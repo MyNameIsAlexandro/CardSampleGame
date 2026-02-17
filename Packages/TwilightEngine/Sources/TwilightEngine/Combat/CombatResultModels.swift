@@ -5,6 +5,25 @@
 
 import Foundation
 
+private func renderCombatLogIcon(_ rawIcon: String) -> String {
+    let icon = rawIcon.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !icon.isEmpty else { return "•" }
+
+    if icon.contains(".") {
+        let token = icon.lowercased()
+        if token.contains("heart") { return "❤️" }
+        if token.contains("shield") { return "🛡️" }
+        if token.contains("cross") { return "✝️" }
+        if token.contains("sparkles") { return "✨" }
+        if token.contains("bolt") || token.contains("flame") { return "⚡" }
+        if token.contains("moon") { return "🌙" }
+        if token.contains("sun") { return "☀️" }
+        return "•"
+    }
+
+    return icon
+}
+
 /// Attack result with full breakdown.
 public struct CombatResult {
     public let isHit: Bool
@@ -59,7 +78,9 @@ public struct CombatResult {
         lines.append("   = \(attackParts.joined(separator: " + "))")
 
         for effect in attackRoll.modifiers {
-            lines.append("   \(effect.icon) \(effect.description): \(effect.value > 0 ? "+" : "")\(effect.value)")
+            lines.append(
+                "   \(renderCombatLogIcon(effect.icon)) \(effect.description): \(effect.value > 0 ? "+" : "")\(effect.value)"
+            )
         }
 
         if isHit, let damage = damageCalculation {
@@ -67,12 +88,14 @@ public struct CombatResult {
             lines.append(L10n.calcBaseDamage.localized(with: damage.base))
 
             for modifier in damage.modifiers {
-                lines.append("   \(modifier.icon) \(modifier.description): \(modifier.value > 0 ? "+" : "")\(modifier.value)")
+                lines.append(
+                    "   \(renderCombatLogIcon(modifier.icon)) \(modifier.description): \(modifier.value > 0 ? "+" : "")\(modifier.value)"
+                )
             }
         }
 
         for effect in specialEffects {
-            lines.append("\(effect.icon) \(effect.description)")
+            lines.append("\(renderCombatLogIcon(effect.icon)) \(effect.description)")
         }
 
         return lines.joined(separator: "\n")

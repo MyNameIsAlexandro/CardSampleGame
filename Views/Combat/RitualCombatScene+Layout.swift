@@ -109,7 +109,10 @@ extension RitualCombatScene {
         roundLabel.name = "roundLabel"
         roundLabel.fontSize = 13
         roundLabel.fontColor = SKColor(white: 0.6, alpha: 1)
-        roundLabel.text = "Раунд 1 · Ритуал"
+        roundLabel.text = formattedRoundPhaseLabel(
+            round: 1,
+            phaseText: phaseDisplayName(.playerAction)
+        )
         roundLabel.horizontalAlignmentMode = .center
         roundLabel.position = CGPoint(x: centerX, y: 690 - 14)
         roundLabel.zPosition = 30

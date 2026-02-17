@@ -65,7 +65,7 @@ TWILIGHT_TEST_VERBOSE=1 swift test --package-path Packages/TwilightEngine --filt
 - **App gate layers**:
   - quality/l10n/design gates,
   - content validation gates,
-  - unit/view suites (`HeroRegistryTests`, `SaveLoadTests`, `ContentManagerTests`, `ContentRegistryTests`, `PackLoaderTests`, `HeroPanelTests`),
+  - unit/view suites (`HeroRegistryTests`, `SaveLoadTests`, `ContentManagerTests`, `ContentRegistryTests`, `PackLoaderTests`, `HeroPanelTests`, `RitualIntegrationMappingsGateTests`),
   - audit core suite in `AuditGateTests` (asset/content/save/runtime contracts and journal/runtime boundary checks),
   - `CodeHygieneTests` enforces hard `<=600` line limit and `<=5` public types per file for first-party Swift code (excluding vendor/build artifacts; no legacy exemptions),
   - `CodeHygieneTests.testFirstPartySwiftFilesHaveCanonicalFileHeaders` enforces mandatory 4-line Russian file-header contract for first-party Swift files,
@@ -75,7 +75,7 @@ TWILIGHT_TEST_VERBOSE=1 swift test --package-path Packages/TwilightEngine --filt
   - `AuditArchitectureBoundaryGateTests.testEngineInvalidActionUsesTypedReasonCodes` blocks regression to `invalidAction(reason: String)` and raw string reason literals in `Engine/Core`.
   - `SaveLoadTests.testEchoEncounterBridgeRelocalizesResumeDeckCardsFromRegistry` enforces resume-path relocalization for external-combat payload display fields via active `ContentRegistry` + `LocalizationManager` (prevents stale EN/service-token leaks in RU UI).
   - `AuditArchitectureBoundaryGateTests.testHeroAndAbilityIconsAreNotRenderedAsRawTokens` blocks icon/service-token rendering as plain `Text`.
-  - Epic 35 external-combat stress determinism checks in `ExternalCombatPersistenceTests` (resume fingerprint stability across repeated save/load + interrupted-commit parity after resume cycles; event lock clears consistently on combat commit).
+  - Epic 35 external-combat stress determinism checks in `INV_RESUME47_GateTests` (resume fingerprint stability across repeated save/load + interrupted-commit parity after resume cycles; event lock clears consistently on combat commit).
   - Epic 64 test observability hardening keeps loader/runtime debug traces quiet by default; set `TWILIGHT_TEST_VERBOSE=1` to re-enable detailed diagnostics in local debug runs.
 - **Destination/tooling stability helpers**:
   - `.github/ci/select_ios_destination.sh` resolves a concrete simulator `name+OS` from current Xcode runtime set.

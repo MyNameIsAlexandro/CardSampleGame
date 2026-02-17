@@ -188,7 +188,7 @@ Phase 3 (Ritual Combat) вводит 5 gate-тест сьютов:
 - prevent direct `TwilightEngine` package linkage in `CardSampleGameTests` target (host app is the single runtime owner, enforced by `AuditGateTests`).
 - Engine/Core static allowlist gate enforces that critical state mutation points stay centralized in approved files.
 - Stress determinism matrix (Epic 35):
-  - `ExternalCombatPersistenceTests` verifies pending external-combat fingerprint stability across repeated save/load cycles,
+  - `INV_RESUME47_GateTests` verifies pending external-combat fingerprint stability across repeated save/load cycles,
   - interrupted-combat commit parity is validated after resume round-trips (`commitExternalCombat(.escaped, ...)`).
   - `combatFinish` commit path clears event lock (`currentEventId/currentEvent`) after quest-trigger processing to avoid stale event drift between fresh and resumed sessions.
 
@@ -406,7 +406,7 @@ bash .github/ci/run_release_check.sh TestResults/QualityDashboard CardSampleGame
   - `ManagedPack` equality extracted to `ContentPacks/ManagedPack+Equatable.swift`,
   - gate-suite helper/migration logic redistributed across existing `AuditGateTests+*` and `CodeHygieneTests+*` modules to keep files below near-limit threshold.
 - Validation policy for decomposition waves:
-  - mandatory: TwilightEngine determinism/schema smoke (`INV_RNG`, `INV_SCHEMA28`, `INV_REPLAY30`, `INV_RESUME47`, `ContentRegistryRegistrySyncTests`),
+  - mandatory: TwilightEngine determinism/schema smoke (`INV_RNG_GateTests`, `INV_SCHEMA28_GateTests`, `INV_REPLAY30_GateTests`, `INV_RESUME47_GateTests`, `ContentRegistryRegistrySyncTests`),
   - mandatory: app architecture gate suite (`AuditGateTests`, `AuditArchitectureBoundaryGateTests`) when simulator infrastructure is available.
 - Infra risk note:
   - `xcodebuild` test runs may fail with runner bootstrap crash (`Early unexpected exit`) unrelated to compile/contracts; classify as `infra_transient` and re-run under CI/local simulator health check before regression triage.

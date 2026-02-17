@@ -14,7 +14,10 @@ extension RitualCombatScene {
 
     func advancePhase() {
         guard let sim = simulation else { return }
-        logEntry("Раунд \(sim.round) · \(phaseDisplayName(sim.phase))", type: .system)
+        logEntry(
+            formattedRoundPhaseLabel(round: sim.round, phaseText: phaseDisplayName(sim.phase)),
+            type: .system
+        )
 
         switch sim.phase {
         case .playerAction:
@@ -47,7 +50,7 @@ extension RitualCombatScene {
     private func showEnemyIntent(completion: @escaping () -> Void) {
         guard let sim = simulation else { completion(); return }
 
-        setSubPhaseLabel("Угроза")
+        setSubPhaseLabel(L10n.encounterPhaseIntent.localized)
 
         for (i, enemy) in sim.enemies.enumerated() where enemy.hp > 0 {
             guard i < idolNodes.count else { continue }
@@ -392,13 +395,13 @@ extension RitualCombatScene {
         case .selectCard(let cardId):
             sim.selectCard(cardId)
             let name = sim.hand.first(where: { $0.id == cardId })?.name ?? cardId
-            logEntry("Выбрана карта: \(name)")
+            logEntry(L10n.encounterLogCardPlayed.localized(with: name))
             syncVisuals()
 
         case .burnForEffort(let cardId):
             if sim.burnForEffort(cardId) {
                 let name = sim.hand.first(where: { $0.id == cardId })?.name ?? cardId
-                logEntry("Сожжена для усилия: \(name)")
+                logEntry("🔥 " + L10n.encounterLogCardPlayed.localized(with: name))
                 bonfireNode?.playBurnAnimation()
                 onSoundEffect?("effortBurn")
                 onHaptic?("medium")
@@ -425,10 +428,10 @@ extension RitualCombatScene {
         accumulatedCardsPlayed += sim.selectedCardIds.count
         let result = sim.commitAttack(targetId: target)
         accumulatedDamageDealt += result.damage
-        logEntry("Удар → \(result.damage) урона", type: .damage)
+        logEntry("\(L10n.encounterActionAttack.localized) → \(result.damage)", type: .damage)
 
         if let fate = result.fateDrawResult {
-            setSubPhaseLabel("Судьба")
+            setSubPhaseLabel(L10n.fateChoiceTitle.localized)
             let idolPos = idolNodes.first(where: { $0.enemyId == target })?.position
             fateDirector?.onRevealComplete = { [weak self] in
                 self?.restorePhaseLabel()
@@ -476,10 +479,10 @@ extension RitualCombatScene {
         accumulatedCardsPlayed += sim.selectedCardIds.count
         let result = sim.commitInfluence(targetId: target)
         accumulatedDamageDealt += result.damage
-        logEntry("Влияние → \(result.damage) к воле", type: .damage)
+        logEntry("\(L10n.encounterActionInfluence.localized) → \(result.damage)", type: .damage)
 
         if let fate = result.fateDrawResult {
-            setSubPhaseLabel("Судьба")
+            setSubPhaseLabel(L10n.fateChoiceTitle.localized)
             let idolPos = idolNodes.first(where: { $0.enemyId == target })?.position
             fateDirector?.onRevealComplete = { [weak self] in
                 self?.restorePhaseLabel()
@@ -533,7 +536,7 @@ extension RitualCombatScene {
         let attacks = sim.resolveEnemyTurn()
         for attack in attacks {
             accumulatedDamageTaken += attack.damage
-            logEntry("Враг атакует → \(attack.damage) урона", type: .damage)
+            logEntry("\(L10n.encounterPhaseEnemyResolution.localized) → \(attack.damage)", type: .damage)
         }
 
         if !attacks.isEmpty {
