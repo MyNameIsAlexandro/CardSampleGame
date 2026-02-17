@@ -216,9 +216,11 @@
 
 ### 11.0 Phase system overview
 - Проект использует фазовую систему разработки для контроля целостности артефактов.
+- **Основной режим:** Agent Teams (секция 12) — Lead-агент автоматически спавнит phase-агентов.
+- **Fallback режим:** ручное переключение через `./phase.sh` (для работы без Agent Teams).
 - Текущая фаза хранится в `.claude/phase.json` и переключается скриптом `./phase.sh`.
-- Deny-списки в `.claude/settings.local.json` технически блокируют Edit вне текущей фазы.
-- Claude **не может** самостоятельно переключать фазу или менять `phase.json`/`settings.local.json`.
+- В ручном режиме deny-списки в `.claude/settings.local.json` блокируют Edit вне текущей фазы.
+- В режиме Agent Teams контроль зон — через промпты агентов (`.claude/agents/*.md`).
 
 ### 11.1 При старте сессии
 Claude обязан прочитать `.claude/phase.json` и показать:
@@ -229,6 +231,8 @@ Claude обязан прочитать `.claude/phase.json` и показать:
 Готов к работе. Что делаем?
 ```
 Если `.claude/phase.json` отсутствует — сообщить пользователю: `"Фаза не установлена. Запустите ./phase.sh <phase> перед началом работы."`
+
+При использовании Agent Teams (секция 12) ручное переключение фаз не требуется — Lead автоматически спавнит нужных phase-агентов.
 
 ### 11.2 Фазы и разрешённые зоны
 
@@ -277,3 +281,43 @@ Claude обязан прочитать `.claude/phase.json` и показать:
 - Claude не редактирует `.claude/phase.json` или `.claude/settings.local.json`.
 - Claude не обходит deny-блокировку через Bash/Write/другие инструменты.
 - Claude не объединяет несколько cross-phase изменений без отдельного одобрения каждого.
+
+---
+
+## 12) Agent Teams Integration
+
+### 12.1 Phase-агенты
+Проект использует Agent Teams для автоматического управления фазами.
+Lead-агент декомпозирует задачу и спавнит phase-агентов:
+
+| Агент | Файл | Зона | Тип |
+|-------|------|------|-----|
+| code-agent | `.claude/agents/code-agent.md` | Sources/**, App/**, Views/** и др. | general-purpose |
+| test-agent | `.claude/agents/test-agent.md` | *Tests/**, gate_inventory.json | general-purpose |
+| docs-agent | `.claude/agents/docs-agent.md` | Docs/**, README.md | general-purpose |
+| content-agent | `.claude/agents/content-agent.md` | StoryPacks/**, CharacterPacks/**, lproj/** | general-purpose |
+| auditor | `.claude/agents/auditor.md` | ничего (read-only) | Explore |
+
+### 12.2 Параллельность
+- `code-agent` + `test-agent` — допускается одновременно.
+- Все остальные комбинации — только последовательно.
+- `contract` фаза — только ручная в основной сессии Lead.
+
+### 12.3 Cross-phase протокол в Agent Teams
+Если phase-агент обнаруживает необходимость изменения вне своей зоны:
+1. Агент отправляет Lead сообщение с обоснованием (ЧТО/ЗАЧЕМ/ВЛИЯНИЕ).
+2. Lead формирует STOP-отчёт пользователю.
+3. Пользователь одобряет → Lead делегирует нужному phase-агенту.
+4. Агент НЕ делает изменение сам — только описывает что нужно.
+
+### 12.4 Аудит
+- После завершения phase-агентов Lead спавнит auditor для проверки.
+- Auditor — read-only, не редактирует файлы.
+- Auditor проверяет: архитектуру, контракты, качество, gate-тесты.
+- По запросу Lead формирует пакет для внешнего аудита (diff + тесты + отчёт).
+
+### 12.5 Запрещено в Agent Teams
+- Phase-агенты не меняют phase.json и settings.local.json.
+- Phase-агенты не меняют CLAUDE.md и .claude/agents/*.
+- Phase-агенты не выходят за свою зону без одобрения.
+- Auditor не редактирует файлы.
