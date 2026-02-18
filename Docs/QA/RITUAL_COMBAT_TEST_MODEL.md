@@ -1,738 +1,1088 @@
 # Disposition Combat Test Model (Phase 3)
 
-**Scope:** Полная тестовая модель Phase 3 — Disposition Combat (единая шкала, momentum, enemy modes).
-**Status:** Draft v4 — переход с Effort/Ritual Combat (v3) на Disposition Combat v2.5.
+**Scope:** Комплексная тестовая модель Phase 3 — Disposition Combat.
+**Status:** v5.3 — sacrifice cost model finalized (card.cost based), auditor rounds 1-3 complete.
 **Policy sync:** CLAUDE.md v4.1, QUALITY_CONTROL_MODEL.md §2a, ENCOUNTER_TEST_MODEL.md
-**Design ref:** [`docs/plans/2026-02-18-disposition-combat-design.md`](../../docs/plans/2026-02-18-disposition-combat-design.md) (v2.5, SoT), [`COMBAT_DIPLOMACY_SPEC.md`](../Design/COMBAT_DIPLOMACY_SPEC.md) (v2.0)
+**Design ref:** [`docs/plans/2026-02-18-disposition-combat-design.md`](../../docs/plans/2026-02-18-disposition-combat-design.md) (v2.5, SoT)
 **Last updated:** 2026-02-18
-
-> **TRANSITION NOTE:** Этот документ находится в процессе перехода с Effort/Ritual Combat модели (v3, `plans/2026-02-13-ritual-combat-design.md`) на Disposition Combat v2.5. Ни один тест ниже ещё не реализован. Категории gate-тестов (35+) определены в Disposition Combat Design §10 и QUALITY_CONTROL_MODEL.md §2a. Полная перезапись тест-модели произойдёт при планировании имплементации.
->
-> **Что заменяется:**
-> - Effort mechanic (burn карт для +1 к Fate Test) → Sacrifice mode (exhaust карты → heal + enemy buff)
-> - Dual Track (HP/WP) → Disposition Track (-100…+100)
-> - Kill/Pacify outcomes → Destroy/Subjugate outcomes
-> - Seal-based commit (Attack/Influence/Wait) → Drag-and-drop (Strike/Influence/Sacrifice)
-> - Старые epic IDs (R0-R10) → новые epic IDs (TBD при планировании имплементации)
 
 ---
 
 ## 1. Организация файлов
 
 Тесты разделены на два корня по принципу зависимостей:
-- **Engine gates (R0, R1)** — pure logic, без SpriteKit/SwiftUI → SPM engine tests
-- **App gates (R2, R3, R6, R7, R9)** — требуют SpriteKit/View типы → Xcode app tests
+- **Engine gates** — pure logic, без SpriteKit/SwiftUI → SPM engine tests
+- **App gates** — требуют SpriteKit/View типы → Xcode app tests
 
 ```
-Packages/TwilightEngine/Tests/TwilightEngineTests/
-├── RitualCombatGates/
-│   ├── FateDeckBalanceGateTests.swift       (R0: 5 тестов)
-│   └── RitualEffortGateTests.swift          (R1: 11 тестов)
+Packages/TwilightEngine/Tests/
+├── GateTests/
+│   ├── DispositionMechanicsGateTests.swift     (9 тестов)
+│   ├── MomentumGateTests.swift                 (5 тестов)
+│   ├── EnergyGateTests.swift                   (6 тестов)   ← NEW
+│   ├── FateKeywordGateTests.swift              (13 тестов)
+│   ├── EnemyModeGateTests.swift                (12 тестов)
+│   ├── EnemyActionGateTests.swift              (5 тестов)   ← NEW
+│   ├── SystemicAsymmetryGateTests.swift        (4 тестов)
+│   └── DispositionStressTests.swift            (5 тестов)
 ├── LayerTests/
-│   └── EffortMechanicTests.swift            (R1: unit-тесты CombatSimulation)
+│   ├── DispositionCombatSimulationTests.swift   (unit-тесты фасада)
+│   ├── DispositionCombatCalculatorTests.swift   (unit-тесты формулы)
+│   ├── EnemyAITests.swift                       (unit-тесты AI mode selection)
+│   └── AffinityMatrixTests.swift                (unit-тесты стартовой disposition)
 └── IntegrationTests/
-    └── RitualCombatIntegrationTests.swift   (R9: e2e scenario с ContentRegistry)
+    ├── DispositionIntegrationTests.swift        (end-to-end сценарии)
+    └── CombatSimulationAgentTests.swift         (5 агентов × метрики)
 
 CardSampleGameTests/
-├── GateTests/RitualCombatGates/
-│   ├── RitualSceneGateTests.swift           (R2+R3: 6 тестов, static scan + SpriteKit)
-│   ├── RitualAtmosphereGateTests.swift      (R7: 2 теста, SpriteKit controller)
-│   └── RitualIntegrationGateTests.swift     (R6+R9+R10a: 8 тестов, FateReveal + Scene + Replay)
-└── Unit/RitualCombat/
-    ├── FateRevealTests.swift                (R6: unit-тесты FateRevealDirector)
-    └── DragDropControllerTests.swift        (R3: unit-тесты DragDropController)
+├── GateTests/
+│   ├── DispositionCardPlayGateTests.swift       (5 тестов)
+│   ├── DispositionArchBoundaryGateTests.swift   (5 тестов)
+│   └── DispositionSceneGateTests.swift          (4 тестов)
+└── Views/
+    └── DispositionCombatViewTests.swift         (UI snapshot tests)
 ```
 
-**Обоснование разделения:** SPM target `TwilightEngine` не может импортировать SpriteKit/SwiftUI.
-Тесты R2/R3/R7 сканируют или инстанцируют Scene/Controller типы, которые зависят от SpriteKit.
-R6 (FateRevealDirector) и R9 (integration с Scene) тоже требуют View-зависимостей.
-
-**Правила (наследуются от ENCOUNTER_TEST_MODEL.md):**
-- Gate < 2 сек per test (hard limit), без system RNG, fixtures hardcoded + fixed seeds
-- Suite-level target budget: ≤ 60 сек на suite (soft — CI jitter допустим, но систематическое превышение = красный флаг)
-- 1 файл = 1 компонент (не по фиче)
-- Каждый файл ≤ 600 строк (CLAUDE.md §5.1)
-- INV-{MODULE}-{NNN} именование для инвариантов
+**Итого:** 68 gate-тестов + 5 stress + layer + integration + simulation.
 
 ---
 
-## 2. Инвентаризация изменений
+## 2. Инварианты (INV-DC-xxx)
 
-### 2.1 Новые тесты (32)
+Каждый инвариант имеет уникальный ID формата `INV-DC-{NNN}`.
 
-| # | Тест | Suite | Epic | Тип | Что проверяет |
-|---|------|-------|------|-----|---------------|
-| 1 | `testMatchMultiplierFromBalancePack` | FateDeckBalanceGateTests | R0 | Gate+ | пропорциональность: два BalancePack (1.0 vs 2.0) → effect × 2; default = 1.5 (surge в combatPhysical) |
-| 2 | `testSurgeSuitDistribution` | FateDeckBalanceGateTests | R0 | Gate+ | ≥1 surge-карта с suit ≠ prav |
-| 3 | `testCritCardNeutralSuit` | FateDeckBalanceGateTests | R0 | Gate+ | crit card: suit = yav |
-| 4 | `testStickyCardResonanceModifyCapped` | FateDeckBalanceGateTests | R0 | Gate+ | `if card.isSticky → ∀ resonanceRules: abs(modifyValue) ≤ 1` |
-| 5 | `testNoStaleCardIdsInContent` | FateDeckBalanceGateTests | R0 | Gate+ | нет dangling refs после rename карт |
-| 6 | `testEffortBurnMovesToDiscard` | RitualEffortGateTests | R1 | Gate+ | карта → discardPile, не exhaustPile |
-| 7 | `testEffortDoesNotSpendEnergy` | RitualEffortGateTests | R1 | Gate− | energy/reservedEnergy не меняются |
-| 8 | `testEffortDoesNotAffectFateDeck` | RitualEffortGateTests | R1 | Gate− | fateDeckCount не меняется |
-| 9 | `testEffortBonusPassedToFateResolve` | RitualEffortGateTests | R1 | Gate+ | effortBonus → CombatCalculator → FateAttackResult |
-| 10 | `testEffortUndoReturnsCardToHand` | RitualEffortGateTests | R1 | Gate+ | undo: карта в hand, effortBonus -= 1 |
-| 11 | `testCannotBurnSelectedCard` | RitualEffortGateTests | R1 | Gate− | burnForEffort(selectedCardId) → false, no side effect |
-| 12 | `testEffortLimitRespected` | RitualEffortGateTests | R1 | Gate− | burn при count >= maxEffort → false, no side effect |
-| 13 | `testEffortDefaultZero` | RitualEffortGateTests | R1 | Gate+ | commitAttack без burn = effortBonus 0 |
-| 14 | `testEffortDeterminism` | RitualEffortGateTests | R1 | Gate+ | replay с Effort + seed → идентичный результат |
-| 15 | `testEffortMidCombatSaveLoad` | RitualEffortGateTests | R1 | Gate+ | save/restore → effortBonus + effortCardIds сохранены |
-| 16 | `testSnapshotContainsEffortFields` | RitualEffortGateTests | R1 | Gate+ | snapshot содержит effortBonus, effortCardIds, selectedCardIds, phase |
-| 17 | `testRitualSceneUsesOnlyCombatSimulationAPI` | RitualSceneGateTests | R2 | Gate− | сцена не обращается к ECS напрямую (ни мутации, ни чтения component(for:)) |
-| 18 | `testRitualSceneHasNoStrongEngineReference` | RitualSceneGateTests | R2 | Gate− | нет strong ref на TwilightGameEngine и bridge (Echo*Bridge); только config/snapshot DTO |
-| 19 | `testDragDropProducesCanonicalCommands` | RitualSceneGateTests | R3 | Gate+ | drag → selectCard / burnForEffort / commitAttack через CombatSimulation |
-| 20 | `testDragDropDoesNotMutateECSDirectly` | RitualSceneGateTests | R3 | Gate− | drag path → нет прямой ECS mutation |
-| 21 | `testDragDropControllerHasNoEngineImports` | RitualSceneGateTests | R3 | Gate− | DragDropController → только протокол CombatSimulation |
-| 22 | `testLongPressDoesNotFireAfterDragStart` | RitualSceneGateTests | R3 | Gate− | long-press не активируется после 5px drag threshold |
-| 23 | `testFateRevealPreservesExistingDeterminism` | RitualIntegrationGateTests | R6 | Gate+ | FateRevealDirector как observer не вносит side effects в CombatSimulation |
-| 24 | `testRitualCombatNoSystemRNGSources` | RitualIntegrationGateTests | R6 | Gate− | static scan RitualCombat/: запрет random()/UUID()/Date()/arc4random/SystemRandomNumberGenerator/CFAbsoluteTimeGetCurrent/DispatchTime.now/CACurrentMediaTime |
-| 25 | `testKeywordEffectConsumedOrDocumented` | RitualIntegrationGateTests | R6 | Gate+ | bonusValue/special из KeywordEffect применяются или документированно отключены |
-| 26 | `testResonanceAtmosphereIsPurePresentation` | RitualAtmosphereGateTests | R7 | Gate− | controller read-only |
-| 27 | `testAtmosphereControllerIsReadOnly` | RitualAtmosphereGateTests | R7 | Gate− | 0 мутационных вызовов (commit/burn/select/advance/resolve); read-only func допустимы |
-| 28 | `testRitualSceneRestoresFromSnapshot` | RitualIntegrationGateTests | R9 | Gate+ | UI восстановление Bonfire/Circle/Seals/Hand из snapshot |
-| 29 | `testBattleArenaDoesNotCallCommitPathWhenUsingRitualScene` | RitualIntegrationGateTests | R9 | Gate− | Arena sandbox → не вызывает commitExternalCombat |
-| 30 | `testOldCombatSceneNotImportedInProduction` | RitualIntegrationGateTests | R9 | Gate− | deprecated CombatScene файлы не в production graph |
-| 31 | `testFateRevealDirectorHasNoSimulationReference` | RitualIntegrationGateTests | R6 | Gate− | FateRevealDirector не хранит ссылку на CombatSimulation (static scan stored properties) |
-| 32 | `testVerticalSliceReplayTrace` | RitualIntegrationGateTests | R10a | Gate+ | Replay trace: fixture `Tests/Fixtures/ritual_replay_trace.json` (seed + action sequence + CombatSnapshot.fingerprint); gate сравнивает replay output fingerprint с эталоном |
+### 2.1 Disposition Track
 
-**Легенда:** Gate+ = позитивный (контракт выполняется), Gate− = негативный (запрещённое действие не происходит).
+| ID | Инвариант | Проверка | Критерий FAIL |
+|----|-----------|----------|---------------|
+| INV-DC-001 | **Disposition Range** | disposition ∈ [-100, +100], clamped | disposition выходит за пределы |
+| INV-DC-002 | **Hard Cap** | effective_power ≤ 25 при любой комбинации модификаторов | effective_power > 25 |
+| INV-DC-003 | **Destroy Outcome** | disposition = -100 → outcome = .destroyed | Неверный outcome при -100 |
+| INV-DC-004 | **Subjugate Outcome** | disposition = +100 → outcome = .subjugated | Неверный outcome при +100 |
+| INV-DC-005 | **Determinism** | один seed → идентичный результат (100 прогонов) | Расхождение при повторном запуске |
+| INV-DC-006 | **Start Position** | initialDisposition = affinityMatrix[heroWorld][enemyType] + situationModifier | Стартовая позиция не соответствует матрице |
+| INV-DC-044 | **Situation Modifier** | situationModifier корректно учитывает предыдущие взаимодействия, мировые флаги, квестовый контекст | situationModifier игнорируется или не влияет на стартовую позицию |
 
-### 2.2 Модифицируемые тесты (3)
+### 2.2 Momentum
 
-| Тест | Файл | Что меняется | Причина |
-|------|------|-------------|---------|
-| `testMatchBonusEnhanced` | KeywordInterpreterTests.swift | matchMultiplier: 2.0 → 1.5 (из BalancePack config) | R0 F5: matchMultiplier drift fix |
-| `testSurge_physicalAttack_bonusDamage` | INV_KW_GateTests+KeywordEffects.swift | Проверить, что surge-карта с yav suit работает в combatPhysical (после F1 rebalance) | R0 F1: surge suit redistribution |
-| `testFateCardSuit` | FateDeckManagerTests.swift | Обновить ожидания suit-distribution при изменении fate_prav_light_b → fate_yav_surge_a | R0 F1: card rename |
+| ID | Инвариант | Проверка | Критерий FAIL |
+|----|-----------|----------|---------------|
+| INV-DC-007 | **Streak Reset** | смена типа действия → streakCount = 1 | streak не сброшен |
+| INV-DC-008 | **Streak Persist** | одинаковый тип через ходы → streak растёт | streak сбрасывается между ходами |
+| INV-DC-009 | **Streak Bonus** | streak_bonus = max(0, streakCount - 1) | Неверный бонус |
+| INV-DC-010 | **Threat Bonus** | lastAction=strike → текущий influence → +2 | threat_bonus отсутствует |
+| INV-DC-011 | **Switch Penalty** | streak≥3 + switch → penalty = max(0, streakCount-2) | Неверный штраф или отсутствие |
 
-### 2.3 Удаляемые тесты (R10b — только после smoke test)
+### 2.3 Card Play
 
-| Тест | Файл | Когда | Причина |
-|------|------|-------|---------|
-| `testConfigure` | CombatSceneTests.swift | R10b | CombatScene заменяется на RitualCombatScene |
-| `testDidMove` | CombatSceneTests.swift | R10b | CombatScene заменяется на RitualCombatScene |
-| `testFullCombat` | CombatSceneTests.swift | R10b | CombatScene заменяется на RitualCombatScene |
-| `testThemeColors` | CombatSceneThemeTests.swift | R10b | Тема CombatScene заменяется на Ritual тему |
+| ID | Инвариант | Проверка | Критерий FAIL |
+|----|-----------|----------|---------------|
+| INV-DC-012 | **Strike Direction** | Strike → disposition уменьшается | disposition не уменьшается |
+| INV-DC-013 | **Influence Direction** | Influence → disposition увеличивается | disposition не увеличивается |
+| INV-DC-014 | **Sacrifice Limit** | максимум 1 sacrifice за ход | Второй sacrifice проходит |
+| INV-DC-015 | **Sacrifice Exhaust** | sacrifice → карта exhaust навсегда | Карта возвращается в колоду |
+| INV-DC-016 | **Sacrifice Enemy Buff** | sacrifice → враг +1 к следующему действию | Buff отсутствует |
+| INV-DC-045 | **Energy Deduction** | каждая карта стоит `cost` энергии; после розыгрыша energy -= cost | energy не списывается |
+| INV-DC-046 | **Insufficient Energy** | card.cost > currentEnergy → карта отклонена, остаётся в руке | Карта сыграна без энергии |
+| INV-DC-047 | **Auto Turn-End** | energy = 0 → ход завершается автоматически | Игрок продолжает играть при 0 энергии |
+| INV-DC-048 | **Energy Reset** | начало каждого хода: energy = N (определяется колодой/прогрессией) | energy не восстанавливается |
 
-> **Safety gate:** Удаление только после R10a Go/No-Go + 1–2 дня smoke-тестирования. Старые тесты — fallback до подтверждённой стабильности.
+### 2.4 Fate Keywords
+
+| ID | Инвариант | Проверка | Критерий FAIL |
+|----|-----------|----------|---------------|
+| INV-DC-017 | **Surge Base Only** | Surge: base_power × 1.5, не умножает streak/threat | Surge умножает bonus'ы |
+| INV-DC-018 | **Echo Block After Sacrifice** | Echo не срабатывает после Sacrifice | Echo срабатывает после Sacrifice |
+| INV-DC-019 | **Echo Free Copy** | Echo → повтор с 0 energy, тот же fate_modifier | Echo стоит энергию или тянет новую Fate |
+| INV-DC-020 | **Echo Continues Streak** | Echo продолжает streak | Echo сбрасывает streak |
+| INV-DC-021 | **Echo No Fate Draw** | Echo не тянет новую Fate-карту | Echo тянет новую карту |
+| INV-DC-022 | **Focus Ignores Defend** | Focus при disposition < -30 → ignore enemy Defend | Defend не игнорируется |
+| INV-DC-023 | **Ward Cancels Backlash** | Ward → отменяет resonance backlash | Backlash не отменён |
+| INV-DC-024 | **Shadow Increases Penalty** | Shadow при disposition < -30 → switch_penalty += 2 | Penalty не увеличен |
+| INV-DC-025 | **Fate Deck Reshuffle** | пустая deck → reshuffle, бой продолжается | Crash или остановка при пустой deck |
+| INV-DC-026 | **Fate Deck Determinism** | один seed → идентичный порядок fate cards | Разный порядок при том же seed |
+| INV-DC-049 | **Focus Ignores Provoke** | Focus при disposition > +30 → ignore enemy Provoke | Provoke не игнорируется при положительной disposition |
+| INV-DC-050 | **Shadow Disables Defend** | Shadow при disposition > +30 → враг теряет Defend на следующий ход | Defend не отключается при положительной disposition |
+| INV-DC-051 | **Echo After Strike/Influence** | Echo срабатывает нормально после Strike или Influence | Echo не срабатывает после валидного действия |
+
+### 2.5 Enemy Modes
+
+| ID | Инвариант | Проверка | Критерий FAIL |
+|----|-----------|----------|---------------|
+| INV-DC-027 | **Survival Threshold** | disposition ≤ -(65 + seed_hash % 11) → SURVIVAL | Режим не активирован или неверный порог |
+| INV-DC-028 | **Desperation Threshold** | disposition ≥ (65 + seed_hash % 11) → DESPERATION | Режим не активирован или неверный порог |
+| INV-DC-029 | **Threshold Determinism** | один seed → идентичные пороги | Пороги отличаются при том же seed |
+| INV-DC-030 | **Hysteresis** | режим держится минимум 1 ход после выхода за порог | Мгновенное переключение обратно |
+| INV-DC-031 | **Weakened Trigger** | ±30 swing за ход → WEAKENED | WEAKENED не активирован |
+| INV-DC-032 | **Weakened Selection** | WEAKENED → выбирается слабейшее действие (min weight); при tie → первое по порядку в deck definition (deterministic) | Выбрано не минимальное по weight, или tie-break нестабилен |
+| INV-DC-033 | **Rage Effect** | Rage: ATK ×2, disposition += 5 | Неверный урон или shift |
+| INV-DC-034 | **Plea Effect** | Plea: disposition +10, Strike после Plea → -5 HP герою | Отсутствие shift или backlash |
+| INV-DC-052 | **Survival Player Bonus** | враг в Survival → каждый Strike игрока получает +3 бонус | Бонус отсутствует в Survival mode |
+| INV-DC-053 | **Desperation ATK Double** | враг в Desperation → ATK ×2 | ATK не удвоен в Desperation |
+| INV-DC-054 | **Desperation Defend Disabled** | враг в Desperation → Defend недоступен (не выбирается AI) | Defend используется в Desperation |
+| INV-DC-055 | **Desperation Provoke Strengthened** | враг в Desperation → Provoke усилен (отчаянное сопротивление подчинению) | Provoke не усилен в Desperation |
+
+### 2.6 Systemic Asymmetry
+
+| ID | Инвариант | Проверка | Критерий FAIL |
+|----|-----------|----------|---------------|
+| INV-DC-035 | **Vulnerability Exists** | каждый тип врага уязвим к ≥1 типу действия | Нет уязвимостей |
+| INV-DC-036 | **Resistance Exists** | каждый тип врага резистентен к ≥1 типу действия | Нет резистенций |
+| INV-DC-037 | **Resonance Changes Vulnerability** | одна уязвимость отличается в Nav/Yav/Prav | Идентичные уязвимости во всех зонах |
+| INV-DC-038 | **No Absolute Vulnerability** | ни один враг не уязвим к одному типу одинаково во всех зонах | Абсолютная уязвимость найдена |
+
+### 2.7 Architecture Boundary
+
+| ID | Инвариант | Проверка | Критерий FAIL |
+|----|-----------|----------|---------------|
+| INV-DC-039 | **Engine Owns Disposition** | App/Views не мутируют disposition напрямую | Прямая мутация из App/Views |
+| INV-DC-040 | **Engine Owns Fate Draw** | fate draw только внутри engine action (engine RNG) | Fate draw из App-слоя |
+| INV-DC-041 | **Save/Restore Disposition** | save/load сохраняет disposition + streak + enemyMode | Потеря состояния при save/restore |
+| INV-DC-042 | **Arena Isolation** | arena не коммитит результат в world-engine state (resonance, enemyStates, flags); локальный arena state (RNG cursor, stats) может меняться | Arena коммитит resonance/enemyStates/flags в world state |
+| INV-DC-043 | **Defeat Changes World** | поражение меняет resonance / enemy state / narrative | Поражение не меняет мир |
+
+### 2.8 Enemy Actions (Base Effects)
+
+| ID | Инвариант | Проверка | Критерий FAIL |
+|----|-----------|----------|---------------|
+| INV-DC-056 | **Attack Effect** | enemy Attack → hero HP уменьшается на ATK value | HP не уменьшается |
+| INV-DC-057 | **Defend Effect** | enemy Defend → следующий Strike игрока получает -N к effective_power | Strike не ослаблен после Defend |
+| INV-DC-058 | **Provoke Effect** | enemy Provoke → Influence в этом ходу получает штраф | Influence не штрафуется после Provoke |
+| INV-DC-059 | **Adapt Effect** | enemy Adapt при streak ≥ 3 → soft-block: penalty = `max(3, streak_bonus)` к effective_power streak-типа. Действие разрешено, но ослаблено | Penalty не применён, или hard block |
+| INV-DC-060 | **Enemy Reads Momentum** | streak ≥ 3 → враг переходит к counter-действиям (Defend+Adapt при strike streak, Provoke при influence streak) | Враг не реагирует на streak |
+
+### 2.9 Resonance-Sacrifice Interaction
+
+| ID | Инвариант | Проверка | Критерий FAIL |
+|----|-----------|----------|---------------|
+| INV-DC-061 | **Nav Sacrifice Discount** | Sacrifice в Навь стоит card.cost - 1 энергии (вместо card.cost); эффект +1 energy тот же | Nav discount не применяется |
+| INV-DC-062 | **Prav Sacrifice Risk** | Sacrifice в зоне Правь может exhaust 1 дополнительную случайную карту | Дополнительный exhaust не происходит в Правь |
 
 ---
 
-## 3. Gate-тесты: подробная спецификация
+## 3. Gate-тесты — спецификации
 
-### 3.1 FateDeckBalanceGateTests (R0) — 5 тестов
+### 3.1 DispositionMechanicsGateTests (engine) — 9 тестов
 
-**INV-FATE-BAL-001: testMatchMultiplierFromBalancePack**
-
-Тест проверяет, что multiplier читается из BalancePack и пропорционально влияет на эффект.
-Не привязан к конкретному полю (bonusDamage / valueDelta / special) — проверяем через
-пропорциональность двух конфигураций на keyword `surge` в combatPhysical (гарантированно
-даёт числовой damageDelta).
-
-```
-GIVEN: BalancePack_A: combat.balance.matchMultiplier = 1.0
-       BalancePack_B: combat.balance.matchMultiplier = 2.0
-       Одинаковые начальные условия, keyword = surge, suit matches combatPhysical path
-       CombatSimulation создан стандартным путём (multiplier не передаётся как параметр)
-WHEN:  resolve_A = resolve surge с BalancePack_A → числовой effect_A
-       resolve_B = resolve surge с BalancePack_B → числовой effect_B
-THEN:  effect_B == effect_A * 2  (пропорциональность: multiplier 2.0 / 1.0 = 2x)
-       — верифицируем, что система читает multiplier из BalancePack внутренне
-       — тест не зависит от конкретного поля (bonusDamage vs damageDelta)
-
-GIVEN: BalancePack БЕЗ ключа combat.balance.matchMultiplier
-WHEN:  resolve surge → effect_default
-THEN:  effect_default == effect_A * 1.5  (default = 1.5, не hardcoded 2.0)
-```
-
-**INV-FATE-BAL-002: testSurgeSuitDistribution**
-```
-GIVEN: fate_deck_core.json загружен
-WHEN:  фильтруем карты с keyword == "surge"
-THEN:  surgeCards.contains { $0.suit != "prav" } == true
-       (минимум 1 surge-карта доступна Kill-пути через non-prav suit)
-```
-
-**INV-FATE-BAL-003: testCritCardNeutralSuit**
-```
-GIVEN: fate_deck_core.json загружен
-WHEN:  находим карту fate_crit
-THEN:  card.suit == "yav" (нейтральный — одинаково для Kill и Pacify)
-```
-
-**INV-FATE-BAL-004: testStickyCardResonanceModifyCapped**
-```
-GIVEN: fate_deck_core.json загружен
-WHEN:  фильтруем карты с isSticky == true
-THEN:  ∀ card in stickyCards:
-         ∀ rule in card.resonanceRules:
-           abs(rule.modifyValue) <= 1
-```
-
-**INV-FATE-BAL-005: testNoStaleCardIdsInContent**
-```
-GIVEN: fate_deck_core.json + все локализации + все fixtures
-WHEN:  ищем старый id "fate_prav_light_b"
-THEN:  0 вхождений
-
-WHEN:  ищем новый id "fate_yav_surge_a"
-THEN:  ≥1 вхождение в fate_deck_core.json
-       0 dangling refs в Localizable.strings и тестовых fixtures
-```
-
-### 3.2 RitualEffortGateTests (R1) — 11 тестов
-
-**Fixture:**
+**Setup:**
 ```swift
-// Стандартный setup: герой с 5 картами, 1 враг, seed = 42
-let sim = CombatSimulationFixtures.standard(seed: 42)
-// sim.hand = [card_a, card_b, card_c, card_d, card_e]
-// sim.maxEffort = 2
+let sim = DispositionCombatSimulation.create(
+    enemyDefinition: TestEnemies.bandit,
+    heroDefinition: TestHeroes.yavHero,
+    resonanceZone: .yav,
+    seed: 42
+)
 ```
 
-**INV-EFF-001: testEffortBurnMovesToDiscard**
+**INV-DC-001: testDispositionRange_clamped**
 ```
-GIVEN: sim, card_a в руке
-WHEN:  sim.selectCard(card_b)
-       sim.burnForEffort(card_a)
-THEN:  card_a ∈ sim.discardPile
-       card_a ∉ sim.hand
-       card_a ∉ sim.exhaustPile
+GIVEN: disposition = -95
+WHEN:  strike с effective_power = 10
+THEN:  disposition = -100 (clamped, не -105)
+
+GIVEN: disposition = +95
+WHEN:  influence с effective_power = 10
+THEN:  disposition = +100 (clamped, не +105)
 ```
 
-**INV-EFF-002: testEffortDoesNotSpendEnergy**
+**INV-DC-002: testEffectivePower_hardCap25**
 ```
-GIVEN: sim, energyBefore = sim.energy
-WHEN:  sim.burnForEffort(card_a)
-THEN:  sim.energy == energyBefore
-       sim.reservedEnergy == 0
-```
-
-**INV-EFF-003: testEffortDoesNotAffectFateDeck**
-```
-GIVEN: sim, deckCountBefore = sim.fateDeckCount
-WHEN:  sim.burnForEffort(card_a)
-THEN:  sim.fateDeckCount == deckCountBefore
-       sim.fateDiscardCount unchanged
+GIVEN: карта с base_power = 20
+  AND: streakCount = 5 (streak_bonus = 4)
+  AND: threat_bonus = 2
+  AND: fate keyword = .surge (+50% base = 30)
+WHEN:  strike
+THEN:  effective_power = 25 (capped)
+  AND: disposition сдвинулась ровно на 25, не больше
 ```
 
-**INV-EFF-004: testEffortBonusPassedToFateResolve**
+**INV-DC-003: testDestroyOutcome**
 ```
-GIVEN: sim, card selected, 2 cards burned (effortBonus = 2)
-WHEN:  sim.commitAttack(targetId: enemy)
-THEN:  result.totalAttack == hero.strength + cardPower + 2 + fateValue
-       result.effortBonus == 2
-```
-
-**INV-EFF-005: testEffortUndoReturnsCardToHand**
-```
-GIVEN: sim, card_a burned (effortBonus = 1)
-WHEN:  sim.undoBurnForEffort(card_a)
-THEN:  card_a ∈ sim.hand
-       card_a ∉ sim.discardPile
-       sim.effortBonus == 0
-       sim.effortCardIds.isEmpty
+GIVEN: disposition = -95
+WHEN:  strike с effective_power достаточным для -100
+THEN:  outcome = .victory(.destroyed)
+  AND: combatResult.resonanceDelta < 0 (сдвиг к Нави)
 ```
 
-**INV-EFF-006: testCannotBurnSelectedCard (NEGATIVE)**
+**INV-DC-004: testSubjugateOutcome**
 ```
-GIVEN: sim, sim.selectCard(card_a)
-WHEN:  result = sim.burnForEffort(card_a)
-THEN:  result == false
-       sim.effortBonus == 0
-       card_a still selected (not in discard)
-```
-
-**INV-EFF-007: testEffortLimitRespected (NEGATIVE)**
-```
-GIVEN: sim, maxEffort = 2, card_a и card_b burned
-WHEN:  result = sim.burnForEffort(card_c)
-THEN:  result == false
-       sim.effortBonus == 2 (не 3)
-       card_c ∈ sim.hand (не перемещён)
+GIVEN: disposition = +95
+WHEN:  influence с effective_power достаточным для +100
+THEN:  outcome = .victory(.subjugated)
+  AND: combatResult.resonanceDelta > 0 (сдвиг к Прави)
 ```
 
-**INV-EFF-008: testEffortDefaultZero**
+**INV-DC-005: testDispositionDeterminism**
 ```
-GIVEN: sim, card selected, NO cards burned
-WHEN:  sim.commitAttack(targetId: enemy)
-THEN:  result.effortBonus == 0
-       result.totalAttack == hero.strength + cardPower + fateValue (без effort)
-```
-
-**INV-EFF-009: testEffortDeterminism**
-```
-GIVEN: seed = 42, одна и та же последовательность действий
-WHEN:  прогон 1: select → burn card_a → burn card_b → commitAttack → результат_1
-       прогон 2: select → burn card_a → burn card_b → commitAttack → результат_2
-THEN:  результат_1 == результат_2 (семантически: Equatable, не побитово — порядок словарей не гарантирован)
+FOR seed IN [42, 100, 999, 0, UInt64.max]:
+  GIVEN: 100 прогонов одного боя с одним seed
+  THEN:  все 100 результатов идентичны (Equatable)
 ```
 
-**INV-EFF-010: testEffortMidCombatSaveLoad**
+**INV-DC-006: testAffinityMatrix_startDisposition**
 ```
-GIVEN: sim, card_a burned, card_b selected
-WHEN:  snapshot = sim.snapshot()
-       sim2 = CombatSimulation.restore(from: snapshot)
-THEN:  sim2.effortBonus == 1
-       sim2.effortCardIds == [card_a.id]
-       sim2.selectedCardIds contain card_b.id
-       sim2.hand does NOT contain card_a
+GIVEN: hero.world = .nav, enemy.type = "нечисть"
+THEN:  sim.disposition = +30 (из affinityMatrix)
+
+GIVEN: hero.world = .prav, enemy.type = "нечисть"
+THEN:  sim.disposition = -40
+
+GIVEN: hero.world = .yav, enemy.type = "человек"
+THEN:  sim.disposition = +20
 ```
 
-**INV-EFF-011: testSnapshotContainsEffortFields**
+**testSurge_onlyAffectsBasePower**
 ```
-GIVEN: sim, card_a burned
-WHEN:  snapshot = sim.snapshot()
-THEN:  snapshot.effortBonus != nil
-       snapshot.effortCardIds != nil
-       snapshot.selectedCardIds != nil
-       snapshot.phase != nil
-```
-
-### 3.3 RitualSceneGateTests (R2+R3) — 6 тестов
-
-**INV-SCENE-001: testRitualSceneUsesOnlyCombatSimulationAPI (STATIC SCAN)**
-```
-GIVEN: исходный код RitualCombatScene.swift
-WHEN:  static scan на прямые обращения к ECS-компонентам:
-       - типы: Deck, DeckCard, CombatEntity, etc.
-       - мутации: .assign(), .create(), .destroy()
-       - чтения: component(for:), getComponent(
-THEN:  0 прямых обращений (ни мутаций, ни чтений ECS)
-       все взаимодействия через: selectCard(), burnForEffort(), commitAttack(), commitInfluence(), skipTurn()
+GIVEN: карта с base_power = 6
+  AND: streak_bonus = 3, threat_bonus = 2
+  AND: fate keyword = .surge
+WHEN:  вычислить effective_power
+THEN:  surged_base = 6 * 3 / 2 = 9
+  AND: raw_power = 9 + 3 + 2 + fate_modifier (НЕ (6+3+2) * 1.5)
 ```
 
-**INV-SCENE-002: testRitualSceneHasNoStrongEngineReference (STATIC SCAN)**
+**testResonanceZone_modifiesEffectiveness**
 ```
-GIVEN: исходный код RitualCombatScene.swift + RitualCombatSceneView.swift
-WHEN:  scan на типы: TwilightGameEngine, EchoEncounterBridge, EchoCombatBridge
-THEN:  0 stored properties с этими типами
-       допустимо: EchoCombatConfig (DTO), CombatSnapshot (DTO)
+GIVEN: zone = .nav
+WHEN:  strike с base_power = 5
+THEN:  effective_power включает +2 бонус (Nav strike bonus)
+  AND: enemy ATK получает +1 (Nav enemy bonus)
+
+GIVEN: zone = .prav
+WHEN:  strike с base_power = 5
+THEN:  hero теряет 1 HP (backlash)
+  AND: influence получает +2 бонус
 ```
 
-**INV-INPUT-001: testDragDropProducesCanonicalCommands**
+**INV-DC-044: testAffinityMatrix_situationModifier**
 ```
-GIVEN: DragDropController с mock CombatSimulation
-WHEN:  simulate drag card_a → RitualCircle zone
-THEN:  mock.selectCard(card_a) called
-WHEN:  simulate drag card_b → Bonfire zone
-THEN:  mock.burnForEffort(card_b) called
-WHEN:  simulate drag Seal ⚔ → enemy idol
-THEN:  mock.commitAttack(targetId: enemy) called
+GIVEN: hero.world = .yav, enemy.type = "нечисть"
+  AND: worldFlags содержат "previous_encounter_friendly" → situationModifier = +15
+WHEN:  создать CombatSimulation
+THEN:  sim.disposition = affinityMatrix[.yav]["нечисть"] + 15 = 0 + 15 = +15
+
+GIVEN: hero.world = .nav, enemy.type = "бандит"
+  AND: situationModifier = 0 (нет контекста)
+WHEN:  создать CombatSimulation
+THEN:  sim.disposition = affinityMatrix[.nav]["человек"] + 0 = -10
 ```
 
-**INV-INPUT-002: testDragDropDoesNotMutateECSDirectly (STATIC SCAN)**
+### 3.2 MomentumGateTests (engine) — 5 тестов
+
+**INV-DC-007: testMomentumStreak_resetsOnSwitch**
 ```
-GIVEN: исходный код DragDropController.swift
-WHEN:  scan на ECS mutation: .assign(), .create(), .destroy(), component access
-THEN:  0 прямых мутаций
+GIVEN: 3 × strike → streakCount = 3
+WHEN:  influence
+THEN:  streakType = .influence, streakCount = 1
 ```
 
-**INV-INPUT-003: testDragDropControllerHasNoEngineImports (STATIC SCAN)**
+**INV-DC-008: testMomentumStreak_preservedAcrossTurns**
 ```
-GIVEN: исходный код DragDropController.swift
-WHEN:  scan на запрещённые символы/типы:
-       - import TwilightEngine
-       - TwilightGameEngine / WorldState / WorldRNG
-       - EchoEncounterBridge / EchoCombatBridge
-THEN:  0 вхождений запрещённых символов
-       допустимо: import EchoEngine (для протоколов/DTO)
-       допустимо: CombatSimulationProtocol, CombatSnapshot, EchoCombatConfig
-       — проверка по символам/типам, не только по import строке
+GIVEN: ход 1: strike → endTurn → resolveEnemyTurn
+WHEN:  ход 2: strike
+THEN:  streakCount = 2 (не сброшен между ходами)
 ```
 
-**INV-INPUT-004: testLongPressDoesNotFireAfterDragStart**
+**INV-DC-009: testStreakBonus_formula**
 ```
-GIVEN: DragDropController, card node в позиции
-WHEN:  touch began → move 6px (> 5px threshold) → hold 500ms (> 400ms tooltip)
-THEN:  drag state == .dragging
-       tooltip state == .hidden (не .showing)
-       long-press handler NOT called
+FOR streakCount IN [1, 2, 3, 5]:
+  streak_bonus = max(0, streakCount - 1)
+  // streak=1 → bonus=0, streak=2 → bonus=1, streak=3 → bonus=2, streak=5 → bonus=4
 ```
 
-### 3.4 RitualAtmosphereGateTests (R7) — 2 теста
-
-**INV-ATM-001: testResonanceAtmosphereIsPurePresentation (STATIC SCAN)**
+**INV-DC-010: testThreatBonus_afterStrike**
 ```
-GIVEN: исходный код ResonanceAtmosphereController.swift
-WHEN:  scan на вызовы CombatSimulation API
-THEN:  только getter-свойства: .resonance, .phase, .isOver, computed properties
-       0 вызовов: selectCard, burnForEffort, commitAttack, commitInfluence, skipTurn, resolveEnemyTurn
+GIVEN: lastAction = .strike
+WHEN:  influence
+THEN:  threat_bonus = 2 в формуле effective_power
+  AND: (без threat): strike → strike → threat_bonus = 0
 ```
 
-**INV-ATM-002: testAtmosphereControllerIsReadOnly**
+**INV-DC-011: testSwitchPenalty_longStreak**
 ```
-GIVEN: ResonanceAtmosphereController с mock CombatSimulation
-WHEN:  controller.update(resonance: -50)
-       controller.update(resonance: 0)
-       controller.update(resonance: +50)
-THEN:  mock: 0 вызовов мутационных методов:
-       selectCard, burnForEffort, commitAttack, commitInfluence, skipTurn,
-       resolveEnemyTurn, advancePhase, resetRound
-       read-only func допустимы (snapshot(), resonance getter и т.п.)
-       controller output: только visual parameters (color, alpha, particle config)
+GIVEN: streakCount = 3, streakType = .strike
+WHEN:  influence (switch)
+THEN:  switch_penalty = max(0, 3 - 2) = 1
+
+GIVEN: streakCount = 5, streakType = .strike
+WHEN:  influence (switch)
+THEN:  switch_penalty = max(0, 5 - 2) = 3
+
+GIVEN: streakCount = 2, streakType = .strike
+WHEN:  influence (switch)
+THEN:  switch_penalty = 0 (порог не достигнут)
 ```
 
-### 3.5 RitualIntegrationGateTests (R6+R9+R10a) — 8 тестов
+### 3.3 DispositionCardPlayGateTests (app) — 5 тестов
 
-**INV-DET-001: testFateRevealPreservesExistingDeterminism**
+**INV-DC-012: testStrikeReducesDisposition**
 ```
-GIVEN: seed = 42, одинаковые начальные условия (hero, enemy, hand, fateDeck)
-WHEN:  прогон A: CombatSimulation + FateRevealDirector подписан → commitAttack → simState_A
-       прогон B: CombatSimulation БЕЗ FateRevealDirector → commitAttack → simState_B
-THEN:  simState_A == simState_B
-       Сравнение по CombatSnapshot.fingerprint (SHA-256 от canonical JSON, sorted keys):
-       — fateResult (value, keyword, suit)
-       — deck states (hand, discard, fateDeck order)
-       — RNG cursor (nextSeedValue)
-       — effortBonus, selectedCardIds, phase
-       FateRevealDirector как observer не вносит side effects в CombatSimulation
+GIVEN: disposition = 0, карта с strikePower = 5
+WHEN:  playCardAsStrike(cardId: card.id, targetId: enemy.id)
+THEN:  disposition < 0
+  AND: карта в discardPile
 ```
 
-**INV-DET-001a: testFateRevealDirectorHasNoSimulationReference (STATIC SCAN)**
+**INV-DC-013: testInfluenceIncreasesDisposition**
 ```
-GIVEN: исходный код FateRevealDirector.swift
-WHEN:  scan на stored properties типа CombatSimulation / CombatSimulationProtocol / any *Simulation*
-THEN:  0 stored properties
-       допустимо: получение данных через method parameters (event-driven / callback)
-       — FateRevealDirector = pure observer, не хранит ссылку на simulation
-```
-
-**INV-DET-002: testRitualCombatNoSystemRNGSources (STATIC SCAN)**
-```
-GIVEN: все .swift файлы в RitualCombat/ папке
-WHEN:  scan на паттерны:
-       - random() / .random(in:) / .random(using:)
-       - UUID()
-       - Date() / Date.now
-       - arc4random / arc4random_uniform
-       - SystemRandomNumberGenerator
-       - CFAbsoluteTimeGetCurrent
-       - DispatchTime.now()
-       - CACurrentMediaTime()
-THEN:  0 вхождений (кроме строк с маркером ANIMATION-ONLY)
-
-WHITELIST FORMAT (единственный допустимый маркер исключения):
-       // ANIMATION-ONLY: <reason>
-       Маркер должен быть на ТОЙ ЖЕ строке, что и вызов.
-       <reason> обязателен и не пустой (regex: `// ANIMATION-ONLY: \S+`).
-       Пример: let now = CFAbsoluteTimeGetCurrent() // ANIMATION-ONLY: particle spawn timestamp
-       Тест: regex `(random|UUID|Date\(\)|arc4random|SystemRandomNumberGenerator|CFAbsoluteTimeGetCurrent|DispatchTime\.now|CACurrentMediaTime)`
-             на строки БЕЗ `// ANIMATION-ONLY: \S` → 0 matches
+GIVEN: disposition = 0, карта с influencePower = 5
+WHEN:  playCardAsInfluence(cardId: card.id)
+THEN:  disposition > 0
+  AND: карта в discardPile
 ```
 
-**INV-CONTRACT-001: testKeywordEffectConsumedOrDocumented**
+**INV-DC-014: testSacrifice_limitOnePerTurn**
 ```
-GIVEN: CombatSystem в EchoEngine
-WHEN:  анализ использования KeywordEffect.bonusValue и KeywordEffect.special
-THEN:  EITHER:
-         bonusValue применяется в CombatCalculator (gate: result.totalAttack includes bonusValue)
-       OR:
-         маркер в исходном коде (inline comment, формат ниже) + gate проверяет наличие маркера
-
-MARKER FORMAT:
-       // INTENTIONALLY_UNUSED: <fieldName> — <reason>
-       Размещается в файле, где поле могло бы использоваться (CombatCalculator / CombatSystem).
-       Пример: // INTENTIONALLY_UNUSED: bonusValue — applied via keyword-specific handler, not generic path
-       Gate scan: regex `INTENTIONALLY_UNUSED: bonusValue` → ≥1 match если bonusValue не в totalAttack
+GIVEN: рука [card_a, card_b]
+WHEN:  playCardAsSacrifice(card_a) → success
+  AND: playCardAsSacrifice(card_b)
+THEN:  второй sacrifice → error / false
+  AND: card_b всё ещё в руке
 ```
 
-**INV-INT-001: testRitualSceneRestoresFromSnapshot**
+**INV-DC-015: testSacrifice_exhaustsPermanently**
 ```
-GIVEN: snapshot с effortBonus=1, effortCardIds=[card_a], selectedCardIds=[card_b], phase=.playerAction
-       полная рука = [card_a, card_b, card_c, card_d, card_e]
-WHEN:  RitualCombatScene.restore(from: snapshot)
-THEN:  bonfireNode.isGlowing == true (effort > 0)
-       circleNode.hasCard == true (selectedCardIds.count > 0)
-       sealNodes.isVisible == true (card in circle → seals visible)
-       handNode.cardIds contains [card_c, card_d, card_e]
-       handNode.cardIds does NOT contain card_a (burned) and card_b (selected/in circle)
-       phaseHUD shows "playerAction"
-
-NEGATIVE: inconsistent snapshot
-GIVEN: snapshot с effortBonus=0, effortCardIds=[card_a] (count mismatch)
-WHEN:  CombatSimulation.restore(from: snapshot)
-THEN:  validation error / assert failure
-       — effortBonus MUST == effortCardIds.count (snapshot internal consistency invariant)
+GIVEN: рука [card_a], deckSize = D
+WHEN:  playCardAsSacrifice(card_a)
+THEN:  card_a не в hand, не в discardPile, не в drawPile
+  AND: общий размер колоды (draw + discard + hand + exhaust) не изменился
+  AND: exhaustPile содержит card_a
 ```
 
-**INV-INT-002: testBattleArenaDoesNotCallCommitPathWhenUsingRitualScene**
+**INV-DC-016: testSacrifice_strengthensEnemy**
 ```
-GIVEN: BattleArenaView с RitualCombatScene (после миграции)
-WHEN:  полный бой: start → play → victory
-THEN:  0 вызовов по всем commit-путям:
-       - commitExternalCombat()
-       - engine.performAction(.commitExternalCombat(...))
-       - EchoCombatBridge.applyCombatResult(...)
-       Arena допускает только локальный result (display-only), без world commit
+GIVEN: enemy.nextActionValue = V
+WHEN:  playCardAsSacrifice(card_a)
+THEN:  enemy.buffedAmount >= 1
+  // Враг получает +1 к следующему действию
 ```
 
-**INV-INT-003: testOldCombatSceneNotImportedInProduction (STATIC SCAN)**
+### 3.4 FateKeywordGateTests (engine) — 13 тестов
+
+**INV-DC-017: testSurge_appliedToBasePowerOnly**
 ```
-GIVEN: все .swift файлы в production targets (не в Tests/)
-WHEN:  scan на символ-использование:
-       - CombatScene( (инстанцирование)
-       - CombatSceneView / SpriteView(scene: ...CombatScene)
-       - CombatScene+ (extension файлы)
-       - typealias к CombatScene
-       + target membership проверка: CombatScene*.swift не входят в production target
-         (через pbxproj анализ или аналогичный gate из AuditArchitectureBoundaryGateTests)
-THEN:  0 символ-использований в production source
-       0 CombatScene*.swift файлов в production target membership
+GIVEN: card.strikePower = 6, fate.keyword = .surge
+WHEN:  вычислить surged_base
+THEN:  surged_base = 6 * 3 / 2 = 9
+  AND: streak_bonus, threat_bonus НЕ умножены
 ```
 
-**INV-REPLAY-001: testVerticalSliceReplayTrace (R10a)**
+**INV-DC-018: testEcho_blockedAfterSacrifice**
 ```
-GIVEN: fixture файл Tests/Fixtures/ritual_replay_trace.json содержит:
-       {
-         "seed": 42,
-         "actions": ["selectCard:card_b", "burnForEffort:card_a", "commitAttack:enemy_1"],
-         "expectedFingerprint": "<sha256 CombatSnapshot после выполнения>"
-       }
-WHEN:  CombatSimulation(seed: fixture.seed) → выполнить fixture.actions → snapshot
-THEN:  snapshot.fingerprint == fixture.expectedFingerprint
-       — fixture генерируется однократно gate-скриптом при R10a Go/No-Go
-       — формат fingerprint: SHA-256 от canonical JSON CombatSnapshot (sorted keys, no whitespace)
-       — fingerprint пишется gate-скриптом, не вручную
+GIVEN: lastAction = .sacrifice, fate.keyword = .echo
+WHEN:  resolve fate keyword
+THEN:  echo не срабатывает (no free copy)
+```
+
+**INV-DC-019: testEcho_freeCopy**
+```
+GIVEN: lastAction = .strike, fate.keyword = .echo
+WHEN:  resolve echo
+THEN:  повтор strike с 0 energy cost
+  AND: тот же fate_modifier (не тянет новую)
+```
+
+**INV-DC-020: testEcho_continuesStreak**
+```
+GIVEN: streakType = .strike, streakCount = 2
+WHEN:  echo срабатывает (повтор strike)
+THEN:  streakCount = 3 (продолжает streak)
+```
+
+**INV-DC-021: testEcho_noNewFateDraw**
+```
+GIVEN: fateDeck.count = N, fate.keyword = .echo
+WHEN:  echo срабатывает
+THEN:  fateDeck.count = N (не тянули новую карту)
+```
+
+**INV-DC-022: testFocus_ignoresDefendAtNegative**
+```
+GIVEN: disposition = -40, enemy intent = .defend, fate.keyword = .focus
+WHEN:  strike
+THEN:  defend НЕ уменьшает effective_power
+
+GIVEN: disposition = 0, enemy intent = .defend, fate.keyword = .focus
+WHEN:  strike
+THEN:  defend работает нормально (disposition > -30 → focus = просто +1)
+```
+
+**INV-DC-023: testWard_cancelsBacklash**
+```
+GIVEN: resonanceZone = .prav, fate.keyword = .ward
+WHEN:  strike (в Прави strike → backlash -1 HP)
+THEN:  heroHP не изменился (backlash отменён)
+```
+
+**INV-DC-024: testShadow_increasesPenaltyAtNegative**
+```
+GIVEN: disposition = -40, streakCount = 3, fate.keyword = .shadow
+WHEN:  switch action
+THEN:  switch_penalty = max(0, 3-2) + 2 = 3 (shadow добавляет +2)
+```
+
+**INV-DC-025: testFateDeck_reshuffleWhenEmpty**
+```
+GIVEN: fateDeck.drawPile = [] (пустая)
+WHEN:  strike (тянет fate card)
+THEN:  reshuffle happened
+  AND: бой продолжается нормально
+  AND: drawPile.count > 0
+```
+
+**INV-DC-026: testFateDeck_deterministicShuffle**
+```
+FOR seed IN [42, 100, 999]:
+  GIVEN: два боя с одним seed
+  WHEN:  тянуть все fate cards по порядку
+  THEN:  оба боя выдают идентичную последовательность
+```
+
+**INV-DC-049: testFocus_ignoresProvokeAtPositive**
+```
+GIVEN: disposition = +40, enemy intent = .provoke, fate.keyword = .focus
+WHEN:  influence
+THEN:  provoke penalty НЕ применяется (Focus при disposition > +30 → ignore Provoke)
+
+GIVEN: disposition = 0, enemy intent = .provoke, fate.keyword = .focus
+WHEN:  influence
+THEN:  provoke penalty применяется нормально (disposition < +30 → focus = просто +1)
+```
+
+**INV-DC-050: testShadow_disablesDefendAtPositive**
+```
+GIVEN: disposition = +40, fate.keyword = .shadow
+WHEN:  resolve fate keyword
+THEN:  враг теряет Defend на следующий ход (Shadow при disposition > +30)
+
+GIVEN: disposition = 0, fate.keyword = .shadow
+WHEN:  resolve fate keyword
+THEN:  Shadow даёт -1 к текущему действию (базовый эффект, Defend не отключается)
+```
+
+**INV-DC-051: testEcho_worksAfterStrikeOrInfluence**
+```
+GIVEN: lastAction = .strike, fate.keyword = .echo
+WHEN:  resolve echo
+THEN:  echo срабатывает → повтор strike с 0 energy cost
+
+GIVEN: lastAction = .influence, fate.keyword = .echo
+WHEN:  resolve echo
+THEN:  echo срабатывает → повтор influence с 0 energy cost
+
+// Контраст с INV-DC-018: echo NOT after sacrifice
+```
+
+### 3.5 EnemyModeGateTests (engine) — 12 тестов
+
+**INV-DC-027: testEnemyMode_survivalAtDynamicThreshold**
+```
+GIVEN: seed → survivalThreshold = -70
+WHEN:  disposition снижается до -70
+THEN:  enemyMode = .survival
+  AND: enemy выбирает Attack/Rage действия
+```
+
+**INV-DC-028: testEnemyMode_desperationAtDynamicThreshold**
+```
+GIVEN: seed → desperationThreshold = +72
+WHEN:  disposition растёт до +72
+THEN:  enemyMode = .desperation
+  AND: enemy выбирает Provoke/Plea действия
+```
+
+**INV-DC-029: testEnemyMode_thresholdDeterministic**
+```
+FOR seed IN [42, 100, 999, 0]:
+  GIVEN: два боя с одним seed
+  THEN:  survivalThreshold идентичен
+  AND:   desperationThreshold идентичен
+  AND:   survivalThreshold ∈ [-75, -65]
+  AND:   desperationThreshold ∈ [+65, +75]
+```
+
+**INV-DC-030: testEnemyMode_hysteresis**
+```
+GIVEN: disposition = -72 (в survival), survivalThreshold = -70
+WHEN:  influence → disposition = -60 (выше порога)
+THEN:  enemyMode всё ещё .survival (hysteresis 1 ход)
+
+WHEN:  следующий ход: disposition остаётся -60
+THEN:  enemyMode = .normal (hysteresis закончился)
+```
+
+**INV-DC-031: testEnemyMode_weakenedOnSwing**
+```
+GIVEN: disposition = 0 в начале хода
+WHEN:  strike → disposition = -35 (swing = 35 > 30)
+THEN:  enemyMode = .weakened
+
+GIVEN: disposition = 0 в начале хода
+WHEN:  strike → disposition = -20 (swing = 20 < 30)
+THEN:  enemyMode ≠ .weakened
+```
+
+**INV-DC-032: testEnemyMode_weakenedNotRandom**
+```
+GIVEN: enemyMode = .weakened, enemy deck с actions [ATK:5/w:3, DEF:2/w:1, ATK:3/w:2]
+WHEN:  resolveEnemyTurn()
+THEN:  выбрано действие с наименьшим weight (DEF:2/w:1)
+  AND: НЕ случайный выбор из пула
+
+// Tie-break test:
+GIVEN: enemyMode = .weakened, enemy deck с actions [ATK:3/w:1, DEF:3/w:1, PRV:3/w:1]
+WHEN:  resolveEnemyTurn()
+THEN:  выбрано ATK:3 (первое по порядку в deck definition)
+  AND: результат стабилен при повторных вызовах (deterministic tie-break)
+  // Правило: при равном weight → порядок в deck definition (index 0 первый)
+```
+
+**INV-DC-033: testEnemyRage_doubleATKplusDispositionShift**
+```
+GIVEN: enemyMode = .survival, enemy ATK = 4
+WHEN:  resolveEnemyTurn() → Rage
+THEN:  heroHP -= 8 (ATK × 2)
+  AND: disposition += 5 (ошибка врага — сдвиг в пользу subjugate)
+```
+
+**INV-DC-034: testEnemyPlea_dispositionPlusBacklash**
+```
+GIVEN: enemyMode = .desperation
+WHEN:  resolveEnemyTurn() → Plea
+THEN:  disposition += 10
+
+WHEN:  игрок отвечает strike после Plea
+THEN:  heroHP -= 5 (backlash за жестокость)
+```
+
+**INV-DC-052: testSurvival_playerStrikeBonusPlus3**
+```
+GIVEN: enemyMode = .survival
+WHEN:  player plays strike с base_power = 5
+THEN:  effective_power включает +3 бонус (враг раскрывается в ярости)
+  AND: total = base_power + streak_bonus + threat_bonus + 3 + fate_modifier (capped at 25)
+
+GIVEN: enemyMode = .normal
+WHEN:  player plays strike с base_power = 5
+THEN:  effective_power НЕ включает +3 бонус
+```
+
+**INV-DC-053: testDesperation_doubleATK**
+```
+GIVEN: enemyMode = .desperation, enemy ATK = 4
+WHEN:  resolveEnemyTurn() → Attack
+THEN:  heroHP -= 8 (ATK × 2)
+```
+
+**INV-DC-054: testDesperation_defendDisabled**
+```
+GIVEN: enemyMode = .desperation
+  AND: enemy action deck содержит Defend
+WHEN:  resolveEnemyTurn()
+THEN:  Defend НИКОГДА не выбирается (исключён из пула)
+  AND: выбрано Provoke/Plea/Attack
+```
+
+**INV-DC-055: testDesperation_provokeStrengthened**
+```
+GIVEN: enemyMode = .desperation, enemy Provoke value = P
+WHEN:  resolveEnemyTurn() → Provoke
+THEN:  influence penalty > P (усиленный Provoke)
+  // Отчаянное сопротивление подчинению
+```
+
+### 3.6 SystemicAsymmetryGateTests (engine) — 4 теста
+
+**INV-DC-035: testSystemicAsymmetry_vulnerabilities**
+```
+FOR enemy IN allEnemyTypes:
+  THEN: enemy.vulnerabilities содержит хотя бы один modifier > 0
+  // Каждый тип врага уязвим к ≥1 типу действия
+```
+
+**INV-DC-036: testSystemicAsymmetry_resistances**
+```
+FOR enemy IN allEnemyTypes:
+  THEN: enemy.vulnerabilities содержит хотя бы один modifier < 0
+  // Каждый тип врага резистентен к ≥1 типу действия
+```
+
+**INV-DC-037: testSystemicAsymmetry_resonanceChangesVulnerability**
+```
+FOR enemy IN allEnemyTypes:
+  LET base = enemy.vulnerabilities(zone: nil)
+  LET nav  = enemy.vulnerabilities(zone: .nav)
+  LET prav = enemy.vulnerabilities(zone: .prav)
+  THEN: base ≠ nav OR base ≠ prav
+  // Resonance меняет хотя бы одну уязвимость
+```
+
+**INV-DC-038: testSystemicAsymmetry_noAbsoluteVulnerability**
+```
+FOR enemy IN allEnemyTypes:
+  FOR actionType IN [.strike, .influence, .sacrifice]:
+    LET mods = [zone: .nav, .yav, .prav].map { enemy.modifier(actionType, zone: $0) }
+    THEN: NOT (mods[0] == mods[1] AND mods[1] == mods[2] AND mods[0] > 0)
+    // Ни один враг не уязвим к одному типу одинаково во всех зонах
+```
+
+### 3.7 DispositionArchBoundaryGateTests (app) — 5 тестов
+
+**INV-DC-039: testDispositionTransaction_engineOwns**
+```
+SCAN: App/**, Views/**, ViewModels/**
+THEN: нет прямых присваиваний disposition-полей
+  AND: нет прямых вызовов CombatSimulation.disposition = ...
+  // Вся мутация — через actions
+```
+
+**INV-DC-040: testFateDraw_insideEngineAction**
+```
+SCAN: App/**, Views/**
+THEN: нет вызовов fateDeck.draw() вне engine action path
+  AND: нет доступа к engine.services.rng из App-слоя
+```
+
+**INV-DC-041: testSaveRestore_dispositionState**
+```
+GIVEN: бой в процессе: disposition=-30, streakCount=2, enemyMode=.survival
+WHEN:  save → restore → resume
+THEN:  sim.disposition = -30
+  AND: sim.streakCount = 2
+  AND: sim.enemyMode = .survival
+  AND: sim.fateDeckState идентичен
+```
+
+**INV-DC-042: testArena_doesNotCommitDisposition**
+```
+GIVEN: world.resonance = R, world.enemyStates = S, world.flags = F
+WHEN:  arena бой завершён (destroy)
+THEN:  world.resonance = R (не изменился)
+  AND: world.enemyStates = S (не изменились)
+  AND: world.flags = F (arena-флаги не добавлены)
+  // Проверяем именно отсутствие world commit.
+  // Arena может менять локальный state (simulation RNG cursor, arena stats) —
+  // это допустимо и НЕ является fail condition.
+```
+
+**INV-DC-043: testDefeatChangesWorldState**
+```
+GIVEN: бой проигран (heroHP = 0)
+THEN:  world.resonance изменился
+  AND: enemy state обновлён (враг усилился)
+  AND: nарративная развилка доступна
+```
+
+### 3.8 DispositionSceneGateTests (app) — 4 теста
+
+**testRitualSceneUsesOnlyCombatSimulationAPI**
+```
+SCAN: RitualCombatScene.swift и дочерние
+THEN: все мутации через CombatSimulation methods
+  AND: нет прямого доступа к engine полям
+```
+
+**testDragDropProducesCanonicalCommands**
+```
+GIVEN: drag карты → enemy zone
+THEN:  вызван sim.playCardAsStrike(cardId:targetId:)
+
+GIVEN: drag карты → altar zone
+THEN:  вызван sim.playCardAsInfluence(cardId:)
+
+GIVEN: drag карты → bonfire zone
+THEN:  вызван sim.playCardAsSacrifice(cardId:)
+```
+
+**testResonanceAtmosphereIsReadOnly**
+```
+SCAN: ResonanceAtmosphereController.swift
+THEN: нет вызовов mutation-методов CombatSimulation
+  AND: только read-access к resonanceZone, disposition, enemyMode
+```
+
+**testEnemyModeTransitionAnimated**
+```
+GIVEN: enemyMode переключается normal → survival
+THEN:  animation event добавлен в queue
+  AND: длительность ≥ 0.3s
+  AND: aura change видима
+```
+
+### 3.9 EnergyGateTests (engine) — 6 тестов
+
+**Setup:**
+```swift
+let sim = DispositionCombatSimulation.create(
+    enemyDefinition: TestEnemies.bandit,
+    heroDefinition: TestHeroes.yavHero,
+    resonanceZone: .yav,
+    seed: 42,
+    startingEnergy: 3
+)
+```
+
+**INV-DC-045: testEnergyDeduction**
+```
+GIVEN: energy = 3, card.cost = 2
+WHEN:  playCardAsStrike(card)
+THEN:  energy = 1 (3 - 2)
+  AND: карта сыграна успешно
+```
+
+**INV-DC-046: testInsufficientEnergyRejected**
+```
+GIVEN: energy = 1, card.cost = 2
+WHEN:  playCardAsStrike(card)
+THEN:  error / false (карта отклонена)
+  AND: energy = 1 (не изменилась)
+  AND: card всё ещё в руке
+  AND: disposition не изменилась
+```
+
+**INV-DC-047: testAutoTurnEndAtZeroEnergy**
+```
+GIVEN: energy = 2, card.cost = 2
+WHEN:  playCardAsStrike(card)
+THEN:  energy = 0
+  AND: ход автоматически завершён (или End Turn доступен как единственное действие)
+  AND: играть ещё карты невозможно
+```
+
+**INV-DC-048: testEnergyResetEachTurn**
+```
+GIVEN: startingEnergy = 3
+WHEN:  ход 1: play cards → energy = 0 → endTurn → resolveEnemyTurn
+  AND: ход 2 начинается
+THEN:  energy = 3 (полный сброс)
+```
+
+**INV-DC-061: testNavSacrificeDiscount**
+```
+// Sacrifice cost model (из SoT §4.3 + §6.2):
+// Sacrifice стоит card.cost энергии (как любой card play).
+// Эффект sacrifice: +1 энергия обратно.
+// "На 1 энергию дешевле" в Навь = cost - 1.
+// Net: Yav = -(card.cost) + 1, Nav = -(card.cost - 1) + 1
+
+GIVEN: resonanceZone = .yav, energy = 3, card.cost = 2
+WHEN:  playCardAsSacrifice(card)
+THEN:  energy = 3 - 2 + 1 = 2 (net: -1)
+  AND: card в exhaustPile
+
+GIVEN: resonanceZone = .nav, energy = 3, card.cost = 2
+WHEN:  playCardAsSacrifice(card)
+THEN:  energy = 3 - 1 + 1 = 3 (net: 0, break even — тьма питается жертвой)
+  AND: card в exhaustPile
+
+// ⚠️ BALANCE HOTSPOT: Nav sacrifice break-even — следить в симуляции,
+// не становится ли Nav sacrifice opener доминантным (особенно с героями Nav).
+```
+
+**INV-DC-062: testPravSacrificeRisk**
+```
+GIVEN: resonanceZone = .prav, hand = [cardA, cardB, cardC]
+WHEN:  playCardAsSacrifice(cardA)
+THEN:  cardA в exhaustPile
+  AND: с вероятностью (определяемой RNG) ещё 1 случайная карта exhaust
+  AND: если дополнительный exhaust произошёл — hand.count = 1, exhaustPile.count = 2
+
+GIVEN: resonanceZone = .yav, hand = [cardA, cardB, cardC]
+WHEN:  playCardAsSacrifice(cardA)
+THEN:  только cardA в exhaustPile (нет доп. exhaust)
+```
+
+### 3.10 EnemyActionGateTests (engine) — 5 тестов
+
+**Setup:**
+```swift
+let sim = DispositionCombatSimulation.create(
+    enemyDefinition: TestEnemies.bandit,  // deck: [ATK:5, DEF:3, PRV:4, ADP:2]
+    heroDefinition: TestHeroes.yavHero,
+    resonanceZone: .yav,
+    seed: 42
+)
+```
+
+**INV-DC-056: testAttack_reducesHeroHP**
+```
+GIVEN: heroHP = 20, enemy выбирает Attack(value: 5)
+WHEN:  resolveEnemyTurn()
+THEN:  heroHP = 15 (20 - 5)
+```
+
+**INV-DC-057: testDefend_reducesNextStrike**
+```
+GIVEN: enemy выбирает Defend(value: 3)
+WHEN:  resolveEnemyTurn()
+  AND: player plays strike с effective_power = 8
+THEN:  actual disposition shift = 8 - 3 = 5 (Defend поглощает часть)
+  AND: после одного strike Defend эффект заканчивается
+```
+
+**INV-DC-058: testProvoke_penalizesInfluence**
+```
+GIVEN: enemy выбирает Provoke(value: 4)
+WHEN:  resolveEnemyTurn()
+  AND: player plays influence с effective_power = 7
+THEN:  actual disposition shift = 7 - 4 = 3 (Provoke штрафует Influence)
+```
+
+**INV-DC-059: testAdapt_blocksStreakType**
+```
+GIVEN: streakType = .strike, streakCount = 3, base_power = 8
+  AND: enemy выбирает Adapt
+WHEN:  resolveEnemyTurn()
+  AND: player пытается strike
+THEN:  adapt_penalty = max(3, streak_bonus) = max(3, 2) = 3
+  AND: effective_power уменьшен на 3
+  AND: действие выполняется (карта в discard, energy списана)
+  AND: UI drag-drop НЕ заблокирован
+
+GIVEN: streakType = .strike, streakCount = 5, base_power = 8
+  AND: enemy выбирает Adapt
+WHEN:  player пытается strike
+THEN:  adapt_penalty = max(3, 4) = 4 (streak_bonus = max(0, 5-1) = 4)
+  AND: effective_power уменьшен на 4 (масштабируется с длиной streak)
+```
+
+// ⚠️ BALANCE HOTSPOT: Adapt не должен стать "AI hard counter machine".
+// В симуляции: % ходов с активным Adapt и win rate Adapt-heavy enemies.
+// Если Adapt dominates → снизить частоту в AI weights.
+
+**INV-DC-060: testEnemyReadsMomentum_countersStreak**
+```
+GIVEN: streakType = .strike, streakCount = 3
+WHEN:  resolveEnemyTurn() (AI decision в NORMAL mode)
+THEN:  выбрано Adapt(50%) или Defend(50%) — контрит strike-streak
+
+GIVEN: streakType = .influence, streakCount = 3
+WHEN:  resolveEnemyTurn() (AI decision в NORMAL mode)
+THEN:  выбрано Provoke — контрит influence-streak
+
+GIVEN: streakCount < 3
+WHEN:  resolveEnemyTurn() (AI decision)
+THEN:  Adapt НЕ выбирается (порог не достигнут)
 ```
 
 ---
 
-## 4. Layer-тесты (unit, не gate)
+## 4. Stress-тесты (exploit-сценарии) — 5 тестов
 
-### 4.1 EffortMechanicTests.swift (R1)
+Каждый сценарий проверяет конкретную цепочку, которая может стать exploit'ом.
 
-Юнит-тесты CombatSimulation — покрывают edge cases не вошедшие в gate.
+### 4.1 testStress_sacrificeCycle
+```
+SCENARIO: sacrifice → strike → enemy rage → strike +3 → weaken trigger
+VERIFY:
+  - disposition не уходит за [-100, +100]
+  - weaken не даёт бесконечный loop
+  - после 10 ходов бой завершается или стабилизируется
+```
 
-| Тест | Тип | Что проверяет |
-|------|-----|---------------|
-| `testBurnExhaustCardGoesToDiscard` | + | exhaust:true карта через Effort → discardPile (не exhaustPile) |
-| `testBurnLastCardLeavesEmptyHand` | + | burn всех карт кроме selected → hand.count == 1 (selected) |
-| `testUndoNonExistentCardReturnsFalse` | − | undo карты не в effortCardIds → false, no side effect |
-| `testUndoAlreadyReturnedCardReturnsFalse` | − | double undo → false |
-| `testEffortResetAfterCommit` | + | после commitAttack: effortBonus = 0, effortCardIds = [] |
-| `testEffortResetAfterSkip` | + | skipTurn() не сбрасывает Effort (Effort не применяется к skip) |
-| `testEffortWithMultiEnemy` | + | Effort bonus применяется к одной цели, не ко всем |
-| `testMaxEffortFromHeroDefinition` | + | HeroDefinition.maxEffort = 3 → можно сжечь 3 карты |
-| `testEffortBonusInInfluence` | + | burnForEffort + commitInfluence → effortBonus в spirit damage |
-| `testBurnDuringWrongPhase` | − | burnForEffort вне playerAction → false |
+### 4.2 testStress_echoSnowball
+```
+SCENARIO: strike ×3 (streak=3) → echo → surge
+VERIFY:
+  - effective_power каждого хода ≤ 25
+  - суммарный disposition shift за ход ≤ 40 (action + echo)
+  - echo не создаёт каскад (один echo = один повтор)
+```
 
-### 4.2 FateRevealTests.swift (R6)
+### 4.3 testStress_thresholdDancing
+```
+SCENARIO: держать disposition на 64–66, не триггеря mode
+VERIFY:
+  - dynamic threshold (65-75) делает это ненадёжным
+  - для 100 seeds: (max_threshold - min_threshold) ≥ 5
+    // разброс между наименьшим и наибольшим порогом ≥ 5 единиц
+    // формула: threshold = 65 + seed_hash % 11 → теоретический range = 10
+  - невозможно точно предсказать порог для конкретного seed без знания hash
 
-Юнит-тесты FateRevealDirector.
+// ⚠️ BALANCE HOTSPOT: если hash function skewed, реальный range может быть < 10.
+// В симуляции построить гистограмму threshold distribution для 10000 seeds.
+// Если distribution кластеризуется (>50% в 3 значениях) → пересмотреть hash function.
+```
 
-| Тест | Тип | Что проверяет |
-|------|-----|---------------|
-| `testMajorFateUsesFullTimeline` | + | commitAttack с высоким значением → Major tempo (2.5s) |
-| `testMinorFateUsesShortTimeline` | + | commitAttack с малым значением → Minor tempo (1.0s) |
-| `testWaitSkipsFateReveal` | + | skipTurn → нет Fate-анимации, tempo 0.6s |
-| `testDefenseFateUsesCompactReveal` | + | enemy attack phase → compact reveal (меньше, быстрее) |
-| `testKeywordVisualMatchesResolution` | + | surge карта → surge visual effect (не shadow и т.п.) |
-| `testSuitMatchShowsGlowEffect` | + | matched suit → контур вспышка + руна пульсация |
-| `testSuitMismatchShowsNoGlow` | − | mismatched suit → нет вспышки |
+### 4.4 testStress_influenceLock
+```
+SCENARIO: influence ×5 → enemy provoke → sacrifice → influence
+VERIFY:
+  - sacrifice + provoke достаточно наказывают
+  - disposition не растёт линейно (penalty + provoke замедляют)
+  - после 10 ходов чистого influence: average effective_power < 15
+```
 
-### 4.3 DragDropControllerTests.swift (R3)
-
-Юнит-тесты DragDropController.
-
-| Тест | Тип | Что проверяет |
-|------|-----|---------------|
-| `testDragThreshold5px` | + | movement < 5px → состояние IDLE (не LIFT) |
-| `testDragBeyondThreshold` | + | movement ≥ 5px → состояние LIFT → DRAG |
-| `testDropOnCircleSnaps` | + | drop в зону Circle → snap animation + selectCard |
-| `testDropOnBonfireBurns` | + | drop в зону Bonfire → burn particles + burnForEffort |
-| `testDropOutsideReturnsToHand` | + | drop вне зон → spring return animation |
-| `testDimmedCardNotDraggable` | − | карта без энергии (dimmed) → drag rejected |
-| `testSealDragOnEnemyCommitsAttack` | + | Seal ⚔ → enemy idol → commitAttack(targetId:) |
-| `testSealDragOnAltarCommitsSkip` | + | Seal ⏳ → altar → skipTurn() |
-| `testSealVisibilityAfterCardInCircle` | + | card в Circle → seals fade in (alpha 0.15 → 1.0) |
-| `testWaitSealAlwaysVisible` | + | ⏳ видим даже без карты в Circle (dimmed) |
+### 4.5 testStress_allSacrificeOpener
+```
+SCENARIO: sacrifice на ходу 1 → sacrifice на ходу 2 → sacrifice на ходу 3
+  (по одному sacrifice за ход = 3 хода, 3 sacrifice)
+VERIFY:
+  - лимит 1/ход соблюдён (только 1 sacrifice за ход)
+  - за 3 хода: 3 sacrifice прошли успешно
+  - враг накопил buff (+1 за каждый sacrifice = +3 к действиям)
+  - рука уменьшена на 3 карты (все в exhaustPile)
+  - героHP пострадал от enemy turns (враг бил 3 хода подряд, с усилением)
+  - disposition двигалась только от enemy actions (sacrifice не двигает шкалу)
+```
 
 ---
 
-## 5. Integration-тесты
+## 5. Integration Tests — End-to-End сценарии
 
-### 5.1 RitualCombatIntegrationTests.swift (R9)
+### 5.1 DispositionIntegrationTests
 
-End-to-end сценарии с реальным ContentRegistry.
+| Тест | Сценарий | Ожидаемый результат |
+|------|----------|---------------------|
+| `testFullDestroyPath` | 1v1, Strike-действия до disposition=-100 | outcome = .destroyed, resonance shift < 0 |
+| `testFullSubjugatePath` | 1v1, Influence-действия до disposition=+100 | outcome = .subjugated, resonance shift > 0 |
+| `testMixedStrategyPath` | Strike ×3 → switch → Influence ×5 | switch_penalty применён, subjugate достигнут |
+| `testSacrificeRecoveryPath` | Low HP → sacrifice → heal → strike to destroy | sacrifice exhaust, heal applied, enemy buff applied |
+| `testDefeatPath` | heroHP → 0 | outcome = .defeat, world state changed |
+| `testResonanceNavCombat` | Полный бой в зоне Навь | Nav modifiers применены, backlash correct |
+| `testResonancePravCombat` | Полный бой в зоне Правь | Prav modifiers applied, strike backlash |
+| `testEnemyModeTransitions` | Бой с проходом через все 4 режима | Все режимы активированы и deactivated по правилам |
+| `testMidCombatSaveResume` | Save mid-combat → restore → complete | Результат идентичен непрерывному бою |
+| `testAffinityMatrixImpact` | Один враг vs 3 героя (Nav/Yav/Prav) | Разные стартовые disposition, разная тактика |
+
+### 5.2 CombatSnapshot Round-Trip
 
 | Тест | Что проверяет |
 |------|---------------|
-| `testFullKillPathWithEffort` | Hero → select card → burn 2 → Seal ⚔ → enemy HP=0 → KILLED outcome |
-| `testFullPacifyPathWithEffort` | Hero → select card → burn 1 → Seal 💬 → enemy WP=0 → PACIFIED outcome |
-| `testWaitPathNoFateDraw` | Hero → ⏳ Wait → нет Fate draw → enemy resolves |
-| `testMidCombatSaveRestoreResume` | Round 1 → burn card → save → restore → Round 2 continues from snapshot |
-| `testArenaDoesNotCommitToWorldEngine` | Arena → full fight → victory → 0 world-state changes |
-| `testCampaignCommitsThroughBridge` | Campaign → full fight → victory → commitExternalCombat called |
-| `testResonanceShiftDuringCombat` | Kill action → resonance shifts to Nav → atmosphere updates |
-| `testPacifyShiftsTowardPrav` | Pacify action → resonance shifts to Prav → atmosphere updates |
+| `testSnapshotContainsAllRequiredFields` | disposition, streakType, streakCount, lastActionType, sacrificeUsedThisTurn, enemyActionDeckState, enemyMode, hysteresisRemaining, thresholds, fateDeckState, lastFateKeyword, resonanceZone |
+| `testSnapshotRoundTrip_encode_decode` | encode → decode → поля идентичны |
+| `testSnapshotRoundTrip_resume_deterministic` | snapshot → resume → complete → результат = непрерывный бой |
 
 ---
 
-## 6. Негативные тесты (сводка)
+## 6. Simulation Requirements (перед балансом)
 
-Все тесты типа Gate− и unit-негативные, собранные в одном месте для аудита полноты.
+### 6.1 Агенты
 
-### 6.1 Effort — что НЕ должно происходить
+| Агент | Стратегия | Что проверяет |
+|-------|-----------|---------------|
+| **Random** | Случайные действия | Baseline — если >60% побед, система не требует навыка |
+| **Greedy Strike** | Всегда strike | Anti-strike мета работает |
+| **Greedy Influence** | Всегда influence | Anti-influence мета работает |
+| **Adaptive** | Strike пока streak<3, затем influence | Наказание за переключение |
+| **Sacrifice-heavy** | Sacrifice каждый ход + strike | Exploit-потенциал sacrifice |
 
-| Сценарий | Ожидание | Тест |
-|----------|----------|------|
-| Burn selected card | → false, no side effect | testCannotBurnSelectedCard |
-| Burn beyond max limit | → false, card stays in hand | testEffortLimitRespected |
-| Burn changes energy | energy unchanged | testEffortDoesNotSpendEnergy |
-| Burn changes Fate Deck | fateDeckCount unchanged | testEffortDoesNotAffectFateDeck |
-| Undo non-existent card | → false, no side effect | testUndoNonExistentCardReturnsFalse |
-| Double undo same card | → false | testUndoAlreadyReturnedCardReturnsFalse |
-| Burn during wrong phase | → false | testBurnDuringWrongPhase |
+### 6.2 Acceptance Criteria
 
-### 6.2 Architecture — что НЕ должно быть в коде
+| Параметр | Метрика | Acceptance |
+|----------|---------|------------|
+| Win path distribution | % побед через -100 vs +100 | Ни один путь не >70% **для каждой конкретной комбинации** hero × enemy × resonance (не в aggregate) |
+| Average combat length | Ходы до завершения | 5–15 ходов |
+| Action type distribution | % Strike/Influence/Sacrifice | Sacrifice <20%; Strike и Influence 30–60% каждый |
+| Echo impact | % disposition shift от Echo | <30% от общего shift |
+| Mode trigger frequency | Survival/Desperation/Weakened | S/D: 40–70% боёв; W: 10–30% |
+| Variety across seeds | Разница исходов для 100 seeds | σ(combat length) > 2 хода |
 
-| Что запрещено | Где сканируем | Тест |
-|---------------|---------------|------|
-| Прямой ECS-доступ в Scene (мутация+чтение) | RitualCombatScene.swift | testRitualSceneUsesOnlyCombatSimulationAPI |
-| Strong ref на Engine/Bridge | RitualCombatScene*.swift | testRitualSceneHasNoStrongEngineReference |
-| Прямая ECS-мутация в Drag | DragDropController.swift | testDragDropDoesNotMutateECSDirectly |
-| Engine import в Controller | DragDropController.swift | testDragDropControllerHasNoEngineImports |
-| Long-press после drag | gesture state | testLongPressDoesNotFireAfterDragStart |
-| Мутационные вызовы в Atmosphere (commit/burn/select/advance) | ResonanceAtmosphereController | testAtmosphereControllerIsReadOnly |
-| System RNG в RitualCombat/ | all .swift in folder | testRitualCombatNoSystemRNGSources |
-| FateRevealDirector хранит ref на Simulation | FateRevealDirector.swift | testFateRevealDirectorHasNoSimulationReference |
-| Deprecated import в prod | production targets | testOldCombatSceneNotImportedInProduction |
-| Arena commits to world (direct + bridge) | BattleArenaView | testBattleArenaDoesNotCallCommitPathWhenUsingRitualScene |
-
----
-
-## 7. Boundary и edge cases
-
-### 7.1 Effort boundary
-
-| Граница | Значение | Ожидание |
-|---------|----------|----------|
-| effortBonus = 0 | baseline | totalAttack = str + card + 0 + fate |
-| effortBonus = 1 | +1 | totalAttack = str + card + 1 + fate |
-| effortBonus = 2 (max) | hard cap | totalAttack = str + card + 2 + fate |
-| effortBonus = 3 (rejected) | over limit | burnForEffort → false |
-| hand = 1 card (selected) | no cards to burn | burnForEffort → false (0 eligible) |
-| hand = 2 cards, 1 selected | 1 eligible | max 1 burn (min of maxEffort and eligible) |
-
-### 7.2 Resonance interpolation boundary
-
-| Значение | Зона | Ожидание |
-|----------|------|----------|
-| -100 | deepNav | max vignette, violet light, fog particles |
-| -30 | Nav→Yav boundary | threshold crossing FX (shader ripple) |
-| 0 | Yav center | neutral atmosphere |
-| +30 | Yav→Prav boundary | threshold crossing FX |
-| +100 | deepPrav | min vignette, gold light, spark particles |
-| rapid -50→+50 | cross 2 zones | smooth lerp, no jitter |
-
-### 7.3 Snapshot restore edge cases
-
-| Состояние | Ожидание |
-|-----------|----------|
-| effortBonus=2, hand=3 → restore | 1 card in hand (5-2effort-2selected... adjust) |
-| Restore after enemy defeated | victory state, не replay |
-| Restore to playerAction with selected card | Circle glow, seals visible |
-| Restore to intent phase | seals hidden, intent token visible |
-| Restore with empty hand | no cards displayed, Wait always available |
-| effortBonus=0, effortCardIds=[card_a] (inconsistent) | assert fail / snapshot validation error — инвариант внутренней согласованности |
-
-### 7.4 Determinism edge cases
-
-| Сценарий | Ожидание |
-|----------|----------|
-| Same seed + same Effort actions → same outcome | семантическое совпадение (Equatable) |
-| Effort на defeated enemy | no crash, victory state |
-| Save → restore → new action → determinism from restore point | consistent forward |
-
----
-
-## 8. Fixture strategy
-
-### 8.1 Новые fixture-файлы
-
-```swift
-// CombatSimulationFixtures.swift
-enum CombatSimulationFixtures {
-    /// 1 hero (str=5, will=4, maxEffort=2), 5 cards, 1 enemy (hp=10, wp=8), seed=42
-    static func standard(seed: UInt64 = 42) → CombatSimulation
-
-    /// standard + 2 enemies
-    static func multiEnemy(seed: UInt64 = 42) → CombatSimulation
-
-    /// standard + hero.maxEffort = customMax
-    static func withMaxEffort(_ max: Int, seed: UInt64 = 42) → CombatSimulation
-
-    /// standard + specific hand cards
-    static func withHand(_ cardIds: [String], seed: UInt64 = 42) → CombatSimulation
-}
-```
-
-```swift
-// SnapshotFixtures.swift
-enum SnapshotFixtures {
-    /// Mid-combat: 1 card burned, 1 selected, playerAction phase
-    static func midEffort() → CombatSnapshot
-
-    /// After victory: enemy HP=0, roundEnd phase
-    static func afterVictory() → CombatSnapshot
-
-    /// Empty hand, intent phase
-    static func emptyHand() → CombatSnapshot
-}
-```
-
-### 8.2 Seed contract
-
-Все gate-тесты используют **hardcoded seeds** (42, 424242, 808080). Системный RNG запрещён в тестах.
-
----
-
-## 9. Матрица покрытия инвариантов
-
-| Инвариант | Gate-тест | Layer-тест | Integration-тест |
-|-----------|-----------|------------|------------------|
-| effortBonus ≤ maxEffort | INV-EFF-007 | testMaxEffortFromHeroDefinition | — |
-| effortCardIds ⊆ hand до commit | INV-EFF-001, -006 | testBurnLastCardLeavesEmptyHand | — |
-| Effort не задействует RNG | INV-EFF-009 | — | — |
-| Effort не влияет на Fate Deck | INV-EFF-003 | — | — |
-| Scene → только CombatSimulation API | INV-SCENE-001 | — | — |
-| Scene → no engine/bridge refs | INV-SCENE-002 | — | — |
-| Drag → canonical commands only | INV-INPUT-001, -002 | DragDropControllerTests | — |
-| Atmosphere → read-only | INV-ATM-001, -002 | — | — |
-| Snapshot → visual restore (no replay) | INV-INT-001 | — | testMidCombatSaveRestoreResume |
-| Arena sandbox → no world commit | INV-INT-002 | — | testArenaDoesNotCommitToWorldEngine |
-| matchMultiplier пропорциональность | INV-FATE-BAL-001 | testMatchBonusEnhanced (modified) | — |
-| Sticky modifyValue ≤ 1 | INV-FATE-BAL-004 | — | — |
-| No system RNG in RitualCombat/ | INV-DET-002 | — | — |
-| FateRevealDirector = pure observer | INV-DET-001a | — | — |
-| Determinism preserved | INV-DET-001, INV-EFF-009 | — | testMidCombatSaveRestoreResume |
-| Replay trace fingerprint stable | INV-REPLAY-001 | — | — |
-
----
-
-## 10. Порядок реализации (TDD workflow)
+### 6.3 Запуск
 
 ```
-1. R0: FateDeckBalanceGateTests (RED) → content changes (GREEN) → commit
-2. R1: RitualEffortGateTests (RED) → CombatSimulation extension (GREEN) → commit
-3. R2: RitualSceneGateTests (RED, static scan) → scene foundation (GREEN) → commit
-4. R3: DragDropControllerTests (RED) → DragDropController (GREEN) → commit
-5. R6: RitualIntegrationGateTests partial (RED) → FateRevealDirector (GREEN) → commit
-6. R7: RitualAtmosphereGateTests (RED) → ResonanceAtmosphereController (GREEN) → commit
-7. R9: RitualIntegrationGateTests full (RED) → integration wiring (GREEN) → commit
-8. R10a: все gate-тесты GREEN + Go/No-Go report
+Матрица: 5 agents × N enemy types × 3 resonance zones × 3 hero worlds
+Прогонов: 1000 боёв для каждой комбинации
+Результаты: TestResults/CombatSimulation/
 ```
 
 ---
 
-## 11. Счётчик тестов
+## 7. Traceability Matrix — Design → Test
 
-| Категория | Новых | Модифицированных | Удаляемых (R10b) | Итого новых |
-|-----------|-------|-----------------|------------------|-------------|
-| Gate-тесты | 32 | 0 | 0 | 32 |
-| Layer-тесты | 27 | 3 | 0 | 27 |
-| Integration-тесты | 8 | 0 | 4 (R10b) | 8 |
-| **Итого** | **67** | **3** | **4** | **67** |
+| Design Section | Тесты | Suite |
+|----------------|-------|-------|
+| §3.1 Шкала | INV-DC-001, INV-DC-003, INV-DC-004 | DispositionMechanicsGateTests |
+| §3.4 Affinity Matrix | INV-DC-006, INV-DC-044 | DispositionMechanicsGateTests |
+| §4.2 Card Play | INV-DC-012…016 | DispositionCardPlayGateTests |
+| §4.3 Энергия | INV-DC-045…048 | EnergyGateTests |
+| §5.1 Momentum | INV-DC-007…011 | MomentumGateTests |
+| §5.2 Resonance | testResonanceZone_modifiesEffectiveness | DispositionMechanicsGateTests |
+| §5.2 Resonance × Sacrifice | INV-DC-061, INV-DC-062 | EnergyGateTests |
+| §5.3 Fate Keywords | INV-DC-017…026, INV-DC-049…051 | FateKeywordGateTests |
+| §6 Sacrifice | INV-DC-014…016, INV-DC-061, INV-DC-062 | DispositionCardPlayGateTests + EnergyGateTests |
+| §7.2 Systemic Asymmetry | INV-DC-035…038 | SystemicAsymmetryGateTests |
+| §7.3 Enemy Modes | INV-DC-027…034, INV-DC-052…055 | EnemyModeGateTests |
+| §7.4 Enemy Actions | INV-DC-056…060 | EnemyActionGateTests |
+| §7.5 Enemy Reads Momentum | INV-DC-060 | EnemyActionGateTests |
+| §10.2 Gate Tests | Все INV-DC-* | All gate suites |
+| §10.3 Stress Tests | 5 stress scenarios | DispositionStressTests |
+| §10.4 Simulation | 5 agents × criteria | CombatSimulationAgentTests |
+| §11.1 Engine Actions | INV-DC-039, INV-DC-040 | DispositionArchBoundaryGateTests |
+| §11.3 CombatSnapshot | Snapshot round-trip | DispositionIntegrationTests |
+| §11.5 Arena | INV-DC-042 | DispositionArchBoundaryGateTests |
+| CLAUDE.md §1.1 | INV-DC-039, INV-DC-040 | DispositionArchBoundaryGateTests |
+| CLAUDE.md §1.3 | INV-DC-005, INV-DC-026, INV-DC-029 | Determinism tests |
+| CLAUDE.md §1.5 | INV-DC-042 | DispositionArchBoundaryGateTests |
 
-> **Примечание:** 4 удаляемых теста (CombatSceneTests, CombatSceneThemeTests) — только после R10b safety gate.
+---
+
+## 8. Запуск тестов
+
+### Engine gates (SPM)
+```bash
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
+  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift test \
+  --package-path Packages/TwilightEngine \
+  --filter "DispositionMechanicsGateTests|MomentumGateTests|EnergyGateTests|FateKeywordGateTests|EnemyModeGateTests|EnemyActionGateTests|SystemicAsymmetryGateTests|DispositionStressTests"
+```
+
+### App gates (Xcode)
+```bash
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
+  bash .github/ci/run_xcodebuild.sh test \
+  -scheme CardSampleGame \
+  -destination "$(bash .github/ci/select_ios_destination.sh --scheme CardSampleGame)" \
+  -only-testing:CardSampleGameTests/DispositionCardPlayGateTests \
+  -only-testing:CardSampleGameTests/DispositionArchBoundaryGateTests \
+  -only-testing:CardSampleGameTests/DispositionSceneGateTests
+```
+
+### Simulation (отдельный запуск)
+```bash
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
+  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift test \
+  --package-path Packages/TwilightEngine \
+  --filter "CombatSimulationAgentTests"
+```
+
+---
+
+## 9. Priority и порядок реализации
+
+| Priority | Suite | Блокирует | Тестов |
+|----------|-------|-----------|--------|
+| **P0** | DispositionMechanicsGateTests | Всё остальное | 9 |
+| **P0** | MomentumGateTests | Card Play, Enemy Modes | 5 |
+| **P0** | EnergyGateTests | Card Play, Integration | 6 |
+| **P1** | DispositionCardPlayGateTests | Scene, Integration | 5 |
+| **P1** | FateKeywordGateTests | Integration, Balance | 13 |
+| **P1** | EnemyModeGateTests | Integration, Stress | 12 |
+| **P1** | EnemyActionGateTests | Integration, Stress | 5 |
+| **P2** | SystemicAsymmetryGateTests | Balance | 4 |
+| **P2** | DispositionArchBoundaryGateTests | Release | 5 |
+| **P2** | DispositionSceneGateTests | Release | 4 |
+| **P3** | DispositionStressTests | Balance | 5 |
+| **P3** | DispositionIntegrationTests | Release | 13 |
+| **P4** | CombatSimulationAgentTests | Balance tuning | 30+ |
+
+---
+
+---
+
+## 10. Known Design Doc Issues
+
+| ID | Проблема | Решение в тестовой модели |
+|----|----------|--------------------------|
+| MISMATCH-1 | §10.2 `testFateKeyword_surgeDoublesMomentum` говорит "streak_bonus ×2", но §5.1 формула показывает Surge = `base_power * 3/2` (только base) | Тестовая модель следует §5.1 формуле (INV-DC-017). §10.2 требует исправления в дизайн-документе |
+
+---
+
+**Версия документа:** 5.3
+**Дата:** 18 февраля 2026
+**Статус:** Auditor rounds 1-3 complete — ready for implementation
+
+**Changelog:**
+- v5.0 → v5.1: +19 invariants, +2 suites (Energy, EnemyAction), audit gaps closed
+- v5.1 → v5.2: tie-break rule, arena scope, threshold metrics, simulation granularity
+- v5.2 → v5.3: sacrifice cost model finalized (`card.cost` based, not free). Nav = cost-1, Prav = extra exhaust. Adapt = soft-block formalized. SPRINT.md synced.

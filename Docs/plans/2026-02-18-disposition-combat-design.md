@@ -568,7 +568,7 @@ Weights определяются в `EnemyActionDefinition`. Resolve через 
 | `testSystemicAsymmetry_resistances` | каждый тип врага имеет резистенцию хотя бы к одному типу действия |
 | `testSystemicAsymmetry_resonanceChangesVulnerability` | одна и та же уязвимость отличается в Nav/Yav/Prav |
 | `testSystemicAsymmetry_noAbsoluteVulnerability` | ни один враг не уязвим к одному типу во всех трёх resonance зонах одинаково |
-| `testFateKeyword_surgeDoublesMomentum` | Surge при active streak → streak_bonus x2 для этого действия |
+| `testSurge_onlyAffectsBasePower` | Surge: base_power × 1.5 (только base, не умножает streak/threat). См. §5.1 формулу |
 | `testFateKeyword_echoFreeCopy` | Echo → повтор предыдущего действия с 0 energy cost |
 | `testFateKeyword_focusIgnoresDefend` | Focus при disposition < -30 → ignore enemy Defend |
 | `testFateKeyword_wardCancelsBacklash` | Ward → отменяет resonance backlash |
