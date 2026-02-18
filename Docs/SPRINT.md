@@ -1,26 +1,39 @@
 # Sprint Board
 
-> Read this file at the start of every Claude session.
+> **Назначение:** Единый центр планирования. Читать при старте каждой сессии.
 > Take the **Next Task**, complete it, update status, commit.
 
 ---
 
-## Phase 3 (Ritual Combat)
+## Phase 3 (Disposition Combat)
+
+**Design:** [Disposition Combat v2.5](../docs/plans/2026-02-18-disposition-combat-design.md) — SoT для боевой механики
 
 Source of truth:
-- `Docs/plans/2026-02-13-ritual-combat-design.md` (design doc, v1.2 approved)
-- `Docs/plans/2026-02-14-ritual-combat-epics.md` (epic ledger)
+- `docs/plans/2026-02-18-disposition-combat-design.md` (design doc, v2.5 approved)
+- `Docs/Design/COMBAT_DIPLOMACY_SPEC.md` (compact reference, v2.0)
 - `Docs/QA/QUALITY_CONTROL_MODEL.md` (quality policy + mandatory gates)
 - `Docs/QA/TESTING_GUIDE.md` (how to run gates)
 
-Current focus:
-- `R0` (pending): Fate Deck Balance Hardening (F1–F6 из стресс-аудита)
-- `R1` (pending): Effort Mechanic (engine extension)
-- `R2` (pending): RitualCombatScene Foundation
+### Status: Design complete, documentation actualized
 
-Next task: Тестовая модель → R0 (balance fixes) → R1 + R2 параллельно.
+**Что сделано:**
+- Disposition Combat v2.5 — design doc утверждён (5 раундов аудиторской проверки)
+- Документация актуализирована (12 документов, все Dual Track → Disposition, Kill/Pacify → Destroy/Subjugate):
+  - COMBAT_DIPLOMACY_SPEC.md v2.0 — переписан (v1.1 архивирован)
+  - PROJECT_BIBLE.md — обновлён
+  - GAME_DESIGN_DOCUMENT.md v4.0 — обновлён (§9, §15)
+  - ENCOUNTER_SYSTEM_DESIGN.md v1.1 — обновлён
+  - INDEX.md — обновлена навигация
+  - ENGINE_ARCHITECTURE.md — обновлён combat-модуль
+  - EXPLORATION_CORE_DESIGN.md — терминология обновлена
+  - RITUAL_COMBAT_TEST_MODEL.md → Disposition Combat Test Model (header + transition note)
+  - ENCOUNTER_TEST_MODEL.md — инварианты обновлены (INV-ENC-002, INV-ENC-003)
+  - QUALITY_CONTROL_MODEL.md — Phase 3 gates + balance risks обновлены
+  - TESTING_GUIDE.md — секция 9a обновлена
+  - SPRINT.md — актуализирован как центральный планировщик
 
-Epics: R0–R10 (11 epics). Dependency graph и полный список — в epic ledger.
+**Next:** Переход к имплементации — epic planning для Disposition Combat
 
 ---
 

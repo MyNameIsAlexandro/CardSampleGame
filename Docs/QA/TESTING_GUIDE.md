@@ -266,66 +266,42 @@ xcodebuild test -project CardSampleGame.xcodeproj \
   -only-testing:CardSampleGameTests/CodeHygieneTests/testFirstPartySwiftFilesHaveCanonicalFileHeaders
 ```
 
-## 9a. Phase 3: Ritual Combat Tests (planned)
+## 9a. Phase 3: Disposition Combat Tests (planned)
 
-Phase 3 вводит 5 test suites. После реализации — запуск:
+Phase 3 вводит 7 категорий gate-тестов (35+). После реализации — запуск:
 
-**Engine-side (Effort + Balance):**
+**Engine-side (Disposition + Momentum + Fate):**
 ```bash
 DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift test \
   --package-path Packages/TwilightEngine \
-  --filter "RitualEffortGateTests|FateDeckBalanceGateTests"
+  --filter "DispositionMechanicsGateTests|MomentumGateTests|FateKeywordGateTests|EnemyModeGateTests"
 ```
 
-**App-side (Scene + Atmosphere + Integration):**
+**App-side (Scene + Resonance + Integration + Anti-Meta):**
 ```bash
 xcodebuild test -project CardSampleGame.xcodeproj \
   -scheme CardSampleGame \
   -destination "$(bash .github/ci/select_ios_destination.sh --scheme CardSampleGame)" \
-  -only-testing:CardSampleGameTests/RitualSceneGateTests \
-  -only-testing:CardSampleGameTests/RitualAtmosphereGateTests \
-  -only-testing:CardSampleGameTests/RitualIntegrationGateTests
+  -only-testing:CardSampleGameTests/CardPlayGateTests \
+  -only-testing:CardSampleGameTests/ResonanceEffectsGateTests \
+  -only-testing:CardSampleGameTests/AntiMetaGateTests \
+  -only-testing:CardSampleGameTests/DispositionIntegrationGateTests
 ```
 
-**Gate-тесты (32):**
+**Gate-тесты по категориям (35+):**
 
-| Suite | Тест | Инвариант |
-|-------|------|-----------|
-| FateDeckBalanceGateTests | `testMatchMultiplierFromBalancePack` | matchMultiplier из balance config |
-| | `testSurgeSuitDistribution` | Surge suit distribution |
-| | `testCritCardNeutralSuit` | Crit-карта neutral suit |
-| | `testStickyCardResonanceModifyCapped` | Sticky card resonance cap |
-| | `testNoStaleCardIdsInContent` | No stale card IDs |
-| RitualEffortGateTests | `testEffortBurnMovesToDiscard` | Сброс → discardPile |
-| | `testEffortDoesNotSpendEnergy` | Effort ≠ Faith cost |
-| | `testEffortDoesNotAffectFateDeck` | Hand Deck ≠ Fate Deck |
-| | `testEffortBonusPassedToFateResolve` | +N в формуле |
-| | `testEffortUndoReturnsCardToHand` | Undo до commit |
-| | `testCannotBurnSelectedCard` | Карта в круге ≠ Effort |
-| | `testEffortLimitRespected` | ≤ maxEffort |
-| | `testEffortDefaultZero` | Без Effort = 0 |
-| | `testEffortDeterminism` | Replay determinism |
-| | `testEffortMidCombatSaveLoad` | Snapshot round-trip |
-| | `testSnapshotContainsEffortFields` | Required fields in snapshot |
-| RitualSceneGateTests | `testRitualSceneUsesOnlyCombatSimulationAPI` | No direct ECS access |
-| | `testRitualSceneHasNoStrongEngineReference` | No engine reference |
-| | `testDragDropProducesCanonicalCommands` | Drag → command |
-| | `testDragDropDoesNotMutateECSDirectly` | No ECS mutation |
-| | `testDragDropControllerHasNoEngineImports` | No engine imports |
-| | `testLongPressDoesNotFireAfterDragStart` | Long-press guard |
-| RitualAtmosphereGateTests | `testResonanceAtmosphereIsPurePresentation` | Read-only |
-| | `testAtmosphereControllerIsReadOnly` | No mutation calls |
-| RitualIntegrationGateTests | `testRitualSceneRestoresFromSnapshot` | Snapshot → visual |
-| | `testOldCombatSceneNotImportedInProduction` | No legacy import |
-| | `testFateRevealDirectorHasNoSimulationReference` | No sim reference |
-| | `testFateRevealPreservesExistingDeterminism` | No new RNG sources |
-| | `testBattleArenaDoesNotCallCommitPathWhenUsingRitualScene` | Arena sandbox |
-| | `testRitualCombatNoSystemRNGSources` | No system RNG |
-| | `testKeywordEffectConsumedOrDocumented` | Keyword consumption |
-| | `testVerticalSliceReplayTrace` | Vertical slice replay determinism |
+| Категория | Тестов | Ключевые инварианты |
+|-----------|--------|---------------------|
+| Disposition mechanics | 6 | Шкала -100…+100, hard cap effective_power ≤ 25, clamping |
+| Momentum system | 5 | streak_bonus, switch_penalty (threshold 3), threat_bonus |
+| Card play modes | 4 | Strike/Influence/Sacrifice contracts, drag targets |
+| Fate keywords | 5 | Surge +50%, Echo not after Sacrifice, disposition-dependent effects |
+| Enemy modes | 5 | Survival/Desperation/Weakened transitions, dynamic thresholds |
+| Resonance effects | 5 | Zone modifiers (Навь/Правь/Явь), backlash cancellation |
+| Anti-meta | 5 | Vulnerability × Resonance 3D lookup, systemic asymmetry |
 
-> **Source:** `plans/2026-02-14-ritual-combat-epics.md`, `QUALITY_CONTROL_MODEL.md` §2a
+> **Source:** [Disposition Combat Design v2.5](../../docs/plans/2026-02-18-disposition-combat-design.md) §10, `QUALITY_CONTROL_MODEL.md` §2a
 
 ## 10. Change Discipline
 

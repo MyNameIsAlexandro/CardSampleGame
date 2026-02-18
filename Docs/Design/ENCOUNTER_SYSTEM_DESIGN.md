@@ -9,26 +9,24 @@
 > ENGINE_ARCHITECTURE.md — SoT для кода/контрактов.
 
 **Зависимости:**
-- [COMBAT_DIPLOMACY_SPEC.md](./COMBAT_DIPLOMACY_SPEC.md) — спецификация боевой и дипломатической системы (включая Effort)
+- [COMBAT_DIPLOMACY_SPEC.md](./COMBAT_DIPLOMACY_SPEC.md) — спецификация Disposition Combat (v2.0)
+- [Disposition Combat Design v2.5](../../docs/plans/2026-02-18-disposition-combat-design.md) — полный дизайн-документ (SoT для боевой механики)
 - [ENGINE_ARCHITECTURE.md](../Technical/ENGINE_ARCHITECTURE.md) — архитектура движка
-- [GAME_DESIGN_DOCUMENT.md](./GAME_DESIGN_DOCUMENT.md) — игровой дизайн (Уровень 8, секция 9)
-
-**Визуальная реализация (Phase 3):**
-- [Ritual Combat Design](../plans/2026-02-13-ritual-combat-design.md) — SpriteKit-сцена "Стол Волхва", drag-and-drop Effort/Seal mechanics, resonance atmosphere
+- [GAME_DESIGN_DOCUMENT.md](./GAME_DESIGN_DOCUMENT.md) — игровой дизайн (секция 9)
 
 ---
 
 ## 1. Обзор
 
-Encounter System — модуль разрешения конфликтов. Реализует **Unified Encounter** — любая встреча с сущностью (враг, NPC, дух) разрешается через единый движок с двумя шкалами (Body/Spirit) и множеством путей (Kill, Pacify, Flee, Custom).
+Encounter System — модуль разрешения конфликтов. Реализует **Unified Encounter** — любая встреча с сущностью (враг, NPC, дух) разрешается через единый движок с **Disposition Track** (единая шкала -100…+100) и множеством путей (Destroy, Subjugate, Flee, Custom).
 
 Это **не "боевая система"**, а **система встреч**, где бой — лишь один из путей разрешения.
 
 ### Аналогия
 
 Encounter System — это **система правил** (как D&D, Call of Cthulhu, Arkham Horror LCG), а не игровой движок. Она определяет:
-- Как разрешаются конфликты (Fate Deck, Dual Track)
-- Какие сущности участвуют (герой, противник, колода, шкалы)
+- Как разрешаются конфликты (Fate Deck, Disposition Combat)
+- Какие сущности участвуют (герой, противник, колода, disposition)
 - Как сущности взаимодействуют (Intent → Action → Resolution)
 
 Но она **не знает** про конкретный сценарий, карту мира или сюжет.
@@ -52,8 +50,8 @@ Encounter System — это **система правил** (как D&D, Call of
 │  — переиспользуемые для других игр          │
 ├─────────────────────────────────────────────┤
 │  Encounter Engine (Движок встреч)           │
-│  Turn loop, Intent resolution, Fate Tests,  │
-│  Dual Track (Body/Spirit), Action economy   │
+│  Turn loop, Intent resolution, Fate Cards,  │
+│  Disposition Track (-100…+100), Momentum    │
 │  — изолированный: не читает/пишет ничего    │
 │    вне EncounterContext/EncounterResult;     │
 │    вся изменяемость локальна и сериализуема  │
@@ -82,17 +80,19 @@ Encounter System — "слепой" модуль. Он не знает про р
 ```
 EncounterContext
 ├── hero: EncounterHero               // Статы героя (HP, strength, armor, wisdom...)
-├── enemies: [EncounterEnemy]         // Противники с dual-track (HP + WP)
-│   ├── stats                         // HP, WP, power, defense...
+├── enemies: [EncounterEnemy]         // Противники
+│   ├── stats                         // power, defense, vulnerabilities...
 │   └── behaviorId                    // Ссылка на behaviors.json (для AI)
+├── initialDisposition: Int           // Стартовое значение шкалы (-100...+100)
+│   // = affinityMatrix[heroWorld][enemyType] + situationModifier
 ├── playerDeck: DeckSnapshot          // Текущая колода игрока
 ├── fateDeck: FateDeckSnapshot        // Текущее состояние Fate Deck
 ├── modifiers: [EncounterModifier]    // Generic модификаторы среды
 │   ├── id, target, effect, value     // Что и как модифицирует
 │   └── sourceUIName                  // Для отображения в UI ("Гниль")
 ├── encounterRules: EncounterRules    // Тип встречи, доступные пути
-│   ├── availablePaths                // [.kill, .pacify, .flee, .custom(...)]
-│   ├── victoryConditions             // [.killAll, .survive(rounds: 5)]
+│   ├── availablePaths                // [.destroy, .subjugate, .flee, .custom(...)]
+│   ├── victoryConditions             // [.dispositionMin(-100), .dispositionMax(+100), .survive(rounds: 5)]
 │   ├── defeatConditions              // [.heroDeath, .resonanceThreshold(-80)]
 │   └── escapePolicy                  // .allowed(cost:) / .forbidden / .requiresCheck
 ├── rngSeed: UInt64                   // Seed для seeded RNG (weighted_random и др.)
@@ -103,10 +103,11 @@ EncounterContext
 
 ```
 EncounterResult
-├── outcome: EncounterOutcome         // .victory(.kill), .victory(.pacify), .defeat, .escaped
+├── outcome: EncounterOutcome         // .victory(.destroyed), .victory(.subjugated), .defeat, .escaped
+├── finalDisposition: Int             // Финальное значение disposition (-100...+100)
 ├── transaction: Transaction          // Атомарный набор эффектов (всё или ничего)
 │   ├── resourceChanges               // {hp: -5, faith: +10}
-│   ├── worldFlags                    // {killed_leshy: true}
+│   ├── worldFlags                    // {destroyed_leshy: true}
 │   ├── resonanceShift                // -15
 │   └── tensionShift                  // +2
 ├── updatedFateDeck: FateDeckSnapshot // Состояние Fate Deck после встречи
@@ -114,23 +115,23 @@ EncounterResult
 │   // Включает структурные изменения (добавленные/удалённые карты:
 │   // проклятия, лут) и порядок (draw/discard/hand) для anti-save-scum
 ├── updatedRngState: UInt64           // Обновлённое состояние RNG после encounter
-├── perEntityOutcomes: [ParticipantId: EntityOutcome]  // Per-entity: .killed/.pacified/.escaped/.alive
+├── perEntityOutcomes: [ParticipantId: EntityOutcome]  // Per-entity: .destroyed/.subjugated/.escaped/.alive
 ├── actionLog: [ActionLogEntry]       // Полный лог для replay/аналитики
-└── endParticipantStates              // Финальные HP/WP всех участников
+└── combatSnapshot: CombatSnapshot    // Финальное состояние (disposition, streaks, enemy mode)
 ```
 
 **Принцип:** Transaction применяется атомарно — всё или ничего. GameEngine (большая игра) решает, как transaction маппится на мир.
 
-**Multi-enemy outcomes** (см. COMBAT_DIPLOMACY_SPEC.md §1.3): `perEntityOutcomes` фиксирует исход для каждого участника. Агрегация:
-- Убит хоть один враг → `violence: true` в worldFlags
-- Все враги умиротворены → `nonviolent: true` в worldFlags
+**Multi-enemy outcomes** (см. COMBAT_DIPLOMACY_SPEC.md §6): `perEntityOutcomes` фиксирует исход для каждого участника. Агрегация:
+- Уничтожен хоть один враг (disposition → -100) → `violence: true` в worldFlags
+- Все враги подчинены (disposition → +100) → `nonviolent: true` в worldFlags
 - Смешанный исход допустим; сценарий определяет последствия
 
 ---
 
 ## 4. Структура раунда (Strict Phases)
 
-Порядок фаз фиксирован. Это канон из [COMBAT_DIPLOMACY_SPEC.md §2](./COMBAT_DIPLOMACY_SPEC.md#2-структура-раунда-игровой-цикл).
+Порядок фаз фиксирован. Каноническая механика раунда описана в [Disposition Combat Design §3](../../docs/plans/2026-02-18-disposition-combat-design.md).
 
 ### 4.0 Именованные фазы (контрактный enum)
 
@@ -147,11 +148,11 @@ enum EncounterPhase: String, Codable {
 
 **Соответствие между документами:**
 
-| Имя (контракт) | COMBAT_DIPLOMACY_SPEC §2 | Описание |
-|-----------------|--------------------------|----------|
-| `intent` | Фаза 0: Намерение врага | Враг раскрывает intent; игрок видит |
-| `playerAction` | Фаза 1: Ход игрока | Розыгрыш карт + одно Finish Action |
-| `enemyResolution` | Фаза 2: Разрешение врага | Враг выполняет intent; автозащита |
+| Имя (контракт) | Disposition Combat Design §3 | Описание |
+|-----------------|------------------------------|----------|
+| `intent` | Фаза: Enemy Telegraph | Враг раскрывает intent (telegraph); игрок видит |
+| `playerAction` | Фаза: Player Card Play | Drag-and-drop: Strike / Influence / Sacrifice |
+| `enemyResolution` | Фаза: Enemy Resolution | Враг выполняет intent; momentum обновляется |
 | `roundEnd` | (неявная) | Сброс эффектов, victory/defeat check, draw |
 
 > **Правило:** В документации, тестах и коде всегда используются **имена фаз** (`intent`, `playerAction`, `enemyResolution`, `roundEnd`). Числовые индексы допустимы только в логах и отладке.
@@ -165,14 +166,12 @@ enum EncounterPhase: String, Codable {
 │  → Игрок видит: атака 8, защита, спецприём  │
 │                                             │
 │  .playerAction (Ход игрока)                 │
-│  → Играть карты из руки                      │
-│  → Выбирать цель (при 1 vs N)               │
-│  → Fate Test для особых действий             │
-│  → Путь: Attack (Body) / Influence (Spirit)  │
-│  → Один Finish Action за раунд               │
-│    (Атака / Влияние / Ожидание).             │
-│    Сыграть карт можно много,                 │
-│    но завершающее действие — одно.           │
+│  → Drag-and-drop карты из руки               │
+│  → Strike (drag→врага): disposition -=       │
+│  → Influence (drag→алтарь): disposition +=   │
+│  → Sacrifice (drag→костёр): heal + exhaust   │
+│  → Fate Card модифицирует effective_power    │
+│  → Momentum: streak bonus / switch penalty   │
 │                                             │
 │  .enemyResolution (Ход врага)               │
 │  → Враг выполняет объявленный Intent         │
@@ -290,24 +289,31 @@ Game Engine                    Encounter Engine
 
 ### 6.2 Декларативные условия (Condition DSL)
 
-> **SoT для Condition DSL:** [COMBAT_DIPLOMACY_SPEC.md §6.2](./COMBAT_DIPLOMACY_SPEC.md). Этот раздел содержит пример для иллюстрации; канонические имена типов, операторы и формат — в спецификации.
+> **SoT для боевой механики:** [Disposition Combat Design v2.5](../../docs/plans/2026-02-18-disposition-combat-design.md) §7 (Enemy System).
+> Этот раздел содержит пример для иллюстрации; канонические имена типов, операторы и формат — в дизайн-документе.
 
-Behaviors описываются в формате `behaviors.json` из COMBAT_DIPLOMACY_SPEC.md §6.2:
+Behaviors описываются в формате `behaviors.json`. Враги переключаются между **динамическими режимами** (Survival / Desperation / Weakened) в зависимости от текущего disposition:
 
 ```json
 {
   "id": "behavior_forest_guardian",
   "default_intent": "attack_normal",
+  "vulnerabilities": ["fire", "iron"],
   "rules": [
     {
       "priority": 100,
-      "condition": {"type": "hp_percent", "operator": "<", "value": 30},
-      "intent": "heal_roots"
+      "condition": {"type": "enemy_mode", "operator": "==", "value": "survival"},
+      "intent": "rage_strike"
     },
     {
       "priority": 90,
-      "condition": {"type": "player_attacking_wp", "value": true},
-      "intent": "argument_restore"
+      "condition": {"type": "enemy_mode", "operator": "==", "value": "desperation"},
+      "intent": "plea_roots"
+    },
+    {
+      "priority": 80,
+      "condition": {"type": "enemy_mode", "operator": "==", "value": "weakened"},
+      "intent": "defend_weak"
     },
     {
       "priority": 50,
@@ -321,8 +327,9 @@ Behaviors описываются в формате `behaviors.json` из COMBAT_
   "intents": {
     "attack_normal": {"type": "attack", "value_formula": "power"},
     "attack_heavy": {"type": "attack", "value_formula": "power * heavyAttackMultiplier"},
-    "heal_roots": {"type": "heal", "value": 5},
-    "argument_restore": {"type": "restore_wp", "value": 3}
+    "rage_strike": {"type": "attack", "value_formula": "power * 1.5"},
+    "plea_roots": {"type": "plea", "value": 3},
+    "defend_weak": {"type": "defend", "value": 1}
   }
 }
 ```
@@ -333,7 +340,7 @@ Behaviors описываются в формате `behaviors.json` из COMBAT_
 - `weighted_random` — специальный тип правила для пула с весами. Использует seeded RNG из EncounterContext
 - `intents{}` — словарь intent-ов с type/value_formula/description
 
-**Encounter Engine** содержит `ConditionEvaluator` — конечный набор поддерживаемых типов условий (канонический список: COMBAT_DIPLOMACY_SPEC.md §6.2).
+**Encounter Engine** содержит `ConditionEvaluator` — конечный набор поддерживаемых типов условий (канонический список: Disposition Combat Design §7).
 
 Пак **не может** добавить новый тип условия — только комбинировать существующие. Новые типы условий добавляются только через обновление движка.
 
@@ -510,7 +517,7 @@ sequenceDiagram
     rect rgb(30, 30, 30)
         Note over Encounter: STEP-BASED ЦИКЛ (изолирован)
         Encounter->>Encounter: generateIntent(for:)
-        Encounter->>Encounter: performAction(.attack / .spiritAttack / ...)
+        Encounter->>Encounter: performAction(.strike / .influence / .sacrifice)
         Encounter->>Encounter: resolveEnemyAction(enemyId:)
         Encounter->>Encounter: advancePhase()
         Note over Encounter: Повтор до завершения
@@ -526,7 +533,8 @@ sequenceDiagram
 ---
 
 **Статус документа:** APPROVED
-**Версия:** 1.0
-**Дата:** 29 января 2026
+**Версия:** 1.1
+**Дата:** 18 февраля 2026
 **Changelog:**
+- v1.1 (2026-02-18): Synced with Disposition Combat v2.5. Dual Track → Disposition Track, Kill/Pacify → Destroy/Subjugate, behavior conditions updated for enemy modes, EncounterContext/Result contracts updated
 - v1.0 (2026-01-29): Initial APPROVED. P0 audit fixes: named phases, SoT behaviors.json, RNG contract, perEntityOutcomes, FateKeyword/Tags split

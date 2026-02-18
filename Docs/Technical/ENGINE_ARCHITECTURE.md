@@ -540,7 +540,7 @@ protocol ProgressionPathProtocol {
 | `ResonanceEngine` | Расчёт резонанса между картами и стихиями |
 | `EnemyIntent` | Отображение намерений врага перед ходом |
 
-Dual-track combat: физический урон + духовный резонанс. Карты судьбы вытягиваются из общей колоды и влияют на оба трека.
+Disposition Combat: единая шкала -100…+100 (уничтожение ↔ подчинение). Карты судьбы модифицируют effective_power. Подробности: [Disposition Combat Design v2.5](../../docs/plans/2026-02-18-disposition-combat-design.md).
 
 ### 3.10 Player Progression
 
@@ -1267,22 +1267,24 @@ EchoEngine — параллельная реализация боевой сис
 
 - **Энергия:** 3/ход, `card.cost ?? 1` за карту, сброс в начале хода
 - **Exhaust:** Карты с `exhaust: true` → exhaustPile (не возвращаются)
-- **Паттерны врагов:** Циклический массив `EnemyPatternStep` (attack/block/heal/ritual)
-- **Dual Health:** HP (Body) + Will (Mind), Will depletion = умиротворение
-- **Статус-эффекты:** poison, shield, buff — тикают каждый ход
-- **Fate Resolution:** FateResolutionService оборачивает FateDeckManager + KeywordInterpreter. Keyword эффекты (surge/focus/echo/shadow/ward) зависят от `ActionContext`. Suit match (Nav↔physical, Prav↔spiritual) усиливает ×2, mismatch обнуляет keyword.
-- **Дипломатия:** `playerInfluence()` наносит урон Will вместо HP. Переключение трека physical↔spiritual: surprise bonus / rage shield. Эскалация спадает каждый ход.
-- **Dual Victory:** `CombatOutcome.victory(.killed)` при HP=0, `.victory(.pacified)` при Will=0. Resonance delta: -5 за kill (Nav), +5 за pacify (Prav).
+- **Disposition Track:** Единая шкала -100…+100. disposition → -100 = уничтожен, → +100 = подчинён.
+- **Momentum:** streak_bonus, threat_bonus, switch_penalty — детерминистическая система без RNG.
+- **Enemy Modes:** Survival (disposition < -threshold), Desperation (disposition > +threshold), Weakened (swing ±30).
+- **Статус-эффекты:** poison, shield, buff — тикают каждый ход.
+- **Fate Resolution:** FateResolutionService оборачивает FateDeckManager + KeywordInterpreter. Keyword эффекты (surge/focus/echo/shadow/ward) зависят от текущего disposition. Surge: +50% base_power. Echo: бесплатный повтор (не после Sacrifice).
+- **Victory:** `CombatOutcome.victory(.destroyed)` при disposition=-100, `.victory(.subjugated)` при disposition=+100. Resonance delta: негативный за destroy (Nav), позитивный за subjugate (Prav).
 
 #### CombatResult
 
 ```swift
 public struct CombatResult {
-    let outcome: CombatOutcome      // .victory(.killed), .victory(.pacified), .defeat
-    let resonanceDelta: Int         // Nav за kill, Prav за pacify
+    let outcome: CombatOutcome      // .victory(.destroyed), .victory(.subjugated), .defeat
+    let finalDisposition: Int       // -100...+100
+    let resonanceDelta: Int         // Nav за destroy, Prav за subjugate
     let faithDelta: Int
     let lootCardIds: [String]
     let updatedFateDeckState: FateDeckState?
+    let combatSnapshot: CombatSnapshot  // для replay/аналитики
 }
 ```
 
@@ -1291,50 +1293,42 @@ public struct CombatResult {
 ```swift
 let sim = CombatSimulation.create(enemyDefinition: enemy, playerStrength: 10, seed: 42)
 sim.beginCombat()
-sim.playerAttack()      // физическая атака с fate resolution
-sim.playerInfluence()   // духовная атака по Will
+sim.strike(cardId: id, targetId: enemy)   // disposition -= effective_power
+sim.influence(cardId: id)                  // disposition += effective_power
+sim.sacrifice(cardId: id)                  // heal hero + enemy buff, exhaust card
 sim.endTurn()
 sim.resolveEnemyTurn()
 let result = sim.combatResult  // CombatResult после завершения боя
 ```
 
-#### Effort API (Phase 3 — Ritual Combat, planned)
+#### Disposition Combat API (Phase 3)
 
-Расширение CombatSimulation для механики Effort (сброс карт для усиления Fate-проверки):
+> **Дизайн:** [Disposition Combat Design v2.5](../../docs/plans/2026-02-18-disposition-combat-design.md)
 
-```swift
-// Internal state
-private(set) var effortBonus: Int = 0
-private(set) var effortCardIds: [String] = []
-let maxEffort: Int  // default = 2, из HeroDefinition
-
-// Новые методы
-func burnForEffort(cardId: String) -> Bool   // Сбросить карту из руки, +1 к Fate Test
-func undoBurnForEffort(cardId: String) -> Bool  // Отменить сброс (до commit)
-// commitAttack() / commitInfluence() читают self.effortBonus внутренне
+Формула effective_power:
+```
+surged_base     = fate.keyword == .surge ? (base_power * 3 / 2) : base_power
+raw_power       = surged_base + streak_bonus + threat_bonus - switch_penalty + fate_modifier
+effective_power = min(raw_power, 25)   // hard cap
 ```
 
 **Инварианты:**
-- `effortBonus` — чистое число, не задействует RNG
-- `effortCardIds ⊆ hand` (до commit), после commit → `discardPile`
-- `effortBonus <= maxEffort` (жёсткий cap)
-- Effort не влияет на Fate Deck (Hand Deck и Fate Deck — разные колоды)
+- `effective_power <= 25` (hard cap — четверть шкалы)
+- Momentum — чистое число, не задействует RNG
+- `disposition ∈ [-100, +100]`, clamped
+- Sacrifice exhaust необратим (карта удаляется из колоды навсегда)
 
-**Snapshot-контракт (mid-combat save):** `effortCardIds`, `effortBonus`, `selectedCardIds`, `phase` обязательны в snapshot.
-
-> **Дизайн:** `plans/2026-02-13-ritual-combat-design.md` §3.5, §11.2
+**Snapshot-контракт (mid-combat save):** `disposition`, `streakType`, `streakCount`, `enemyMode`, `heroHP`, `fateDeckState` обязательны в `CombatSnapshot`.
 
 #### RitualCombatScene (Phase 3 — planned)
 
 Единая SpriteKit-сцена для боя, заменяющая SwiftUI CombatView и Arena CombatScene. Работает поверх `CombatSimulation` через drag-and-drop:
 
-- Карты перетаскиваются в Ритуальный Круг → `selectCard()`
-- Карты перетаскиваются в Костёр → `burnForEffort()`
-- Печати (Attack/Influence/Wait) перетаскиваются на врага → `commitAttack()`/`commitInfluence()`
+- Карты перетаскиваются на врага → `strike()` (disposition -)
+- Карты перетаскиваются на алтарь → `influence()` (disposition +)
+- Карты перетаскиваются в костёр → `sacrifice()` (heal + exhaust)
 
 **Архитектурный инвариант:** `ResonanceAtmosphereController` — read-only observer, не вызывает mutation-методы `CombatSimulation`.
-
-> **Дизайн:** `plans/2026-02-13-ritual-combat-design.md` §3–§10
 
 #### EchoEncounterBridge (Интеграция)
 

@@ -6,7 +6,7 @@
 > Все участники проекта обязаны следовать данной карте.
 
 **Проект:** ECHO: Legends of the Veil (раб. назв. «Грань Миров»)
-**Последнее обновление:** 14 февраля 2026
+**Последнее обновление:** 18 февраля 2026
 
 ---
 
@@ -32,7 +32,8 @@
 | [GAME_DESIGN_DOCUMENT.md](./Design/GAME_DESIGN_DOCUMENT.md) | Полный GDD |
 | [EXPLORATION_CORE_DESIGN.md](./Design/EXPLORATION_CORE_DESIGN.md) | Дизайн механик исследования |
 | [ENCOUNTER_SYSTEM_DESIGN.md](./Design/ENCOUNTER_SYSTEM_DESIGN.md) | Дизайн системы энкаунтеров |
-| [COMBAT_DIPLOMACY_SPEC.md](./Design/COMBAT_DIPLOMACY_SPEC.md) | Спецификация боевой и дипломатической системы (формулы, Effort, Fate) |
+| [COMBAT_DIPLOMACY_SPEC.md](./Design/COMBAT_DIPLOMACY_SPEC.md) | Спецификация Disposition Combat v2.0 (compact reference → SoT в design doc) |
+| [Disposition Combat Design v2.5](../docs/plans/2026-02-18-disposition-combat-design.md) | Полный дизайн-документ Disposition Combat (SoT) |
 
 ### Technical/ — Техническая документация
 Архитектура движка и реализация.
@@ -67,7 +68,7 @@
 | [QUALITY_CONTROL_MODEL.md](./QA/QUALITY_CONTROL_MODEL.md) | Модель контроля качества, обязательные gate-тесты | **ЗАКОН** |
 | [TESTING_GUIDE.md](./QA/TESTING_GUIDE.md) | Руководство по запуску gate/модульных тестов | **GUIDE** |
 | [ENCOUNTER_TEST_MODEL.md](./QA/ENCOUNTER_TEST_MODEL.md) | Тестовая модель EncounterEngine (инварианты, структура) | **МОДУЛЬ** |
-| [RITUAL_COMBAT_TEST_MODEL.md](./QA/RITUAL_COMBAT_TEST_MODEL.md) | Тестовая модель Phase 3 Ritual Combat (Effort, Scene, 66 тестов) | **МОДУЛЬ** |
+| [RITUAL_COMBAT_TEST_MODEL.md](./QA/RITUAL_COMBAT_TEST_MODEL.md) | Тестовая модель Phase 3 Disposition Combat (disposition, momentum, 35+ тестов) | **МОДУЛЬ** |
 | [QA_ACT_I_CHECKLIST.md](./QA/QA_ACT_I_CHECKLIST.md) | Чеклист тестирования Act I |
 
 ### Archive/ — Архив
@@ -88,10 +89,9 @@
 | Документ | Описание |
 |----------|----------|
 | **INDEX.md** | Вы здесь |
-| [SPRINT.md](./SPRINT.md) | Спринт-борд (Epic 1–14) + ссылка на Phase 2 |
+| [SPRINT.md](./SPRINT.md) | Центральный планировщик: Phase 1–3, текущий фокус, бэклог |
 | [plans/2026-02-07-audit-refactor-phase2-epics.md](./plans/2026-02-07-audit-refactor-phase2-epics.md) | Леджер эпиков Phase 2 (audit/refactor) + бэклог (Epic 15+) |
-| [plans/2026-02-13-ritual-combat-design.md](./plans/2026-02-13-ritual-combat-design.md) | Дизайн Ritual Combat v1.2 (Phase 3, утверждён) |
-| [plans/2026-02-14-ritual-combat-epics.md](./plans/2026-02-14-ritual-combat-epics.md) | Леджер эпиков Phase 3: Ritual Combat (R1–R10) |
+| [plans/2026-02-18-disposition-combat-design.md](../docs/plans/2026-02-18-disposition-combat-design.md) | Disposition Combat v2.5 — SoT для боевой механики |
 
 ---
 
@@ -171,4 +171,4 @@ CardSampleGame/
 - **Репозиторий:** github.com/MyNameIsAlexandro/CardSampleGame
 - **Тесты:** 700+ (SPM + Xcode, all passing)
 - **Build:** SUCCESS
-- **Текущая фаза:** Phase 3 — Ritual Combat (R1–R10)
+- **Текущая фаза:** Phase 3 — Disposition Combat (design complete, documentation sync)

@@ -32,14 +32,14 @@ Packages/TwilightEngine/Tests/TwilightEngineTests/
 │   └── ModifierSystemTests.swift   # Modifier stacking, priorities
 │
 ├── IntegrationTests/               # End-to-end сценарии
-│   ├── EncounterIntegrationTests.swift  # Kill path, Pacify path, Flee
+│   ├── EncounterIntegrationTests.swift  # Destroy path, Subjugate path, Flee
 │   ├── SnapshotRoundTripTests.swift     # FateDeck/PlayerDeck snapshot
 │   └── ContextBuilderTests.swift        # Region→Modifiers pipeline
 │
 ├── TDD/                            # Инкубатор (RED tests, вне CI)
 │   └── (мигрирующие тесты)
 │
-└── RitualCombatGates/              # Phase 3: Ritual Combat (planned)
+└── DispositionCombatGates/         # Phase 3: Disposition Combat (planned)
     ├── RitualEffortGateTests.swift  # Effort mechanic invariants (11 tests)
     ├── RitualSceneGateTests.swift   # Scene → CombatSimulation contract (3 tests)
     ├── RitualAtmosphereGateTests.swift  # Atmosphere read-only guard (2 tests)
@@ -69,8 +69,8 @@ Gate-тесты проверяют **архитектурные инвариан
 | ID | Инвариант | Проверка | Критерий FAIL |
 |----|-----------|----------|---------------|
 | INV-ENC-001 | **Phase Order** | Вызовы фаз в неправильном порядке → Engine возвращает `.invalidPhaseOrder` error | Принятие действия вне очереди |
-| INV-ENC-002 | **Dual Track Independence** | Physical attack → только HP меняется; Spirit → только WP | HP и WP меняются одновременно от одного действия |
-| INV-ENC-003 | **Kill Priority** | HP=0 → outcome = .killed, независимо от WP | WP=0 && HP=0 → outcome != .killed |
+| INV-ENC-002 | **Disposition Track Integrity** | Strike → disposition уменьшается; Influence → disposition увеличивается; effective_power ≤ 25 (hard cap) | Действие сдвигает disposition в неправильном направлении или превышает hard cap |
+| INV-ENC-003 | **Disposition Edge Semantics** | disposition=-100 → outcome = .destroyed; disposition=+100 → outcome = .subjugated | Неверный outcome при достижении края шкалы |
 | INV-ENC-004 | **Transaction Atomicity** | Abort mid-encounter → ни одно поле мира не изменено. Ответственность: Game Integration (EncounterEngine возвращает EncounterResult, GameEngine решает применять ли transaction) | Частичное применение transaction |
 | INV-ENC-005 | **Determinism** | Одинаковый EncounterContext + одинаковый seed → семантически идентичный EncounterResult (Equatable) | Расхождение при повторном запуске |
 | INV-ENC-006 | **No External State** | Encounter Engine не читает и не пишет ничего вне EncounterContext/EncounterResult | Обращение к глобальному состоянию (синглтонам, файлам) |
@@ -136,8 +136,8 @@ Layer-тесты проверяют **поведение** конкретных 
 | Тест | Что проверяет | Mock/Stub |
 |------|---------------|-----------|
 | `testTurnLoopAdvancesPhases` | intent→playerAction→enemyResolution→roundEnd→intent корректно | Stub participants |
-| `testVictoryConditionKill` | HP=0 → outcome .killed | — |
-| `testVictoryConditionPacify` | WP=0, HP>0 → outcome .pacified | — |
+| `testVictoryConditionDestroyed` | disposition=-100 → outcome .destroyed | — |
+| `testVictoryConditionSubjugated` | disposition=+100 → outcome .subjugated | — |
 | `testFleeWithCost` | Flee → outcome .escaped, cost applied | — |
 | `testCustomVictoryCondition` | survive(rounds: 5) → victory после 5 раундов | Stub encounterRules |
 | `testEscalationResonanceShift` | Spirit→Body → resonance -= balancePack.escalationResonanceShift | Stub balance pack |
@@ -201,11 +201,11 @@ Integration-тесты проверяют **полный pipeline** от Encount
 
 | Тест | Сценарий | Ожидаемый результат |
 |------|----------|---------------------|
-| `testFullKillPath` | 1v1, физические атаки до HP=0 | outcome = .killed, WP > 0 |
-| `testFullPacifyPath` | 1v1, духовные атаки до WP=0 | outcome = .pacified, HP > 0 |
+| `testFullDestroyPath` | 1v1, Strike-действия до disposition=-100 | outcome = .destroyed |
+| `testFullSubjugatePath` | 1v1, Influence-действия до disposition=+100 | outcome = .subjugated |
 | `testFleePath` | 1v1, Flee на 2-м раунде | outcome = .escaped, cost в transaction |
 | `testEscalationFullCycle` | Spirit→Body→проверка resonance + damage | resonanceShift в transaction |
-| `testMultiEnemy1vN` | 1v3, kill первого, pacify второго, flee от третьего | per-entity outcomes |
+| `testMultiEnemy1vN` | 1v3, destroy первого, subjugate второго, flee от третьего | per-entity outcomes |
 | `testCustomVictorySurvival` | survive(5) условие, выжить 5 раундов | outcome = .victory(.custom("survive")) |
 
 **Правило:** Каждый тест включает проверку EncounterResult.transaction на полноту (все ожидаемые resourceChanges, worldFlags, resonanceShift присутствуют).
@@ -242,12 +242,12 @@ Integration-тесты проверяют **полный pipeline** от Encount
 4. **Skip-list обновляется** в том же PR (удаление из `.github/tdd-skip-list.yml`)
 5. **Spec-to-Test Traceability Matrix** (TESTING_GUIDE.md §6) обновляется в том же PR
 
-### 5.2 Первые 5 тестов для Gate (из текущих DualTrackCombatTests)
+### 5.2 Первые 5 тестов для Gate (из текущих DispositionCombatTests)
 
 | Текущий тест | Целевой Gate ID | Целевой файл |
 |-------------|----------------|--------------|
-| `testPhysicalAttackReducesHPOnly` | INV-ENC-002 | INV_ENC_GateTests.swift |
-| `testKillPriorityWhenBothZero` | INV-ENC-003 | INV_ENC_GateTests.swift |
+| `testStrikeReducesDisposition` | INV-ENC-002 | INV_ENC_GateTests.swift |
+| `testDispositionEdgeOutcomes` | INV-ENC-003 | INV_ENC_GateTests.swift |
 | `testWaitHasNoHiddenFateDeckSideEffects` | INV-FATE-002 (Snapshot Isolation aspect) | INV_FATE_GateTests.swift |
 | `testEscalationUsesBalancePackValue` | INV-BHV-004 (Formula Whitelist aspect) | INV_BHV_GateTests.swift |
 | `testIntentGeneratedAtRoundStart` | INV-ENC-001 (Phase Order aspect) | INV_ENC_GateTests.swift |

@@ -1,10 +1,19 @@
-# Ritual Combat Test Model (Phase 3)
+# Disposition Combat Test Model (Phase 3)
 
-**Scope:** Полная тестовая модель Phase 3 — Effort, RitualCombatScene, visual combat overhaul.
-**Status:** Draft v3 — P0/P1/P2 аудиторские правки (раунд 2) применены.
+**Scope:** Полная тестовая модель Phase 3 — Disposition Combat (единая шкала, momentum, enemy modes).
+**Status:** Draft v4 — переход с Effort/Ritual Combat (v3) на Disposition Combat v2.5.
 **Policy sync:** CLAUDE.md v4.1, QUALITY_CONTROL_MODEL.md §2a, ENCOUNTER_TEST_MODEL.md
-**Design ref:** `plans/2026-02-13-ritual-combat-design.md` (v1.2), `plans/2026-02-14-ritual-combat-epics.md`
-**Last updated:** 2026-02-14
+**Design ref:** [`docs/plans/2026-02-18-disposition-combat-design.md`](../../docs/plans/2026-02-18-disposition-combat-design.md) (v2.5, SoT), [`COMBAT_DIPLOMACY_SPEC.md`](../Design/COMBAT_DIPLOMACY_SPEC.md) (v2.0)
+**Last updated:** 2026-02-18
+
+> **TRANSITION NOTE:** Этот документ находится в процессе перехода с Effort/Ritual Combat модели (v3, `plans/2026-02-13-ritual-combat-design.md`) на Disposition Combat v2.5. Ни один тест ниже ещё не реализован. Категории gate-тестов (35+) определены в Disposition Combat Design §10 и QUALITY_CONTROL_MODEL.md §2a. Полная перезапись тест-модели произойдёт при планировании имплементации.
+>
+> **Что заменяется:**
+> - Effort mechanic (burn карт для +1 к Fate Test) → Sacrifice mode (exhaust карты → heal + enemy buff)
+> - Dual Track (HP/WP) → Disposition Track (-100…+100)
+> - Kill/Pacify outcomes → Destroy/Subjugate outcomes
+> - Seal-based commit (Attack/Influence/Wait) → Drag-and-drop (Strike/Influence/Sacrifice)
+> - Старые epic IDs (R0-R10) → новые epic IDs (TBD при планировании имплементации)
 
 ---
 

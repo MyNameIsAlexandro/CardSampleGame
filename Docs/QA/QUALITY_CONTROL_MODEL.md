@@ -94,47 +94,49 @@ This document is the canonical control point for validating product health after
   - Verbose diagnostics are opt-in via `TWILIGHT_TEST_VERBOSE=1` and are used only for focused local debugging.
   - Scope includes app + engine test helpers and content-loading debug traces (`CardSampleGameTests/TestHelpers/TestContentLoader.swift`, `Packages/TwilightEngine/Tests/TwilightEngineTests/Helpers/TestContentLoader.swift`, `App/CardGameApp.swift`, `Packages/TwilightEngine/Sources/TwilightEngine/ContentPacks/ContentRegistry.swift`).
 
-## 2a. Phase 3: Ritual Combat Gates (planned)
+## 2a. Phase 3: Disposition Combat Gates (planned)
 
-Phase 3 (Ritual Combat) вводит 5 gate-тест сьютов:
+Phase 3 (Disposition Combat) вводит gate-тесты по 7 категориям (35+ тестов):
 
-| Suite | Scope | Тестов |
-|-------|-------|--------|
-| `FateDeckBalanceGateTests` | Fate deck balance: matchMultiplier из balance pack, suit distribution, crit-карта neutral suit, sticky card resonance cap, stale card ID check | 5 |
-| `RitualEffortGateTests` | Effort mechanic: burn→discard, no energy cost, no Fate Deck impact, bonus в Fate resolve, undo, limit max 2, determinism, mid-combat save/load | 11 |
-| `RitualSceneGateTests` | RitualCombatScene: только CombatSimulation API, no engine reference, drag-drop → canonical commands, no ECS mutation, no engine imports, long-press guard | 6 |
-| `RitualAtmosphereGateTests` | ResonanceAtmosphereController: pure presentation (read-only), no mutation | 2 |
-| `RitualIntegrationGateTests` | Restore from snapshot, no old CombatScene import, fate reveal determinism, arena isolation, no system RNG, keyword consumption, vertical slice replay | 8 |
+| Категория | Scope | Тестов |
+|-----------|-------|--------|
+| Disposition mechanics | Шкала -100…+100, hard cap 25, clamping, start position | 6 |
+| Momentum system | Streak bonus, switch penalty, threat bonus, determinism | 5 |
+| Card play modes | Strike/Influence/Sacrifice contracts, drag targets | 4 |
+| Fate keywords | Surge +50%, Echo not after Sacrifice, disposition-dependent | 5 |
+| Enemy modes | Survival/Desperation/Weakened transitions, dynamic thresholds | 5 |
+| Resonance effects | Zone modifiers, backlash, cancellation | 5 |
+| Anti-meta | Vulnerability × Resonance 3D lookup, systemic asymmetry | 5 |
 
-**Итого:** 32 gate-теста.
+**Итого:** 35+ gate-тестов.
 
 **Инварианты Phase 3:**
-- `effortBonus <= maxEffort` (hard cap)
-- `effortCardIds ⊆ hand` до commit
-- Effort не задействует RNG
-- Effort не влияет на Fate Deck
+- `effective_power <= 25` (hard cap — четверть шкалы)
+- `disposition ∈ [-100, +100]`, clamped
+- Momentum — детерминистическая система, не задействует RNG
+- Sacrifice exhaust необратим (карта удаляется навсегда)
 - RitualCombatScene работает только через CombatSimulation API
 - ResonanceAtmosphereController — read-only (gate: `testAtmosphereControllerIsReadOnly`)
-- Snapshot содержит `effortCardIds`, `effortBonus`, `selectedCardIds`, `phase`
+- Snapshot содержит `disposition`, `streakType`, `streakCount`, `enemyMode`, `heroHP`, `fateDeckState`
 - Restore из snapshot → visual state (no replay)
 
-> **Source:** `plans/2026-02-13-ritual-combat-design.md` §11, `plans/2026-02-14-ritual-combat-epics.md`
-> **Status:** planned (реализация — Phase 3 epics R1–R10)
+> **Source:** [Disposition Combat Design v2.5](../../docs/plans/2026-02-18-disposition-combat-design.md) §10
+> **Status:** planned (design complete, documentation sync in progress)
 
-## 2b. Fate Deck Balance Risks (Audit 2026-02-14)
+## 2b. Fate Deck & Disposition Balance Risks (Audit 2026-02-18)
 
-Стресс-аудит `fate_deck_core.json` выявил 6 рисков (подробности — `Design/COMBAT_DIPLOMACY_SPEC.md` Приложение D):
+Стресс-аудит Fate Deck + Disposition Combat выявил риски. Disposition Combat v2.5 вводит hard cap 25 и momentum, частично закрывая F1-F2:
 
-| ID | Sev | Риск | Когда проверять |
+| ID | Sev | Риск | Статус |
 |---|---|---|---|
-| F1 | P1 | Surge keyword (×4, лучший dmg) всегда suppressed при Kill (все prav → mismatch) | Контент-ревью после vertical slice |
-| F2 | P1 | Crit-карта на 67% эффективнее при Pacify чем при Kill (prav suit + surge) | Контент-ревью после vertical slice |
-| F3 | P2 | deepNav doom spiral: curse sticky -4 effectiveValue, E[total] < 0 | Плейтест deepNav-сценариев |
-| F4 | P2 | deepPrav snowball: E[value]=+1.5, self-reinforcing resonance shifts | Мониторинг |
-| F5 | P3 | matchMultiplier=2.0 hardcoded (исправлено в `a055ede`, ранее было 1.5 — дрифт с тестами) | Закрыто: KeywordInterpreter default = 2.0 |
+| F1 | P1 | Surge keyword (+50% base_power) может доминировать при Strike-специализации | Частично закрыт: hard cap 25 ограничивает пиковый урон |
+| F2 | P1 | Асимметрия Destroy vs Subjugate по эффективности | Закрыт дизайном: momentum system + threat bonus уравнивают стратегии |
+| F3 | P2 | deepNav doom spiral: curse sticky, E[total] < 0 | Плейтест deepNav-сценариев |
+| F4 | P2 | deepPrav snowball: self-reinforcing resonance shifts | Мониторинг |
+| F5 | P3 | matchMultiplier=2.0 hardcoded | Закрыто: KeywordInterpreter default = 2.0 |
 | F6 | P3 | bonusValue/special из KeywordEffect не потребляется CombatCalculator | Code review EchoEngine CombatSystem |
 
-**Не блокеры текущего эпика.** Контрольная точка — первый контент-ревью после vertical slice (R9).
+**Контрольная точка:** первый плейтест после vertical slice реализации Disposition Combat.
 
 ## 3. Save Schema Contract (Epic 28)
 
