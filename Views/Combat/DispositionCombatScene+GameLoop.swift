@@ -1,6 +1,6 @@
 /// Файл: Views/Combat/DispositionCombatScene+GameLoop.swift
 /// Назначение: Game loop Disposition Combat — touch handling, card actions, enemy turns, result emission.
-/// Зона ответственности: Input → card drag → action zones → enemy resolution → outcome.
+/// Зона ответственности: Input → card drag → Y-band action zones → enemy resolution → outcome.
 /// Контекст: Phase 3 Disposition Combat. Extension of DispositionCombatScene.
 
 import SpriteKit
@@ -19,12 +19,28 @@ extension DispositionCombatScene {
         inputEnabled = true
         syncVisuals()
         updatePhaseLabel(L10n.encounterPhasePlayerAction.localized)
+
+        // Compute and show enemy intent (Slay the Spire telegraph)
+        computeAndShowEnemyIntent()
     }
 
     func updatePhaseLabel(_ text: String) {
         if let label = childNode(withName: "phaseLabel") as? SKLabelNode {
             label.text = text
         }
+    }
+
+    // MARK: - Enemy Intent Telegraph
+
+    private func computeAndShowEnemyIntent() {
+        guard let vm = viewModel, let modeState = enemyModeState else { return }
+        let action = EnemyAI.selectAction(
+            mode: modeState.currentMode,
+            simulation: vm.simulation,
+            rng: vm.simulation.rng
+        )
+        pendingEnemyAction = action
+        showEnemyIntent(action)
     }
 
     // MARK: - Touch Handling
@@ -50,7 +66,6 @@ extension DispositionCombatScene {
         guard inputEnabled, let touch = touches.first, let cardId = draggedCardId else { return }
         let location = touch.location(in: self)
         moveCard(id: cardId, to: location)
-
         highlightDropZone(at: location)
     }
 
@@ -149,29 +164,44 @@ extension DispositionCombatScene {
     private func transitionToEnemyPhase() {
         phase = .enemyResolution
         inputEnabled = false
+        hideEnemyIntent()
         updatePhaseLabel(L10n.encounterPhaseEnemyResolution.localized)
 
-        guard let vm = viewModel, let modeState = enemyModeState else { return }
+        guard let vm = viewModel else { return }
 
         vm.endTurn()
         updateIdolMode()
 
-        let enemyAction = vm.resolveEnemyAction(mode: modeState.currentMode)
+        // Use pre-computed intent (or fallback to computing now)
+        let enemyAction: EnemyAction
+        if let stored = pendingEnemyAction {
+            vm.resolveStoredAction(stored)
+            enemyAction = stored
+            pendingEnemyAction = nil
+        } else if let modeState = enemyModeState {
+            enemyAction = vm.resolveEnemyAction(mode: modeState.currentMode)
+        } else {
+            enemyAction = vm.resolveEnemyAction(mode: .normal)
+        }
 
         let animDuration: TimeInterval = 0.6
+        let idolPos = idolNode?.position ?? CGPoint(x: 195, y: 600)
 
         switch enemyAction {
-        case .attack(let damage), .rage(let damage):
-            showFloatingText("−\(damage) HP", at: idolNode?.position ?? .zero, color: .red)
+        case .attack(let damage):
+            showFloatingText("-\(damage) HP", at: idolPos, color: .red)
+            onHaptic?("heavy")
+        case .rage(let damage):
+            showFloatingText("-\(damage) RAGE", at: idolPos, color: SKColor(red: 1, green: 0.2, blue: 0.2, alpha: 1))
             onHaptic?("heavy")
         case .defend(let value):
-            showFloatingText("🛡\(value)", at: idolNode?.position ?? .zero, color: .cyan)
+            showFloatingText("DEF \(value)", at: idolPos, color: .cyan)
         case .provoke(let penalty):
-            showFloatingText("⚡−\(penalty)", at: idolNode?.position ?? .zero, color: .orange)
+            showFloatingText("PROVOKE \(penalty)", at: idolPos, color: .orange)
         case .adapt:
-            showFloatingText("↻", at: idolNode?.position ?? .zero, color: .yellow)
+            showFloatingText("ADAPT", at: idolPos, color: .yellow)
         case .plea(let shift):
-            showFloatingText("\(shift > 0 ? "+" : "")\(shift)", at: idolNode?.position ?? .zero, color: .purple)
+            showFloatingText("PLEA +\(shift)", at: idolPos, color: .purple)
         }
 
         syncVisuals()
@@ -179,7 +209,6 @@ extension DispositionCombatScene {
 
         run(SKAction.wait(forDuration: animDuration)) { [weak self] in
             guard let self, let vm = self.viewModel else { return }
-
             if vm.outcome != nil {
                 self.finishCombat()
             } else {
@@ -193,13 +222,33 @@ extension DispositionCombatScene {
     private func finishCombat() {
         phase = .finished
         inputEnabled = false
+        hideEnemyIntent()
 
         guard let vm = viewModel else { return }
 
         let isVictory = vm.outcome == .destroyed || vm.outcome == .subjugated
-        updatePhaseLabel(isVictory ? "Victory" : "Defeat")
+        let flavorText: String
+        switch vm.outcome {
+        case .destroyed:
+            flavorText = "Enemy Destroyed"
+        case .subjugated:
+            flavorText = "Enemy Subjugated"
+        case .defeated:
+            flavorText = "Defeated..."
+        case .none:
+            flavorText = "Combat Over"
+        }
+        updatePhaseLabel(flavorText)
 
-        let resultDelay: TimeInterval = 1.0
+        if isVictory {
+            onSoundEffect?("victory")
+            onHaptic?("success")
+        } else {
+            onSoundEffect?("defeat")
+            onHaptic?("error")
+        }
+
+        let resultDelay: TimeInterval = 1.2
         run(SKAction.wait(forDuration: resultDelay)) { [weak self] in
             guard let self, let vm = self.viewModel else { return }
 
@@ -227,21 +276,25 @@ extension DispositionCombatScene {
     func hitTestCard(at point: CGPoint) -> String? {
         let layer = handLayer ?? self
         let localPoint = convert(point, to: layer)
+        var topCard: (id: String, zPos: CGFloat)?
         for (cardId, node) in handCardNodes {
-            if node.frame.contains(localPoint) || node.contains(localPoint) {
-                return cardId
+            let cardFrame = node.calculateAccumulatedFrame()
+            if cardFrame.contains(localPoint) {
+                if topCard == nil || node.zPosition > topCard!.zPos {
+                    topCard = (cardId, node.zPosition)
+                }
             }
         }
-        return nil
+        return topCard?.id
     }
 
     private func hitTestEndTurn(at point: CGPoint) -> Bool {
         guard let btn = endTurnButton else { return false }
-        let expanded = btn.frame.insetBy(dx: -10, dy: -10)
+        let expanded = btn.frame.insetBy(dx: -15, dy: -15)
         return expanded.contains(point)
     }
 
-    // MARK: - Drop Zones
+    // MARK: - Drop Zones (Y-band detection per design §9.2)
 
     enum DropZone {
         case strike
@@ -250,15 +303,13 @@ extension DispositionCombatScene {
         case none
     }
 
+    /// Y-band detection: upper area = Strike, middle = Influence, lower-middle = Sacrifice.
+    /// Below hand area (y < 155) = cancel (return card to hand).
     func determineDropZone(at point: CGPoint) -> DropZone {
-        if let zone = strikeZone, expandedFrame(zone).contains(point) { return .strike }
-        if let zone = influenceZone, expandedFrame(zone).contains(point) { return .influence }
-        if let zone = sacrificeZone, expandedFrame(zone).contains(point) { return .sacrifice }
-        return .none
-    }
-
-    private func expandedFrame(_ node: SKNode) -> CGRect {
-        node.frame.insetBy(dx: -15, dy: -15)
+        guard point.y > 155 else { return .none }
+        if point.y >= 400 { return .strike }
+        if point.y >= 270 { return .influence }
+        return .sacrifice
     }
 
     // MARK: - Card Drag Visuals
@@ -301,25 +352,36 @@ extension DispositionCombatScene {
         clearHighlights()
         let zone = determineDropZone(at: point)
         switch zone {
-        case .strike: strikeZone?.glowWidth = 4
-        case .influence: influenceZone?.glowWidth = 4
-        case .sacrifice: sacrificeZone?.glowWidth = 4
-        case .none: break
+        case .strike:
+            strikeZone?.glowWidth = 5
+            strikeZone?.fillColor = SKColor(red: 0.90, green: 0.30, blue: 0.30, alpha: 0.30)
+        case .influence:
+            influenceZone?.glowWidth = 5
+            influenceZone?.fillColor = SKColor(red: 0.30, green: 0.50, blue: 0.90, alpha: 0.30)
+        case .sacrifice:
+            sacrificeZone?.glowWidth = 5
+            sacrificeZone?.fillColor = SKColor(red: 0.60, green: 0.30, blue: 0.70, alpha: 0.30)
+        case .none:
+            break
         }
     }
 
     func clearHighlights() {
         strikeZone?.glowWidth = 0
+        strikeZone?.fillColor = SKColor(red: 0.90, green: 0.30, blue: 0.30, alpha: 0.12)
         influenceZone?.glowWidth = 0
+        influenceZone?.fillColor = SKColor(red: 0.30, green: 0.50, blue: 0.90, alpha: 0.12)
         sacrificeZone?.glowWidth = 0
+        sacrificeZone?.fillColor = SKColor(red: 0.60, green: 0.30, blue: 0.70, alpha: 0.12)
     }
 
     func flashZone(_ zone: SKShapeNode?) {
         guard let zone else { return }
+        let originalColor = zone.fillColor
         let flash = SKAction.sequence([
-            SKAction.run { zone.glowWidth = 6 },
-            SKAction.wait(forDuration: 0.15),
-            SKAction.run { zone.glowWidth = 0 }
+            SKAction.run { zone.glowWidth = 8 },
+            SKAction.wait(forDuration: 0.2),
+            SKAction.run { zone.glowWidth = 0; zone.fillColor = originalColor }
         ])
         zone.run(flash)
     }

@@ -1,6 +1,6 @@
 /// Файл: Views/Combat/DispositionCombatScene+Layout.swift
 /// Назначение: Layout Disposition Combat сцены — создание и позиционирование всех узлов.
-/// Зона ответственности: Disposition track bar, idol, action zones, hand area, HUD.
+/// Зона ответственности: Disposition track bar, idol, action zones, hand area, HUD, intent label.
 /// Контекст: Phase 3 Disposition Combat. Extension of DispositionCombatScene.
 
 import SpriteKit
@@ -21,6 +21,7 @@ extension DispositionCombatScene {
         buildIdol(centerX: centerX)
         buildDispositionTrack(centerX: centerX)
         buildActionZones(centerX: centerX)
+        buildMomentumAura(centerX: centerX)
         buildHUD(centerX: centerX, sceneW: sceneW)
     }
 
@@ -49,7 +50,7 @@ extension DispositionCombatScene {
         guard let vm = viewModel else { return }
         let idol = IdolNode(enemyId: vm.enemyType)
         idol.configure(name: vm.enemyType, maxHP: vm.heroMaxHP, maxWP: nil)
-        idol.position = CGPoint(x: centerX, y: 590)
+        idol.position = CGPoint(x: centerX, y: 600)
         idol.zPosition = 15
         addChild(idol)
         idolNode = idol
@@ -62,7 +63,6 @@ extension DispositionCombatScene {
         let barHeight: CGFloat = 16
         let barY: CGFloat = 510
 
-        // Background bar
         let barBg = SKShapeNode(
             rect: CGRect(x: -barWidth / 2, y: -barHeight / 2, width: barWidth, height: barHeight),
             cornerRadius: 4
@@ -75,7 +75,6 @@ extension DispositionCombatScene {
         addChild(barBg)
         dispositionBar = barBg
 
-        // Fill bar (starts at center for disposition=0)
         let fill = SKShapeNode(
             rect: CGRect(x: -barWidth / 2, y: -barHeight / 2 + 1, width: barWidth / 2, height: barHeight - 2),
             cornerRadius: 3
@@ -86,7 +85,6 @@ extension DispositionCombatScene {
         barBg.addChild(fill)
         dispositionFill = fill
 
-        // Labels: -100 left, +100 right
         let leftLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
         leftLabel.text = "-100"
         leftLabel.fontSize = 9
@@ -103,7 +101,6 @@ extension DispositionCombatScene {
         rightLabel.horizontalAlignmentMode = .center
         barBg.addChild(rightLabel)
 
-        // Center value label
         let valueLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
         valueLabel.name = "dispositionValue"
         valueLabel.text = "0"
@@ -116,7 +113,6 @@ extension DispositionCombatScene {
         addChild(valueLabel)
         dispositionLabel = valueLabel
 
-        // Center marker
         let marker = SKShapeNode(rectOf: CGSize(width: 2, height: barHeight + 4))
         marker.fillColor = SKColor(white: 0.7, alpha: 0.8)
         marker.strokeColor = .clear
@@ -125,64 +121,76 @@ extension DispositionCombatScene {
         barBg.addChild(marker)
     }
 
-    // MARK: - Action Zones
+    // MARK: - Action Zones (vertical layout per design §9)
 
     private func buildActionZones(centerX: CGFloat) {
-        let zoneY: CGFloat = 430
-        let zoneSize = CGSize(width: 90, height: 50)
-        let spacing: CGFloat = 100
+        // Vertical layout: Strike near enemy (top), Influence middle, Sacrifice below.
+        // Y-band detection in GameLoop makes full screen areas responsive.
 
-        // Strike zone (left) — shifts disposition negative
+        // Strike zone — near enemy, disposition toward -100
         let strike = makeActionZone(
-            size: zoneSize,
+            size: CGSize(width: 160, height: 50),
             label: "⚔",
             sublabel: L10n.encounterActionAttack.localized,
             color: SKColor(red: 0.90, green: 0.30, blue: 0.30, alpha: 0.8)
         )
         strike.name = "strikeZone"
-        strike.position = CGPoint(x: centerX - spacing, y: zoneY)
+        strike.position = CGPoint(x: centerX, y: 450)
         strike.zPosition = 15
         addChild(strike)
         strikeZone = strike
 
-        // Influence zone (right) — shifts disposition positive
+        // Influence zone — altar area, disposition toward +100
         let influence = makeActionZone(
-            size: zoneSize,
+            size: CGSize(width: 160, height: 50),
             label: "☽",
             sublabel: L10n.encounterActionInfluence.localized,
             color: SKColor(red: 0.30, green: 0.50, blue: 0.90, alpha: 0.8)
         )
         influence.name = "influenceZone"
-        influence.position = CGPoint(x: centerX + spacing, y: zoneY)
+        influence.position = CGPoint(x: centerX, y: 340)
         influence.zPosition = 15
         addChild(influence)
         influenceZone = influence
 
-        // Sacrifice zone (center-bottom) — exhaust card for energy
+        // Sacrifice zone — bonfire, exhaust card for +1 energy
         let sacrifice = makeActionZone(
-            size: CGSize(width: 80, height: 40),
+            size: CGSize(width: 130, height: 45),
             label: "♦",
             sublabel: "Sacrifice",
             color: SKColor(red: 0.60, green: 0.30, blue: 0.70, alpha: 0.8)
         )
         sacrifice.name = "sacrificeZone"
-        sacrifice.position = CGPoint(x: centerX, y: zoneY - 50)
+        sacrifice.position = CGPoint(x: centerX, y: 250)
         sacrifice.zPosition = 15
         addChild(sacrifice)
         sacrificeZone = sacrifice
 
         // End turn button
         let endBtn = makeActionZone(
-            size: CGSize(width: 80, height: 32),
+            size: CGSize(width: 100, height: 36),
             label: "⏭",
             sublabel: "End Turn",
             color: SKColor(red: 0.40, green: 0.40, blue: 0.45, alpha: 0.8)
         )
         endBtn.name = "endTurnButton"
-        endBtn.position = CGPoint(x: centerX, y: zoneY - 100)
+        endBtn.position = CGPoint(x: centerX, y: 190)
         endBtn.zPosition = 15
         addChild(endBtn)
         endTurnButton = endBtn
+
+        // Intent label — positioned between idol and disposition bar
+        let intent = SKLabelNode(fontNamed: "AvenirNext-Bold")
+        intent.name = "intentLabel"
+        intent.fontSize = 14
+        intent.fontColor = SKColor(white: 0.8, alpha: 1)
+        intent.horizontalAlignmentMode = .center
+        intent.verticalAlignmentMode = .center
+        intent.position = CGPoint(x: centerX, y: 555)
+        intent.zPosition = 16
+        intent.alpha = 0
+        addChild(intent)
+        intentLabel = intent
     }
 
     private func makeActionZone(
@@ -191,34 +199,46 @@ extension DispositionCombatScene {
         sublabel: String,
         color: SKColor
     ) -> SKShapeNode {
-        let zone = SKShapeNode(rectOf: size, cornerRadius: 10)
-        zone.fillColor = color.withAlphaComponent(0.15)
+        let zone = SKShapeNode(rectOf: size, cornerRadius: 12)
+        zone.fillColor = color.withAlphaComponent(0.12)
         zone.strokeColor = color
         zone.lineWidth = 1.5
 
         let iconLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
         iconLabel.text = label
-        iconLabel.fontSize = 20
+        iconLabel.fontSize = 22
         iconLabel.verticalAlignmentMode = .center
         iconLabel.position = CGPoint(x: 0, y: 6)
         zone.addChild(iconLabel)
 
         let subLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
         subLabel.text = sublabel
-        subLabel.fontSize = 8
-        subLabel.fontColor = SKColor(white: 0.7, alpha: 1)
+        subLabel.fontSize = 9
+        subLabel.fontColor = SKColor(white: 0.65, alpha: 1)
         subLabel.verticalAlignmentMode = .center
         subLabel.horizontalAlignmentMode = .center
-        subLabel.position = CGPoint(x: 0, y: -12)
+        subLabel.position = CGPoint(x: 0, y: -13)
         zone.addChild(subLabel)
 
         return zone
     }
 
+    // MARK: - Momentum Aura
+
+    private func buildMomentumAura(centerX: CGFloat) {
+        let aura = SKShapeNode(ellipseOf: CGSize(width: 340, height: 100))
+        aura.fillColor = .clear
+        aura.strokeColor = .clear
+        aura.position = CGPoint(x: centerX, y: 85)
+        aura.zPosition = 19
+        aura.alpha = 0
+        addChild(aura)
+        momentumAuraNode = aura
+    }
+
     // MARK: - HUD
 
     private func buildHUD(centerX: CGFloat, sceneW: CGFloat) {
-        // Energy label
         let energyLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
         energyLabel.name = "energyLabel"
         energyLabel.fontSize = 14
@@ -229,7 +249,6 @@ extension DispositionCombatScene {
         energyLabel.zPosition = 30
         addChild(energyLabel)
 
-        // Streak indicator
         let streakLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
         streakLabel.name = "streakLabel"
         streakLabel.fontSize = 13
@@ -241,7 +260,6 @@ extension DispositionCombatScene {
         streakLabel.zPosition = 30
         addChild(streakLabel)
 
-        // Hero HP
         let hpLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
         hpLabel.name = "heroHPLabel"
         hpLabel.fontSize = 12
@@ -252,7 +270,6 @@ extension DispositionCombatScene {
         hpLabel.zPosition = 30
         addChild(hpLabel)
 
-        // Phase label
         let phaseLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
         phaseLabel.name = "phaseLabel"
         phaseLabel.fontSize = 11
@@ -263,7 +280,6 @@ extension DispositionCombatScene {
         phaseLabel.zPosition = 30
         addChild(phaseLabel)
 
-        // Resonance zone label
         let zoneLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
         zoneLabel.name = "zoneLabel"
         zoneLabel.fontSize = 10

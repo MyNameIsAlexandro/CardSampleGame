@@ -83,6 +83,7 @@ public struct EnemyModeState: Equatable, Codable, Sendable {
 
 /// AI for enemy action selection in disposition combat.
 /// INV-DC-027..034, INV-DC-052..055, INV-DC-060.
+/// Design §7.6: probability-based per mode with streak awareness.
 public struct EnemyAI {
 
     // MARK: - Mode Evaluation (convenience static)
@@ -98,9 +99,11 @@ public struct EnemyAI {
 
     // MARK: - Action Selection
 
-    /// Select an enemy action based on combat state.
-    /// INV-DC-060: In NORMAL mode, reads momentum (streak >= 3 triggers counter-action).
-    /// INV-DC-052: Survival — defensive bias. INV-DC-053..055: Desperation — ATK x2, no defend, provoke +2.
+    /// Select an enemy action based on combat state (design §7.6).
+    /// NORMAL: streak counter + position-based probabilities.
+    /// SURVIVAL: Attack(60%) | Rage(30%) | Attack(10%). INV-DC-052.
+    /// DESPERATION: ATK x2, no defend, provoke +2. INV-DC-053..055.
+    /// WEAKENED: half damage (weakest action). INV-DC-032.
     public static func selectAction(
         mode: EnemyMode,
         simulation: DispositionCombatSimulation,
@@ -111,29 +114,95 @@ public struct EnemyAI {
     ) -> EnemyAction {
         switch mode {
         case .normal:
-            if simulation.streakCount >= 3, let streakType = simulation.streakType {
-                switch streakType {
-                case .strike:
-                    return .defend(reduction: baseDefend)
-                case .influence:
-                    return .provoke(penalty: baseProvoke)
-                case .sacrifice:
-                    return .adapt
-                }
-            }
-            return .attack(damage: baseDamage)
-
+            return selectNormalAction(
+                simulation: simulation, rng: rng,
+                baseDamage: baseDamage, baseDefend: baseDefend, baseProvoke: baseProvoke
+            )
         case .survival:
-            return .attack(damage: baseDamage)
-
+            return selectSurvivalAction(rng: rng, baseDamage: baseDamage)
         case .desperation:
-            if simulation.streakCount >= 3, simulation.streakType == .influence {
-                return .provoke(penalty: baseProvoke + 2)
-            }
-            return .attack(damage: baseDamage * 2)
-
+            return selectDesperationAction(
+                simulation: simulation, rng: rng,
+                baseDamage: baseDamage, baseProvoke: baseProvoke
+            )
         case .weakened:
             return .attack(damage: max(1, baseDamage / 2))
+        }
+    }
+
+    // MARK: - Normal Mode (design §7.6)
+
+    private static func selectNormalAction(
+        simulation: DispositionCombatSimulation,
+        rng: WorldRNG,
+        baseDamage: Int,
+        baseDefend: Int,
+        baseProvoke: Int
+    ) -> EnemyAction {
+        // Streak >= 3: 50% counter, 50% adapt
+        if simulation.streakCount >= 3, let streakType = simulation.streakType {
+            let roll = rng.nextInt(in: 0...99)
+            if roll < 50 {
+                switch streakType {
+                case .strike: return .defend(reduction: baseDefend)
+                case .influence: return .provoke(penalty: baseProvoke)
+                case .sacrifice: return .adapt
+                }
+            }
+            return .adapt
+        }
+
+        let disp = simulation.disposition
+        let roll = rng.nextInt(in: 0...99)
+
+        // Position-based probabilities
+        if disp < -50 {
+            // Near enemy destruction: Defend(60%) | Attack(40%)
+            return roll < 60 ? .defend(reduction: baseDefend) : .attack(damage: baseDamage)
+        } else if disp > 30 {
+            // Near subjugation: Provoke(50%) | Attack(50%)
+            return roll < 50 ? .provoke(penalty: baseProvoke) : .attack(damage: baseDamage)
+        } else {
+            // Neutral zone: Attack(80%) | random(20%)
+            if roll < 80 { return .attack(damage: baseDamage) }
+            let sub = rng.nextInt(in: 0...1)
+            return sub == 0 ? .defend(reduction: baseDefend) : .provoke(penalty: baseProvoke)
+        }
+    }
+
+    // MARK: - Survival Mode (design §7.6)
+
+    private static func selectSurvivalAction(
+        rng: WorldRNG,
+        baseDamage: Int
+    ) -> EnemyAction {
+        // Attack(60%) | Rage(30%) | Attack(10%)
+        let roll = rng.nextInt(in: 0...99)
+        if roll < 60 {
+            return .attack(damage: baseDamage)
+        } else if roll < 90 {
+            return .rage(damage: baseDamage * 2)
+        } else {
+            return .attack(damage: baseDamage)
+        }
+    }
+
+    // MARK: - Desperation Mode (design §7.6, INV-DC-053..055)
+
+    private static func selectDesperationAction(
+        simulation: DispositionCombatSimulation,
+        rng: WorldRNG,
+        baseDamage: Int,
+        baseProvoke: Int
+    ) -> EnemyAction {
+        // Provoke(40%) | Plea(30%) | Attack(30%)
+        let roll = rng.nextInt(in: 0...99)
+        if roll < 40 {
+            return .provoke(penalty: baseProvoke + 2)
+        } else if roll < 70 {
+            return .plea(dispositionShift: 10)
+        } else {
+            return .attack(damage: baseDamage * 2)
         }
     }
 }

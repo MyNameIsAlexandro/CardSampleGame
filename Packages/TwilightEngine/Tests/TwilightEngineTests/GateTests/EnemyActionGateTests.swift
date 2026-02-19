@@ -147,9 +147,9 @@ final class EnemyActionGateTests: XCTestCase {
 
     // MARK: - INV-DC-060: Enemy AI reads momentum in NORMAL mode
 
-    /// In NORMAL mode with streak >= 3, AI must select a counter-action.
-    /// Strike streak -> Defend, Influence streak -> Provoke, Sacrifice streak -> Adapt.
-    /// Non-normal modes default to attack.
+    /// In NORMAL mode with streak >= 3, AI must select counter-action or adapt.
+    /// Strike streak -> 50% Defend / 50% Adapt (design §7.6).
+    /// Non-normal modes use their own probability tables, ignoring streak.
     func testEnemyAI_readsMomentum() {
         var sim = makeSimulation(disposition: 0, startingEnergy: 10)
 
@@ -160,26 +160,42 @@ final class EnemyActionGateTests: XCTestCase {
         XCTAssertEqual(sim.streakCount, 3,
             "Precondition: 3 strikes -> streakCount=3")
 
-        // Normal mode: must counter strike streak with Defend
-        let action = EnemyAI.selectAction(
-            mode: .normal, simulation: sim, rng: WorldRNG(seed: 42)
-        )
-        XCTAssertEqual(action, .defend(reduction: 3),
-            "AI must Defend against 3+ strike streak in NORMAL mode")
+        // Normal mode with streak >= 3: must produce only defend or adapt
+        var gotDefend = false
+        var gotAdapt = false
+        for seed: UInt64 in 0..<100 {
+            let action = EnemyAI.selectAction(
+                mode: .normal, simulation: sim, rng: WorldRNG(seed: seed)
+            )
+            switch action {
+            case .defend: gotDefend = true
+            case .adapt: gotAdapt = true
+            default:
+                XCTFail("Normal mode with strike streak must produce .defend or .adapt, got \(action)")
+            }
+        }
+        XCTAssertTrue(gotDefend, "AI must Defend against strike streak at some seeds")
+        XCTAssertTrue(gotAdapt, "AI must Adapt at some seeds (50% probability)")
 
-        // Non-normal mode: must default to attack
+        // Survival mode: must produce only attack or rage (ignores streak)
         let survivalAction = EnemyAI.selectAction(
             mode: .survival, simulation: sim, rng: WorldRNG(seed: 42)
         )
-        XCTAssertEqual(survivalAction, .attack(damage: 3),
-            "Non-normal mode must default to attack")
+        switch survivalAction {
+        case .attack, .rage: break
+        default:
+            XCTFail("Survival mode must produce .attack or .rage, got \(survivalAction)")
+        }
 
-        // Normal mode with no streak (< 3): must default to attack
+        // Normal mode with no streak (< 3): position-based probabilities
         let freshSim = makeSimulation()
         let noStreakAction = EnemyAI.selectAction(
             mode: .normal, simulation: freshSim, rng: WorldRNG(seed: 42)
         )
-        XCTAssertEqual(noStreakAction, .attack(damage: 3),
-            "Normal mode with no streak must default to attack")
+        switch noStreakAction {
+        case .attack, .defend, .provoke: break
+        default:
+            XCTFail("Normal mode without streak must produce .attack, .defend, or .provoke, got \(noStreakAction)")
+        }
     }
 }

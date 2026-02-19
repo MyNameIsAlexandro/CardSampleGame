@@ -234,28 +234,38 @@ final class EnemyModeGateTests: XCTestCase {
     // MARK: - INV-DC-034: Plea action — disposition shift + next strike backlash
 
     /// Plea action shifts disposition positively; the trade-off is a backlash
-    /// on next strike. In current implementation, this manifests as provoke
-    /// with strengthened penalty in desperation mode.
+    /// on next strike. Desperation provoke has strengthened penalty (+2).
+    /// Design §7.6: Desperation = Provoke(40%) | Plea(30%) | Attack(30%).
     func testPleaAction_dispositionShiftAndBacklash() {
         var sim = makeSimulation(disposition: 0, startingEnergy: 20)
 
-        // Build 3-influence streak for desperation provoke
+        // Build 3-influence streak for context
         _ = sim.playInfluence(cardId: "card_0")
         _ = sim.playInfluence(cardId: "card_1")
         _ = sim.playInfluence(cardId: "card_2")
         XCTAssertEqual(sim.streakCount, 3,
             "Precondition: 3 influences -> streakCount=3")
 
-        let rng = WorldRNG(seed: 42)
+        // Find a seed that produces provoke in desperation mode
+        var provokeAction: EnemyAction?
+        for seed: UInt64 in 0..<200 {
+            let action = EnemyAI.selectAction(
+                mode: .desperation, simulation: sim, rng: WorldRNG(seed: seed), baseProvoke: 3
+            )
+            if case .provoke = action {
+                provokeAction = action
+                break
+            }
+        }
+        guard let action = provokeAction else {
+            XCTFail("Desperation mode must produce provoke at some seeds (40% probability)")
+            return
+        }
 
-        // Desperation provoke with strengthened penalty (+2)
-        let action = EnemyAI.selectAction(
-            mode: .desperation, simulation: sim, rng: rng, baseProvoke: 3
-        )
         XCTAssertEqual(action, .provoke(penalty: 5),
             "Desperation provoke must be strengthened: baseProvoke(3) + 2 = 5")
 
-        // Resolve provoke
+        // Resolve provoke and verify penalty applied
         EnemyActionResolver.resolve(action: action, simulation: &sim)
         XCTAssertEqual(sim.provokePenalty, 5,
             "Provoke penalty must be set to 5 after resolution")
@@ -263,53 +273,73 @@ final class EnemyModeGateTests: XCTestCase {
 
     // MARK: - INV-DC-052: Survival mode attacks with base damage
 
-    /// In survival mode, AI attacks with base damage (no doubling).
-    /// This verifies survival mode's distinct behavior from normal/desperation.
+    /// Survival mode produces attack (baseDamage) or rage (baseDamage×2).
+    /// Design §7.6: Attack(60%) | Rage(30%) | Attack(10%).
     func testSurvivalMode_attacksWithBaseDamage() {
         let sim = makeSimulation(disposition: 0, startingEnergy: 20)
-        let rng = WorldRNG(seed: 42)
 
-        // Survival mode must attack with base damage (not doubled like desperation)
-        let action = EnemyAI.selectAction(
-            mode: .survival, simulation: sim, rng: rng, baseDamage: 3
-        )
-        XCTAssertEqual(action, .attack(damage: 3),
-            "Survival mode must attack with baseDamage (not doubled)")
-
-        // Verify survival differs from desperation (desperation doubles)
-        let despAction = EnemyAI.selectAction(
-            mode: .desperation, simulation: sim, rng: rng, baseDamage: 3
-        )
-        XCTAssertNotEqual(action, despAction,
-            "Survival must differ from desperation: base(3) vs doubled(6)")
+        // Survival mode: verify attack uses baseDamage, rage uses baseDamage*2
+        var gotAttack = false
+        var gotRage = false
+        for seed: UInt64 in 0..<100 {
+            let action = EnemyAI.selectAction(
+                mode: .survival, simulation: sim, rng: WorldRNG(seed: seed), baseDamage: 3
+            )
+            switch action {
+            case .attack(let dmg):
+                XCTAssertEqual(dmg, 3, "Survival attack must use baseDamage")
+                gotAttack = true
+            case .rage(let dmg):
+                XCTAssertEqual(dmg, 6, "Survival rage must double baseDamage")
+                gotRage = true
+            default:
+                XCTFail("Survival mode must produce .attack or .rage, got \(action)")
+            }
+        }
+        XCTAssertTrue(gotAttack, "Survival mode must produce .attack at some seeds")
+        XCTAssertTrue(gotRage, "Survival mode must produce .rage at some seeds")
     }
 
     // MARK: - INV-DC-053: Desperation ATK x2
 
-    /// In desperation mode, attack damage is doubled.
+    /// In desperation mode, attack damage is doubled (design §7.6, INV-DC-053).
     func testDesperationMode_doubledAttackDamage() {
         let sim = makeSimulation()
-        let rng = WorldRNG(seed: 42)
 
-        let action = EnemyAI.selectAction(
-            mode: .desperation, simulation: sim, rng: rng, baseDamage: 3
-        )
-        XCTAssertEqual(action, .attack(damage: 6),
-            "Desperation mode must double attack damage: 3 * 2 = 6")
+        // Verify every desperation attack uses doubled damage
+        var gotAttack3 = false
+        for seed: UInt64 in 0..<100 {
+            let action = EnemyAI.selectAction(
+                mode: .desperation, simulation: sim, rng: WorldRNG(seed: seed), baseDamage: 3
+            )
+            if case .attack(let dmg) = action {
+                XCTAssertEqual(dmg, 6,
+                    "Desperation attack must double damage: 3 * 2 = 6")
+                gotAttack3 = true
+            }
+        }
+        XCTAssertTrue(gotAttack3, "Desperation must produce attack at some seeds")
 
-        let bigAction = EnemyAI.selectAction(
-            mode: .desperation, simulation: sim, rng: rng, baseDamage: 5
-        )
-        XCTAssertEqual(bigAction, .attack(damage: 10),
-            "Desperation mode must double attack damage: 5 * 2 = 10")
+        var gotAttack5 = false
+        for seed: UInt64 in 0..<100 {
+            let action = EnemyAI.selectAction(
+                mode: .desperation, simulation: sim, rng: WorldRNG(seed: seed), baseDamage: 5
+            )
+            if case .attack(let dmg) = action {
+                XCTAssertEqual(dmg, 10,
+                    "Desperation attack must double damage: 5 * 2 = 10")
+                gotAttack5 = true
+            }
+        }
+        XCTAssertTrue(gotAttack5, "Desperation must produce attack at some seeds")
     }
 
     // MARK: - INV-DC-054: Desperation Defend disabled
 
     /// In desperation mode, AI must never return .defend even with strike streak.
+    /// Design §7.6: Desperation = Provoke(40%) | Plea(30%) | Attack(30%).
     func testDesperationMode_noDefend() {
         var sim = makeSimulation(disposition: 0, startingEnergy: 20)
-        let rng = WorldRNG(seed: 42)
 
         // Build 3-strike streak (would normally trigger defend in normal mode)
         _ = sim.playStrike(cardId: "card_0", targetId: "enemy")
@@ -318,25 +348,24 @@ final class EnemyModeGateTests: XCTestCase {
         XCTAssertEqual(sim.streakCount, 3,
             "Precondition: 3 strikes -> streakCount=3")
 
-        let action = EnemyAI.selectAction(
-            mode: .desperation, simulation: sim, rng: rng
-        )
-
-        if case .defend = action {
-            XCTFail("Desperation mode must NEVER return .defend, got \(action)")
+        // Verify no seed ever produces .defend in desperation
+        for seed: UInt64 in 0..<100 {
+            let action = EnemyAI.selectAction(
+                mode: .desperation, simulation: sim, rng: WorldRNG(seed: seed)
+            )
+            if case .defend = action {
+                XCTFail("Desperation mode must NEVER return .defend, got \(action) with seed \(seed)")
+            }
         }
-
-        // Should attack with doubled damage instead
-        XCTAssertEqual(action, .attack(damage: 6),
-            "Desperation mode with strike streak must attack (doubled), not defend")
     }
 
     // MARK: - INV-DC-055: Desperation Provoke strengthened (+2)
 
-    /// In desperation mode with influence streak, provoke penalty is increased by +2.
+    /// In desperation mode, provoke penalty is increased by +2 (INV-DC-055).
+    /// Design §7.6: All desperation provokes get baseProvoke + 2.
+    /// Normal mode provokes use base penalty without bonus.
     func testDesperationMode_provokeStrengthened() {
         var sim = makeSimulation(disposition: 0, startingEnergy: 20)
-        let rng = WorldRNG(seed: 42)
 
         // Build 3-influence streak
         _ = sim.playInfluence(cardId: "card_0")
@@ -345,17 +374,31 @@ final class EnemyModeGateTests: XCTestCase {
         XCTAssertEqual(sim.streakCount, 3,
             "Precondition: 3 influences -> streakCount=3")
 
-        let action = EnemyAI.selectAction(
-            mode: .desperation, simulation: sim, rng: rng, baseProvoke: 3
-        )
-        XCTAssertEqual(action, .provoke(penalty: 5),
-            "Desperation provoke must be strengthened: base(3) + 2 = 5")
+        // Verify every desperation provoke has +2 bonus
+        var gotDesperationProvoke = false
+        for seed: UInt64 in 0..<100 {
+            let action = EnemyAI.selectAction(
+                mode: .desperation, simulation: sim, rng: WorldRNG(seed: seed), baseProvoke: 3
+            )
+            if case .provoke(let penalty) = action {
+                XCTAssertEqual(penalty, 5,
+                    "Desperation provoke must be strengthened: base(3) + 2 = 5")
+                gotDesperationProvoke = true
+            }
+        }
+        XCTAssertTrue(gotDesperationProvoke,
+            "Desperation mode must produce provoke at some seeds")
 
-        // Compare with normal mode provoke
-        let normalAction = EnemyAI.selectAction(
-            mode: .normal, simulation: sim, rng: rng, baseProvoke: 3
-        )
-        XCTAssertEqual(normalAction, .provoke(penalty: 3),
-            "Normal mode provoke must use base penalty without bonus")
+        // Verify normal mode provokes use base penalty (no +2 bonus)
+        let freshSim = makeSimulation(disposition: 50, startingEnergy: 20)
+        for seed: UInt64 in 0..<100 {
+            let action = EnemyAI.selectAction(
+                mode: .normal, simulation: freshSim, rng: WorldRNG(seed: seed), baseProvoke: 3
+            )
+            if case .provoke(let penalty) = action {
+                XCTAssertEqual(penalty, 3,
+                    "Normal mode provoke must use base penalty without bonus")
+            }
+        }
     }
 }

@@ -107,6 +107,12 @@ final class DispositionCombatViewModel: ObservableObject {
         return action
     }
 
+    /// Resolve a pre-computed enemy action (from intent telegraph).
+    func resolveStoredAction(_ action: EnemyAction) {
+        EnemyActionResolver.resolve(action: action, simulation: &simulation)
+        objectWillChange.send()
+    }
+
     // MARK: - Result
 
     /// Build combat result for bridge submission.

@@ -40,6 +40,11 @@ final class DispositionCombatScene: SKScene {
     var endTurnButton: SKShapeNode?
     var handCardNodes: [String: SKNode] = [:]
 
+    // Enemy intent display (between idol and disposition bar)
+    var intentLabel: SKLabelNode?
+    // Momentum aura behind hand
+    var momentumAuraNode: SKShapeNode?
+
     // MARK: - Layers
 
     var combatLayer: SKNode?
@@ -58,6 +63,9 @@ final class DispositionCombatScene: SKScene {
 
     var enemyModeState: EnemyModeState?
 
+    // Stored enemy intent for Slay the Spire-style telegraph
+    var pendingEnemyAction: EnemyAction?
+
     // MARK: - Phase
 
     enum CombatPhase {
@@ -74,7 +82,7 @@ final class DispositionCombatScene: SKScene {
         let vm = DispositionCombatViewModel(simulation: simulation)
         self.viewModel = vm
         self.scaleMode = .aspectFill
-        self.backgroundColor = SKColor(red: 0.06, green: 0.05, blue: 0.09, alpha: 1)
+        self.backgroundColor = resonanceBackgroundColor(for: simulation.resonanceZone)
         self.enemyModeState = EnemyModeState(seed: simulation.seed)
 
         buildLayout()
@@ -93,6 +101,7 @@ final class DispositionCombatScene: SKScene {
         rebuildHandCards()
         dimUnplayableCards()
         updateActionZoneVisibility()
+        updateMomentumAura()
     }
 
     // MARK: - Disposition Bar
@@ -310,5 +319,70 @@ final class DispositionCombatScene: SKScene {
         sacrificeZone?.alpha = (hasEnergy && hasCards && combatActive
             && !vm.simulation.sacrificeUsedThisTurn) ? 1.0 : 0.3
         endTurnButton?.alpha = combatActive ? 1.0 : 0.3
+    }
+
+    // MARK: - Momentum Aura
+
+    func updateMomentumAura() {
+        guard let vm = viewModel, let aura = momentumAuraNode else { return }
+        let count = vm.streakCount
+        if count >= 2 {
+            let intensity = min(CGFloat(count - 1) * 0.15, 0.6)
+            let color: SKColor
+            switch vm.streakType {
+            case .strike: color = SKColor(red: 0.9, green: 0.3, blue: 0.2, alpha: intensity)
+            case .influence: color = SKColor(red: 0.3, green: 0.5, blue: 0.9, alpha: intensity)
+            default: color = SKColor(red: 0.6, green: 0.3, blue: 0.7, alpha: intensity)
+            }
+            aura.fillColor = color
+            aura.alpha = 1
+        } else {
+            aura.alpha = 0
+        }
+    }
+
+    // MARK: - Intent Display
+
+    func showEnemyIntent(_ action: EnemyAction) {
+        guard let label = intentLabel else { return }
+        let (text, color) = intentDisplay(for: action)
+        label.text = text
+        label.fontColor = color
+        label.alpha = 0
+        label.run(SKAction.fadeIn(withDuration: 0.3))
+    }
+
+    func hideEnemyIntent() {
+        intentLabel?.run(SKAction.fadeOut(withDuration: 0.2))
+    }
+
+    private func intentDisplay(for action: EnemyAction) -> (String, SKColor) {
+        switch action {
+        case .attack(let dmg):
+            return ("⚔ ATK \(dmg)", SKColor(red: 0.9, green: 0.3, blue: 0.3, alpha: 1))
+        case .rage(let dmg):
+            return ("💥 RAGE \(dmg)", SKColor(red: 1.0, green: 0.2, blue: 0.2, alpha: 1))
+        case .defend(let val):
+            return ("🛡 DEF \(val)", SKColor(red: 0.3, green: 0.7, blue: 0.9, alpha: 1))
+        case .provoke(let pen):
+            return ("⚡ PROVOKE \(pen)", SKColor(red: 0.9, green: 0.6, blue: 0.2, alpha: 1))
+        case .adapt:
+            return ("↻ ADAPT", SKColor(red: 0.9, green: 0.8, blue: 0.3, alpha: 1))
+        case .plea(let shift):
+            return ("🙏 PLEA +\(shift)", SKColor(red: 0.7, green: 0.4, blue: 0.9, alpha: 1))
+        }
+    }
+
+    // MARK: - Resonance Background
+
+    private func resonanceBackgroundColor(for zone: TwilightEngine.ResonanceZone) -> SKColor {
+        switch zone {
+        case .nav, .deepNav:
+            return SKColor(red: 0.08, green: 0.04, blue: 0.14, alpha: 1)
+        case .prav, .deepPrav:
+            return SKColor(red: 0.12, green: 0.09, blue: 0.04, alpha: 1)
+        case .yav:
+            return SKColor(red: 0.06, green: 0.06, blue: 0.08, alpha: 1)
+        }
     }
 }
