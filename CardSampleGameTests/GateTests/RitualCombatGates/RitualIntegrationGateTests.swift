@@ -378,18 +378,22 @@ final class RitualIntegrationGateTests: XCTestCase {
                 let fileName = fileURL.lastPathComponent
 
                 // Skip files that ARE the CombatScene definition (EchoScenes package)
-                // and Ritual combat files (RitualCombatScene* are the replacement)
+                // and Ritual/Disposition combat files (they are the replacements)
                 if fileName.hasPrefix("CombatScene") { continue }
                 if fileName.hasPrefix("RitualCombat") { continue }
+                if fileName.hasPrefix("DispositionCombat") { continue }
                 // Skip test files
                 if fileName.contains("Test") { continue }
 
                 let codeLines = try readCodeLines(from: fileURL)
                 for (line, code) in codeLines {
-                    // Strip RitualCombat references before checking for legacy CombatScene usage
+                    // Strip Ritual/Disposition combat refs before checking for legacy CombatScene usage
                     let stripped = code.replacingOccurrences(of: "RitualCombatScene", with: "")
                                        .replacingOccurrences(of: "RitualCombatResult", with: "")
                                        .replacingOccurrences(of: "RitualCombatBridge", with: "")
+                                       .replacingOccurrences(of: "DispositionCombatScene", with: "")
+                                       .replacingOccurrences(of: "DispositionCombatResult", with: "")
+                                       .replacingOccurrences(of: "DispositionCombatBridge", with: "")
                     // Check for CombatScene instantiation
                     if stripped.contains("CombatScene(") {
                         violations.append("  \(fileName):\(line): \(code) [symbol: CombatScene(]")
