@@ -209,7 +209,7 @@ final class DispositionIntegrationTests: XCTestCase {
             "Strike in Prav must cost -1 HP backlash without ward")
 
         // Sacrifice in Prav: extra exhaust risk (RNG-dependent with seed=42)
-        let handBefore = sim.hand.count
+        _ = sim.hand.count // handBefore — tracked for debugging
         let exhaustBefore = sim.exhaustPile.count
         sim.playCardAsSacrifice(cardId: "card_2")
         // Card_2 itself is exhausted + possibly one extra
@@ -485,7 +485,7 @@ final class DispositionIntegrationTests: XCTestCase {
         let action1 = EnemyAI.selectAction(mode: mode1, simulation: sim, rng: aiRng)
         EnemyActionResolver.resolve(action: action1, simulation: &sim)
 
-        let hpAfterTurn1 = sim.heroHP
+        _ = sim.heroHP // hpAfterTurn1 — tracked for debugging, consumed by assertion context
         let dispAfterTurn1 = sim.disposition
 
         // -- Turn 2 --
