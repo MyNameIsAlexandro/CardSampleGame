@@ -1,7 +1,7 @@
 /// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Combat/DispositionCombatSimulation.swift
 /// Назначение: Pure-logic state machine для Disposition Combat (Phase 3).
 /// Зона ответственности: Управление disposition track, momentum, energy, sacrifice; делегирование расчётов в DispositionCalculator.
-/// Контекст: Disposition combat — дуальный исход (destroyed/subjugated). Reference: RITUAL_COMBAT_TEST_MODEL.md §3.1
+/// Контекст: Disposition combat — дуальный исход (destroyed/subjugated). Epic 21: plea backlash. Reference: RITUAL_COMBAT_TEST_MODEL.md §3.1
 
 import Foundation
 
@@ -100,6 +100,9 @@ public struct DispositionCombatSimulation: Equatable {
 
     /// Enemy adapt penalty applied when matching streak type.
     public private(set) var adaptPenalty: Int = 0
+
+    /// Plea backlash: next strike costs hero HP (INV-DC-034).
+    public private(set) var pleaBacklash: Int = 0
 
     // MARK: - Echo State (Epic 18, INV-DC-019..021)
 
@@ -241,6 +244,7 @@ public struct DispositionCombatSimulation: Equatable {
             && lhs.defendReduction == rhs.defendReduction
             && lhs.provokePenalty == rhs.provokePenalty
             && lhs.adaptPenalty == rhs.adaptPenalty
+            && lhs.pleaBacklash == rhs.pleaBacklash
             && lhs.lastPlayedCardId == rhs.lastPlayedCardId
             && lhs.lastPlayedAction == rhs.lastPlayedAction
             && lhs.lastPlayedBasePower == rhs.lastPlayedBasePower
@@ -295,6 +299,12 @@ public struct DispositionCombatSimulation: Equatable {
 
         disposition = Self.clampDisposition(disposition - effectivePower)
         defendReduction = 0
+
+        // Plea backlash: next strike costs hero HP (INV-DC-034)
+        if pleaBacklash > 0 {
+            heroHP = max(0, heroHP - pleaBacklash)
+            pleaBacklash = 0
+        }
 
         // Ward: cancel Prav resonance backlash (INV-DC-023)
         if (resonanceZone == .prav || resonanceZone == .deepPrav) && fateKeyword != .ward {
@@ -517,6 +527,17 @@ public struct DispositionCombatSimulation: Equatable {
     /// Clear adapt penalty (after it has been applied).
     public mutating func clearAdaptPenalty() {
         adaptPenalty = 0
+    }
+
+    /// Apply a direct disposition shift (for enemy actions like Rage/Plea, INV-DC-033/034).
+    public mutating func applyDispositionShift(_ shift: Int) {
+        disposition = Self.clampDisposition(disposition + shift)
+        resolveOutcome()
+    }
+
+    /// Set plea backlash: next strike costs hero HP (INV-DC-034).
+    public mutating func applyPleaBacklash(hpLoss: Int) {
+        pleaBacklash = hpLoss
     }
 
     // MARK: - Private Helpers

@@ -1,7 +1,7 @@
 /// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Combat/DispositionCalculator.swift
 /// Назначение: Static calculator для effective_power в Disposition Combat.
-/// Зона ответственности: Формула effective_power, streak bonus, switch penalty, threat bonus, surge, hard cap.
-/// Контекст: INV-DC-002 (hard cap 25), INV-DC-009..011 (momentum), INV-DC-017 (surge). Reference: RITUAL_COMBAT_TEST_MODEL.md §3.1
+/// Зона ответственности: Формула effective_power, streak bonus, switch penalty, threat bonus, surge, hard cap, survival bonus.
+/// Контекст: INV-DC-002 (hard cap 25), INV-DC-009..011 (momentum), INV-DC-017 (surge), INV-DC-052 (survival). Reference: RITUAL_COMBAT_TEST_MODEL.md §3.1
 
 import Foundation
 
@@ -134,5 +134,13 @@ public struct DispositionCalculator {
     /// Active when disposition > +30 and fate keyword is shadow.
     public static func shadowDisablesDefend(disposition: Int, fateKeyword: FateKeyword?) -> Bool {
         return fateKeyword == .shadow && disposition > 30
+    }
+
+    // MARK: - Mode Bonuses (Epic 21)
+
+    /// Survival mode bonus: Strike gets +3 power (INV-DC-052).
+    public static func survivalStrikeBonus(mode: EnemyMode, actionType: DispositionActionType) -> Int {
+        guard mode == .survival && actionType == .strike else { return 0 }
+        return 3
     }
 }

@@ -1,7 +1,7 @@
 /// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Combat/EnemyActionResolver.swift
 /// Назначение: Enemy action types and resolution logic for disposition combat.
 /// Зона ответственности: Define EnemyAction enum, apply enemy actions to DispositionCombatSimulation.
-/// Контекст: Epic 19 — Enemy Action Core. INV-DC-056..059.
+/// Контекст: Epic 19 (INV-DC-056..059), Epic 21 (INV-DC-033..034 rage/plea).
 
 import Foundation
 
@@ -17,6 +17,10 @@ public enum EnemyAction: Equatable, Codable, Sendable {
     case provoke(penalty: Int)
     /// Soft-block current streak type (INV-DC-059).
     case adapt
+    /// Rage: ATK x2, disposition += 5 (INV-DC-033).
+    case rage(damage: Int)
+    /// Plea: disposition +shift, next strike backlash -5 HP to hero (INV-DC-034).
+    case plea(dispositionShift: Int)
 }
 
 // MARK: - EnemyActionResolver
@@ -46,6 +50,14 @@ public struct EnemyActionResolver {
         case .adapt:
             let streakBon = DispositionCalculator.streakBonus(streakCount: simulation.streakCount)
             simulation.applyEnemyAdapt(streakBonus: streakBon)
+            return true
+        case .rage(let damage):
+            simulation.applyEnemyAttack(damage: damage)
+            simulation.applyDispositionShift(5)
+            return true
+        case .plea(let shift):
+            simulation.applyDispositionShift(shift)
+            simulation.applyPleaBacklash(hpLoss: 5)
             return true
         }
     }
