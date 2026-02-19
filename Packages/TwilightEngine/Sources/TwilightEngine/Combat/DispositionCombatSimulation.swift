@@ -101,6 +101,23 @@ public struct DispositionCombatSimulation: Equatable {
     /// Enemy adapt penalty applied when matching streak type.
     public private(set) var adaptPenalty: Int = 0
 
+    // MARK: - Echo State (Epic 18, INV-DC-019..021)
+
+    /// Last played card ID for Echo replay (INV-DC-019).
+    public private(set) var lastPlayedCardId: String?
+
+    /// Last played action type for Echo replay.
+    public private(set) var lastPlayedAction: DispositionActionType?
+
+    /// Last played base power for Echo replay.
+    public private(set) var lastPlayedBasePower: Int = 0
+
+    /// Last fate modifier used (stored for Echo).
+    public private(set) var lastFateModifier: Int = 0
+
+    /// Whether Echo has been used this action (INV-DC-021: no new fate draw).
+    public private(set) var echoUsedThisAction: Bool = false
+
     // MARK: - Determinism
 
     /// Deterministic RNG for this combat.
@@ -224,6 +241,11 @@ public struct DispositionCombatSimulation: Equatable {
             && lhs.defendReduction == rhs.defendReduction
             && lhs.provokePenalty == rhs.provokePenalty
             && lhs.adaptPenalty == rhs.adaptPenalty
+            && lhs.lastPlayedCardId == rhs.lastPlayedCardId
+            && lhs.lastPlayedAction == rhs.lastPlayedAction
+            && lhs.lastPlayedBasePower == rhs.lastPlayedBasePower
+            && lhs.lastFateModifier == rhs.lastFateModifier
+            && lhs.echoUsedThisAction == rhs.echoUsedThisAction
     }
 
     // MARK: - Player Actions
@@ -241,6 +263,19 @@ public struct DispositionCombatSimulation: Equatable {
 
         let basePower = card.power ?? 1
 
+        // Focus: ignore Defend at disposition < -30 (INV-DC-022)
+        let effectiveDefend: Int
+        if DispositionCalculator.focusIgnoresDefend(disposition: disposition, fateKeyword: fateKeyword) {
+            effectiveDefend = 0
+        } else {
+            effectiveDefend = defendReduction
+        }
+
+        // Shadow: extra switch penalty at disposition < -30 (INV-DC-024)
+        let shadowPenalty = DispositionCalculator.shadowSwitchPenalty(
+            disposition: disposition, fateKeyword: fateKeyword
+        )
+
         let effectivePower = DispositionCalculator.effectivePower(
             basePower: basePower,
             streakCount: nextStreakCount(for: .strike),
@@ -250,7 +285,7 @@ public struct DispositionCombatSimulation: Equatable {
             fateKeyword: fateKeyword,
             fateModifier: fateModifier,
             resonanceZone: resonanceZone,
-            defendReduction: defendReduction,
+            defendReduction: effectiveDefend + shadowPenalty,
             adaptPenalty: currentAdaptPenalty(for: .strike)
         )
 
@@ -260,6 +295,18 @@ public struct DispositionCombatSimulation: Equatable {
 
         disposition = Self.clampDisposition(disposition - effectivePower)
         defendReduction = 0
+
+        // Ward: cancel Prav resonance backlash (INV-DC-023)
+        if (resonanceZone == .prav || resonanceZone == .deepPrav) && fateKeyword != .ward {
+            heroHP = max(0, heroHP - 1)
+        }
+
+        // Store Echo state (INV-DC-019)
+        lastPlayedCardId = cardId
+        lastPlayedAction = .strike
+        lastPlayedBasePower = basePower
+        lastFateModifier = fateModifier
+        echoUsedThisAction = false
 
         updateMomentum(action: .strike)
         resolveOutcome()
@@ -280,6 +327,11 @@ public struct DispositionCombatSimulation: Equatable {
 
         let basePower = card.power ?? 1
 
+        // Shadow: extra switch penalty at disposition < -30 (INV-DC-024)
+        let shadowPenalty = DispositionCalculator.shadowSwitchPenalty(
+            disposition: disposition, fateKeyword: fateKeyword
+        )
+
         let effectivePower = DispositionCalculator.effectivePower(
             basePower: basePower,
             streakCount: nextStreakCount(for: .influence),
@@ -289,11 +341,19 @@ public struct DispositionCombatSimulation: Equatable {
             fateKeyword: fateKeyword,
             fateModifier: fateModifier,
             resonanceZone: resonanceZone,
-            defendReduction: 0,
+            defendReduction: shadowPenalty,
             adaptPenalty: currentAdaptPenalty(for: .influence)
         )
 
-        let effectiveShift = max(0, effectivePower - provokePenalty)
+        // Focus: ignore Provoke at disposition > +30 (INV-DC-049)
+        let effectiveProvoke: Int
+        if DispositionCalculator.focusIgnoresProvoke(disposition: disposition, fateKeyword: fateKeyword) {
+            effectiveProvoke = 0
+        } else {
+            effectiveProvoke = provokePenalty
+        }
+
+        let effectiveShift = max(0, effectivePower - effectiveProvoke)
 
         energy -= cardCost
         let played = hand.remove(at: cardIndex)
@@ -301,6 +361,13 @@ public struct DispositionCombatSimulation: Equatable {
 
         disposition = Self.clampDisposition(disposition + effectiveShift)
         provokePenalty = 0
+
+        // Store Echo state (INV-DC-019)
+        lastPlayedCardId = cardId
+        lastPlayedAction = .influence
+        lastPlayedBasePower = basePower
+        lastFateModifier = fateModifier
+        echoUsedThisAction = false
 
         updateMomentum(action: .influence)
         resolveOutcome()
@@ -347,8 +414,60 @@ public struct DispositionCombatSimulation: Equatable {
             }
         }
 
+        // Store Echo state — sacrifice blocks Echo (INV-DC-018)
+        lastPlayedCardId = cardId
+        lastPlayedAction = .sacrifice
+        lastPlayedBasePower = 0
+        lastFateModifier = 0
+        echoUsedThisAction = false
+
         updateMomentum(action: .sacrifice)
 
+        return true
+    }
+
+    // MARK: - Echo Action (Epic 18, INV-DC-019..021)
+
+    /// Play Echo: free replay of last action at 0 energy cost.
+    /// Returns false if: no previous action, last action was sacrifice, outcome reached.
+    /// INV-DC-018: Echo blocked after sacrifice.
+    /// INV-DC-020: Echo continues the streak.
+    /// INV-DC-021: No new fate draw — uses stored fateModifier.
+    @discardableResult
+    public mutating func playEcho(fateModifier: Int = 0) -> Bool {
+        guard outcome == nil else { return false }
+        guard let lastAction = lastPlayedAction else { return false }
+        guard lastAction != .sacrifice else { return false }
+
+        echoUsedThisAction = true
+
+        let effectivePower = DispositionCalculator.effectivePower(
+            basePower: lastPlayedBasePower,
+            streakCount: nextStreakCount(for: lastAction),
+            previousStreakCount: streakCount,
+            lastActionType: lastActionType,
+            currentActionType: lastAction,
+            fateKeyword: nil,
+            fateModifier: fateModifier,
+            resonanceZone: resonanceZone,
+            defendReduction: lastAction == .strike ? defendReduction : 0,
+            adaptPenalty: currentAdaptPenalty(for: lastAction)
+        )
+
+        switch lastAction {
+        case .strike:
+            disposition = Self.clampDisposition(disposition - effectivePower)
+            defendReduction = 0
+        case .influence:
+            let effectiveShift = max(0, effectivePower - provokePenalty)
+            disposition = Self.clampDisposition(disposition + effectiveShift)
+            provokePenalty = 0
+        case .sacrifice:
+            break
+        }
+
+        updateMomentum(action: lastAction)
+        resolveOutcome()
         return true
     }
 
@@ -371,6 +490,13 @@ public struct DispositionCombatSimulation: Equatable {
     public mutating func beginPlayerTurn() {
         energy = startingEnergy
         sacrificeUsedThisTurn = false
+    }
+
+    /// Apply enemy attack damage to hero HP (INV-DC-056).
+    /// Damage is increased by accumulated sacrifice buff.
+    public mutating func applyEnemyAttack(damage: Int) {
+        let totalDamage = damage + enemySacrificeBuff
+        heroHP = max(0, heroHP - totalDamage)
     }
 
     /// Apply enemy defend effect (reduces next strike).

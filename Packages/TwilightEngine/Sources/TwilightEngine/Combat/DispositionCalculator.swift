@@ -108,4 +108,31 @@ public struct DispositionCalculator {
             return 0
         }
     }
+
+    // MARK: - Fate Keyword Helpers (Epic 18)
+
+    /// Focus: should ignore Defend reduction? (INV-DC-022)
+    /// Active when disposition < -30 and fate keyword is focus.
+    public static func focusIgnoresDefend(disposition: Int, fateKeyword: FateKeyword?) -> Bool {
+        return fateKeyword == .focus && disposition < -30
+    }
+
+    /// Focus: should ignore Provoke penalty? (INV-DC-049)
+    /// Active when disposition > +30 and fate keyword is focus.
+    public static func focusIgnoresProvoke(disposition: Int, fateKeyword: FateKeyword?) -> Bool {
+        return fateKeyword == .focus && disposition > 30
+    }
+
+    /// Shadow: additional switch penalty (INV-DC-024).
+    /// +2 when disposition < -30 and fate keyword is shadow.
+    public static func shadowSwitchPenalty(disposition: Int, fateKeyword: FateKeyword?) -> Int {
+        guard fateKeyword == .shadow, disposition < -30 else { return 0 }
+        return 2
+    }
+
+    /// Shadow: should disable Defend for enemy? (INV-DC-050)
+    /// Active when disposition > +30 and fate keyword is shadow.
+    public static func shadowDisablesDefend(disposition: Int, fateKeyword: FateKeyword?) -> Bool {
+        return fateKeyword == .shadow && disposition > 30
+    }
 }
