@@ -32,101 +32,58 @@ public struct DispositionCombatSimulation: Equatable {
     // MARK: - Disposition Track
 
     /// Current disposition value, clamped to [-100, +100].
-    /// Negative = toward destruction, positive = toward subjugation.
     public private(set) var disposition: Int
-
     /// Combat outcome, set when disposition reaches -100 or +100.
     public private(set) var outcome: DispositionOutcome?
 
     // MARK: - Momentum
 
-    /// Current streak action type (nil if no actions taken yet).
     public private(set) var streakType: DispositionActionType?
-
-    /// Number of consecutive actions of the same type.
     public private(set) var streakCount: Int = 0
-
-    /// Last action type played (for threat bonus calculation).
     public private(set) var lastActionType: DispositionActionType?
 
     // MARK: - Energy
 
-    /// Current energy available for card play.
     public private(set) var energy: Int
-
-    /// Energy granted at the start of each turn.
     public let startingEnergy: Int
 
     // MARK: - Sacrifice
 
-    /// Whether a sacrifice has been used this turn (max 1 per turn).
     public private(set) var sacrificeUsedThisTurn: Bool = false
-
-    /// Enemy buff accumulated from sacrifices (+1 per sacrifice).
     public private(set) var enemySacrificeBuff: Int = 0
 
     // MARK: - Card Zones
 
-    /// Cards currently in hand.
     public private(set) var hand: [Card]
-
-    /// Cards discarded (recyclable).
     public private(set) var discardPile: [Card] = []
-
-    /// Cards exhausted (removed from play permanently).
     public private(set) var exhaustPile: [Card] = []
 
     // MARK: - Hero
 
-    /// Hero hit points.
     public private(set) var heroHP: Int
-
-    /// Hero maximum hit points.
     public let heroMaxHP: Int
 
     // MARK: - Combat Context
 
-    /// Resonance zone for this combat.
     public let resonanceZone: ResonanceZone
-
-    /// Enemy type identifier (for affinity matrix lookup).
     public let enemyType: String
-
-    /// Enemy defend reduction applied to next strike.
     public private(set) var defendReduction: Int = 0
-
-    /// Enemy provoke penalty applied to next influence.
     public private(set) var provokePenalty: Int = 0
-
-    /// Enemy adapt penalty applied when matching streak type.
     public private(set) var adaptPenalty: Int = 0
-
     /// Plea backlash: next strike costs hero HP (INV-DC-034).
     public private(set) var pleaBacklash: Int = 0
 
     // MARK: - Echo State (Epic 18, INV-DC-019..021)
 
-    /// Last played card ID for Echo replay (INV-DC-019).
     public private(set) var lastPlayedCardId: String?
-
-    /// Last played action type for Echo replay.
     public private(set) var lastPlayedAction: DispositionActionType?
-
-    /// Last played base power for Echo replay.
     public private(set) var lastPlayedBasePower: Int = 0
-
-    /// Last fate modifier used (stored for Echo).
     public private(set) var lastFateModifier: Int = 0
-
-    /// Whether Echo has been used this action (INV-DC-021: no new fate draw).
     public private(set) var echoUsedThisAction: Bool = false
 
     // MARK: - Determinism
 
-    /// Deterministic RNG for this combat.
     public let rng: WorldRNG
-
-    /// Original seed for reproducibility.
     public let seed: UInt64
 
     // MARK: - Factory
@@ -196,27 +153,62 @@ public struct DispositionCombatSimulation: Equatable {
 
     // MARK: - Init
 
-    /// Memberwise initializer (internal for restore/testing).
+    /// Full-state initializer with defaults for mutable fields.
+    /// Used for fresh creation and snapshot restore alike.
     public init(
         disposition: Int,
+        outcome: DispositionOutcome? = nil,
+        streakType: DispositionActionType? = nil,
+        streakCount: Int = 0,
+        lastActionType: DispositionActionType? = nil,
         energy: Int,
         startingEnergy: Int,
+        sacrificeUsedThisTurn: Bool = false,
+        enemySacrificeBuff: Int = 0,
         hand: [Card],
+        discardPile: [Card] = [],
+        exhaustPile: [Card] = [],
         heroHP: Int,
         heroMaxHP: Int,
         resonanceZone: ResonanceZone,
         enemyType: String,
+        defendReduction: Int = 0,
+        provokePenalty: Int = 0,
+        adaptPenalty: Int = 0,
+        pleaBacklash: Int = 0,
+        lastPlayedCardId: String? = nil,
+        lastPlayedAction: DispositionActionType? = nil,
+        lastPlayedBasePower: Int = 0,
+        lastFateModifier: Int = 0,
+        echoUsedThisAction: Bool = false,
         rng: WorldRNG,
         seed: UInt64
     ) {
         self.disposition = Self.clampDisposition(disposition)
+        self.outcome = outcome
+        self.streakType = streakType
+        self.streakCount = streakCount
+        self.lastActionType = lastActionType
         self.energy = energy
         self.startingEnergy = startingEnergy
+        self.sacrificeUsedThisTurn = sacrificeUsedThisTurn
+        self.enemySacrificeBuff = enemySacrificeBuff
         self.hand = hand
+        self.discardPile = discardPile
+        self.exhaustPile = exhaustPile
         self.heroHP = heroHP
         self.heroMaxHP = heroMaxHP
         self.resonanceZone = resonanceZone
         self.enemyType = enemyType
+        self.defendReduction = defendReduction
+        self.provokePenalty = provokePenalty
+        self.adaptPenalty = adaptPenalty
+        self.pleaBacklash = pleaBacklash
+        self.lastPlayedCardId = lastPlayedCardId
+        self.lastPlayedAction = lastPlayedAction
+        self.lastPlayedBasePower = lastPlayedBasePower
+        self.lastFateModifier = lastFateModifier
+        self.echoUsedThisAction = echoUsedThisAction
         self.rng = rng
         self.seed = seed
     }
@@ -224,27 +216,19 @@ public struct DispositionCombatSimulation: Equatable {
     // MARK: - Equatable (WorldRNG excluded — compared by seed)
 
     public static func == (lhs: DispositionCombatSimulation, rhs: DispositionCombatSimulation) -> Bool {
-        return lhs.disposition == rhs.disposition
-            && lhs.outcome == rhs.outcome
-            && lhs.streakType == rhs.streakType
-            && lhs.streakCount == rhs.streakCount
+        lhs.disposition == rhs.disposition && lhs.outcome == rhs.outcome
+            && lhs.streakType == rhs.streakType && lhs.streakCount == rhs.streakCount
             && lhs.lastActionType == rhs.lastActionType
-            && lhs.energy == rhs.energy
-            && lhs.startingEnergy == rhs.startingEnergy
+            && lhs.energy == rhs.energy && lhs.startingEnergy == rhs.startingEnergy
             && lhs.sacrificeUsedThisTurn == rhs.sacrificeUsedThisTurn
             && lhs.enemySacrificeBuff == rhs.enemySacrificeBuff
-            && lhs.hand == rhs.hand
-            && lhs.discardPile == rhs.discardPile
+            && lhs.hand == rhs.hand && lhs.discardPile == rhs.discardPile
             && lhs.exhaustPile == rhs.exhaustPile
-            && lhs.heroHP == rhs.heroHP
-            && lhs.heroMaxHP == rhs.heroMaxHP
-            && lhs.resonanceZone == rhs.resonanceZone
-            && lhs.enemyType == rhs.enemyType
+            && lhs.heroHP == rhs.heroHP && lhs.heroMaxHP == rhs.heroMaxHP
+            && lhs.resonanceZone == rhs.resonanceZone && lhs.enemyType == rhs.enemyType
             && lhs.seed == rhs.seed
-            && lhs.defendReduction == rhs.defendReduction
-            && lhs.provokePenalty == rhs.provokePenalty
-            && lhs.adaptPenalty == rhs.adaptPenalty
-            && lhs.pleaBacklash == rhs.pleaBacklash
+            && lhs.defendReduction == rhs.defendReduction && lhs.provokePenalty == rhs.provokePenalty
+            && lhs.adaptPenalty == rhs.adaptPenalty && lhs.pleaBacklash == rhs.pleaBacklash
             && lhs.lastPlayedCardId == rhs.lastPlayedCardId
             && lhs.lastPlayedAction == rhs.lastPlayedAction
             && lhs.lastPlayedBasePower == rhs.lastPlayedBasePower
