@@ -188,7 +188,8 @@ extension AuditArchitectureBoundaryGateTests {
         let allowedFiles: Set<String> = [
             "EventView.swift",
             "EchoCombatBridge.swift",
-            "RitualCombatBridge.swift"
+            "RitualCombatBridge.swift",
+            "DispositionCombatBridge.swift"
         ]
         let pattern = "commitExternalCombat("
 
