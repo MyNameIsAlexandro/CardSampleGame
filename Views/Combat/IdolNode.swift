@@ -17,6 +17,17 @@ enum IdolVisualState: Equatable {
     case hoverTarget
 }
 
+// MARK: - Idol Mode Aura
+
+/// Visual aura state for enemy mode transitions.
+/// Maps 1:1 to engine EnemyMode but keeps IdolNode free of TwilightEngine dependency.
+enum IdolModeAura: Equatable {
+    case normal
+    case survival
+    case desperation
+    case weakened
+}
+
 // MARK: - Idol Node
 
 /// Diegetic enemy idol with carved HP notches, glowing WP runes, and intent tokens.
@@ -32,6 +43,8 @@ final class IdolNode: SKNode {
     // MARK: - Constants
 
     static let frameSize = CGSize(width: 70, height: 100)
+    /// Minimum duration for mode transition animation (Epic 24 visual communication contract).
+    static let modeTransitionDuration: TimeInterval = 0.35
     private let notchSize = CGSize(width: 2, height: 12)
     private let runeSize: CGFloat = 12
 
@@ -39,6 +52,8 @@ final class IdolNode: SKNode {
 
     let enemyId: String
     private(set) var visualState: IdolVisualState = .idle
+    /// Current mode aura for enemy mode transitions.
+    private(set) var currentModeAura: IdolModeAura = .normal
 
     // MARK: - Child Nodes
 
@@ -422,6 +437,48 @@ final class IdolNode: SKNode {
             SKAction.wait(forDuration: 1.0),
             SKAction.removeFromParent()
         ]))
+    }
+
+    // MARK: - Mode Transition
+
+    /// Animate enemy mode transition with aura color change.
+    /// Duration meets visual communication contract (≥ 0.3s).
+    func playModeTransition(to mode: IdolModeAura, completion: (() -> Void)? = nil) {
+        currentModeAura = mode
+
+        let auraColor: SKColor
+        switch mode {
+        case .normal:
+            auraColor = SKColor(red: 0.50, green: 0.45, blue: 0.55, alpha: 1)
+        case .survival:
+            auraColor = SKColor(red: 0.90, green: 0.60, blue: 0.20, alpha: 1)
+        case .desperation:
+            auraColor = SKColor(red: 0.90, green: 0.25, blue: 0.25, alpha: 1)
+        case .weakened:
+            auraColor = SKColor(red: 0.50, green: 0.50, blue: 0.60, alpha: 0.6)
+        }
+
+        let duration = Self.modeTransitionDuration
+
+        let auraFlash = SKAction.sequence([
+            SKAction.run { [weak self] in
+                self?.frameNode.strokeColor = auraColor
+                self?.frameNode.glowWidth = 4
+            },
+            SKAction.wait(forDuration: duration * 0.4),
+            SKAction.run { [weak self] in
+                self?.frameNode.glowWidth = 2
+            },
+            SKAction.wait(forDuration: duration * 0.6)
+        ])
+
+        let fullAction: SKAction
+        if let completion {
+            fullAction = SKAction.sequence([auraFlash, SKAction.run(completion)])
+        } else {
+            fullAction = auraFlash
+        }
+        run(fullAction, withKey: "modeTransition")
     }
 
     // MARK: - Layout Helper
