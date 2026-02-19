@@ -21,6 +21,7 @@ struct EventView: View {
     @State private var showingResult = false
     @State private var resultMessage: String = ""
     @State private var activeCombat: ActiveEventCombat?
+    @State private var activeDispositionCombat: ActiveEventDispositionCombat?
     @State private var combatVictory: Bool?
 
     // MARK: - Initialization (Engine-First only)
@@ -103,29 +104,28 @@ struct EventView: View {
                     onCombatEnd: { result in
                         RitualCombatBridge.applyCombatResult(result, to: vm.engine)
                         let stats = AppCombatStats(
-                            turnsPlayed: result.turnsPlayed,
-                            totalDamageDealt: result.totalDamageDealt,
-                            totalDamageTaken: result.totalDamageTaken,
-                            cardsPlayed: result.cardsPlayed
-                        )
-                        let outcome: AppCombatOutcome = result.outcome.isVictory
-                            ? .victory(stats: stats)
-                            : .defeat(stats: stats)
-                        handleCombatEnd(outcome: outcome)
+                            turnsPlayed: result.turnsPlayed, totalDamageDealt: result.totalDamageDealt,
+                            totalDamageTaken: result.totalDamageTaken, cardsPlayed: result.cardsPlayed)
+                        handleCombatEnd(outcome: result.outcome.isVictory
+                            ? .victory(stats: stats) : .defeat(stats: stats))
                     },
-                    onSoundEffect: { SoundManager.shared.play(SoundManager.SoundEffect(rawValue: $0) ?? .buttonTap) },
-                    onHaptic: { name in
-                        let type: HapticManager.HapticType
-                        switch name {
-                        case "light": type = .light
-                        case "medium": type = .medium
-                        case "heavy": type = .heavy
-                        case "success": type = .success
-                        case "error": type = .error
-                        default: type = .light
-                        }
-                        HapticManager.shared.play(type)
-                    }
+                    onSoundEffect: Self.playSoundEffect,
+                    onHaptic: Self.playHaptic
+                )
+            }
+            .fullScreenCover(item: $activeDispositionCombat) { combat in
+                DispositionCombatSceneView(
+                    simulation: combat.simulation,
+                    onCombatEnd: { result in
+                        DispositionCombatBridge.applyCombatResult(result, to: vm.engine)
+                        let stats = AppCombatStats(
+                            turnsPlayed: result.turnsPlayed, totalDamageDealt: 0,
+                            totalDamageTaken: 0, cardsPlayed: result.cardsPlayed)
+                        handleCombatEnd(outcome: result.outcome == .subjugated
+                            ? .victory(stats: stats) : .defeat(stats: stats))
+                    },
+                    onSoundEffect: Self.playSoundEffect,
+                    onHaptic: Self.playHaptic
                 )
             }
         }
@@ -359,6 +359,23 @@ struct EventView: View {
             return
         }
 
+        if shouldUseDispositionCombat(enemyDef: snapshot.enemyDefinition) {
+            initiateDispositionCombat(snapshot: snapshot)
+        } else {
+            initiateRitualCombat(snapshot: snapshot)
+        }
+    }
+
+    private func shouldUseDispositionCombat(enemyDef: EnemyDefinition) -> Bool {
+        switch enemyDef.enemyType {
+        case .human, .spirit, .beast:
+            return true
+        case .undead, .demon, .boss:
+            return false
+        }
+    }
+
+    private func initiateRitualCombat(snapshot: ExternalCombatSnapshot) {
         let encounterEnemy = EncounterEnemy(
             id: snapshot.enemy.id,
             name: snapshot.enemy.name,
@@ -392,6 +409,54 @@ struct EventView: View {
         activeCombat = ActiveEventCombat(simulation: sim)
     }
 
+    private func initiateDispositionCombat(snapshot: ExternalCombatSnapshot) {
+        let enemyTypeName = Self.affinityEnemyType(snapshot.enemyDefinition.enemyType)
+        let zone: TwilightEngine.ResonanceZone = snapshot.resonance < -60
+            ? .deepNav
+            : snapshot.resonance < -20 ? .nav
+            : snapshot.resonance > 60 ? .deepPrav
+            : snapshot.resonance > 20 ? .prav
+            : .yav
+
+        let sim = DispositionCombatSimulation.create(
+            enemyType: enemyTypeName,
+            heroHP: snapshot.hero.hp,
+            heroMaxHP: snapshot.hero.maxHp,
+            hand: snapshot.encounterHeroCards,
+            resonanceZone: zone,
+            seed: snapshot.seed
+        )
+
+        activeDispositionCombat = ActiveEventDispositionCombat(simulation: sim)
+    }
+
+    /// Map EnemyType enum to AffinityMatrix string key.
+    private static func affinityEnemyType(_ type: EnemyType) -> String {
+        switch type {
+        case .human: return "человек"
+        case .spirit: return "дух"
+        case .beast: return "зверь"
+        case .undead: return "нежить"
+        case .demon: return "нечисть"
+        case .boss: return "бандит"
+        }
+    }
+
+    static func playSoundEffect(_ name: String) {
+        SoundManager.shared.play(SoundManager.SoundEffect(rawValue: name) ?? .buttonTap)
+    }
+
+    static func playHaptic(_ name: String) {
+        switch name {
+        case "light": HapticManager.shared.play(.light)
+        case "medium": HapticManager.shared.play(.medium)
+        case "heavy": HapticManager.shared.play(.heavy)
+        case "success": HapticManager.shared.play(.success)
+        case "error": HapticManager.shared.play(.error)
+        default: HapticManager.shared.play(.light)
+        }
+    }
+
     func handleCombatEnd(outcome: AppCombatOutcome) {
         // Apply non-combat consequences from the choice (if victory)
         if outcome.isVictory, let choice = selectedChoice {
@@ -402,6 +467,7 @@ struct EventView: View {
         // Just close combat and dismiss event view
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             activeCombat = nil
+            activeDispositionCombat = nil
             // Small delay before dismissing to allow animation to complete
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                 onDismiss()
@@ -464,6 +530,11 @@ struct EventView: View {
 private struct ActiveEventCombat: Identifiable {
     let id = UUID()
     let simulation: CombatSimulation
+}
+
+private struct ActiveEventDispositionCombat: Identifiable {
+    let id = UUID()
+    let simulation: DispositionCombatSimulation
 }
 
 // MARK: - Preview

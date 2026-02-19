@@ -92,6 +92,21 @@ final class DispositionCombatViewModel: ObservableObject {
         objectWillChange.send()
     }
 
+    // MARK: - Enemy Resolution
+
+    /// Resolve enemy action against the simulation. Returns the action taken.
+    @discardableResult
+    func resolveEnemyAction(mode: EnemyMode) -> EnemyAction {
+        let action = EnemyAI.selectAction(
+            mode: mode,
+            simulation: simulation,
+            rng: simulation.rng
+        )
+        EnemyActionResolver.resolve(action: action, simulation: &simulation)
+        objectWillChange.send()
+        return action
+    }
+
     // MARK: - Result
 
     /// Build combat result for bridge submission.

@@ -16,6 +16,8 @@ struct BattleArenaView: View {
     @State private var selectedEnemyId: String?
     @State private var lastOutcome: AppCombatOutcome?
     @State private var activeCombat: ActiveCombat?
+    @State private var activeDispositionCombat: ActiveDispositionCombat?
+    @State private var useDispositionCombat: Bool = false
     @State private var arenaSeedState: UInt64 = Self.initialArenaSeed
 
     private var availableHeroes: [HeroDefinition] {
@@ -92,6 +94,17 @@ struct BattleArenaView: View {
                 }
             }
 
+            // MARK: - Combat Mode Toggle
+            Toggle(isOn: $useDispositionCombat) {
+                HStack(spacing: Spacing.sm) {
+                    Image(systemName: useDispositionCombat ? "slider.horizontal.3" : "theatermasks")
+                    Text(useDispositionCombat ? "Disposition Combat" : "Ritual Combat")
+                        .font(.subheadline)
+                }
+            }
+            .padding(.horizontal)
+            .padding(.bottom, Spacing.sm)
+
             // MARK: - Start Button
             VStack(spacing: 0) {
                 Divider()
@@ -147,6 +160,38 @@ struct BattleArenaView: View {
                 }
             )
         }
+        .fullScreenCover(item: $activeDispositionCombat) { combat in
+            DispositionCombatSceneView(
+                simulation: combat.simulation,
+                onCombatEnd: { result in
+                    let stats = AppCombatStats(
+                        turnsPlayed: result.turnsPlayed,
+                        totalDamageDealt: 0,
+                        totalDamageTaken: 0,
+                        cardsPlayed: result.cardsPlayed
+                    )
+                    if result.outcome == .subjugated {
+                        lastOutcome = .victory(stats: stats)
+                    } else {
+                        lastOutcome = .defeat(stats: stats)
+                    }
+                    activeDispositionCombat = nil
+                },
+                onSoundEffect: { SoundManager.shared.play(SoundManager.SoundEffect(rawValue: $0) ?? .buttonTap) },
+                onHaptic: { name in
+                    let type: HapticManager.HapticType
+                    switch name {
+                    case "light": type = .light
+                    case "medium": type = .medium
+                    case "heavy": type = .heavy
+                    case "success": type = .success
+                    case "error": type = .error
+                    default: type = .light
+                    }
+                    HapticManager.shared.play(type)
+                }
+            )
+        }
     }
 
     private var canStart: Bool {
@@ -172,6 +217,16 @@ struct BattleArenaView: View {
               let hero = services.registry.heroRegistry.hero(id: heroId),
               let enemy = selectedEnemy else { return }
 
+        lastOutcome = nil
+
+        if useDispositionCombat {
+            startDispositionBattle(hero: hero, enemy: enemy, heroId: heroId)
+        } else {
+            startRitualBattle(hero: hero, enemy: enemy, heroId: heroId)
+        }
+    }
+
+    private func startRitualBattle(hero: HeroDefinition, enemy: EnemyDefinition, heroId: String) {
         let startingDeck = services.cardFactory.createStartingDeck(forHero: heroId)
         let fateCards = services.registry.getAllFateCards()
 
@@ -197,8 +252,23 @@ struct BattleArenaView: View {
             worldResonance: 0
         )
 
-        lastOutcome = nil
         activeCombat = ActiveCombat(simulation: sim)
+    }
+
+    private func startDispositionBattle(hero: HeroDefinition, enemy: EnemyDefinition, heroId: String) {
+        let startingDeck = services.cardFactory.createStartingDeck(forHero: heroId)
+        let seed = nextArenaSeed()
+
+        let sim = DispositionCombatSimulation.create(
+            enemyType: enemy.name.resolve(using: services.localizationManager),
+            heroHP: hero.baseStats.health,
+            heroMaxHP: hero.baseStats.health,
+            hand: startingDeck,
+            resonanceZone: .yav,
+            seed: seed
+        )
+
+        activeDispositionCombat = ActiveDispositionCombat(simulation: sim)
     }
 
     // MARK: - Subviews
@@ -241,4 +311,9 @@ struct BattleArenaView: View {
 private struct ActiveCombat: Identifiable {
     let id = UUID()
     let simulation: CombatSimulation
+}
+
+private struct ActiveDispositionCombat: Identifiable {
+    let id = UUID()
+    let simulation: DispositionCombatSimulation
 }

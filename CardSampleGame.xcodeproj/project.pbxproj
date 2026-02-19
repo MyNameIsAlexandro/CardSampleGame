@@ -12,9 +12,13 @@
 		0869558992AD64C9C9AC00CB /* LocalizationValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 204A28A32636BB8C22E758C3 /* LocalizationValidatorTests.swift */; };
 		0A1C2D3E4F5A6B7C8D9E0F1A /* LocalizationCompletenessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2C3D4E5F6A7B8C9D0E1F2A /* LocalizationCompletenessTests.swift */; };
 		1EA4518FD1D6F207BD1464B5 /* DispositionArchBoundaryGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFC9DD68CA8F29F281AF0C7A /* DispositionArchBoundaryGateTests.swift */; };
+		21FA6506632F6BC34AAFCF46 /* DispositionCombatScene+Layout.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6D1A14B68966E33DCED0A41 /* DispositionCombatScene+Layout.swift */; };
+		24FDDC6E399F926DABA01174 /* DispositionCombatScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67E74864AB7B6DA217261649 /* DispositionCombatScene.swift */; };
+		4298DB1B512B7A46A1B6B129 /* DispositionCombatScene+GameLoop.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA11A7E0D0F695D86A01092F /* DispositionCombatScene+GameLoop.swift */; };
 		4748A720AAB2F6E8C7247419 /* DispositionCardPlayGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D23A7FDD58FA74AB0FA6657 /* DispositionCardPlayGateTests.swift */; };
 		4A62B7903EAB9A19F55B061F /* DispositionCombatBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5875F2DCFC769778EAB9096A /* DispositionCombatBridge.swift */; };
 		6352A5DDAB8A087797D247C9 /* ContentValidationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E948FF6BD58A6370B765AD94 /* ContentValidationTests.swift */; };
+		8835941EDB53C5A2FFF97D8C /* DispositionCombatSceneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E699A0AE1C17B5AF2389767 /* DispositionCombatSceneView.swift */; };
 		8B5C529E75755A127084F62A /* SourcePathResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85E6536727E3995B16A50F82 /* SourcePathResolver.swift */; };
 		8F035EDB750B2C0441F077B0 /* WorldMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BEC0AA856AB6706612208E1 /* WorldMapView.swift */; };
 		A17EABC43572E702B3A65946 /* DispositionSceneGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8760BEC68C6999DAA517BA45 /* DispositionSceneGateTests.swift */; };
@@ -174,10 +178,12 @@
 		43D4E3FBE4DC34B63B61E061 /* EventView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EventView.swift; path = EventView.swift; sourceTree = "<group>"; };
 		5875F2DCFC769778EAB9096A /* DispositionCombatBridge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DispositionCombatBridge.swift; sourceTree = "<group>"; };
 		60C1474DB750BB1D0378466E /* CodeHygieneTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CodeHygieneTests.swift; sourceTree = "<group>"; };
+		67E74864AB7B6DA217261649 /* DispositionCombatScene.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DispositionCombatScene.swift; sourceTree = "<group>"; };
 		6BEC0AA856AB6706612208E1 /* WorldMapView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WorldMapView.swift; path = WorldMapView.swift; sourceTree = "<group>"; };
 		7281A0D5F94962EEED1D9DB2 /* DispositionCombatViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DispositionCombatViewModel.swift; sourceTree = "<group>"; };
 		85E6536727E3995B16A50F82 /* SourcePathResolver.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SourcePathResolver.swift; sourceTree = "<group>"; };
 		8760BEC68C6999DAA517BA45 /* DispositionSceneGateTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DispositionSceneGateTests.swift; path = ../../CardSampleGameTests/GateTests/DispositionSceneGateTests.swift; sourceTree = "<group>"; };
+		8E699A0AE1C17B5AF2389767 /* DispositionCombatSceneView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DispositionCombatSceneView.swift; sourceTree = "<group>"; };
 		A0CA67A53A024B4CEDD6685C /* DesignSystemComplianceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DesignSystemComplianceTests.swift; sourceTree = "<group>"; };
 		AA0000000000000000000001 /* EchoCombatBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EchoCombatBridge.swift; sourceTree = "<group>"; };
 		AA0000140000000000000001 /* CardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardView.swift; sourceTree = "<group>"; };
@@ -210,6 +216,7 @@
 		APS00202000000000000001 /* SaveSlotSelectionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveSlotSelectionScreen.swift; sourceTree = "<group>"; };
 		APS00302000000000000001 /* LoadSlotSelectionScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadSlotSelectionScreen.swift; sourceTree = "<group>"; };
 		AS00000000000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B6D1A14B68966E33DCED0A41 /* DispositionCombatScene+Layout.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "DispositionCombatScene+Layout.swift"; sourceTree = "<group>"; };
 		BAV0000200000000000000001 /* BattleArenaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BattleArenaView.swift; sourceTree = "<group>"; };
 		BB0000010000000000000001 /* CardSampleGameTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CardSampleGameTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB0001160000000000000001 /* SaveLoadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveLoadTests.swift; sourceTree = "<group>"; };
@@ -241,6 +248,7 @@
 		DHB0000200000000000000001 /* DualHealthBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DualHealthBar.swift; sourceTree = "<group>"; };
 		DS00000000000001 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
 		E948FF6BD58A6370B765AD94 /* ContentValidationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ContentValidationTests.swift; sourceTree = "<group>"; };
+		EA11A7E0D0F695D86A01092F /* DispositionCombatScene+GameLoop.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "DispositionCombatScene+GameLoop.swift"; sourceTree = "<group>"; };
 		ECV0000200000000000000001 /* EnemyCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemyCardView.swift; sourceTree = "<group>"; };
 		EIV000020000000000000001 /* EnemyIntentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemyIntentView.swift; sourceTree = "<group>"; };
 		ESC0000200000000000000001 /* EnemySelectionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemySelectionCard.swift; sourceTree = "<group>"; };
@@ -348,6 +356,26 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3F1287A150688FE074AEA41D /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				820A672EFDA7E8FC5F9DB6E5 /* Combat */,
+			);
+			name = Views;
+			sourceTree = "<group>";
+		};
+		820A672EFDA7E8FC5F9DB6E5 /* Combat */ = {
+			isa = PBXGroup;
+			children = (
+				67E74864AB7B6DA217261649 /* DispositionCombatScene.swift */,
+				B6D1A14B68966E33DCED0A41 /* DispositionCombatScene+Layout.swift */,
+				EA11A7E0D0F695D86A01092F /* DispositionCombatScene+GameLoop.swift */,
+				8E699A0AE1C17B5AF2389767 /* DispositionCombatSceneView.swift */,
+			);
+			name = Combat;
+			path = Views/Combat;
+			sourceTree = SOURCE_ROOT;
+		};
 		AA0000240000000000000001 = {
 			isa = PBXGroup;
 			children = (
@@ -355,6 +383,7 @@
 				PEG0010000000000PE000001 /* PackEditor */,
 				BB0003000000000000000001 /* CardSampleGameTests */,
 				AA0000260000000000000001 /* Products */,
+				3F1287A150688FE074AEA41D /* Views */,
 			);
 			sourceTree = "<group>";
 		};
@@ -928,6 +957,10 @@
 				C554D44FD5BB996A504E842D /* DispositionCombatResult.swift in Sources */,
 				4A62B7903EAB9A19F55B061F /* DispositionCombatBridge.swift in Sources */,
 				B9A7179091F517C5A8B715B9 /* DispositionCombatViewModel.swift in Sources */,
+				24FDDC6E399F926DABA01174 /* DispositionCombatScene.swift in Sources */,
+				21FA6506632F6BC34AAFCF46 /* DispositionCombatScene+Layout.swift in Sources */,
+				4298DB1B512B7A46A1B6B129 /* DispositionCombatScene+GameLoop.swift in Sources */,
+				8835941EDB53C5A2FFF97D8C /* DispositionCombatSceneView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
