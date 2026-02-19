@@ -22,8 +22,9 @@ struct DispositionCombatResult: Equatable {
     /// Map disposition outcome to engine combat outcome.
     var engineOutcome: CombatEndOutcome {
         switch outcome {
-        case .destroyed: return .defeat
+        case .destroyed: return .victory
         case .subjugated: return .victory
+        case .defeated: return .defeat
         }
     }
 }

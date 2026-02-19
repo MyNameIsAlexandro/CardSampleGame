@@ -170,10 +170,10 @@ struct BattleArenaView: View {
                         totalDamageTaken: 0,
                         cardsPlayed: result.cardsPlayed
                     )
-                    if result.outcome == .subjugated {
-                        lastOutcome = .victory(stats: stats)
-                    } else {
+                    if result.outcome == .defeated {
                         lastOutcome = .defeat(stats: stats)
+                    } else {
+                        lastOutcome = .victory(stats: stats)
                     }
                     activeDispositionCombat = nil
                 },

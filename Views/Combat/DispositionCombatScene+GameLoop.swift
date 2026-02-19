@@ -154,6 +154,7 @@ extension DispositionCombatScene {
         guard let vm = viewModel, let modeState = enemyModeState else { return }
 
         vm.endTurn()
+        updateIdolMode()
 
         let enemyAction = vm.resolveEnemyAction(mode: modeState.currentMode)
 
@@ -179,7 +180,7 @@ extension DispositionCombatScene {
         run(SKAction.wait(forDuration: animDuration)) { [weak self] in
             guard let self, let vm = self.viewModel else { return }
 
-            if vm.outcome != nil || vm.heroHP <= 0 {
+            if vm.outcome != nil {
                 self.finishCombat()
             } else {
                 self.beginPlayerPhase()
@@ -195,15 +196,24 @@ extension DispositionCombatScene {
 
         guard let vm = viewModel else { return }
 
-        let isVictory = vm.outcome == .subjugated
+        let isVictory = vm.outcome == .destroyed || vm.outcome == .subjugated
         updatePhaseLabel(isVictory ? "Victory" : "Defeat")
 
         let resultDelay: TimeInterval = 1.0
         run(SKAction.wait(forDuration: resultDelay)) { [weak self] in
             guard let self, let vm = self.viewModel else { return }
 
-            let faithDelta = isVictory ? 5 : 0
-            let resonanceDelta: Float = isVictory ? 3.0 : -2.0
+            let faithDelta: Int
+            let resonanceDelta: Float
+            switch vm.outcome {
+            case .destroyed:
+                faithDelta = 3; resonanceDelta = -3.0
+            case .subjugated:
+                faithDelta = 5; resonanceDelta = 3.0
+            case .defeated, .none:
+                faithDelta = 0; resonanceDelta = -2.0
+            }
+
             let result = vm.makeCombatResult(
                 faithDelta: faithDelta,
                 resonanceDelta: resonanceDelta

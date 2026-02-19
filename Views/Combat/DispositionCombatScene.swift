@@ -88,7 +88,6 @@ final class DispositionCombatScene: SKScene {
         guard let vm = viewModel else { return }
 
         updateDispositionBar(disposition: vm.disposition, animated: animated)
-        updateIdolMode()
         updateEnergyLabel()
         updateStreakLabel()
         rebuildHandCards()

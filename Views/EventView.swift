@@ -121,8 +121,8 @@ struct EventView: View {
                         let stats = AppCombatStats(
                             turnsPlayed: result.turnsPlayed, totalDamageDealt: 0,
                             totalDamageTaken: 0, cardsPlayed: result.cardsPlayed)
-                        handleCombatEnd(outcome: result.outcome == .subjugated
-                            ? .victory(stats: stats) : .defeat(stats: stats))
+                        handleCombatEnd(outcome: result.outcome == .defeated
+                            ? .defeat(stats: stats) : .victory(stats: stats))
                     },
                     onSoundEffect: Self.playSoundEffect,
                     onHaptic: Self.playHaptic

@@ -225,8 +225,7 @@ final class DispositionIntegrationTests: XCTestCase {
     // MARK: - testEnemyModeTransitions
 
     /// Start in normal mode. Build 3-strike streak -> enemy selects Defend.
-    /// Move disposition past survival threshold -> mode changes.
-    /// Move past desperation -> desperation mode.
+    /// Move disposition past survival threshold (negative) -> survival mode.
     func testEnemyModeTransitions() {
         var sim = makeSimulation(disposition: 0, startingEnergy: 15)
         var modeState = EnemyModeState(seed: 42)
@@ -248,7 +247,7 @@ final class DispositionIntegrationTests: XCTestCase {
             "Normal mode + 3-strike streak must trigger Defend")
 
         // Move disposition deep negative for survival threshold
-        // survivalThreshold for seed 42: -60 + offset
+        // survivalThreshold for seed 42: -(65 + offset)
         sim.playStrike(cardId: "card_3", targetId: "enemy")
         sim.playStrike(cardId: "card_4", targetId: "enemy")
         sim.playStrike(cardId: "card_5", targetId: "enemy")
@@ -261,17 +260,10 @@ final class DispositionIntegrationTests: XCTestCase {
         XCTAssertLessThan(sim.disposition, -50,
             "Disposition must be deep negative after many strikes")
 
-        // Evaluate mode — should transition based on disposition
+        // Evaluate mode — should transition to survival or weakened at deep negative
         let modeAfterStrikes = EnemyAI.evaluateMode(state: &modeState, disposition: sim.disposition)
 
-        // The mode depends on thresholds and hysteresis, but it should not be normal
-        // at this deep negative disposition
-        if sim.disposition <= modeState.desperationThreshold {
-            // Could be desperation or weakened (if swing was large)
-            XCTAssertTrue(
-                modeAfterStrikes == .desperation || modeAfterStrikes == .weakened,
-                "Must be desperation or weakened at disposition \(sim.disposition)")
-        } else if sim.disposition <= modeState.survivalThreshold {
+        if sim.disposition <= modeState.survivalThreshold {
             XCTAssertTrue(
                 modeAfterStrikes == .survival || modeAfterStrikes == .weakened,
                 "Must be survival or weakened at disposition \(sim.disposition)")
@@ -442,9 +434,9 @@ final class DispositionIntegrationTests: XCTestCase {
         let adaptAction: EnemyAction = .adapt
         EnemyActionResolver.resolve(action: adaptAction, simulation: &sim)
 
-        // Adapt penalty should be max(3, streakBonus(3)) = max(3, 2) = 3
-        XCTAssertEqual(sim.adaptPenalty, 3,
-            "Adapt penalty must be max(3, streakBonus)")
+        // Adapt penalty should be max(1, streakBonus(2)) = 2
+        XCTAssertEqual(sim.adaptPenalty, 2,
+            "Adapt penalty must be max(1, streakBonus)")
 
         // Play another strike — should succeed but with reduced power
         let dispBeforeStrike = sim.disposition
@@ -452,8 +444,8 @@ final class DispositionIntegrationTests: XCTestCase {
         XCTAssertTrue(result, "Strike must still succeed with adapt penalty")
 
         let strikeShift = abs(sim.disposition - dispBeforeStrike)
-        // base=5, streak=4(bonus=+3), adapt_penalty=-3 => effective = 5+3-3 = 5
-        XCTAssertEqual(strikeShift, 5,
+        // base=5, streak=4(bonus=+3), adapt_penalty=-2 => effective = 5+3-2 = 6
+        XCTAssertEqual(strikeShift, 6,
             "Strike with adapt penalty must have reduced effective power. Shift=\(strikeShift)")
 
         // Disposition must still have changed

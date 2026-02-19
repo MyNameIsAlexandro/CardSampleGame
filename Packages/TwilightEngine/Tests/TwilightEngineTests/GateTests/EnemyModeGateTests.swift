@@ -39,18 +39,18 @@ final class EnemyModeGateTests: XCTestCase {
 
     // MARK: - INV-DC-027: Dynamic survival threshold
 
-    /// Survival threshold = -60 + (seed_hash % 11 - 5).
-    /// Different seeds must produce thresholds within [-65, -55].
+    /// Survival threshold = -(65 + seed_hash % 11).
+    /// Different seeds must produce thresholds within [-75, -65].
     func testDynamicSurvivalThreshold_withinRange() {
         let seeds: [UInt64] = [1, 7, 42, 100, 255, 1000, 9999, 123456]
         var thresholds = Set<Int>()
 
         for seed in seeds {
             let state = EnemyModeState(seed: seed)
-            XCTAssertGreaterThanOrEqual(state.survivalThreshold, -65,
-                "Survival threshold for seed \(seed) must be >= -65")
-            XCTAssertLessThanOrEqual(state.survivalThreshold, -55,
-                "Survival threshold for seed \(seed) must be <= -55")
+            XCTAssertGreaterThanOrEqual(state.survivalThreshold, -75,
+                "Survival threshold for seed \(seed) must be >= -75")
+            XCTAssertLessThanOrEqual(state.survivalThreshold, -65,
+                "Survival threshold for seed \(seed) must be <= -65")
             thresholds.insert(state.survivalThreshold)
         }
 
@@ -60,18 +60,18 @@ final class EnemyModeGateTests: XCTestCase {
 
     // MARK: - INV-DC-028: Dynamic desperation threshold
 
-    /// Desperation threshold = -80 + (seed_hash % 11 - 5).
-    /// Different seeds must produce thresholds within [-85, -75].
+    /// Desperation threshold = 65 + seed_hash % 11.
+    /// Different seeds must produce thresholds within [+65, +75].
     func testDynamicDesperationThreshold_withinRange() {
         let seeds: [UInt64] = [1, 7, 42, 100, 255, 1000, 9999, 123456]
         var thresholds = Set<Int>()
 
         for seed in seeds {
             let state = EnemyModeState(seed: seed)
-            XCTAssertGreaterThanOrEqual(state.desperationThreshold, -85,
-                "Desperation threshold for seed \(seed) must be >= -85")
-            XCTAssertLessThanOrEqual(state.desperationThreshold, -75,
-                "Desperation threshold for seed \(seed) must be <= -75")
+            XCTAssertGreaterThanOrEqual(state.desperationThreshold, 65,
+                "Desperation threshold for seed \(seed) must be >= 65")
+            XCTAssertLessThanOrEqual(state.desperationThreshold, 75,
+                "Desperation threshold for seed \(seed) must be <= 75")
             thresholds.insert(state.desperationThreshold)
         }
 
@@ -81,8 +81,8 @@ final class EnemyModeGateTests: XCTestCase {
 
     // MARK: - INV-DC-029: Mode transitions at correct thresholds
 
-    /// Disposition at survivalThreshold triggers survival mode.
-    /// Disposition at desperationThreshold triggers desperation mode.
+    /// Disposition at survivalThreshold triggers survival mode (negative direction).
+    /// Disposition at desperationThreshold triggers desperation mode (positive direction).
     /// Approach thresholds gradually (steps < 30) to avoid triggering weakened swing.
     func testModeTransitions_atCorrectThresholds() {
         let seed: UInt64 = 42
@@ -92,13 +92,12 @@ final class EnemyModeGateTests: XCTestCase {
         XCTAssertEqual(state.currentMode, .normal,
             "Initial mode must be normal")
 
-        // Approach survival threshold gradually to avoid ±30 swing triggering weakened
+        // Approach survival threshold gradually (negative direction)
         let survThreshold = state.survivalThreshold
         var current = 0
         while current > survThreshold {
             let step = max(current - 25, survThreshold)
             EnemyAI.evaluateMode(state: &state, disposition: step)
-            // Drain any hysteresis from mode transitions
             if state.hysteresisCounter > 0 {
                 EnemyAI.evaluateMode(state: &state, disposition: step)
             }
@@ -108,19 +107,20 @@ final class EnemyModeGateTests: XCTestCase {
         XCTAssertEqual(state.currentMode, .survival,
             "Disposition at survivalThreshold must trigger survival mode")
 
-        // Continue to desperation threshold gradually
-        let despThreshold = state.desperationThreshold
-        current = survThreshold
-        while current > despThreshold {
-            let step = max(current - 25, despThreshold)
-            EnemyAI.evaluateMode(state: &state, disposition: step)
-            if state.hysteresisCounter > 0 {
-                EnemyAI.evaluateMode(state: &state, disposition: step)
+        // Reset to normal for desperation test (approach from positive direction)
+        var state2 = EnemyModeState(seed: seed)
+        let despThreshold = state2.desperationThreshold
+        current = 0
+        while current < despThreshold {
+            let step = min(current + 25, despThreshold)
+            EnemyAI.evaluateMode(state: &state2, disposition: step)
+            if state2.hysteresisCounter > 0 {
+                EnemyAI.evaluateMode(state: &state2, disposition: step)
             }
             current = step
         }
 
-        XCTAssertEqual(state.currentMode, .desperation,
+        XCTAssertEqual(state2.currentMode, .desperation,
             "Disposition at desperationThreshold must trigger desperation mode")
     }
 

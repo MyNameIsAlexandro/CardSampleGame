@@ -222,43 +222,57 @@ final class DispositionArchBoundaryGateTests: XCTestCase {
         """)
     }
 
-    // MARK: - INV-DC-043: Defeat produces correct engine outcome mapping
+    // MARK: - INV-DC-043: Outcome mapping — both edges are victory, HP=0 is defeat
 
     /// DispositionCombatResult must correctly map disposition outcomes to engine outcomes.
-    /// Defeat (destroyed) → .defeat, Victory (subjugated) → .victory.
+    /// Destroyed (force, -100) → .victory, Subjugated (diplomacy, +100) → .victory,
+    /// Defeated (HP=0) → .defeat.
     func testDefeatAndVictory_produceCorrectEngineOutcomes() {
-        let defeatResult = DispositionCombatResult(
+        let destroyedResult = DispositionCombatResult(
             outcome: .destroyed,
             finalDisposition: -100,
             hpDelta: -30,
-            faithDelta: -1,
-            resonanceDelta: -0.1,
+            faithDelta: 3,
+            resonanceDelta: -3.0,
             lootCardIds: [],
             updatedFateDeckState: nil,
             turnsPlayed: 5,
             cardsPlayed: 10
         )
 
-        XCTAssertEqual(defeatResult.engineOutcome, .defeat,
-            "Destroyed outcome must map to .defeat")
-        XCTAssertLessThan(defeatResult.hpDelta, 0,
-            "Defeat must carry negative hpDelta for world state update")
+        XCTAssertEqual(destroyedResult.engineOutcome, .victory,
+            "Destroyed outcome (force victory at -100) must map to .victory")
 
-        let victoryResult = DispositionCombatResult(
+        let subjugatedResult = DispositionCombatResult(
             outcome: .subjugated,
             finalDisposition: 100,
             hpDelta: -10,
-            faithDelta: 2,
-            resonanceDelta: 0.2,
+            faithDelta: 5,
+            resonanceDelta: 3.0,
             lootCardIds: ["reward_1"],
             updatedFateDeckState: nil,
             turnsPlayed: 8,
             cardsPlayed: 15
         )
 
-        XCTAssertEqual(victoryResult.engineOutcome, .victory,
-            "Subjugated outcome must map to .victory")
-        XCTAssertFalse(victoryResult.lootCardIds.isEmpty,
+        XCTAssertEqual(subjugatedResult.engineOutcome, .victory,
+            "Subjugated outcome (diplomacy victory at +100) must map to .victory")
+        XCTAssertFalse(subjugatedResult.lootCardIds.isEmpty,
             "Victory must allow loot card distribution")
+
+        let defeatedResult = DispositionCombatResult(
+            outcome: .defeated,
+            finalDisposition: -20,
+            hpDelta: -100,
+            faithDelta: 0,
+            resonanceDelta: -2.0,
+            lootCardIds: [],
+            updatedFateDeckState: nil,
+            turnsPlayed: 3,
+            cardsPlayed: 5
+        )
+
+        XCTAssertEqual(defeatedResult.engineOutcome, .defeat,
+            "Defeated outcome (hero HP=0) must map to .defeat")
     }
 }

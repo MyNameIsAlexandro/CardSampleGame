@@ -9,10 +9,12 @@ import Foundation
 
 /// Outcome of a disposition combat encounter.
 public enum DispositionOutcome: Equatable, Codable, Sendable {
-    /// Enemy is destroyed (disposition reached -100)
+    /// Enemy is destroyed (disposition reached -100). Player victory by force.
     case destroyed
-    /// Enemy is subjugated (disposition reached +100)
+    /// Enemy is subjugated (disposition reached +100). Player victory by diplomacy.
     case subjugated
+    /// Hero HP reached 0. Player defeat.
+    case defeated
 }
 
 /// Type of player action in disposition combat.
@@ -505,7 +507,7 @@ public struct DispositionCombatSimulation: Equatable {
 
     /// Apply enemy adapt effect (penalizes streak-matching action).
     public mutating func applyEnemyAdapt(streakBonus: Int) {
-        adaptPenalty = max(3, streakBonus)
+        adaptPenalty = max(1, streakBonus)
     }
 
     /// Clear adapt penalty (after it has been applied).
@@ -557,9 +559,11 @@ public struct DispositionCombatSimulation: Equatable {
         return adaptPenalty
     }
 
-    /// Check if disposition has reached an outcome threshold.
+    /// Check if disposition or HP has reached an outcome threshold.
     private mutating func resolveOutcome() {
-        if disposition <= -100 {
+        if heroHP <= 0 {
+            outcome = .defeated
+        } else if disposition <= -100 {
             outcome = .destroyed
         } else if disposition >= 100 {
             outcome = .subjugated

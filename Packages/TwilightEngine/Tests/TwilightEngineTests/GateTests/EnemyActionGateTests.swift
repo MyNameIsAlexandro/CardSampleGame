@@ -115,7 +115,7 @@ final class EnemyActionGateTests: XCTestCase {
 
     // MARK: - INV-DC-059: Adapt soft-blocks streak
 
-    /// Adapt penalty = max(3, streak_bonus); action still succeeds (soft-block).
+    /// Adapt penalty = max(1, streak_bonus); action still succeeds (soft-block).
     func testEnemyAdapt_softBlockStreak() {
         var sim = makeSimulation(disposition: 0, startingEnergy: 10)
 
@@ -127,10 +127,10 @@ final class EnemyActionGateTests: XCTestCase {
             "Precondition: 3 strikes -> streakCount=3")
 
         // streak_bonus = max(0, 3-1) = 2
-        // adaptPenalty = max(3, 2) = 3
+        // adaptPenalty = max(1, 2) = 2
         EnemyActionResolver.resolve(action: .adapt, simulation: &sim)
-        XCTAssertEqual(sim.adaptPenalty, 3,
-            "Adapt penalty must be max(3, streakBonus(2)) = 3")
+        XCTAssertEqual(sim.adaptPenalty, 2,
+            "Adapt penalty must be max(1, streakBonus(2)) = 2")
 
         let dispBefore = sim.disposition
 

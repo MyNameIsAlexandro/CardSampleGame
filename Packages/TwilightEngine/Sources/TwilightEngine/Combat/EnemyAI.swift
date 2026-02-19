@@ -32,9 +32,9 @@ public struct EnemyModeState: Equatable, Codable, Sendable {
 
     public init(seed: UInt64) {
         let hash = Int(truncatingIfNeeded: seed &* 6364136223846793005 &+ 1442695040888963407)
-        let offset = abs(hash) % 11 - 5
-        self.survivalThreshold = -60 + offset
-        self.desperationThreshold = -80 + offset
+        let offset = abs(hash) % 11
+        self.survivalThreshold = -(65 + offset)
+        self.desperationThreshold = 65 + offset
     }
 
     /// Evaluate current mode based on disposition and history.
@@ -61,7 +61,7 @@ public struct EnemyModeState: Equatable, Codable, Sendable {
         }
 
         let newMode: EnemyMode
-        if disposition <= desperationThreshold {
+        if disposition >= desperationThreshold {
             newMode = .desperation
         } else if disposition <= survivalThreshold {
             newMode = .survival
