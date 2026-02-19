@@ -26,7 +26,8 @@ public struct DispositionCalculator {
     ///
     /// - Parameters:
     ///   - basePower: Base power of the card.
-    ///   - streakCount: Current streak count (after this action).
+    ///   - streakCount: Current streak count (after this action, for streak_bonus).
+    ///   - previousStreakCount: Streak count before this action (for switch_penalty, INV-DC-011).
     ///   - lastActionType: The previous action type (for threat bonus).
     ///   - currentActionType: The action being performed.
     ///   - fateKeyword: Active fate keyword (optional).
@@ -38,6 +39,7 @@ public struct DispositionCalculator {
     public static func effectivePower(
         basePower: Int,
         streakCount: Int,
+        previousStreakCount: Int = 0,
         lastActionType: DispositionActionType?,
         currentActionType: DispositionActionType,
         fateKeyword: FateKeyword? = nil,
@@ -52,7 +54,7 @@ public struct DispositionCalculator {
         let resonance = resonanceBonus(zone: resonanceZone, actionType: currentActionType)
         let switchPen: Int
         if lastActionType != nil && lastActionType != currentActionType {
-            switchPen = switchPenalty(streakCount: streakCount)
+            switchPen = switchPenalty(streakCount: previousStreakCount)
         } else {
             switchPen = 0
         }

@@ -244,6 +244,7 @@ public struct DispositionCombatSimulation: Equatable {
         let effectivePower = DispositionCalculator.effectivePower(
             basePower: basePower,
             streakCount: nextStreakCount(for: .strike),
+            previousStreakCount: streakCount,
             lastActionType: lastActionType,
             currentActionType: .strike,
             fateKeyword: fateKeyword,
@@ -282,6 +283,7 @@ public struct DispositionCombatSimulation: Equatable {
         let effectivePower = DispositionCalculator.effectivePower(
             basePower: basePower,
             streakCount: nextStreakCount(for: .influence),
+            previousStreakCount: streakCount,
             lastActionType: lastActionType,
             currentActionType: .influence,
             fateKeyword: fateKeyword,
@@ -348,6 +350,14 @@ public struct DispositionCombatSimulation: Equatable {
         updateMomentum(action: .sacrifice)
 
         return true
+    }
+
+    // MARK: - Turn State
+
+    /// Whether the player's turn is effectively over (no energy to play cards).
+    /// When true, no card can be played since all cards cost >= 1 (INV-DC-047).
+    public var isAutoTurnEnd: Bool {
+        energy <= 0 && outcome == nil
     }
 
     // MARK: - Turn Management
