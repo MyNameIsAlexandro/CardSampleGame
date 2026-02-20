@@ -45,6 +45,12 @@ final class DispositionCombatScene: SKScene {
     // Momentum aura behind hand
     var momentumAuraNode: SKShapeNode?
 
+    // HUD nodes
+    var enemyModifierStrip: SKNode?
+    var heroModifierStrip: SKNode?
+    var prevHeroHP: Int?
+    var prevEnergy: Int?
+
     // MARK: - Layers
 
     var combatLayer: SKNode?
@@ -56,8 +62,16 @@ final class DispositionCombatScene: SKScene {
     var inputEnabled: Bool = false
     var draggedCardId: String?
     var dragStartLocation: CGPoint?
+    var isDragging: Bool = false
+    var selectedCardId: String?
+    var cardPreviewNode: SKNode?
     var originalCardPositions: [String: CGPoint] = [:]
     var originalCardRotations: [String: CGFloat] = [:]
+    var originalCardZPositions: [String: CGFloat] = [:]
+    var originalCardScales: [String: CGFloat] = [:]
+
+    /// Minimum distance to start drag (prevents accidental plays).
+    static let dragThreshold: CGFloat = 20
 
     // MARK: - Enemy AI State
 
@@ -102,6 +116,8 @@ final class DispositionCombatScene: SKScene {
         dimUnplayableCards()
         updateActionZoneVisibility()
         updateMomentumAura()
+        updateHUDValues()
+        syncModifierBadges()
     }
 
     // MARK: - Disposition Bar
@@ -163,6 +179,11 @@ final class DispositionCombatScene: SKScene {
             idol.playModeTransition(to: aura)
             onHaptic?("medium")
         }
+
+        let bonus = DispositionCalculator.survivalStrikeBonus(
+            mode: newMode, actionType: .strike
+        )
+        vm.setEnemyModeStrikeBonus(bonus)
     }
 
     // MARK: - Energy Label
@@ -170,7 +191,18 @@ final class DispositionCombatScene: SKScene {
     func updateEnergyLabel() {
         guard let vm = viewModel,
               let label = childNode(withName: "energyLabel") as? SKLabelNode else { return }
-        label.text = "⚡ \(vm.energy)/\(vm.simulation.startingEnergy)"
+        let newEnergy = vm.energy
+        label.text = "⚡ \(newEnergy)/\(vm.simulation.startingEnergy)"
+
+        if let prev = prevEnergy, prev != newEnergy {
+            let originalColor = label.fontColor
+            label.fontColor = .white
+            label.run(SKAction.sequence([
+                SKAction.wait(forDuration: 0.1),
+                SKAction.run { [weak label] in label?.fontColor = originalColor }
+            ]))
+        }
+        prevEnergy = newEnergy
     }
 
     // MARK: - Streak Label
@@ -192,21 +224,32 @@ final class DispositionCombatScene: SKScene {
     func rebuildHandCards() {
         guard let vm = viewModel else { return }
         let layer = handLayer ?? self
-
-        handCardNodes.values.forEach { $0.removeFromParent() }
-        handCardNodes.removeAll()
-        originalCardPositions.removeAll()
-        originalCardRotations.removeAll()
-
         let cards = vm.hand
+
+        // Remove nodes for cards no longer in hand
+        let currentCardIds = Set(cards.map(\.id))
+        for (cardId, node) in handCardNodes where !currentCardIds.contains(cardId) {
+            node.run(SKAction.sequence([
+                SKAction.group([
+                    SKAction.fadeOut(withDuration: 0.2),
+                    SKAction.scale(to: 0.5, duration: 0.2)
+                ]),
+                SKAction.removeFromParent()
+            ]))
+            handCardNodes.removeValue(forKey: cardId)
+            originalCardPositions.removeValue(forKey: cardId)
+            originalCardRotations.removeValue(forKey: cardId)
+            originalCardZPositions.removeValue(forKey: cardId)
+            originalCardScales.removeValue(forKey: cardId)
+        }
+
         guard !cards.isEmpty else { return }
 
-        let cardSize = RitualTheme.cardSize
         let scaleFactor = cards.count > RitualTheme.scaleThreshold
             ? min(1.0, CGFloat(RitualTheme.scaleThreshold) / CGFloat(cards.count))
             : 1.0
         let centerX = DispositionCombatScene.sceneSize.width / 2
-        let baseY: CGFloat = 85
+        let baseY: CGFloat = 105
         let centerIndex = CGFloat(cards.count - 1) / 2.0
         let overlapSpacing = min(
             RitualTheme.baseOverlapSpacing,
@@ -224,22 +267,39 @@ final class DispositionCombatScene: SKScene {
             )
             let rotation = -angle * .pi / 180
 
-            let node = makeCardNode(card: card)
-            node.position = position
-            node.zRotation = rotation
-            node.zPosition = CGFloat(20 + i)
-            node.setScale(scaleFactor)
-            node.name = "card_\(card.id)"
-            layer.addChild(node)
-            handCardNodes[card.id] = node
+            if let existingNode = handCardNodes[card.id] {
+                // Animate existing card to its new position
+                existingNode.removeAction(forKey: "cardSway")
+                let move = SKAction.move(to: position, duration: 0.25)
+                move.timingMode = .easeOut
+                let rotate = SKAction.rotate(toAngle: rotation, duration: 0.2)
+                rotate.timingMode = .easeOut
+                let rescale = SKAction.scale(to: scaleFactor, duration: 0.2)
+                existingNode.run(SKAction.group([move, rotate, rescale])) { [weak self] in
+                    self?.addCardSway(to: existingNode, index: i)
+                }
+                existingNode.zPosition = CGFloat(20 + i)
+            } else {
+                // Create new card node
+                let node = makeCardNode(card: card)
+                node.position = position
+                node.zRotation = rotation
+                node.zPosition = CGFloat(20 + i)
+                node.setScale(scaleFactor)
+                node.name = "card_\(card.id)"
+                layer.addChild(node)
+                handCardNodes[card.id] = node
+                addCardSway(to: node, index: i)
+            }
+
             originalCardPositions[card.id] = position
             originalCardRotations[card.id] = rotation
-
-            addCardSway(to: node, index: i)
+            originalCardZPositions[card.id] = CGFloat(20 + i)
+            originalCardScales[card.id] = scaleFactor
         }
     }
 
-    private func addCardSway(to node: SKNode, index: Int) {
+    func addCardSway(to node: SKNode, index: Int) {
         let amp = RitualTheme.swayAmplitude
         let dur = RitualTheme.swayCycleDuration
         let stagger = RitualTheme.swayStagger * Double(index)
@@ -327,7 +387,7 @@ final class DispositionCombatScene: SKScene {
         guard let vm = viewModel, let aura = momentumAuraNode else { return }
         let count = vm.streakCount
         if count >= 2 {
-            let intensity = min(CGFloat(count - 1) * 0.15, 0.6)
+            let intensity = min(CGFloat(count - 1) * 0.08, 0.25)
             let color: SKColor
             switch vm.streakType {
             case .strike: color = SKColor(red: 0.9, green: 0.3, blue: 0.2, alpha: intensity)
@@ -359,17 +419,74 @@ final class DispositionCombatScene: SKScene {
     private func intentDisplay(for action: EnemyAction) -> (String, SKColor) {
         switch action {
         case .attack(let dmg):
-            return ("⚔ ATK \(dmg)", SKColor(red: 0.9, green: 0.3, blue: 0.3, alpha: 1))
+            return (L10n.dispositionIntentAttack.localized(with: dmg), SKColor(red: 0.9, green: 0.3, blue: 0.3, alpha: 1))
         case .rage(let dmg):
-            return ("💥 RAGE \(dmg)", SKColor(red: 1.0, green: 0.2, blue: 0.2, alpha: 1))
+            return (L10n.dispositionIntentRage.localized(with: dmg), SKColor(red: 1.0, green: 0.2, blue: 0.2, alpha: 1))
         case .defend(let val):
-            return ("🛡 DEF \(val)", SKColor(red: 0.3, green: 0.7, blue: 0.9, alpha: 1))
+            return (L10n.dispositionIntentDefend.localized(with: val), SKColor(red: 0.3, green: 0.7, blue: 0.9, alpha: 1))
         case .provoke(let pen):
-            return ("⚡ PROVOKE \(pen)", SKColor(red: 0.9, green: 0.6, blue: 0.2, alpha: 1))
+            return (L10n.dispositionIntentProvoke.localized(with: pen), SKColor(red: 0.9, green: 0.6, blue: 0.2, alpha: 1))
         case .adapt:
-            return ("↻ ADAPT", SKColor(red: 0.9, green: 0.8, blue: 0.3, alpha: 1))
+            return (L10n.dispositionIntentAdapt.localized, SKColor(red: 0.9, green: 0.8, blue: 0.3, alpha: 1))
         case .plea(let shift):
-            return ("🙏 PLEA +\(shift)", SKColor(red: 0.7, green: 0.4, blue: 0.9, alpha: 1))
+            return (L10n.dispositionIntentPlea.localized(with: shift), SKColor(red: 0.7, green: 0.4, blue: 0.9, alpha: 1))
+        }
+    }
+
+    // MARK: - Modifier Badges
+
+    func syncModifierBadges() {
+        guard let vm = viewModel else { return }
+
+        syncBadge(in: enemyModifierStrip, type: .defend, value: vm.defendReduction)
+        syncBadge(in: enemyModifierStrip, type: .adapt, value: vm.adaptPenalty)
+        syncBadge(in: enemyModifierStrip, type: .sacrificeBuff, value: vm.enemySacrificeBuff)
+        layoutBadges(in: enemyModifierStrip, centered: true)
+
+        syncBadge(in: heroModifierStrip, type: .provoke, value: vm.provokePenalty)
+        syncBadge(in: heroModifierStrip, type: .plea, value: vm.pleaBacklash)
+        layoutBadges(in: heroModifierStrip, centered: false)
+    }
+
+    private func syncBadge(
+        in strip: SKNode?,
+        type: ModifierBadgeNode.ModifierType,
+        value: Int
+    ) {
+        guard let strip else { return }
+        let existing = strip.childNode(withName: type.rawValue) as? ModifierBadgeNode
+
+        if value > 0 {
+            if let badge = existing {
+                badge.updateValue(value)
+            } else {
+                let badge = ModifierBadgeNode.make(type: type, value: value)
+                strip.addChild(badge)
+                badge.animateAppear()
+            }
+        } else if let badge = existing {
+            badge.animateDisappear {
+                badge.removeFromParent()
+            }
+        }
+    }
+
+    private func layoutBadges(in strip: SKNode?, centered: Bool) {
+        guard let strip else { return }
+        let badges = strip.children.compactMap { $0 as? ModifierBadgeNode }
+        guard !badges.isEmpty else { return }
+
+        let badgeWidth: CGFloat = 50
+        let spacing: CGFloat = 6
+        let totalWidth = CGFloat(badges.count) * badgeWidth
+            + CGFloat(badges.count - 1) * spacing
+        let startX = centered
+            ? -totalWidth / 2 + badgeWidth / 2
+            : badgeWidth / 2
+
+        for (i, badge) in badges.enumerated() {
+            let targetX = startX + CGFloat(i) * (badgeWidth + spacing)
+            badge.run(SKAction.moveTo(x: targetX, duration: 0.2))
         }
     }
 

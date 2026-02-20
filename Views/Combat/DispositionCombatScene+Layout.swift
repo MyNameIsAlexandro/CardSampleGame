@@ -4,6 +4,7 @@
 /// Контекст: Phase 3 Disposition Combat. Extension of DispositionCombatScene.
 
 import SpriteKit
+import TwilightEngine
 
 // MARK: - Layout
 
@@ -23,6 +24,7 @@ extension DispositionCombatScene {
         buildActionZones(centerX: centerX)
         buildMomentumAura(centerX: centerX)
         buildHUD(centerX: centerX, sceneW: sceneW)
+        buildModifierStrips(centerX: centerX)
     }
 
     // MARK: - Layers
@@ -49,8 +51,8 @@ extension DispositionCombatScene {
     private func buildIdol(centerX: CGFloat) {
         guard let vm = viewModel else { return }
         let idol = IdolNode(enemyId: vm.enemyType)
-        idol.configure(name: vm.enemyType, maxHP: vm.heroMaxHP, maxWP: nil)
-        idol.position = CGPoint(x: centerX, y: 600)
+        idol.configure(name: vm.enemyType, maxHP: 0, maxWP: nil)
+        idol.position = CGPoint(x: centerX, y: 590)
         idol.zPosition = 15
         addChild(idol)
         idolNode = idol
@@ -61,7 +63,7 @@ extension DispositionCombatScene {
     private func buildDispositionTrack(centerX: CGFloat) {
         let barWidth: CGFloat = 300
         let barHeight: CGFloat = 16
-        let barY: CGFloat = 510
+        let barY: CGFloat = 468
 
         let barBg = SKShapeNode(
             rect: CGRect(x: -barWidth / 2, y: -barHeight / 2, width: barWidth, height: barHeight),
@@ -135,7 +137,7 @@ extension DispositionCombatScene {
             color: SKColor(red: 0.90, green: 0.30, blue: 0.30, alpha: 0.8)
         )
         strike.name = "strikeZone"
-        strike.position = CGPoint(x: centerX, y: 450)
+        strike.position = CGPoint(x: centerX, y: 420)
         strike.zPosition = 15
         addChild(strike)
         strikeZone = strike
@@ -157,7 +159,7 @@ extension DispositionCombatScene {
         let sacrifice = makeActionZone(
             size: CGSize(width: 130, height: 45),
             label: "♦",
-            sublabel: "Sacrifice",
+            sublabel: L10n.dispositionActionSacrifice.localized,
             color: SKColor(red: 0.60, green: 0.30, blue: 0.70, alpha: 0.8)
         )
         sacrifice.name = "sacrificeZone"
@@ -170,7 +172,7 @@ extension DispositionCombatScene {
         let endBtn = makeActionZone(
             size: CGSize(width: 100, height: 36),
             label: "⏭",
-            sublabel: "End Turn",
+            sublabel: L10n.dispositionActionEndTurn.localized,
             color: SKColor(red: 0.40, green: 0.40, blue: 0.45, alpha: 0.8)
         )
         endBtn.name = "endTurnButton"
@@ -186,7 +188,7 @@ extension DispositionCombatScene {
         intent.fontColor = SKColor(white: 0.8, alpha: 1)
         intent.horizontalAlignmentMode = .center
         intent.verticalAlignmentMode = .center
-        intent.position = CGPoint(x: centerX, y: 555)
+        intent.position = CGPoint(x: centerX, y: 515)
         intent.zPosition = 16
         intent.alpha = 0
         addChild(intent)
@@ -226,10 +228,10 @@ extension DispositionCombatScene {
     // MARK: - Momentum Aura
 
     private func buildMomentumAura(centerX: CGFloat) {
-        let aura = SKShapeNode(ellipseOf: CGSize(width: 340, height: 100))
+        let aura = SKShapeNode(ellipseOf: CGSize(width: 200, height: 50))
         aura.fillColor = .clear
         aura.strokeColor = .clear
-        aura.position = CGPoint(x: centerX, y: 85)
+        aura.position = CGPoint(x: centerX, y: 105)
         aura.zPosition = 19
         aura.alpha = 0
         addChild(aura)
@@ -237,46 +239,82 @@ extension DispositionCombatScene {
     }
 
     // MARK: - HUD
+    // Safe area margins: bottom ~50pt, top ~50pt, sides ~35pt in scene coords.
+    // All HUD elements stay within x: 40…350, y: 55…645.
+    // Stats use symbol+number (no bars) flanking End Turn at y=190.
 
     private func buildHUD(centerX: CGFloat, sceneW: CGFloat) {
-        let energyLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+        let statsY: CGFloat = 190
+
+        // Hero HP — left of End Turn
+        let hpLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
+        hpLabel.name = "heroHPLabel"
+        hpLabel.fontSize = 16
+        hpLabel.fontColor = SKColor(red: 0.9, green: 0.35, blue: 0.35, alpha: 1)
+        hpLabel.horizontalAlignmentMode = .left
+        hpLabel.verticalAlignmentMode = .center
+        hpLabel.text = "♥ --"
+        hpLabel.position = CGPoint(x: 45, y: statsY)
+        hpLabel.zPosition = 30
+        addChild(hpLabel)
+
+        // Energy — right of End Turn
+        let energyLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
         energyLabel.name = "energyLabel"
-        energyLabel.fontSize = 14
+        energyLabel.fontSize = 16
         energyLabel.fontColor = SKColor(red: 0.5, green: 0.7, blue: 0.9, alpha: 1)
-        energyLabel.horizontalAlignmentMode = .center
+        energyLabel.horizontalAlignmentMode = .right
+        energyLabel.verticalAlignmentMode = .center
         energyLabel.text = "⚡ 3/3"
-        energyLabel.position = CGPoint(x: centerX, y: 25)
+        energyLabel.position = CGPoint(x: sceneW - 45, y: statsY)
         energyLabel.zPosition = 30
         addChild(energyLabel)
 
+        // Streak — below energy, appears only when active
         let streakLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
         streakLabel.name = "streakLabel"
         streakLabel.fontSize = 13
         streakLabel.fontColor = SKColor(red: 0.9, green: 0.7, blue: 0.3, alpha: 1)
         streakLabel.horizontalAlignmentMode = .right
+        streakLabel.verticalAlignmentMode = .center
         streakLabel.text = ""
         streakLabel.alpha = 0
-        streakLabel.position = CGPoint(x: sceneW - 15, y: 25)
+        streakLabel.position = CGPoint(x: sceneW - 45, y: statsY - 20)
         streakLabel.zPosition = 30
         addChild(streakLabel)
 
-        let hpLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
-        hpLabel.name = "heroHPLabel"
-        hpLabel.fontSize = 12
-        hpLabel.fontColor = SKColor(red: 0.9, green: 0.4, blue: 0.4, alpha: 1)
-        hpLabel.horizontalAlignmentMode = .left
-        hpLabel.text = "♥ 100"
-        hpLabel.position = CGPoint(x: 15, y: 25)
-        hpLabel.zPosition = 30
-        addChild(hpLabel)
+        // Discard pile indicator — below hand, left
+        let discardLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+        discardLabel.name = "discardLabel"
+        discardLabel.fontSize = 11
+        discardLabel.fontColor = SKColor(white: 0.45, alpha: 1)
+        discardLabel.horizontalAlignmentMode = .left
+        discardLabel.verticalAlignmentMode = .center
+        discardLabel.text = ""
+        discardLabel.position = CGPoint(x: 45, y: 65)
+        discardLabel.zPosition = 30
+        addChild(discardLabel)
 
+        // Exhaust pile indicator — below hand, right
+        let exhaustLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
+        exhaustLabel.name = "exhaustLabel"
+        exhaustLabel.fontSize = 11
+        exhaustLabel.fontColor = SKColor(red: 0.6, green: 0.35, blue: 0.2, alpha: 0.7)
+        exhaustLabel.horizontalAlignmentMode = .right
+        exhaustLabel.verticalAlignmentMode = .center
+        exhaustLabel.text = ""
+        exhaustLabel.position = CGPoint(x: sceneW - 45, y: 65)
+        exhaustLabel.zPosition = 30
+        addChild(exhaustLabel)
+
+        // Phase label — top area
         let phaseLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
         phaseLabel.name = "phaseLabel"
         phaseLabel.fontSize = 11
         phaseLabel.fontColor = SKColor(white: 0.5, alpha: 1)
         phaseLabel.horizontalAlignmentMode = .center
         phaseLabel.text = L10n.encounterPhasePlayerAction.localized
-        phaseLabel.position = CGPoint(x: centerX, y: 690 - 14)
+        phaseLabel.position = CGPoint(x: centerX, y: 648)
         phaseLabel.zPosition = 30
         addChild(phaseLabel)
 
@@ -285,22 +323,84 @@ extension DispositionCombatScene {
         zoneLabel.fontSize = 10
         zoneLabel.fontColor = SKColor(white: 0.45, alpha: 1)
         zoneLabel.horizontalAlignmentMode = .right
-        zoneLabel.position = CGPoint(x: sceneW - 15, y: 690 - 14)
+        zoneLabel.position = CGPoint(x: sceneW - 45, y: 648)
         zoneLabel.zPosition = 30
         addChild(zoneLabel)
 
         updateHUDValues()
     }
 
+    // MARK: - Modifier Strips
+
+    private func buildModifierStrips(centerX: CGFloat) {
+        let enemyStrip = SKNode()
+        enemyStrip.position = CGPoint(x: centerX, y: 498)
+        enemyStrip.zPosition = 16
+        addChild(enemyStrip)
+        enemyModifierStrip = enemyStrip
+
+        let heroStrip = SKNode()
+        heroStrip.position = CGPoint(x: centerX, y: 165)
+        heroStrip.zPosition = 30
+        addChild(heroStrip)
+        heroModifierStrip = heroStrip
+    }
+
     func updateHUDValues() {
         guard let vm = viewModel else { return }
 
         if let hpLabel = childNode(withName: "heroHPLabel") as? SKLabelNode {
-            hpLabel.text = "♥ \(vm.heroHP)/\(vm.heroMaxHP)"
+            let hp = vm.heroHP
+            let maxHP = vm.heroMaxHP
+            hpLabel.text = "♥ \(hp)/\(maxHP)"
+
+            let fraction = CGFloat(hp) / CGFloat(max(maxHP, 1))
+            let baseColor: SKColor = fraction <= 0.3
+                ? SKColor(red: 1.0, green: 0.25, blue: 0.25, alpha: 1)
+                : SKColor(red: 0.9, green: 0.35, blue: 0.35, alpha: 1)
+            hpLabel.fontColor = baseColor
+
+            if let prev = prevHeroHP, prev != hp {
+                let delta = hp - prev
+                let flashColor: SKColor = delta < 0
+                    ? SKColor(red: 1.0, green: 0.15, blue: 0.15, alpha: 1)
+                    : SKColor(red: 0.2, green: 0.9, blue: 0.3, alpha: 1)
+                hpLabel.fontColor = flashColor
+                hpLabel.run(SKAction.sequence([
+                    SKAction.scale(to: 1.2, duration: 0.08),
+                    SKAction.scale(to: 1.0, duration: 0.08),
+                    SKAction.run { [weak hpLabel] in hpLabel?.fontColor = baseColor }
+                ]))
+            }
+            prevHeroHP = hp
         }
 
         if let zoneLabel = childNode(withName: "zoneLabel") as? SKLabelNode {
-            zoneLabel.text = vm.resonanceZone.rawValue.uppercased()
+            zoneLabel.text = localizedZoneName(for: vm.resonanceZone)
+        }
+
+        // Pile indicators
+        if let discardLabel = childNode(withName: "discardLabel") as? SKLabelNode {
+            let count = vm.discardCount
+            discardLabel.text = count > 0 ? "♻ \(count)" : ""
+        }
+        if let exhaustLabel = childNode(withName: "exhaustLabel") as? SKLabelNode {
+            let count = vm.exhaustCount
+            exhaustLabel.text = count > 0 ? "🔥 \(count)" : ""
+        }
+    }
+
+    // MARK: - Zone Localization
+
+    private func localizedZoneName(
+        for zone: TwilightEngine.ResonanceZone
+    ) -> String {
+        switch zone {
+        case .deepNav: return L10n.resonanceZoneDeepNav.localized
+        case .nav: return L10n.resonanceZoneNav.localized
+        case .yav: return L10n.resonanceZoneYav.localized
+        case .prav: return L10n.resonanceZonePrav.localized
+        case .deepPrav: return L10n.resonanceZoneDeepPrav.localized
         }
     }
 }

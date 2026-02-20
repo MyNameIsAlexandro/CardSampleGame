@@ -69,11 +69,14 @@ public struct DispositionCombatSimulation: Equatable {
 
     public let resonanceZone: ResonanceZone
     public let enemyType: String
+    public let vulnerabilityRegistry: VulnerabilityRegistry
     public private(set) var defendReduction: Int = 0
     public private(set) var provokePenalty: Int = 0
     public private(set) var adaptPenalty: Int = 0
     /// Plea backlash: next strike costs hero HP (INV-DC-034).
     public private(set) var pleaBacklash: Int = 0
+    /// Mode-based strike bonus (e.g. +3 in survival mode, INV-DC-052).
+    public var enemyModeStrikeBonus: Int = 0
 
     // MARK: - Echo State (Epic 18, INV-DC-019..021)
 
@@ -100,7 +103,8 @@ public struct DispositionCombatSimulation: Equatable {
         resonanceZone: ResonanceZone,
         seed: UInt64,
         situationModifier: Int = 0,
-        startingEnergy: Int = 3
+        startingEnergy: Int = 3,
+        vulnerabilityRegistry: VulnerabilityRegistry = VulnerabilityRegistry()
     ) -> DispositionCombatSimulation {
         let heroWorld = resonanceZone
         let startDisposition = AffinityMatrix.startingDisposition(
@@ -118,6 +122,7 @@ public struct DispositionCombatSimulation: Equatable {
             heroMaxHP: heroMaxHP,
             resonanceZone: resonanceZone,
             enemyType: enemyType,
+            vulnerabilityRegistry: vulnerabilityRegistry,
             rng: WorldRNG(seed: seed),
             seed: seed
         )
@@ -174,6 +179,7 @@ public struct DispositionCombatSimulation: Equatable {
         heroMaxHP: Int,
         resonanceZone: ResonanceZone,
         enemyType: String,
+        vulnerabilityRegistry: VulnerabilityRegistry = VulnerabilityRegistry(),
         defendReduction: Int = 0,
         provokePenalty: Int = 0,
         adaptPenalty: Int = 0,
@@ -202,6 +208,7 @@ public struct DispositionCombatSimulation: Equatable {
         self.heroMaxHP = heroMaxHP
         self.resonanceZone = resonanceZone
         self.enemyType = enemyType
+        self.vulnerabilityRegistry = vulnerabilityRegistry
         self.defendReduction = defendReduction
         self.provokePenalty = provokePenalty
         self.adaptPenalty = adaptPenalty
@@ -228,6 +235,7 @@ public struct DispositionCombatSimulation: Equatable {
             && lhs.exhaustPile == rhs.exhaustPile
             && lhs.heroHP == rhs.heroHP && lhs.heroMaxHP == rhs.heroMaxHP
             && lhs.resonanceZone == rhs.resonanceZone && lhs.enemyType == rhs.enemyType
+            && lhs.vulnerabilityRegistry == rhs.vulnerabilityRegistry
             && lhs.seed == rhs.seed
             && lhs.defendReduction == rhs.defendReduction && lhs.provokePenalty == rhs.provokePenalty
             && lhs.adaptPenalty == rhs.adaptPenalty && lhs.pleaBacklash == rhs.pleaBacklash
@@ -266,6 +274,9 @@ public struct DispositionCombatSimulation: Equatable {
             disposition: disposition, fateKeyword: fateKeyword
         )
 
+        let vulnMod = vulnerabilityRegistry.modifier(
+            enemyType: enemyType, actionType: .strike, zone: resonanceZone
+        )
         let effectivePower = DispositionCalculator.effectivePower(
             basePower: basePower,
             streakCount: nextStreakCount(for: .strike),
@@ -273,10 +284,11 @@ public struct DispositionCombatSimulation: Equatable {
             lastActionType: lastActionType,
             currentActionType: .strike,
             fateKeyword: fateKeyword,
-            fateModifier: fateModifier,
+            fateModifier: fateModifier + enemyModeStrikeBonus,
             resonanceZone: resonanceZone,
             defendReduction: effectiveDefend + shadowPenalty,
-            adaptPenalty: currentAdaptPenalty(for: .strike)
+            adaptPenalty: currentAdaptPenalty(for: .strike),
+            vulnerabilityModifier: vulnMod
         )
 
         energy -= cardCost
@@ -328,6 +340,9 @@ public struct DispositionCombatSimulation: Equatable {
             disposition: disposition, fateKeyword: fateKeyword
         )
 
+        let vulnMod = vulnerabilityRegistry.modifier(
+            enemyType: enemyType, actionType: .influence, zone: resonanceZone
+        )
         let effectivePower = DispositionCalculator.effectivePower(
             basePower: basePower,
             streakCount: nextStreakCount(for: .influence),
@@ -338,7 +353,8 @@ public struct DispositionCombatSimulation: Equatable {
             fateModifier: fateModifier,
             resonanceZone: resonanceZone,
             defendReduction: shadowPenalty,
-            adaptPenalty: currentAdaptPenalty(for: .influence)
+            adaptPenalty: currentAdaptPenalty(for: .influence),
+            vulnerabilityModifier: vulnMod
         )
 
         // Focus: ignore Provoke at disposition > +30 (INV-DC-049)
@@ -437,6 +453,9 @@ public struct DispositionCombatSimulation: Equatable {
 
         echoUsedThisAction = true
 
+        let echoVulnMod = vulnerabilityRegistry.modifier(
+            enemyType: enemyType, actionType: lastAction, zone: resonanceZone
+        )
         let effectivePower = DispositionCalculator.effectivePower(
             basePower: lastPlayedBasePower,
             streakCount: nextStreakCount(for: lastAction),
@@ -447,7 +466,8 @@ public struct DispositionCombatSimulation: Equatable {
             fateModifier: fateModifier,
             resonanceZone: resonanceZone,
             defendReduction: lastAction == .strike ? defendReduction : 0,
-            adaptPenalty: currentAdaptPenalty(for: lastAction)
+            adaptPenalty: currentAdaptPenalty(for: lastAction),
+            vulnerabilityModifier: echoVulnMod
         )
 
         switch lastAction {

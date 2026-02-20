@@ -28,7 +28,7 @@ struct DualHealthBar: View {
         VStack(spacing: Spacing.xxs) {
             // Body (HP) bar
             healthBar(
-                label: "HP",
+                label: L10n.statHPShort.localized,
                 current: currentHP,
                 max: maxHP,
                 color: AppColors.health,
@@ -39,7 +39,7 @@ struct DualHealthBar: View {
             // Spirit (Will) bar — only if enemy has will
             if hasSpiritTrack {
                 healthBar(
-                    label: "WP",
+                    label: L10n.statWPShort.localized,
                     current: currentWill,
                     max: maxWill,
                     color: AppColors.spirit,

@@ -46,7 +46,8 @@ public struct DispositionCalculator {
         fateModifier: Int = 0,
         resonanceZone: ResonanceZone = .yav,
         defendReduction: Int = 0,
-        adaptPenalty: Int = 0
+        adaptPenalty: Int = 0,
+        vulnerabilityModifier: Int = 0
     ) -> Int {
         let surgedBase = surgedBasePower(basePower: basePower, fateKeyword: fateKeyword)
         let streak = streakBonus(streakCount: streakCount)
@@ -60,7 +61,7 @@ public struct DispositionCalculator {
         }
 
         let raw = surgedBase + streak + threat + fateModifier + resonance
-            - switchPen - defendReduction - adaptPenalty
+            + vulnerabilityModifier - switchPen - defendReduction - adaptPenalty
 
         return min(hardCap, max(0, raw))
     }
@@ -104,6 +105,8 @@ public struct DispositionCalculator {
             return 2
         case (.prav, .influence), (.deepPrav, .influence):
             return 2
+        case (.nav, .influence), (.deepNav, .influence):
+            return -1
         default:
             return 0
         }

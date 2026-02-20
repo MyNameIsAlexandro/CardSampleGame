@@ -83,33 +83,6 @@ struct ContentView: View {
         } message: {
             Text(flow.loadAlertMessage ?? "")
         }
-        .fullScreenCover(isPresented: $flow.resumingCombat) {
-            if let simulation = buildResumeSimulation() {
-                RitualCombatSceneView(
-                    simulation: simulation,
-                    onCombatEnd: { result in
-                        RitualCombatBridge.applyCombatResult(result, to: vm.engine)
-                        flow.resumingCombat = false
-                        if let slot = flow.selectedSaveSlot {
-                            saveManager.saveGame(to: slot, engine: vm.engine)
-                        }
-                    },
-                    onSoundEffect: { SoundManager.shared.play(SoundManager.SoundEffect(rawValue: $0) ?? .buttonTap) },
-                    onHaptic: { name in
-                        let type: HapticManager.HapticType
-                        switch name {
-                        case "light": type = .light
-                        case "medium": type = .medium
-                        case "heavy": type = .heavy
-                        case "success": type = .success
-                        case "error": type = .error
-                        default: type = .light
-                        }
-                        HapticManager.shared.play(type)
-                    }
-                )
-            }
-        }
         .fullScreenCover(isPresented: $flow.showingTutorial) {
             TutorialOverlayView {
                 hasCompletedTutorial = true
@@ -186,44 +159,6 @@ struct ContentView: View {
             },
             onLoadGame: { flow.loadGame(from: $0, engine: vm.engine, saveManager: saveManager, registry: services.registry) },
             onDelete: { saveManager.deleteSave(from: $0) }
-        )
-    }
-
-    // MARK: - Combat Resume
-
-    private func buildResumeSimulation() -> CombatSimulation? {
-        guard let savedState = vm.engine.pendingEncounterState else { return nil }
-
-        let encounterEnemies = savedState.enemies.map { state in
-            EncounterEnemy(
-                id: state.id,
-                name: state.name,
-                hp: state.hp,
-                maxHp: state.maxHp,
-                wp: state.wp,
-                maxWp: state.maxWp,
-                power: state.power,
-                defense: state.defense,
-                spiritDefense: state.spiritDefense,
-                resonanceBehavior: state.resonanceBehavior,
-                lootCardIds: state.lootCardIds,
-                faithReward: state.faithReward,
-                weaknesses: state.weaknesses,
-                strengths: state.strengths,
-                abilities: state.abilities
-            )
-        }
-
-        return CombatSimulation(
-            hand: savedState.context.heroCards,
-            heroHP: savedState.heroHP,
-            heroStrength: savedState.context.hero.strength,
-            heroWisdom: savedState.context.hero.wisdom,
-            heroArmor: savedState.context.hero.armor,
-            enemies: encounterEnemies,
-            fateDeckState: savedState.fateDeckState,
-            rngSeed: savedState.rngState,
-            worldResonance: savedState.context.worldResonance
         )
     }
 

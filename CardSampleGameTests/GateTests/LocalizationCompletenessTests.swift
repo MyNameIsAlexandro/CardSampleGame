@@ -182,4 +182,95 @@ final class LocalizationCompletenessTests: XCTestCase {
             )
         }
     }
+
+    // MARK: - Hardcoded String Detection
+
+    /// Gate: detect hardcoded English strings in UI code that should use L10n.
+    /// Scans Views/, App/, ViewModels/ for string literals in UI assignment
+    /// contexts (title:, label:, .text =, Text(...), etc.) that bypass L10n.
+    func testNoHardcodedUIStringsInViewLayer() throws {
+        guard let root = projectRoot else {
+            XCTFail("Could not determine project root"); return
+        }
+
+        let uiDirs = ["Views", "App", "ViewModels"]
+        var violations: [String] = []
+
+        // Patterns that indicate UI-visible string assignment.
+        // Each captures the string content in group 1.
+        let uiPatterns: [NSRegularExpression] = try [
+            #"(?:title|sublabel)\s*:\s*"([^"]+)""#,
+            #"\.text\s*=\s*"([^"]+)""#,
+            #"showFloatingText\(\s*"([^"]+)""#,
+            #"updatePhaseLabel\(\s*"([^"]+)""#,
+        ].map { try NSRegularExpression(pattern: $0) }
+
+        // Latin-letter check: at least 2 consecutive ASCII letters
+        let latinRegex = try NSRegularExpression(pattern: #"[A-Za-z]{2,}"#)
+
+        for dir in uiDirs {
+            let dirURL = root.appendingPathComponent(dir)
+            guard FileManager.default.fileExists(atPath: dirURL.path) else { continue }
+
+            guard let enumerator = FileManager.default.enumerator(
+                at: dirURL, includingPropertiesForKeys: nil
+            ) else { continue }
+
+            while let fileURL = enumerator.nextObject() as? URL {
+                guard fileURL.pathExtension == "swift" else { continue }
+                let content = try String(contentsOf: fileURL, encoding: .utf8)
+                let lines = content.components(separatedBy: "\n")
+
+                var inPreview = false
+                var previewBraceDepth = 0
+
+                for (lineIdx, line) in lines.enumerated() {
+                    // Skip #Preview blocks
+                    if line.contains("#Preview") {
+                        inPreview = true
+                        previewBraceDepth = 0
+                    }
+                    if inPreview {
+                        previewBraceDepth += line.filter { $0 == "{" }.count
+                        previewBraceDepth -= line.filter { $0 == "}" }.count
+                        if previewBraceDepth <= 0 && lineIdx > 0 { inPreview = false }
+                        continue
+                    }
+
+                    let trimmed = line.trimmingCharacters(in: .whitespaces)
+                    if trimmed.hasPrefix("//") || trimmed.hasPrefix("///") { continue }
+                    if line.contains(".localized") || line.contains("L10n.") { continue }
+
+                    let lineRange = NSRange(line.startIndex..., in: line)
+                    for regex in uiPatterns {
+                        for match in regex.matches(in: line, range: lineRange) {
+                            guard let strRange = Range(match.range(at: 1), in: line) else { continue }
+                            let str = String(line[strRange])
+
+                            // Strip interpolations \(...) before checking for Latin text.
+                            // Content inside \() is Swift code, not user-facing text.
+                            let stripped = str.replacingOccurrences(
+                                of: #"\\[^)]*\)"#, with: "", options: .regularExpression
+                            )
+
+                            // Skip if no Latin letters remain (pure emoji/symbols/numbers)
+                            let strippedNS = NSRange(stripped.startIndex..., in: stripped)
+                            guard latinRegex.firstMatch(in: stripped, range: strippedNS) != nil else { continue }
+
+                            // Skip dot-separated keys without spaces (L10n key format)
+                            if str.contains(".") && !str.contains(" ") { continue }
+
+                            let rel = fileURL.path.replacingOccurrences(of: root.path + "/", with: "")
+                            violations.append("\(rel):\(lineIdx + 1): \"\(str)\"")
+                        }
+                    }
+                }
+            }
+        }
+
+        XCTAssertTrue(
+            violations.isEmpty,
+            "Hardcoded UI strings found (\(violations.count)) — use L10n.*.localized:\n\(violations.joined(separator: "\n"))"
+        )
+    }
 }

@@ -1,7 +1,7 @@
 /// Файл: Views/Combat/DispositionCombatResult.swift
 /// Назначение: DTO результата Disposition Combat для передачи через Bridge.
 /// Зона ответственности: Типы исхода и полный результат Disposition Combat боя.
-/// Контекст: Epic 20 — Card Play App Integration. Паттерн аналогичен RitualCombatResult.
+/// Контекст: Epic 20 — Card Play App Integration. Disposition Combat result.
 
 import TwilightEngine
 

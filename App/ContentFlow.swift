@@ -35,7 +35,6 @@ final class ContentFlow: ObservableObject {
     @Published var selectedSaveSlot: Int?
 
     @Published var showingTutorial = false
-    @Published var resumingCombat = false
     @Published var showingLoadAlert = false
     @Published var loadAlertMessage: String?
 
@@ -76,10 +75,6 @@ final class ContentFlow: ObservableObject {
         if result.success {
             selectedHeroId = engine.player.heroId
             selectedSaveSlot = slot
-
-            if engine.pendingEncounterState != nil {
-                resumingCombat = true
-            }
 
             screen = .worldMap
 

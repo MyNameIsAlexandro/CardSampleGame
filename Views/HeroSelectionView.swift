@@ -134,7 +134,7 @@ struct HeroCard: View {
             // Характеристики
             let stats = hero.baseStats
             HStack(spacing: Spacing.lg) {
-                StatBadge(icon: "heart.fill", value: stats.health, label: "HP", color: AppColors.health)
+                StatBadge(icon: "heart.fill", value: stats.health, label: L10n.statHPShort.localized, color: AppColors.health)
                 StatBadge(icon: "hand.raised.fill", value: stats.strength, label: L10n.cardStatStrength.localized, color: AppColors.power)
                 StatBadge(icon: "sparkles", value: stats.faith, label: L10n.statFaith.localized, color: AppColors.faith)
                 StatBadge(icon: "brain.head.profile", value: stats.intelligence, label: L10n.statIntelligenceShort.localized, color: AppColors.dark)

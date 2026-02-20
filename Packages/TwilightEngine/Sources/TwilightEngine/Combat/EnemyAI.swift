@@ -126,7 +126,7 @@ public struct EnemyAI {
                 baseDamage: baseDamage, baseProvoke: baseProvoke
             )
         case .weakened:
-            return .attack(damage: max(1, baseDamage / 2))
+            return .defend(reduction: max(1, baseDefend / 2))
         }
     }
 

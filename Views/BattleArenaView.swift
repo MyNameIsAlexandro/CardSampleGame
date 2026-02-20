@@ -15,9 +15,7 @@ struct BattleArenaView: View {
     @State private var selectedHeroId: String?
     @State private var selectedEnemyId: String?
     @State private var lastOutcome: AppCombatOutcome?
-    @State private var activeCombat: ActiveCombat?
     @State private var activeDispositionCombat: ActiveDispositionCombat?
-    @State private var useDispositionCombat: Bool = false
     @State private var arenaSeedState: UInt64 = Self.initialArenaSeed
 
     private var availableHeroes: [HeroDefinition] {
@@ -94,17 +92,6 @@ struct BattleArenaView: View {
                 }
             }
 
-            // MARK: - Combat Mode Toggle
-            Toggle(isOn: $useDispositionCombat) {
-                HStack(spacing: Spacing.sm) {
-                    Image(systemName: useDispositionCombat ? "slider.horizontal.3" : "theatermasks")
-                    Text(useDispositionCombat ? "Disposition Combat" : "Ritual Combat")
-                        .font(.subheadline)
-                }
-            }
-            .padding(.horizontal)
-            .padding(.bottom, Spacing.sm)
-
             // MARK: - Start Button
             VStack(spacing: 0) {
                 Divider()
@@ -128,38 +115,6 @@ struct BattleArenaView: View {
         }
         .background(AppColors.backgroundSystem.ignoresSafeArea())
         .navigationBarHidden(true)
-        .fullScreenCover(item: $activeCombat) { combat in
-            RitualCombatSceneView(
-                simulation: combat.simulation,
-                onCombatEnd: { result in
-                    let stats = AppCombatStats(
-                        turnsPlayed: result.turnsPlayed,
-                        totalDamageDealt: result.totalDamageDealt,
-                        totalDamageTaken: result.totalDamageTaken,
-                        cardsPlayed: result.cardsPlayed
-                    )
-                    if case .victory = result.outcome {
-                        lastOutcome = .victory(stats: stats)
-                    } else {
-                        lastOutcome = .defeat(stats: stats)
-                    }
-                    activeCombat = nil
-                },
-                onSoundEffect: { SoundManager.shared.play(SoundManager.SoundEffect(rawValue: $0) ?? .buttonTap) },
-                onHaptic: { name in
-                    let type: HapticManager.HapticType
-                    switch name {
-                    case "light": type = .light
-                    case "medium": type = .medium
-                    case "heavy": type = .heavy
-                    case "success": type = .success
-                    case "error": type = .error
-                    default: type = .light
-                    }
-                    HapticManager.shared.play(type)
-                }
-            )
-        }
         .fullScreenCover(item: $activeDispositionCombat) { combat in
             DispositionCombatSceneView(
                 simulation: combat.simulation,
@@ -218,41 +173,7 @@ struct BattleArenaView: View {
               let enemy = selectedEnemy else { return }
 
         lastOutcome = nil
-
-        if useDispositionCombat {
-            startDispositionBattle(hero: hero, enemy: enemy, heroId: heroId)
-        } else {
-            startRitualBattle(hero: hero, enemy: enemy, heroId: heroId)
-        }
-    }
-
-    private func startRitualBattle(hero: HeroDefinition, enemy: EnemyDefinition, heroId: String) {
-        let startingDeck = services.cardFactory.createStartingDeck(forHero: heroId)
-        let fateCards = services.registry.getAllFateCards()
-
-        let encounterEnemy = EncounterEnemy(
-            id: enemy.id,
-            name: enemy.name.resolve(using: services.localizationManager),
-            hp: enemy.health,
-            maxHp: enemy.health,
-            wp: enemy.will,
-            maxWp: enemy.will,
-            power: enemy.power,
-            defense: enemy.defense
-        )
-
-        let sim = CombatSimulation(
-            hand: startingDeck,
-            heroHP: hero.baseStats.health,
-            heroStrength: hero.baseStats.strength,
-            heroArmor: 0,
-            enemies: [encounterEnemy],
-            fateDeckState: FateDeckState(drawPile: fateCards, discardPile: []),
-            rngSeed: nextArenaSeed(),
-            worldResonance: 0
-        )
-
-        activeCombat = ActiveCombat(simulation: sim)
+        startDispositionBattle(hero: hero, enemy: enemy, heroId: heroId)
     }
 
     private func startDispositionBattle(hero: HeroDefinition, enemy: EnemyDefinition, heroId: String) {
@@ -265,7 +186,8 @@ struct BattleArenaView: View {
             heroMaxHP: hero.baseStats.health,
             hand: startingDeck,
             resonanceZone: .yav,
-            seed: seed
+            seed: seed,
+            vulnerabilityRegistry: VulnerabilityRegistry.makeTestDataset()
         )
 
         activeDispositionCombat = ActiveDispositionCombat(simulation: sim)
@@ -307,11 +229,6 @@ struct BattleArenaView: View {
 }
 
 // MARK: - Active Combat Wrapper
-
-private struct ActiveCombat: Identifiable {
-    let id = UUID()
-    let simulation: CombatSimulation
-}
 
 private struct ActiveDispositionCombat: Identifiable {
     let id = UUID()

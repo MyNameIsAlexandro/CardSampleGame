@@ -1,7 +1,7 @@
 /// Файл: Views/Combat/DispositionCombatBridge.swift
 /// Назначение: Адаптер результата Disposition Combat в action-пайплайн TwilightEngine.
 /// Зона ответственности: DispositionCombatResult → engine.commitExternalCombat().
-/// Контекст: Epic 20 — Card Play App Integration. Паттерн аналогичен RitualCombatBridge.
+/// Контекст: Epic 20 — Card Play App Integration. Disposition Combat bridge.
 
 import Foundation
 import TwilightEngine

@@ -72,21 +72,21 @@ struct StatisticsView: View {
                             HStack(spacing: Spacing.lg) {
                                 StatCard(
                                     icon: "crossed.swords",
-                                    title: "Total Fights",
+                                    title: L10n.statsTotalFights.localized,
                                     value: "\(profileManager.profile.combatStats.totalFights)",
                                     color: AppColors.primary
                                 )
 
                                 StatCard(
                                     icon: "checkmark.seal.fill",
-                                    title: "Victories",
+                                    title: L10n.statsVictories.localized,
                                     value: "\(profileManager.profile.combatStats.totalVictories)",
                                     color: AppColors.success
                                 )
 
                                 StatCard(
                                     icon: "xmark.seal.fill",
-                                    title: "Defeats",
+                                    title: L10n.statsDefeats.localized,
                                     value: "\(profileManager.profile.combatStats.totalDefeats)",
                                     color: AppColors.danger
                                 )
@@ -95,21 +95,21 @@ struct StatisticsView: View {
                             HStack(spacing: Spacing.lg) {
                                 StatCard(
                                     icon: "figure.run",
-                                    title: "Fled",
+                                    title: L10n.statsFled.localized,
                                     value: "\(profileManager.profile.combatStats.totalFlees)",
                                     color: AppColors.warning
                                 )
 
                                 StatCard(
                                     icon: "bolt.fill",
-                                    title: "Damage Dealt",
+                                    title: L10n.statsDamageDealt.localized,
                                     value: "\(profileManager.profile.combatStats.totalDamageDealt)",
                                     color: AppColors.power
                                 )
 
                                 StatCard(
                                     icon: "shield.lefthalf.filled",
-                                    title: "Damage Taken",
+                                    title: L10n.statsDamageTaken.localized,
                                     value: "\(profileManager.profile.combatStats.totalDamageTaken)",
                                     color: AppColors.health
                                 )
@@ -128,21 +128,21 @@ struct StatisticsView: View {
                         HStack(spacing: Spacing.lg) {
                             StatCard(
                                 icon: "eye.fill",
-                                title: "Encountered",
+                                title: L10n.statsEncountered.localized,
                                 value: "\(profileManager.profile.creatureKnowledge.values.filter { $0.level >= .encountered }.count)",
                                 color: AppColors.primary
                             )
 
                             StatCard(
                                 icon: "book.fill",
-                                title: "Studied",
+                                title: L10n.statsStudied.localized,
                                 value: "\(profileManager.profile.creatureKnowledge.values.filter { $0.level >= .studied }.count)",
                                 color: AppColors.info
                             )
 
                             StatCard(
                                 icon: "star.fill",
-                                title: "Mastered",
+                                title: L10n.statsMastered.localized,
                                 value: "\(profileManager.profile.creatureKnowledge.values.filter { $0.level == .mastered }.count)",
                                 color: AppColors.rarityLegendary
                             )
@@ -160,14 +160,14 @@ struct StatisticsView: View {
                         HStack(spacing: Spacing.lg) {
                             StatCard(
                                 icon: "arrow.circlepath",
-                                title: "Total Playthroughs",
+                                title: L10n.statsTotalPlaythroughs.localized,
                                 value: "\(profileManager.profile.totalPlaythroughs)",
                                 color: AppColors.primary
                             )
 
                             StatCard(
                                 icon: "trophy.fill",
-                                title: "Achievements",
+                                title: L10n.statsAchievements.localized,
                                 value: "\(AchievementEngine.unlockedCount(profile: profileManager.profile))",
                                 color: AppColors.rarityLegendary
                             )

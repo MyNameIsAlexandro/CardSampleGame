@@ -15,6 +15,7 @@
 		21FA6506632F6BC34AAFCF46 /* DispositionCombatScene+Layout.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6D1A14B68966E33DCED0A41 /* DispositionCombatScene+Layout.swift */; };
 		24FDDC6E399F926DABA01174 /* DispositionCombatScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67E74864AB7B6DA217261649 /* DispositionCombatScene.swift */; };
 		4298DB1B512B7A46A1B6B129 /* DispositionCombatScene+GameLoop.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA11A7E0D0F695D86A01092F /* DispositionCombatScene+GameLoop.swift */; };
+		DCI000020000000000000001 /* DispositionCombatScene+CardInteraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCI000010000000000000001 /* DispositionCombatScene+CardInteraction.swift */; };
 		4748A720AAB2F6E8C7247419 /* DispositionCardPlayGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D23A7FDD58FA74AB0FA6657 /* DispositionCardPlayGateTests.swift */; };
 		4A62B7903EAB9A19F55B061F /* DispositionCombatBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5875F2DCFC769778EAB9096A /* DispositionCombatBridge.swift */; };
 		6352A5DDAB8A087797D247C9 /* ContentValidationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E948FF6BD58A6370B765AD94 /* ContentValidationTests.swift */; };
@@ -51,6 +52,7 @@
 		APS00301000000000000001 /* LoadSlotSelectionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = APS00302000000000000001 /* LoadSlotSelectionScreen.swift */; };
 		AS00000000000010 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AS00000000000001 /* Assets.xcassets */; };
 		B9A7179091F517C5A8B715B9 /* DispositionCombatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7281A0D5F94962EEED1D9DB2 /* DispositionCombatViewModel.swift */; };
+		MBDG00020000000000000001 /* ModifierBadgeNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = MBDG00010000000000000001 /* ModifierBadgeNode.swift */; };
 		BAV0000100000000000000001 /* BattleArenaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAV0000200000000000000001 /* BattleArenaView.swift */; };
 		BB0001150000000000000001 /* SaveLoadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0001160000000000000001 /* SaveLoadTests.swift */; };
 		BB0004110000000000000001 /* AuditGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0004120000000000000001 /* AuditGateTests.swift */; };
@@ -123,21 +125,9 @@
 		R5SN00020000000000000001 /* SealNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = R5SN00010000000000000001 /* SealNode.swift */; };
 		R8AM00020000000000000001 /* AmuletNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = R8AM00010000000000000001 /* AmuletNode.swift */; };
 		R8RR00020000000000000001 /* ResonanceRuneNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = R8RR00010000000000000001 /* ResonanceRuneNode.swift */; };
-		R9BR00020000000000000001 /* RitualCombatBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = R9BR00010000000000000001 /* RitualCombatBridge.swift */; };
 		R9CL00020000000000000001 /* CombatLogOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = R9CL00010000000000000001 /* CombatLogOverlay.swift */; };
-		R9DV00020000000000000001 /* RitualCombatScene+DragVisuals.swift in Sources */ = {isa = PBXBuildFile; fileRef = R9DV00010000000000000001 /* RitualCombatScene+DragVisuals.swift */; };
-		R9GL00020000000000000001 /* RitualCombatScene+GameLoop.swift in Sources */ = {isa = PBXBuildFile; fileRef = R9GL00010000000000000001 /* RitualCombatScene+GameLoop.swift */; };
-		R9LY00020000000000000001 /* RitualCombatScene+Layout.swift in Sources */ = {isa = PBXBuildFile; fileRef = R9LY00010000000000000001 /* RitualCombatScene+Layout.swift */; };
-		R9RS00020000000000000001 /* RitualCombatResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = R9RS00010000000000000001 /* RitualCombatResult.swift */; };
 		R9TC00020000000000000001 /* RitualThemeConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = R9TC00010000000000000001 /* RitualThemeConstants.swift */; };
-		R9TT00020000000000000001 /* RitualCombatScene+Tooltips.swift in Sources */ = {isa = PBXBuildFile; fileRef = R9TT00010000000000000001 /* RitualCombatScene+Tooltips.swift */; };
 		RA0000020000000000000001 /* ResonanceAtmosphereController.swift in Sources */ = {isa = PBXBuildFile; fileRef = RA0000010000000000000001 /* ResonanceAtmosphereController.swift */; };
-		RC0000020000000000000001 /* RitualCombatScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = RC0000010000000000000001 /* RitualCombatScene.swift */; };
-		RC0000040000000000000001 /* RitualCombatSceneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = RC0000030000000000000001 /* RitualCombatSceneView.swift */; };
-		RG0000020000000000000001 /* RitualSceneGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = RG0000010000000000000001 /* RitualSceneGateTests.swift */; };
-		RG0000040000000000000001 /* RitualAtmosphereGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = RG0000030000000000000001 /* RitualAtmosphereGateTests.swift */; };
-		RG0000060000000000000001 /* RitualIntegrationGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = RG0000050000000000000001 /* RitualIntegrationGateTests.swift */; };
-		RG0000080000000000000001 /* RitualIntegrationGateTests+Mappings.swift in Sources */ = {isa = PBXBuildFile; fileRef = RG0000070000000000000001 /* RitualIntegrationGateTests+Mappings.swift */; };
 		RW00000100000000000000001 /* ResonanceWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = RW00000200000000000000001 /* ResonanceWidget.swift */; };
 		SND0000100000000000000001 /* SoundManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = SND0000200000000000000001 /* SoundManager.swift */; };
 		SSC0000100000000000000001 /* SaveSlotCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = SSC0000200000000000000001 /* SaveSlotCard.swift */; };
@@ -181,6 +171,7 @@
 		67E74864AB7B6DA217261649 /* DispositionCombatScene.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DispositionCombatScene.swift; sourceTree = "<group>"; };
 		6BEC0AA856AB6706612208E1 /* WorldMapView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WorldMapView.swift; path = WorldMapView.swift; sourceTree = "<group>"; };
 		7281A0D5F94962EEED1D9DB2 /* DispositionCombatViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DispositionCombatViewModel.swift; sourceTree = "<group>"; };
+		MBDG00010000000000000001 /* ModifierBadgeNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModifierBadgeNode.swift; sourceTree = "<group>"; };
 		85E6536727E3995B16A50F82 /* SourcePathResolver.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SourcePathResolver.swift; sourceTree = "<group>"; };
 		8760BEC68C6999DAA517BA45 /* DispositionSceneGateTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DispositionSceneGateTests.swift; path = ../../CardSampleGameTests/GateTests/DispositionSceneGateTests.swift; sourceTree = "<group>"; };
 		8E699A0AE1C17B5AF2389767 /* DispositionCombatSceneView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DispositionCombatSceneView.swift; sourceTree = "<group>"; };
@@ -249,6 +240,7 @@
 		DS00000000000001 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
 		E948FF6BD58A6370B765AD94 /* ContentValidationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ContentValidationTests.swift; sourceTree = "<group>"; };
 		EA11A7E0D0F695D86A01092F /* DispositionCombatScene+GameLoop.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "DispositionCombatScene+GameLoop.swift"; sourceTree = "<group>"; };
+		DCI000010000000000000001 /* DispositionCombatScene+CardInteraction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DispositionCombatScene+CardInteraction.swift"; sourceTree = "<group>"; };
 		ECV0000200000000000000001 /* EnemyCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemyCardView.swift; sourceTree = "<group>"; };
 		EIV000020000000000000001 /* EnemyIntentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemyIntentView.swift; sourceTree = "<group>"; };
 		ESC0000200000000000000001 /* EnemySelectionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemySelectionCard.swift; sourceTree = "<group>"; };
@@ -283,21 +275,9 @@
 		R5SN00010000000000000001 /* SealNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SealNode.swift; sourceTree = "<group>"; };
 		R8AM00010000000000000001 /* AmuletNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmuletNode.swift; sourceTree = "<group>"; };
 		R8RR00010000000000000001 /* ResonanceRuneNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResonanceRuneNode.swift; sourceTree = "<group>"; };
-		R9BR00010000000000000001 /* RitualCombatBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RitualCombatBridge.swift; sourceTree = "<group>"; };
 		R9CL00010000000000000001 /* CombatLogOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombatLogOverlay.swift; sourceTree = "<group>"; };
-		R9DV00010000000000000001 /* RitualCombatScene+DragVisuals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RitualCombatScene+DragVisuals.swift"; sourceTree = "<group>"; };
-		R9GL00010000000000000001 /* RitualCombatScene+GameLoop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RitualCombatScene+GameLoop.swift"; sourceTree = "<group>"; };
-		R9LY00010000000000000001 /* RitualCombatScene+Layout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RitualCombatScene+Layout.swift"; sourceTree = "<group>"; };
-		R9RS00010000000000000001 /* RitualCombatResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RitualCombatResult.swift; sourceTree = "<group>"; };
 		R9TC00010000000000000001 /* RitualThemeConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RitualThemeConstants.swift; sourceTree = "<group>"; };
-		R9TT00010000000000000001 /* RitualCombatScene+Tooltips.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RitualCombatScene+Tooltips.swift"; sourceTree = "<group>"; };
 		RA0000010000000000000001 /* ResonanceAtmosphereController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResonanceAtmosphereController.swift; sourceTree = "<group>"; };
-		RC0000010000000000000001 /* RitualCombatScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RitualCombatScene.swift; sourceTree = "<group>"; };
-		RC0000030000000000000001 /* RitualCombatSceneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RitualCombatSceneView.swift; sourceTree = "<group>"; };
-		RG0000010000000000000001 /* RitualSceneGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RitualSceneGateTests.swift; sourceTree = "<group>"; };
-		RG0000030000000000000001 /* RitualAtmosphereGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RitualAtmosphereGateTests.swift; sourceTree = "<group>"; };
-		RG0000050000000000000001 /* RitualIntegrationGateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RitualIntegrationGateTests.swift; sourceTree = "<group>"; };
-		RG0000070000000000000001 /* RitualIntegrationGateTests+Mappings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RitualIntegrationGateTests+Mappings.swift"; sourceTree = "<group>"; };
 		RW00000200000000000000001 /* ResonanceWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResonanceWidget.swift; sourceTree = "<group>"; };
 		SND0000200000000000000001 /* SoundManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundManager.swift; sourceTree = "<group>"; };
 		SSC0000200000000000000001 /* SaveSlotCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveSlotCard.swift; sourceTree = "<group>"; };
@@ -370,6 +350,7 @@
 				67E74864AB7B6DA217261649 /* DispositionCombatScene.swift */,
 				B6D1A14B68966E33DCED0A41 /* DispositionCombatScene+Layout.swift */,
 				EA11A7E0D0F695D86A01092F /* DispositionCombatScene+GameLoop.swift */,
+				DCI000010000000000000001 /* DispositionCombatScene+CardInteraction.swift */,
 				8E699A0AE1C17B5AF2389767 /* DispositionCombatSceneView.swift */,
 			);
 			name = Combat;
@@ -537,7 +518,6 @@
 				D72352D1C9BABFA97F62257B /* ConditionValidatorTests.swift */,
 				204A28A32636BB8C22E758C3 /* LocalizationValidatorTests.swift */,
 				0B2C3D4E5F6A7B8C9D0E1F2A /* LocalizationCompletenessTests.swift */,
-				RCGTGRP0000000000000001 /* RitualCombatGates */,
 				1D23A7FDD58FA74AB0FA6657 /* DispositionCardPlayGateTests.swift */,
 				FFC9DD68CA8F29F281AF0C7A /* DispositionArchBoundaryGateTests.swift */,
 				8760BEC68C6999DAA517BA45 /* DispositionSceneGateTests.swift */,
@@ -564,16 +544,8 @@
 				CB00000A0000000000000001 /* CombatOutcomeAndCardsViews.swift */,
 				CB0000080000000000000001 /* EchoEncounterBridge.swift */,
 				AA0000000000000000000001 /* EchoCombatBridge.swift */,
-				RC0000010000000000000001 /* RitualCombatScene.swift */,
-				RC0000030000000000000001 /* RitualCombatSceneView.swift */,
-				R9RS00010000000000000001 /* RitualCombatResult.swift */,
-				R9BR00010000000000000001 /* RitualCombatBridge.swift */,
-				R9LY00010000000000000001 /* RitualCombatScene+Layout.swift */,
-				R9GL00010000000000000001 /* RitualCombatScene+GameLoop.swift */,
-				R9DV00010000000000000001 /* RitualCombatScene+DragVisuals.swift */,
 				R9TC00010000000000000001 /* RitualThemeConstants.swift */,
 				R9CL00010000000000000001 /* CombatLogOverlay.swift */,
-				R9TT00010000000000000001 /* RitualCombatScene+Tooltips.swift */,
 				DD0000010000000000000001 /* DragDropController.swift */,
 				FR0000010000000000000001 /* FateRevealDirector.swift */,
 				RA0000010000000000000001 /* ResonanceAtmosphereController.swift */,
@@ -581,6 +553,7 @@
 				R5RC00010000000000000001 /* RitualCircleNode.swift */,
 				R5BF00010000000000000001 /* BonfireNode.swift */,
 				R4ID00010000000000000001 /* IdolNode.swift */,
+				MBDG00010000000000000001 /* ModifierBadgeNode.swift */,
 				R8AM00010000000000000001 /* AmuletNode.swift */,
 				R8RR00010000000000000001 /* ResonanceRuneNode.swift */,
 				C21A3BAB00D2CD2E3996F903 /* DispositionCombatResult.swift */,
@@ -623,17 +596,6 @@
 				PEF0010000000000PE000001 /* PackEditorApp.swift */,
 			);
 			path = PackEditor;
-			sourceTree = "<group>";
-		};
-		RCGTGRP0000000000000001 /* RitualCombatGates */ = {
-			isa = PBXGroup;
-			children = (
-				RG0000010000000000000001 /* RitualSceneGateTests.swift */,
-				RG0000030000000000000001 /* RitualAtmosphereGateTests.swift */,
-				RG0000050000000000000001 /* RitualIntegrationGateTests.swift */,
-				RG0000070000000000000001 /* RitualIntegrationGateTests+Mappings.swift */,
-			);
-			path = RitualCombatGates;
 			sourceTree = "<group>";
 		};
 		TH00000100000000000000001 /* TestHelpers */ = {
@@ -916,16 +878,8 @@
 				AA0000000000000000000002 /* EchoCombatBridge.swift in Sources */,
 				EIV000010000000000000001 /* EnemyIntentView.swift in Sources */,
 				FRV000010000000000000001 /* FateCardRevealView.swift in Sources */,
-				RC0000020000000000000001 /* RitualCombatScene.swift in Sources */,
-				RC0000040000000000000001 /* RitualCombatSceneView.swift in Sources */,
-				R9RS00020000000000000001 /* RitualCombatResult.swift in Sources */,
-				R9BR00020000000000000001 /* RitualCombatBridge.swift in Sources */,
-				R9LY00020000000000000001 /* RitualCombatScene+Layout.swift in Sources */,
-				R9GL00020000000000000001 /* RitualCombatScene+GameLoop.swift in Sources */,
-				R9DV00020000000000000001 /* RitualCombatScene+DragVisuals.swift in Sources */,
 				R9TC00020000000000000001 /* RitualThemeConstants.swift in Sources */,
 				R9CL00020000000000000001 /* CombatLogOverlay.swift in Sources */,
-				R9TT00020000000000000001 /* RitualCombatScene+Tooltips.swift in Sources */,
 				DD0000020000000000000001 /* DragDropController.swift in Sources */,
 				FR0000020000000000000001 /* FateRevealDirector.swift in Sources */,
 				RA0000020000000000000001 /* ResonanceAtmosphereController.swift in Sources */,
@@ -957,9 +911,11 @@
 				C554D44FD5BB996A504E842D /* DispositionCombatResult.swift in Sources */,
 				4A62B7903EAB9A19F55B061F /* DispositionCombatBridge.swift in Sources */,
 				B9A7179091F517C5A8B715B9 /* DispositionCombatViewModel.swift in Sources */,
+				MBDG00020000000000000001 /* ModifierBadgeNode.swift in Sources */,
 				24FDDC6E399F926DABA01174 /* DispositionCombatScene.swift in Sources */,
 				21FA6506632F6BC34AAFCF46 /* DispositionCombatScene+Layout.swift in Sources */,
 				4298DB1B512B7A46A1B6B129 /* DispositionCombatScene+GameLoop.swift in Sources */,
+				DCI000020000000000000001 /* DispositionCombatScene+CardInteraction.swift in Sources */,
 				8835941EDB53C5A2FFF97D8C /* DispositionCombatSceneView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -997,10 +953,6 @@
 				0869558992AD64C9C9AC00CB /* LocalizationValidatorTests.swift in Sources */,
 				0A1C2D3E4F5A6B7C8D9E0F1A /* LocalizationCompletenessTests.swift in Sources */,
 				8B5C529E75755A127084F62A /* SourcePathResolver.swift in Sources */,
-				RG0000020000000000000001 /* RitualSceneGateTests.swift in Sources */,
-				RG0000040000000000000001 /* RitualAtmosphereGateTests.swift in Sources */,
-				RG0000060000000000000001 /* RitualIntegrationGateTests.swift in Sources */,
-				RG0000080000000000000001 /* RitualIntegrationGateTests+Mappings.swift in Sources */,
 				4748A720AAB2F6E8C7247419 /* DispositionCardPlayGateTests.swift in Sources */,
 				1EA4518FD1D6F207BD1464B5 /* DispositionArchBoundaryGateTests.swift in Sources */,
 				A17EABC43572E702B3A65946 /* DispositionSceneGateTests.swift in Sources */,

@@ -20,7 +20,6 @@ struct EventView: View {
     @State private var selectedChoice: EventChoice?
     @State private var showingResult = false
     @State private var resultMessage: String = ""
-    @State private var activeCombat: ActiveEventCombat?
     @State private var activeDispositionCombat: ActiveEventDispositionCombat?
     @State private var combatVictory: Bool?
 
@@ -97,21 +96,6 @@ struct EventView: View {
                 }
             } message: {
                 Text(resultMessage)
-            }
-            .fullScreenCover(item: $activeCombat) { combat in
-                RitualCombatSceneView(
-                    simulation: combat.simulation,
-                    onCombatEnd: { result in
-                        RitualCombatBridge.applyCombatResult(result, to: vm.engine)
-                        let stats = AppCombatStats(
-                            turnsPlayed: result.turnsPlayed, totalDamageDealt: result.totalDamageDealt,
-                            totalDamageTaken: result.totalDamageTaken, cardsPlayed: result.cardsPlayed)
-                        handleCombatEnd(outcome: result.outcome.isVictory
-                            ? .victory(stats: stats) : .defeat(stats: stats))
-                    },
-                    onSoundEffect: Self.playSoundEffect,
-                    onHaptic: Self.playHaptic
-                )
             }
             .fullScreenCover(item: $activeDispositionCombat) { combat in
                 DispositionCombatSceneView(
@@ -359,54 +343,7 @@ struct EventView: View {
             return
         }
 
-        if shouldUseDispositionCombat(enemyDef: snapshot.enemyDefinition) {
-            initiateDispositionCombat(snapshot: snapshot)
-        } else {
-            initiateRitualCombat(snapshot: snapshot)
-        }
-    }
-
-    private func shouldUseDispositionCombat(enemyDef: EnemyDefinition) -> Bool {
-        switch enemyDef.enemyType {
-        case .human, .spirit, .beast:
-            return true
-        case .undead, .demon, .boss:
-            return false
-        }
-    }
-
-    private func initiateRitualCombat(snapshot: ExternalCombatSnapshot) {
-        let encounterEnemy = EncounterEnemy(
-            id: snapshot.enemy.id,
-            name: snapshot.enemy.name,
-            hp: snapshot.enemy.hp,
-            maxHp: snapshot.enemy.maxHp,
-            wp: snapshot.enemy.wp,
-            maxWp: snapshot.enemy.maxWp,
-            power: snapshot.enemy.power,
-            defense: snapshot.enemy.defense,
-            resonanceBehavior: snapshot.enemyDefinition.resonanceBehavior,
-            lootCardIds: snapshot.enemyDefinition.lootCardIds,
-            faithReward: snapshot.enemyDefinition.faithReward,
-            weaknesses: snapshot.enemyDefinition.weaknesses ?? [],
-            strengths: snapshot.enemyDefinition.strengths ?? [],
-            abilities: snapshot.enemyDefinition.abilities
-        )
-
-        let sim = CombatSimulation(
-            hand: snapshot.encounterHeroCards,
-            heroHP: snapshot.hero.hp,
-            heroStrength: snapshot.hero.strength,
-            heroWisdom: snapshot.hero.wisdom,
-            heroArmor: snapshot.hero.armor,
-            enemies: [encounterEnemy],
-            fateDeckState: snapshot.fateDeckState,
-            rngSeed: snapshot.seed,
-            worldResonance: snapshot.resonance,
-            balanceConfig: snapshot.balanceConfig ?? .default
-        )
-
-        activeCombat = ActiveEventCombat(simulation: sim)
+        initiateDispositionCombat(snapshot: snapshot)
     }
 
     private func initiateDispositionCombat(snapshot: ExternalCombatSnapshot) {
@@ -424,7 +361,8 @@ struct EventView: View {
             heroMaxHP: snapshot.hero.maxHp,
             hand: snapshot.encounterHeroCards,
             resonanceZone: zone,
-            seed: snapshot.seed
+            seed: snapshot.seed,
+            vulnerabilityRegistry: VulnerabilityRegistry.makeTestDataset()
         )
 
         activeDispositionCombat = ActiveEventDispositionCombat(simulation: sim)
@@ -466,7 +404,6 @@ struct EventView: View {
         // Combat already shows its own victory/defeat screen, no need for additional alert
         // Just close combat and dismiss event view
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            activeCombat = nil
             activeDispositionCombat = nil
             // Small delay before dismissing to allow animation to complete
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
@@ -526,11 +463,6 @@ struct EventView: View {
 }
 
 // MARK: - Active Combat Wrapper
-
-private struct ActiveEventCombat: Identifiable {
-    let id = UUID()
-    let simulation: CombatSimulation
-}
 
 private struct ActiveEventDispositionCombat: Identifiable {
     let id = UUID()

@@ -190,23 +190,23 @@ final class EnemyModeGateTests: XCTestCase {
     // MARK: - INV-DC-032: Weakened deterministic selection — reduced damage
 
     /// Weakened enemy attacks with baseDamage/2.
-    func testWeakenedMode_reducedDamage() {
+    func testWeakenedMode_leastImpactfulAction() {
         let sim = makeSimulation()
         let rng = WorldRNG(seed: 42)
 
         let action = EnemyAI.selectAction(
-            mode: .weakened, simulation: sim, rng: rng, baseDamage: 6
+            mode: .weakened, simulation: sim, rng: rng, baseDefend: 6
         )
 
-        XCTAssertEqual(action, .attack(damage: 3),
-            "Weakened mode must attack with baseDamage/2 = 6/2 = 3")
+        XCTAssertEqual(action, .defend(reduction: 3),
+            "Weakened mode must defend with baseDefend/2 = 6/2 = 3")
 
-        // Verify minimum 1 damage
+        // Verify minimum 1 reduction
         let minAction = EnemyAI.selectAction(
-            mode: .weakened, simulation: sim, rng: rng, baseDamage: 1
+            mode: .weakened, simulation: sim, rng: rng, baseDefend: 1
         )
-        XCTAssertEqual(minAction, .attack(damage: 1),
-            "Weakened mode damage must be at least 1: max(1, 1/2) = 1")
+        XCTAssertEqual(minAction, .defend(reduction: 1),
+            "Weakened mode reduction must be at least 1: max(1, 1/2) = 1")
     }
 
     // MARK: - INV-DC-033: Rage action — attack damage + disposition shift +5
