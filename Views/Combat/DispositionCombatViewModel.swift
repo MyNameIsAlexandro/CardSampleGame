@@ -162,6 +162,21 @@ final class DispositionCombatViewModel: ObservableObject {
         objectWillChange.send()
     }
 
+    // MARK: - Preview (for action buttons)
+
+    /// Preview strike power for a card (without fate keyword, which is unknown before play).
+    func previewStrikePower(card: Card) -> Int {
+        DispositionCalculator.previewStrikePower(card: card, simulation: simulation)
+    }
+
+    /// Preview influence power for a card.
+    func previewInfluencePower(card: Card) -> Int {
+        DispositionCalculator.previewInfluencePower(card: card, simulation: simulation)
+    }
+
+    /// Whether sacrifice is available this turn.
+    var canSacrifice: Bool { !simulation.sacrificeUsedThisTurn }
+
     // MARK: - Result
 
     /// Build combat result for bridge submission.
