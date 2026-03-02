@@ -169,9 +169,9 @@ final class DispositionCombatViewModel: ObservableObject {
         faithDelta: Int = 0,
         resonanceDelta: Float = 0,
         lootCardIds: [String] = []
-    ) -> DispositionCombatResult {
+    ) -> DispositionCombatResult? {
         guard let outcome = simulation.outcome else {
-            fatalError("Cannot build result before combat ends")
+            return nil
         }
         return DispositionCombatResult(
             outcome: outcome,

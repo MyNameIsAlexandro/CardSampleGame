@@ -237,8 +237,7 @@ extension DispositionCombatScene {
         container.addChild(nameLabel)
 
         var detailParts: [String] = []
-        if let power = card.power, power > 0 { detailParts.append("⚔ \(power)") }
-        if let cost = card.cost, cost > 0 { detailParts.append("◉ \(cost)") }
+        if let cost = card.cost, cost > 0 { detailParts.append("⚡ \(cost)") }
         let detailText = detailParts.joined(separator: "  ")
 
         if !detailText.isEmpty {
@@ -479,10 +478,12 @@ extension DispositionCombatScene {
                 faithDelta = 0; resonanceDelta = -2.0
             }
 
-            let result = vm.makeCombatResult(
+            guard let result = vm.makeCombatResult(
                 faithDelta: faithDelta,
                 resonanceDelta: resonanceDelta
-            )
+            ) else {
+                return
+            }
             self.onCombatEnd?(result)
         }
     }
