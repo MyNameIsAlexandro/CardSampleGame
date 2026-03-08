@@ -1,10 +1,10 @@
 # Disposition Combat Test Model (Phase 3)
 
 **Scope:** Комплексная тестовая модель Phase 3 — Disposition Combat.
-**Status:** v5.3 — sacrifice cost model finalized (card.cost based), auditor rounds 1-3 complete.
+**Status:** v5.4 — UX overhaul complete (tap-tap buttons, preview API, visual feedback), 148 gate tests pass.
 **Policy sync:** CLAUDE.md v4.1, QUALITY_CONTROL_MODEL.md §2a, ENCOUNTER_TEST_MODEL.md
 **Design ref:** [`docs/plans/2026-02-18-disposition-combat-design.md`](../../docs/plans/2026-02-18-disposition-combat-design.md) (v2.5, SoT)
-**Last updated:** 2026-02-18
+**Last updated:** 2026-03-03
 
 ---
 
@@ -14,36 +14,53 @@
 - **Engine gates** — pure logic, без SpriteKit/SwiftUI → SPM engine tests
 - **App gates** — требуют SpriteKit/View типы → Xcode app tests
 
-```
-Packages/TwilightEngine/Tests/
-├── GateTests/
-│   ├── DispositionMechanicsGateTests.swift     (9 тестов)
-│   ├── MomentumGateTests.swift                 (5 тестов)
-│   ├── EnergyGateTests.swift                   (6 тестов)   ← NEW
-│   ├── FateKeywordGateTests.swift              (13 тестов)
-│   ├── EnemyModeGateTests.swift                (12 тестов)
-│   ├── EnemyActionGateTests.swift              (5 тестов)   ← NEW
-│   ├── SystemicAsymmetryGateTests.swift        (4 тестов)
-│   └── DispositionStressTests.swift            (5 тестов)
-├── LayerTests/
-│   ├── DispositionCombatSimulationTests.swift   (unit-тесты фасада)
-│   ├── DispositionCombatCalculatorTests.swift   (unit-тесты формулы)
-│   ├── EnemyAITests.swift                       (unit-тесты AI mode selection)
-│   └── AffinityMatrixTests.swift                (unit-тесты стартовой disposition)
-└── IntegrationTests/
-    ├── DispositionIntegrationTests.swift        (end-to-end сценарии)
-    └── CombatSimulationAgentTests.swift         (5 агентов × метрики)
+### 1.1 Engine tests
 
+```
+Packages/TwilightEngine/Tests/TwilightEngineTests/
+└── GateTests/
+    ├── DispositionMechanicsGateTests.swift     (9 тестов)
+    ├── MomentumGateTests.swift                 (5 тестов)
+    ├── EnergyGateTests.swift                   (6 тестов)
+    ├── FateKeywordGateTests.swift              (13 тестов)
+    ├── EnemyModeGateTests.swift                (12 тестов)
+    ├── EnemyActionGateTests.swift              (5 тестов)
+    ├── SystemicAsymmetryGateTests.swift        (4 тестов)
+    ├── DispositionStressTests.swift            (5 тестов)
+    ├── DispositionSnapshotGateTests.swift      (snapshot round-trip)
+    ├── DispositionIntegrationTests.swift       (end-to-end сценарии)
+    └── CombatSimulationAgentTests.swift        (5 агентов × метрики)
+```
+
+### 1.2 App tests
+
+```
 CardSampleGameTests/
-├── GateTests/
-│   ├── DispositionCardPlayGateTests.swift       (5 тестов)
-│   ├── DispositionArchBoundaryGateTests.swift   (5 тестов)
-│   └── DispositionSceneGateTests.swift          (4 тестов)
-└── Views/
-    └── DispositionCombatViewTests.swift         (UI snapshot tests)
+└── GateTests/
+    ├── DispositionCardPlayGateTests.swift       (5 тестов)
+    ├── DispositionArchBoundaryGateTests.swift   (5 тестов)
+    └── DispositionSceneGateTests.swift          (4 тестов)
 ```
 
-**Итого:** 68 gate-тестов + 5 stress + layer + integration + simulation.
+### 1.3 Production source files (Views/Combat/)
+
+```
+Views/Combat/
+├── DispositionCombatScene.swift               (основная сцена, свойства, lifecycle)
+├── DispositionCombatScene+Layout.swift         (компактный HUD, action buttons, disposition bar)
+├── DispositionCombatScene+GameLoop.swift        (tap-tap interaction flow, enemy/player phases)
+├── DispositionCombatScene+CardInteraction.swift (card selection, drag fallback)
+├── DispositionCombatScene+Effects.swift         (floating text, card-to-bar animation, fate flash, hero damage float)
+├── DispositionCombatScene+Summary.swift         (post-combat summary overlay with stats and continue button)
+├── DispositionCombatSceneView.swift             (SwiftUI SpriteView hosting)
+├── DispositionCombatViewModel.swift             (preview methods, combat state bridge)
+├── DispositionCombatBridge.swift                (engine ↔ scene adapter)
+├── DispositionCombatResult.swift                (result type)
+├── IdolNode.swift                               (enemy visual representation)
+└── EnemySelectionCard.swift                     (enemy selection UI)
+```
+
+**Итого:** 68 gate-тестов + 5 stress + snapshot + integration + simulation.
 
 ---
 
@@ -148,7 +165,7 @@ CardSampleGameTests/
 | INV-DC-056 | **Attack Effect** | enemy Attack → hero HP уменьшается на ATK value | HP не уменьшается |
 | INV-DC-057 | **Defend Effect** | enemy Defend → следующий Strike игрока получает -N к effective_power | Strike не ослаблен после Defend |
 | INV-DC-058 | **Provoke Effect** | enemy Provoke → Influence в этом ходу получает штраф | Influence не штрафуется после Provoke |
-| INV-DC-059 | **Adapt Effect** | enemy Adapt при streak ≥ 3 → soft-block: penalty = `max(3, streak_bonus)` к effective_power streak-типа. Действие разрешено, но ослаблено | Penalty не применён, или hard block |
+| INV-DC-059 | **Adapt Effect** | enemy Adapt при streak >= 3 → soft-block: penalty = `max(3, streak_bonus)` к effective_power streak-типа. Действие разрешено, но ослаблено. adaptPenalty cleared to 0 after consumption (one-time effect) | Penalty не применён, hard block, или penalty stacks between turns |
 | INV-DC-060 | **Enemy Reads Momentum** | streak ≥ 3 → враг переходит к counter-действиям (Defend+Adapt при strike streak, Provoke при influence streak) | Враг не реагирует на streak |
 
 ### 2.9 Resonance-Sacrifice Interaction
@@ -677,21 +694,25 @@ THEN:  world.resonance изменился
 
 **testRitualSceneUsesOnlyCombatSimulationAPI**
 ```
-SCAN: RitualCombatScene.swift и дочерние
+SCAN: DispositionCombatScene.swift и дочерние (+Layout, +GameLoop, +CardInteraction, +Effects, +Summary)
 THEN: все мутации через CombatSimulation methods
   AND: нет прямого доступа к engine полям
 ```
 
-**testDragDropProducesCanonicalCommands**
+**testActionButtonsProduceCanonicalCommands**
 ```
-GIVEN: drag карты → enemy zone
+GIVEN: tap card → tap Strike button
 THEN:  вызван sim.playCardAsStrike(cardId:targetId:)
 
-GIVEN: drag карты → altar zone
+GIVEN: tap card → tap Influence button
 THEN:  вызван sim.playCardAsInfluence(cardId:)
 
-GIVEN: drag карты → bonfire zone
+GIVEN: tap card → tap Sacrifice button
 THEN:  вызван sim.playCardAsSacrifice(cardId:)
+
+// Drag remains as alternative input — same canonical API
+GIVEN: drag карты → strike button area
+THEN:  вызван sim.playCardAsStrike(cardId:targetId:)
 ```
 
 **testResonanceAtmosphereIsReadOnly**
@@ -844,6 +865,13 @@ GIVEN: streakType = .strike, streakCount = 5, base_power = 8
 WHEN:  player пытается strike
 THEN:  adapt_penalty = max(3, 4) = 4 (streak_bonus = max(0, 5-1) = 4)
   AND: effective_power уменьшен на 4 (масштабируется с длиной streak)
+
+// After consumption:
+GIVEN: adaptPenalty = 3 (set by enemy Adapt)
+WHEN:  player plays streak-type action
+THEN:  penalty applied to effective_power
+  AND: adaptPenalty = 0 (cleared after consumption, one-time effect)
+  AND: subsequent actions of same type have no penalty from previous Adapt
 ```
 
 // ⚠️ BALANCE HOTSPOT: Adapt не должен стать "AI hard counter machine".
@@ -1078,11 +1106,12 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
 
 ---
 
-**Версия документа:** 5.3
-**Дата:** 18 февраля 2026
-**Статус:** Auditor rounds 1-3 complete — ready for implementation
+**Версия документа:** 5.4
+**Дата:** 3 марта 2026
+**Статус:** Implemented — 148 gate tests pass, 0 failures
 
 **Changelog:**
 - v5.0 → v5.1: +19 invariants, +2 suites (Energy, EnemyAction), audit gaps closed
 - v5.1 → v5.2: tie-break rule, arena scope, threshold metrics, simulation granularity
 - v5.2 → v5.3: sacrifice cost model finalized (`card.cost` based, not free). Nav = cost-1, Prav = extra exhaust. Adapt = soft-block formalized. SPRINT.md synced.
+- v5.3 → v5.4: UX overhaul sync — tap-tap action buttons replace Y-band drag zones (drag remains as secondary input). File organization updated to match actual structure (all disposition tests in GateTests/). New source files documented (+Effects.swift, +Summary.swift). adaptPenalty clearing after consumption documented. Preview API (DispositionCalculator.previewStrikePower/previewInfluencePower) and ViewModel preview methods documented. makeCombatResult returns optional instead of fatalError. enemyModeStrikeBonus changed to `public private(set) var`.

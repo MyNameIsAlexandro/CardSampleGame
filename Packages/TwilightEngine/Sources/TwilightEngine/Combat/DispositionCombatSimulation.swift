@@ -5,25 +5,6 @@
 
 import Foundation
 
-// MARK: - Supporting Types
-
-/// Outcome of a disposition combat encounter.
-public enum DispositionOutcome: Equatable, Codable, Sendable {
-    /// Enemy is destroyed (disposition reached -100). Player victory by force.
-    case destroyed
-    /// Enemy is subjugated (disposition reached +100). Player victory by diplomacy.
-    case subjugated
-    /// Hero HP reached 0. Player defeat.
-    case defeated
-}
-
-/// Type of player action in disposition combat.
-public enum DispositionActionType: Equatable, Codable, Sendable {
-    case strike
-    case influence
-    case sacrifice
-}
-
 // MARK: - DispositionCombatSimulation
 
 /// Pure-logic struct for Disposition Combat Phase 3.
@@ -76,7 +57,7 @@ public struct DispositionCombatSimulation: Equatable {
     /// Plea backlash: next strike costs hero HP (INV-DC-034).
     public private(set) var pleaBacklash: Int = 0
     /// Mode-based strike bonus (e.g. +3 in survival mode, INV-DC-052).
-    public var enemyModeStrikeBonus: Int = 0
+    public private(set) var enemyModeStrikeBonus: Int = 0
 
     // MARK: - Echo State (Epic 18, INV-DC-019..021)
 
@@ -290,6 +271,7 @@ public struct DispositionCombatSimulation: Equatable {
             adaptPenalty: currentAdaptPenalty(for: .strike),
             vulnerabilityModifier: vulnMod
         )
+        if currentAdaptPenalty(for: .strike) > 0 { adaptPenalty = 0 }
 
         energy -= cardCost
         let played = hand.remove(at: cardIndex)
@@ -356,6 +338,7 @@ public struct DispositionCombatSimulation: Equatable {
             adaptPenalty: currentAdaptPenalty(for: .influence),
             vulnerabilityModifier: vulnMod
         )
+        if currentAdaptPenalty(for: .influence) > 0 { adaptPenalty = 0 }
 
         // Focus: ignore Provoke at disposition > +30 (INV-DC-049)
         let effectiveProvoke: Int
@@ -469,6 +452,7 @@ public struct DispositionCombatSimulation: Equatable {
             adaptPenalty: currentAdaptPenalty(for: lastAction),
             vulnerabilityModifier: echoVulnMod
         )
+        if currentAdaptPenalty(for: lastAction) > 0 { adaptPenalty = 0 }
 
         switch lastAction {
         case .strike:
@@ -497,16 +481,25 @@ public struct DispositionCombatSimulation: Equatable {
 
     // MARK: - Turn Management
 
-    /// End the current player turn.
+    /// End the current player turn. Remaining hand cards stay in hand.
     public mutating func endPlayerTurn() {
         sacrificeUsedThisTurn = false
     }
 
-    /// Begin a new player turn (resets energy).
+    /// Begin a new player turn: reset energy, recycle discard pile into hand.
+    /// Exhausted cards (sacrifice) stay permanently removed.
     public mutating func beginPlayerTurn() {
         energy = startingEnergy
         sacrificeUsedThisTurn = false
+
+        // Recycle discard pile back into hand (cards played via strike/influence)
+        if !discardPile.isEmpty {
+            hand.append(contentsOf: discardPile)
+            discardPile.removeAll()
+        }
     }
+
+    // MARK: - Enemy Effects
 
     /// Apply enemy attack damage to hero HP (INV-DC-056).
     /// Damage is increased by accumulated sacrifice buff.
@@ -530,11 +523,6 @@ public struct DispositionCombatSimulation: Equatable {
         adaptPenalty = max(1, streakBonus)
     }
 
-    /// Clear adapt penalty (after it has been applied).
-    public mutating func clearAdaptPenalty() {
-        adaptPenalty = 0
-    }
-
     /// Apply a direct disposition shift (for enemy actions like Rage/Plea, INV-DC-033/034).
     public mutating func applyDispositionShift(_ shift: Int) {
         disposition = Self.clampDisposition(disposition + shift)
@@ -544,6 +532,11 @@ public struct DispositionCombatSimulation: Equatable {
     /// Set plea backlash: next strike costs hero HP (INV-DC-034).
     public mutating func applyPleaBacklash(hpLoss: Int) {
         pleaBacklash = hpLoss
+    }
+
+    /// Set the mode-based strike bonus (e.g. +3 in survival, INV-DC-052).
+    public mutating func updateEnemyModeStrikeBonus(_ bonus: Int) {
+        enemyModeStrikeBonus = bonus
     }
 
     // MARK: - Private Helpers

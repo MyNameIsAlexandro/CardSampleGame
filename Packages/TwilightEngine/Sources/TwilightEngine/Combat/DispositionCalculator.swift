@@ -1,6 +1,6 @@
 /// Файл: Packages/TwilightEngine/Sources/TwilightEngine/Combat/DispositionCalculator.swift
 /// Назначение: Static calculator для effective_power в Disposition Combat.
-/// Зона ответственности: Формула effective_power, streak bonus, switch penalty, threat bonus, surge, hard cap, survival bonus.
+/// Зона ответственности: Формула effective_power, streak bonus, switch penalty, threat bonus, surge, hard cap, survival bonus, preview power.
 /// Контекст: INV-DC-002 (hard cap 25), INV-DC-009..011 (momentum), INV-DC-017 (surge), INV-DC-052 (survival). Reference: RITUAL_COMBAT_TEST_MODEL.md §3.1
 
 import Foundation
@@ -145,5 +145,91 @@ public struct DispositionCalculator {
     public static func survivalStrikeBonus(mode: EnemyMode, actionType: DispositionActionType) -> Int {
         guard mode == .survival && actionType == .strike else { return 0 }
         return 3
+    }
+
+    // MARK: - Preview Power (for UI action buttons)
+
+    /// Preview the effective strike power of a card without playing it.
+    /// Uses fateKeyword=nil (fate is unknown until drawn).
+    /// Accounts for: streak, vulnerability, defendReduction, adaptPenalty, enemyModeStrikeBonus.
+    /// - Parameters:
+    ///   - card: The card to preview.
+    ///   - simulation: Current combat simulation state.
+    /// - Returns: Predicted effective power for a strike action, minimum 0, capped at 25.
+    public static func previewStrikePower(
+        card: Card,
+        simulation: DispositionCombatSimulation
+    ) -> Int {
+        let basePower = card.power ?? 1
+        let nextStreak = simulation.streakType == .strike
+            ? simulation.streakCount + 1 : 1
+        let vulnMod = simulation.vulnerabilityRegistry.modifier(
+            enemyType: simulation.enemyType,
+            actionType: .strike,
+            zone: simulation.resonanceZone
+        )
+        let activeAdaptPenalty: Int
+        if simulation.adaptPenalty > 0,
+           simulation.streakType == .strike {
+            activeAdaptPenalty = simulation.adaptPenalty
+        } else {
+            activeAdaptPenalty = 0
+        }
+        return effectivePower(
+            basePower: basePower,
+            streakCount: nextStreak,
+            previousStreakCount: simulation.streakCount,
+            lastActionType: simulation.lastActionType,
+            currentActionType: .strike,
+            fateKeyword: nil,
+            fateModifier: simulation.enemyModeStrikeBonus,
+            resonanceZone: simulation.resonanceZone,
+            defendReduction: simulation.defendReduction,
+            adaptPenalty: activeAdaptPenalty,
+            vulnerabilityModifier: vulnMod
+        )
+    }
+
+    /// Preview the effective influence power of a card without playing it.
+    /// Uses fateKeyword=nil (fate is unknown until drawn).
+    /// Accounts for: streak, vulnerability, adaptPenalty, provokePenalty.
+    /// - Parameters:
+    ///   - card: The card to preview.
+    ///   - simulation: Current combat simulation state.
+    /// - Returns: Predicted effective power for an influence action (after provoke),
+    ///   minimum 0, capped at 25.
+    public static func previewInfluencePower(
+        card: Card,
+        simulation: DispositionCombatSimulation
+    ) -> Int {
+        let basePower = card.power ?? 1
+        let nextStreak = simulation.streakType == .influence
+            ? simulation.streakCount + 1 : 1
+        let vulnMod = simulation.vulnerabilityRegistry.modifier(
+            enemyType: simulation.enemyType,
+            actionType: .influence,
+            zone: simulation.resonanceZone
+        )
+        let activeAdaptPenalty: Int
+        if simulation.adaptPenalty > 0,
+           simulation.streakType == .influence {
+            activeAdaptPenalty = simulation.adaptPenalty
+        } else {
+            activeAdaptPenalty = 0
+        }
+        let rawPower = effectivePower(
+            basePower: basePower,
+            streakCount: nextStreak,
+            previousStreakCount: simulation.streakCount,
+            lastActionType: simulation.lastActionType,
+            currentActionType: .influence,
+            fateKeyword: nil,
+            fateModifier: 0,
+            resonanceZone: simulation.resonanceZone,
+            defendReduction: 0,
+            adaptPenalty: activeAdaptPenalty,
+            vulnerabilityModifier: vulnMod
+        )
+        return max(0, rawPower - simulation.provokePenalty)
     }
 }

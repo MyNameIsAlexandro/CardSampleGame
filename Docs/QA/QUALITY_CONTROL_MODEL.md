@@ -3,7 +3,7 @@
 **Scope:** architecture correctness, determinism, migration safety, CI enforceability.  
 **Status:** source of truth for quality gates.  
 **Policy sync:** `CLAUDE.md` v4.1 engineering contract  
-**Last updated:** 2026-02-12  
+**Last updated:** 2026-03-03
 **Phase 2 checkpoint:** Epic 66
 
 This document is the canonical control point for validating product health after the Phase 2 audit/refactor stream.
@@ -94,34 +94,42 @@ This document is the canonical control point for validating product health after
   - Verbose diagnostics are opt-in via `TWILIGHT_TEST_VERBOSE=1` and are used only for focused local debugging.
   - Scope includes app + engine test helpers and content-loading debug traces (`CardSampleGameTests/TestHelpers/TestContentLoader.swift`, `Packages/TwilightEngine/Tests/TwilightEngineTests/Helpers/TestContentLoader.swift`, `App/CardGameApp.swift`, `Packages/TwilightEngine/Sources/TwilightEngine/ContentPacks/ContentRegistry.swift`).
 
-## 2a. Phase 3: Disposition Combat Gates (planned)
+## 2a. Phase 3: Disposition Combat Gates (implemented)
 
-Phase 3 (Disposition Combat) вводит gate-тесты по 7 категориям (35+ тестов):
+Phase 3 (Disposition Combat) gate-тесты по 11 категориям (148 тестов, 0 failures):
 
-| Категория | Scope | Тестов |
+| Категория | Suite | Тестов |
 |-----------|-------|--------|
-| Disposition mechanics | Шкала -100…+100, hard cap 25, clamping, start position | 6 |
-| Momentum system | Streak bonus, switch penalty, threat bonus, determinism | 5 |
-| Card play modes | Strike/Influence/Sacrifice contracts, drag targets | 4 |
-| Fate keywords | Surge +50%, Echo not after Sacrifice, disposition-dependent | 5 |
-| Enemy modes | Survival/Desperation/Weakened transitions, dynamic thresholds | 5 |
-| Resonance effects | Zone modifiers, backlash, cancellation | 5 |
-| Anti-meta | Vulnerability × Resonance 3D lookup, systemic asymmetry | 5 |
+| Disposition mechanics | DispositionMechanicsGateTests | 9 |
+| Momentum system | MomentumGateTests | 5 |
+| Energy system | EnergyGateTests | 6 |
+| Card play modes | DispositionCardPlayGateTests | 5 |
+| Fate keywords | FateKeywordGateTests | 13 |
+| Enemy modes | EnemyModeGateTests | 12 |
+| Enemy actions | EnemyActionGateTests | 5 |
+| Systemic asymmetry | SystemicAsymmetryGateTests | 4 |
+| Architecture boundary | DispositionArchBoundaryGateTests | 5 |
+| Scene gates | DispositionSceneGateTests | 4 |
+| Stress tests | DispositionStressTests | 5 |
 
-**Итого:** 35+ gate-тестов.
+**Итого:** 68 gate-тестов + 5 stress + snapshot + integration + simulation = 148 pass.
 
 **Инварианты Phase 3:**
-- `effective_power <= 25` (hard cap — четверть шкалы)
-- `disposition ∈ [-100, +100]`, clamped
-- Momentum — детерминистическая система, не задействует RNG
+- `effective_power <= 25` (hard cap -- четверть шкалы)
+- `disposition in [-100, +100]`, clamped
+- Momentum -- детерминистическая система, не задействует RNG
 - Sacrifice exhaust необратим (карта удаляется навсегда)
-- RitualCombatScene работает только через CombatSimulation API
-- ResonanceAtmosphereController — read-only (gate: `testAtmosphereControllerIsReadOnly`)
+- `adaptPenalty` cleared to 0 after consumption (one-time effect, not stacking)
+- `enemyModeStrikeBonus` is `public private(set) var` (engine-only mutation)
+- DispositionCombatScene работает только через CombatSimulation API
+- Tap-tap action buttons with preview numbers (drag as secondary input)
+- `makeCombatResult()` returns `DispositionCombatResult?` (no fatalError)
+- Preview API: `DispositionCalculator.previewStrikePower/previewInfluencePower`
 - Snapshot содержит `disposition`, `streakType`, `streakCount`, `enemyMode`, `heroHP`, `fateDeckState`
 - Restore из snapshot → visual state (no replay)
 
-> **Source:** [Disposition Combat Design v2.5](../../docs/plans/2026-02-18-disposition-combat-design.md) §10
-> **Status:** planned (design complete, documentation sync in progress)
+> **Source:** [Disposition Combat Design v2.5](../../docs/plans/2026-02-18-disposition-combat-design.md) §10, `RITUAL_COMBAT_TEST_MODEL.md`
+> **Status:** implemented (2026-03-03, 148 gate tests pass)
 
 ## 2b. Fate Deck & Disposition Balance Risks (Audit 2026-02-18)
 

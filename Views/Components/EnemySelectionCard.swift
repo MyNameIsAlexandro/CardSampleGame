@@ -25,23 +25,9 @@ struct EnemySelectionCard: View {
             }
 
             // Info
-            VStack(alignment: .leading, spacing: Spacing.xxs) {
-                Text(enemy.name.resolved)
-                    .font(.headline)
-                    .lineLimit(1)
-
-                HStack(spacing: Spacing.md) {
-                    Label("\(enemy.health)", systemImage: "heart.fill")
-                        .foregroundColor(AppColors.health)
-                    Label("\(enemy.power)", systemImage: "bolt.fill")
-                        .foregroundColor(AppColors.power)
-                    if let will = enemy.will, will > 0 {
-                        Label("\(will)", systemImage: "sparkle")
-                            .foregroundColor(AppColors.spirit)
-                    }
-                }
-                .font(.caption)
-            }
+            Text(enemy.name.resolved)
+                .font(.headline)
+                .lineLimit(1)
 
             Spacer()
 

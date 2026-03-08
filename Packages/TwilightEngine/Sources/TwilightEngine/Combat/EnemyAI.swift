@@ -155,18 +155,40 @@ public struct EnemyAI {
         let disp = simulation.disposition
         let roll = rng.nextInt(in: 0...99)
 
-        // Position-based probabilities
+        // Disposition-scaled probabilities — enemy reacts to player's progress.
         if disp < -50 {
-            // Near enemy destruction: Defend(60%) | Attack(40%)
-            return roll < 60 ? .defend(reduction: baseDefend) : .attack(damage: baseDamage)
-        } else if disp > 30 {
-            // Near subjugation: Provoke(50%) | Attack(50%)
-            return roll < 50 ? .provoke(penalty: baseProvoke) : .attack(damage: baseDamage)
-        } else {
-            // Neutral zone: Attack(80%) | random(20%)
+            // Near destruction: mostly defensive
+            // Defend(60%) | Attack(25%) | Plea(15%)
+            if roll < 60 { return .defend(reduction: baseDefend) }
+            if roll < 85 { return .attack(damage: baseDamage) }
+            return .plea(dispositionShift: 5)
+        } else if disp < -20 {
+            // Losing ground: mixed defensive
+            // Defend(40%) | Attack(40%) | Adapt(20%)
+            if roll < 40 { return .defend(reduction: baseDefend) }
             if roll < 80 { return .attack(damage: baseDamage) }
-            let sub = rng.nextInt(in: 0...1)
-            return sub == 0 ? .defend(reduction: baseDefend) : .provoke(penalty: baseProvoke)
+            return .adapt
+        } else if disp <= 20 {
+            // Neutral: balanced aggression
+            // Attack(60%) | Defend(15%) | Provoke(15%) | Adapt(10%)
+            if roll < 60 { return .attack(damage: baseDamage) }
+            if roll < 75 { return .defend(reduction: baseDefend) }
+            if roll < 90 { return .provoke(penalty: baseProvoke) }
+            return .adapt
+        } else if disp <= 50 {
+            // Player gaining influence: enemy resists
+            // Provoke(40%) | Attack(35%) | Plea(15%) | Adapt(10%)
+            if roll < 40 { return .provoke(penalty: baseProvoke) }
+            if roll < 75 { return .attack(damage: baseDamage) }
+            if roll < 90 { return .plea(dispositionShift: 5) }
+            return .adapt
+        } else {
+            // Near subjugation: desperate resistance
+            // Provoke(35%) | Plea(30%) | Attack(20%) | Adapt(15%)
+            if roll < 35 { return .provoke(penalty: baseProvoke) }
+            if roll < 65 { return .plea(dispositionShift: 8) }
+            if roll < 85 { return .attack(damage: baseDamage) }
+            return .adapt
         }
     }
 

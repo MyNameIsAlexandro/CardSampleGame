@@ -42,7 +42,7 @@ final class IdolNode: SKNode {
 
     // MARK: - Constants
 
-    static let frameSize = CGSize(width: 70, height: 100)
+    static let frameSize = CGSize(width: 100, height: 100)
     /// Minimum duration for mode transition animation (Epic 24 visual communication contract).
     static let modeTransitionDuration: TimeInterval = 0.35
     private let notchSize = CGSize(width: 2, height: 12)
@@ -76,10 +76,12 @@ final class IdolNode: SKNode {
         self.frameNode = frame
 
         let label = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
-        label.fontSize = 11
+        label.fontSize = 13
         label.fontColor = SKColor(red: 0.75, green: 0.70, blue: 0.80, alpha: 1)
         label.verticalAlignmentMode = .center
         label.horizontalAlignmentMode = .center
+        label.numberOfLines = 0
+        label.preferredMaxLayoutWidth = IdolNode.frameSize.width - 10
         label.position = CGPoint(x: 0, y: 20)
         self.nameLabel = label
 

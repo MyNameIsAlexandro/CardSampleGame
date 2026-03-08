@@ -17,12 +17,17 @@ struct DispositionCombatSceneView: View {
     var onHaptic: ((String) -> Void)?
 
     var body: some View {
-        SpriteView(scene: makeScene())
-            .ignoresSafeArea()
+        GeometryReader { geo in
+            SpriteView(scene: makeScene(viewSize: geo.size))
+                .ignoresSafeArea()
+        }
+        .ignoresSafeArea()
     }
 
-    private func makeScene() -> DispositionCombatScene {
-        let scene = DispositionCombatScene(size: DispositionCombatScene.sceneSize)
+    private func makeScene(viewSize: CGSize) -> DispositionCombatScene {
+        let sceneW: CGFloat = 390
+        let sceneH = viewSize.height * (sceneW / max(viewSize.width, 1))
+        let scene = DispositionCombatScene(size: CGSize(width: sceneW, height: sceneH))
         scene.scaleMode = .aspectFill
         scene.onCombatEnd = onCombatEnd
         scene.onSoundEffect = onSoundEffect

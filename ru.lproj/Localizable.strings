@@ -1158,6 +1158,9 @@
 "disposition.outcome.subjugated" = "Враг покорён";
 "disposition.outcome.defeated" = "Поражение...";
 "disposition.outcome.combat.over" = "Бой окончен";
+"disposition.hand.count" = "Рука: %d/%d";
+"disposition.discard.count" = "Сброс: %d";
+"disposition.exhaust.count" = "Изгнано: %d";
 "fate.keyword.surge" = "РЫВОК";
 "fate.keyword.shadow" = "ТЕНЬ";
 "fate.keyword.ward" = "ОБЕРЕГ";

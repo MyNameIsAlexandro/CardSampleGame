@@ -1152,6 +1152,9 @@
 "disposition.outcome.subjugated" = "Enemy Subjugated";
 "disposition.outcome.defeated" = "Defeated...";
 "disposition.outcome.combat.over" = "Combat Over";
+"disposition.hand.count" = "Hand: %d/%d";
+"disposition.discard.count" = "Discard: %d";
+"disposition.exhaust.count" = "Exhaust: %d";
 "fate.keyword.surge" = "SURGE";
 "fate.keyword.shadow" = "SHADOW";
 "fate.keyword.ward" = "WARD";

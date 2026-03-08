@@ -16,6 +16,9 @@
 		24FDDC6E399F926DABA01174 /* DispositionCombatScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67E74864AB7B6DA217261649 /* DispositionCombatScene.swift */; };
 		4298DB1B512B7A46A1B6B129 /* DispositionCombatScene+GameLoop.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA11A7E0D0F695D86A01092F /* DispositionCombatScene+GameLoop.swift */; };
 		DCI000020000000000000001 /* DispositionCombatScene+CardInteraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCI000010000000000000001 /* DispositionCombatScene+CardInteraction.swift */; };
+		DCN000020000000000000001 /* DispositionCombatScene+CardNodes.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCN000010000000000000001 /* DispositionCombatScene+CardNodes.swift */; };
+		DCE000020000000000000001 /* DispositionCombatScene+Effects.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCE000010000000000000001 /* DispositionCombatScene+Effects.swift */; };
+		DCS000020000000000000001 /* DispositionCombatScene+Summary.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCS000010000000000000001 /* DispositionCombatScene+Summary.swift */; };
 		4748A720AAB2F6E8C7247419 /* DispositionCardPlayGateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D23A7FDD58FA74AB0FA6657 /* DispositionCardPlayGateTests.swift */; };
 		4A62B7903EAB9A19F55B061F /* DispositionCombatBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5875F2DCFC769778EAB9096A /* DispositionCombatBridge.swift */; };
 		6352A5DDAB8A087797D247C9 /* ContentValidationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E948FF6BD58A6370B765AD94 /* ContentValidationTests.swift */; };
@@ -241,6 +244,9 @@
 		E948FF6BD58A6370B765AD94 /* ContentValidationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ContentValidationTests.swift; sourceTree = "<group>"; };
 		EA11A7E0D0F695D86A01092F /* DispositionCombatScene+GameLoop.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "DispositionCombatScene+GameLoop.swift"; sourceTree = "<group>"; };
 		DCI000010000000000000001 /* DispositionCombatScene+CardInteraction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DispositionCombatScene+CardInteraction.swift"; sourceTree = "<group>"; };
+		DCN000010000000000000001 /* DispositionCombatScene+CardNodes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DispositionCombatScene+CardNodes.swift"; sourceTree = "<group>"; };
+		DCE000010000000000000001 /* DispositionCombatScene+Effects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DispositionCombatScene+Effects.swift"; sourceTree = "<group>"; };
+		DCS000010000000000000001 /* DispositionCombatScene+Summary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DispositionCombatScene+Summary.swift"; sourceTree = "<group>"; };
 		ECV0000200000000000000001 /* EnemyCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemyCardView.swift; sourceTree = "<group>"; };
 		EIV000020000000000000001 /* EnemyIntentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemyIntentView.swift; sourceTree = "<group>"; };
 		ESC0000200000000000000001 /* EnemySelectionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemySelectionCard.swift; sourceTree = "<group>"; };
@@ -351,6 +357,9 @@
 				B6D1A14B68966E33DCED0A41 /* DispositionCombatScene+Layout.swift */,
 				EA11A7E0D0F695D86A01092F /* DispositionCombatScene+GameLoop.swift */,
 				DCI000010000000000000001 /* DispositionCombatScene+CardInteraction.swift */,
+				DCN000010000000000000001 /* DispositionCombatScene+CardNodes.swift */,
+				DCE000010000000000000001 /* DispositionCombatScene+Effects.swift */,
+				DCS000010000000000000001 /* DispositionCombatScene+Summary.swift */,
 				8E699A0AE1C17B5AF2389767 /* DispositionCombatSceneView.swift */,
 			);
 			name = Combat;
@@ -916,6 +925,9 @@
 				21FA6506632F6BC34AAFCF46 /* DispositionCombatScene+Layout.swift in Sources */,
 				4298DB1B512B7A46A1B6B129 /* DispositionCombatScene+GameLoop.swift in Sources */,
 				DCI000020000000000000001 /* DispositionCombatScene+CardInteraction.swift in Sources */,
+				DCN000020000000000000001 /* DispositionCombatScene+CardNodes.swift in Sources */,
+				DCE000020000000000000001 /* DispositionCombatScene+Effects.swift in Sources */,
+				DCS000020000000000000001 /* DispositionCombatScene+Summary.swift in Sources */,
 				8835941EDB53C5A2FFF97D8C /* DispositionCombatSceneView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

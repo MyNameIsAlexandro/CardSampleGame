@@ -266,42 +266,56 @@ xcodebuild test -project CardSampleGame.xcodeproj \
   -only-testing:CardSampleGameTests/CodeHygieneTests/testFirstPartySwiftFilesHaveCanonicalFileHeaders
 ```
 
-## 9a. Phase 3: Disposition Combat Tests (planned)
+## 9a. Phase 3: Disposition Combat Tests (implemented)
 
-Phase 3 вводит 7 категорий gate-тестов (35+). После реализации — запуск:
+Phase 3 disposition combat gate tests: 10 suites, 68 gate-тестов + 5 stress + snapshot + integration + simulation.
 
-**Engine-side (Disposition + Momentum + Fate):**
+**Engine-side (all disposition gate suites):**
 ```bash
 DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift test \
   --package-path Packages/TwilightEngine \
-  --filter "DispositionMechanicsGateTests|MomentumGateTests|FateKeywordGateTests|EnemyModeGateTests"
+  --filter "DispositionMechanicsGateTests|MomentumGateTests|EnergyGateTests|FateKeywordGateTests|EnemyModeGateTests|EnemyActionGateTests|SystemicAsymmetryGateTests|DispositionStressTests"
 ```
 
-**App-side (Scene + Resonance + Integration + Anti-Meta):**
+**App-side (Scene + CardPlay + ArchBoundary):**
 ```bash
-xcodebuild test -project CardSampleGame.xcodeproj \
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
+  bash .github/ci/run_xcodebuild.sh test \
   -scheme CardSampleGame \
   -destination "$(bash .github/ci/select_ios_destination.sh --scheme CardSampleGame)" \
-  -only-testing:CardSampleGameTests/CardPlayGateTests \
-  -only-testing:CardSampleGameTests/ResonanceEffectsGateTests \
-  -only-testing:CardSampleGameTests/AntiMetaGateTests \
-  -only-testing:CardSampleGameTests/DispositionIntegrationGateTests
+  -only-testing:CardSampleGameTests/DispositionCardPlayGateTests \
+  -only-testing:CardSampleGameTests/DispositionArchBoundaryGateTests \
+  -only-testing:CardSampleGameTests/DispositionSceneGateTests
 ```
 
-**Gate-тесты по категориям (35+):**
+**Simulation (separate run):**
+```bash
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
+  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift test \
+  --package-path Packages/TwilightEngine \
+  --filter "CombatSimulationAgentTests"
+```
 
-| Категория | Тестов | Ключевые инварианты |
-|-----------|--------|---------------------|
-| Disposition mechanics | 6 | Шкала -100…+100, hard cap effective_power ≤ 25, clamping |
-| Momentum system | 5 | streak_bonus, switch_penalty (threshold 3), threat_bonus |
-| Card play modes | 4 | Strike/Influence/Sacrifice contracts, drag targets |
-| Fate keywords | 5 | Surge +50%, Echo not after Sacrifice, disposition-dependent effects |
-| Enemy modes | 5 | Survival/Desperation/Weakened transitions, dynamic thresholds |
-| Resonance effects | 5 | Zone modifiers (Навь/Правь/Явь), backlash cancellation |
-| Anti-meta | 5 | Vulnerability × Resonance 3D lookup, systemic asymmetry |
+**Gate-тесты по категориям:**
 
-> **Source:** [Disposition Combat Design v2.5](../../docs/plans/2026-02-18-disposition-combat-design.md) §10, `QUALITY_CONTROL_MODEL.md` §2a
+| Категория | Suite | Тестов | Ключевые инварианты |
+|-----------|-------|--------|---------------------|
+| Disposition mechanics | DispositionMechanicsGateTests | 9 | Шкала -100...+100, hard cap effective_power <= 25, clamping, determinism, affinity matrix |
+| Momentum system | MomentumGateTests | 5 | streak_bonus, switch_penalty (threshold 3), threat_bonus, adaptPenalty clearing |
+| Energy system | EnergyGateTests | 6 | Energy deduction, insufficient energy rejection, auto turn-end, energy reset, Nav/Prav sacrifice modifiers |
+| Card play modes | DispositionCardPlayGateTests | 5 | Strike/Influence/Sacrifice contracts, tap-tap action buttons (drag as secondary) |
+| Fate keywords | FateKeywordGateTests | 13 | Surge +50%, Echo not after Sacrifice, Focus ignores Defend/Provoke, Shadow, Ward, disposition-dependent |
+| Enemy modes | EnemyModeGateTests | 12 | Survival/Desperation/Weakened transitions, dynamic thresholds, hysteresis, Rage/Plea effects |
+| Enemy actions | EnemyActionGateTests | 5 | Attack/Defend/Provoke/Adapt base effects, momentum reading |
+| Systemic asymmetry | SystemicAsymmetryGateTests | 4 | Vulnerability x Resonance 3D lookup, no absolute vulnerability |
+| Architecture boundary | DispositionArchBoundaryGateTests | 5 | Engine owns disposition/fate, save/restore, arena isolation |
+| Scene gates | DispositionSceneGateTests | 4 | Scene uses CombatSimulation API only, action buttons produce canonical commands |
+| Stress tests | DispositionStressTests | 5 | Exploit scenarios: sacrifice cycle, echo snowball, threshold dancing, influence lock, all-sacrifice opener |
+
+**Итого:** 148 gate tests pass, 0 failures (as of 2026-03-03).
+
+> **Source:** [Disposition Combat Design v2.5](../../docs/plans/2026-02-18-disposition-combat-design.md) §10, `QUALITY_CONTROL_MODEL.md` §2a, `RITUAL_COMBAT_TEST_MODEL.md`
 
 ## 10. Change Discipline
 

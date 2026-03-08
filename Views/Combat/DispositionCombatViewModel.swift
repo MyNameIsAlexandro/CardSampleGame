@@ -125,7 +125,7 @@ final class DispositionCombatViewModel: ObservableObject {
 
     /// Set the enemy mode strike bonus on the simulation (e.g. +3 in survival).
     func setEnemyModeStrikeBonus(_ bonus: Int) {
-        simulation.enemyModeStrikeBonus = bonus
+        simulation.updateEnemyModeStrikeBonus(bonus)
     }
 
     // MARK: - Turn Management
@@ -176,6 +176,14 @@ final class DispositionCombatViewModel: ObservableObject {
 
     /// Whether sacrifice is available this turn.
     var canSacrifice: Bool { !simulation.sacrificeUsedThisTurn }
+
+    /// Starting energy for the combat (for HUD display).
+    var startingEnergy: Int { simulation.startingEnergy }
+
+    /// Access simulation and RNG for enemy intent computation.
+    func computeEnemyAction(mode: EnemyMode) -> EnemyAction {
+        EnemyAI.selectAction(mode: mode, simulation: simulation, rng: simulation.rng)
+    }
 
     // MARK: - Result
 

@@ -14,9 +14,29 @@ import TwilightEngine
 ///   - `DispositionCombatScene+GameLoop.swift` — input, phases, result emission
 final class DispositionCombatScene: SKScene {
 
-    // MARK: - Configuration
+    // MARK: - Proportional Layout
 
-    static let sceneSize = CGSize(width: 390, height: 700)
+    /// Proportional layout — Y positions as fractions of scene height.
+    /// Gaps are uniform (35–85pt). Max gap = 85pt play area.
+    /// Design: compact enemy top, bar center, hand dominant bottom.
+    enum Layout {
+        /// Fixed top padding for Dynamic Island clearance (80pt).
+        static let hudTopPad: CGFloat = 80
+        // Enemy zone — tight stack
+        static let idol: CGFloat = 0.82
+        static let intent: CGFloat = 0.74
+        static let enemyMods: CGFloat = 0.66
+        static let bar: CGFloat = 0.58
+        // Player zone — hand dominant
+        static let heroMods: CGFloat = 0.48
+        static let hand: CGFloat = 0.36
+        static let actions: CGFloat = 0.20
+        static let endTurn: CGFloat = 0.20
+        static let handLabels: CGFloat = 0.12
+        // Contextual (appear on interaction)
+        static let cardPreview: CGFloat = 0.56
+        static let fateFlash: CGFloat = 0.50
+    }
 
     // MARK: - ViewModel
 
@@ -27,6 +47,7 @@ final class DispositionCombatScene: SKScene {
     var onCombatEnd: ((DispositionCombatResult) -> Void)?
     var onSoundEffect: ((String) -> Void)?
     var onHaptic: ((String) -> Void)?
+    var summaryCompletion: (() -> Void)?
 
     // MARK: - Node References
 
@@ -37,6 +58,10 @@ final class DispositionCombatScene: SKScene {
     var strikeZone: SKShapeNode?
     var influenceZone: SKShapeNode?
     var sacrificeZone: SKShapeNode?
+    var actionButtonsContainer: SKNode?
+    var strikeButton: SKNode?
+    var influenceButton: SKNode?
+    var sacrificeButton: SKNode?
     var endTurnButton: SKShapeNode?
     var handCardNodes: [String: SKNode] = [:]
 
@@ -127,36 +152,45 @@ final class DispositionCombatScene: SKScene {
 
         let barWidth: CGFloat = 300
         let fraction = CGFloat(disposition + 100) / 200.0
-        let fillWidth = max(4, barWidth * fraction)
+        let fillWidth = barWidth * fraction
 
+        // Gradient: red (-100) → gray (0) → blue (+100) per design doc §9.1
         let color: SKColor
-        if disposition < -50 {
-            color = SKColor(red: 0.90, green: 0.20, blue: 0.20, alpha: 1)
-        } else if disposition < -20 {
-            color = SKColor(red: 0.90, green: 0.50, blue: 0.20, alpha: 1)
-        } else if disposition < 20 {
-            color = SKColor(red: 0.80, green: 0.80, blue: 0.30, alpha: 1)
-        } else if disposition < 50 {
-            color = SKColor(red: 0.40, green: 0.75, blue: 0.40, alpha: 1)
+        let t = fraction // 0.0 = -100, 0.5 = 0, 1.0 = +100
+        if t < 0.5 {
+            let s = t / 0.5 // 0→1 within left half
+            let r = 0.85 - s * 0.45
+            let g = 0.25 + s * 0.20
+            let b = 0.20 + s * 0.20
+            color = SKColor(red: r, green: g, blue: b, alpha: 1)
         } else {
-            color = SKColor(red: 0.30, green: 0.60, blue: 0.90, alpha: 1)
+            let s = (t - 0.5) / 0.5 // 0→1 within right half
+            let r = 0.40 - s * 0.10
+            let g = 0.45 + s * 0.15
+            let b = 0.40 + s * 0.50
+            color = SKColor(red: r, green: g, blue: b, alpha: 1)
         }
 
         if animated {
-            let resize = SKAction.resize(toWidth: fillWidth, duration: 0.3)
-            resize.timingMode = .easeOut
-            fill.run(resize)
-            let colorize = SKAction.customAction(withDuration: 0.3) { node, _ in
-                (node as? SKShapeNode)?.fillColor = color
+            let startWidth = fill.path?.boundingBox.width ?? barWidth / 2
+            let action = SKAction.customAction(withDuration: 0.3) { node, elapsed in
+                guard let shape = node as? SKShapeNode else { return }
+                let t = min(1.0, elapsed / 0.3)
+                let eased = 1.0 - (1.0 - t) * (1.0 - t)
+                let w = startWidth + (fillWidth - startWidth) * eased
+                let rect = CGRect(x: -barWidth / 2, y: -10, width: w, height: 20)
+                shape.path = CGPath(roundedRect: rect, cornerWidth: 3, cornerHeight: 3, transform: nil)
+                shape.fillColor = color
             }
-            fill.run(colorize)
+            fill.run(action, withKey: "fillAnim")
         } else {
-            let rect = CGRect(x: -barWidth / 2, y: -8, width: fillWidth, height: 16)
-            fill.path = CGPath(roundedRect: rect, cornerWidth: 4, cornerHeight: 4, transform: nil)
+            let rect = CGRect(x: -barWidth / 2, y: -10, width: fillWidth, height: 20)
+            fill.path = CGPath(roundedRect: rect, cornerWidth: 3, cornerHeight: 3, transform: nil)
             fill.fillColor = color
         }
 
         dispositionLabel?.text = "\(disposition)"
+        dispositionLabel?.fontColor = color
     }
 
     // MARK: - Enemy Mode
@@ -178,6 +212,23 @@ final class DispositionCombatScene: SKScene {
         if idol.currentModeAura != aura {
             idol.playModeTransition(to: aura)
             onHaptic?("medium")
+
+            // Show mode change flash text near the idol
+            let modeText: String
+            switch newMode {
+            case .survival:
+                modeText = "Выживание — атаки усилены!"
+            case .desperation:
+                modeText = "Отчаяние — удвоенный урон!"
+            case .weakened:
+                modeText = "Ослаблен — действует слабо"
+            case .normal:
+                modeText = ""
+            }
+            if !modeText.isEmpty {
+                let pos = idol.position
+                showFloatingText(modeText, at: CGPoint(x: pos.x, y: pos.y - 50), color: .orange)
+            }
         }
 
         let bonus = DispositionCalculator.survivalStrikeBonus(
@@ -192,7 +243,7 @@ final class DispositionCombatScene: SKScene {
         guard let vm = viewModel,
               let label = childNode(withName: "energyLabel") as? SKLabelNode else { return }
         let newEnergy = vm.energy
-        label.text = "⚡ \(newEnergy)/\(vm.simulation.startingEnergy)"
+        label.text = "⚡ \(newEnergy)/\(vm.startingEnergy)"
 
         if let prev = prevEnergy, prev != newEnergy {
             let originalColor = label.fontColor
@@ -245,116 +296,72 @@ final class DispositionCombatScene: SKScene {
 
         guard !cards.isEmpty else { return }
 
-        let scaleFactor = cards.count > RitualTheme.scaleThreshold
-            ? min(1.0, CGFloat(RitualTheme.scaleThreshold) / CGFloat(cards.count))
-            : 1.0
-        let centerX = DispositionCombatScene.sceneSize.width / 2
-        let baseY: CGFloat = 105
-        let centerIndex = CGFloat(cards.count - 1) / 2.0
-        let overlapSpacing = min(
-            RitualTheme.baseOverlapSpacing,
-            (DispositionCombatScene.sceneSize.width - 40) / CGFloat(cards.count)
-        )
+        let scaleFactor: CGFloat
+        switch cards.count {
+        case 1...3: scaleFactor = 0.85
+        case 4...5: scaleFactor = 0.78
+        case 6...7: scaleFactor = 0.70
+        default:    scaleFactor = 0.62
+        }
+        let centerX = size.width / 2
+        let baseY = size.height * Layout.hand
+
+        // Horizontal row — positions are card centers, so reserve half-card on each side
+        let cardW = RitualTheme.cardSize.width * scaleFactor
+        let edgePad: CGFloat = 14
+        let availableSpan = size.width - cardW - edgePad * 2
+        let idealGap = cardW * 0.72
+        let spacing: CGFloat = cards.count > 1
+            ? min(idealGap, availableSpan / CGFloat(cards.count - 1))
+            : 0
+        let totalSpan = spacing * CGFloat(max(cards.count - 1, 0))
+        let startX = centerX - totalSpan / 2
 
         for (i, card) in cards.enumerated() {
-            let offset = CGFloat(i) - centerIndex
-            let angle = offset * RitualTheme.fanAngleStep
-            let yOffset = -abs(offset) * RitualTheme.arcYDropPerUnit
-
             let position = CGPoint(
-                x: centerX + offset * overlapSpacing,
-                y: baseY + yOffset
+                x: startX + CGFloat(i) * spacing,
+                y: baseY
             )
-            let rotation = -angle * .pi / 180
 
             if let existingNode = handCardNodes[card.id] {
-                // Animate existing card to its new position
                 existingNode.removeAction(forKey: "cardSway")
                 let move = SKAction.move(to: position, duration: 0.25)
                 move.timingMode = .easeOut
-                let rotate = SKAction.rotate(toAngle: rotation, duration: 0.2)
-                rotate.timingMode = .easeOut
+                let rotate = SKAction.rotate(toAngle: 0, duration: 0.2)
                 let rescale = SKAction.scale(to: scaleFactor, duration: 0.2)
                 existingNode.run(SKAction.group([move, rotate, rescale])) { [weak self] in
                     self?.addCardSway(to: existingNode, index: i)
                 }
                 existingNode.zPosition = CGFloat(20 + i)
             } else {
-                // Create new card node
                 let node = makeCardNode(card: card)
-                node.position = position
-                node.zRotation = rotation
+                node.position = CGPoint(x: centerX, y: baseY - 50)
+                node.zRotation = 0
                 node.zPosition = CGFloat(20 + i)
-                node.setScale(scaleFactor)
+                node.setScale(0.3)
+                node.alpha = 0
                 node.name = "card_\(card.id)"
                 layer.addChild(node)
                 handCardNodes[card.id] = node
-                addCardSway(to: node, index: i)
+
+                let delay = SKAction.wait(forDuration: Double(i) * 0.06)
+                let move = SKAction.move(to: position, duration: 0.3)
+                move.timingMode = .easeOut
+                let scale = SKAction.scale(to: scaleFactor, duration: 0.25)
+                let fadeIn = SKAction.fadeIn(withDuration: 0.15)
+                node.run(SKAction.sequence([
+                    delay,
+                    SKAction.group([move, scale, fadeIn])
+                ])) { [weak self] in
+                    self?.addCardSway(to: node, index: i)
+                }
             }
 
             originalCardPositions[card.id] = position
-            originalCardRotations[card.id] = rotation
+            originalCardRotations[card.id] = 0
             originalCardZPositions[card.id] = CGFloat(20 + i)
             originalCardScales[card.id] = scaleFactor
         }
-    }
-
-    func addCardSway(to node: SKNode, index: Int) {
-        let amp = RitualTheme.swayAmplitude
-        let dur = RitualTheme.swayCycleDuration
-        let stagger = RitualTheme.swayStagger * Double(index)
-
-        let sway = SKAction.sequence([
-            SKAction.wait(forDuration: stagger),
-            SKAction.repeatForever(SKAction.sequence([
-                SKAction.rotate(byAngle: amp, duration: dur / 2),
-                SKAction.rotate(byAngle: -amp * 2, duration: dur),
-                SKAction.rotate(byAngle: amp, duration: dur / 2)
-            ]))
-        ])
-        node.run(sway, withKey: "cardSway")
-    }
-
-    func makeCardNode(card: Card) -> SKNode {
-        let size = RitualTheme.cardSize
-        let container = SKNode()
-
-        let bg = SKShapeNode(rectOf: size, cornerRadius: 8)
-        bg.fillColor = SKColor(red: 0.12, green: 0.10, blue: 0.16, alpha: 1)
-        bg.strokeColor = SKColor(red: 0.35, green: 0.30, blue: 0.40, alpha: 1)
-        bg.lineWidth = 1.5
-        container.addChild(bg)
-
-        let nameLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
-        nameLabel.text = String(card.name.prefix(10))
-        nameLabel.fontSize = 10
-        nameLabel.fontColor = .white
-        nameLabel.position = CGPoint(x: 0, y: -2)
-        nameLabel.verticalAlignmentMode = .center
-        nameLabel.horizontalAlignmentMode = .center
-        container.addChild(nameLabel)
-
-        if let power = card.power, power > 0 {
-            let powerLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
-            powerLabel.text = "\(power)"
-            powerLabel.fontSize = 14
-            powerLabel.fontColor = SKColor(red: 0.9, green: 0.8, blue: 0.3, alpha: 1)
-            powerLabel.position = CGPoint(x: -size.width / 2 + 14, y: size.height / 2 - 14)
-            powerLabel.verticalAlignmentMode = .center
-            container.addChild(powerLabel)
-        }
-
-        if let cost = card.cost, cost > 0 {
-            let costLabel = SKLabelNode(fontNamed: "AvenirNext-DemiBold")
-            costLabel.text = "◉\(cost)"
-            costLabel.fontSize = 10
-            costLabel.fontColor = SKColor(red: 0.5, green: 0.7, blue: 0.9, alpha: 1)
-            costLabel.position = CGPoint(x: size.width / 2 - 16, y: size.height / 2 - 14)
-            costLabel.verticalAlignmentMode = .center
-            container.addChild(costLabel)
-        }
-
-        return container
     }
 
     func dimUnplayableCards() {
@@ -362,7 +369,14 @@ final class DispositionCombatScene: SKScene {
         for (cardId, node) in handCardNodes {
             guard let card = vm.hand.first(where: { $0.id == cardId }) else { continue }
             let cost = card.cost ?? 1
-            node.alpha = cost <= vm.energy ? 1.0 : 0.4
+            let playable = cost <= vm.energy
+            node.alpha = playable ? 1.0 : 0.45
+            if let border = node.childNode(withName: "cardBorder") as? SKShapeNode {
+                border.glowWidth = playable ? 1 : 0
+                border.strokeColor = playable
+                    ? cardAccentColor(for: card.type).withAlphaComponent(0.5)
+                    : SKColor(white: 0.3, alpha: 0.4)
+            }
         }
     }
 
@@ -374,10 +388,18 @@ final class DispositionCombatScene: SKScene {
         let hasCards = !vm.hand.isEmpty
         let combatActive = vm.outcome == nil
 
+        // Legacy zone nodes (may be nil after layout redesign)
         strikeZone?.alpha = (hasEnergy && hasCards && combatActive) ? 1.0 : 0.3
         influenceZone?.alpha = (hasEnergy && hasCards && combatActive) ? 1.0 : 0.3
         sacrificeZone?.alpha = (hasEnergy && hasCards && combatActive
-            && !vm.simulation.sacrificeUsedThisTurn) ? 1.0 : 0.3
+            && vm.canSacrifice) ? 1.0 : 0.3
+
+        // New action buttons — visibility driven by card selection
+        let canPlay = hasEnergy && hasCards && combatActive
+        strikeButton?.alpha = canPlay ? 1.0 : 0.3
+        influenceButton?.alpha = canPlay ? 1.0 : 0.3
+        sacrificeButton?.alpha = (canPlay && vm.canSacrifice) ? 1.0 : 0.4
+
         endTurnButton?.alpha = combatActive ? 1.0 : 0.3
     }
 

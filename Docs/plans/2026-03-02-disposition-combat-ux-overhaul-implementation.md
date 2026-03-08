@@ -1,5 +1,7 @@
 # Disposition Combat UX Overhaul — Implementation Plan
 
+> **COMPLETED: 2026-03-03** -- All 11 tasks implemented. 148 gate tests pass, 0 failures. UX overhaul shipped: tap-tap action buttons with preview numbers, compact HUD, card-to-bar animations, floating damage numbers, fate flash, enemy anticipation pulse, post-combat summary screen.
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Make disposition combat playable end-to-end with clear UX: compact HUD, action buttons with preview numbers, visual feedback, and post-combat summary.
