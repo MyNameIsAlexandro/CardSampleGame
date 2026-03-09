@@ -1,7 +1,7 @@
 # Disposition Combat Test Model (Phase 3)
 
 **Scope:** Комплексная тестовая модель Phase 3 — Disposition Combat.
-**Status:** v5.4 — UX overhaul complete (tap-tap buttons, preview API, visual feedback), 148 gate tests pass.
+**Status:** v5.5 — UX overhaul complete; interaction gate suite synced with button-only drag fallback, preview semantics, End Turn visibility, and long-press overlays.
 **Policy sync:** CLAUDE.md v4.1, QUALITY_CONTROL_MODEL.md §2a, ENCOUNTER_TEST_MODEL.md
 **Design ref:** [`docs/plans/2026-02-18-disposition-combat-design.md`](../../docs/plans/2026-02-18-disposition-combat-design.md) (v2.5, SoT)
 **Last updated:** 2026-03-03
@@ -39,7 +39,7 @@ CardSampleGameTests/
 └── GateTests/
     ├── DispositionCardPlayGateTests.swift       (5 тестов)
     ├── DispositionArchBoundaryGateTests.swift   (5 тестов)
-    └── DispositionSceneGateTests.swift          (4 тестов)
+    └── DispositionSceneGateTests.swift          (8 тестов)
 ```
 
 ### 1.3 Production source files (Views/Combat/)
@@ -60,7 +60,7 @@ Views/Combat/
 └── EnemySelectionCard.swift                     (enemy selection UI)
 ```
 
-**Итого:** 68 gate-тестов + 5 stress + snapshot + integration + simulation.
+**Итого:** 72 gate-теста + 5 stress + snapshot + integration + simulation.
 
 ---
 
@@ -690,7 +690,7 @@ THEN:  world.resonance изменился
   AND: nарративная развилка доступна
 ```
 
-### 3.8 DispositionSceneGateTests (app) — 4 теста
+### 3.8 DispositionSceneGateTests (app) — 8 тестов
 
 **testRitualSceneUsesOnlyCombatSimulationAPI**
 ```
@@ -699,7 +699,7 @@ THEN: все мутации через CombatSimulation methods
   AND: нет прямого доступа к engine полям
 ```
 
-**testActionButtonsProduceCanonicalCommands**
+**testDragDropProducesCanonicalCommands**
 ```
 GIVEN: tap card → tap Strike button
 THEN:  вызван sim.playCardAsStrike(cardId:targetId:)
@@ -713,6 +713,45 @@ THEN:  вызван sim.playCardAsSacrifice(cardId:)
 // Drag remains as alternative input — same canonical API
 GIVEN: drag карты → strike button area
 THEN:  вызван sim.playCardAsStrike(cardId:targetId:)
+```
+
+**testDragFallbackUsesOnlyActionButtons**
+```
+GIVEN: action buttons видимы после выбора карты
+WHEN:  drop происходит в реальный frame кнопки Strike
+THEN:  determineDropZone(at:) = .strike
+
+GIVEN: точка попадает только в legacy Y-band без кнопки
+THEN:  determineDropZone(at:) = .none
+```
+
+**testActionPreviewPresentationSignalsBoostAndPenalty**
+```
+GIVEN: preview power > base power
+THEN:  текст содержит ↑
+  AND: цветовой тон = boosted (зелёный)
+
+GIVEN: preview power < base power
+THEN:  цветовой тон = weakened (красный)
+
+GIVEN: sacrifice недоступен
+THEN:  preview = "—"
+  AND: цветовой тон = disabled
+```
+
+**testShowActionButtonsDoesNotHideEndTurn**
+```
+GIVEN: карта выбрана и action buttons показаны
+THEN:  End Turn остаётся alpha = 1
+  AND: на кнопке не запускается fade-out action
+```
+
+**testInteractionDetailsOverlayRendersForHudCardAndEnemyTargets**
+```
+GIVEN: long-press target = HUD / card / enemy
+WHEN:  showInteractionDetails(for:)
+THEN:  popup overlay создаётся
+  AND: title + detail lines присутствуют в node tree
 ```
 
 **testResonanceAtmosphereIsReadOnly**
@@ -1089,7 +1128,7 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
 | **P1** | EnemyActionGateTests | Integration, Stress | 5 |
 | **P2** | SystemicAsymmetryGateTests | Balance | 4 |
 | **P2** | DispositionArchBoundaryGateTests | Release | 5 |
-| **P2** | DispositionSceneGateTests | Release | 4 |
+| **P2** | DispositionSceneGateTests | Release | 8 |
 | **P3** | DispositionStressTests | Balance | 5 |
 | **P3** | DispositionIntegrationTests | Release | 13 |
 | **P4** | CombatSimulationAgentTests | Balance tuning | 30+ |
@@ -1106,12 +1145,13 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
 
 ---
 
-**Версия документа:** 5.4
-**Дата:** 3 марта 2026
-**Статус:** Implemented — 148 gate tests pass, 0 failures
+**Версия документа:** 5.5
+**Дата:** 9 марта 2026
+**Статус:** Implemented — interaction gate suite synced with production scene behavior
 
 **Changelog:**
 - v5.0 → v5.1: +19 invariants, +2 suites (Energy, EnemyAction), audit gaps closed
 - v5.1 → v5.2: tie-break rule, arena scope, threshold metrics, simulation granularity
 - v5.2 → v5.3: sacrifice cost model finalized (`card.cost` based, not free). Nav = cost-1, Prav = extra exhaust. Adapt = soft-block formalized. SPRINT.md synced.
 - v5.3 → v5.4: UX overhaul sync — tap-tap action buttons replace Y-band drag zones (drag remains as secondary input). File organization updated to match actual structure (all disposition tests in GateTests/). New source files documented (+Effects.swift, +Summary.swift). adaptPenalty clearing after consumption documented. Preview API (DispositionCalculator.previewStrikePower/previewInfluencePower) and ViewModel preview methods documented. makeCombatResult returns optional instead of fatalError. enemyModeStrikeBonus changed to `public private(set) var`.
+- v5.4 → v5.5: DispositionSceneGateTests expanded from 4 to 8 tests. Interaction contract now explicitly covers button-only drag fallback, preview boost/penalty semantics, End Turn visibility, and long-press overlays for HUD/card/enemy targets.

@@ -3,6 +3,7 @@
 /// Зона ответственности: Properties, card rendering, visual sync. Layout в +Layout, loop в +GameLoop.
 /// Контекст: Phase 3 Disposition Combat. Scene uses DispositionCombatViewModel (не simulation напрямую).
 
+import Foundation
 import SpriteKit
 import TwilightEngine
 
@@ -55,9 +56,6 @@ final class DispositionCombatScene: SKScene {
     var dispositionBar: SKShapeNode?
     var dispositionFill: SKShapeNode?
     var dispositionLabel: SKLabelNode?
-    var strikeZone: SKShapeNode?
-    var influenceZone: SKShapeNode?
-    var sacrificeZone: SKShapeNode?
     var actionButtonsContainer: SKNode?
     var strikeButton: SKNode?
     var influenceButton: SKNode?
@@ -81,6 +79,7 @@ final class DispositionCombatScene: SKScene {
     var combatLayer: SKNode?
     var handLayer: SKNode?
     var overlayLayer: SKNode?
+    var interactionDetailsNode: SKNode?
 
     // MARK: - Input State
 
@@ -94,9 +93,14 @@ final class DispositionCombatScene: SKScene {
     var originalCardRotations: [String: CGFloat] = [:]
     var originalCardZPositions: [String: CGFloat] = [:]
     var originalCardScales: [String: CGFloat] = [:]
+    var pendingInteractionLongPress: DispatchWorkItem?
+    var pendingInteractionTarget: InteractionDetailsTarget?
+    var interactionLongPressTriggered: Bool = false
+    var hasShownInteractionHint: Bool = false
 
     /// Minimum distance to start drag (prevents accidental plays).
     static let dragThreshold: CGFloat = 20
+    static let longPressDuration: TimeInterval = 0.4
 
     // MARK: - Enemy AI State
 
@@ -111,6 +115,12 @@ final class DispositionCombatScene: SKScene {
         case playerAction
         case enemyResolution
         case finished
+    }
+
+    enum InteractionDetailsTarget: Equatable {
+        case card(String)
+        case hud
+        case enemy
     }
 
     var phase: CombatPhase = .playerAction
@@ -259,15 +269,9 @@ final class DispositionCombatScene: SKScene {
     // MARK: - Streak Label
 
     func updateStreakLabel() {
-        guard let vm = viewModel,
-              let label = childNode(withName: "streakLabel") as? SKLabelNode else { return }
-        if let streakType = vm.streakType, vm.streakCount > 1 {
-            let icon = streakType == .strike ? "⚔" : (streakType == .influence ? "☽" : "♦")
-            label.text = "\(icon)×\(vm.streakCount)"
-            label.alpha = 1
-        } else {
-            label.alpha = 0
-        }
+        guard let label = childNode(withName: "streakLabel") as? SKLabelNode else { return }
+        label.text = ""
+        label.alpha = 0
     }
 
     // MARK: - Hand Cards
@@ -380,7 +384,7 @@ final class DispositionCombatScene: SKScene {
         }
     }
 
-    // MARK: - Action Zone Visibility
+    // MARK: - Action Availability
 
     func updateActionZoneVisibility() {
         guard let vm = viewModel else { return }
@@ -388,13 +392,6 @@ final class DispositionCombatScene: SKScene {
         let hasCards = !vm.hand.isEmpty
         let combatActive = vm.outcome == nil
 
-        // Legacy zone nodes (may be nil after layout redesign)
-        strikeZone?.alpha = (hasEnergy && hasCards && combatActive) ? 1.0 : 0.3
-        influenceZone?.alpha = (hasEnergy && hasCards && combatActive) ? 1.0 : 0.3
-        sacrificeZone?.alpha = (hasEnergy && hasCards && combatActive
-            && vm.canSacrifice) ? 1.0 : 0.3
-
-        // New action buttons — visibility driven by card selection
         let canPlay = hasEnergy && hasCards && combatActive
         strikeButton?.alpha = canPlay ? 1.0 : 0.3
         influenceButton?.alpha = canPlay ? 1.0 : 0.3

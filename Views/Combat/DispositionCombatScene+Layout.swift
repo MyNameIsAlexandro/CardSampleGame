@@ -1,6 +1,6 @@
 /// Файл: Views/Combat/DispositionCombatScene+Layout.swift
 /// Назначение: Layout Disposition Combat сцены — создание и позиционирование всех узлов.
-/// Зона ответственности: Disposition track bar, idol, action zones, hand area, HUD, intent label.
+/// Зона ответственности: Disposition track bar, idol, action buttons, hand area, HUD, intent label.
 /// Контекст: Phase 3 Disposition Combat. Extension of DispositionCombatScene.
 
 import SpriteKit
@@ -272,34 +272,45 @@ extension DispositionCombatScene {
 
         let strikePower = vm.previewStrikePower(card: card)
         let influencePower = vm.previewInfluencePower(card: card)
+        let basePower = card.power ?? 1
 
         if let label = strikeButton?.childNode(withName: "strikeButtonPreview") as? SKLabelNode {
-            label.text = "-\(strikePower)"
-            let basePower = card.power ?? 1
-            label.fontColor = strikePower > basePower
-                ? SKColor(red: 0.3, green: 0.9, blue: 0.3, alpha: 1)
-                : .white
+            let presentation = actionPreviewPresentation(
+                for: .strike,
+                value: strikePower,
+                basePower: basePower
+            )
+            label.text = presentation.text
+            label.fontColor = presentation.color
         }
         if let label = influenceButton?.childNode(withName: "influenceButtonPreview") as? SKLabelNode {
-            label.text = "+\(influencePower)"
-            let basePower = card.power ?? 1
-            label.fontColor = influencePower > basePower
-                ? SKColor(red: 0.3, green: 0.9, blue: 0.3, alpha: 1)
-                : .white
+            let presentation = actionPreviewPresentation(
+                for: .influence,
+                value: influencePower,
+                basePower: basePower
+            )
+            label.text = presentation.text
+            label.fontColor = presentation.color
         }
         if let label = sacrificeButton?.childNode(withName: "sacrificeButtonPreview") as? SKLabelNode {
-            label.text = vm.canSacrifice ? "+1 ⚡" : "—"
-            label.fontColor = vm.canSacrifice ? .white : .gray
+            let presentation = actionPreviewPresentation(
+                for: .sacrifice,
+                value: 1,
+                basePower: 1,
+                enabled: vm.canSacrifice
+            )
+            label.text = presentation.text
+            label.fontColor = presentation.color
         }
         sacrificeButton?.alpha = vm.canSacrifice ? 1.0 : 0.4
 
-        container.run(SKAction.fadeIn(withDuration: 0.15))
-        endTurnButton?.run(SKAction.fadeOut(withDuration: 0.1))
+        container.removeAllActions()
+        container.alpha = 1
     }
 
     func hideActionButtons() {
-        actionButtonsContainer?.run(SKAction.fadeOut(withDuration: 0.1))
-        endTurnButton?.run(SKAction.fadeIn(withDuration: 0.15))
+        actionButtonsContainer?.removeAllActions()
+        actionButtonsContainer?.alpha = 0
     }
 
     private func makeActionZone(
@@ -346,7 +357,7 @@ extension DispositionCombatScene {
     }
 
     // MARK: - HUD
-    // Two-row HUD: Row 1 = HP + Energy (high priority), Row 2 = Phase + Streak.
+    // Primary HUD stays visible; secondary counters moved to long-press details overlay.
     // Sits below Dynamic Island safe area (Layout.hudTopPad = 80pt).
 
     private func buildHUD(centerX: CGFloat, sceneW: CGFloat) {
@@ -411,6 +422,7 @@ extension DispositionCombatScene {
         handSizeLabel.text = ""
         handSizeLabel.position = CGPoint(x: centerX, y: handLabelsY)
         handSizeLabel.zPosition = 30
+        handSizeLabel.alpha = 0
         addChild(handSizeLabel)
 
         // Discard pile indicator — below hand, left
@@ -423,6 +435,7 @@ extension DispositionCombatScene {
         discardLabel.text = ""
         discardLabel.position = CGPoint(x: 20, y: handLabelsY)
         discardLabel.zPosition = 30
+        discardLabel.alpha = 0
         addChild(discardLabel)
 
         // Exhaust pile indicator — below hand, right
@@ -435,6 +448,7 @@ extension DispositionCombatScene {
         exhaustLabel.text = ""
         exhaustLabel.position = CGPoint(x: sceneW - 20, y: handLabelsY)
         exhaustLabel.zPosition = 30
+        exhaustLabel.alpha = 0
         addChild(exhaustLabel)
 
         // Zone label — removed from main HUD (available via long-press later)

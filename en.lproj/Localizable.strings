@@ -1152,6 +1152,11 @@
 "disposition.outcome.subjugated" = "Enemy Subjugated";
 "disposition.outcome.defeated" = "Defeated...";
 "disposition.outcome.combat.over" = "Combat Over";
+"disposition.hint.long.press" = "Hold for details";
+"disposition.details.mode.normal" = "Normal";
+"disposition.details.mode.survival" = "Survival";
+"disposition.details.mode.desperation" = "Desperation";
+"disposition.details.mode.weakened" = "Weakened";
 "disposition.hand.count" = "Hand: %d/%d";
 "disposition.discard.count" = "Discard: %d";
 "disposition.exhaust.count" = "Exhaust: %d";

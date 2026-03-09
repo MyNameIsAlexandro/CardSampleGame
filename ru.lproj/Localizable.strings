@@ -1158,6 +1158,11 @@
 "disposition.outcome.subjugated" = "Враг покорён";
 "disposition.outcome.defeated" = "Поражение...";
 "disposition.outcome.combat.over" = "Бой окончен";
+"disposition.hint.long.press" = "Удерживайте для деталей";
+"disposition.details.mode.normal" = "Обычный";
+"disposition.details.mode.survival" = "Выживание";
+"disposition.details.mode.desperation" = "Отчаяние";
+"disposition.details.mode.weakened" = "Ослаблен";
 "disposition.hand.count" = "Рука: %d/%d";
 "disposition.discard.count" = "Сброс: %d";
 "disposition.exhaust.count" = "Изгнано: %d";

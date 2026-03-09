@@ -71,10 +71,12 @@ extension DispositionCombatScene {
         }
 
         guard inputEnabled else { return }
+        hideInteractionDetails()
 
         // If card selected -> check action buttons
         if let selId = selectedCardId {
             if let action = hitTestActionButton(at: location) {
+                resetInteractionLongPressState()
                 let cardId = selId
                 selectedCardId = nil
                 hideCardPreview()
@@ -88,6 +90,7 @@ extension DispositionCombatScene {
             }
             // Tap end turn while card selected
             if hitTestEndTurn(at: location) {
+                resetInteractionLongPressState()
                 deselectCard()
                 hideActionButtons()
                 performEndTurn()
@@ -100,11 +103,19 @@ extension DispositionCombatScene {
             draggedCardId = cardId
             dragStartLocation = location
             isDragging = false
+            scheduleInteractionLongPress(for: .card(cardId))
+            return
+        }
+
+        if let target = interactionTarget(at: location) {
+            dragStartLocation = location
+            scheduleInteractionLongPress(for: target)
             return
         }
 
         // Tap end turn button
         if hitTestEndTurn(at: location) {
+            resetInteractionLongPressState()
             deselectCard()
             hideActionButtons()
             performEndTurn()
@@ -119,8 +130,23 @@ extension DispositionCombatScene {
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard inputEnabled, let touch = touches.first, let cardId = draggedCardId else { return }
+        guard inputEnabled, let touch = touches.first else { return }
         let location = touch.location(in: self)
+
+        if let start = dragStartLocation {
+            let dx = location.x - start.x
+            let dy = location.y - start.y
+            let distance = sqrt(dx * dx + dy * dy)
+            if distance > DispositionCombatScene.dragThreshold {
+                cancelInteractionLongPress()
+            }
+        }
+
+        guard let cardId = draggedCardId else { return }
+
+        if interactionLongPressTriggered {
+            return
+        }
 
         if !isDragging {
             // Check if moved past drag threshold
@@ -131,6 +157,7 @@ extension DispositionCombatScene {
             guard distance > DispositionCombatScene.dragThreshold else { return }
 
             // Transition to drag mode
+            cancelInteractionLongPress()
             isDragging = true
             deselectCard()
             liftCard(id: cardId)
@@ -143,9 +170,20 @@ extension DispositionCombatScene {
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard inputEnabled, let touch = touches.first else { return }
         let location = touch.location(in: self)
+        cancelInteractionLongPress()
+
+        if interactionLongPressTriggered {
+            interactionLongPressTriggered = false
+            draggedCardId = nil
+            dragStartLocation = nil
+            isDragging = false
+            clearHighlights()
+            return
+        }
 
         if let cardId = draggedCardId {
             draggedCardId = nil
+            dragStartLocation = nil
 
             if isDragging {
                 // Finish drag — drop in zone or return
@@ -169,15 +207,19 @@ extension DispositionCombatScene {
             }
             return
         }
+
+        dragStartLocation = nil
     }
 
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        resetInteractionLongPressState()
         if let cardId = draggedCardId {
             if isDragging {
                 returnCardToHand(id: cardId)
             }
         }
         draggedCardId = nil
+        dragStartLocation = nil
         isDragging = false
         clearHighlights()
     }
@@ -189,6 +231,7 @@ extension DispositionCombatScene {
         if let prevId = selectedCardId {
             returnCardToHand(id: prevId)
         }
+        hideInteractionDetails()
         selectedCardId = id
 
         guard let node = handCardNodes[id],
@@ -212,12 +255,14 @@ extension DispositionCombatScene {
 
         showActionButtons(for: card)
         pulseActionZones()
+        showInteractionHintIfNeeded(at: CGPoint(x: centerX, y: previewY))
         onHaptic?("light")
     }
 
     func deselectCard() {
         guard let cardId = selectedCardId else { return }
         selectedCardId = nil
+        hideInteractionDetails()
         returnCardToHand(id: cardId)
         hideCardPreview()
         hideActionButtons()
@@ -335,7 +380,9 @@ extension DispositionCombatScene {
 
     private func afterPlayerAction() {
         guard let vm = viewModel else { return }
+        resetInteractionLongPressState()
         selectedCardId = nil
+        hideInteractionDetails()
         hideCardPreview()
         hideActionButtons()
         syncVisuals()
@@ -357,6 +404,8 @@ extension DispositionCombatScene {
     private func transitionToEnemyPhase() {
         phase = .enemyResolution
         inputEnabled = false
+        resetInteractionLongPressState()
+        hideInteractionDetails()
         hideEnemyIntent()
 
         guard let vm = viewModel else { return }
@@ -409,6 +458,8 @@ extension DispositionCombatScene {
     private func finishCombat() {
         phase = .finished
         inputEnabled = false
+        resetInteractionLongPressState()
+        hideInteractionDetails()
         hideEnemyIntent()
 
         guard let vm = viewModel else { return }
@@ -497,7 +548,7 @@ extension DispositionCombatScene {
         return expanded.contains(point)
     }
 
-    // MARK: - Drop Zones (Y-band detection per design §9.2)
+    // MARK: - Drop Zones
 
     enum DropZone {
         case strike
@@ -514,24 +565,19 @@ extension DispositionCombatScene {
         guard let container = actionButtonsContainer, container.alpha > 0.5 else { return nil }
         let localPoint = convert(point, to: container)
         let pad: CGFloat = 10
-        let bW: CGFloat = 105
-        let bH: CGFloat = 55
 
         let buttons: [(SKNode?, CombatAction)] = [
             (strikeButton, .strike), (influenceButton, .influence), (sacrificeButton, .sacrifice)
         ]
         for (btn, action) in buttons {
             guard let btn else { continue }
-            let frame = CGRect(
-                x: btn.position.x - bW / 2 - pad, y: btn.position.y - bH / 2 - pad,
-                width: bW + pad * 2, height: bH + pad * 2
-            )
+            let frame = expandedHitFrame(for: btn, padding: pad)
             if frame.contains(localPoint) { return action }
         }
         return nil
     }
 
-    /// Check action buttons first, then Y-band fallback for drag-drop compatibility.
+    /// Drag fallback routes only to visible action buttons. Legacy Y-bands are disabled.
     func determineDropZone(at point: CGPoint) -> DropZone {
         if let action = hitTestActionButton(at: point) {
             switch action {
@@ -540,11 +586,7 @@ extension DispositionCombatScene {
             case .sacrifice: return .sacrifice
             }
         }
-        let h = size.height
-        guard point.y > h * Layout.actions else { return .none }
-        if point.y >= h * Layout.bar { return .strike }
-        if point.y >= h * Layout.hand { return .influence }
-        return .sacrifice
+        return .none
     }
 
 }

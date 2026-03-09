@@ -37,7 +37,7 @@ final class DispositionCombatViewModel: ObservableObject {
     var isAutoTurnEnd: Bool { simulation.isAutoTurnEnd }
     var discardCount: Int { simulation.discardPile.count }
     var exhaustCount: Int { simulation.exhaustPile.count }
-    var startingHandSize: Int { simulation.hand.count + simulation.discardPile.count + simulation.exhaustPile.count }
+    var startingHandSize: Int { initialDeckSize }
 
     // MARK: - Combat Modifiers (read-through)
 
@@ -46,18 +46,22 @@ final class DispositionCombatViewModel: ObservableObject {
     var adaptPenalty: Int { simulation.adaptPenalty }
     var pleaBacklash: Int { simulation.pleaBacklash }
     var enemySacrificeBuff: Int { simulation.enemySacrificeBuff }
+    var enemyModeStrikeBonus: Int { simulation.enemyModeStrikeBonus }
 
     // MARK: - Tracking
 
     private(set) var turnsPlayed: Int = 0
     private(set) var cardsPlayed: Int = 0
     private let initialHeroHP: Int
+    private let initialDeckSize: Int
 
     // MARK: - Init
 
     init(simulation: DispositionCombatSimulation) {
         self.simulation = simulation
         self.initialHeroHP = simulation.heroHP
+        self.initialDeckSize =
+            simulation.hand.count + simulation.discardPile.count + simulation.exhaustPile.count
         self.fateDeck = DispositionFateDeck(rng: simulation.rng)
     }
 
@@ -183,6 +187,14 @@ final class DispositionCombatViewModel: ObservableObject {
     /// Access simulation and RNG for enemy intent computation.
     func computeEnemyAction(mode: EnemyMode) -> EnemyAction {
         EnemyAI.selectAction(mode: mode, simulation: simulation, rng: simulation.rng)
+    }
+
+    func vulnerabilityModifier(for action: DispositionActionType) -> Int {
+        simulation.vulnerabilityRegistry.modifier(
+            enemyType: simulation.enemyType,
+            actionType: action,
+            zone: simulation.resonanceZone
+        )
     }
 
     // MARK: - Result

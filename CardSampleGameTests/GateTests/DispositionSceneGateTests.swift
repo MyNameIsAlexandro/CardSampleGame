@@ -16,6 +16,14 @@ final class DispositionSceneGateTests: XCTestCase {
 
     private let projectRoot = SourcePathResolver.projectRoot
 
+    private func makeConfiguredScene(
+        simulation: DispositionCombatSimulation = .makeStandard(seed: 42)
+    ) -> DispositionCombatScene {
+        let scene = DispositionCombatScene(size: CGSize(width: 390, height: 700))
+        scene.configure(with: simulation)
+        return scene
+    }
+
     private func readCodeLines(from url: URL) throws -> [(line: Int, code: String)] {
         let content = try String(contentsOf: url, encoding: .utf8)
         return content.components(separatedBy: .newlines).enumerated().compactMap { index, raw in
@@ -171,5 +179,88 @@ final class DispositionSceneGateTests: XCTestCase {
         idol.playModeTransition(to: .desperation)
         XCTAssertEqual(idol.currentModeAura, .desperation,
             "Sequential transitions must update mode aura correctly")
+    }
+
+    // MARK: - Test 5: Drag fallback must use buttons, not legacy Y-bands
+
+    func testDragFallbackUsesOnlyActionButtons() throws {
+        let scene = makeConfiguredScene()
+        let card = try XCTUnwrap(scene.viewModel?.hand.first)
+        scene.showActionButtons(for: card)
+
+        let strikeCenter = scene.convert(
+            scene.strikeButton?.position ?? .zero,
+            from: scene.actionButtonsContainer ?? scene
+        )
+        XCTAssertEqual(
+            scene.determineDropZone(at: strikeCenter),
+            .strike,
+            "Dragging onto the visible strike button must resolve to .strike"
+        )
+
+        let legacyStrikeBandPoint = CGPoint(x: 12, y: scene.size.height * DispositionCombatScene.Layout.bar)
+        XCTAssertEqual(
+            scene.determineDropZone(at: legacyStrikeBandPoint),
+            .none,
+            "Legacy Y-band fallback must be disabled; only real action buttons are valid drop targets"
+        )
+    }
+
+    // MARK: - Test 6: Preview semantics must signal buff/penalty explicitly
+
+    func testActionPreviewPresentationSignalsBoostAndPenalty() {
+        let scene = makeConfiguredScene()
+
+        let boosted = scene.actionPreviewPresentation(for: .strike, value: 8, basePower: 5)
+        XCTAssertEqual(boosted.text, "-8↑")
+        XCTAssertEqual(boosted.tone, .boosted)
+
+        let weakened = scene.actionPreviewPresentation(for: .influence, value: 3, basePower: 5)
+        XCTAssertEqual(weakened.text, "+3")
+        XCTAssertEqual(weakened.tone, .weakened)
+
+        let disabled = scene.actionPreviewPresentation(
+            for: .sacrifice,
+            value: 1,
+            basePower: 1,
+            enabled: false
+        )
+        XCTAssertEqual(disabled.text, "—")
+        XCTAssertEqual(disabled.tone, .disabled)
+    }
+
+    // MARK: - Test 7: End Turn remains available while action buttons are visible
+
+    func testShowActionButtonsDoesNotHideEndTurn() throws {
+        let scene = makeConfiguredScene()
+        let card = try XCTUnwrap(scene.viewModel?.hand.first)
+
+        scene.showActionButtons(for: card)
+
+        XCTAssertFalse(
+            scene.endTurnButton?.hasActions() ?? true,
+            "End Turn must remain available; action buttons must not schedule a fade-out on it"
+        )
+        XCTAssertEqual(scene.endTurnButton?.alpha ?? 0, 1.0, accuracy: 0.001)
+    }
+
+    // MARK: - Test 8: Long-press details overlay must exist for card/HUD/enemy targets
+
+    func testInteractionDetailsOverlayRendersForHudCardAndEnemyTargets() {
+        let scene = makeConfiguredScene()
+
+        scene.showInteractionDetails(for: .hud)
+        XCTAssertNotNil(scene.interactionDetailsNode, "HUD long-press must render details overlay")
+        XCTAssertNotNil(scene.interactionDetailsNode?.childNode(withName: "interactionDetailsTitle"))
+
+        scene.hideInteractionDetails()
+        scene.showInteractionDetails(for: .card("card_a"))
+        XCTAssertNotNil(scene.interactionDetailsNode, "Card long-press must render details overlay")
+        XCTAssertNotNil(scene.interactionDetailsNode?.childNode(withName: "interactionDetailsLine0"))
+
+        scene.hideInteractionDetails()
+        scene.showInteractionDetails(for: .enemy)
+        XCTAssertNotNil(scene.interactionDetailsNode, "Enemy long-press must render details overlay")
+        XCTAssertNotNil(scene.interactionDetailsNode?.childNode(withName: "interactionDetailsLine0"))
     }
 }
