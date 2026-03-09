@@ -1,6 +1,6 @@
 # Testing Guide
 
-**Last updated:** 2026-02-12  
+**Last updated:** 2026-03-03  
 **Phase 2 checkpoint:** Epic 66  
 **Primary QA source of truth:** `Docs/QA/QUALITY_CONTROL_MODEL.md`
 **Policy sync:** `CLAUDE.md` v4.1 engineering contract

@@ -7,7 +7,7 @@ Policy sync baseline: `CLAUDE.md` v4.1 engineering contract.
 
 - External combat determinism hardening: external combat seed allocated in `performAction(.startCombat)` and reused (UI reads no longer advance RNG); bridges commit results via `performAction(.combatFinish)`.
 
-## Status snapshot (2026-02-12)
+## Status snapshot (2026-03-03)
 
 - `Epic 15`: DONE (canonical consequences + mini-game action path covered by target tests).
 - `Epic 16`: DONE (typed invalid-action reasons + l10n mapping + gate checks, no raw reason construction in `Engine/Core`).

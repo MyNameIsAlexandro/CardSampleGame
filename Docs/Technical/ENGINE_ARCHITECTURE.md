@@ -3,7 +3,7 @@
 **Версия:** 1.11
 **Статус:** Architecture Lock (Source of Truth)
 **Дата:** 12 февраля 2026
-**Last updated (ISO):** 2026-02-12
+**Last updated (ISO):** 2026-03-03
 **Phase 2 checkpoint:** Epic 66
 **Policy sync:** `CLAUDE.md` v4.1 engineering contract
 **Назначение:** Техническая спецификация для реализации переиспользуемого игрового ядра.

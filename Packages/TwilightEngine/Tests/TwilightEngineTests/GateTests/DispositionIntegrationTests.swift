@@ -519,10 +519,13 @@ final class DispositionIntegrationTests: XCTestCase {
         XCTAssertLessThan(sim.disposition, dispAfterTurn1,
             "Disposition must decrease with more strikes")
 
-        // 9 cards played, 0 sacrificed
-        XCTAssertEqual(sim.discardPile.count, 9, "9 cards must be in discard")
-        XCTAssertEqual(sim.hand.count, Self.testCards.count - 9,
-            "Hand must have 6 remaining cards")
+        // Discard is recycled into hand at beginPlayerTurn(), so by turn 3 end
+        // only current-turn played cards remain in discard.
+        XCTAssertEqual(sim.discardPile.count, 3, "Only current-turn cards must remain in discard")
+        XCTAssertEqual(sim.hand.count, Self.testCards.count - 3,
+            "Hand must include recycled cards from previous turns")
+        XCTAssertEqual(sim.hand.count + sim.discardPile.count + sim.exhaustPile.count, Self.testCards.count,
+            "Card-zone accounting must preserve total card count")
 
         // Enemy attacks should have affected hero HP
         // (action depends on mode/streak but at least some damage applied)
